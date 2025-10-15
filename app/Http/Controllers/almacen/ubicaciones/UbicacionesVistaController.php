@@ -239,61 +239,71 @@ class UbicacionesVistaController extends Controller
             $sede = $rackInfo->sede;
         }
 
-        // ✅ CORREGIDO: Incluir JOIN con custodias y modelo para custodias
-        $rackData = DB::table('racks as r')
-            ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
-            ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
-            ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
-            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
-            // ✅ JOIN para custodias con marcas y modelos
-            ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
-            ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
-            ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
-            ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
-            ->select(
-                'r.idRack',
-                'r.nombre as rack_nombre',
-                'r.sede',
-                'ru.idRackUbicacion',
-                'ru.codigo',
-                'ru.codigo_unico',
-                'ru.nivel',
-                'ru.posicion',
-                'ru.capacidad_maxima',
-                'ru.estado_ocupacion',
-                'a.idArticulos',
-                // ✅ CORREGIDO: Aplicar lógica de repuestos igual que en listarProductos
-                DB::raw('CASE 
+         // ✅ CORREGIDO: Incluir JOIN con custodias, modelo Y cliente general
+    $rackData = DB::table('racks as r')
+        ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
+        ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+        ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+        ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+        // ✅ JOIN para custodias con marcas y modelos
+        ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
+        ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
+        ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
+        ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
+        // ✅ NUEVO: JOIN para cliente general desde inventario_ingresos_clientes
+        ->leftJoin('inventario_ingresos_clientes as iic', function($join) {
+            $join->on('a.idArticulos', '=', 'iic.articulo_id')
+                 ->where('iic.tipo_ingreso', '=', 'ajuste');
+        })
+        ->leftJoin('clientegeneral as cg', 'iic.cliente_general_id', '=', 'cg.idClienteGeneral')
+        ->select(
+            'r.idRack',
+            'r.nombre as rack_nombre',
+            'r.sede',
+            'ru.idRackUbicacion',
+            'ru.codigo',
+            'ru.codigo_unico',
+            'ru.nivel',
+            'ru.posicion',
+            'ru.capacidad_maxima',
+            'ru.estado_ocupacion',
+            'a.idArticulos',
+            // ✅ CORREGIDO: Aplicar lógica de repuestos igual que en listarProductos
+            DB::raw('CASE 
                 WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
                 THEN a.codigo_repuesto 
                 ELSE a.nombre 
             END as producto'),
-                'a.nombre as nombre_original', // ✅ Guardar nombre original
-                'a.codigo_repuesto', // ✅ Incluir código de repuesto
-                'a.stock_total',
-                'ta.nombre as tipo_articulo',
-                'ta.idTipoArticulo', // ✅ Incluir ID del tipo de artículo
-                'c.nombre as categoria',
-                'rua.cantidad',
-                'rua.custodia_id',
-                // ✅ Campos de custodia con nombres reales
-                'cust.codigocustodias',
-                'cust.serie',
-                'cust.idMarca',
-                'cust.idModelo',
-                'c_cust.nombre as categoria_custodia',
-                'mar_cust.nombre as marca_nombre',
-                'm_cust.nombre as modelo_nombre',
-                'ru.updated_at'
-            )
-            ->where('r.nombre', $rack)
-            ->where('r.sede', $sede)
-            ->where('r.estado', 'activo')
-            ->orderBy('ru.nivel', 'desc')
-            ->orderBy('ru.posicion')
-            ->get();
+            'a.nombre as nombre_original',
+            'a.codigo_repuesto',
+            'a.stock_total',
+            'ta.nombre as tipo_articulo',
+            'ta.idTipoArticulo',
+            'c.nombre as categoria',
+            'rua.cantidad',
+            'rua.custodia_id',
+            // ✅ Campos de custodia con nombres reales
+            'cust.codigocustodias',
+            'cust.serie',
+            'cust.idMarca',
+            'cust.idModelo',
+            'c_cust.nombre as categoria_custodia',
+            'mar_cust.nombre as marca_nombre',
+            'm_cust.nombre as modelo_nombre',
+            // ✅ NUEVO: Campos de cliente general
+            'cg.idClienteGeneral as cliente_general_id',
+            'cg.descripcion as cliente_general_nombre',
+            'ru.updated_at'
+        )
+        ->where('r.nombre', $rack)
+        ->where('r.sede', $sede)
+        ->where('r.estado', 'activo')
+        ->orderBy('ru.nivel', 'desc')
+        ->orderBy('ru.posicion')
+        ->get();
+
 
         // Si no existe el rack, redirigir
         if ($rackData->isEmpty()) {
@@ -404,48 +414,54 @@ class UbicacionesVistaController extends Controller
                 // Calcular cantidad total y productos
                 $cantidadTotal = $articulos->sum('cantidad');
 
-                // ✅ CORREGIDO: Mapeo de productos con lógica para custodias Y repuestos
-                $productos = $articulos->where(function ($art) {
-                    return $art->producto || $art->custodia_id;
-                })->map(function ($art) {
-                    // ✅ SI ES CUSTODIA
-                    if ($art->custodia_id) {
-                        return [
-                            'id' => $art->idArticulos,
-                            'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
-                            'cantidad' => $art->cantidad,
-                            'stock_total' => $art->stock_total,
-                            'tipo_articulo' => 'CUSTODIA',
-                            'categoria' => $art->categoria_custodia ?: 'Custodia',
-                            'custodia_id' => $art->custodia_id,
-                            'codigocustodias' => $art->codigocustodias,
-                            'serie' => $art->serie,
-                            'idMarca' => $art->idMarca,
-                            'idModelo' => $art->idModelo,
-                            'marca_nombre' => $art->marca_nombre,
-                            'modelo_nombre' => $art->modelo_nombre
-                        ];
-                    }
+                // En la parte donde mapeas los productos, asegúrate de incluir el cliente general:
+    $productos = $articulos->where(function ($art) {
+        return $art->producto || $art->custodia_id;
+    })->map(function ($art) {
+        // ✅ SI ES CUSTODIA
+        if ($art->custodia_id) {
+            return [
+                'id' => $art->idArticulos,
+                'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
+                'cantidad' => $art->cantidad,
+                'stock_total' => $art->stock_total,
+                'tipo_articulo' => 'CUSTODIA',
+                'categoria' => $art->categoria_custodia ?: 'Custodia',
+                'custodia_id' => $art->custodia_id,
+                'codigocustodias' => $art->codigocustodias,
+                'serie' => $art->serie,
+                'idMarca' => $art->idMarca,
+                'idModelo' => $art->idModelo,
+                'marca_nombre' => $art->marca_nombre,
+                'modelo_nombre' => $art->modelo_nombre,
+                // ✅ NO incluir cliente general para custodias
+                'cliente_general_id' => null,
+                'cliente_general_nombre' => null
+            ];
+        }
 
-                    // ✅ SI ES PRODUCTO NORMAL - APLICAR LÓGICA DE REPUESTOS
-                    $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
+        // ✅ SI ES PRODUCTO NORMAL - APLICAR LÓGICA DE REPUESTOS
+        $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
 
-                    return [
-                        'id' => $art->idArticulos,
-                        'nombre' => $art->producto, // Ya viene procesado por el CASE en SQL
-                        'nombre_original' => $art->nombre_original, // Nombre original del producto
-                        'codigo_repuesto' => $art->codigo_repuesto,
-                        'cantidad' => $art->cantidad,
-                        'stock_total' => $art->stock_total,
-                        'tipo_articulo' => $art->tipo_articulo,
-                        'idTipoArticulo' => $art->idTipoArticulo,
-                        'categoria' => $art->categoria,
-                        'custodia_id' => null,
-                        // ✅ NUEVO: Campos para la lógica de repuestos
-                        'es_repuesto' => $art->idTipoArticulo == 2,
-                        'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto
-                    ];
-                })->values();
+        return [
+            'id' => $art->idArticulos,
+            'nombre' => $art->producto,
+            'nombre_original' => $art->nombre_original,
+            'codigo_repuesto' => $art->codigo_repuesto,
+            'cantidad' => $art->cantidad,
+            'stock_total' => $art->stock_total,
+            'tipo_articulo' => $art->tipo_articulo,
+            'idTipoArticulo' => $art->idTipoArticulo,
+            'categoria' => $art->categoria,
+            'custodia_id' => null,
+            // ✅ NUEVO: Campos para la lógica de repuestos
+            'es_repuesto' => $art->idTipoArticulo == 2,
+            'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
+            // ✅ NUEVO: Campos de cliente general para productos normales
+            'cliente_general_id' => $art->cliente_general_id,
+            'cliente_general_nombre' => $art->cliente_general_nombre
+        ];
+    })->values();
 
                 // Determinar estado basado en porcentaje de ocupación
                 $porcentajeOcupacion = 0;
@@ -928,127 +944,140 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-    public function agregarProducto(Request $request)
-    {
-        DB::beginTransaction();
+   // Actualiza el método agregarProducto para guardar en ambas tablas
+public function agregarProducto(Request $request)
+{
+    DB::beginTransaction();
 
-        try {
-            $validator = Validator::make($request->all(), [
-                'ubicacion_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
-                'articulo_id' => 'required|integer|exists:articulos,idArticulos',
-                'cantidad' => 'required|integer|min:1',
-                'observaciones' => 'nullable|string|max:500'
-            ]);
+    try {
+        $validator = Validator::make($request->all(), [
+            'ubicacion_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+            'articulo_id' => 'required|integer|exists:articulos,idArticulos',
+            'cantidad' => 'required|integer|min:1',
+            'cliente_general_id' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'tipo_ingreso' => 'required|in:compra,entrada_proveedor,ajuste',
+            'observaciones' => 'nullable|string|max:500'
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Datos inválidos',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
+        }
 
-            // Obtener información de la ubicación
-            $ubicacion = DB::table('rack_ubicaciones as ru')
-                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
-                ->where('ru.idRackUbicacion', $request->ubicacion_id)
-                ->first();
+        // Obtener información de la ubicación
+        $ubicacion = DB::table('rack_ubicaciones as ru')
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+            ->where('ru.idRackUbicacion', $request->ubicacion_id)
+            ->first();
 
-            // Calcular cantidad total actual en la ubicación (SOLO de rack_ubicacion_articulos)
-            $cantidadTotalActual = DB::table('rack_ubicacion_articulos')
-                ->where('rack_ubicacion_id', $request->ubicacion_id)
-                ->sum('cantidad');
+        // Calcular cantidad total actual en la ubicación
+        $cantidadTotalActual = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $request->ubicacion_id)
+            ->sum('cantidad');
 
-            // Verificar que la nueva cantidad no supere la capacidad
-            if (($cantidadTotalActual + $request->cantidad) > $ubicacion->capacidad_maxima) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'La cantidad supera la capacidad máxima de la ubicación. Espacio disponible: ' . ($ubicacion->capacidad_maxima - $cantidadTotalActual) . ' unidades'
-                ], 422);
-            }
+        // Verificar que la nueva cantidad no supere la capacidad
+        if (($cantidadTotalActual + $request->cantidad) > $ubicacion->capacidad_maxima) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La cantidad supera la capacidad máxima de la ubicación. Espacio disponible: ' . ($ubicacion->capacidad_maxima - $cantidadTotalActual) . ' unidades'
+            ], 422);
+        }
 
-            // Obtener información del producto
-            $producto = DB::table('articulos')
-                ->where('idArticulos', $request->articulo_id)
-                ->first();
+        // Obtener información del producto
+        $producto = DB::table('articulos')
+            ->where('idArticulos', $request->articulo_id)
+            ->first();
 
-            // Verificar si ya existe el artículo en la ubicación (SOLO en rack_ubicacion_articulos)
-            $articuloExistente = DB::table('rack_ubicacion_articulos')
+        // Verificar si ya existe el artículo en la ubicación
+        $articuloExistente = DB::table('rack_ubicacion_articulos')
+            ->where('rack_ubicacion_id', $request->ubicacion_id)
+            ->where('articulo_id', $request->articulo_id)
+            ->first();
+
+        if ($articuloExistente) {
+            // Actualizar cantidad existente
+            DB::table('rack_ubicacion_articulos')
                 ->where('rack_ubicacion_id', $request->ubicacion_id)
                 ->where('articulo_id', $request->articulo_id)
-                ->first();
-
-            if ($articuloExistente) {
-                // Actualizar cantidad existente en rack_ubicacion_articulos
-                DB::table('rack_ubicacion_articulos')
-                    ->where('rack_ubicacion_id', $request->ubicacion_id)
-                    ->where('articulo_id', $request->articulo_id)
-                    ->update([
-                        'cantidad' => $articuloExistente->cantidad + $request->cantidad,
-                        'updated_at' => now()
-                    ]);
-            } else {
-                // Insertar nuevo registro SOLO en rack_ubicacion_articulos
-                DB::table('rack_ubicacion_articulos')->insert([
-                    'rack_ubicacion_id' => $request->ubicacion_id,
-                    'articulo_id' => $request->articulo_id,
-                    'cantidad' => $request->cantidad,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-            }
-
-            // Actualizar estado de ocupación de la ubicación (SOLO en rack_ubicaciones)
-            $nuevaCantidadTotal = $cantidadTotalActual + $request->cantidad;
-            $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotal, $ubicacion->capacidad_maxima);
-
-            DB::table('rack_ubicaciones')
-                ->where('idRackUbicacion', $request->ubicacion_id)
                 ->update([
-                    'estado_ocupacion' => $nuevoEstado,
+                    'cantidad' => $articuloExistente->cantidad + $request->cantidad,
                     'updated_at' => now()
                 ]);
-
-            // Registrar el movimiento
-            DB::table('rack_movimientos')->insert([
+        } else {
+            // Insertar nuevo registro
+            DB::table('rack_ubicacion_articulos')->insert([
+                'rack_ubicacion_id' => $request->ubicacion_id,
                 'articulo_id' => $request->articulo_id,
-                'ubicacion_destino_id' => $request->ubicacion_id,
-                'rack_destino_id' => $ubicacion->rack_id,
                 'cantidad' => $request->cantidad,
-                'tipo_movimiento' => 'ajuste',
-                'observaciones' => $request->observaciones ?: 'Ingreso de producto',
-                'codigo_ubicacion_destino' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
-                'nombre_rack_destino' => $ubicacion->rack_nombre,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Producto agregado exitosamente',
-                'data' => [
-                    'producto' => [
-                        'id' => $producto->idArticulos,
-                        'nombre' => $producto->nombre,
-                        'cantidad' => $request->cantidad
-                    ],
-                    'espacio_disponible' => $ubicacion->capacidad_maxima - $nuevaCantidadTotal,
-                    'cantidad_total_ubicacion' => $nuevaCantidadTotal
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al agregar producto: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage()
-            ], 500);
         }
-    }
 
+        // ✅ NUEVO: Registrar en inventario_ingresos_clientes
+        DB::table('inventario_ingresos_clientes')->insert([
+            'articulo_id' => $request->articulo_id,
+            'cliente_general_id' => $request->cliente_general_id,
+            'tipo_ingreso' => $request->tipo_ingreso,
+            'cantidad' => $request->cantidad,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Actualizar estado de ocupación de la ubicación
+        $nuevaCantidadTotal = $cantidadTotalActual + $request->cantidad;
+        $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotal, $ubicacion->capacidad_maxima);
+
+        DB::table('rack_ubicaciones')
+            ->where('idRackUbicacion', $request->ubicacion_id)
+            ->update([
+                'estado_ocupacion' => $nuevoEstado,
+                'updated_at' => now()
+            ]);
+
+        // Registrar el movimiento
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $request->articulo_id,
+            'ubicacion_destino_id' => $request->ubicacion_id,
+            'rack_destino_id' => $ubicacion->rack_id,
+            'cantidad' => $request->cantidad,
+            'tipo_movimiento' => 'ajuste',
+            'observaciones' => $request->observaciones ?: 'Ingreso de producto con cliente general',
+            'codigo_ubicacion_destino' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
+            'nombre_rack_destino' => $ubicacion->rack_nombre,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Producto agregado exitosamente con cliente general',
+            'data' => [
+                'producto' => [
+                    'id' => $producto->idArticulos,
+                    'nombre' => $producto->nombre,
+                    'cantidad' => $request->cantidad
+                ],
+                'cliente_general_id' => $request->cliente_general_id,
+                'espacio_disponible' => $ubicacion->capacidad_maxima - $nuevaCantidadTotal,
+                'cantidad_total_ubicacion' => $nuevaCantidadTotal
+            ]
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al agregar producto: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
+        ], 500);
+    }
+}
     public function vaciarUbicacion(Request $request)
     {
         DB::beginTransaction();
@@ -1985,4 +2014,28 @@ class UbicacionesVistaController extends Controller
                 'updated_at' => now()
             ]);
     }
+
+
+    // Agrega este método al controlador para listar clientes generales
+public function listarClientesGenerales()
+{
+    try {
+        $clientes = DB::table('clientegeneral')
+            ->where('estado', 1)
+            ->select('idClienteGeneral as id', 'descripcion')
+            ->orderBy('descripcion')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $clientes
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al listar clientes generales: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar clientes generales'
+        ], 500);
+    }
+}
 }

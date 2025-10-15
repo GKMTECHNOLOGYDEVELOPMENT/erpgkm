@@ -1476,3 +1476,6 @@ Route::post('/almacen/ubicaciones/eliminar-producto', [UbicacionesVistaControlle
 
 Route::get('/custodia/{id}/sugerencias-ubicacion', [CustodiaController::class, 'sugerirUbicacionesCustodia']);
 Route::get('/custodia/{id}/ubicacion-actual', [CustodiaController::class, 'obtenerUbicacionActual']);
+
+// routes/web.php
+Route::get('/almacen/clientes-generales/listar', [UbicacionesVistaController::class, 'listarClientesGenerales']);

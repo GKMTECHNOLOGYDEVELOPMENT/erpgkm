@@ -426,220 +426,230 @@
                                     </div>
                                 </div>
 
-                                <!-- Lista de productos MEJORADA -->
-                                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                    <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
-                                        <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
-                                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                                            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>/<span
-                                                x-text="modal.ubi.capacidad"></span>
-                                        </span>
+                                <!-- Lista de productos MEJORADA CON CLIENTE GENERAL -->
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
+        <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
+        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
+            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>/<span
+                x-text="modal.ubi.capacidad"></span>
+        </span>
+    </div>
+
+    <div class="max-h-80 overflow-y-auto custom-scrollbar p-2">
+        <template x-for="(producto, idx) in modal.ubi.productos"
+            :key="idx">
+            <div
+                class="border border-gray-200 rounded-lg mb-2 last:mb-0 bg-white hover:shadow-md transition-all duration-200">
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                                :class="producto.custodia_id ? 'bg-red-100' : 'bg-blue-100'">
+                                <i class="fas fa-shield"
+                                    x-show="producto.custodia_id"></i>
+                                <i class="fas fa-box"
+                                    x-show="!producto.custodia_id"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <template x-if="producto.custodia_id">
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
+                                            x-text="producto.serie || producto.codigocustodias || 'Custodia'">
+                                        </p>
+                                        <div class="flex gap-2">
+                                            <span
+                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+                                                x-text="producto.categoria || 'Custodia'"></span>
+                                            <template x-if="producto.marca_nombre">
+                                                <span
+                                                    class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium"
+                                                    x-text="producto.marca_nombre"></span>
+                                            </template>
+                                            <template x-if="producto.modelo_nombre">
+                                                <span
+                                                    class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium"
+                                                    x-text="producto.modelo_nombre"></span>
+                                            </template>
+                                        </div>
+                                        <div class="mt-1 flex flex-wrap gap-2">
+                                            <template
+                                                x-if="producto.serie && producto.codigocustodias">
+                                                <span class="text-xs text-gray-600">
+                                                    <i class="fas fa-hashtag mr-1"></i>
+                                                    Código: <span
+                                                        x-text="producto.codigocustodias"></span>
+                                                </span>
+                                            </template>
+                                            <template
+                                                x-if="!producto.marca_nombre && producto.idMarca">
+                                                <span class="text-xs text-gray-600">
+                                                    <i class="fas fa-tag mr-1"></i>
+                                                    Marca ID: <span
+                                                        x-text="producto.idMarca"></span>
+                                                </span>
+                                            </template>
+                                            <template
+                                                x-if="!producto.modelo_nombre && producto.idModelo">
+                                                <span class="text-xs text-gray-600">
+                                                    <i class="fas fa-cube mr-1"></i>
+                                                    Modelo ID: <span
+                                                        x-text="producto.idModelo"></span>
+                                                </span>
+                                            </template>
+                                        </div>
                                     </div>
+                                </template>
 
-                                    <div class="max-h-80 overflow-y-auto custom-scrollbar p-2">
-                                        <template x-for="(producto, idx) in modal.ubi.productos"
-                                            :key="idx">
-                                            <div
-                                                class="border border-gray-200 rounded-lg mb-2 last:mb-0 bg-white hover:shadow-md transition-all duration-200">
-                                                <div class="flex items-center justify-between p-4">
-                                                    <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center gap-3">
-                                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                                :class="producto.custodia_id ? 'bg-red-100' : 'bg-blue-100'">
-                                                                <i class="fas fa-shield"
-                                                                    x-show="producto.custodia_id"></i>
-                                                                <i class="fas fa-box"
-                                                                    x-show="!producto.custodia_id"></i>
-                                                            </div>
-                                                            <div class="flex-1 min-w-0">
-                                                                <template x-if="producto.custodia_id">
-                                                                    <div>
-                                                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
-                                                                            x-text="producto.serie || producto.codigocustodias || 'Custodia'">
-                                                                        </p>
-                                                                        <div class="flex gap-2">
-                                                                            <span
-                                                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
-                                                                                x-text="producto.categoria || 'Custodia'"></span>
-                                                                            <template x-if="producto.marca_nombre">
-                                                                                <span
-                                                                                    class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium"
-                                                                                    x-text="producto.marca_nombre"></span>
-                                                                            </template>
-                                                                            <template x-if="producto.modelo_nombre">
-                                                                                <span
-                                                                                    class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium"
-                                                                                    x-text="producto.modelo_nombre"></span>
-                                                                            </template>
-                                                                        </div>
-                                                                        <div class="mt-1 flex flex-wrap gap-2">
-                                                                            <template
-                                                                                x-if="producto.serie && producto.codigocustodias">
-                                                                                <span class="text-xs text-gray-600">
-                                                                                    <i class="fas fa-hashtag mr-1"></i>
-                                                                                    Código: <span
-                                                                                        x-text="producto.codigocustodias"></span>
-                                                                                </span>
-                                                                            </template>
-                                                                            <template
-                                                                                x-if="!producto.marca_nombre && producto.idMarca">
-                                                                                <span class="text-xs text-gray-600">
-                                                                                    <i class="fas fa-tag mr-1"></i>
-                                                                                    Marca ID: <span
-                                                                                        x-text="producto.idMarca"></span>
-                                                                                </span>
-                                                                            </template>
-                                                                            <template
-                                                                                x-if="!producto.modelo_nombre && producto.idModelo">
-                                                                                <span class="text-xs text-gray-600">
-                                                                                    <i class="fas fa-cube mr-1"></i>
-                                                                                    Modelo ID: <span
-                                                                                        x-text="producto.idModelo"></span>
-                                                                                </span>
-                                                                            </template>
-                                                                        </div>
-                                                                    </div>
-                                                                </template>
+                                <template x-if="!producto.custodia_id">
+                                    <div>
+                                        <!-- ✅ CORREGIDO: Mostrar nombre o código según el tipo -->
+                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
+                                            x-text="producto.nombre"></p>
 
-                                                                <template x-if="!producto.custodia_id">
-                                                                    <div>
-                                                                        <!-- ✅ CORREGIDO: Mostrar nombre o código según el tipo -->
-                                                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
-                                                                            x-text="producto.nombre"></p>
-
-                                                                        <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
-                                                                        <template
-                                                                            x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
-                                                                            <p class="text-xs text-gray-500 truncate mb-1"
-                                                                                x-text="'Nombre: ' + producto.nombre_original">
-                                                                            </p>
-                                                                        </template>
-
-                                                                        <div class="flex gap-2">
-                                                                            <span
-                                                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
-                                                                                x-text="producto.categoria || 'General'"></span>
-                                                                            <span
-                                                                                class="px-2 py-1 rounded text-xs font-medium"
-                                                                                :class="{
-                                                                                    'bg-green-100 text-green-700': producto
-                                                                                        .tipo_articulo === 'PRODUCTOS',
-                                                                                    'bg-yellow-100 text-warning': producto
-                                                                                        .tipo_articulo === 'REPUESTOS',
-                                                                                    'bg-purple-100 text-secondary': producto
-                                                                                        .tipo_articulo === 'SUMINISTROS',
-                                                                                    'bg-orange-100 text-danger': producto
-                                                                                        .tipo_articulo === 'HERAMIENTAS',
-                                                                                    'bg-gray-100 text-gray-700': ![
-                                                                                        'PRODUCTOS', 'REPUESTOS',
-                                                                                        'SUMINISTROS', 'HERAMIENTAS'
-                                                                                    ].includes(producto
-                                                                                        .tipo_articulo)
-                                                                                }"
-                                                                                x-text="producto.tipo_articulo || 'Sin tipo'">
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                </template>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="text-right flex items-center gap-4 ml-4">
-                                                        <!-- Controles de edición (mantener restricciones para custodias) -->
-                                                        <div class="flex items-center gap-2 rounded-lg p-2"
-                                                            :class="producto.custodia_id ? 'bg-red-50' : 'bg-gray-100'">
-                                                            <button @click="decrementarCantidadExistente(idx)"
-                                                                :disabled="producto.cantidad <= 1 || producto.custodia_id"
-                                                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
-                                                                    'Decrementar'">
-                                                                <i class="fas fa-minus text-gray-600 text-xs"></i>
-                                                            </button>
-
-                                                            <input type="number" x-model="producto.cantidad"
-                                                                @change="actualizarCantidadProducto(idx)"
-                                                                min="1" :max="modal.ubi.capacidad"
-                                                                :disabled="producto.custodia_id"
-                                                                class="w-14 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
-                                                                    'Cantidad'">
-
-                                                            <button @click="incrementarCantidadExistente(idx)"
-                                                                :disabled="getCantidadTotalModal() >= modal.ubi.capacidad ||
-                                                                    producto.custodia_id"
-                                                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
-                                                                    'Incrementar'">
-                                                                <i class="fas fa-plus text-gray-600 text-xs"></i>
-                                                            </button>
-                                                        </div>
-
-                                                        <div class="flex flex-col items-end gap-2">
-                                                            <span class="block font-bold text-lg"
-                                                                :class="producto.custodia_id ? 'text-red-600' : 'text-gray-800'"
-                                                                x-text="producto.cantidad + ' und.'"></span>
-
-                                                            <div class="flex gap-2">
-                                                                <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
-                                                                <button
-                                                                    @click="iniciarReubicacionProducto(modal.ubi, producto)"
-                                                                    :class="producto.custodia_id ?
-                                                                        'bg-secondary hover:bg-purple-600' :
-                                                                        'bg-primary hover:bg-blue-600'"
-                                                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                                                                    :title="producto.custodia_id ?
-                                                                        'Mover' :
-                                                                        'Mover'">
-                                                                    <i class="fas fa-arrows-alt text-xs"></i>
-                                                                    <span
-                                                                        x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
-                                                                </button>
-
-                                                                <button @click="eliminarProductoIndividual(idx)"
-                                                                    :disabled="producto.custodia_id"
-                                                                    :class="producto.custodia_id ?
-                                                                        'bg-gray-400 cursor-not-allowed' :
-                                                                        'bg-red-500 hover:bg-red-600'"
-                                                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                                                                    :title="producto.custodia_id ?
-                                                                        'No se puede eliminar - En custodia' :
-                                                                        'Eliminar producto'">
-                                                                    <i class="fas fa-trash text-xs"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div x-show="!producto.custodia_id && producto.cantidadOriginal !== undefined && producto.cantidad !== producto.cantidadOriginal"
-                                                    class="bg-yellow-50 border-t border-yellow-200 px-4 py-3 text-xs text-yellow-700 flex justify-between items-center">
-                                                    <span class="font-medium">Cambios pendientes: <span
-                                                            x-text="producto.cantidadOriginal"></span> → <span
-                                                            x-text="producto.cantidad"></span> unidades</span>
-                                                    <div class="flex gap-2">
-                                                        <button @click="guardarCambiosProducto(idx)"
-                                                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
-                                                            Guardar
-                                                        </button>
-                                                        <button @click="cancelarCambiosProducto(idx)"
-                                                            class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium">
-                                                            Cancelar
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <!-- INFORMACIÓN MODIFICADA PARA CUSTODIAS -->
-                                                <div x-show="producto.custodia_id"
-                                                    class="bg-blue-50 border-t border-blue-200 px-4 py-3 text-xs text-blue-700 flex items-center gap-2">
-                                                    <i class="fas fa-shield-alt"></i>
-                                                    <span class="font-medium">Artículo en custodia - Puede ser movido
-                                                        entre ubicaciones pero no modificado ni eliminado</span>
-                                                </div>
-                                            </div>
+                                        <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
+                                        <template
+                                            x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
+                                            <p class="text-xs text-gray-500 truncate mb-1"
+                                                x-text="'Nombre: ' + producto.nombre_original">
+                                            </p>
                                         </template>
+
+                                        <div class="flex gap-2 mb-2">
+                                            <span
+                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+                                                x-text="producto.categoria || 'General'"></span>
+                                            <span
+                                                class="px-2 py-1 rounded text-xs font-medium"
+                                                :class="{
+                                                    'bg-green-100 text-green-700': producto
+                                                        .tipo_articulo === 'PRODUCTOS',
+                                                    'bg-yellow-100 text-warning': producto
+                                                        .tipo_articulo === 'REPUESTOS',
+                                                    'bg-purple-100 text-secondary': producto
+                                                        .tipo_articulo === 'SUMINISTROS',
+                                                    'bg-orange-100 text-danger': producto
+                                                        .tipo_articulo === 'HERAMIENTAS',
+                                                    'bg-gray-100 text-gray-700': ![
+                                                        'PRODUCTOS', 'REPUESTOS',
+                                                        'SUMINISTROS', 'HERAMIENTAS'
+                                                    ].includes(producto
+                                                        .tipo_articulo)
+                                                }"
+                                                x-text="producto.tipo_articulo || 'Sin tipo'">
+                                            </span>
+                                        </div>
+
+                                        <!-- ✅ NUEVO: Mostrar Cliente General solo para productos normales -->
+                                        <div x-show="producto.cliente_general_nombre" class="mt-2">
+                                            <div class="flex items-center gap-1">
+                                                <i class="fas fa-user-tie text-xs text-purple-500"></i>
+                                                <span class="text-xs text-gray-600 font-medium">Cliente:</span>
+                                                <span class="text-xs text-purple-700 font-semibold"
+                                                    x-text="producto.cliente_general_nombre"></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-right flex items-center gap-4 ml-4">
+                        <!-- Controles de edición (mantener restricciones para custodias) -->
+                        <div class="flex items-center gap-2 rounded-lg p-2"
+                            :class="producto.custodia_id ? 'bg-red-50' : 'bg-gray-100'">
+                            <button @click="decrementarCantidadExistente(idx)"
+                                :disabled="producto.cantidad <= 1 || producto.custodia_id"
+                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                    'Decrementar'">
+                                <i class="fas fa-minus text-gray-600 text-xs"></i>
+                            </button>
+
+                            <input type="number" x-model="producto.cantidad"
+                                @change="actualizarCantidadProducto(idx)"
+                                min="1" :max="modal.ubi.capacidad"
+                                :disabled="producto.custodia_id"
+                                class="w-14 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                    'Cantidad'">
+
+                            <button @click="incrementarCantidadExistente(idx)"
+                                :disabled="getCantidadTotalModal() >= modal.ubi.capacidad ||
+                                    producto.custodia_id"
+                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                    'Incrementar'">
+                                <i class="fas fa-plus text-gray-600 text-xs"></i>
+                            </button>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-2">
+                            <span class="block font-bold text-lg"
+                                :class="producto.custodia_id ? 'text-red-600' : 'text-gray-800'"
+                                x-text="producto.cantidad + ' und.'"></span>
+
+                            <div class="flex gap-2">
+                                <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
+                                <button
+                                    @click="iniciarReubicacionProducto(modal.ubi, producto)"
+                                    :class="producto.custodia_id ?
+                                        'bg-secondary hover:bg-purple-600' :
+                                        'bg-primary hover:bg-blue-600'"
+                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                                    :title="producto.custodia_id ?
+                                        'Mover' :
+                                        'Mover'">
+                                    <i class="fas fa-arrows-alt text-xs"></i>
+                                    <span
+                                        x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
+                                </button>
+
+                                <button @click="eliminarProductoIndividual(idx)"
+                                    :disabled="producto.custodia_id"
+                                    :class="producto.custodia_id ?
+                                        'bg-gray-400 cursor-not-allowed' :
+                                        'bg-red-500 hover:bg-red-600'"
+                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                                    :title="producto.custodia_id ?
+                                        'No se puede eliminar - En custodia' :
+                                        'Eliminar producto'">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="!producto.custodia_id && producto.cantidadOriginal !== undefined && producto.cantidad !== producto.cantidadOriginal"
+                    class="bg-yellow-50 border-t border-yellow-200 px-4 py-3 text-xs text-yellow-700 flex justify-between items-center">
+                    <span class="font-medium">Cambios pendientes: <span
+                            x-text="producto.cantidadOriginal"></span> → <span
+                            x-text="producto.cantidad"></span> unidades</span>
+                    <div class="flex gap-2">
+                        <button @click="guardarCambiosProducto(idx)"
+                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
+                            Guardar
+                        </button>
+                        <button @click="cancelarCambiosProducto(idx)"
+                            class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN MODIFICADA PARA CUSTODIAS -->
+                <div x-show="producto.custodia_id"
+                    class="bg-blue-50 border-t border-blue-200 px-4 py-3 text-xs text-blue-700 flex items-center gap-2">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="font-medium">Artículo en custodia - Puede ser movido
+                        entre ubicaciones pero no modificado ni eliminado</span>
+                </div>
+            </div>
+        </template>
+    </div>
+</div>
 
                                 <!-- Información adicional -->
                                 <div class="grid grid-cols-2 gap-4">
@@ -832,387 +842,392 @@
             </div>
         </div>
 
-        <!-- Modal para Agregar Múltiples Productos -->
-        <div x-show="modalAgregarProducto.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
-            :class="modalAgregarProducto.open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalAgregarProducto()">
-                <div x-show="modalAgregarProducto.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-4xl relative">
+        <!-- Modal para Agregar Múltiples Productos - ACTUALIZADO CON CLIENTE GENERAL -->
+<div x-show="modalAgregarProducto.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+    :class="modalAgregarProducto.open && '!block'">
+    <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalAgregarProducto()">
+        <div x-show="modalAgregarProducto.open" x-transition x-transition.duration.300
+            class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-4xl relative">
 
-                    <!-- Header Mejorado -->
-                    <div
-                        class="flex bg-gradient-to-r from-blue-600 to-purple-600 items-center justify-between px-6 py-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-boxes text-white text-lg"></i>
-                            </div>
-                            <div>
-                                <div class="font-bold text-lg text-white">Agregar Múltiples Productos</div>
-                                <div class="text-blue-100 text-sm">Ubicación: <span
-                                        x-text="modalAgregarProducto.ubicacion.codigo" class="font-semibold"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="text-white hover:text-blue-200 transition-colors"
-                            @click="cerrarModalAgregarProducto()">
-                            <i class="fas fa-times text-xl"></i>
-                        </button>
+            <!-- Header Mejorado -->
+            <div class="flex bg-gradient-to-r from-blue-600 to-purple-600 items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-boxes text-white text-lg"></i>
                     </div>
-
-                    <!-- Body -->
-                    <div class="p-6 bg-gray-50">
-                        <!-- Información de la ubicación -->
-                        <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
-                            <div class="grid grid-cols-4 gap-4 text-center">
-                                <div>
-                                    <div class="text-2xl font-bold text-blue-600"
-                                        x-text="modalAgregarProducto.ubicacion.capacidad"></div>
-                                    <div class="text-xs text-gray-600 mt-1">Capacidad Total</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold text-green-600" x-text="getTotalCantidades()">
-                                    </div>
-                                    <div class="text-xs text-gray-600 mt-1">Unidades a Agregar</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold"
-                                        :class="getCapacidadDisponible() >= 0 ? 'text-green-600' : 'text-red-600'"
-                                        x-text="getCapacidadDisponible()"></div>
-                                    <div class="text-xs text-gray-600 mt-1">Disponible</div>
-                                </div>
-                                <div>
-                                    <div class="text-2xl font-bold text-purple-600"
-                                        x-text="modalAgregarProducto.productosSeleccionados.length"></div>
-                                    <div class="text-xs text-gray-600 mt-1">Productos</div>
-                                </div>
-                            </div>
-
-                            <!-- ✅ NUEVO: Mostrar productos existentes -->
-                            <div x-show="modalAgregarProducto.ubicacion.productos && modalAgregarProducto.ubicacion.productos.length > 0"
-                                class="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
-                                <div class="text-xs text-blue-700 flex justify-between">
-                                    <span>Productos existentes:</span>
-                                    <span class="font-semibold"
-                                        x-text="(modalAgregarProducto.ubicacion.capacidad - modalAgregarProducto.capacidadMaxima) + ' unidades'"></span>
-                                </div>
-                            </div>
-
-                            <!-- Barra de progreso -->
-                            <div class="mt-4">
-                                <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>Ocupación total</span>
-                                    <span x-text="getPorcentajeOcupacionTotal() + '%'"></span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-                                        :style="'width: ' + Math.min(getPorcentajeOcupacionTotal(), 100) + '%;'"
-                                        :class="getPorcentajeOcupacionTotal() > 80 ? 'from-yellow-500 to-red-500' :
-                                            'from-green-500 to-blue-500'">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <!-- Columna izquierda - Búsqueda y selección -->
-                            <div class="space-y-4">
-                                <!-- Buscador de productos -->
-                                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                    <label class="block text-sm font-semibold text-gray-800 mb-3">
-                                        <i class="fas fa-search mr-2 text-blue-500"></i>
-                                        Buscar y Seleccionar Artículos
-                                    </label>
-
-                                    <div class="space-y-3">
-
-                                        <!-- Búsqueda rápida -->
-                                        <div class="relative">
-                                            <input type="text" x-model="modalAgregarProducto.busqueda"
-                                                @input="filtrarProductos()"
-                                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10"
-                                                placeholder="Buscar artículos...">
-                                            <i
-                                                class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Artículos filtrados -->
-                                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
-                                    x-show="modalAgregarProducto.productosFiltrados.length > 0">
-                                    <label class="block text-sm font-semibold text-gray-800 mb-3">
-                                        <i class="fas fa-bolt mr-2 text-yellow-500"></i>
-                                        Artículos Disponibles
-                                        <span class="text-gray-500 font-normal"
-                                            x-text="'(' + modalAgregarProducto.productosFiltrados.length + ' encontrados)'"></span>
-                                    </label>
-
-                                    <!-- Virtual Scroll Container SIMPLIFICADO -->
-                                    <div class="relative border border-gray-200 rounded-lg bg-gray-50">
-                                        <!-- Scroll container -->
-                                        <div class="h-64 overflow-y-auto custom-scrollbar" x-ref="scrollContainer"
-                                            @scroll.debounce="handleScroll($event)">
-
-                                            <!-- Contenido principal SIN virtual scroll complejo -->
-                                            <div class="space-y-2 p-2">
-                                                <template x-for="producto in modalAgregarProducto.productosFiltrados"
-                                                    :key="producto.id">
-                                                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white hover:bg-blue-50 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
-                                                        @click="agregarProductoDesdeLista(producto)">
-                                                        <div class="flex items-center gap-3 flex-1">
-                                                            <div
-                                                                class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                                                <i class="fas fa-box text-blue-600"></i>
-                                                            </div>
-                                                            <div class="flex-1 min-w-0">
-                                                                <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
-                                                                <p class="font-semibold text-gray-800 text-sm truncate mb-1"
-                                                                    x-text="producto.nombre"></p>
-
-                                                                <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
-                                                                <template
-                                                                    x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
-                                                                    <p class="text-xs text-gray-500 truncate mb-1"
-                                                                        x-text="'Nombre: ' + producto.nombre_original">
-                                                                    </p>
-                                                                </template>
-
-                                                                <div class="flex gap-2">
-                                                                    <span
-                                                                        class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
-                                                                        x-text="producto.categoria || 'General'"></span>
-                                                                    <span class="px-2 py-1 rounded text-xs font-medium"
-                                                                        :class="{
-                                                                            'bg-green-100 text-green-700': producto
-                                                                                .tipo_articulo === 'PRODUCTOS',
-                                                                            'bg-yellow-100 text-warning': producto
-                                                                                .tipo_articulo === 'REPUESTOS',
-                                                                            'bg-purple-100 text-secondary': producto
-                                                                                .tipo_articulo === 'SUMINISTROS',
-                                                                            'bg-orange-100 text-danger': producto
-                                                                                .tipo_articulo === 'HERAMIENTAS',
-                                                                            'bg-gray-100 text-gray-700': !['PRODUCTOS',
-                                                                                'REPUESTOS', 'SUMINISTROS',
-                                                                                'HERAMIENTAS'
-                                                                            ].includes(producto.tipo_articulo)
-                                                                        }"
-                                                                        x-text="producto.tipo_articulo || 'Standard'">
-                                                                    </span>
-                                                                </div>
-
-                                                                <!-- ✅ NUEVO: Stock debajo de categoría y tipo -->
-                                                                <div class="mt-1">
-                                                                    <span class="text-xs text-gray-500 font-medium"
-                                                                        x-text="'Stock: ' + (producto.stock || 'N/A')"></span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex items-center gap-2">
-                                                            <i
-                                                                class="fas fa-plus text-green-500 text-lg hover:text-green-600 transition-colors"></i>
-                                                        </div>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </div>
-
-                                        <!-- Loading indicator -->
-                                        <div x-show="modalAgregarProducto.loading"
-                                            class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
-                                            <div class="flex flex-col items-center gap-3 text-gray-600">
-                                                <div
-                                                    class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
-                                                </div>
-                                                <span class="text-sm font-medium">Cargando productos...</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Información de resultados -->
-                                    <div class="mt-2 text-xs text-gray-500 flex justify-between items-center">
-                                        <span>💡 Usa la rueda del mouse para navegar rápidamente</span>
-                                        <span
-                                            x-text="modalAgregarProducto.productosFiltrados.length + ' productos'"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Columna derecha - Productos seleccionados -->
-                            <div class="space-y-4">
-                                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <label class="block text-sm font-semibold text-gray-800">
-                                            <i class="fas fa-clipboard-list mr-2 text-green-500"></i>
-                                            Artículos Seleccionados
-                                            <span class="text-gray-500 font-normal"
-                                                x-text="'(' + modalAgregarProducto.productosSeleccionados.length + ')'"></span>
-                                        </label>
-
-                                        <button @click="limpiarSeleccion()"
-                                            class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-1">
-                                            <i class="fas fa-trash text-xs"></i>
-                                            Limpiar Todo
-                                        </button>
-                                    </div>
-
-                                    <!-- Lista de productos seleccionados (MEJORADO) -->
-                                    <div class="space-y-3 max-h-80 overflow-y-auto">
-                                        <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
-                                            <template
-                                                x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
-                                                :key="producto.id">
-                                                <div
-                                                    class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
-                                                    <!-- Encabezado del producto -->
-                                                    <div class="flex items-start justify-between mb-3">
-                                                        <div class="flex items-start gap-3 flex-1">
-                                                            <!-- Ícono del producto -->
-                                                            <div
-                                                                class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                                                                <i class="fas fa-box text-sm"></i>
-                                                            </div>
-
-                                                            <!-- Información del producto -->
-                                                            <div class="flex-1 min-w-0">
-                                                                <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
-                                                                <h4 class="font-semibold text-gray-800 text-sm truncate mb-1"
-                                                                    x-text="producto.nombre || 'Sin nombre'"></h4>
-
-                                                                <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
-                                                                <template x-if="producto.mostrando_codigo_repuesto">
-                                                                    <p class="text-xs text-gray-500 truncate mb-2"
-                                                                        x-text="'Nombre: ' + producto.nombre_original">
-                                                                    </p>
-                                                                </template>
-
-                                                                <div class="flex gap-2 mt-2">
-                                                                    <span
-                                                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
-                                                                        x-text="producto.categoria || 'Sin categoría'"></span>
-                                                                    <span
-                                                                        class="px-2 py-0.5 rounded text-xs font-medium"
-                                                                        :class="{
-                                                                            'bg-green-100 text-green-700': producto
-                                                                                .tipo_articulo === 'PRODUCTOS',
-                                                                            'bg-yellow-100 text-warning': producto
-                                                                                .tipo_articulo === 'REPUESTOS',
-                                                                            'bg-purple-100 text-secondary': producto
-                                                                                .tipo_articulo === 'SUMINISTROS',
-                                                                            'bg-orange-100 text-danger': producto
-                                                                                .tipo_articulo === 'HERAMIENTAS',
-                                                                            'bg-gray-100 text-gray-700': !['PRODUCTOS',
-                                                                                'REPUESTOS', 'SUMINISTROS',
-                                                                                'HERAMIENTAS'
-                                                                            ].includes(producto.tipo_articulo)
-                                                                        }"
-                                                                        x-text="producto.tipo_articulo || 'Sin tipo'">
-                                                                    </span>
-
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-
-                                                    <div
-                                                        class="flex items-center justify-between pt-3 border-t border-gray-100">
-                                                        <!-- Controles de cantidad -->
-                                                        <div class="flex items-center gap-2">
-                                                            <button @click="decrementarCantidad(index)"
-                                                                :disabled="producto.cantidad <= 1"
-                                                                class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                                                <i class="fas fa-minus text-gray-600 text-xs"></i>
-                                                            </button>
-
-                                                            <input type="number" x-model="producto.cantidad"
-                                                                :max="modalAgregarProducto.capacidadMaxima"
-                                                                min="1" @change="validarCantidad(index)"
-                                                                class="w-16 text-center p-1 border border-gray-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-
-                                                            <button @click="incrementarCantidad(index)"
-                                                                :disabled="getTotalCantidades() >= modalAgregarProducto
-                                                                    .capacidadMaxima"
-                                                                class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                                                                <i class="fas fa-plus text-gray-600 text-xs"></i>
-                                                            </button>
-
-                                                            <!-- Remover -->
-                                                            <button @click="removerProductoSeleccionado(index)"
-                                                                class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors ml-2">
-                                                                <i class="fas fa-times text-xs"></i>
-                                                            </button>
-                                                        </div>
-
-                                                        <!-- Stock disponible -->
-                                                        <div class="flex flex-col items-end">
-                                                            <span class="text-xs text-gray-500">Stock disponible:
-                                                                <span class="font-semibold"
-                                                                    x-text="producto.stock || 'N/A'"></span>
-                                                            </span>
-                                                            <span class="text-xs font-semibold mt-1"
-                                                                :class="producto.cantidad > (producto.stock || 999) ?
-                                                                    'text-red-600' : 'text-green-600'">
-                                                                <span x-text="producto.cantidad"></span> unidades
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </template>
-
-                                        <!-- Estado vacío -->
-                                        <template x-if="modalAgregarProducto.productosSeleccionados.length === 0">
-                                            <div
-                                                class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                                                <i class="fas fa-box-open text-4xl text-gray-400 mb-3"></i>
-                                                <p class="text-gray-600 font-medium">No hay productos seleccionados</p>
-                                                <p class="text-sm text-gray-500 mt-1">Usa el buscador para agregar
-                                                    productos</p>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Observaciones -->
-                                <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                                    <label class="block text-sm font-semibold text-gray-800 mb-3">
-                                        <i class="fas fa-edit mr-2 text-purple-500"></i>
-                                        Observaciones (Opcional)
-                                    </label>
-                                    <textarea x-model="modalAgregarProducto.observaciones"
-                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                                        rows="3" placeholder="Agregue notas sobre este movimiento de inventario..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones de acción -->
-                        <div class="flex gap-3 pt-6 border-t border-gray-200 mt-6">
-                            <button @click="cerrarModalAgregarProducto()"
-                                class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
-                                <i class="fas fa-times"></i>
-                                Cancelar
-                            </button>
-                            <button @click="confirmarAgregarProducto()"
-                                :disabled="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
-                                    modalAgregarProducto.capacidadMaxima"
-                                :class="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
-                                    modalAgregarProducto.capacidadMaxima ?
-                                    'bg-gray-400 cursor-not-allowed' :
-                                    'bg-green-500 hover:from-green-600 hover:to-blue-600'"
-                                class="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
-                                <i class="fas fa-check"></i>
-                                Agregar Productos
-                                <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
-                                    <span class="bg-white/20 px-2 py-1 rounded text-xs ml-2"
-                                        x-text="modalAgregarProducto.productosSeleccionados.length"></span>
-                                </template>
-                            </button>
+                    <div>
+                        <div class="font-bold text-lg text-white">Agregar Múltiples Productos</div>
+                        <div class="text-blue-100 text-sm">Ubicación: <span
+                                x-text="modalAgregarProducto.ubicacion.codigo" class="font-semibold"></span>
                         </div>
                     </div>
                 </div>
+                <button type="button" class="text-white hover:text-blue-200 transition-colors"
+                    @click="cerrarModalAgregarProducto()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 bg-gray-50">
+                <!-- Información de la ubicación -->
+                <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
+                    <div class="grid grid-cols-4 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-blue-600"
+                                x-text="modalAgregarProducto.ubicacion.capacidad"></div>
+                            <div class="text-xs text-gray-600 mt-1">Capacidad Total</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-600" x-text="getTotalCantidades()">
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">Unidades a Agregar</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold"
+                                :class="getCapacidadDisponible() >= 0 ? 'text-green-600' : 'text-red-600'"
+                                x-text="getCapacidadDisponible()"></div>
+                            <div class="text-xs text-gray-600 mt-1">Disponible</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-purple-600"
+                                x-text="modalAgregarProducto.productosSeleccionados.length"></div>
+                            <div class="text-xs text-gray-600 mt-1">Productos</div>
+                        </div>
+                    </div>
+
+                    <!-- ✅ NUEVO: Mostrar productos existentes -->
+                    <div x-show="modalAgregarProducto.ubicacion.productos && modalAgregarProducto.ubicacion.productos.length > 0"
+                        class="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                        <div class="text-xs text-blue-700 flex justify-between">
+                            <span>Productos existentes:</span>
+                            <span class="font-semibold"
+                                x-text="(modalAgregarProducto.ubicacion.capacidad - modalAgregarProducto.capacidadMaxima) + ' unidades'"></span>
+                        </div>
+                    </div>
+
+                    <!-- Barra de progreso -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>Ocupación total</span>
+                            <span x-text="getPorcentajeOcupacionTotal() + '%'"></span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
+                                :style="'width: ' + Math.min(getPorcentajeOcupacionTotal(), 100) + '%;'"
+                                :class="getPorcentajeOcupacionTotal() > 80 ? 'from-yellow-500 to-red-500' :
+                                    'from-green-500 to-blue-500'">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Columna izquierda - Búsqueda y selección -->
+                    <div class="space-y-4">
+                        <!-- Buscador de productos -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <label class="block text-sm font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-search mr-2 text-blue-500"></i>
+                                Buscar y Seleccionar Artículos
+                            </label>
+
+                            <div class="space-y-3">
+                                <!-- Búsqueda rápida -->
+                                <div class="relative">
+                                    <input type="text" x-model="modalAgregarProducto.busqueda"
+                                        @input="filtrarProductos()"
+                                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10"
+                                        placeholder="Buscar artículos...">
+                                    <i
+                                        class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Artículos filtrados -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+                            x-show="modalAgregarProducto.productosFiltrados.length > 0">
+                            <label class="block text-sm font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-bolt mr-2 text-yellow-500"></i>
+                                Artículos Disponibles
+                                <span class="text-gray-500 font-normal"
+                                    x-text="'(' + modalAgregarProducto.productosFiltrados.length + ' encontrados)'"></span>
+                            </label>
+
+                            <!-- Virtual Scroll Container -->
+                            <div class="relative border border-gray-200 rounded-lg bg-gray-50">
+                                <div class="h-64 overflow-y-auto custom-scrollbar" x-ref="scrollContainer"
+                                    @scroll.debounce="handleScroll($event)">
+
+                                    <div class="space-y-2 p-2">
+                                        <template x-for="producto in modalAgregarProducto.productosFiltrados"
+                                            :key="producto.id">
+                                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white hover:bg-blue-50 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+                                                @click="agregarProductoDesdeLista(producto)">
+                                                <div class="flex items-center gap-3 flex-1">
+                                                    <div
+                                                        class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                        <i class="fas fa-box text-blue-600"></i>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-semibold text-gray-800 text-sm truncate mb-1"
+                                                            x-text="producto.nombre"></p>
+
+                                                        <template
+                                                            x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
+                                                            <p class="text-xs text-gray-500 truncate mb-1"
+                                                                x-text="'Nombre: ' + producto.nombre_original">
+                                                            </p>
+                                                        </template>
+
+                                                        <div class="flex gap-2">
+                                                            <span
+                                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+                                                                x-text="producto.categoria || 'General'"></span>
+                                                            <span class="px-2 py-1 rounded text-xs font-medium"
+                                                                :class="{
+                                                                    'bg-green-100 text-green-700': producto
+                                                                        .tipo_articulo === 'PRODUCTOS',
+                                                                    'bg-yellow-100 text-warning': producto
+                                                                        .tipo_articulo === 'REPUESTOS',
+                                                                    'bg-purple-100 text-secondary': producto
+                                                                        .tipo_articulo === 'SUMINISTROS',
+                                                                    'bg-orange-100 text-danger': producto
+                                                                        .tipo_articulo === 'HERAMIENTAS',
+                                                                    'bg-gray-100 text-gray-700': !['PRODUCTOS',
+                                                                        'REPUESTOS', 'SUMINISTROS',
+                                                                        'HERAMIENTAS'
+                                                                    ].includes(producto.tipo_articulo)
+                                                                }"
+                                                                x-text="producto.tipo_articulo || 'Standard'">
+                                                            </span>
+                                                        </div>
+
+                                                        <div class="mt-1">
+                                                            <span class="text-xs text-gray-500 font-medium"
+                                                                x-text="'Stock: ' + (producto.stock || 'N/A')"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <i
+                                                        class="fas fa-plus text-green-500 text-lg hover:text-green-600 transition-colors"></i>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div x-show="modalAgregarProducto.loading"
+                                    class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center rounded-lg">
+                                    <div class="flex flex-col items-center gap-3 text-gray-600">
+                                        <div
+                                            class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin">
+                                        </div>
+                                        <span class="text-sm font-medium">Cargando productos...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-2 text-xs text-gray-500 flex justify-between items-center">
+                                <span>💡 Usa la rueda del mouse para navegar rápidamente</span>
+                                <span
+                                    x-text="modalAgregarProducto.productosFiltrados.length + ' productos'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna derecha - Productos seleccionados -->
+                    <div class="space-y-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <label class="block text-sm font-semibold text-gray-800">
+                                    <i class="fas fa-clipboard-list mr-2 text-green-500"></i>
+                                    Artículos Seleccionados
+                                    <span class="text-gray-500 font-normal"
+                                        x-text="'(' + modalAgregarProducto.productosSeleccionados.length + ')'"></span>
+                                </label>
+
+                                <button @click="limpiarSeleccion()"
+                                    class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 transition-colors flex items-center gap-1">
+                                    <i class="fas fa-trash text-xs"></i>
+                                    Limpiar Todo
+                                </button>
+                            </div>
+
+                            <!-- Lista de productos seleccionados ACTUALIZADA CON CLIENTE GENERAL -->
+                            <div class="space-y-3 max-h-80 overflow-y-auto">
+                                <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
+                                    <template
+                                        x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
+                                        :key="producto.id">
+                                        <div
+                                            class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
+                                            <!-- Encabezado del producto -->
+                                            <div class="flex items-start justify-between mb-3">
+                                                <div class="flex items-start gap-3 flex-1">
+                                                    <div
+                                                        class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                                        <i class="fas fa-box text-sm"></i>
+                                                    </div>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <h4 class="font-semibold text-gray-800 text-sm truncate mb-1"
+                                                            x-text="producto.nombre || 'Sin nombre'"></h4>
+
+                                                        <template x-if="producto.mostrando_codigo_repuesto">
+                                                            <p class="text-xs text-gray-500 truncate mb-2"
+                                                                x-text="'Nombre: ' + producto.nombre_original">
+                                                            </p>
+                                                        </template>
+
+                                                        <div class="flex gap-2 mt-2">
+                                                            <span
+                                                                class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
+                                                                x-text="producto.categoria || 'Sin categoría'"></span>
+                                                            <span
+                                                                class="px-2 py-0.5 rounded text-xs font-medium"
+                                                                :class="{
+                                                                    'bg-green-100 text-green-700': producto
+                                                                        .tipo_articulo === 'PRODUCTOS',
+                                                                    'bg-yellow-100 text-warning': producto
+                                                                        .tipo_articulo === 'REPUESTOS',
+                                                                    'bg-purple-100 text-secondary': producto
+                                                                        .tipo_articulo === 'SUMINISTROS',
+                                                                    'bg-orange-100 text-danger': producto
+                                                                        .tipo_articulo === 'HERAMIENTAS',
+                                                                    'bg-gray-100 text-gray-700': !['PRODUCTOS',
+                                                                        'REPUESTOS', 'SUMINISTROS',
+                                                                        'HERAMIENTAS'
+                                                                    ].includes(producto.tipo_articulo)
+                                                                }"
+                                                                x-text="producto.tipo_articulo || 'Sin tipo'">
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- ✅ NUEVO: Selección de Cliente General -->
+                                            <div class="mb-3">
+                                                <label class="block text-xs font-medium text-gray-700 mb-1">
+                                                    <i class="fas fa-user-tie mr-1 text-purple-500"></i>
+                                                    Cliente General *
+                                                </label>
+                                                <select x-model="producto.cliente_general_id" required
+                                                    class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                                    <option value="">Seleccione un cliente</option>
+                                                    <template x-for="cliente in modalAgregarProducto.clientesGenerales"
+                                                        :key="cliente.id">
+                                                        <option :value="cliente.id" x-text="cliente.descripcion">
+                                                        </option>
+                                                    </template>
+                                                </select>
+                                                <p x-show="!producto.cliente_general_id" class="text-xs text-red-500 mt-1">
+                                                    Este campo es obligatorio
+                                                </p>
+                                            </div>
+
+                                            <div
+                                                class="flex items-center justify-between pt-3 border-t border-gray-100">
+                                                <!-- Controles de cantidad -->
+                                                <div class="flex items-center gap-2">
+                                                    <button @click="decrementarCantidad(index)"
+                                                        :disabled="producto.cantidad <= 1"
+                                                        class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <i class="fas fa-minus text-gray-600 text-xs"></i>
+                                                    </button>
+
+                                                    <input type="number" x-model="producto.cantidad"
+                                                        :max="modalAgregarProducto.capacidadMaxima"
+                                                        min="1" @change="validarCantidad(index)"
+                                                        class="w-16 text-center p-1 border border-gray-300 rounded-lg text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+                                                    <button @click="incrementarCantidad(index)"
+                                                        :disabled="getTotalCantidades() >= modalAgregarProducto
+                                                            .capacidadMaxima"
+                                                        class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <i class="fas fa-plus text-gray-600 text-xs"></i>
+                                                    </button>
+
+                                                    <!-- Remover -->
+                                                    <button @click="removerProductoSeleccionado(index)"
+                                                        class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors ml-2">
+                                                        <i class="fas fa-times text-xs"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Stock disponible -->
+                                                <div class="flex flex-col items-end">
+                                                    <span class="text-xs text-gray-500">Stock disponible:
+                                                        <span class="font-semibold"
+                                                            x-text="producto.stock || 'N/A'"></span>
+                                                    </span>
+                                                    <span class="text-xs font-semibold mt-1"
+                                                        :class="producto.cantidad > (producto.stock || 999) ?
+                                                            'text-red-600' : 'text-green-600'">
+                                                        <span x-text="producto.cantidad"></span> unidades
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <!-- Estado vacío -->
+                                <template x-if="modalAgregarProducto.productosSeleccionados.length === 0">
+                                    <div
+                                        class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                                        <i class="fas fa-box-open text-4xl text-gray-400 mb-3"></i>
+                                        <p class="text-gray-600 font-medium">No hay productos seleccionados</p>
+                                        <p class="text-sm text-gray-500 mt-1">Usa el buscador para agregar
+                                            productos</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <label class="block text-sm font-semibold text-gray-800 mb-3">
+                                <i class="fas fa-edit mr-2 text-purple-500"></i>
+                                Observaciones (Opcional)
+                            </label>
+                            <textarea x-model="modalAgregarProducto.observaciones"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                rows="3" placeholder="Agregue notas sobre este movimiento de inventario..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="flex gap-3 pt-6 border-t border-gray-200 mt-6">
+                    <button @click="cerrarModalAgregarProducto()"
+                        class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button @click="confirmarAgregarProducto()"
+                        :disabled="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
+                                modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados()"
+                        :class="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
+                                modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados() ?
+                                'bg-gray-400 cursor-not-allowed' :
+                                'bg-green-500 hover:from-green-600 hover:to-blue-600'"
+                        class="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
+                        <i class="fas fa-check"></i>
+                        Agregar Productos
+                        <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
+                            <span class="bg-white/20 px-2 py-1 rounded text-xs ml-2"
+                                x-text="modalAgregarProducto.productosSeleccionados.length"></span>
+                        </template>
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
+</div>
 
         <!-- Modal para selección de rack destino -->
         <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
@@ -1435,6 +1450,7 @@
                     productos: [],
                     productosSeleccionados: [],
                     productosFiltrados: [],
+                    clientesGenerales: [], // ✅ NUEVO: Array para clientes generales
                     productoSeleccionado: '',
                     busqueda: '',
                     cantidad: 1,
@@ -2145,74 +2161,112 @@
 
                     return Math.round((ocupacionTotal / capacidadTotal) * 100);
                 },
+                // ✅ NUEVO MÉTODO: Verificar que todos los productos tengan cliente seleccionado
+todosClientesSeleccionados() {
+    if (this.modalAgregarProducto.productosSeleccionados.length === 0) return false;
+    
+    return this.modalAgregarProducto.productosSeleccionados.every(
+        producto => producto.cliente_general_id && producto.cliente_general_id !== ''
+    );
+},
 
-                // 3. También necesitas actualizar el método abrirModalAgregarProducto:
-                async abrirModalAgregarProducto(ubi) {
-                    try {
-                        this.modalAgregarProducto.ubicacion = ubi;
+// ✅ ACTUALIZAR: Método para agregar producto desde lista
+agregarProductoDesdeLista(producto) {
+    if (!this.modalAgregarProducto.productosSeleccionados.some(p => p.id === producto.id)) {
+        this.modalAgregarProducto.productosSeleccionados.push({
+            ...producto,
+            cantidad: 1,
+            cliente_general_id: '' // ✅ Inicializar cliente general vacío
+        });
+        this.filtrarProductos();
+    }
+},
+// ✅ ACTUALIZAR: Método para abrir modal (cargar clientes generales)
+async abrirModalAgregarProducto(ubi) {
+    try {
+        this.modalAgregarProducto.ubicacion = ubi;
 
-                        // ✅ CORREGIDO: Calcular capacidad disponible restando productos existentes
-                        const productosExistentes = ubi.productos ?
-                            ubi.productos.reduce((total, prod) => total + (prod.cantidad || 0), 0) : 0;
+        // Calcular capacidad disponible
+        const productosExistentes = ubi.productos ?
+            ubi.productos.reduce((total, prod) => total + (prod.cantidad || 0), 0) : 0;
 
-                        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad - productosExistentes;
+        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad - productosExistentes;
 
-                        this.modalAgregarProducto.productosSeleccionados = [];
-                        this.modalAgregarProducto.productosFiltrados = [];
-                        this.modalAgregarProducto.busqueda = '';
-                        this.modalAgregarProducto.productoSeleccionado = '';
-                        this.modalAgregarProducto.observaciones = '';
+        this.modalAgregarProducto.productosSeleccionados = [];
+        this.modalAgregarProducto.productosFiltrados = [];
+        this.modalAgregarProducto.busqueda = '';
+        this.modalAgregarProducto.productoSeleccionado = '';
+        this.modalAgregarProducto.observaciones = '';
 
-                        // Inicializar virtual scroll
-                        this.modalAgregarProducto.virtualScroll = {
-                            visibleItems: [],
-                            startOffset: 0,
-                            endOffset: 0,
-                            itemHeight: 72,
-                            visibleCount: 10,
-                            loading: true,
-                            searchTimeout: null
-                        };
+        // Inicializar virtual scroll
+        this.modalAgregarProducto.virtualScroll = {
+            visibleItems: [],
+            startOffset: 0,
+            endOffset: 0,
+            itemHeight: 72,
+            visibleCount: 10,
+            loading: true,
+            searchTimeout: null
+        };
 
-                        console.log('Cargando productos...');
+        console.log('Cargando productos y clientes...');
 
-                        const response = await fetch('/almacen/productos/listar', {
-                            method: 'GET',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            }
-                        });
+        // ✅ NUEVO: Cargar clientes generales
+        const [productosResponse, clientesResponse] = await Promise.all([
+            fetch('/almacen/productos/listar', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            }),
+            fetch('/almacen/clientes-generales/listar', { // ✅ Nueva ruta
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+        ]);
 
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
+        if (!productosResponse.ok || !clientesResponse.ok) {
+            throw new Error('Error al cargar datos');
+        }
 
-                        const result = await response.json();
+        const productosResult = await productosResponse.json();
+        const clientesResult = await clientesResponse.json();
 
-                        if (result.success) {
-                            this.modalAgregarProducto.productos = result.data;
-                            this.modalAgregarProducto.productosFiltrados = result.data;
+        if (productosResult.success) {
+            this.modalAgregarProducto.productos = productosResult.data;
+            this.modalAgregarProducto.productosFiltrados = productosResult.data;
+        } else {
+            this.error(productosResult.message || 'Error al cargar productos');
+            return;
+        }
 
-                            // Inicializar virtual scroll después de cargar datos
-                            this.initVirtualScroll();
-                            console.log('Productos cargados:', result.data.length);
-                        } else {
-                            this.error(result.message || 'Error al cargar productos');
-                            return;
-                        }
+        // ✅ NUEVO: Cargar clientes generales
+        if (clientesResult.success) {
+            this.modalAgregarProducto.clientesGenerales = clientesResult.data;
+        } else {
+            this.error(clientesResult.message || 'Error al cargar clientes generales');
+            return;
+        }
 
-                        this.modalAgregarProducto.open = true;
-                        this.modal.open = false;
-                        this.modalAgregarProducto.virtualScroll.loading = false;
+        // Inicializar virtual scroll después de cargar datos
+        this.initVirtualScroll();
+        console.log('Productos cargados:', productosResult.data.length);
+        console.log('Clientes cargados:', clientesResult.data.length);
 
-                    } catch (error) {
-                        console.error('Error al cargar productos:', error);
-                        this.error('Error al cargar la lista de productos: ' + error.message);
-                        this.modalAgregarProducto.virtualScroll.loading = false;
-                    }
-                },
+        this.modalAgregarProducto.open = true;
+        this.modal.open = false;
+        this.modalAgregarProducto.virtualScroll.loading = false;
+
+    } catch (error) {
+        console.error('Error al cargar datos:', error);
+        this.error('Error al cargar los datos: ' + error.message);
+        this.modalAgregarProducto.virtualScroll.loading = false;
+    }
+},
                 // 4. Y actualizar el método cerrarModalAgregarProducto:
                 cerrarModalAgregarProducto() {
                     this.modalAgregarProducto.open = false;
@@ -2321,107 +2375,117 @@
                     }
                 },
 
-                async confirmarAgregarProducto() {
-                    try {
-                        // ✅ VALIDACIONES ACTUALIZADAS para múltiples productos
-                        if (this.modalAgregarProducto.productosSeleccionados.length === 0) {
-                            this.error('Por favor seleccione al menos un producto');
-                            return;
-                        }
+                // ✅ ACTUALIZAR: Método para confirmar agregar producto
+async confirmarAgregarProducto() {
+    try {
+        // ✅ VALIDACIÓN MEJORADA: Incluir cliente general
+        if (this.modalAgregarProducto.productosSeleccionados.length === 0) {
+            this.error('Por favor seleccione al menos un producto');
+            return;
+        }
 
-                        // Validar que no se exceda la capacidad máxima
-                        const totalCantidades = this.getTotalCantidades();
-                        if (totalCantidades > this.modalAgregarProducto.capacidadMaxima) {
-                            this.error(
-                                `La cantidad total (${totalCantidades}) no puede superar la capacidad máxima de ${this.modalAgregarProducto.capacidadMaxima} unidades`
-                            );
-                            return;
-                        }
+        // Validar que todos los productos tengan cliente general seleccionado
+        const productosSinCliente = this.modalAgregarProducto.productosSeleccionados.filter(
+            p => !p.cliente_general_id
+        );
 
-                        // Validar cantidades individuales
-                        for (let producto of this.modalAgregarProducto.productosSeleccionados) {
-                            const cantidad = parseInt(producto.cantidad);
-                            if (isNaN(cantidad) || cantidad <= 0) {
-                                this.error(`La cantidad para ${producto.nombre} debe ser mayor a 0`);
-                                return;
-                            }
+        if (productosSinCliente.length > 0) {
+            this.error('Todos los productos deben tener un cliente general asignado');
+            return;
+        }
 
-                            // Validar stock si está disponible
-                            if (producto.stock && cantidad > producto.stock) {
-                                this.error(
-                                    `La cantidad para ${producto.nombre} (${cantidad}) excede el stock disponible (${producto.stock})`
-                                );
-                                return;
-                            }
-                        }
+        // Resto de validaciones...
+        const totalCantidades = this.getTotalCantidades();
+        if (totalCantidades > this.modalAgregarProducto.capacidadMaxima) {
+            this.error(
+                `La cantidad total (${totalCantidades}) no puede superar la capacidad máxima de ${this.modalAgregarProducto.capacidadMaxima} unidades`
+            );
+            return;
+        }
 
-                        console.log('Preparando para agregar productos:', {
-                            ubicacion_id: this.modalAgregarProducto.ubicacion.id,
-                            productos_count: this.modalAgregarProducto.productosSeleccionados.length,
-                            total_cantidad: totalCantidades
-                        });
+        // Validar cantidades individuales
+        for (let producto of this.modalAgregarProducto.productosSeleccionados) {
+            const cantidad = parseInt(producto.cantidad);
+            if (isNaN(cantidad) || cantidad <= 0) {
+                this.error(`La cantidad para ${producto.nombre} debe ser mayor a 0`);
+                return;
+            }
 
-                        // ✅ ENVIAR CADA PRODUCTO INDIVIDUALMENTE (manteniendo compatibilidad con tu backend actual)
-                        const promises = this.modalAgregarProducto.productosSeleccionados.map(async (producto) => {
-                            const payload = {
-                                ubicacion_id: this.modalAgregarProducto.ubicacion.id,
-                                articulo_id: producto.id,
-                                cantidad: parseInt(producto.cantidad),
-                                observaciones: this.modalAgregarProducto.observaciones
-                            };
+            if (producto.stock && cantidad > producto.stock) {
+                this.error(
+                    `La cantidad para ${producto.nombre} (${cantidad}) excede el stock disponible (${producto.stock})`
+                );
+                return;
+            }
+        }
 
-                            console.log('Enviando producto:', payload);
+        console.log('Preparando para agregar productos con clientes:', {
+            ubicacion_id: this.modalAgregarProducto.ubicacion.id,
+            productos_count: this.modalAgregarProducto.productosSeleccionados.length,
+            total_cantidad: totalCantidades
+        });
 
-                            const response = await fetch('/almacen/ubicaciones/agregar-producto', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: JSON.stringify(payload)
-                            });
+        // ✅ ENVIAR CADA PRODUCTO CON SU CLIENTE GENERAL
+        const promises = this.modalAgregarProducto.productosSeleccionados.map(async (producto) => {
+            const payload = {
+                ubicacion_id: this.modalAgregarProducto.ubicacion.id,
+                articulo_id: producto.id,
+                cantidad: parseInt(producto.cantidad),
+                cliente_general_id: producto.cliente_general_id, // ✅ NUEVO: Incluir cliente general
+                observaciones: this.modalAgregarProducto.observaciones,
+                tipo_ingreso: 'ajuste' // ✅ NUEVO: Tipo de ingreso
+            };
 
-                            return await response.json();
-                        });
+            console.log('Enviando producto con cliente:', payload);
 
-                        // Esperar a que todas las peticiones se completen
-                        const results = await Promise.all(promises);
-
-                        // Verificar si todas fueron exitosas
-                        const allSuccess = results.every(result => result.success);
-
-                        if (allSuccess) {
-                            this.success(
-                                `✅ ${this.modalAgregarProducto.productosSeleccionados.length} producto(s) agregado(s) exitosamente`
-                            );
-
-                            // ✅ ACTUALIZAR INTERFAZ para múltiples productos
-                            // Usamos tu función existente pero la llamamos para cada producto
-                            this.modalAgregarProducto.productosSeleccionados.forEach(producto => {
-                                this.actualizarInterfazDespuesAgregarProducto(
-                                    this.modalAgregarProducto.ubicacion.id,
-                                    producto, // El objeto producto completo
-                                    parseInt(producto.cantidad)
-                                );
-                            });
-
-                            this.cerrarModalAgregarProducto();
-                        } else {
-                            // Manejar errores individuales
-                            const errorMessages = results
-                                .filter(result => !result.success)
-                                .map(result => result.message)
-                                .join(', ');
-
-                            this.error(`Error al agregar algunos productos: ${errorMessages}`);
-                        }
-
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    }
+            const response = await fetch('/almacen/ubicaciones/agregar-producto', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
+                body: JSON.stringify(payload)
+            });
+
+            return await response.json();
+        });
+
+        // Esperar a que todas las peticiones se completen
+        const results = await Promise.all(promises);
+
+        // Verificar si todas fueron exitosas
+        const allSuccess = results.every(result => result.success);
+
+        if (allSuccess) {
+            this.success(
+                `✅ ${this.modalAgregarProducto.productosSeleccionados.length} producto(s) agregado(s) exitosamente`
+            );
+
+            // Actualizar interfaz para cada producto
+            this.modalAgregarProducto.productosSeleccionados.forEach(producto => {
+                this.actualizarInterfazDespuesAgregarProducto(
+                    this.modalAgregarProducto.ubicacion.id,
+                    producto,
+                    parseInt(producto.cantidad)
+                );
+            });
+
+            this.cerrarModalAgregarProducto();
+        } else {
+            // Manejar errores individuales
+            const errorMessages = results
+                .filter(result => !result.success)
+                .map(result => result.message)
+                .join(', ');
+
+            this.error(`Error al agregar algunos productos: ${errorMessages}`);
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    }
+},
 
                 actualizarInterfazDespuesAgregarProducto(ubicacionId, producto, cantidad) {
                     // Buscar la ubicación en la estructura de datos
