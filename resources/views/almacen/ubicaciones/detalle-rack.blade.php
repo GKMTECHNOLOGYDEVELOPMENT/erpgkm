@@ -503,25 +503,38 @@
 
                                                                 <template x-if="!producto.custodia_id">
                                                                     <div>
+                                                                        <!-- ✅ CORREGIDO: Mostrar nombre o código según el tipo -->
                                                                         <p class="font-semibold text-gray-800 text-sm truncate mb-2"
                                                                             x-text="producto.nombre"></p>
+
+                                                                        <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
+                                                                        <template
+                                                                            x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
+                                                                            <p class="text-xs text-gray-500 truncate mb-1"
+                                                                                x-text="'Nombre: ' + producto.nombre_original">
+                                                                            </p>
+                                                                        </template>
+
                                                                         <div class="flex gap-2">
                                                                             <span
                                                                                 class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
-                                                                                x-text="producto.categoria"></span>
+                                                                                x-text="producto.categoria || 'General'"></span>
                                                                             <span
                                                                                 class="px-2 py-1 rounded text-xs font-medium"
                                                                                 :class="{
                                                                                     'bg-green-100 text-green-700': producto
                                                                                         .tipo_articulo === 'PRODUCTOS',
-                                                                                    'bg-yellow-100 text-yellow-700': producto
+                                                                                    'bg-yellow-100 text-warning': producto
                                                                                         .tipo_articulo === 'REPUESTOS',
-                                                                                    'bg-purple-100 text-purple-700': producto
+                                                                                    'bg-purple-100 text-secondary': producto
                                                                                         .tipo_articulo === 'SUMINISTROS',
-                                                                                    'bg-orange-100 text-orange-700': producto
+                                                                                    'bg-orange-100 text-danger': producto
                                                                                         .tipo_articulo === 'HERAMIENTAS',
-                                                                                    'bg-gray-100 text-gray-700': !
-                                                                                        producto.tipo_articulo
+                                                                                    'bg-gray-100 text-gray-700': ![
+                                                                                        'PRODUCTOS', 'REPUESTOS',
+                                                                                        'SUMINISTROS', 'HERAMIENTAS'
+                                                                                    ].includes(producto
+                                                                                        .tipo_articulo)
                                                                                 }"
                                                                                 x-text="producto.tipo_articulo || 'Sin tipo'">
                                                                             </span>

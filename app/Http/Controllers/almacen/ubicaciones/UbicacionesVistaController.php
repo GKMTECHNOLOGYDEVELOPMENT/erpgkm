@@ -240,7 +240,6 @@ class UbicacionesVistaController extends Controller
         }
 
         // ✅ CORREGIDO: Incluir JOIN con custodias y modelo para custodias
-        // En el método detalleRack(), modifica la consulta:
         $rackData = DB::table('racks as r')
             ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
             ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
@@ -252,7 +251,7 @@ class UbicacionesVistaController extends Controller
             ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
             ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
             ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
-            ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca') // ✅ JOIN con marca (nota: tabla se llama 'marca' no 'marcas')
+            ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
             ->select(
                 'r.idRack',
                 'r.nombre as rack_nombre',
@@ -265,9 +264,17 @@ class UbicacionesVistaController extends Controller
                 'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'a.idArticulos',
-                'a.nombre as producto',
+                // ✅ CORREGIDO: Aplicar lógica de repuestos igual que en listarProductos
+                DB::raw('CASE 
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as producto'),
+                'a.nombre as nombre_original', // ✅ Guardar nombre original
+                'a.codigo_repuesto', // ✅ Incluir código de repuesto
                 'a.stock_total',
                 'ta.nombre as tipo_articulo',
+                'ta.idTipoArticulo', // ✅ Incluir ID del tipo de artículo
                 'c.nombre as categoria',
                 'rua.cantidad',
                 'rua.custodia_id',
@@ -277,8 +284,8 @@ class UbicacionesVistaController extends Controller
                 'cust.idMarca',
                 'cust.idModelo',
                 'c_cust.nombre as categoria_custodia',
-                'mar_cust.nombre as marca_nombre', // ✅ Nombre de la marca
-                'm_cust.nombre as modelo_nombre',  // ✅ Nombre del modelo
+                'mar_cust.nombre as marca_nombre',
+                'm_cust.nombre as modelo_nombre',
                 'ru.updated_at'
             )
             ->where('r.nombre', $rack)
@@ -397,12 +404,11 @@ class UbicacionesVistaController extends Controller
                 // Calcular cantidad total y productos
                 $cantidadTotal = $articulos->sum('cantidad');
 
-                // ✅ CORREGIDO: Mapeo de productos con lógica para custodias
+                // ✅ CORREGIDO: Mapeo de productos con lógica para custodias Y repuestos
                 $productos = $articulos->where(function ($art) {
                     return $art->producto || $art->custodia_id;
                 })->map(function ($art) {
                     // ✅ SI ES CUSTODIA
-                    // En el mapeo de productos para custodias:
                     if ($art->custodia_id) {
                         return [
                             'id' => $art->idArticulos,
@@ -416,21 +422,28 @@ class UbicacionesVistaController extends Controller
                             'serie' => $art->serie,
                             'idMarca' => $art->idMarca,
                             'idModelo' => $art->idModelo,
-                            // ✅ NUEVO: Nombres reales
                             'marca_nombre' => $art->marca_nombre,
                             'modelo_nombre' => $art->modelo_nombre
                         ];
                     }
 
-                    // ✅ SI ES PRODUCTO NORMAL
+                    // ✅ SI ES PRODUCTO NORMAL - APLICAR LÓGICA DE REPUESTOS
+                    $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
+
                     return [
                         'id' => $art->idArticulos,
-                        'nombre' => $art->producto,
+                        'nombre' => $art->producto, // Ya viene procesado por el CASE en SQL
+                        'nombre_original' => $art->nombre_original, // Nombre original del producto
+                        'codigo_repuesto' => $art->codigo_repuesto,
                         'cantidad' => $art->cantidad,
                         'stock_total' => $art->stock_total,
                         'tipo_articulo' => $art->tipo_articulo,
+                        'idTipoArticulo' => $art->idTipoArticulo,
                         'categoria' => $art->categoria,
-                        'custodia_id' => null
+                        'custodia_id' => null,
+                        // ✅ NUEVO: Campos para la lógica de repuestos
+                        'es_repuesto' => $art->idTipoArticulo == 2,
+                        'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto
                     ];
                 })->values();
 
