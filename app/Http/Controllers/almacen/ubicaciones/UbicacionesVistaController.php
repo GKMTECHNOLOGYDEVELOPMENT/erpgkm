@@ -256,7 +256,7 @@ Log::debug('=== FINAL getDatosRacks ===', [
             $sede = $rackInfo->sede;
         }
 
-         // ✅ CORREGIDO: Incluir JOIN con custodias, modelo Y cliente general
+        // ✅ CORREGIDO: Incluir JOIN con custodias, modelo, tickets Y cliente general
     $rackData = DB::table('racks as r')
         ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
         ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
@@ -264,12 +264,15 @@ Log::debug('=== FINAL getDatosRacks ===', [
         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
         ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
         ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
-        // ✅ JOIN para custodias con marcas y modelos
+        // ✅ JOIN para custodias con marcas, modelos Y TICKETS
         ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
         ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
         ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
         ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
-        // ✅ NUEVO: JOIN para cliente general desde inventario_ingresos_clientes
+        // ✅ NUEVO: JOIN para tickets de custodias
+        ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
+        ->leftJoin('clientegeneral as cg_cust', 't_cust.idClienteGeneral', '=', 'cg_cust.idClienteGeneral')
+        // ✅ JOIN para cliente general de productos normales
         ->leftJoin('inventario_ingresos_clientes as iic', function($join) {
             $join->on('a.idArticulos', '=', 'iic.articulo_id')
                  ->where('iic.tipo_ingreso', '=', 'ajuste');
@@ -306,10 +309,14 @@ Log::debug('=== FINAL getDatosRacks ===', [
             'cust.serie',
             'cust.idMarca',
             'cust.idModelo',
+            'cust.numero_ticket',
             'c_cust.nombre as categoria_custodia',
             'mar_cust.nombre as marca_nombre',
             'm_cust.nombre as modelo_nombre',
-            // ✅ NUEVO: Campos de cliente general
+            // ✅ NUEVO: Campos de cliente general para CUSTODIAS (desde tickets)
+            'cg_cust.idClienteGeneral as cliente_general_id_custodia',
+            'cg_cust.descripcion as cliente_general_nombre_custodia',
+            // ✅ Campos de cliente general para PRODUCTOS NORMALES
             'cg.idClienteGeneral as cliente_general_id',
             'cg.descripcion as cliente_general_nombre',
             'ru.updated_at'
@@ -431,7 +438,7 @@ Log::debug('=== FINAL getDatosRacks ===', [
                 // Calcular cantidad total y productos
                 $cantidadTotal = $articulos->sum('cantidad');
 
-                // En la parte donde mapeas los productos, asegúrate de incluir el cliente general:
+               // En la parte donde mapeas los productos, actualiza para incluir cliente general de custodias:
     $productos = $articulos->where(function ($art) {
         return $art->producto || $art->custodia_id;
     })->map(function ($art) {
@@ -451,9 +458,10 @@ Log::debug('=== FINAL getDatosRacks ===', [
                 'idModelo' => $art->idModelo,
                 'marca_nombre' => $art->marca_nombre,
                 'modelo_nombre' => $art->modelo_nombre,
-                // ✅ NO incluir cliente general para custodias
-                'cliente_general_id' => null,
-                'cliente_general_nombre' => null
+                'numero_ticket' => $art->numero_ticket,
+                // ✅ NUEVO: Incluir cliente general para custodias (desde tickets)
+                'cliente_general_id' => $art->cliente_general_id_custodia,
+                'cliente_general_nombre' => $art->cliente_general_nombre_custodia ?: 'Sin cliente'
             ];
         }
 
@@ -476,7 +484,7 @@ Log::debug('=== FINAL getDatosRacks ===', [
             'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
             // ✅ NUEVO: Campos de cliente general para productos normales
             'cliente_general_id' => $art->cliente_general_id,
-            'cliente_general_nombre' => $art->cliente_general_nombre
+            'cliente_general_nombre' => $art->cliente_general_nombre ?: 'Sin cliente'
         ];
     })->values();
 

@@ -426,7 +426,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Lista de productos MEJORADA CON CLIENTE GENERAL -->
+                                <!-- Lista de productos MEJORADA CON CLIENTE GENERAL PARA CUSTODIAS Y PRODUCTOS -->
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
     <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
         <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
@@ -457,7 +457,18 @@
                                         <p class="font-semibold text-gray-800 text-sm truncate mb-2"
                                             x-text="producto.serie || producto.codigocustodias || 'Custodia'">
                                         </p>
-                                        <div class="flex gap-2">
+                                        
+                                        <!-- ✅ NUEVO: Mostrar número de ticket para custodias -->
+                                        <div x-show="producto.numero_ticket" class="mb-2">
+                                            <div class="flex items-center gap-1">
+                                                <i class="fas fa-ticket-alt text-xs text-blue-500"></i>
+                                                <span class="text-xs text-gray-600 font-medium">Ticket:</span>
+                                                <span class="text-xs text-blue-700 font-semibold"
+                                                    x-text="producto.numero_ticket"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex gap-2 mb-2">
                                             <span
                                                 class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
                                                 x-text="producto.categoria || 'Custodia'"></span>
@@ -472,6 +483,17 @@
                                                     x-text="producto.modelo_nombre"></span>
                                             </template>
                                         </div>
+
+                                        <!-- ✅ NUEVO: Mostrar Cliente General para custodias -->
+                                        <div x-show="producto.cliente_general_nombre && producto.cliente_general_nombre !== 'Sin cliente'" class="mt-2">
+                                            <div class="flex items-center gap-1">
+                                                <i class="fas fa-user-tie text-xs text-purple-500"></i>
+                                                <span class="text-xs text-gray-600 font-medium">Cliente:</span>
+                                                <span class="text-xs text-purple-700 font-semibold"
+                                                    x-text="producto.cliente_general_nombre"></span>
+                                            </div>
+                                        </div>
+
                                         <div class="mt-1 flex flex-wrap gap-2">
                                             <template
                                                 x-if="producto.serie && producto.codigocustodias">
@@ -541,7 +563,7 @@
                                         </div>
 
                                         <!-- ✅ NUEVO: Mostrar Cliente General solo para productos normales -->
-                                        <div x-show="producto.cliente_general_nombre" class="mt-2">
+                                        <div x-show="producto.cliente_general_nombre && producto.cliente_general_nombre !== 'Sin cliente'" class="mt-2">
                                             <div class="flex items-center gap-1">
                                                 <i class="fas fa-user-tie text-xs text-purple-500"></i>
                                                 <span class="text-xs text-gray-600 font-medium">Cliente:</span>
@@ -1525,6 +1547,7 @@
                 },
 
                 // ✅ NUEVO MÉTODO: Procesar datos para acumular categorías y tipos
+// ✅ ACTUALIZAR MÉTODO: Procesar datos para acumular categorías y tipos
 procesarDatosRack() {
     this.rack.niveles.forEach(nivel => {
         nivel.ubicaciones.forEach(ubicacion => {
@@ -1542,11 +1565,10 @@ procesarDatosRack() {
                     .filter(t => t && t !== 'Sin tipo')
                 )];
 
-                // ✅ Acumular clientes generales únicos (solo productos normales)
+                // ✅ Acumular clientes generales únicos (PRODUCTOS NORMALES Y CUSTODIAS)
                 const clientesUnicos = [...new Set(ubicacion.productos
-                    .filter(p => !p.custodia_id && p.cliente_general_nombre)
+                    .filter(p => p.cliente_general_nombre && p.cliente_general_nombre !== 'Sin cliente')
                     .map(p => p.cliente_general_nombre)
-                    .filter(c => c && c !== 'Cliente no encontrado')
                 )];
 
                 // ✅ Agregar propiedades acumuladas a la ubicación
@@ -1564,7 +1586,7 @@ procesarDatosRack() {
                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                     .cantidad || 0), 0);
 
-                // ✅ NUEVO: Asegurar que cada producto tenga las propiedades de custodia y cliente
+                // ✅ NUEVO: Asegurar que cada producto tenga las propiedades necesarias
                 ubicacion.productos.forEach(producto => {
                     if (!producto.hasOwnProperty('custodia_id')) {
                         producto.custodia_id = null;
@@ -1574,8 +1596,8 @@ procesarDatosRack() {
                         producto.codigocustodias = 'CUST-' + producto.custodia_id;
                     }
                     
-                    // ✅ NUEVO: Asegurar que los productos normales tengan cliente general
-                    if (!producto.custodia_id && !producto.hasOwnProperty('cliente_general_nombre')) {
+                    // ✅ Asegurar que todos los productos tengan cliente general
+                    if (!producto.hasOwnProperty('cliente_general_nombre')) {
                         producto.cliente_general_nombre = 'Sin cliente';
                     }
                 });
@@ -1584,7 +1606,7 @@ procesarDatosRack() {
                 // Si no hay productos, establecer valores por defecto
                 ubicacion.categorias_acumuladas = 'Sin categoría';
                 ubicacion.tipos_acumulados = 'Sin tipo';
-                ubicacion.clientes_acumulados = 'Sin cliente'; // ✅ NUEVO
+                ubicacion.clientes_acumulados = 'Sin cliente';
                 ubicacion.cantidad_total = 0;
             }
         });
