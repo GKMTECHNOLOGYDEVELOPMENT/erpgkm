@@ -436,70 +436,162 @@
                                         </span>
                                     </div>
 
-                                    <div class="max-h-64 overflow-y-auto">
+                                    <div class="max-h-80 overflow-y-auto custom-scrollbar p-2">
                                         <template x-for="(producto, idx) in modal.ubi.productos"
                                             :key="idx">
                                             <div
-                                                class="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                                                class="border border-gray-200 rounded-lg mb-2 last:mb-0 bg-white hover:shadow-md transition-all duration-200">
                                                 <div class="flex items-center justify-between p-4">
                                                     <div class="flex-1 min-w-0">
-                                                        <div class="flex items-center gap-3 mb-2">
-                                                            <div
-                                                                class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                                <i class="fas fa-box text-blue-600 text-sm"></i>
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                                :class="producto.custodia_id ? 'bg-red-100' : 'bg-blue-100'">
+                                                                <i class="fas fa-shield"
+                                                                    x-show="producto.custodia_id"></i>
+                                                                <i class="fas fa-box"
+                                                                    x-show="!producto.custodia_id"></i>
                                                             </div>
                                                             <div class="flex-1 min-w-0">
-                                                                <p class="font-semibold text-gray-800 truncate"
-                                                                    x-text="producto.nombre"></p>
-                                                                <div class="flex gap-2 text-xs text-gray-500 mt-1">
-                                                                    <span
-                                                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded"
-                                                                        x-text="producto.categoria"></span>
-                                                                    <span
-                                                                        class="bg-green-100 text-green-700 px-2 py-0.5 rounded"
-                                                                        x-text="producto.tipo_articulo"></span>
-                                                                </div>
+                                                                <template x-if="producto.custodia_id">
+                                                                    <div>
+                                                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
+                                                                            x-text="producto.serie || producto.codigocustodias || 'Custodia'">
+                                                                        </p>
+                                                                        <div class="flex gap-2">
+                                                                            <span
+                                                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+                                                                                x-text="producto.categoria || 'Custodia'"></span>
+                                                                            <template x-if="producto.marca_nombre">
+                                                                                <span
+                                                                                    class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium"
+                                                                                    x-text="producto.marca_nombre"></span>
+                                                                            </template>
+                                                                            <template x-if="producto.modelo_nombre">
+                                                                                <span
+                                                                                    class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-medium"
+                                                                                    x-text="producto.modelo_nombre"></span>
+                                                                            </template>
+                                                                        </div>
+                                                                        <div class="mt-1 flex flex-wrap gap-2">
+                                                                            <template
+                                                                                x-if="producto.serie && producto.codigocustodias">
+                                                                                <span class="text-xs text-gray-600">
+                                                                                    <i class="fas fa-hashtag mr-1"></i>
+                                                                                    Código: <span
+                                                                                        x-text="producto.codigocustodias"></span>
+                                                                                </span>
+                                                                            </template>
+                                                                            <template
+                                                                                x-if="!producto.marca_nombre && producto.idMarca">
+                                                                                <span class="text-xs text-gray-600">
+                                                                                    <i class="fas fa-tag mr-1"></i>
+                                                                                    Marca ID: <span
+                                                                                        x-text="producto.idMarca"></span>
+                                                                                </span>
+                                                                            </template>
+                                                                            <template
+                                                                                x-if="!producto.modelo_nombre && producto.idModelo">
+                                                                                <span class="text-xs text-gray-600">
+                                                                                    <i class="fas fa-cube mr-1"></i>
+                                                                                    Modelo ID: <span
+                                                                                        x-text="producto.idModelo"></span>
+                                                                                </span>
+                                                                            </template>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
+
+                                                                <template x-if="!producto.custodia_id">
+                                                                    <div>
+                                                                        <p class="font-semibold text-gray-800 text-sm truncate mb-2"
+                                                                            x-text="producto.nombre"></p>
+                                                                        <div class="flex gap-2">
+                                                                            <span
+                                                                                class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+                                                                                x-text="producto.categoria"></span>
+                                                                            <span
+                                                                                class="px-2 py-1 rounded text-xs font-medium"
+                                                                                :class="{
+                                                                                    'bg-green-100 text-green-700': producto
+                                                                                        .tipo_articulo === 'PRODUCTOS',
+                                                                                    'bg-yellow-100 text-yellow-700': producto
+                                                                                        .tipo_articulo === 'REPUESTOS',
+                                                                                    'bg-purple-100 text-purple-700': producto
+                                                                                        .tipo_articulo === 'SUMINISTROS',
+                                                                                    'bg-orange-100 text-orange-700': producto
+                                                                                        .tipo_articulo === 'HERAMIENTAS',
+                                                                                    'bg-gray-100 text-gray-700': !
+                                                                                        producto.tipo_articulo
+                                                                                }"
+                                                                                x-text="producto.tipo_articulo || 'Sin tipo'">
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </template>
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div class="text-right flex items-center gap-3">
-                                                        <!-- ✅ NUEVO: Controles de edición -->
-                                                        <div
-                                                            class="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+                                                    <div class="text-right flex items-center gap-4 ml-4">
+                                                        <!-- Controles de edición (mantener restricciones para custodias) -->
+                                                        <div class="flex items-center gap-2 rounded-lg p-2"
+                                                            :class="producto.custodia_id ? 'bg-red-50' : 'bg-gray-100'">
                                                             <button @click="decrementarCantidadExistente(idx)"
-                                                                :disabled="producto.cantidad <= 1"
-                                                                class="w-6 h-6 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                :disabled="producto.cantidad <= 1 || producto.custodia_id"
+                                                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                                                    'Decrementar'">
                                                                 <i class="fas fa-minus text-gray-600 text-xs"></i>
                                                             </button>
 
                                                             <input type="number" x-model="producto.cantidad"
                                                                 @change="actualizarCantidadProducto(idx)"
                                                                 min="1" :max="modal.ubi.capacidad"
-                                                                class="w-12 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                                :disabled="producto.custodia_id"
+                                                                class="w-14 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                                                    'Cantidad'">
 
                                                             <button @click="incrementarCantidadExistente(idx)"
-                                                                :disabled="getCantidadTotalModal() >= modal.ubi.capacidad"
-                                                                class="w-6 h-6 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                                :disabled="getCantidadTotalModal() >= modal.ubi.capacidad ||
+                                                                    producto.custodia_id"
+                                                                class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                :title="producto.custodia_id ? 'No editable - En custodia' :
+                                                                    'Incrementar'">
                                                                 <i class="fas fa-plus text-gray-600 text-xs"></i>
                                                             </button>
                                                         </div>
 
-                                                        <div class="flex flex-col items-end gap-1">
-                                                            <span class="block font-bold text-gray-800 text-lg"
+                                                        <div class="flex flex-col items-end gap-2">
+                                                            <span class="block font-bold text-lg"
+                                                                :class="producto.custodia_id ? 'text-red-600' : 'text-gray-800'"
                                                                 x-text="producto.cantidad + ' und.'"></span>
 
-                                                            <div class="flex gap-1">
+                                                            <div class="flex gap-2">
+                                                                <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
                                                                 <button
                                                                     @click="iniciarReubicacionProducto(modal.ubi, producto)"
-                                                                    class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1">
+                                                                    :class="producto.custodia_id ?
+                                                                        'bg-secondary hover:bg-purple-600' :
+                                                                        'bg-primary hover:bg-blue-600'"
+                                                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                                                                    :title="producto.custodia_id ?
+                                                                        'Mover' :
+                                                                        'Mover'">
                                                                     <i class="fas fa-arrows-alt text-xs"></i>
-                                                                    Mover
+                                                                    <span
+                                                                        x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
                                                                 </button>
 
-                                                                <!-- ✅ NUEVO: Botón para eliminar producto específico -->
                                                                 <button @click="eliminarProductoIndividual(idx)"
-                                                                    class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1">
+                                                                    :disabled="producto.custodia_id"
+                                                                    :class="producto.custodia_id ?
+                                                                        'bg-gray-400 cursor-not-allowed' :
+                                                                        'bg-red-500 hover:bg-red-600'"
+                                                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                                                                    :title="producto.custodia_id ?
+                                                                        'No se puede eliminar - En custodia' :
+                                                                        'Eliminar producto'">
                                                                     <i class="fas fa-trash text-xs"></i>
                                                                 </button>
                                                             </div>
@@ -507,22 +599,29 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- ✅ NUEVO: Información de cambios pendientes -->
-                                                <div x-show="producto.cantidadOriginal !== undefined && producto.cantidad !== producto.cantidadOriginal"
-                                                    class="bg-yellow-50 border-t border-yellow-200 px-4 py-2 text-xs text-yellow-700 flex justify-between items-center">
-                                                    <span>Cambios pendientes: <span
+                                                <div x-show="!producto.custodia_id && producto.cantidadOriginal !== undefined && producto.cantidad !== producto.cantidadOriginal"
+                                                    class="bg-yellow-50 border-t border-yellow-200 px-4 py-3 text-xs text-yellow-700 flex justify-between items-center">
+                                                    <span class="font-medium">Cambios pendientes: <span
                                                             x-text="producto.cantidadOriginal"></span> → <span
                                                             x-text="producto.cantidad"></span> unidades</span>
-                                                    <div class="flex gap-1">
+                                                    <div class="flex gap-2">
                                                         <button @click="guardarCambiosProducto(idx)"
-                                                            class="bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 rounded text-xs">
+                                                            class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Guardar
                                                         </button>
                                                         <button @click="cancelarCambiosProducto(idx)"
-                                                            class="bg-gray-500 hover:bg-gray-600 text-white px-2 py-0.5 rounded text-xs">
+                                                            class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Cancelar
                                                         </button>
                                                     </div>
+                                                </div>
+
+                                                <!-- INFORMACIÓN MODIFICADA PARA CUSTODIAS -->
+                                                <div x-show="producto.custodia_id"
+                                                    class="bg-blue-50 border-t border-blue-200 px-4 py-3 text-xs text-blue-700 flex items-center gap-2">
+                                                    <i class="fas fa-shield-alt"></i>
+                                                    <span class="font-medium">Artículo en custodia - Puede ser movido
+                                                        entre ubicaciones pero no modificado ni eliminado</span>
                                                 </div>
                                             </div>
                                         </template>
@@ -563,7 +662,7 @@
                                     </button>
 
                                     <button @click="iniciarReubicacionRack(modal.ubi)"
-                                        class="bg-purple-500 hover:bg-purple-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
+                                        class="bg-secondary hover:bg-purple-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-exchange-alt text-xs"></i>
                                         Otro Rack
                                     </button>
@@ -754,7 +853,7 @@
                             <div class="grid grid-cols-4 gap-4 text-center">
                                 <div>
                                     <div class="text-2xl font-bold text-blue-600"
-                                        x-text="modalAgregarProducto.capacidadMaxima"></div>
+                                        x-text="modalAgregarProducto.ubicacion.capacidad"></div>
                                     <div class="text-xs text-gray-600 mt-1">Capacidad Total</div>
                                 </div>
                                 <div>
@@ -775,16 +874,26 @@
                                 </div>
                             </div>
 
+                            <!-- ✅ NUEVO: Mostrar productos existentes -->
+                            <div x-show="modalAgregarProducto.ubicacion.productos && modalAgregarProducto.ubicacion.productos.length > 0"
+                                class="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                                <div class="text-xs text-blue-700 flex justify-between">
+                                    <span>Productos existentes:</span>
+                                    <span class="font-semibold"
+                                        x-text="(modalAgregarProducto.ubicacion.capacidad - modalAgregarProducto.capacidadMaxima) + ' unidades'"></span>
+                                </div>
+                            </div>
+
                             <!-- Barra de progreso -->
                             <div class="mt-4">
                                 <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>Ocupación</span>
-                                    <span x-text="getPorcentajeOcupacion() + '%'"></span>
+                                    <span>Ocupación total</span>
+                                    <span x-text="getPorcentajeOcupacionTotal() + '%'"></span>
                                 </div>
                                 <div class="w-full bg-gray-200 rounded-full h-2">
                                     <div class="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-                                        :style="'width: ' + Math.min(getPorcentajeOcupacion(), 100) + '%;'"
-                                        :class="getPorcentajeOcupacion() > 80 ? 'from-yellow-500 to-red-500' :
+                                        :style="'width: ' + Math.min(getPorcentajeOcupacionTotal(), 100) + '%;'"
+                                        :class="getPorcentajeOcupacionTotal() > 80 ? 'from-yellow-500 to-red-500' :
                                             'from-green-500 to-blue-500'">
                                     </div>
                                 </div>
@@ -815,7 +924,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Artículos filtrados -->
                                 <!-- Artículos filtrados -->
                                 <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
                                     x-show="modalAgregarProducto.productosFiltrados.length > 0">
@@ -849,7 +957,8 @@
                                                                     x-text="producto.nombre"></p>
 
                                                                 <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
-                                                                <template x-if="producto.mostrando_codigo_repuesto">
+                                                                <template
+                                                                    x-if="producto.mostrando_codigo_repuesto && producto.nombre_original">
                                                                     <p class="text-xs text-gray-500 truncate mb-1"
                                                                         x-text="'Nombre: ' + producto.nombre_original">
                                                                     </p>
@@ -863,11 +972,11 @@
                                                                         :class="{
                                                                             'bg-green-100 text-green-700': producto
                                                                                 .tipo_articulo === 'PRODUCTOS',
-                                                                            'bg-yellow-100 text-yellow-700': producto
+                                                                            'bg-yellow-100 text-warning': producto
                                                                                 .tipo_articulo === 'REPUESTOS',
-                                                                            'bg-purple-100 text-purple-700': producto
+                                                                            'bg-purple-100 text-secondary': producto
                                                                                 .tipo_articulo === 'SUMINISTROS',
-                                                                            'bg-orange-100 text-orange-700': producto
+                                                                            'bg-orange-100 text-danger': producto
                                                                                 .tipo_articulo === 'HERAMIENTAS',
                                                                             'bg-gray-100 text-gray-700': !['PRODUCTOS',
                                                                                 'REPUESTOS', 'SUMINISTROS',
@@ -876,22 +985,16 @@
                                                                         }"
                                                                         x-text="producto.tipo_articulo || 'Standard'">
                                                                     </span>
+                                                                </div>
 
-                                                                    <!-- ✅ NUEVO: Badge para indicar que se muestra código de repuesto -->
-                                                                    <template
-                                                                        x-if="producto.mostrando_codigo_repuesto">
-                                                                        <span
-                                                                            class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-medium">
-                                                                            Código Repuesto
-                                                                        </span>
-                                                                    </template>
+                                                                <!-- ✅ NUEVO: Stock debajo de categoría y tipo -->
+                                                                <div class="mt-1">
+                                                                    <span class="text-xs text-gray-500 font-medium"
+                                                                        x-text="'Stock: ' + (producto.stock || 'N/A')"></span>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="flex items-center gap-2">
-                                                            <span
-                                                                class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded"
-                                                                x-text="'Stock: ' + (producto.stock || 'N/A')"></span>
                                                             <i
                                                                 class="fas fa-plus text-green-500 text-lg hover:text-green-600 transition-colors"></i>
                                                         </div>
@@ -942,55 +1045,62 @@
                                     <!-- Lista de productos seleccionados (MEJORADO) -->
                                     <div class="space-y-3 max-h-80 overflow-y-auto">
                                         <template x-if="modalAgregarProducto.productosSeleccionados.length > 0">
-                                           <template x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
-          :key="producto.id">
-    <div class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
-        <!-- Encabezado del producto -->
-        <div class="flex items-start justify-between mb-3">
-            <div class="flex items-start gap-3 flex-1">
-                <!-- Ícono del producto -->
-                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
-                    <i class="fas fa-box text-sm"></i>
-                </div>
+                                            <template
+                                                x-for="(producto, index) in modalAgregarProducto.productosSeleccionados"
+                                                :key="producto.id">
+                                                <div
+                                                    class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-all duration-200">
+                                                    <!-- Encabezado del producto -->
+                                                    <div class="flex items-start justify-between mb-3">
+                                                        <div class="flex items-start gap-3 flex-1">
+                                                            <!-- Ícono del producto -->
+                                                            <div
+                                                                class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                                                                <i class="fas fa-box text-sm"></i>
+                                                            </div>
 
-                <!-- Información del producto -->
-                <div class="flex-1 min-w-0">
-                    <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
-                    <h4 class="font-semibold text-gray-800 text-sm truncate mb-1"
-                        x-text="producto.nombre || 'Sin nombre'"></h4>
-                    
-                    <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
-                    <template x-if="producto.mostrando_codigo_repuesto">
-                        <p class="text-xs text-gray-500 truncate mb-2"
-                           x-text="'Nombre: ' + producto.nombre_original"></p>
-                    </template>
-                    
-                    <div class="flex gap-2 mt-2">
-                        <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
-                              x-text="producto.categoria || 'Sin categoría'"></span>
-                        <span class="px-2 py-0.5 rounded text-xs font-medium"
-                              :class="{
-                                  'bg-green-100 text-green-700': producto.tipo_articulo === 'PRODUCTOS',
-                                  'bg-yellow-100 text-yellow-700': producto.tipo_articulo === 'REPUESTOS',
-                                  'bg-purple-100 text-purple-700': producto.tipo_articulo === 'SUMINISTROS',
-                                  'bg-orange-100 text-orange-700': producto.tipo_articulo === 'HERAMIENTAS',
-                                  'bg-gray-100 text-gray-700': !['PRODUCTOS', 'REPUESTOS', 'SUMINISTROS', 'HERAMIENTAS'].includes(producto.tipo_articulo)
-                              }"
-                              x-text="producto.tipo_articulo || 'Sin tipo'">
-                        </span>
-                        
-                        <!-- ✅ NUEVO: Badge para indicar que se muestra código de repuesto -->
-                        <template x-if="producto.mostrando_codigo_repuesto">
-                            <span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-medium">
-                                Código Repuesto
-                            </span>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div
+                                                            <!-- Información del producto -->
+                                                            <div class="flex-1 min-w-0">
+                                                                <!-- ✅ NUEVO: Mostrar nombre o código según el tipo -->
+                                                                <h4 class="font-semibold text-gray-800 text-sm truncate mb-1"
+                                                                    x-text="producto.nombre || 'Sin nombre'"></h4>
 
-                                                    <!-- Controles y stock -->
+                                                                <!-- ✅ NUEVO: Mostrar información adicional para repuestos -->
+                                                                <template x-if="producto.mostrando_codigo_repuesto">
+                                                                    <p class="text-xs text-gray-500 truncate mb-2"
+                                                                        x-text="'Nombre: ' + producto.nombre_original">
+                                                                    </p>
+                                                                </template>
+
+                                                                <div class="flex gap-2 mt-2">
+                                                                    <span
+                                                                        class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs"
+                                                                        x-text="producto.categoria || 'Sin categoría'"></span>
+                                                                    <span
+                                                                        class="px-2 py-0.5 rounded text-xs font-medium"
+                                                                        :class="{
+                                                                            'bg-green-100 text-green-700': producto
+                                                                                .tipo_articulo === 'PRODUCTOS',
+                                                                            'bg-yellow-100 text-warning': producto
+                                                                                .tipo_articulo === 'REPUESTOS',
+                                                                            'bg-purple-100 text-secondary': producto
+                                                                                .tipo_articulo === 'SUMINISTROS',
+                                                                            'bg-orange-100 text-danger': producto
+                                                                                .tipo_articulo === 'HERAMIENTAS',
+                                                                            'bg-gray-100 text-gray-700': !['PRODUCTOS',
+                                                                                'REPUESTOS', 'SUMINISTROS',
+                                                                                'HERAMIENTAS'
+                                                                            ].includes(producto.tipo_articulo)
+                                                                        }"
+                                                                        x-text="producto.tipo_articulo || 'Sin tipo'">
+                                                                    </span>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
                                                     <div
                                                         class="flex items-center justify-between pt-3 border-t border-gray-100">
                                                         <!-- Controles de cantidad -->
@@ -1076,7 +1186,7 @@
                                 :class="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
                                     modalAgregarProducto.capacidadMaxima ?
                                     'bg-gray-400 cursor-not-allowed' :
-                                    'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600'"
+                                    'bg-green-500 hover:from-green-600 hover:to-blue-600'"
                                 class="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
                                 <i class="fas fa-check"></i>
                                 Agregar Productos
@@ -1390,15 +1500,16 @@
                     this.rack.niveles.forEach(nivel => {
                         nivel.ubicaciones.forEach(ubicacion => {
                             if (ubicacion.productos && ubicacion.productos.length > 0) {
-                                // ✅ Acumular categorías únicas
+                                // ✅ Acumular categorías únicas (incluyendo custodias)
                                 const categoriasUnicas = [...new Set(ubicacion.productos
-                                    .map(p => p.categoria)
+                                    .map(p => p.custodia_id ? (p.categoria_custodia || 'Custodia') :
+                                        p.categoria)
                                     .filter(c => c && c !== 'Sin categoría')
                                 )];
 
-                                // ✅ Acumular tipos de artículo únicos
+                                // ✅ Acumular tipos de artículo únicos (incluyendo custodias)
                                 const tiposUnicos = [...new Set(ubicacion.productos
-                                    .map(p => p.tipo_articulo)
+                                    .map(p => p.custodia_id ? 'CUSTODIA' : p.tipo_articulo)
                                     .filter(t => t && t !== 'Sin tipo')
                                 )];
 
@@ -1412,6 +1523,17 @@
                                 // ✅ Calcular cantidad total
                                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                                     .cantidad || 0), 0);
+
+                                // ✅ NUEVO: Asegurar que cada producto tenga las propiedades de custodia
+                                ubicacion.productos.forEach(producto => {
+                                    if (!producto.hasOwnProperty('custodia_id')) {
+                                        producto.custodia_id = null;
+                                    }
+                                    // Si es custodia y no tiene código, asignar uno por defecto
+                                    if (producto.custodia_id && !producto.codigocustodias) {
+                                        producto.codigocustodias = 'CUST-' + producto.custodia_id;
+                                    }
+                                });
 
                             } else {
                                 // Si no hay productos, establecer valores por defecto
@@ -1464,22 +1586,42 @@
 
                 // Método para reubicar un producto específico
                 // Método para reubicar un producto específico
+                // Método para reubicar un producto específico (AHORA INCLUYE CUSTODIAS)
                 iniciarReubicacionProducto(ubi, producto) {
                     // ✅ CORRECCIÓN: Asegurar que el producto tenga nombre
-                    if (!producto || !producto.nombre) {
+                    if (!producto) {
                         this.error('No se puede reubicar: producto no válido');
+                        return;
+                    }
+
+                    // ✅ NUEVO: Para custodias, usar nombre específico
+                    let nombreProducto = producto.nombre;
+                    if (producto.custodia_id) {
+                        nombreProducto = producto.serie || producto.codigocustodias || 'Custodia ' + producto.custodia_id;
+                    }
+
+                    if (!nombreProducto) {
+                        this.error('No se puede reubicar: nombre de producto no válido');
                         return;
                     }
 
                     this.modoReubicacion.activo = true;
                     this.modoReubicacion.origen = ubi.codigo;
-                    this.modoReubicacion.producto = producto.nombre.toString().trim(); // ✅ Asegurar string
+                    this.modoReubicacion.producto = nombreProducto.toString().trim();
                     this.modoReubicacion.ubicacionOrigenId = ubi.id;
                     this.modoReubicacion.productoId = producto.id;
-                    this.modoReubicacion.cantidad = producto.cantidad;
+                    this.modoReubicacion.cantidad = producto.custodia_id ? 1 : producto
+                        .cantidad; // Custodias siempre son 1 unidad
+                    this.modoReubicacion.esCustodia = !!producto
+                        .custodia_id; // ✅ Nueva propiedad para identificar custodias
                     this.modoReubicacion.tipo = 'producto_especifico';
                     this.modal.open = false;
-                    this.success('Modo reubicación activado para: ' + producto.nombre);
+
+                    const mensaje = producto.custodia_id ?
+                        'Modo reubicación activado para custodia: ' + nombreProducto :
+                        'Modo reubicación activado para: ' + nombreProducto;
+
+                    this.success(mensaje);
                 },
 
                 // Método para reubicar todos los productos
@@ -1500,14 +1642,26 @@
                     this.success('Modo reubicación activado para todos los productos');
                 },
                 // Actualizar el método esDestinoValido
+                // Actualizar el método esDestinoValido para custodias
                 esDestinoValido(ubi) {
-                    if (this.modoReubicacion.tipo === 'producto_especifico') {
-                        // Para producto específico, verificar que no exista el mismo producto en el destino
-                        const productoExistente = ubi.productos?.find(p => p.id === this.modoReubicacion.productoId);
-                        return !productoExistente && ubi.codigo !== this.modoReubicacion.origen;
+                    if (ubi.codigo === this.modoReubicacion.origen) {
+                        return false; // No puede ser la misma ubicación
                     }
+
+                    // ✅ NUEVO: Lógica diferente para custodias
+                    if (this.modoReubicacion.esCustodia) {
+                        // Para custodias: el destino debe estar vacío (no pueden compartir espacio con otros productos)
+                        return (!ubi.productos || ubi.productos.length === 0);
+                    }
+
+                    // Para productos normales: lógica existente
+                    if (this.modoReubicacion.tipo === 'producto_especifico') {
+                        const productoExistente = ubi.productos?.find(p => p.id === this.modoReubicacion.productoId);
+                        return !productoExistente;
+                    }
+
                     // Para reubicación completa, el destino debe estar vacío
-                    return (!ubi.productos || ubi.productos.length === 0) && ubi.codigo !== this.modoReubicacion.origen;
+                    return (!ubi.productos || ubi.productos.length === 0);
                 },
 
                 // Navegación entre racks
@@ -1720,11 +1874,14 @@
                         }
 
                         const payload = {
-                            ubicacion_origen_id: this.modoReubicacion.ubicacionOrigenId,
+                            ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
                             ubicacion_destino_id: ubicacionDestino.id,
-                            producto: this.modalReubicacion.producto.toString().trim(), // ✅ Asegurar que sea string
+                            producto: this.modalReubicacion.producto.toString().trim(),
                             cantidad: cantidad,
-                            tipo_reubicacion: 'mismo_rack'
+                            tipo_reubicacion: 'mismo_rack',
+                            es_custodia: this.modoReubicacion.esCustodia || false, // ✅ Nueva propiedad
+                            custodia_id: this.modoReubicacion.esCustodia ? this.modoReubicacion.productoId :
+                                null // ✅ ID de custodia si aplica
                         };
 
                         console.log('Payload enviado:', payload);
@@ -1958,7 +2115,8 @@
 
                 // Obtener capacidad disponible
                 getCapacidadDisponible() {
-                    return this.modalAgregarProducto.capacidadMaxima - this.getTotalCantidades();
+                    const totalSeleccionado = this.getTotalCantidades();
+                    return this.modalAgregarProducto.capacidadMaxima - totalSeleccionado;
                 },
 
                 // Calcular porcentaje de ocupación
@@ -1966,12 +2124,26 @@
                     if (this.modalAgregarProducto.capacidadMaxima === 0) return 0;
                     return Math.round((this.getTotalCantidades() / this.modalAgregarProducto.capacidadMaxima) * 100);
                 },
+                getPorcentajeOcupacionTotal() {
+                    const capacidadTotal = this.modalAgregarProducto.ubicacion.capacidad;
+                    const productosExistentes = capacidadTotal - this.modalAgregarProducto.capacidadMaxima;
+                    const productosNuevos = this.getTotalCantidades();
+                    const ocupacionTotal = productosExistentes + productosNuevos;
+
+                    return Math.round((ocupacionTotal / capacidadTotal) * 100);
+                },
 
                 // 3. También necesitas actualizar el método abrirModalAgregarProducto:
                 async abrirModalAgregarProducto(ubi) {
                     try {
                         this.modalAgregarProducto.ubicacion = ubi;
-                        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad;
+
+                        // ✅ CORREGIDO: Calcular capacidad disponible restando productos existentes
+                        const productosExistentes = ubi.productos ?
+                            ubi.productos.reduce((total, prod) => total + (prod.cantidad || 0), 0) : 0;
+
+                        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad - productosExistentes;
+
                         this.modalAgregarProducto.productosSeleccionados = [];
                         this.modalAgregarProducto.productosFiltrados = [];
                         this.modalAgregarProducto.busqueda = '';
@@ -2028,7 +2200,6 @@
                         this.modalAgregarProducto.virtualScroll.loading = false;
                     }
                 },
-
                 // 4. Y actualizar el método cerrarModalAgregarProducto:
                 cerrarModalAgregarProducto() {
                     this.modalAgregarProducto.open = false;
@@ -2474,7 +2645,6 @@
                         this.error('Error de conexión al servidor');
                     }
                 },
-
                 // Actualizar interfaz después de cambios
                 actualizarInterfazDespuesCambio(ubicacionId) {
                     // Buscar y actualizar la ubicación en la estructura principal
@@ -2880,9 +3050,6 @@
                 info(msg) {
                     toastr.info(msg);
                 },
-
-                // Los demás métodos de reubicación los mantienes igual...
-                // confirmarReubicacion(), iniciarReubicacionRack(), etc.
             };
         }
     </script>
