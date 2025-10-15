@@ -162,10 +162,10 @@
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         @foreach ($sedes as $sede)
-                        <option value="{{ $sede }}"
-                            {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}> <!-- ← Esto asegura que esté seleccionado -->
-                            {{ $sede }}
-                        </option>
+                            <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
+                                <!-- ← Esto asegura que esté seleccionado -->
+                                {{ $sede }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -355,17 +355,21 @@
                                 <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
                                     @click="seleccionarRackParaEdicion(rack)">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                        <div
+                                            class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                                             <i class="fas fa-warehouse text-indigo-600"></i>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-800" x-text="'Rack ' + rack.nombre"></div>
+                                            <div class="font-semibold text-gray-800" x-text="'Rack ' + rack.nombre">
+                                            </div>
                                             <div class="text-sm text-gray-600" x-text="rack.sede"></div>
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <div class="text-sm text-gray-500" x-text="rack.filas + 'x' + rack.columnas"></div>
-                                        <div class="text-xs text-gray-400" x-text="(rack.filas * rack.columnas) + ' ubicaciones'"></div>
+                                        <div class="text-sm text-gray-500" x-text="rack.filas + 'x' + rack.columnas">
+                                        </div>
+                                        <div class="text-xs text-gray-400"
+                                            x-text="(rack.filas * rack.columnas) + ' ubicaciones'"></div>
                                     </div>
                                     <i class="fas fa-chevron-right text-gray-400 ml-4"></i>
                                 </div>
@@ -413,7 +417,7 @@
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="">Seleccione una sede</option>
                                     @foreach ($sedes as $sede)
-                                    <option value="{{ $sede }}">{{ $sede }}</option>
+                                        <option value="{{ $sede }}">{{ $sede }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -679,25 +683,34 @@
                     <div class="p-5">
                         <form @submit.prevent="actualizarDimensionesRack()" class="space-y-4">
                             <!-- Información del rack -->
-                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg" x-show="modalEditarDimensiones.rack">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg"
+                                x-show="modalEditarDimensiones.rack">
                                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                                    <span x-text="'Rack: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.nombre : '')"></span>
+                                    <span
+                                        x-text="'Rack: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.nombre : '')"></span>
                                     <span x-show="modalEditarDimensiones.rack"> | </span>
-                                    <span x-text="'Sede: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.sede : '')"></span>
+                                    <span
+                                        x-text="'Sede: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.sede : '')"></span>
                                 </div>
                             </div>
 
                             <!-- Configuración de dimensiones -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas *</label>
-                                    <input type="number" x-model="modalEditarDimensiones.form.filas" required min="1" max="12"
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas
+                                        *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.filas" required
+                                        min="1" max="12"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de filas">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas *</label>
-                                    <input type="number" x-model="modalEditarDimensiones.form.columnas" required min="1" max="24"
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas
+                                        *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.columnas" required
+                                        min="1" max="24"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de columnas">
                                 </div>
@@ -708,7 +721,8 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                     Capacidad Máxima por Ubicación *
                                 </label>
-                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required min="1" max="1000"
+                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required
+                                    min="1" max="1000"
                                     class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                     placeholder="Ej: 100, 200, 500...">
                                 <p class="text-xs text-slate-500 mt-1">
@@ -717,7 +731,8 @@
                             </div>
 
                             <!-- Resumen de cambios -->
-                            <div x-show="modalEditarDimensiones.cambiosDetectados" class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
+                            <div x-show="modalEditarDimensiones.cambiosDetectados"
+                                class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
                                 <div class="text-sm text-amber-800 dark:text-amber-300">
                                     <div class="font-medium mb-1">Resumen de cambios:</div>
                                     <div x-text="modalEditarDimensiones.resumenCambios"></div>
@@ -731,10 +746,12 @@
                                     Cancelar
                                 </button>
                                 <button type="submit" :disabled="modalEditarDimensiones.loading"
-                                    :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'"
+                                    :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
+                                        'bg-indigo-600 hover:bg-indigo-700'"
                                     class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                     <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
-                                    <span x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 'Actualizar Dimensiones'"></span>
+                                    <span
+                                        x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 'Actualizar Dimensiones'"></span>
                                 </button>
                             </div>
                         </form>
@@ -906,7 +923,8 @@
                             this.modalEditarDimensiones.rack = result.data;
                             this.modalEditarDimensiones.form.filas = result.data.filas;
                             this.modalEditarDimensiones.form.columnas = result.data.columnas;
-                            this.modalEditarDimensiones.form.capacidad_maxima = 100; // Valor por defecto
+                            this.modalEditarDimensiones.form.capacidad_maxima =
+                                100; // Valor por defecto
                             this.modalEditarDimensiones.open = true;
                             this.calcularCambios();
                         } else {
@@ -993,7 +1011,8 @@
                         this.modalEditarDimensiones.resumenCambios =
                             `Se reducirán ${Math.abs(diferencia)} ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
                     } else {
-                        this.modalEditarDimensiones.resumenCambios = 'No hay cambios en el número de ubicaciones.';
+                        this.modalEditarDimensiones.resumenCambios =
+                            'No hay cambios en el número de ubicaciones.';
                     }
                 },
                 // Método para actualizar dimensiones
@@ -1001,14 +1020,16 @@
                     this.modalEditarDimensiones.loading = true;
 
                     try {
-                        const response = await fetch(`/almacen/racks/${this.modalEditarDimensiones.rack.idRack}/actualizar-dimensiones`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(this.modalEditarDimensiones.form)
-                        });
+                        const response = await fetch(
+                            `/almacen/racks/${this.modalEditarDimensiones.rack.idRack}/actualizar-dimensiones`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify(this.modalEditarDimensiones.form)
+                            });
 
                         const result = await response.json();
 
@@ -1383,19 +1404,20 @@
                     const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
 
                     // ✅ AGREGAR SEDE AL ARRAY DE DATOS (índice 10)
-                    const data = this.data.map(d => [
-                        d.x || 0,
-                        d.y || 0,
-                        d[valorCampo] || 0,
-                        d.ubicacion || 'N/A',
-                        d.piso || 1,
-                        d.rack || 'N/A',
-                        d.cantidad || 0,
-                        d.categoria || 'Sin categoría',
-                        d.capacidad || 100,
-                        d.sede || 'N/A',
-                        d.tipo_articulo || 'Sin tipo', // ✅ NUEVO: Tipo de artículo
-                        d.nivel || 1 // ✅ NUEVO: Nivel (piso)
+                    // ✅ AGREGAR TODOS LOS CAMPOS INCLUYENDO CUSTODIAS
+   const data = this.data.map(d => [
+    d.x || 0,
+    d.y || 0,
+    d[valorCampo] || 0,
+    d.ubicacion || 'N/A',
+    d.piso || 1,
+    d.rack || 'N/A',
+    d.cantidad || 0,
+    d.categoria || 'Sin categoría',
+    d.capacidad || 100,
+    d.sede || 'N/A',
+    d.tipo_articulo || 'Sin tipo',
+    d.nivel || 1
                     ]);
 
 
@@ -1412,31 +1434,36 @@
                                 color: '#fff',
                                 fontSize: 14
                             },
-                            formatter: (p) => {
-                                try {
-                                    // ✅ ACTUALIZAR ÍNDICES CON TODOS LOS NUEVOS CAMPOS
-                                    const [x, y, val, ubicacion, piso, rack, cantidad,
-                                        categoria, capacidad, sede, tipoArticulo, nivel
-                                    ] = p.data;
+                           formatter: (p) => {
+    try {
+        // ✅ SOLO LOS CAMPOS QUE NECESITAMOS
+        const [x, y, val, ubicacion, piso, rack, cantidad,
+                categoria, capacidad, sede, tipoArticulo, nivel
+            ] = p.data;
 
-                                    return `
-                        <div style="padding:12px; min-width: 300px;">
-                            <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">🏢 Rack ${rack} - ${sede}</div>
-                            <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
-                            <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
-                            <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidad} / ${capacidad}</div>
-                            <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
-                            <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
-                            <div style="margin-bottom:6px;">📈 <strong>${this.mode === 'heat' ? 'Actividad' : 'Ocupación'}:</strong> ${val}%</div>
-                            <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-                            <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
-                        </div>
-                    `;
-                                } catch (error) {
-                                    console.error('Error en tooltip:', error);
-                                    return '<div>Error al cargar información</div>';
-                                }
-                            }
+        return `
+            <div style="padding:12px; min-width: 320px;">
+                <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">
+                    🏢 Rack ${rack} - ${sede}
+                    ${tipoArticulo.includes('CUSTODIA') ? '<span style="font-size:12px;background:#ef4444;color:white;padding:2px 6px;border-radius:10px;margin-left:8px;">CUSTODIA</span>' : ''}
+                </div>
+                
+                <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
+                <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
+                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidad} / ${capacidad}</div>
+                <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
+                <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
+                <div style="margin-bottom:6px;">📈 <strong>${this.mode === 'heat' ? 'Actividad' : 'Ocupación'}:</strong> ${val}%</div>
+                
+                <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+                <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error en tooltip:', error);
+        return '<div>Error al cargar información</div>';
+    }
+}
 
                         },
                         grid: {

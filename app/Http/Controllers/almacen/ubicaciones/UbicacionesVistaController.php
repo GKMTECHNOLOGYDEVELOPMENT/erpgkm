@@ -66,8 +66,10 @@ class UbicacionesVistaController extends Controller
         // ✅ Obtener productos por ubicación y AGRUPAR categorías y tipos
         $ubicacionIds = $ubicaciones->pluck('idRackUbicacion')->toArray();
 
+        // ✅ MODIFICADO: Incluir información de custodias
+        // En la consulta de productos, puedes dejarlo así:
         $productosPorUbicacion = DB::table('rack_ubicacion_articulos as rua')
-            ->join('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+            ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
             ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
             ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
@@ -75,6 +77,7 @@ class UbicacionesVistaController extends Controller
             ->select(
                 'rua.rack_ubicacion_id',
                 'rua.cantidad',
+                'rua.custodia_id', // ✅ Solo necesitas esto para detectar custodias
                 'a.nombre as producto',
                 'ta.nombre as tipo_articulo',
                 'c.nombre as categoria'
@@ -106,7 +109,7 @@ class UbicacionesVistaController extends Controller
             $actividadNormalizada[$rackId] = $porcentaje;
         }
 
-        // Preparar datos para el heatmap - SIMPLIFICADO
+        // Preparar datos para el heatmap
         $data = [];
         $rackGroups = [];
 
@@ -136,14 +139,21 @@ class UbicacionesVistaController extends Controller
                 $producto = 'Vacío';
                 $categorias = 'Sin categoría';
                 $tiposArticulo = 'Sin tipo';
+                $tieneCustodia = false;
+                $infoCustodia = null;
 
+                // Dentro del if ($productosUbicacion->isNotEmpty()), modifica esta sección:
                 if ($productosUbicacion->isNotEmpty()) {
+                    // ✅ VERIFICAR SI HAY CUSTODIAS
+                    $tieneCustodia = $productosUbicacion->where('custodia_id', '!=', null)->isNotEmpty();
+
                     // Si hay un solo producto
                     if ($productosUbicacion->count() === 1) {
                         $primerProducto = $productosUbicacion->first();
                         $producto = $primerProducto->producto;
                         $categorias = $primerProducto->categoria ?? 'Sin categoría';
-                        $tiposArticulo = $primerProducto->tipo_articulo ?? 'Sin tipo';
+                        // ✅ SOLO CAMBIA EL TIPO ARTÍCULO SI HAY CUSTODIA
+                        $tiposArticulo = $tieneCustodia ? 'CUSTODIA' : ($primerProducto->tipo_articulo ?? 'Sin tipo');
                     } else {
                         // ✅ Si hay múltiples productos, mostrar el primero y agregar "+X más"
                         $primerProducto = $productosUbicacion->first();
@@ -161,6 +171,12 @@ class UbicacionesVistaController extends Controller
                             ->filter()
                             ->unique()
                             ->values();
+
+                        // ✅ SI HAY CUSTODIA, AGREGAR "CUSTODIA" A LOS TIPOS
+                        if ($tieneCustodia) {
+                            $tiposUnicos = $tiposUnicos->push('CUSTODIA')->unique();
+                        }
+
                         $tiposArticulo = $tiposUnicos->isNotEmpty() ?
                             $tiposUnicos->join(', ') : 'Sin tipo';
                     }
@@ -180,17 +196,17 @@ class UbicacionesVistaController extends Controller
                     'rack' => $rackNombre,
                     'letra' => $letraRack,
                     'ubicacion' => $ub->codigo_unico ?? $ub->codigo,
-                    'producto' => $producto, // ✅ Producto principal o resumen
-                    'cantidad' => $cantidadTotal, // ✅ Cantidad total
+                    'producto' => $producto,
+                    'cantidad' => $cantidadTotal,
                     'capacidad' => $ub->capacidad_maxima,
-                    'categoria' => $categorias, // ✅ Categorías separadas por comas
-                    'tipo_articulo' => $tiposArticulo, // ✅ Tipos separados por comas
+                    'categoria' => $categorias,
+                    'tipo_articulo' => $tiposArticulo, // ✅ Aquí ya vendrá "CUSTODIA" si corresponde
                     'piso' => $ub->piso,
                     'estado' => $ub->estado_ocupacion,
                     'sede' => $ub->sede,
                     'actividad_bruta' => $actividadPorRack[$ub->idRack] ?? 0,
                     'max_actividad' => $maxActividad,
-                    'total_productos' => $productosUbicacion->count() // ✅ Para debug
+                    'total_productos' => $productosUbicacion->count()
                 ];
 
                 $x++;
@@ -207,10 +223,11 @@ class UbicacionesVistaController extends Controller
             'ocupadas' => $ubicaciones->where('estado_ocupacion', '!=', 'vacio')->count(),
         ];
 
-        Log::debug('=== FINAL getDatosRacks ===', [
-            'total_data_points' => count($data),
-            'stats' => $stats
-        ]);
+Log::debug('=== FINAL getDatosRacks ===', [
+    'total_data_points' => count($data),
+    'ubicaciones_con_custodia' => count(array_filter($data, fn($d) => str_contains($d['tipo_articulo'], 'CUSTODIA'))), // ← CORREGIDO
+    'stats' => $stats
+]);
 
         return response()->json([
             'success' => true,
