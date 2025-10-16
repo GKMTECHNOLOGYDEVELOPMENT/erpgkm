@@ -1666,34 +1666,36 @@
 
                 // ========== MÉTODOS DE INTERACCIÓN CON UBICACIONES ==========
                 manejarClickUbicacion(ubi) {
-                    if (this.modoReubicacion.activo) {
-                        if (ubi.codigo === this.modoReubicacion.origen) {
-                            this.cancelarReubicacion();
-                        } else if (this.esDestinoValido(ubi)) {
-                            if (!this.modoReubicacion.producto) {
-                                this.error('No se ha seleccionado un producto para reubicar');
-                                this.cancelarReubicacion();
-                                return;
-                            }
+    if (this.modoReubicacion.activo) {
+        if (ubi.codigo === this.modoReubicacion.origen) {
+            this.cancelarReubicacion();
+        } else if (this.esDestinoValido(ubi)) {
+            if (!this.modoReubicacion.producto) {
+                this.error('No se ha seleccionado un producto para reubicar');
+                this.cancelarReubicacion();
+                return;
+            }
 
-                            const ubicacionOrigenActual = this.buscarUbicacionPorCodigo(this.modoReubicacion.origen);
-                            if (!ubicacionOrigenActual) {
-                                this.error('No se pudo encontrar la ubicación origen');
-                                this.cancelarReubicacion();
-                                return;
-                            }
+            const ubicacionOrigenActual = this.buscarUbicacionPorCodigo(this.modoReubicacion.origen);
+            if (!ubicacionOrigenActual) {
+                this.error('No se pudo encontrar la ubicación origen');
+                this.cancelarReubicacion();
+                return;
+            }
 
-                            this.modalReubicacion.origen = this.modoReubicacion.origen;
-                            this.modalReubicacion.destino = ubi.codigo;
-                            this.modalReubicacion.producto = this.modoReubicacion.producto;
-                            this.modalReubicacion.cantidad = ubicacionOrigenActual.cantidad_total || this.modoReubicacion
-                                .cantidad;
-                            this.modalReubicacion.open = true;
-                        }
-                    } else {
-                        this.verDetalle(ubi);
-                    }
-                },
+            this.modalReubicacion.origen = this.modoReubicacion.origen;
+            this.modalReubicacion.destino = ubi.codigo;
+            this.modalReubicacion.producto = this.modoReubicacion.producto;
+            
+            // ✅ CORREGIDO: Usar la cantidad específica del modoReubicacion
+            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← CAMBIO AQUÍ
+            
+            this.modalReubicacion.open = true;
+        }
+    } else {
+        this.verDetalle(ubi);
+    }
+},
 
                 verDetalle(ubi) {
                     this.modal.ubi = ubi;
@@ -1707,47 +1709,110 @@
                 },
 
                 // ========== MÉTODOS DE REUBICACIÓN ==========
-                iniciarReubicacionProducto(ubi, producto) {
-                    if (!producto) {
-                        this.error('No se puede reubicar: producto no válido');
-                        return;
-                    }
+               iniciarReubicacionProducto(ubi, producto) {
+    if (!producto) {
+        this.error('No se puede reubicar: producto no válido');
+        return;
+    }
 
-                    console.log('🔍 DEBUG - Producto completo:', producto);
+    console.log('🔍 DEBUG - Producto completo:', producto);
 
-                    let nombreProducto = producto.nombre;
-                    if (producto.custodia_id) {
-                        nombreProducto = producto.serie || producto.codigocustodias || 'Custodia ' + producto.custodia_id;
-                    }
+    let nombreProducto = producto.nombre;
+    if (producto.custodia_id) {
+        nombreProducto = producto.serie || producto.codigocustodias || 'Custodia ' + producto.custodia_id;
+    }
 
-                    if (!nombreProducto) {
-                        this.error('No se puede reubicar: nombre de producto no válido');
-                        return;
-                    }
+    if (!nombreProducto) {
+        this.error('No se puede reubicar: nombre de producto no válido');
+        return;
+    }
 
-                    this.modoReubicacion.activo = true;
-                    this.modoReubicacion.origen = ubi.codigo;
-                    this.modoReubicacion.producto = nombreProducto.toString().trim();
-                    this.modoReubicacion.ubicacionOrigenId = ubi.id;
-                    this.modoReubicacion.productoId = producto.custodia_id ? producto.custodia_id : producto.id;
-                    this.modoReubicacion.cantidad = producto.custodia_id ? 1 : producto.cantidad;
-                    this.modoReubicacion.esCustodia = !!producto.custodia_id;
-                    this.modoReubicacion.tipo = 'producto_especifico';
-                    this.modal.open = false;
+    const cantidadProducto = producto.cantidad || 1;
 
-                    console.log('✅ Datos configurados para reubicación:', {
-                        productoId: this.modoReubicacion.productoId,
-                        esCustodia: this.modoReubicacion.esCustodia,
-                        custodiaId: producto.custodia_id,
-                        cantidad: this.modoReubicacion.cantidad
-                    });
+    // ✅ CORREGIDO: Payload diferente para custodias vs productos normales
+    const payload = {
+        ubicacion_origen_id: ubi.id,
+        producto: nombreProducto.toString().trim(),
+        cantidad: cantidadProducto,
+    };
 
-                    const mensaje = producto.custodia_id ?
-                        'Modo reubicación activado para custodia: ' + nombreProducto :
-                        'Modo reubicación activado para: ' + nombreProducto;
+    // ✅ PARA CUSTODIAS
+    if (producto.custodia_id) {
+        payload.custodia_id = producto.custodia_id;
+        // Para custodias, NO enviar articulo_id ni cliente_general_id
+        payload.articulo_id = null;
+        payload.cliente_general_id = null;
+    } 
+    // ✅ PARA PRODUCTOS NORMALES
+    else {
+        payload.articulo_id = producto.id;
+        payload.cliente_general_id = producto.cliente_general_id;
+        payload.custodia_id = null;
+    }
 
-                    this.success(mensaje);
-                },
+    console.log('📤 Enviando datos de reubicación:', payload);
+
+    // ✅ NUEVO: Llamar al backend para iniciar reubicación
+    fetch('/almacen/reubicacion/iniciar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(result => {
+        console.log('📥 Respuesta del backend:', result);
+        
+        if (result.success) {
+            // ✅ Configurar modo reubicación con datos del backend
+            this.modoReubicacion.activo = true;
+            this.modoReubicacion.origen = ubi.codigo;
+            this.modoReubicacion.producto = result.data.ubicacion_origen.producto;
+            this.modoReubicacion.ubicacionOrigenId = ubi.id;
+            
+            // ✅ DIFERENCIAR ENTRE CUSTODIA Y PRODUCTO NORMAL
+            if (producto.custodia_id) {
+                this.modoReubicacion.productoId = producto.custodia_id;
+                this.modoReubicacion.esCustodia = true;
+                this.modoReubicacion.articuloId = null;
+                this.modoReubicacion.clienteGeneralId = null;
+            } else {
+                this.modoReubicacion.productoId = producto.id;
+                this.modoReubicacion.esCustodia = false;
+                this.modoReubicacion.articuloId = producto.id;
+                this.modoReubicacion.clienteGeneralId = producto.cliente_general_id;
+            }
+            
+            this.modoReubicacion.cantidad = cantidadProducto;
+            this.modoReubicacion.tipo = 'producto_especifico';
+            
+            this.modal.open = false;
+
+            console.log('✅ Datos configurados para reubicación:', {
+                producto: this.modoReubicacion.producto,
+                productoId: this.modoReubicacion.productoId,
+                articuloId: this.modoReubicacion.articuloId,
+                clienteGeneralId: this.modoReubicacion.clienteGeneralId,
+                esCustodia: this.modoReubicacion.esCustodia,
+                cantidad: this.modoReubicacion.cantidad
+            });
+
+            const mensaje = producto.custodia_id ?
+                'Modo reubicación activado para custodia: ' + nombreProducto :
+                'Modo reubicación activado para: ' + nombreProducto + ' - Cliente: ' + (producto.cliente_general_nombre || 'Sin cliente');
+
+            this.success(mensaje);
+        } else {
+            this.error(result.message || 'Error al iniciar reubicación');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    });
+},
 
                 iniciarReubicacionMultiple(ubi) {
                     if (!ubi.productos || ubi.productos.length === 0) {
@@ -1783,83 +1848,87 @@
                 },
 
                 async confirmarReubicacion() {
-                    try {
-                        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
-                            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
-                            return;
-                        }
+    try {
+        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
+            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
+            return;
+        }
 
-                        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
-                        if (!ubicacionDestino) {
-                            this.error('Ubicación destino no encontrada');
-                            return;
-                        }
+        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
+        if (!ubicacionDestino) {
+            this.error('Ubicación destino no encontrada');
+            return;
+        }
 
-                        const cantidad = parseInt(this.modalReubicacion.cantidad);
-                        if (cantidad <= 0 || isNaN(cantidad)) {
-                            this.error('Cantidad inválida para reubicación');
-                            return;
-                        }
+        const cantidad = parseInt(this.modalReubicacion.cantidad);
+        if (cantidad <= 0 || isNaN(cantidad)) {
+            this.error('Cantidad inválida para reubicación');
+            return;
+        }
 
-                        const payload = {
-                            ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
-                            ubicacion_destino_id: ubicacionDestino.id,
-                            producto: this.modalReubicacion.producto.toString().trim(),
-                            cantidad: cantidad,
-                            tipo_reubicacion: 'mismo_rack',
-                            es_custodia: this.modoReubicacion.esCustodia || false,
-                            custodia_id: this.modoReubicacion.esCustodia ? Number(this.modoReubicacion.productoId) :
-                                null
-                        };
+        // En confirmarReubicacion(), dentro del payload:
+const payload = {
+    ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
+    ubicacion_destino_id: ubicacionDestino.id,
+    producto: this.modalReubicacion.producto.toString().trim(),
+    cantidad: cantidad,
+    tipo_reubicacion: 'mismo_rack',
+    es_custodia: this.modoReubicacion.esCustodia || false,
+};
 
-                        console.log('📤 PAYLOAD enviado al backend:', payload);
+// ✅ AGREGAR LOS CAMPOS SEGÚN EL TIPO
+if (this.modoReubicacion.esCustodia) {
+    payload.custodia_id = this.modoReubicacion.productoId;
+    payload.articulo_id = null;
+    payload.cliente_general_id = null;
+} else {
+    payload.custodia_id = null;
+    payload.articulo_id = this.modoReubicacion.articuloId;
+    payload.cliente_general_id = this.modoReubicacion.clienteGeneralId;
+}
+        console.log('📤 PAYLOAD COMPLETO enviado al backend:', payload);
 
-                        const response = await fetch('/almacen/reubicacion/confirmar', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            },
-                            body: JSON.stringify(payload)
+        const response = await fetch('/almacen/reubicacion/confirmar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+        console.log('Respuesta confirmación:', result);
+
+        if (result.success) {
+            this.success(result.message);
+            await this.recargarDatosRackCompletos();
+            this.cancelarReubicacion();
+            this.modalReubicacion.open = false;
+        } else {
+            let errorMessage = result.message || 'Error al confirmar reubicación';
+            if (result.errors) {
+                console.error('Errores de validación:', result.errors);
+                if (result.errors.producto) {
+                    errorMessage = result.errors.producto[0];
+                } else if (result.errors.cantidad) {
+                    errorMessage = result.errors.cantidad[0];
+                } else {
+                    Object.values(result.errors).forEach(errorArray => {
+                        errorArray.forEach(error => {
+                            this.error(error);
                         });
-
-                        const result = await response.json();
-                        console.log('Respuesta confirmación:', result);
-
-                        if (result.success) {
-                            this.success(result.message);
-
-                            // ✅ NUEVO: Recargar datos completos del rack
-                            await this.recargarDatosRackCompletos();
-
-                            this.cancelarReubicacion();
-                            this.modalReubicacion.open = false;
-
-                        } else {
-                            let errorMessage = result.message || 'Error al confirmar reubicación';
-                            if (result.errors) {
-                                console.error('Errores de validación:', result.errors);
-                                if (result.errors.producto) {
-                                    errorMessage = result.errors.producto[0];
-                                } else if (result.errors.cantidad) {
-                                    errorMessage = result.errors.cantidad[0];
-                                } else {
-                                    Object.values(result.errors).forEach(errorArray => {
-                                        errorArray.forEach(error => {
-                                            this.error(error);
-                                        });
-                                    });
-                                    return;
-                                }
-                            }
-                            this.error(errorMessage);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    }
-                },
+                    });
+                    return;
+                }
+            }
+            this.error(errorMessage);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        this.error('Error de conexión al servidor');
+    }
+},
                 // ✅ NUEVO MÉTODO: Recargar datos completos del rack
                 // En tu Alpine.js - MÉTODO MEJORADO
                 async recargarDatosRackCompletos() {
@@ -2599,41 +2668,60 @@
                     });
                 },
 
-                actualizarUbicacionesEnFrontend(ubicacionesActualizadas) {
-                    console.log('🔄 Actualizando frontend con:', ubicacionesActualizadas);
+               actualizarUbicacionesEnFrontend(ubicacionesActualizadas) {
+    console.log('🔄 Actualizando frontend con:', ubicacionesActualizadas);
 
-                    const {
-                        origen,
-                        destino
-                    } = ubicacionesActualizadas;
+    const { origen, destino } = ubicacionesActualizadas;
 
-                    if (origen) {
-                        console.log('Actualizando origen:', origen);
-                        this.actualizarUbicacionIndividual(origen.id, origen);
-                    }
+    if (origen) {
+        console.log('Actualizando origen:', origen);
+        // ✅ DEBERÍA REMOVER el producto movido de la ubicación origen
+        this.actualizarUbicacionIndividual(origen.id, origen);
+    }
 
-                    if (destino) {
-                        console.log('Actualizando destino:', destino);
-                        this.actualizarUbicacionIndividual(destino.id, destino);
-                    }
+    if (destino) {
+        console.log('Actualizando destino:', destino);
+        // ✅ DEBERÍA AGREGAR el producto a la ubicación destino  
+        this.actualizarUbicacionIndividual(destino.id, destino);
+    }
 
-                    // Reprocesar datos para estadísticas
-                    this.procesarDatosRack();
+    // ✅ LIMPIAR: Asegurarse de que la ubicación origen quede sin el producto movido
+    this.limpiarUbicacionOrigen(origen.id, destino.id);
 
-                    // Forzar actualización de Alpine
-                    this.rack = {
-                        ...this.rack
-                    };
+    // Reprocesar datos para estadísticas
+    this.procesarDatosRack();
 
-                    // Re-inicializar swipers
-                    this.$nextTick(() => {
-                        setTimeout(() => {
-                            this.initSwipers();
-                        }, 200);
-                    });
+    // Forzar actualización de Alpine
+    this.rack = { ...this.rack };
 
-                    console.log('✅ Frontend actualizado');
-                },
+    // Re-inicializar swipers
+    this.$nextTick(() => {
+        setTimeout(() => {
+            this.initSwipers();
+        }, 200);
+    });
+
+    console.log('✅ Frontend actualizado');
+},
+
+// ✅ NUEVO MÉTODO: Limpiar específicamente la ubicación origen
+limpiarUbicacionOrigen(ubicacionOrigenId, ubicacionDestinoId) {
+    this.rack.niveles.forEach((nivel, nivelIndex) => {
+        nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
+            if (ubicacion.id === ubicacionOrigenId) {
+                // Remover productos que ya fueron movidos al destino
+                const productosRestantes = ubicacion.productos.filter(producto => {
+                    // Aquí necesitas la lógica para identificar qué producto se movió
+                    // Esto depende de cómo estés trackeando el producto específico
+                    return true; // Placeholder - necesitas implementar esta lógica
+                });
+                
+                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex].productos = productosRestantes;
+                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex].cantidad_total = productosRestantes.reduce((sum, p) => sum + p.cantidad, 0);
+            }
+        });
+    });
+},
                 actualizarUbicacionIndividual(ubicacionId, nuevosDatos) {
                     let ubicacionEncontrada = false;
 

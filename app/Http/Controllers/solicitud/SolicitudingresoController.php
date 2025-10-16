@@ -256,6 +256,7 @@ public function guardarUbicacion(Request $request)
                 DB::table('rack_ubicacion_articulos')->insert([
                     'rack_ubicacion_id' => $rackUbicacionId,
                     'articulo_id' => $solicitud->articulo_id,
+                    'cliente_general_id' => $solicitud->cliente_general_id, // 👈 ESTE ES EL NUEVO CAMPO
                     'cantidad' => $ubicacionData['cantidad'],
                     'created_at' => now(),
                     'updated_at' => now()
