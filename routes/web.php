@@ -1468,7 +1468,7 @@ Route::get('/almacen/racks/listar', [UbicacionesVistaController::class, 'listarR
 Route::get('/almacen/racks/{id}/info', [UbicacionesVistaController::class, 'obtenerInfoRack']);
 Route::post('/almacen/ubicaciones/crear', [UbicacionesVistaController::class, 'crearUbicacion']);
 Route::post('/almacen/racks/sugerir-letra', [UbicacionesVistaController::class, 'sugerirSiguienteLetra']);
-
+Route::get('/almacen/racks/{rack}/datos-actualizados', [UbicacionesVistaController::class, 'getDatosActualizados']);
 
 Route::get('/solicitud-ingreso/sugerir-ubicaciones/{articuloId}/{cantidad}', [SolicitudingresoController::class, 'sugerirUbicacionesMejorado']);
 Route::post('/almacen/ubicaciones/actualizar-producto', [UbicacionesVistaController::class, 'actualizarProducto'])->name('ubicaciones.actualizar-producto');
