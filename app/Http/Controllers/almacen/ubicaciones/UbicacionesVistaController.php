@@ -66,23 +66,36 @@ class UbicacionesVistaController extends Controller
         // ✅ Obtener productos por ubicación y AGRUPAR categorías y tipos
         $ubicacionIds = $ubicaciones->pluck('idRackUbicacion')->toArray();
 
-        // ✅ MODIFICADO: Incluir JOIN con clientegeneral
+        // ✅ MODIFICADO: OBTENER CATEGORÍAS PARA REPUESTOS CON MÚLTIPLOS MODELOS
         $productosPorUbicacion = DB::table('rack_ubicacion_articulos as rua')
             ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
-            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral') // ✅ NUEVO JOIN
+            // Para repuestos: obtener categorías desde articulo_modelo
+            ->leftJoin('articulo_modelo as am', function ($join) {
+                $join->on('a.idArticulos', '=', 'am.articulo_id')
+                    ->where('a.idTipoArticulo', '=', 2);
+            })
+            ->leftJoin('modelo as m_repuesto', 'am.modelo_id', '=', 'm_repuesto.idModelo')
+            ->leftJoin('categoria as c_repuesto', 'm_repuesto.idCategoria', '=', 'c_repuesto.idCategoria')
+            // Para productos normales: categoría directa
+            ->leftJoin('modelo as m_normal', 'a.idModelo', '=', 'm_normal.idModelo')
+            ->leftJoin('categoria as c_normal', 'm_normal.idCategoria', '=', 'c_normal.idCategoria')
+            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
             ->whereIn('rua.rack_ubicacion_id', $ubicacionIds)
             ->select(
                 'rua.rack_ubicacion_id',
                 'rua.cantidad',
                 'rua.custodia_id',
-                'rua.cliente_general_id', // ✅ NUEVO
+                'rua.cliente_general_id',
                 'a.nombre as producto',
                 'ta.nombre as tipo_articulo',
-                'c.nombre as categoria',
-                'cg.descripcion as cliente_general_nombre' // ✅ NUEVO
+                'ta.idTipoArticulo',
+                // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
+                DB::raw('CASE 
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+            ELSE c_normal.nombre 
+        END as categoria'),
+                'cg.descripcion as cliente_general_nombre'
             )
             ->get()
             ->groupBy('rack_ubicacion_id');
@@ -501,13 +514,22 @@ class UbicacionesVistaController extends Controller
         }
 
         // ✅ CORREGIDO: Consulta sin los JOINS que causan duplicados
+        // ✅ CORREGIDO: Consulta con JOIN CORRECTO para categoría de repuestos
         $rackData = DB::table('racks as r')
             ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
             ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
             ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+            // ✅ PARA REPUESTOS: categoría desde articulo_modelo
+            ->leftJoin('articulo_modelo as am', function ($join) {
+                $join->on('a.idArticulos', '=', 'am.articulo_id')
+                    ->where('a.idTipoArticulo', '=', 2);
+            })
+            ->leftJoin('modelo as m_repuesto', 'am.modelo_id', '=', 'm_repuesto.idModelo')
+            ->leftJoin('categoria as c_repuesto', 'm_repuesto.idCategoria', '=', 'c_repuesto.idCategoria')
+            // ✅ PARA PRODUCTOS NORMALES: categoría directa
+            ->leftJoin('modelo as m_normal', 'a.idModelo', '=', 'm_normal.idModelo')
+            ->leftJoin('categoria as c_normal', 'm_normal.idCategoria', '=', 'c_normal.idCategoria')
             // ✅ JOIN para custodias con marcas, modelos Y TICKETS
             ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
             ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
@@ -529,25 +551,29 @@ class UbicacionesVistaController extends Controller
                 'ru.posicion',
                 'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
-                'ru.updated_at', // ✅ AGREGADO: Campo necesario para la fecha
+                'ru.updated_at',
                 'a.idArticulos',
-                // ✅ CORREGIDO: Aplicar lógica de repuestos igual que en listarProductos
+                // ✅ CORREGIDO: Aplicar lógica de repuestos
                 DB::raw('CASE 
-                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                THEN a.codigo_repuesto 
-                ELSE a.nombre 
-            END as producto'),
+            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+            THEN a.codigo_repuesto 
+            ELSE a.nombre 
+        END as producto'),
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
                 'a.stock_total',
                 'ta.nombre as tipo_articulo',
                 'ta.idTipoArticulo',
-                'c.nombre as categoria',
+                // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
+                DB::raw('CASE 
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+            ELSE c_normal.nombre 
+        END as categoria'),
                 'rua.cantidad',
                 'rua.custodia_id',
-                'rua.cliente_general_id', // ✅ cliente general desde rack_ubicacion_articulos
-                'cg.descripcion as cliente_general_nombre', // ✅ nombre del cliente general
-                // ✅ Campos de custodia con nombres reales
+                'rua.cliente_general_id',
+                'cg.descripcion as cliente_general_nombre',
+                // ✅ Campos de custodia
                 'cust.codigocustodias',
                 'cust.serie',
                 'cust.idMarca',
@@ -556,7 +582,7 @@ class UbicacionesVistaController extends Controller
                 'c_cust.nombre as categoria_custodia',
                 'mar_cust.nombre as marca_nombre',
                 'm_cust.nombre as modelo_nombre',
-                // ✅ Campos de cliente general para CUSTODIAS (desde tickets)
+                // ✅ Campos de cliente general para CUSTODIAS
                 'cg_cust.idClienteGeneral as cliente_general_id_custodia',
                 'cg_cust.descripcion as cliente_general_nombre_custodia'
             )
@@ -1466,28 +1492,40 @@ class UbicacionesVistaController extends Controller
                 ];
             }
 
-            // ✅ Obtener productos normales - CONVERTIR A ARRAY
+            // ✅ CORREGIDO: Obtener productos normales - CON JOIN CORRECTO PARA CATEGORÍA
             $productos = DB::table('rack_ubicacion_articulos as rua')
                 ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
                 ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-                ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-                ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+                // ✅ PARA REPUESTOS: categoría desde articulo_modelo
+                ->leftJoin('articulo_modelo as am', function ($join) {
+                    $join->on('a.idArticulos', '=', 'am.articulo_id')
+                        ->where('a.idTipoArticulo', '=', 2);
+                })
+                ->leftJoin('modelo as m_repuesto', 'am.modelo_id', '=', 'm_repuesto.idModelo')
+                ->leftJoin('categoria as c_repuesto', 'm_repuesto.idCategoria', '=', 'c_repuesto.idCategoria')
+                // ✅ PARA PRODUCTOS NORMALES: categoría directa
+                ->leftJoin('modelo as m_normal', 'a.idModelo', '=', 'm_normal.idModelo')
+                ->leftJoin('categoria as c_normal', 'm_normal.idCategoria', '=', 'c_normal.idCategoria')
                 ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
                 ->where('rua.rack_ubicacion_id', $ubicacionId)
                 ->whereNull('rua.custodia_id')
                 ->select(
                     'a.idArticulos as id',
                     DB::raw('CASE 
-                    WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                    THEN a.codigo_repuesto 
-                    ELSE a.nombre 
-                END as nombre'),
+            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+            THEN a.codigo_repuesto 
+            ELSE a.nombre 
+        END as nombre'),
                     'a.nombre as nombre_original',
                     'a.codigo_repuesto',
                     'a.stock_total',
                     'ta.nombre as tipo_articulo',
                     'ta.idTipoArticulo',
-                    'c.nombre as categoria',
+                    // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
+                    DB::raw('CASE 
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+            ELSE c_normal.nombre 
+        END as categoria'),
                     'rua.cantidad',
                     'rua.cliente_general_id',
                     'cg.descripcion as cliente_general_nombre',
@@ -1497,7 +1535,7 @@ class UbicacionesVistaController extends Controller
                 )
                 ->get()
                 ->map(function ($item) {
-                    return (array) $item; // ✅ CONVERTIR OBJETO A ARRAY
+                    return (array) $item;
                 })
                 ->toArray();
 
