@@ -2274,9 +2274,14 @@
 
                 getCantidadTotalModal() {
                     if (!this.modal.ubi || !this.modal.ubi.productos) return 0;
-                    return this.modal.ubi.productos.reduce((sum, p) => sum + (parseInt(p.cantidad) || 0), 0);
-                },
 
+                    const total = this.modal.ubi.productos.reduce((sum, p) => {
+                        return sum + (parseInt(p.cantidad) || 0);
+                    }, 0);
+
+                    console.log('📊 Total modal calculado:', total);
+                    return total;
+                },
                 incrementarCantidadExistente(index) {
                     if (!this.modal.ubi || !this.modal.ubi.productos) return;
 
@@ -2285,6 +2290,17 @@
 
                     if (totalActual < this.modal.ubi.capacidad) {
                         producto.cantidad = parseInt(producto.cantidad) + 1;
+
+                        // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
+                        this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
+                        this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi
+                            .capacidad);
+
+                        console.log('➕ Cantidad incrementada:', {
+                            producto: producto.nombre,
+                            cantidad: producto.cantidad,
+                            total_ubicacion: this.modal.ubi.cantidad_total
+                        });
                     } else {
                         this.warning('No se puede exceder la capacidad máxima de la ubicación');
                     }
@@ -2296,9 +2312,19 @@
                     const producto = this.modal.ubi.productos[index];
                     if (producto.cantidad > 1) {
                         producto.cantidad = parseInt(producto.cantidad) - 1;
+
+                        // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
+                        this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
+                        this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi
+                            .capacidad);
+
+                        console.log('➖ Cantidad decrementada:', {
+                            producto: producto.nombre,
+                            cantidad: producto.cantidad,
+                            total_ubicacion: this.modal.ubi.cantidad_total
+                        });
                     }
                 },
-
                 actualizarCantidadProducto(index) {
                     if (!this.modal.ubi || !this.modal.ubi.productos) return;
 
@@ -2316,22 +2342,27 @@
                         producto.cantidad = Math.max(1, cantidad - exceso);
                         this.warning('Se ajustó la cantidad para no exceder la capacidad máxima');
                     }
+
+                    // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
+                    this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
+                    this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi.capacidad);
                 },
 
                 async guardarCambiosProducto(index) {
                     if (!this.modal.ubi || !this.modal.ubi.productos) return;
 
                     const producto = this.modal.ubi.productos[index];
+                    const ubicacionId = this.modal.ubi.id;
 
                     try {
                         const payload = {
-                            ubicacion_id: this.modal.ubi.id,
+                            ubicacion_id: ubicacionId,
                             articulo_id: producto.id,
                             cantidad: parseInt(producto.cantidad),
                             accion: 'actualizar'
                         };
 
-                        console.log('Actualizando producto:', payload);
+                        console.log('📤 Actualizando producto:', payload);
 
                         const response = await fetch('/almacen/ubicaciones/actualizar-producto', {
                             method: 'POST',
@@ -2348,7 +2379,18 @@
                         if (result.success) {
                             this.success(`Cantidad de ${producto.nombre} actualizada exitosamente`);
                             producto.cantidadOriginal = producto.cantidad;
-                            this.actualizarInterfazDespuesCambio(this.modal.ubi.id);
+
+                            // ✅ RECARGAR DATOS COMPLETOS EN LUGAR DE ACTUALIZACIÓN PARCIAL
+                            await this.recargarDatosRackCompletos();
+
+                            // ✅ CERRAR MODAL Y REABRIR CON DATOS ACTUALIZADOS
+                            if (this.modal.open) {
+                                const ubiActualizada = this.buscarUbicacionPorId(ubicacionId);
+                                if (ubiActualizada) {
+                                    this.modal.ubi = ubiActualizada;
+                                    this.prepararEdicionProductos();
+                                }
+                            }
                         } else {
                             this.error(`Error al actualizar ${producto.nombre}: ${result.message}`);
                             producto.cantidad = producto.cantidadOriginal;
@@ -2925,20 +2967,38 @@
                 },
 
                 actualizarInterfazDespuesCambio(ubicacionId) {
+                    console.log('🔄 Actualizando interfaz para ubicación:', ubicacionId);
+
                     this.rack.niveles.forEach((nivel, nivelIndex) => {
                         nivel.ubicaciones.forEach((ubi, ubiIndex) => {
                             if (ubi.id === ubicacionId) {
-                                ubi.cantidad_total = ubi.productos.reduce((sum, p) => sum + p.cantidad, 0);
-                                ubi.estado = this.calcularEstado(ubi.cantidad_total, ubi.capacidad);
-                                ubi.fecha = new Date().toISOString();
-                                this.procesarDatosRack();
+                                // ✅ CALCULAR CANTIDAD TOTAL DESDE CERO
+                                const cantidadTotal = ubi.productos ?
+                                    ubi.productos.reduce((sum, p) => sum + (parseInt(p.cantidad) || 0), 0) :
+                                    0;
+
+                                // ✅ ACTUALIZAR PROPIEDADES
+                                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
+                                    ...ubi,
+                                    cantidad_total: cantidadTotal,
+                                    estado: this.calcularEstado(cantidadTotal, ubi.capacidad),
+                                    fecha: new Date().toISOString()
+                                };
+
+                                console.log(`✅ Ubicación ${ubicacionId} actualizada:`, {
+                                    cantidad_total: cantidadTotal,
+                                    productos: ubi.productos?.length || 0
+                                });
                             }
                         });
                     });
 
+                    // ✅ FORZAR ACTUALIZACIÓN REACTIVA
+                    this.procesarDatosRack();
                     this.rack = {
                         ...this.rack
                     };
+
                     this.$nextTick(() => {
                         this.initSwipers();
                     });
@@ -3094,6 +3154,16 @@
                     });
                 },
 
+                buscarUbicacionPorId(ubicacionId) {
+                    for (const nivel of this.rack.niveles) {
+                        for (const ubi of nivel.ubicaciones) {
+                            if (ubi.id === ubicacionId) {
+                                return ubi;
+                            }
+                        }
+                    }
+                    return null;
+                },
                 buscarUbicacionPorCodigo(codigo) {
                     for (const nivel of this.rack.niveles) {
                         for (const ubi of nivel.ubicaciones) {
