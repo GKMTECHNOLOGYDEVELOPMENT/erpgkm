@@ -199,7 +199,7 @@
 
     <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
         <!-- Header Mejorado -->
-        <header class="relative overflow-hidden bg-black text-white px-6 py-8">
+        <div class="relative overflow-hidden bg-black text-white px-6 py-8">
             <div
                 class="absolute inset-0 -translate-x-full animate-[shine_3s_linear_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent">
             </div>
@@ -255,7 +255,8 @@
                     </button>
                 </div>
             </div>
-        </header>
+        </div>
+
 
         <!-- Indicador de Reubicación -->
         <div x-show="modoReubicacion.activo"
@@ -699,10 +700,12 @@
                                         <div class="flex items-center gap-2">
                                             <div class="w-3 h-3 rounded-full"
                                                 :class="{
-                                                    'bg-green-500': modal.ubi.estado === 'bajo',
-                                                    'bg-yellow-500': modal.ubi.estado === 'medio',
-                                                    'bg-orange-500': modal.ubi.estado === 'alto',
-                                                    'bg-red-500': modal.ubi.estado === 'muy_alto',
+                                                
+                                                    'bg-success': modal.ubi.estado === 'bajo',
+                                                    'bg-warning': modal.ubi.estado === 'medio',
+                                                    'bg-secondary': modal.ubi.estado === 'alto',
+                                                    'bg-danger': modal.ubi.estado === 'muy_alto',
+                                                
                                                     'bg-gray-500': !modal.ubi.estado
                                                 }">
                                             </div>
@@ -1337,66 +1340,311 @@
         </div>
 
         <!-- Modal Historial -->
+        <!-- Modal Historial Mejorado -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="modalHistorial.open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="modalHistorial.open = false">
                 <div x-show="modalHistorial.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-4xl relative">
 
-                    <!-- Header -->
-                    <div class="flex bg-[#fbfbfb] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-800">
-                            Historial <span x-text="modalHistorial.ubi.codigo" class="text-purple-600"></span>
+                    <!-- Header Mejorado -->
+                    <div class="flex bg-primary items-center justify-between px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-history text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-lg text-white">Historial Completo de Ubicación</div>
+                                <div class="text-blue-100 text-sm">Código: <span x-text="modalHistorial.ubi.codigo"
+                                        class="font-semibold text-white"></span></div>
+                            </div>
                         </div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700"
+                        <button type="button" class="text-white hover:text-blue-200 transition-colors"
                             @click="modalHistorial.open = false">
-                            <i class="fas fa-times"></i>
+                            <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
 
                     <!-- Body -->
-                    <div class="p-5 max-h-[70vh] overflow-y-auto">
-                        <!-- En el modal de historial, actualiza el template: -->
-                        <template x-if="modalHistorial.ubi.historial && modalHistorial.ubi.historial.length > 0">
-                            <ul class="space-y-3">
-                                <template x-for="(mov, idx) in modalHistorial.ubi.historial" :key="idx">
-                                    <li class="p-3 border rounded-lg bg-white shadow">
-                                        <div class="flex justify-between items-start mb-2">
-                                            <div>
-                                                <p class="font-medium text-gray-800" x-text="mov.producto || 'Vacío'">
-                                                </p>
-                                                <p class="text-xs text-gray-500 capitalize" x-text="mov.tipo"></p>
-                                            </div>
-                                            <span
-                                                class="font-semibold text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded"
-                                                x-text="mov.cantidad + ' und.'"></span>
-                                        </div>
-                                        <div class="text-xs text-gray-500" x-text="formatFecha(mov.fecha)"></div>
-                                        <!-- Información adicional para reubicaciones -->
-                                        <template x-if="mov.desde">
-                                            <div class="text-xs text-purple-600 mt-1">
-                                                <i class="fas fa-arrow-right"></i> Desde: <span
-                                                    x-text="mov.desde"></span>
-                                                <template x-if="mov.rack_origen"> (Rack <span
-                                                        x-text="mov.rack_origen"></span>)</template>
+                    <div class="p-6 bg-gray-50">
+                        <!-- Resumen Estadístico -->
+                        <div class="grid grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                <div class="text-2xl font-bold text-blue-600"
+                                    x-text="modalHistorial.ubi.historial ? modalHistorial.ubi.historial.length : 0">
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">Total Movimientos</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                <div class="text-2xl font-bold text-green-600"
+                                    x-text="getMovimientosPorTipo('ingreso')"></div>
+                                <div class="text-xs text-gray-600 mt-1">Ingresos</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                <div class="text-2xl font-bold text-orange-600"
+                                    x-text="getMovimientosPorTipo('reubicacion')"></div>
+                                <div class="text-xs text-gray-600 mt-1">Reubicaciones</div>
+                            </div>
+                            <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                <div class="text-2xl font-bold text-red-600" x-text="getMovimientosPorTipo('salida')">
+                                </div>
+                                <div class="text-xs text-gray-600 mt-1">Salidas</div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm mb-6">
+                            <div class="flex flex-wrap gap-4 items-center">
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por
+                                        tipo:</label>
+                                    <select x-model="modalHistorial.filtroTipo" @change="filtrarHistorial()"
+                                        class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="todos">Todos los movimientos</option>
+                                        <option value="ingreso">Ingresos</option>
+                                        <option value="salida">Salidas</option>
+                                        <option value="reubicacion">Reubicaciones Normales</option>
+                                        <option value="reubicacion_custodia">Reubicaciones Custodia</option>
+                                        <option value="ajuste">Ajustes</option>
+                                        <option value="custodia">Todas las Custodias</option>
+                                    </select>
+                                </div>
+                                <div class="flex-1 min-w-[200px]">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Buscar
+                                        producto:</label>
+                                    <div class="relative">
+                                        <input type="text" x-model="modalHistorial.busqueda"
+                                            @input="filtrarHistorial()"
+                                            placeholder="Buscar por producto, serie o código..."
+                                            class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <i
+                                            class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Movimientos -->
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div class="bg-gray-50 px-6 py-4 border-b">
+                                <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                                    <i class="fas fa-list-ul text-blue-500"></i>
+                                    Registro de Movimientos
+                                    <span class="text-sm text-gray-500 font-normal ml-2"
+                                        x-text="'(' + (modalHistorial.historialFiltrado ? modalHistorial.historialFiltrado.length : 0) + ' resultados)'"></span>
+                                </h3>
+                            </div>
+
+                            <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
+                                <template
+                                    x-if="modalHistorial.historialFiltrado && modalHistorial.historialFiltrado.length > 0">
+                                    <div class="divide-y divide-gray-100">
+                                        <template x-for="(mov, idx) in modalHistorial.historialFiltrado"
+                                            :key="idx">
+                                            <div class="p-4 hover:bg-gray-50 transition-colors">
+                                                <!-- Header del Movimiento -->
+                                                <div class="flex justify-between items-start mb-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <!-- Icono según tipo - AHORA DIFERENCIADO -->
+                                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm"
+                                                            :class="{
+                                                                'bg-success': mov.tipo === 'ingreso',
+                                                                'bg-danger': mov.tipo === 'salida',
+                                                                'bg-info': mov.tipo === 'reubicacion',
+                                                                'bg-secondary': mov.tipo === 'reubicacion_custodia',
+                                                                'bg-warning': mov.tipo === 'ajuste',
+                                                                'bg-gray-500': !mov.tipo
+                                                            }">
+                                                            <i
+                                                                :class="{
+                                                                    'fas fa-sign-in-alt': mov.tipo === 'ingreso',
+                                                                    'fas fa-sign-out-alt': mov.tipo === 'salida',
+                                                                    'fas fa-arrows-alt': mov.tipo === 'reubicacion',
+                                                                    'fas fa-shield-alt': mov
+                                                                        .tipo === 'reubicacion_custodia',
+                                                                    'fas fa-cog': mov.tipo === 'ajuste',
+                                                                    'fas fa-exchange-alt': !mov.tipo
+                                                                }"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-semibold text-gray-800 text-sm"
+                                                                x-text="mov.producto || 'Movimiento de inventario'">
+                                                            </p>
+                                                            <div class="flex items-center gap-2 mt-1">
+                                                                <span
+                                                                    class="text-xs font-medium px-2 py-1 rounded capitalize"
+                                                                    :class="{
+                                                                        'bg-green-100 text-success': mov
+                                                                            .tipo === 'ingreso',
+                                                                        'bg-red-100 text-danger': mov
+                                                                            .tipo === 'salida',
+                                                                        'bg-blue-100 text-info': mov
+                                                                            .tipo === 'reubicacion',
+                                                                        'bg-secondary text-white': mov
+                                                                            .tipo === 'reubicacion_custodia',
+                                                                        'bg-orange-100 text-warning': mov
+                                                                            .tipo === 'ajuste',
+                                                                        'bg-gray-100 text-gray-800': !mov.tipo
+                                                                    }"
+                                                                    x-text="mov.tipo === 'reubicacion_custodia' ? 'reubicación custodia' : (mov.tipo || 'movimiento')"></span>
+
+                                                                <!-- Badge de Custodia - SOLO PARA REUBICACION_CUSTODIA -->
+                                                                <span x-show="mov.tipo === 'reubicacion_custodia'"
+                                                                    class="bg-secondary text-white text-xs font-medium px-2 py-1 rounded flex items-center gap-1">
+                                                                    <i class="fas fa-shield-alt text-xs"></i>
+                                                                    Custodia
+                                                                </span>
+
+                                                                <!-- Badge de Cliente -->
+                                                                <span
+                                                                    x-show="mov.cliente_general_nombre && mov.cliente_general_nombre !== 'Sin cliente'"
+                                                                    class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded flex items-center gap-1">
+                                                                    <i class="fas fa-user-tie text-xs"></i>
+                                                                    <span x-text="mov.cliente_general_nombre"></span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <span class="font-bold text-lg"
+                                                            :class="{
+                                                                'text-green-600': mov.tipo === 'ingreso',
+                                                                'text-red-600': mov.tipo === 'salida',
+                                                                'text-blue-600': mov.tipo === 'reubicacion',
+                                                                'text-secondary': mov.tipo === 'reubicacion_custodia',
+                                                                'text-warning': mov.tipo === 'ajuste',
+                                                                'text-gray-600': !mov.tipo
+                                                            }"
+                                                            x-text="mov.cantidad + ' und.'"></span>
+                                                        <div class="text-xs text-gray-500 mt-1"
+                                                            x-text="formatFechaHora(mov.fecha)"></div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Detalles del Movimiento -->
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                    <!-- Información de Origen/Destino -->
+                                                    <template x-if="mov.desde || mov.hacia">
+                                                        <div class="space-y-2">
+                                                            <template x-if="mov.desde">
+                                                                <div class="flex items-center gap-2">
+                                                                    <i
+                                                                        class="fas fa-arrow-right text-red-500 text-xs"></i>
+                                                                    <span
+                                                                        class="text-gray-600 font-medium">Desde:</span>
+                                                                    <span class="font-semibold text-gray-800"
+                                                                        x-text="mov.desde"></span>
+                                                                    <template x-if="mov.rack_origen">
+                                                                        <span class="text-xs text-gray-500">(Rack <span
+                                                                                x-text="mov.rack_origen"></span>)</span>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="mov.hacia">
+                                                                <div class="flex items-center gap-2">
+                                                                    <i
+                                                                        class="fas fa-arrow-right text-green-500 text-xs"></i>
+                                                                    <span
+                                                                        class="text-gray-600 font-medium">Hacia:</span>
+                                                                    <span class="font-semibold text-gray-800"
+                                                                        x-text="mov.hacia"></span>
+                                                                    <template x-if="mov.rack_destino">
+                                                                        <span class="text-xs text-gray-500">(Rack <span
+                                                                                x-text="mov.rack_destino"></span>)</span>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+
+                                                    <!-- Información Adicional -->
+                                                    <div class="space-y-2">
+                                                        <template x-if="mov.usuario">
+                                                            <div class="flex items-center gap-2">
+                                                                <i class="fas fa-user text-gray-400 text-xs"></i>
+                                                                <span class="text-gray-600 font-medium">Usuario:</span>
+                                                                <span class="font-semibold text-gray-800"
+                                                                    x-text="mov.usuario"></span>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="mov.observaciones">
+                                                            <div class="flex items-start gap-2">
+                                                                <i
+                                                                    class="fas fa-sticky-note text-gray-400 text-xs mt-1"></i>
+                                                                <div>
+                                                                    <span
+                                                                        class="text-gray-600 font-medium">Observaciones:</span>
+                                                                    <p class="text-gray-800"
+                                                                        x-text="mov.observaciones"></p>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="mov.numero_ticket">
+                                                            <div class="flex items-center gap-2">
+                                                                <i class="fas fa-ticket-alt text-blue-400 text-xs"></i>
+                                                                <span class="text-gray-600 font-medium">Ticket:</span>
+                                                                <span class="font-semibold text-blue-800"
+                                                                    x-text="mov.numero_ticket"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
-                                        <template x-if="mov.hacia">
-                                            <div class="text-xs text-green-600 mt-1">
-                                                <i class="fas fa-arrow-right"></i> Hacia: <span
-                                                    x-text="mov.hacia"></span>
-                                                <template x-if="mov.rack_destino"> (Rack <span
-                                                        x-text="mov.rack_destino"></span>)</template>
-                                            </div>
-                                        </template>
-                                    </li>
+                                    </div>
                                 </template>
-                            </ul>
-                        </template>
+
+                                <!-- Estado vacío -->
+                                <template
+                                    x-if="!modalHistorial.historialFiltrado || modalHistorial.historialFiltrado.length === 0">
+                                    <div class="text-center py-12">
+                                        <div
+                                            class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="fas fa-history text-3xl text-gray-400"></i>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-gray-800 mb-2">No hay movimientos
+                                            registrados</h3>
+                                        <p class="text-gray-600 max-w-md mx-auto">Esta ubicación no tiene historial de
+                                            movimientos aún.</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Leyenda ACTUALIZADA -->
+                        <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-2 flex items-center gap-2">
+                                <i class="fas fa-info-circle"></i>
+                                Leyenda de Movimientos
+                            </h4>
+                            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-success rounded-full"></div>
+                                    <span class="text-gray-700">Ingreso</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-danger rounded-full"></div>
+                                    <span class="text-gray-700">Salida</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-info rounded-full"></div>
+                                    <span class="text-gray-700">Reubicación</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-secondary rounded-full"></div>
+                                    <span class="text-gray-700">Reubicación Custodia</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-warning rounded-full"></div>
+                                    <span class="text-gray-700">Ajuste</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
 
 
         <!-- Modal -->
@@ -1500,7 +1748,10 @@
                 },
                 modalHistorial: {
                     open: false,
-                    ubi: {}
+                    ubi: {},
+                    historialFiltrado: [],
+                    filtroTipo: 'todos',
+                    busqueda: ''
                 },
                 modalSeleccionRack: {
                     open: false,
@@ -1573,49 +1824,32 @@
 
                     this.rack.niveles.forEach(nivel => {
                         nivel.ubicaciones.forEach(ubicacion => {
+                            // ✅ LIMPIAR Y NORMALIZAR DATOS
                             if (!ubicacion.productos) ubicacion.productos = [];
-                            if (!ubicacion.cantidad_total) ubicacion.cantidad_total = 0;
 
-                            if (ubicacion.productos && ubicacion.productos.length > 0) {
-                                // Acumular categorías únicas
-                                const categoriasUnicas = [...new Set(ubicacion.productos
-                                    .map(p => {
-                                        if (p.custodia_id) {
-                                            return p.categoria_custodia || 'Custodia';
-                                        }
-                                        return p.categoria || 'Sin categoría';
-                                    })
-                                    .filter(c => c && c !== 'Sin categoría')
-                                )];
+                            // ✅ ELIMINAR DUPLICADOS POR ID
+                            const productosUnicos = [];
+                            const idsVistos = new Set();
 
-                                // Acumular tipos únicos
-                                const tiposUnicos = [...new Set(ubicacion.productos
-                                    .map(p => p.custodia_id ? 'CUSTODIA' : (p.tipo_articulo ||
-                                        'Sin tipo'))
-                                    .filter(t => t && t !== 'Sin tipo')
-                                )];
+                            ubicacion.productos.forEach(producto => {
+                                const id = producto.custodia_id ?
+                                    `custodia_${producto.custodia_id}` : `articulo_${producto.id}`;
+                                if (!idsVistos.has(id)) {
+                                    idsVistos.add(id);
+                                    productosUnicos.push(producto);
+                                }
+                            });
 
-                                // Acumular clientes únicos
-                                const clientesUnicos = [...new Set(ubicacion.productos
-                                    .filter(p => p.cliente_general_nombre && p
-                                        .cliente_general_nombre !== 'Sin cliente')
-                                    .map(p => p.cliente_general_nombre)
-                                )];
+                            ubicacion.productos = productosUnicos;
 
-                                // Asignar propiedades acumuladas
-                                ubicacion.categorias_acumuladas = categoriasUnicas.length > 0 ?
-                                    categoriasUnicas.join(', ') : 'Sin categoría';
-                                ubicacion.tipos_acumulados = tiposUnicos.length > 0 ?
-                                    tiposUnicos.join(', ') : 'Sin tipo';
-                                ubicacion.clientes_acumulados = clientesUnicos.length > 0 ?
-                                    clientesUnicos.join(', ') : 'Sin cliente';
+                            // ✅ RESTANTE DEL CÓDIGO EXISTENTE...
+                            if (ubicacion.productos.length > 0) {
+                                // ... lógica existente para categorías, tipos, etc.
                                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                                     .cantidad || 0), 0);
                                 ubicacion.estado = this.calcularEstado(ubicacion.cantidad_total, ubicacion
                                     .capacidad);
-
                             } else {
-                                // Ubicación vacía
                                 ubicacion.categorias_acumuladas = 'Sin categoría';
                                 ubicacion.tipos_acumulados = 'Sin tipo';
                                 ubicacion.clientes_acumulados = 'Sin cliente';
@@ -1666,36 +1900,36 @@
 
                 // ========== MÉTODOS DE INTERACCIÓN CON UBICACIONES ==========
                 manejarClickUbicacion(ubi) {
-    if (this.modoReubicacion.activo) {
-        if (ubi.codigo === this.modoReubicacion.origen) {
-            this.cancelarReubicacion();
-        } else if (this.esDestinoValido(ubi)) {
-            if (!this.modoReubicacion.producto) {
-                this.error('No se ha seleccionado un producto para reubicar');
-                this.cancelarReubicacion();
-                return;
-            }
+                    if (this.modoReubicacion.activo) {
+                        if (ubi.codigo === this.modoReubicacion.origen) {
+                            this.cancelarReubicacion();
+                        } else if (this.esDestinoValido(ubi)) {
+                            if (!this.modoReubicacion.producto) {
+                                this.error('No se ha seleccionado un producto para reubicar');
+                                this.cancelarReubicacion();
+                                return;
+                            }
 
-            const ubicacionOrigenActual = this.buscarUbicacionPorCodigo(this.modoReubicacion.origen);
-            if (!ubicacionOrigenActual) {
-                this.error('No se pudo encontrar la ubicación origen');
-                this.cancelarReubicacion();
-                return;
-            }
+                            const ubicacionOrigenActual = this.buscarUbicacionPorCodigo(this.modoReubicacion.origen);
+                            if (!ubicacionOrigenActual) {
+                                this.error('No se pudo encontrar la ubicación origen');
+                                this.cancelarReubicacion();
+                                return;
+                            }
 
-            this.modalReubicacion.origen = this.modoReubicacion.origen;
-            this.modalReubicacion.destino = ubi.codigo;
-            this.modalReubicacion.producto = this.modoReubicacion.producto;
-            
-            // ✅ CORREGIDO: Usar la cantidad específica del modoReubicacion
-            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← CAMBIO AQUÍ
-            
-            this.modalReubicacion.open = true;
-        }
-    } else {
-        this.verDetalle(ubi);
-    }
-},
+                            this.modalReubicacion.origen = this.modoReubicacion.origen;
+                            this.modalReubicacion.destino = ubi.codigo;
+                            this.modalReubicacion.producto = this.modoReubicacion.producto;
+
+                            // ✅ CORREGIDO: Usar la cantidad específica del modoReubicacion
+                            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← CAMBIO AQUÍ
+
+                            this.modalReubicacion.open = true;
+                        }
+                    } else {
+                        this.verDetalle(ubi);
+                    }
+                },
 
                 verDetalle(ubi) {
                     this.modal.ubi = ubi;
@@ -1709,110 +1943,112 @@
                 },
 
                 // ========== MÉTODOS DE REUBICACIÓN ==========
-               iniciarReubicacionProducto(ubi, producto) {
-    if (!producto) {
-        this.error('No se puede reubicar: producto no válido');
-        return;
-    }
+                iniciarReubicacionProducto(ubi, producto) {
+                    if (!producto) {
+                        this.error('No se puede reubicar: producto no válido');
+                        return;
+                    }
 
-    console.log('🔍 DEBUG - Producto completo:', producto);
+                    console.log('🔍 DEBUG - Producto completo:', producto);
 
-    let nombreProducto = producto.nombre;
-    if (producto.custodia_id) {
-        nombreProducto = producto.serie || producto.codigocustodias || 'Custodia ' + producto.custodia_id;
-    }
+                    let nombreProducto = producto.nombre;
+                    if (producto.custodia_id) {
+                        nombreProducto = producto.serie || producto.codigocustodias || 'Custodia ' + producto.custodia_id;
+                    }
 
-    if (!nombreProducto) {
-        this.error('No se puede reubicar: nombre de producto no válido');
-        return;
-    }
+                    if (!nombreProducto) {
+                        this.error('No se puede reubicar: nombre de producto no válido');
+                        return;
+                    }
 
-    const cantidadProducto = producto.cantidad || 1;
+                    const cantidadProducto = producto.cantidad || 1;
 
-    // ✅ CORREGIDO: Payload diferente para custodias vs productos normales
-    const payload = {
-        ubicacion_origen_id: ubi.id,
-        producto: nombreProducto.toString().trim(),
-        cantidad: cantidadProducto,
-    };
+                    // ✅ CORREGIDO: Payload diferente para custodias vs productos normales
+                    const payload = {
+                        ubicacion_origen_id: ubi.id,
+                        producto: nombreProducto.toString().trim(),
+                        cantidad: cantidadProducto,
+                    };
 
-    // ✅ PARA CUSTODIAS
-    if (producto.custodia_id) {
-        payload.custodia_id = producto.custodia_id;
-        // Para custodias, NO enviar articulo_id ni cliente_general_id
-        payload.articulo_id = null;
-        payload.cliente_general_id = null;
-    } 
-    // ✅ PARA PRODUCTOS NORMALES
-    else {
-        payload.articulo_id = producto.id;
-        payload.cliente_general_id = producto.cliente_general_id;
-        payload.custodia_id = null;
-    }
+                    // ✅ PARA CUSTODIAS
+                    if (producto.custodia_id) {
+                        payload.custodia_id = producto.custodia_id;
+                        // Para custodias, NO enviar articulo_id ni cliente_general_id
+                        payload.articulo_id = null;
+                        payload.cliente_general_id = null;
+                    }
+                    // ✅ PARA PRODUCTOS NORMALES
+                    else {
+                        payload.articulo_id = producto.id;
+                        payload.cliente_general_id = producto.cliente_general_id;
+                        payload.custodia_id = null;
+                    }
 
-    console.log('📤 Enviando datos de reubicación:', payload);
+                    console.log('📤 Enviando datos de reubicación:', payload);
 
-    // ✅ NUEVO: Llamar al backend para iniciar reubicación
-    fetch('/almacen/reubicacion/iniciar', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(response => response.json())
-    .then(result => {
-        console.log('📥 Respuesta del backend:', result);
-        
-        if (result.success) {
-            // ✅ Configurar modo reubicación con datos del backend
-            this.modoReubicacion.activo = true;
-            this.modoReubicacion.origen = ubi.codigo;
-            this.modoReubicacion.producto = result.data.ubicacion_origen.producto;
-            this.modoReubicacion.ubicacionOrigenId = ubi.id;
-            
-            // ✅ DIFERENCIAR ENTRE CUSTODIA Y PRODUCTO NORMAL
-            if (producto.custodia_id) {
-                this.modoReubicacion.productoId = producto.custodia_id;
-                this.modoReubicacion.esCustodia = true;
-                this.modoReubicacion.articuloId = null;
-                this.modoReubicacion.clienteGeneralId = null;
-            } else {
-                this.modoReubicacion.productoId = producto.id;
-                this.modoReubicacion.esCustodia = false;
-                this.modoReubicacion.articuloId = producto.id;
-                this.modoReubicacion.clienteGeneralId = producto.cliente_general_id;
-            }
-            
-            this.modoReubicacion.cantidad = cantidadProducto;
-            this.modoReubicacion.tipo = 'producto_especifico';
-            
-            this.modal.open = false;
+                    // ✅ NUEVO: Llamar al backend para iniciar reubicación
+                    fetch('/almacen/reubicacion/iniciar', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(payload)
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            console.log('📥 Respuesta del backend:', result);
 
-            console.log('✅ Datos configurados para reubicación:', {
-                producto: this.modoReubicacion.producto,
-                productoId: this.modoReubicacion.productoId,
-                articuloId: this.modoReubicacion.articuloId,
-                clienteGeneralId: this.modoReubicacion.clienteGeneralId,
-                esCustodia: this.modoReubicacion.esCustodia,
-                cantidad: this.modoReubicacion.cantidad
-            });
+                            if (result.success) {
+                                // ✅ Configurar modo reubicación con datos del backend
+                                this.modoReubicacion.activo = true;
+                                this.modoReubicacion.origen = ubi.codigo;
+                                this.modoReubicacion.producto = result.data.ubicacion_origen.producto;
+                                this.modoReubicacion.ubicacionOrigenId = ubi.id;
 
-            const mensaje = producto.custodia_id ?
-                'Modo reubicación activado para custodia: ' + nombreProducto :
-                'Modo reubicación activado para: ' + nombreProducto + ' - Cliente: ' + (producto.cliente_general_nombre || 'Sin cliente');
+                                // ✅ DIFERENCIAR ENTRE CUSTODIA Y PRODUCTO NORMAL
+                                if (producto.custodia_id) {
+                                    this.modoReubicacion.productoId = producto.custodia_id;
+                                    this.modoReubicacion.esCustodia = true;
+                                    this.modoReubicacion.articuloId = null;
+                                    this.modoReubicacion.clienteGeneralId = null;
+                                } else {
+                                    this.modoReubicacion.productoId = producto.id;
+                                    this.modoReubicacion.esCustodia = false;
+                                    this.modoReubicacion.articuloId = producto.id;
+                                    this.modoReubicacion.clienteGeneralId = producto.cliente_general_id;
+                                }
 
-            this.success(mensaje);
-        } else {
-            this.error(result.message || 'Error al iniciar reubicación');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        this.error('Error de conexión al servidor');
-    });
-},
+                                this.modoReubicacion.cantidad = cantidadProducto;
+                                this.modoReubicacion.tipo = 'producto_especifico';
+
+                                this.modal.open = false;
+
+                                console.log('✅ Datos configurados para reubicación:', {
+                                    producto: this.modoReubicacion.producto,
+                                    productoId: this.modoReubicacion.productoId,
+                                    articuloId: this.modoReubicacion.articuloId,
+                                    clienteGeneralId: this.modoReubicacion.clienteGeneralId,
+                                    esCustodia: this.modoReubicacion.esCustodia,
+                                    cantidad: this.modoReubicacion.cantidad
+                                });
+
+                                const mensaje = producto.custodia_id ?
+                                    'Modo reubicación activado para custodia: ' + nombreProducto :
+                                    'Modo reubicación activado para: ' + nombreProducto + ' - Cliente: ' + (producto
+                                        .cliente_general_nombre || 'Sin cliente');
+
+                                this.success(mensaje);
+                            } else {
+                                this.error(result.message || 'Error al iniciar reubicación');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            this.error('Error de conexión al servidor');
+                        });
+                },
 
                 iniciarReubicacionMultiple(ubi) {
                     if (!ubi.productos || ubi.productos.length === 0) {
@@ -1848,142 +2084,138 @@
                 },
 
                 async confirmarReubicacion() {
-    try {
-        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
-            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
-            return;
-        }
+                    try {
+                        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
+                            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
+                            return;
+                        }
 
-        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
-        if (!ubicacionDestino) {
-            this.error('Ubicación destino no encontrada');
-            return;
-        }
+                        const ubicacionDestino = this.buscarUbicacionPorCodigo(this.modalReubicacion.destino);
+                        if (!ubicacionDestino) {
+                            this.error('Ubicación destino no encontrada');
+                            return;
+                        }
 
-        const cantidad = parseInt(this.modalReubicacion.cantidad);
-        if (cantidad <= 0 || isNaN(cantidad)) {
-            this.error('Cantidad inválida para reubicación');
-            return;
-        }
+                        const cantidad = parseInt(this.modalReubicacion.cantidad);
+                        if (cantidad <= 0 || isNaN(cantidad)) {
+                            this.error('Cantidad inválida para reubicación');
+                            return;
+                        }
 
-        // En confirmarReubicacion(), dentro del payload:
-const payload = {
-    ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
-    ubicacion_destino_id: ubicacionDestino.id,
-    producto: this.modalReubicacion.producto.toString().trim(),
-    cantidad: cantidad,
-    tipo_reubicacion: 'mismo_rack',
-    es_custodia: this.modoReubicacion.esCustodia || false,
-};
+                        // En confirmarReubicacion(), dentro del payload:
+                        const payload = {
+                            ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
+                            ubicacion_destino_id: ubicacionDestino.id,
+                            producto: this.modalReubicacion.producto.toString().trim(),
+                            cantidad: cantidad,
+                            tipo_reubicacion: 'mismo_rack',
+                            es_custodia: this.modoReubicacion.esCustodia || false,
+                        };
 
-// ✅ AGREGAR LOS CAMPOS SEGÚN EL TIPO
-if (this.modoReubicacion.esCustodia) {
-    payload.custodia_id = this.modoReubicacion.productoId;
-    payload.articulo_id = null;
-    payload.cliente_general_id = null;
-} else {
-    payload.custodia_id = null;
-    payload.articulo_id = this.modoReubicacion.articuloId;
-    payload.cliente_general_id = this.modoReubicacion.clienteGeneralId;
-}
-        console.log('📤 PAYLOAD COMPLETO enviado al backend:', payload);
+                        // ✅ AGREGAR LOS CAMPOS SEGÚN EL TIPO
+                        if (this.modoReubicacion.esCustodia) {
+                            payload.custodia_id = this.modoReubicacion.productoId;
+                            payload.articulo_id = null;
+                            payload.cliente_general_id = null;
+                        } else {
+                            payload.custodia_id = null;
+                            payload.articulo_id = this.modoReubicacion.articuloId;
+                            payload.cliente_general_id = this.modoReubicacion.clienteGeneralId;
+                        }
+                        console.log('📤 PAYLOAD COMPLETO enviado al backend:', payload);
 
-        const response = await fetch('/almacen/reubicacion/confirmar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await response.json();
-        console.log('Respuesta confirmación:', result);
-
-        if (result.success) {
-            this.success(result.message);
-            await this.recargarDatosRackCompletos();
-            this.cancelarReubicacion();
-            this.modalReubicacion.open = false;
-        } else {
-            let errorMessage = result.message || 'Error al confirmar reubicación';
-            if (result.errors) {
-                console.error('Errores de validación:', result.errors);
-                if (result.errors.producto) {
-                    errorMessage = result.errors.producto[0];
-                } else if (result.errors.cantidad) {
-                    errorMessage = result.errors.cantidad[0];
-                } else {
-                    Object.values(result.errors).forEach(errorArray => {
-                        errorArray.forEach(error => {
-                            this.error(error);
+                        const response = await fetch('/almacen/reubicacion/confirmar', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(payload)
                         });
-                    });
-                    return;
-                }
-            }
-            this.error(errorMessage);
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        this.error('Error de conexión al servidor');
-    }
-},
-                // ✅ NUEVO MÉTODO: Recargar datos completos del rack
+
+                        const result = await response.json();
+                        console.log('Respuesta confirmación:', result);
+
+                        if (result.success) {
+                            this.success(result.message);
+
+                            // ✅ ESPERAR A QUE SE COMPLETE LA RECARGA ANTES DE CERRAR MODALES
+                            const recargaExitosa = await this.recargarDatosRackCompletos();
+
+                            if (recargaExitosa) {
+                                this.cancelarReubicacion();
+                                this.modalReubicacion.open = false;
+
+                                // ✅ CERRAR MODAL DE DETALLE SI ESTÁ ABIERTO
+                                if (this.modal.open) {
+                                    this.modal.open = false;
+                                }
+                            }
+                        } else {
+                            let errorMessage = result.message || 'Error al confirmar reubicación';
+                            if (result.errors) {
+                                console.error('Errores de validación:', result.errors);
+                                // ... manejo de errores ...
+                            }
+                            this.error(errorMessage);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
+                },
                 // En tu Alpine.js - MÉTODO MEJORADO
                 async recargarDatosRackCompletos() {
                     try {
-                        console.log('🔄 Recargando datos del rack...');
+                        console.log('🔄 Recargando datos del rack desde servidor...');
 
                         const rackNombre = this.rack.nombre;
                         const sede = this.rack.sede;
 
+                        // ✅ AGREGAR TIMESTAMP PARA EVITAR CACHE
+                        const timestamp = new Date().getTime();
                         const response = await fetch(
-                            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}`);
+                            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}&_t=${timestamp}`
+                        );
 
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
                         const result = await response.json();
 
                         if (result.success && result.data) {
-                            // Actualizar el rack completo con los nuevos datos
-                            this.rack = result.data;
+                            // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
+                            this.rack = JSON.parse(JSON.stringify(result.data)); // Deep clone
 
-                            // Reprocesar datos locales
+                            // ✅ LIMPIAR CACHE DE UBICACIONES
+                            this.rack.niveles.forEach(nivel => {
+                                nivel.ubicaciones.forEach(ubicacion => {
+                                    // Forzar nueva referencia para reactividad
+                                    ubicacion.productos = [...(ubicacion.productos || [])];
+                                });
+                            });
+
+                            // ✅ REPROCESAR
                             this.procesarDatosRack();
 
-                            // Re-inicializar swipers
-                            this.$nextTick(() => {
-                                setTimeout(() => {
-                                    this.initSwipers();
-                                }, 300);
-                            });
+                            // ✅ FORZAR ACTUALIZACIÓN
+                            await this.$nextTick();
 
-                            console.log('✅ Datos del rack recargados exitosamente', {
-                                niveles: this.rack.niveles.length,
-                                ubicaciones: this.rack.niveles.reduce((total, nivel) => total + nivel
-                                    .ubicaciones.length, 0)
-                            });
+                            setTimeout(() => {
+                                this.initSwipers();
+                            }, 100);
 
-                            this.success('Datos actualizados correctamente');
-
+                            console.log('✅ Datos recargados exitosamente');
+                            return true;
                         } else {
-                            throw new Error(result.message || 'Error en la respuesta del servidor');
+                            throw new Error(result.message || 'Error en la respuesta');
                         }
-
                     } catch (error) {
                         console.error('❌ Error recargando datos:', error);
-                        this.error('Error al actualizar datos. Recargando página...');
-
-                        // Fallback: recargar página después de 2 segundos
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
+                        this.error('Error al actualizar datos');
+                        return false;
                     }
                 },
-
 
                 async cancelarReubicacion() {
                     try {
@@ -1996,6 +2228,7 @@ if (this.modoReubicacion.esCustodia) {
                             }
                         });
 
+                        // ✅ LIMPIAR ESTADO EXISTENTE
                         this.modoReubicacion.activo = false;
                         this.modoReubicacion.origen = '';
                         this.modoReubicacion.producto = '';
@@ -2004,6 +2237,8 @@ if (this.modoReubicacion.esCustodia) {
                         this.modoReubicacion.tipo = '';
                         this.modoReubicacion.esCustodia = false;
                         this.modoReubicacion.productoId = null;
+                        this.modoReubicacion.articuloId = null; // ✅ NUEVO
+                        this.modoReubicacion.clienteGeneralId = null; // ✅ NUEVO
 
                         this.modalReubicacion.open = false;
                         this.modalReubicacion.origen = '';
@@ -2011,11 +2246,20 @@ if (this.modoReubicacion.esCustodia) {
                         this.modalReubicacion.producto = '';
                         this.modalReubicacion.cantidad = 0;
 
-                        this.info('Reubicación cancelada');
+                        // ✅ RECARGAR DATOS PARA ASEGURAR CONSISTENCIA
+                        await this.recargarDatosRackCompletos();
                     } catch (error) {
                         console.error('Error:', error);
+                        // Aún así limpiar el estado local
                         this.modoReubicacion.activo = false;
                         this.modalReubicacion.open = false;
+
+                        // ✅ INTENTAR RECARGAR A PESAR DEL ERROR
+                        try {
+                            await this.recargarDatosRackCompletos();
+                        } catch (e) {
+                            console.error('Error secundario al recargar:', e);
+                        }
                     }
                 },
 
@@ -2203,6 +2447,66 @@ if (this.modoReubicacion.esCustodia) {
                         this.error('Error de conexión al servidor');
                     }
                 },
+                // Métodos adicionales para el historial
+                getMovimientosPorTipo(tipo) {
+                    if (!this.modalHistorial.ubi.historial) return 0;
+                    return this.modalHistorial.ubi.historial.filter(mov => mov.tipo === tipo).length;
+                },
+
+                filtrarHistorial() {
+                    if (!this.modalHistorial.ubi.historial) {
+                        this.modalHistorial.historialFiltrado = [];
+                        return;
+                    }
+
+                    let filtered = [...this.modalHistorial.ubi.historial];
+
+                    // Filtrar por tipo
+                    if (this.modalHistorial.filtroTipo !== 'todos') {
+                        filtered = filtered.filter(mov => mov.tipo === this.modalHistorial.filtroTipo);
+                    }
+
+                    // Filtrar por búsqueda
+                    if (this.modalHistorial.busqueda) {
+                        const busqueda = this.modalHistorial.busqueda.toLowerCase();
+                        filtered = filtered.filter(mov =>
+                            (mov.producto && mov.producto.toLowerCase().includes(busqueda)) ||
+                            (mov.observaciones && mov.observaciones.toLowerCase().includes(busqueda)) ||
+                            (mov.serie && mov.serie.toLowerCase().includes(busqueda)) ||
+                            (mov.codigocustodias && mov.codigocustodias.toLowerCase().includes(busqueda))
+                        );
+                    }
+
+                    // Ordenar por fecha (más reciente primero)
+                    filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+                    this.modalHistorial.historialFiltrado = filtered;
+                },
+
+                formatFechaHora(fecha) {
+                    if (!fecha) return 'Sin fecha';
+                    return new Date(fecha).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+
+
+                // En abrirHistorial, inicializar los filtros
+                abrirHistorial(ubi) {
+                    this.modalHistorial.ubi = ubi;
+                    this.modalHistorial.filtroTipo = 'todos';
+                    this.modalHistorial.busqueda = '';
+                    this.modalHistorial.open = true;
+
+                    // Inicializar historial filtrado
+                    this.$nextTick(() => {
+                        this.filtrarHistorial();
+                    });
+                },
 
                 // ========== MÉTODOS DE AGREGAR PRODUCTOS ==========
                 async abrirModalAgregarProducto(ubi) {
@@ -2329,7 +2633,7 @@ if (this.modoReubicacion.esCustodia) {
                             this.modalAgregarProducto.productosFiltrados = this.modalAgregarProducto.productos
                                 .filter(producto => {
                                     return (producto.nombre && producto.nombre.toLowerCase().includes(
-                                        busqueda)) ||
+                                            busqueda)) ||
                                         (producto.categoria && producto.categoria.toLowerCase().includes(
                                             busqueda)) ||
                                         (producto.tipo_articulo && producto.tipo_articulo.toLowerCase()
@@ -2356,7 +2660,7 @@ if (this.modoReubicacion.esCustodia) {
                             virtualScroll.itemHeight);
 
                         virtualScroll.visibleItems = allItems.slice(0, Math.min(visibleWithBuffer, allItems
-                        .length));
+                            .length));
 
                         if (this.$refs.scrollContainer) {
                             this.$refs.scrollContainer.scrollTop = 0;
@@ -2668,92 +2972,6 @@ if (this.modoReubicacion.esCustodia) {
                     });
                 },
 
-               actualizarUbicacionesEnFrontend(ubicacionesActualizadas) {
-    console.log('🔄 Actualizando frontend con:', ubicacionesActualizadas);
-
-    const { origen, destino } = ubicacionesActualizadas;
-
-    if (origen) {
-        console.log('Actualizando origen:', origen);
-        // ✅ DEBERÍA REMOVER el producto movido de la ubicación origen
-        this.actualizarUbicacionIndividual(origen.id, origen);
-    }
-
-    if (destino) {
-        console.log('Actualizando destino:', destino);
-        // ✅ DEBERÍA AGREGAR el producto a la ubicación destino  
-        this.actualizarUbicacionIndividual(destino.id, destino);
-    }
-
-    // ✅ LIMPIAR: Asegurarse de que la ubicación origen quede sin el producto movido
-    this.limpiarUbicacionOrigen(origen.id, destino.id);
-
-    // Reprocesar datos para estadísticas
-    this.procesarDatosRack();
-
-    // Forzar actualización de Alpine
-    this.rack = { ...this.rack };
-
-    // Re-inicializar swipers
-    this.$nextTick(() => {
-        setTimeout(() => {
-            this.initSwipers();
-        }, 200);
-    });
-
-    console.log('✅ Frontend actualizado');
-},
-
-// ✅ NUEVO MÉTODO: Limpiar específicamente la ubicación origen
-limpiarUbicacionOrigen(ubicacionOrigenId, ubicacionDestinoId) {
-    this.rack.niveles.forEach((nivel, nivelIndex) => {
-        nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
-            if (ubicacion.id === ubicacionOrigenId) {
-                // Remover productos que ya fueron movidos al destino
-                const productosRestantes = ubicacion.productos.filter(producto => {
-                    // Aquí necesitas la lógica para identificar qué producto se movió
-                    // Esto depende de cómo estés trackeando el producto específico
-                    return true; // Placeholder - necesitas implementar esta lógica
-                });
-                
-                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex].productos = productosRestantes;
-                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex].cantidad_total = productosRestantes.reduce((sum, p) => sum + p.cantidad, 0);
-            }
-        });
-    });
-},
-                actualizarUbicacionIndividual(ubicacionId, nuevosDatos) {
-                    let ubicacionEncontrada = false;
-
-                    this.rack.niveles.forEach((nivel, nivelIndex) => {
-                        nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
-                            if (ubicacion.id === ubicacionId) {
-                                ubicacionEncontrada = true;
-
-                                // Actualizar todos los datos de la ubicación
-                                this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
-                                    ...ubicacion,
-                                    productos: nuevosDatos.productos || [],
-                                    cantidad_total: nuevosDatos.cantidad_total || 0,
-                                    categorias_acumuladas: nuevosDatos.categorias_acumuladas ||
-                                        'Sin categoría',
-                                    tipos_acumulados: nuevosDatos.tipos_acumulados || 'Sin tipo',
-                                    clientes_acumulados: nuevosDatos.clientes_acumulados ||
-                                        'Sin cliente',
-                                    estado: nuevosDatos.estado || 'vacio',
-                                    fecha: nuevosDatos.fecha || null
-                                };
-
-                                console.log(`✅ Ubicación ${ubicacionId} actualizada en frontend`);
-                            }
-                        });
-                    });
-
-                    if (!ubicacionEncontrada) {
-                        console.warn(`❌ Ubicación ${ubicacionId} no encontrada en el rack`);
-                    }
-                },
-
                 actualizarUbicacionEnRack(ubicacionActualizada) {
                     let encontrada = false;
 
@@ -2763,7 +2981,7 @@ limpiarUbicacionOrigen(ubicacionOrigenId, ubicacionDestinoId) {
                                 encontrada = true;
                                 console.log(
                                     `Encontrada ubicación ${ubicacionActualizada.id} en nivel ${nivelIndex}, ubicación ${ubiIndex}`
-                                    );
+                                );
 
                                 this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
                                     ...ubicacionActualizada,
