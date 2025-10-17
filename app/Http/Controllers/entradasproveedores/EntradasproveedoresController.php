@@ -215,7 +215,7 @@ public function guardarEntradaProveedor(Request $request)
 
             // Insertar en inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
-                'compra_id' => $entradaId,
+                // 'compra_id' => $entradaId,
                 'articulo_id' => $articuloId,
                 'tipo_ingreso' => 'entrada_proveedor',
                 'ingreso_id' => $detalleId,
