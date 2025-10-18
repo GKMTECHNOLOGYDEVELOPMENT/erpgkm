@@ -300,7 +300,7 @@ class UbicacionesVistaController extends Controller
 
     private function obtenerEstructuraRackIndividual($rackNombre, $sede)
     {
-        // Query base similar a tu getDatosRacks pero para un rack específico
+        // Query base para ubicaciones
         $ubicaciones = DB::table('rack_ubicaciones as ru')
             ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
             ->select(
@@ -328,43 +328,67 @@ class UbicacionesVistaController extends Controller
 
         $ubicacionIds = $ubicaciones->pluck('idRackUbicacion')->toArray();
 
-        // ✅ Obtener productos con toda la información (ACTUALIZADO CON CLIENTE GENERAL)
+        // ✅ CORREGIDO: Obtener productos normales Y custodias - SIN AGRUPAR
         $productosCompletos = DB::table('rack_ubicacion_articulos as rua')
             ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
-            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral') // ✅ NUEVO JOIN
+
+            // ✅ PARA REPUESTOS: categoría desde articulo_modelo
+            ->leftJoin('articulo_modelo as am', function ($join) {
+                $join->on('a.idArticulos', '=', 'am.articulo_id')
+                    ->where('a.idTipoArticulo', '=', 2);
+            })
+            ->leftJoin('modelo as m_repuesto', 'am.modelo_id', '=', 'm_repuesto.idModelo')
+            ->leftJoin('categoria as c_repuesto', 'm_repuesto.idCategoria', '=', 'c_repuesto.idCategoria')
+
+            // ✅ PARA PRODUCTOS NORMALES: categoría directa
+            ->leftJoin('modelo as m_normal', 'a.idModelo', '=', 'm_normal.idModelo')
+            ->leftJoin('categoria as c_normal', 'm_normal.idCategoria', '=', 'c_normal.idCategoria')
+
+            // ✅ PARA CUSTODIAS
             ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
             ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
             ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
             ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
             ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
             ->leftJoin('clientegeneral as cg_cust', 't_cust.idClienteGeneral', '=', 'cg_cust.idClienteGeneral')
-            ->leftJoin('inventario_ingresos_clientes as iic', function ($join) {
-                $join->on('a.idArticulos', '=', 'iic.articulo_id')
-                    ->where('iic.tipo_ingreso', '=', 'ajuste');
-            })
-            ->leftJoin('clientegeneral as cg_ingreso', 'iic.cliente_general_id', '=', 'cg_ingreso.idClienteGeneral')
+
+            // ✅ Cliente general para productos normales
+            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
+
             ->whereIn('rua.rack_ubicacion_id', $ubicacionIds)
+
+            // ✅ NUEVO: SELECCIONAR EL ID ÚNICO DE CADA REGISTRO
             ->select(
+                'rua.idRackUbicacionArticulo', // ✅ ESTE ES EL ID ÚNICO DE CADA REGISTRO
                 'rua.rack_ubicacion_id',
                 'rua.cantidad',
                 'rua.custodia_id',
-                'rua.cliente_general_id', // ✅ NUEVO
+                'rua.cliente_general_id',
+                'rua.articulo_id',
+
+                // Campos para productos normales
                 'a.idArticulos',
                 DB::raw('CASE 
-                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                THEN a.codigo_repuesto 
-                ELSE a.nombre 
-            END as producto'),
+            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+            THEN a.codigo_repuesto 
+            ELSE a.nombre 
+        END as producto'),
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
                 'a.stock_total',
                 'ta.nombre as tipo_articulo',
                 'ta.idTipoArticulo',
-                'c.nombre as categoria',
-                'cg.descripcion as cliente_general_nombre', // ✅ NUEVO
+
+                // ✅ CATEGORÍA CORRECTA
+                DB::raw('CASE 
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+            ELSE c_normal.nombre 
+        END as categoria'),
+
+                'cg.descripcion as cliente_general_nombre',
+
+                // Campos para custodias
                 'cust.codigocustodias',
                 'cust.serie',
                 'cust.idMarca',
@@ -374,14 +398,12 @@ class UbicacionesVistaController extends Controller
                 'mar_cust.nombre as marca_nombre',
                 'm_cust.nombre as modelo_nombre',
                 'cg_cust.idClienteGeneral as cliente_general_id_custodia',
-                'cg_cust.descripcion as cliente_general_nombre_custodia',
-                'cg_ingreso.idClienteGeneral as cliente_general_id_ingreso',
-                'cg_ingreso.descripcion as cliente_general_nombre_ingreso'
+                'cg_cust.descripcion as cliente_general_nombre_custodia'
             )
             ->get()
             ->groupBy('rack_ubicacion_id');
 
-        // Estructurar el rack igual que en tu detalleRack
+        // Estructurar el rack
         $rackEstructurado = [
             'nombre' => $ubicaciones->first()->rack_nombre,
             'sede' => $ubicaciones->first()->sede,
@@ -400,11 +422,12 @@ class UbicacionesVistaController extends Controller
 
                 $cantidadTotal = $productosUbicacion->sum('cantidad');
 
-                // Mapear productos (igual que en tu detalleRack)
+                // Mapear productos (incluyendo custodias)
                 $productos = $productosUbicacion->map(function ($art) {
+                    // ✅ SI ES CUSTODIA
                     if ($art->custodia_id) {
                         return [
-                            'id' => $art->idArticulos,
+                            'id' => $art->articulo_id, // Puede ser null para custodias
                             'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
                             'cantidad' => $art->cantidad,
                             'stock_total' => $art->stock_total,
@@ -423,6 +446,7 @@ class UbicacionesVistaController extends Controller
                         ];
                     }
 
+                    // ✅ SI ES PRODUCTO NORMAL
                     $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
 
                     return [
@@ -470,12 +494,24 @@ class UbicacionesVistaController extends Controller
                     'id' => $ubicacion->idRackUbicacion,
                     'codigo' => $ubicacion->codigo_unico ?? $ubicacion->codigo,
                     'productos' => $productos->toArray(),
-                    'producto' => $productos->isNotEmpty() ? $productos->first()['nombre'] : null,
+
+                    // ✅ CORREGIDO: Mostrar información de múltiples productos
+                    'producto' => $productos->isNotEmpty() ?
+                        ($productos->count() === 1 ?
+                            $productos->first()['nombre'] :
+                            $productos->first()['nombre'] . ' +' . ($productos->count() - 1) . ' más'
+                        ) : null,
+
                     'cantidad' => $cantidadTotal,
                     'cantidad_total' => $cantidadTotal,
                     'stock_total' => $productos->isNotEmpty() ? $productos->first()['stock_total'] : null,
-                    'tipo_articulo' => $productos->isNotEmpty() ? $productos->first()['tipo_articulo'] : null,
-                    'categoria' => $productos->isNotEmpty() ? $productos->first()['categoria'] : null,
+
+                    // ✅ CORREGIDO: Usar tipos acumulados en lugar del primero
+                    'tipo_articulo' => $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : null,
+
+                    // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
+                    'categoria' => $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null,
+
                     'capacidad' => $ubicacion->capacidad_maxima,
                     'estado' => $estado,
                     'nivel' => $ubicacion->nivel,
@@ -513,33 +549,34 @@ class UbicacionesVistaController extends Controller
             $sede = $rackInfo->sede;
         }
 
-        // ✅ CORREGIDO: Consulta sin los JOINS que causan duplicados
-        // ✅ CORREGIDO: Consulta con JOIN CORRECTO para categoría de repuestos
+        // ✅ CORREGIDO: Consulta que incluye el ID único de cada registro
         $rackData = DB::table('racks as r')
             ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
             ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
             ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            // ✅ PARA REPUESTOS: categoría desde articulo_modelo
-            ->leftJoin('articulo_modelo as am', function ($join) {
-                $join->on('a.idArticulos', '=', 'am.articulo_id')
-                    ->where('a.idTipoArticulo', '=', 2);
+
+            // ✅ UNIFICADO: Un solo JOIN para modelo que funcione para ambos casos
+            ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+            ->leftJoin('modelo as m', function ($join) {
+                $join->on('am.modelo_id', '=', 'm.idModelo')
+                    ->orOn('a.idModelo', '=', 'm.idModelo');
             })
-            ->leftJoin('modelo as m_repuesto', 'am.modelo_id', '=', 'm_repuesto.idModelo')
-            ->leftJoin('categoria as c_repuesto', 'm_repuesto.idCategoria', '=', 'c_repuesto.idCategoria')
-            // ✅ PARA PRODUCTOS NORMALES: categoría directa
-            ->leftJoin('modelo as m_normal', 'a.idModelo', '=', 'm_normal.idModelo')
-            ->leftJoin('categoria as c_normal', 'm_normal.idCategoria', '=', 'c_normal.idCategoria')
-            // ✅ JOIN para custodias con marcas, modelos Y TICKETS
+            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+
+            // ✅ JOIN para custodias
             ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
             ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
             ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
             ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
+
             // ✅ JOIN para tickets de custodias
             ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
             ->leftJoin('clientegeneral as cg_cust', 't_cust.idClienteGeneral', '=', 'cg_cust.idClienteGeneral')
-            // ✅ JOIN para cliente general de PRODUCTOS NORMALES desde rack_ubicacion_articulos
+
+            // ✅ JOIN para cliente general de PRODUCTOS NORMALES
             ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
+
             ->select(
                 'r.idRack',
                 'r.nombre as rack_nombre',
@@ -552,28 +589,33 @@ class UbicacionesVistaController extends Controller
                 'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'ru.updated_at',
+
+                // ✅ NUEVO: INCLUIR EL ID ÚNICO DE CADA REGISTRO
+                'rua.idRackUbicacionArticulo',
                 'a.idArticulos',
-                // ✅ CORREGIDO: Aplicar lógica de repuestos
+
+                // ✅ Lógica de repuestos
                 DB::raw('CASE 
-            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-            THEN a.codigo_repuesto 
-            ELSE a.nombre 
-        END as producto'),
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as producto'),
+
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
                 'a.stock_total',
                 'ta.nombre as tipo_articulo',
                 'ta.idTipoArticulo',
-                // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
-                DB::raw('CASE 
-            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-            ELSE c_normal.nombre 
-        END as categoria'),
+
+                // ✅ CATEGORÍA CORRECTA (usando COALESCE para evitar NULLs)
+                DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria'),
+
                 'rua.cantidad',
                 'rua.custodia_id',
                 'rua.cliente_general_id',
                 'cg.descripcion as cliente_general_nombre',
-                // ✅ Campos de custodia
+
+                // Campos de custodia
                 'cust.codigocustodias',
                 'cust.serie',
                 'cust.idMarca',
@@ -582,7 +624,8 @@ class UbicacionesVistaController extends Controller
                 'c_cust.nombre as categoria_custodia',
                 'mar_cust.nombre as marca_nombre',
                 'm_cust.nombre as modelo_nombre',
-                // ✅ Campos de cliente general para CUSTODIAS
+
+                // Campos de cliente general para CUSTODIAS
                 'cg_cust.idClienteGeneral as cliente_general_id_custodia',
                 'cg_cust.descripcion as cliente_general_nombre_custodia'
             )
@@ -699,73 +742,63 @@ class UbicacionesVistaController extends Controller
             foreach ($ubicacionesAgrupadas as $ubicacionId => $articulos) {
                 $primerArticulo = $articulos->first();
 
-                // ✅ NUEVO: Agrupar artículos por cliente_general_id para evitar duplicados
-                $articulosAgrupados = $articulos->groupBy('cliente_general_id');
-
-                // ... dentro del foreach de $ubicacionesAgrupadas
-
+                // ✅ CORREGIDO: Procesar CADA ARTÍCULO INDIVIDUALMENTE sin agrupar
                 $productosAgrupados = collect();
 
-                // ✅ NUEVO: VERIFICAR SI HAY ARTÍCULOS VÁLIDOS ANTES DE PROCESAR
+                // ✅ FILTRAR SOLO ARTÍCULOS VÁLIDOS (que tengan idArticulos o custodia_id)
                 $articulosValidos = $articulos->filter(function ($art) {
                     return $art->idArticulos !== null || $art->custodia_id !== null;
                 });
 
                 if ($articulosValidos->isNotEmpty()) {
-                    foreach ($articulosAgrupados as $clienteGeneralId => $artsDelMismoCliente) {
-                        $primerArtDelCliente = $artsDelMismoCliente->first();
-                        $cantidadPorCliente = $artsDelMismoCliente->sum('cantidad');
-
-                        // ✅ VERIFICACIÓN ADICIONAL: Solo procesar si tiene artículo o custodia
-                        if (!$primerArtDelCliente->idArticulos && !$primerArtDelCliente->custodia_id) {
-                            continue; // Saltar este "producto fantasma"
-                        }
-
+                    foreach ($articulosValidos as $art) {
                         // ✅ SI ES CUSTODIA
-                        if ($primerArtDelCliente->custodia_id) {
+                        if ($art->custodia_id) {
                             $productosAgrupados->push([
-                                'id' => $primerArtDelCliente->idArticulos,
-                                'nombre' => $primerArtDelCliente->serie ?: $primerArtDelCliente->codigocustodias ?: 'Custodia ' . $primerArtDelCliente->custodia_id,
-                                'cantidad' => $cantidadPorCliente,
-                                'stock_total' => $primerArtDelCliente->stock_total,
+                                'id' => $art->idArticulos,
+                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
+                                'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
+                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
+                                'stock_total' => $art->stock_total,
                                 'tipo_articulo' => 'CUSTODIA',
-                                'categoria' => $primerArtDelCliente->categoria_custodia ?: 'Custodia',
-                                'custodia_id' => $primerArtDelCliente->custodia_id,
-                                'codigocustodias' => $primerArtDelCliente->codigocustodias,
-                                'serie' => $primerArtDelCliente->serie,
-                                'idMarca' => $primerArtDelCliente->idMarca,
-                                'idModelo' => $primerArtDelCliente->idModelo,
-                                'marca_nombre' => $primerArtDelCliente->marca_nombre,
-                                'modelo_nombre' => $primerArtDelCliente->modelo_nombre,
-                                'numero_ticket' => $primerArtDelCliente->numero_ticket,
-                                'cliente_general_id' => $primerArtDelCliente->cliente_general_id_custodia,
-                                'cliente_general_nombre' => $primerArtDelCliente->cliente_general_nombre_custodia ?: 'Sin cliente'
+                                'categoria' => $art->categoria_custodia ?: 'Custodia',
+                                'custodia_id' => $art->custodia_id,
+                                'codigocustodias' => $art->codigocustodias,
+                                'serie' => $art->serie,
+                                'idMarca' => $art->idMarca,
+                                'idModelo' => $art->idModelo,
+                                'marca_nombre' => $art->marca_nombre,
+                                'modelo_nombre' => $art->modelo_nombre,
+                                'numero_ticket' => $art->numero_ticket,
+                                'cliente_general_id' => $art->cliente_general_id_custodia,
+                                'cliente_general_nombre' => $art->cliente_general_nombre_custodia ?: 'Sin cliente'
                             ]);
                         } else {
-                            // ✅ SI ES PRODUCTO NORMAL - APLICAR LÓGICA DE REPUESTOS
-                            $mostrandoCodigoRepuesto = ($primerArtDelCliente->idTipoArticulo == 2 && !empty($primerArtDelCliente->codigo_repuesto));
+                            // ✅ SI ES PRODUCTO NORMAL
+                            $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
 
                             $productosAgrupados->push([
-                                'id' => $primerArtDelCliente->idArticulos,
-                                'nombre' => $primerArtDelCliente->producto,
-                                'nombre_original' => $primerArtDelCliente->nombre_original,
-                                'codigo_repuesto' => $primerArtDelCliente->codigo_repuesto,
-                                'cantidad' => $cantidadPorCliente,
-                                'stock_total' => $primerArtDelCliente->stock_total,
-                                'tipo_articulo' => $primerArtDelCliente->tipo_articulo,
-                                'idTipoArticulo' => $primerArtDelCliente->idTipoArticulo,
-                                'categoria' => $primerArtDelCliente->categoria,
+                                'id' => $art->idArticulos,
+                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
+                                'nombre' => $art->producto,
+                                'nombre_original' => $art->nombre_original,
+                                'codigo_repuesto' => $art->codigo_repuesto,
+                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
+                                'stock_total' => $art->stock_total,
+                                'tipo_articulo' => $art->tipo_articulo,
+                                'idTipoArticulo' => $art->idTipoArticulo,
+                                'categoria' => $art->categoria,
                                 'custodia_id' => null,
-                                'es_repuesto' => $primerArtDelCliente->idTipoArticulo == 2,
+                                'es_repuesto' => $art->idTipoArticulo == 2,
                                 'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
-                                'cliente_general_id' => $primerArtDelCliente->cliente_general_id,
-                                'cliente_general_nombre' => $primerArtDelCliente->cliente_general_nombre ?: 'Sin cliente'
+                                'cliente_general_id' => $art->cliente_general_id,
+                                'cliente_general_nombre' => $art->cliente_general_nombre ?: 'Sin cliente'
                             ]);
                         }
                     }
                 }
 
-                // ✅ CALCULAR CANTIDAD TOTAL SOLO SI HAY PRODUCTOS VÁLIDOS
+                // ✅ CALCULAR CANTIDAD TOTAL
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
 
                 // Determinar estado basado en porcentaje de ocupación
@@ -792,20 +825,57 @@ class UbicacionesVistaController extends Controller
                     ->filter(fn($cliente) => $cliente && $cliente !== 'Sin cliente')
                     ->unique();
 
+                // ✅ CORREGIDO: Mostrar información de múltiples productos
+                $productoDisplay = $productosAgrupados->isNotEmpty() ?
+                    ($productosAgrupados->count() === 1 ?
+                        $productosAgrupados->first()['nombre'] :
+                        $productosAgrupados->first()['nombre'] . ' +' . ($productosAgrupados->count() - 1) . ' más'
+                    ) : null;
+
+                // ✅ CORREGIDO: Usar tipos acumulados en lugar del primero
+                $tipoArticuloDisplay = $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : null;
+
+                // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
+                $categoriaDisplay = $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null;
+
+                // ✅ DEBUG: Verificar ubicación específica
+                if ($primerArticulo->idRackUbicacion == 94) {
+                    Log::debug("🔍 DEBUG Ubicación 94 en detalleRack:", [
+                        'total_articulos' => $articulos->count(),
+                        'articulos_validos' => $articulosValidos->count(),
+                        'productos_procesados' => $productosAgrupados->count(),
+                        'articulos_ids' => $articulosValidos->pluck('idArticulos'),
+                        'articulos_cantidades' => $articulosValidos->pluck('cantidad'),
+                        'ids_rack_ubicacion_articulo' => $articulosValidos->pluck('idRackUbicacionArticulo'),
+                        'productos_finales' => $productosAgrupados->map(function ($p) {
+                            return [
+                                'id' => $p['id'],
+                                'idRackUbicacionArticulo' => $p['idRackUbicacionArticulo'],
+                                'nombre' => $p['nombre'],
+                                'cantidad' => $p['cantidad'],
+                                'cliente_general_id' => $p['cliente_general_id']
+                            ];
+                        })
+                    ]);
+                }
+
                 $ubicacionesEstructuradas[] = [
                     'id' => $primerArticulo->idRackUbicacion,
                     'codigo' => $primerArticulo->codigo_unico ?? $primerArticulo->codigo,
                     'productos' => $productosAgrupados->toArray(),
-                    'producto' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['nombre'] : null,
+
+                    // ✅ CORREGIDO: Usar las variables corregidas
+                    'producto' => $productoDisplay,
                     'cantidad' => $cantidadTotal,
                     'cantidad_total' => $cantidadTotal,
                     'stock_total' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['stock_total'] : null,
-                    'tipo_articulo' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['tipo_articulo'] : null,
-                    'categoria' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['categoria'] : null,
+                    'tipo_articulo' => $tipoArticuloDisplay,
+                    'categoria' => $categoriaDisplay,
+
                     'capacidad' => $primerArticulo->capacidad_maxima,
                     'estado' => $estado,
                     'nivel' => $primerArticulo->nivel,
-                    'fecha' => $primerArticulo->updated_at, // ✅ AHORA SÍ EXISTE
+                    'fecha' => $primerArticulo->updated_at,
                     'categorias_acumuladas' => $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : 'Sin categoría',
                     'tipos_acumulados' => $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : 'Sin tipo',
                     'clientes_acumulados' => $clientesUnicos->isNotEmpty() ? $clientesUnicos->join(', ') : 'Sin cliente',
@@ -834,7 +904,6 @@ class UbicacionesVistaController extends Controller
             'sedeActual' => $sede
         ]);
     }
-
 
     public function iniciarReubicacion(Request $request)
     {
@@ -1512,10 +1581,10 @@ class UbicacionesVistaController extends Controller
                 ->select(
                     'a.idArticulos as id',
                     DB::raw('CASE 
-            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-            THEN a.codigo_repuesto 
-            ELSE a.nombre 
-        END as nombre'),
+                    WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                    THEN a.codigo_repuesto 
+                    ELSE a.nombre 
+                END as nombre'),
                     'a.nombre as nombre_original',
                     'a.codigo_repuesto',
                     'a.stock_total',
@@ -1523,9 +1592,9 @@ class UbicacionesVistaController extends Controller
                     'ta.idTipoArticulo',
                     // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
                     DB::raw('CASE 
-            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-            ELSE c_normal.nombre 
-        END as categoria'),
+                    WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+                    ELSE c_normal.nombre 
+                END as categoria'),
                     'rua.cantidad',
                     'rua.cliente_general_id',
                     'cg.descripcion as cliente_general_nombre',
@@ -1608,8 +1677,25 @@ class UbicacionesVistaController extends Controller
             );
             $clientesUnicos = array_unique($clientesNombres);
 
+            // ✅ CORREGIDO: Mostrar información de múltiples productos
+            $productoDisplay = !empty($todosLosProductos) ?
+                (count($todosLosProductos) === 1 ?
+                    $todosLosProductos[0]['nombre'] :
+                    $todosLosProductos[0]['nombre'] . ' +' . (count($todosLosProductos) - 1) . ' más'
+                ) : null;
+
+            // ✅ CORREGIDO: Usar tipos acumulados en lugar del primero
+            $tipoArticuloDisplay = !empty($tiposUnicos) ? implode(', ', $tiposUnicos) : null;
+
+            // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
+            $categoriaDisplay = !empty($categoriasUnicas) ? implode(', ', $categoriasUnicas) : null;
+
             Log::debug("✅ Ubicación {$ubicacionId} procesada:", [
-                'productos' => count($todosLosProductos),
+                'productos_count' => count($todosLosProductos),
+                'productos_nombres' => array_column($todosLosProductos, 'nombre'),
+                'producto_display' => $productoDisplay,
+                'tipos_display' => $tipoArticuloDisplay,
+                'categorias_display' => $categoriaDisplay,
                 'cantidad_total' => $cantidadTotal,
                 'estado' => $estado
             ]);
@@ -1618,12 +1704,15 @@ class UbicacionesVistaController extends Controller
                 'id' => $ubicacionBase->id,
                 'codigo' => $ubicacionBase->codigo_unico ?? $ubicacionBase->codigo,
                 'productos' => $todosLosProductos,
-                'producto' => !empty($todosLosProductos) ? $todosLosProductos[0]['nombre'] : null,
+
+                // ✅ CORREGIDO: Usar las variables corregidas
+                'producto' => $productoDisplay,
                 'cantidad' => $cantidadTotal,
                 'cantidad_total' => $cantidadTotal,
                 'stock_total' => !empty($todosLosProductos) ? ($todosLosProductos[0]['stock_total'] ?? null) : null,
-                'tipo_articulo' => !empty($todosLosProductos) ? $todosLosProductos[0]['tipo_articulo'] : null,
-                'categoria' => !empty($todosLosProductos) ? $todosLosProductos[0]['categoria'] : null,
+                'tipo_articulo' => $tipoArticuloDisplay,
+                'categoria' => $categoriaDisplay,
+
                 'capacidad' => $ubicacionBase->capacidad,
                 'estado' => $estado,
                 'nivel' => $ubicacionBase->nivel,

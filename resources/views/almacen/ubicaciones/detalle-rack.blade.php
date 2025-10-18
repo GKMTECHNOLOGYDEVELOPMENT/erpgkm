@@ -1814,41 +1814,61 @@
                         timeOut: '3000',
                     };
 
+                    // ✅ DEBUG: Verificar datos iniciales
+                    console.log('📥 Datos iniciales del rack:', this.rack);
+                    this.rack.niveles.forEach((nivel, nivelIndex) => {
+                        nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
+                            if (ubicacion.codigo === 'A-A2-01') {
+                                console.log(`📍 Ubicación A-A2-01 INICIAL:`, {
+                                    productosCount: ubicacion.productos?.length || 0,
+                                    productos: ubicacion.productos
+                                });
+                            }
+                        });
+                    });
+
                     this.procesarDatosRack();
                     this.initSwipers();
                 },
 
                 // ========== MÉTODOS DE INICIALIZACIÓN ==========
                 procesarDatosRack() {
-                    console.log('Reprocesando datos del rack...');
+                    console.log('🔄 Reprocesando datos del rack...');
 
                     this.rack.niveles.forEach(nivel => {
                         nivel.ubicaciones.forEach(ubicacion => {
                             // ✅ LIMPIAR Y NORMALIZAR DATOS
                             if (!ubicacion.productos) ubicacion.productos = [];
 
-                            // ✅ ELIMINAR DUPLICADOS POR ID
-                            const productosUnicos = [];
-                            const idsVistos = new Set();
+                            // ❌ ELIMINAR ESTA SECCIÓN QUE ESTÁ CAUSANDO EL PROBLEMA
+                            // NO eliminar duplicados - cada registro de la BD es único
 
-                            ubicacion.productos.forEach(producto => {
-                                const id = producto.custodia_id ?
-                                    `custodia_${producto.custodia_id}` : `articulo_${producto.id}`;
-                                if (!idsVistos.has(id)) {
-                                    idsVistos.add(id);
-                                    productosUnicos.push(producto);
-                                }
-                            });
-
-                            ubicacion.productos = productosUnicos;
-
-                            // ✅ RESTANTE DEL CÓDIGO EXISTENTE...
                             if (ubicacion.productos.length > 0) {
-                                // ... lógica existente para categorías, tipos, etc.
                                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                                     .cantidad || 0), 0);
                                 ubicacion.estado = this.calcularEstado(ubicacion.cantidad_total, ubicacion
                                     .capacidad);
+
+                                // ✅ ACUMULAR CATEGORÍAS Y TIPOS
+                                const categoriasUnicas = [...new Set(ubicacion.productos
+                                    .map(p => p.categoria)
+                                    .filter(c => c && c !== 'Sin categoría'))];
+
+                                const tiposUnicos = [...new Set(ubicacion.productos
+                                    .map(p => p.tipo_articulo)
+                                    .filter(t => t && t !== 'Sin tipo'))];
+
+                                const clientesUnicos = [...new Set(ubicacion.productos
+                                    .map(p => p.cliente_general_nombre)
+                                    .filter(c => c && c !== 'Sin cliente'))];
+
+                                ubicacion.categorias_acumuladas = categoriasUnicas.length > 0 ?
+                                    categoriasUnicas.join(', ') : 'Sin categoría';
+                                ubicacion.tipos_acumulados = tiposUnicos.length > 0 ?
+                                    tiposUnicos.join(', ') : 'Sin tipo';
+                                ubicacion.clientes_acumulados = clientesUnicos.length > 0 ?
+                                    clientesUnicos.join(', ') : 'Sin cliente';
+
                             } else {
                                 ubicacion.categorias_acumuladas = 'Sin categoría';
                                 ubicacion.tipos_acumulados = 'Sin tipo';
@@ -1856,10 +1876,23 @@
                                 ubicacion.cantidad_total = 0;
                                 ubicacion.estado = 'vacio';
                             }
+
+                            // ✅ DEBUG: Verificar productos individuales
+                            if (ubicacion.codigo === 'A-A2-01') { // Tu ubicación específica
+                                console.log(`📍 Ubicación ${ubicacion.codigo} después de procesar:`, {
+                                    productosCount: ubicacion.productos.length,
+                                    productos: ubicacion.productos.map(p => ({
+                                        id: p.id,
+                                        nombre: p.nombre,
+                                        cantidad: p.cantidad,
+                                        tipo: p.tipo_articulo
+                                    }))
+                                });
+                            }
                         });
                     });
 
-                    console.log('Reprocesamiento de datos completado');
+                    console.log('✅ Reprocesamiento de datos completado');
                 },
 
                 initSwipers() {
@@ -2166,56 +2199,60 @@
                     }
                 },
                 // En tu Alpine.js - MÉTODO MEJORADO
-                async recargarDatosRackCompletos() {
-                    try {
-                        console.log('🔄 Recargando datos del rack desde servidor...');
+async recargarDatosRackCompletos() {
+    try {
+        console.log('🔄 Recargando datos del rack desde servidor...');
 
-                        const rackNombre = this.rack.nombre;
-                        const sede = this.rack.sede;
+        const rackNombre = this.rack.nombre;
+        const sede = this.rack.sede;
 
-                        // ✅ AGREGAR TIMESTAMP PARA EVITAR CACHE
-                        const timestamp = new Date().getTime();
-                        const response = await fetch(
-                            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}&_t=${timestamp}`
-                        );
+        const timestamp = new Date().getTime();
+        const response = await fetch(
+            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}&_t=${timestamp}`
+        );
 
-                        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-                        const result = await response.json();
+        const result = await response.json();
 
-                        if (result.success && result.data) {
-                            // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
-                            this.rack = JSON.parse(JSON.stringify(result.data)); // Deep clone
+        if (result.success && result.data) {
+            console.log('📥 Datos COMPLETOS recibidos del servidor:', result.data);
+            
+            // ✅ DEBUG ESPECÍFICO
+            const ubicacionEspecifica = result.data.niveles?.flatMap(n => n.ubicaciones)
+                .find(u => u.codigo === 'A-A2-01');
+            
+            if (ubicacionEspecifica) {
+                console.log('🔍 DEBUG A-A2-01 desde servidor:', {
+                    productosCount: ubicacionEspecifica.productos?.length || 0,
+                    productos: ubicacionEspecifica.productos
+                });
+            }
 
-                            // ✅ LIMPIAR CACHE DE UBICACIONES
-                            this.rack.niveles.forEach(nivel => {
-                                nivel.ubicaciones.forEach(ubicacion => {
-                                    // Forzar nueva referencia para reactividad
-                                    ubicacion.productos = [...(ubicacion.productos || [])];
-                                });
-                            });
+            // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
+            this.rack = JSON.parse(JSON.stringify(result.data));
 
-                            // ✅ REPROCESAR
-                            this.procesarDatosRack();
+            // ✅ REPROCESAR DATOS
+            this.procesarDatosRack();
 
-                            // ✅ FORZAR ACTUALIZACIÓN
-                            await this.$nextTick();
+            await this.$nextTick();
+            await this.$nextTick();
 
-                            setTimeout(() => {
-                                this.initSwipers();
-                            }, 100);
+            setTimeout(() => {
+                this.initSwipers();
+            }, 150);
 
-                            console.log('✅ Datos recargados exitosamente');
-                            return true;
-                        } else {
-                            throw new Error(result.message || 'Error en la respuesta');
-                        }
-                    } catch (error) {
-                        console.error('❌ Error recargando datos:', error);
-                        this.error('Error al actualizar datos');
-                        return false;
-                    }
-                },
+            console.log('✅ Datos recargados exitosamente');
+            return true;
+        } else {
+            throw new Error(result.message || 'Error en la respuesta');
+        }
+    } catch (error) {
+        console.error('❌ Error recargando datos:', error);
+        this.error('Error al actualizar datos: ' + error.message);
+        return false;
+    }
+},
 
                 async cancelarReubicacion() {
                     try {
@@ -2873,15 +2910,16 @@
                                 `✅ ${this.modalAgregarProducto.productosSeleccionados.length} producto(s) agregado(s) exitosamente`
                             );
 
-                            this.modalAgregarProducto.productosSeleccionados.forEach(producto => {
-                                this.actualizarInterfazDespuesAgregarProducto(
-                                    this.modalAgregarProducto.ubicacion.id,
-                                    producto,
-                                    parseInt(producto.cantidad)
-                                );
-                            });
+                            // ✅ CORREGIDO: En lugar de actualizar manualmente, recargar datos completos
+                            await this.recargarDatosRackCompletos();
 
                             this.cerrarModalAgregarProducto();
+
+                            // ✅ CERRAR MODAL PRINCIPAL SI ESTÁ ABIERTO
+                            if (this.modal.open) {
+                                this.modal.open = false;
+                            }
+
                         } else {
                             const errorMessages = results
                                 .filter(result => !result.success)
