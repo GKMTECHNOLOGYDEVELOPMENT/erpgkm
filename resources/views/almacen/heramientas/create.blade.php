@@ -200,9 +200,10 @@
                         </span>
                     </label>
                     <div class="relative mt-1">
-                        <i class="fas fa-boxes input-icon"></i>
-                        <input id="stock_total" name="stock_total" type="number" min="0" value="0"
-                            class="clean-input w-full bg-gray-50" placeholder="Ingrese stock total" required>
+                        <i class="fas fa-boxes absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="stock_total" name="stock_total" type="number" value="0" readonly
+                            class="pl-10 pr-10 clean-input w-full bg-gray-100 text-gray-500 cursor-not-allowed">
+                        <i class="fas fa-lock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                 </div>
 

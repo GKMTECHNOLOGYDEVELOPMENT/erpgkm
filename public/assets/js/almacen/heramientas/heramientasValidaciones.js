@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
         { id: "sku", name: "SKU" },
         { id: "codigo_repuesto", name: "Código Repuesto" },
         { id: "idModelo", name: "Modelo" },
-        { id: "precio_compra", name: "Precio de Compra" },
-        { id: "precio_venta", name: "Precio de Venta" },
+        // { id: "precio_compra", name: "Precio de Compra" },
+        // { id: "precio_venta", name: "Precio de Venta" },
         { id: "stock_total", name: "Stock Total" },
         { id: "idUnidad", name: "Unidad de Medida" },
         { id: "nombre", name: "Nombre" },
@@ -122,17 +122,17 @@ if (input.tagName === "SELECT") {
                 }
             }
 
-            const precioCompra = parseFloat(document.getElementById("precio_compra").value);
-            const precioVenta = parseFloat(document.getElementById("precio_venta").value);
-            if (!isNaN(precioCompra) && precioCompra <= 0) {
-                todosValidos = false;
-            }
-            if (!isNaN(precioVenta) && precioVenta <= 0) {
-                todosValidos = false;
-            }
-            if (!isNaN(precioCompra) && !isNaN(precioVenta) && precioCompra > precioVenta) {
-                todosValidos = false;
-            }
+            // const precioCompra = parseFloat(document.getElementById("precio_compra").value);
+            // const precioVenta = parseFloat(document.getElementById("precio_venta").value);
+            // if (!isNaN(precioCompra) && precioCompra <= 0) {
+            //     todosValidos = false;
+            // }
+            // if (!isNaN(precioVenta) && precioVenta <= 0) {
+            //     todosValidos = false;
+            // }
+            // if (!isNaN(precioCompra) && !isNaN(precioVenta) && precioCompra > precioVenta) {
+            //     todosValidos = false;
+            // }
         });
 
         submitBtn.classList.toggle('opacity-50', !todosValidos);
@@ -199,37 +199,37 @@ if (input.tagName === "SELECT") {
                 parent.appendChild(msg);
             }
 
-          if (campo.id === "precio_venta" || campo.id === "precio_compra") {
-                const pc = parseFloat(document.getElementById("precio_compra").value);
-                const pv = parseFloat(document.getElementById("precio_venta").value);
+        //   if (campo.id === "precio_venta" || campo.id === "precio_compra") {
+        //         const pc = parseFloat(document.getElementById("precio_compra").value);
+        //         const pv = parseFloat(document.getElementById("precio_venta").value);
 
-                // Validación para el precio de compra
-                if (!isNaN(pc) && pc <= 0) {
-                    valid = false;
-                    const msg = document.createElement("p");
-                    msg.className = "text-red-500 text-sm mt-1 error-msg";
-                    msg.innerText = `El precio de compra no puede ser menor o igual a 0.`;
-                    parent.appendChild(msg);
-                }
+        //         // Validación para el precio de compra
+        //         if (!isNaN(pc) && pc <= 0) {
+        //             valid = false;
+        //             const msg = document.createElement("p");
+        //             msg.className = "text-red-500 text-sm mt-1 error-msg";
+        //             msg.innerText = `El precio de compra no puede ser menor o igual a 0.`;
+        //             parent.appendChild(msg);
+        //         }
 
-                // Solo se valida el precio de venta si el precio de compra es válido
-                if (valid && !isNaN(pv) && pv <= 0) {
-                    valid = false;
-                    const msg = document.createElement("p");
-                    msg.className = "text-red-500 text-sm mt-1 error-msg";
-                    msg.innerText = `El precio de venta no puede ser menor o igual a 0.`;
-                    parent.appendChild(msg);
-                }
+        //         // Solo se valida el precio de venta si el precio de compra es válido
+        //         if (valid && !isNaN(pv) && pv <= 0) {
+        //             valid = false;
+        //             const msg = document.createElement("p");
+        //             msg.className = "text-red-500 text-sm mt-1 error-msg";
+        //             msg.innerText = `El precio de venta no puede ser menor o igual a 0.`;
+        //             parent.appendChild(msg);
+        //         }
 
-                // Validación para el precio de compra siendo mayor al precio de venta
-                if (valid && !isNaN(pc) && !isNaN(pv) && pc > pv) {
-                    valid = false;
-                    const msg = document.createElement("p");
-                    msg.className = "text-red-500 text-sm mt-1 error-msg";
-                    msg.innerText = `El precio de compra no puede ser mayor que el precio de venta.`;
-                    parent.appendChild(msg);
-                }
-            }
+        //         // Validación para el precio de compra siendo mayor al precio de venta
+        //         if (valid && !isNaN(pc) && !isNaN(pv) && pc > pv) {
+        //             valid = false;
+        //             const msg = document.createElement("p");
+        //             msg.className = "text-red-500 text-sm mt-1 error-msg";
+        //             msg.innerText = `El precio de compra no puede ser mayor que el precio de venta.`;
+        //             parent.appendChild(msg);
+        //         }
+        //     }
 
             if (campo.id === "stock_total" && value !== "" && parseInt(value) < 0) {
                 valid = false;

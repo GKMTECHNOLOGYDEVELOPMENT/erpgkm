@@ -168,10 +168,39 @@
                     </div>
                 </div>
 
-                <!-- Stock Total -->
+               <!-- Stock Total -->
                 <div class="relative">
                     <label for="stock_total" class="block text-sm font-medium text-gray-700">
                         Stock Total
+                        <span class="inline-block ml-1 relative group">
+                            <i
+                                class="fas fa-info-circle text-blue-500 hover:text-blue-600 cursor-help transition-colors duration-200"></i>
+                            <!-- Tooltip -->
+                            <div
+                                class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-72 z-50">
+                                <div class="bg-primary text-white text-sm rounded-xl py-3 px-4 shadow-xl">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-lightbulb text-yellow-300 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <p class="font-semibold mb-1.5">💡 Información Importante</p>
+                                            <p class="text-blue-50 leading-relaxed">
+                                                El <span class="font-bold text-white">stock total</span> siempre debe
+                                                permanecer en
+                                                <span
+                                                    class="inline-flex items-center justify-center w-6 h-6 bg-white text-blue-600 rounded-full font-bold text-xs mx-1">0</span>
+                                                como medida de control y referencia del sistema.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Flecha del tooltip -->
+                                    <div class="absolute left-1/2 -translate-x-1/2 top-full">
+                                        <div
+                                            class="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
                     </label>
                     <div class="relative mt-1">
                         <i class="fas fa-boxes absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>

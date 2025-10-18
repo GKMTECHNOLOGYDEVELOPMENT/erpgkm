@@ -492,7 +492,7 @@
                                     Capacidad Máxima por Ubicación *
                                 </label>
                                 <input type="number" x-model="modalCrearRack.form.capacidad_maxima" required
-                                    min="1" max="1000"
+                                    min="1" max="10000"
                                     class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                     placeholder="Ej: 100, 200, 500...">
                                 <p class="text-xs text-slate-500 mt-1">
@@ -722,7 +722,7 @@
                                     Capacidad Máxima por Ubicación *
                                 </label>
                                 <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required
-                                    min="1" max="1000"
+                                    min="1" max="10000"
                                     class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                     placeholder="Ej: 100, 200, 500...">
                                 <p class="text-xs text-slate-500 mt-1">
@@ -786,7 +786,7 @@
                         sede: '',
                         filas: 1,
                         columnas: 1,
-                        capacidad_maxima: 100, // Nuevo campo
+                        capacidad_maxima: 10000, // Nuevo campo
                         estado: 'activo'
                     }
                 },
@@ -807,7 +807,7 @@
                     form: {
                         filas: 1,
                         columnas: 1,
-                        capacidad_maxima: 100
+                        capacidad_maxima: 10000
                     }
                 },
 
@@ -822,7 +822,7 @@
                         codigo: '',
                         nivel: 1,
                         posicion: 1,
-                        capacidad_maxima: 100,
+                        capacidad_maxima: 10000,
                         estado_ocupacion: 'vacio'
                     }
                 },
@@ -924,7 +924,7 @@
                             this.modalEditarDimensiones.form.filas = result.data.filas;
                             this.modalEditarDimensiones.form.columnas = result.data.columnas;
                             this.modalEditarDimensiones.form.capacidad_maxima =
-                                100; // Valor por defecto
+                                10000; // Valor por defecto
                             this.modalEditarDimensiones.open = true;
                             this.calcularCambios();
                         } else {
@@ -1135,7 +1135,7 @@
                                 codigo: '',
                                 nivel: 1,
                                 posicion: 1,
-                                capacidad_maxima: 100,
+                                capacidad_maxima: 10000,
                                 estado_ocupacion: 'vacio'
                             };
                             this.modalCrearUbicacion.rackInfo = null;

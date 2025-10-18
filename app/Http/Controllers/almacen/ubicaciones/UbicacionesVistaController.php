@@ -2072,7 +2072,7 @@ class UbicacionesVistaController extends Controller
                 'sede' => 'required|string|max:50|exists:sucursal,nombre',
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
-                'capacidad_maxima' => 'required|integer|min:1|max:1000',
+                'capacidad_maxima' => 'required|integer|min:1|max:10000',
                 'estado' => 'required|in:activo,inactivo'
             ]);
 
@@ -2122,131 +2122,141 @@ class UbicacionesVistaController extends Controller
     }
 
 
-    public function actualizarDimensionesRack(Request $request, $rackId)
-    {
-        DB::beginTransaction();
+   public function actualizarDimensionesRack(Request $request, $rackId)
+{
+    DB::beginTransaction();
 
-        try {
-            $validator = Validator::make($request->all(), [
-                'filas' => 'required|integer|min:1|max:12',
-                'columnas' => 'required|integer|min:1|max:24',
-                'capacidad_maxima' => 'required|integer|min:1|max:1000'
-            ]);
+    try {
+        $validator = Validator::make($request->all(), [
+            'filas' => 'required|integer|min:1|max:12',
+            'columnas' => 'required|integer|min:1|max:24',
+            'capacidad_maxima' => 'required|integer|min:1|max:10000'
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Datos inválidos',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Obtener el rack actual
-            $rack = DB::table('racks')->where('idRack', $rackId)->first();
-
-            if (!$rack) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Rack no encontrado'
-                ], 404);
-            }
-
-            // Obtener las ubicaciones existentes
-            $ubicacionesExistentes = DB::table('rack_ubicaciones')
-                ->where('rack_id', $rackId)
-                ->get();
-
-            // Actualizar las dimensiones del rack
-            DB::table('racks')
-                ->where('idRack', $rackId)
-                ->update([
-                    'filas' => $request->filas,
-                    'columnas' => $request->columnas,
-                    'updated_at' => now()
-                ]);
-
-            $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
-            $nuevasUbicacionesGeneradas = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Dimensiones actualizadas exitosamente. ' . $nuevasUbicacionesGeneradas . ' nuevas ubicaciones generadas.',
-                'data' => [
-                    'rack_id' => $rackId,
-                    'nuevas_ubicaciones' => $nuevasUbicacionesGeneradas,
-                    'total_filas' => $request->filas,
-                    'total_columnas' => $request->columnas
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al actualizar dimensiones del rack: ' . $e->getMessage());
+        if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error interno del servidor: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Datos inválidos',
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        // Obtener el rack actual
+        $rack = DB::table('racks')->where('idRack', $rackId)->first();
+
+        if (!$rack) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rack no encontrado'
+            ], 404);
+        }
+
+        // Obtener las ubicaciones existentes
+        $ubicacionesExistentes = DB::table('rack_ubicaciones')
+            ->where('rack_id', $rackId)
+            ->get();
+
+        // Actualizar dimensiones del rack
+        DB::table('racks')
+            ->where('idRack', $rackId)
+            ->update([
+                'filas' => $request->filas,
+                'columnas' => $request->columnas,
+                'updated_at' => now()
+            ]);
+
+        // Actualizar capacidad máxima de todas las ubicaciones existentes (en lote)
+        DB::table('rack_ubicaciones')
+            ->where('rack_id', $rackId)
+            ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
+            ->update([
+                'capacidad_maxima' => $request->capacidad_maxima,
+                'updated_at' => now()
+            ]);
+
+        // Obtener el rack actualizado para sincronizar ubicaciones
+        $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
+        $nuevasUbicacionesGeneradas = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dimensiones actualizadas exitosamente. ' . $nuevasUbicacionesGeneradas . ' nuevas ubicaciones generadas.',
+            'data' => [
+                'rack_id' => $rackId,
+                'nuevas_ubicaciones' => $nuevasUbicacionesGeneradas,
+                'total_filas' => $request->filas,
+                'total_columnas' => $request->columnas
+            ]
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al actualizar dimensiones del rack: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error interno del servidor: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 100)
-    {
-        $nuevasUbicaciones = [];
-        $now = now();
-        $ubicacionesCreadas = 0;
+{
+    $nuevasUbicaciones = [];
+    $now = now();
+    $ubicacionesCreadas = 0;
 
-        // Crear un mapa de ubicaciones existentes para verificación rápida
-        $mapaExistente = [];
-        foreach ($ubicacionesExistentes as $ubicacion) {
-            $clave = "{$ubicacion->nivel}-{$ubicacion->posicion}";
-            $mapaExistente[$clave] = $ubicacion;
-        }
+    // Crear un mapa de ubicaciones existentes
+    $mapaExistente = [];
+    foreach ($ubicacionesExistentes as $ubicacion) {
+        $clave = "{$ubicacion->nivel}-{$ubicacion->posicion}";
+        $mapaExistente[$clave] = $ubicacion;
+    }
 
-        // Generar todas las ubicaciones según las nuevas dimensiones
-        for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
-            for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
-                $clave = "{$nivel}-{$posicion}";
+    // Generar nuevas ubicaciones si no existen
+    for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
+        for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
+            $clave = "{$nivel}-{$posicion}";
 
-                // Si la ubicación no existe, crearla
-                if (!isset($mapaExistente[$clave])) {
-                    $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
-                    $codigoUnico = $rack->nombre . '-' . $codigo;
+            if (!isset($mapaExistente[$clave])) {
+                $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
+                $codigoUnico = $rack->nombre . '-' . $codigo;
 
-                    $nuevasUbicaciones[] = [
-                        'rack_id' => $rack->idRack,
-                        'codigo' => $codigo,
-                        'codigo_unico' => $codigoUnico,
-                        'nivel' => $nivel,
-                        'posicion' => $posicion,
-                        'estado_ocupacion' => 'vacio',
-                        'capacidad_maxima' => $capacidadMaxima,
-                        'articulo_id' => null,
-                        'cantidad_actual' => 0,
-                        'created_at' => $now,
-                        'updated_at' => $now
-                    ];
+                $nuevasUbicaciones[] = [
+                    'rack_id' => $rack->idRack,
+                    'codigo' => $codigo,
+                    'codigo_unico' => $codigoUnico,
+                    'nivel' => $nivel,
+                    'posicion' => $posicion,
+                    'estado_ocupacion' => 'vacio',
+                    'capacidad_maxima' => $capacidadMaxima,
+                    'articulo_id' => null,
+                    'cantidad_actual' => 0,
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ];
 
-                    $ubicacionesCreadas++;
-                }
+                $ubicacionesCreadas++;
             }
         }
-
-        // Insertar las nuevas ubicaciones en lote
-        if (!empty($nuevasUbicaciones)) {
-            DB::table('rack_ubicaciones')->insert($nuevasUbicaciones);
-
-            Log::debug('Nuevas ubicaciones generadas', [
-                'rack_id' => $rack->idRack,
-                'rack_nombre' => $rack->nombre,
-                'nuevas_ubicaciones' => count($nuevasUbicaciones),
-                'filas' => $rack->filas,
-                'columnas' => $rack->columnas
-            ]);
-        }
-
-        return $ubicacionesCreadas;
     }
+
+    if (!empty($nuevasUbicaciones)) {
+        DB::table('rack_ubicaciones')->insert($nuevasUbicaciones);
+
+        Log::debug('Nuevas ubicaciones generadas', [
+            'rack_id' => $rack->idRack,
+            'rack_nombre' => $rack->nombre,
+            'nuevas_ubicaciones' => count($nuevasUbicaciones),
+            'filas' => $rack->filas,
+            'columnas' => $rack->columnas
+        ]);
+    }
+
+    return $ubicacionesCreadas;
+}
+
 
     /**
      * Genera ubicaciones automáticamente para un rack

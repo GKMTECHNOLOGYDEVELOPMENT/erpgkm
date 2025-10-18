@@ -202,16 +202,21 @@
                     <div class="relative mt-1">
                         <i class="fas fa-cubes input-icon"></i> <!-- Ícono a la izquierda -->
                         <select id="idModelo" name="idModelo[]" class="select2-multiple clean-input w-full pl-10"
-                            multiple="multiple">
-                            @foreach ($modelos as $modelo)
-                                <option value="{{ $modelo->idModelo }}" data-marca="{{ $modelo->idMarca }}"
-                                    data-categoria="{{ $modelo->idCategoria }}" data-pulgadas="{{ $modelo->pulgadas }}">
-                                    {{ $modelo->nombre }} -
-                                    {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
-                                    {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
-                                </option>
-                            @endforeach
-                        </select>
+                multiple="multiple">
+            @foreach ($modelos as $modelo)
+                <option value="{{ $modelo->idModelo }}" 
+                        data-marca="{{ $modelo->idMarca }}"
+                        data-categoria="{{ $modelo->idCategoria }}" 
+                        data-pulgadas="{{ $modelo->pulgadas }}">
+                    {{ $modelo->nombre }} -
+                    {{ $modelo->marca->nombre ?? 'Sin Marca' }} -
+                    {{ $modelo->categoria->nombre ?? 'Sin Categoría' }}
+                    @if($modelo->pulgadas)
+                        ({{ $modelo->pulgadas }})
+                    @endif
+                </option>
+            @endforeach
+        </select>
                     </div>
                 </div>
 
@@ -276,14 +281,45 @@
                         <input type="hidden" id="moneda_venta" name="moneda_venta" value="0">
                     </div>
                 </div>
-
-                <!-- Stock Total -->
+<!-- Stock Total -->
                 <div class="relative">
-                    <label for="stock_total" class="block text-sm font-medium text-gray-700">Stock Total</label>
+                    <label for="stock_total" class="block text-sm font-medium text-gray-700">
+                        Stock Total
+                        <span class="inline-block ml-1 relative group">
+                            <i
+                                class="fas fa-info-circle text-blue-500 hover:text-blue-600 cursor-help transition-colors duration-200"></i>
+                            <!-- Tooltip -->
+                            <div
+                                class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 w-72 z-50">
+                                <div class="bg-primary text-white text-sm rounded-xl py-3 px-4 shadow-xl">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-lightbulb text-yellow-300 mt-0.5 flex-shrink-0"></i>
+                                        <div>
+                                            <p class="font-semibold mb-1.5">💡 Información Importante</p>
+                                            <p class="text-blue-50 leading-relaxed">
+                                                El <span class="font-bold text-white">stock total</span> siempre debe
+                                                permanecer en
+                                                <span
+                                                    class="inline-flex items-center justify-center w-6 h-6 bg-white text-blue-600 rounded-full font-bold text-xs mx-1">0</span>
+                                                como medida de control y referencia del sistema.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Flecha del tooltip -->
+                                    <div class="absolute left-1/2 -translate-x-1/2 top-full">
+                                        <div
+                                            class="w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-500">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
+                    </label>
                     <div class="relative mt-1">
-                        <i class="fas fa-boxes input-icon"></i>
-                        <input id="stock_total" name="stock_total" type="number" class="clean-input w-full"
-                            placeholder="Ingrese stock total">
+                        <i class="fas fa-boxes absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="stock_total" name="stock_total" type="number" value="0" readonly
+                            class="pl-10 pr-10 clean-input w-full bg-gray-100 text-gray-500 cursor-not-allowed">
+                        <i class="fas fa-lock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                     </div>
                 </div>
 
@@ -789,6 +825,46 @@
             document.getElementById('preview_pdf').classList.add('hidden');
         });
     </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script de pulgadas cargado');
+    
+    const selectModelos = document.getElementById('idModelo');
+    const pulgadasInput = document.getElementById('pulgadas');
+
+    if (!selectModelos || !pulgadasInput) return;
+
+    function actualizarPulgadas() {
+        const selectedOptions = Array.from(selectModelos.selectedOptions);
+        
+        if (selectedOptions.length > 0) {
+            // ✅ Usar Set para eliminar pulgadas duplicadas automáticamente
+            const pulgadasUnicas = new Set();
+            
+            selectedOptions.forEach(option => {
+                const pulgadas = option.getAttribute('data-pulgadas');
+                if (pulgadas && pulgadas.trim() !== '') {
+                    pulgadasUnicas.add(pulgadas);
+                }
+            });
+            
+            console.log('Pulgadas únicas:', Array.from(pulgadasUnicas));
+            
+            // ✅ Convertir Set a array y unir con comas
+            pulgadasInput.value = Array.from(pulgadasUnicas).join(', ');
+        } else {
+            pulgadasInput.value = '';
+        }
+    }
+
+    // Todos los eventos
+    selectModelos.addEventListener('change', actualizarPulgadas);
+    $(selectModelos).on('change', actualizarPulgadas);
+    $(selectModelos).on('select2:select', actualizarPulgadas);
+    $(selectModelos).on('select2:unselect', actualizarPulgadas);
+});
+</script>
     <script src="{{ asset('assets/js/almacen/repuesto/repuestoValidaciones.js') }}"></script>
     <script src="{{ asset('assets/js/almacen/productos/modal.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

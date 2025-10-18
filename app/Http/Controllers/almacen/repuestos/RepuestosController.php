@@ -27,9 +27,11 @@ class RepuestosController extends Controller
     {
         $unidades = Unidad::all();
         $tiposArticulo = Tipoarticulo::all();
+        // En tu controlador
         $modelos = Modelo::with(['marca', 'categoria'])
             ->where('estado', 1)
-            ->get();
+            ->where('repuesto', 1) // o como tengas tu lógica
+            ->get(['idModelo', 'nombre', 'idMarca', 'idCategoria', 'pulgadas']);
 
         $monedas = Moneda::all();
 
@@ -187,8 +189,8 @@ public function storesubcategoria(Request $request)
                 'stock_minimo' => 'required|nullable|integer',
                 'moneda_compra' => 'required|nullable|integer',
                 'moneda_venta' => 'required|nullable|integer',
-                'precio_compra' => 'required|nullable|numeric',
-                'precio_venta' => 'required|nullable|numeric',
+                'precio_compra' => 'nullable|numeric',
+                'precio_venta' => 'nullable|numeric',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
                 'ficha_tecnica' => 'nullable|file|mimes:pdf|max:5120', // <= validación del PDF
                 'pulgadas' => 'required|nullable|string|max:255',

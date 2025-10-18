@@ -1130,7 +1130,7 @@
                                 fill="none" />
                         </svg>
                         <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ubicaciones</span>
+                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Almacen</span>
                     </div>
                     <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ubicaciones' }">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -1142,12 +1142,12 @@
                 </button>
                 <ul x-cloak x-show="activeDropdown === 'ubicaciones'" x-collapse class="sub-menu text-gray-500">
                     <li>
-                        <a href="{{ route('ubicaciones.index') }}">Ubicaciones</a>
+                        <a href="{{ route('almacen.vista') }}">Vista</a>
                     </li>
 
-                    <li>
+                    <!-- <li>
                         <a href="{{ route('ubicacionesarticulo.index') }}">Ubicaciones Articulo</a>
-                    </li>
+                    </li> -->
                 </ul>
             </li>
 
