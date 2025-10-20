@@ -908,8 +908,8 @@
                                                 </div>
                                             </template>
 
-                                            <!-- Grid de artículos en 2 columnas -->
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
+                                            <!-- Grid de artículos en 1 columna -->
+                                            <div class="grid grid-cols-1 gap-3 p-3">
                                                 <template x-for="(articulo, index) in modalReubicacionRack.articulos"
                                                     :key="articulo.id">
                                                     <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:shadow-md transition-all duration-200"
