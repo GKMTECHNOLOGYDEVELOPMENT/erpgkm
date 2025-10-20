@@ -786,7 +786,7 @@
         </div>
 
 
-        <!-- Modal para Reubicación entre Racks - DISEÑO 2 COLUMNAS -->
+        <!-- Modal para Reubicación entre Racks - CON OPCIÓN SELECCIONAR TODOS -->
         <div x-show="modalReubicacionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="modalReubicacionRack.open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalReubicacionRack()">
@@ -869,11 +869,31 @@
 
                                 <!-- Selección de Artículos -->
                                 <div class="space-y-3">
-                                    <label
-                                        class="block text-sm font-semibold text-gray-700 dark:text-white mb-2 flex items-center gap-2">
-                                        <i class="fas fa-boxes text-orange-500"></i>
-                                        Seleccionar Artículos a Mover
-                                    </label>
+                                    <div class="flex items-center justify-between">
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-white flex items-center gap-2">
+                                            <i class="fas fa-boxes text-orange-500"></i>
+                                            Seleccionar Artículos a Mover
+                                        </label>
+
+                                        <!-- Botón Seleccionar Todos -->
+                                        <div class="flex items-center gap-2"
+                                            x-show="modalReubicacionRack.articulos.length > 0">
+                                            <button type="button" @click="seleccionarTodosArticulos()"
+                                                class="btn btn-outline-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"
+                                                :class="todosSeleccionados ? 'bg-blue-500 text-white' : ''">
+                                                <i class="fas"
+                                                    :class="todosSeleccionados ? 'fa-check-square' : 'fa-square'"></i>
+                                                <span
+                                                    x-text="todosSeleccionados ? 'Todos seleccionados' : 'Seleccionar todos'"></span>
+                                            </button>
+
+                                            <!-- Contador rápido -->
+                                            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium"
+                                                x-text="articulosSeleccionados.length + '/' + modalReubicacionRack.articulos.length">
+                                            </span>
+                                        </div>
+                                    </div>
 
                                     <!-- Lista de Artículos en 2 columnas -->
                                     <div
@@ -892,8 +912,9 @@
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
                                                 <template x-for="(articulo, index) in modalReubicacionRack.articulos"
                                                     :key="articulo.id">
-                                                    <div
-                                                        class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:shadow-md transition-all duration-200">
+                                                    <div class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:shadow-md transition-all duration-200"
+                                                        :class="articulo.seleccionado ?
+                                                            'ring-2 ring-blue-500 dark:ring-blue-400' : ''">
                                                         <!-- Header del artículo -->
                                                         <div class="flex items-center justify-between mb-2">
                                                             <div class="flex items-center gap-2 flex-1">
@@ -1006,15 +1027,6 @@
 
                             <!-- COLUMNA DERECHA - DESTINO Y CONFIRMACIÓN -->
                             <div class="space-y-6">
-
-                                <!-- Flecha de Dirección -->
-                                <div class="flex justify-center">
-                                    <div
-                                        class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-800">
-                                        <i class="fas fa-arrow-right text-white text-lg"></i>
-                                    </div>
-                                </div>
-
                                 <!-- Selección de Rack Destino -->
                                 <div class="space-y-4">
                                     <div>
@@ -2743,7 +2755,45 @@
                         }
                     }
                 },
+                // Computed property para verificar si todos están seleccionados
+                get todosSeleccionados() {
+                    if (!this.modalReubicacionRack.articulos || this.modalReubicacionRack.articulos.length === 0) {
+                        return false;
+                    }
+                    return this.modalReubicacionRack.articulos.every(articulo => articulo.seleccionado);
+                },
 
+                // Método para seleccionar/deseleccionar todos
+                seleccionarTodosArticulos() {
+                    const todosSeleccionados = this.todosSeleccionados;
+
+                    this.modalReubicacionRack.articulos.forEach(articulo => {
+                        articulo.seleccionado = !todosSeleccionados;
+                        // Si se están seleccionando, establecer la cantidad a mover como la cantidad total
+                        if (!todosSeleccionados) {
+                            articulo.cantidad_a_mover = articulo.cantidad;
+                        }
+                    });
+
+                    console.log(`✅ ${!todosSeleccionados ? 'Todos los artículos seleccionados' : 'Selección limpiada'}`);
+                },
+
+                // Método para seleccionar todos (alternativa)
+                seleccionarTodos() {
+                    this.modalReubicacionRack.articulos.forEach(articulo => {
+                        articulo.seleccionado = true;
+                        articulo.cantidad_a_mover = articulo.cantidad;
+                    });
+                    console.log('✅ Todos los artículos seleccionados');
+                },
+
+                // Método para deseleccionar todos
+                deseleccionarTodos() {
+                    this.modalReubicacionRack.articulos.forEach(articulo => {
+                        articulo.seleccionado = false;
+                    });
+                    console.log('✅ Selección limpiada');
+                },
                 // ========== MÉTODOS DE GESTIÓN DE PRODUCTOS ==========
                 prepararEdicionProductos() {
                     if (this.modal.ubi && this.modal.ubi.productos) {
