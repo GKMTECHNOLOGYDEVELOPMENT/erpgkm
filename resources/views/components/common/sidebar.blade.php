@@ -1144,20 +1144,8 @@
                     <li>
                         <a href="{{ route('almacen.vista') }}">Vista</a>
                     </li>
-
-                    <!-- <li>
-                        <a href="{{ route('ubicacionesarticulo.index') }}">Ubicaciones Articulo</a>
-                    </li> -->
                 </ul>
             </li>
-
-
-
-
-
-
-
-
             <li class="menu nav-item">
                 <button type="button" class="nav-link group"
                     :class="{ 'active': activeDropdown === 'solicitud' }"
@@ -1170,9 +1158,6 @@
                             <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round" />
                         </svg>
-
-
-
                         <span
                             class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Solicitudes</span>
                     </div>

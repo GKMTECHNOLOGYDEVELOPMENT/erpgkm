@@ -730,28 +730,34 @@
                                 </p>
                             </div>
 
-                            <!-- Resumen de cambios -->
-                            <div x-show="modalEditarDimensiones.cambiosDetectados"
-                                class="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
-                                <div class="text-sm text-amber-800 dark:text-amber-300">
-                                    <div class="font-medium mb-1">Resumen de cambios:</div>
-                                    <div x-text="modalEditarDimensiones.resumenCambios"></div>
-                                </div>
-                            </div>
-
+                            <!-- ✅ ACTUALIZADO: En tu modal de editar dimensiones -->
+<div x-show="modalEditarDimensiones.cambiosDetectados" 
+     :class="modalEditarDimensiones.puedeActualizar ? 'bg-amber-50' : 'bg-red-50'" 
+     class="p-3 rounded-lg">
+    <div :class="modalEditarDimensiones.puedeActualizar ? 'text-amber-800' : 'text-red-800'" class="text-sm">
+        <div class="font-medium mb-1">Resumen de cambios:</div>
+        <div x-text="modalEditarDimensiones.resumenCambios"></div>
+        <div x-show="!modalEditarDimensiones.puedeActualizar" class="mt-2 text-xs">
+            ⚠️ Para disminuir dimensiones, primero vacíe las ubicaciones que serían eliminadas.
+        </div>
+    </div>
+</div>
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-8 gap-4">
                                 <button type="button" @click="cerrarModalEditarDimensiones()"
                                     class="btn btn-outline-danger">
                                     Cancelar
                                 </button>
-                                <button type="submit" :disabled="modalEditarDimensiones.loading"
-                                    :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        'bg-indigo-600 hover:bg-indigo-700'"
-                                    class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                                <!-- Botón actualizado -->
+                                <button type="submit" 
+                                        :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
+                                        :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
+                                                (!modalEditarDimensiones.puedeActualizar ? 'bg-gray-400 cursor-not-allowed' : 
+                                                'bg-indigo-600 hover:bg-indigo-700')"
+                                        class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                     <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
-                                    <span
-                                        x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 'Actualizar Dimensiones'"></span>
+                                    <span x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 
+                                                (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
                                 </button>
                             </div>
                         </form>
@@ -983,12 +989,9 @@
                     }
                 },
 
-                // Calcular cambios cuando se modifiquen las dimensiones
-                // Calcular cambios cuando se modifiquen las dimensiones
                 calcularCambios() {
                     const rack = this.modalEditarDimensiones.rack;
 
-                    // Verificar que el rack existe
                     if (!rack) {
                         this.modalEditarDimensiones.cambiosDetectados = false;
                         this.modalEditarDimensiones.resumenCambios = 'No hay rack seleccionado';
@@ -1002,17 +1005,33 @@
                     const ubicacionesNuevas = nuevasFilas * nuevasColumnas;
                     const diferencia = ubicacionesNuevas - ubicacionesActuales;
 
+                    // ✅ NUEVO: Calcular ubicaciones que se eliminarían
+                    const ubicacionesAEliminar = Math.max(0, -diferencia);
+
                     this.modalEditarDimensiones.cambiosDetectados = diferencia !== 0;
+
+                    const intentaDisminuirFilas = nuevasFilas < rack.filas;
+                    const intentaDisminuirColumnas = nuevasColumnas < rack.columnas;
+                    const puedeDisminuir = !intentaDisminuirFilas && !intentaDisminuirColumnas;
 
                     if (diferencia > 0) {
                         this.modalEditarDimensiones.resumenCambios =
-                            `Se generarán ${diferencia} nuevas ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                            `✅ Se generarán ${diferencia} nuevas ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                        this.modalEditarDimensiones.puedeActualizar = true;
                     } else if (diferencia < 0) {
-                        this.modalEditarDimensiones.resumenCambios =
-                            `Se reducirán ${Math.abs(diferencia)} ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                        if (!puedeDisminuir) {
+                            this.modalEditarDimensiones.resumenCambios =
+                            `❌ Se eliminarían ${ubicacionesAEliminar} ubicaciones, pero hay productos en algunas de ellas.`;
+                            this.modalEditarDimensiones.puedeActualizar = false;
+                        } else {
+                            this.modalEditarDimensiones.resumenCambios =
+                            `⚠️ Se eliminarán ${ubicacionesAEliminar} ubicaciones. Total: ${ubicacionesNuevas} ubicaciones.`;
+                            this.modalEditarDimensiones.puedeActualizar = true;
+                        }
                     } else {
                         this.modalEditarDimensiones.resumenCambios =
                             'No hay cambios en el número de ubicaciones.';
+                        this.modalEditarDimensiones.puedeActualizar = true;
                     }
                 },
                 // Método para actualizar dimensiones

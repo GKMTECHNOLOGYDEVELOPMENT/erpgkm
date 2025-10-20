@@ -100,38 +100,127 @@ class UbicacionesVistaController extends Controller
             ->get()
             ->groupBy('rack_ubicacion_id');
 
-        // Calcular actividad (mantener igual)
-        $movimientos = DB::table('rack_movimientos')
-            ->select('rack_origen_id', 'rack_destino_id', 'cantidad', 'created_at')
-            ->where('created_at', '>=', $fechaInicio)
-            ->get();
+// CALCULAR ACTIVIDAD - AGREGAR LOG DETALLADO
+Log::debug('=== INICIO CÁLCULO ACTIVIDAD ===', [
+    'periodo' => $periodo,
+    'fecha_inicio' => $fechaInicio,
+    'sede_filtrada' => $sede,
+    'buscar' => $buscar
+]);
 
-        $actividadPorRack = [];
-        foreach ($movimientos as $mov) {
-            $racksInvolucrados = [];
-            if ($mov->rack_origen_id) $racksInvolucrados[] = $mov->rack_origen_id;
-            if ($mov->rack_destino_id) $racksInvolucrados[] = $mov->rack_destino_id;
+// Calcular actividad (mantener igual)
+$movimientos = DB::table('rack_movimientos')
+    ->select('rack_origen_id', 'rack_destino_id', 'cantidad', 'created_at')
+    ->where('created_at', '>=', $fechaInicio)
+    ->get();
 
-            foreach ($racksInvolucrados as $rackId) {
-                $actividadPorRack[$rackId] = ($actividadPorRack[$rackId] ?? 0) + 1;
-            }
-        }
+Log::debug('📊 MOVIMIENTOS ENCONTRADOS:', [
+    'total_movimientos' => $movimientos->count(),
+    'movimientos_sample' => $movimientos->take(3)->map(function($mov) {
+        return [
+            'rack_origen' => $mov->rack_origen_id,
+            'rack_destino' => $mov->rack_destino_id,
+            'cantidad' => $mov->cantidad,
+            'fecha' => $mov->created_at
+        ];
+    })
+]);
 
-        $maxActividad = !empty($actividadPorRack) ? max($actividadPorRack) : 1;
-        $actividadNormalizada = [];
-        foreach ($actividadPorRack as $rackId => $actividad) {
-            $porcentaje = min(round(($actividad / $maxActividad) * 100), 100);
-            $actividadNormalizada[$rackId] = $porcentaje;
-        }
+$actividadPorRack = [];
+foreach ($movimientos as $mov) {
+    $racksInvolucrados = [];
+    if ($mov->rack_origen_id) $racksInvolucrados[] = $mov->rack_origen_id;
+    if ($mov->rack_destino_id) $racksInvolucrados[] = $mov->rack_destino_id;
 
-        // Preparar datos para el heatmap
-        $data = [];
-        $rackGroups = [];
+    foreach ($racksInvolucrados as $rackId) {
+        $actividadPorRack[$rackId] = ($actividadPorRack[$rackId] ?? 0) + 1;
+    }
+}
 
-        // Agrupar por rack
-        foreach ($ubicaciones as $ub) {
-            $rackGroups[$ub->rack_nombre][] = $ub;
-        }
+Log::debug('🎯 ACTIVIDAD POR RACK:', [
+    'total_racks_con_actividad' => count($actividadPorRack),
+    'actividad_detallada' => $actividadPorRack,
+    'racks_ids' => array_keys($actividadPorRack)
+]);
+
+// ✅ NUEVO: Calcular porcentaje de actividad de forma MÁS JUSTA
+$totalMovimientosPeriodo = $movimientos->count();
+$racksConMovimientos = array_filter($actividadPorRack); // Solo racks con actividad
+
+Log::debug('📈 DATOS PARA CÁLCULO:', [
+    'total_movimientos_periodo' => $totalMovimientosPeriodo,
+    'racks_con_movimientos_count' => count($racksConMovimientos),
+    'racks_con_movimientos_detalle' => $racksConMovimientos
+]);
+
+if ($totalMovimientosPeriodo > 0 && !empty($racksConMovimientos)) {
+    // Calcular el porcentaje de actividad de CADA rack basado en el total de movimientos
+    $porcentajesRacks = [];
+    foreach ($racksConMovimientos as $rackId => $movimientosRack) {
+        // Porcentaje = (movimientos del rack / total movimientos) * 100
+        $porcentajeRack = ($movimientosRack / $totalMovimientosPeriodo) * 100;
+        $porcentajeFinal = min(round($porcentajeRack), 100);
+        $porcentajesRacks[$rackId] = $porcentajeFinal;
+        
+        Log::debug("🔢 CÁLCULO RACK {$rackId}:", [
+            'movimientos_rack' => $movimientosRack,
+            'total_movimientos' => $totalMovimientosPeriodo,
+            'porcentaje_calculado' => $porcentajeRack,
+            'porcentaje_final' => $porcentajeFinal
+        ]);
+    }
+    
+    // El promedio de actividad es el promedio de estos porcentajes
+    $avgActivity = round(array_sum($porcentajesRacks) / count($porcentajesRacks));
+    
+    Log::debug('📊 PROMEDIO FINAL:', [
+        'suma_porcentajes' => array_sum($porcentajesRacks),
+        'cantidad_racks' => count($porcentajesRacks),
+        'avg_activity_calculado' => array_sum($porcentajesRacks) / count($porcentajesRacks),
+        'avg_activity_final' => $avgActivity,
+        'porcentajes_individuales' => $porcentajesRacks
+    ]);
+} else {
+    $avgActivity = 0;
+    Log::debug('❌ SIN ACTIVIDAD:', [
+        'total_movimientos_periodo' => $totalMovimientosPeriodo,
+        'racks_con_movimientos' => count($racksConMovimientos),
+        'avg_activity' => 0
+    ]);
+}
+// Mantener la actividad normalizada para el heatmap individual (PARA COMPARAR)
+$maxActividad = !empty($actividadPorRack) ? max($actividadPorRack) : 1;
+$actividadNormalizada = [];
+foreach ($actividadPorRack as $rackId => $actividad) {
+    $porcentaje = min(round(($actividad / $maxActividad) * 100), 100);
+    $actividadNormalizada[$rackId] = $porcentaje;
+}
+
+Log::debug('🔥 COMPARACIÓN MÉTODOS:', [
+    'METODO_ANTIGUO_normalizado' => [
+        'max_actividad' => $maxActividad,
+        'actividad_normalizada' => $actividadNormalizada,
+        'promedio_antiguo' => !empty($actividadNormalizada) ? round(array_sum($actividadNormalizada) / count($actividadNormalizada)) : 0
+    ],
+    'METODO_NUEVO_porcentual' => [
+        'avg_activity' => $avgActivity
+    ]
+]);
+
+// Preparar datos para el heatmap
+$data = [];
+$rackGroups = [];
+
+// Agrupar por rack
+foreach ($ubicaciones as $ub) {
+    $rackGroups[$ub->rack_nombre][] = $ub;
+}
+
+Log::debug('🏗️ ESTRUCTURA RACKS:', [
+    'total_rack_groups' => count($rackGroups),
+    'racks_nombres' => array_keys($rackGroups),
+    'ubicaciones_por_rack' => array_map('count', $rackGroups)
+]);
 
         // Generar datos para el heatmap
         $y = 0;
@@ -229,14 +318,15 @@ class UbicacionesVistaController extends Controller
             $y++;
         }
 
-        // Stats finales
-        $stats = [
-            'totalRacks' => count($rackGroups),
-            'activeRacks' => count(array_filter($actividadNormalizada, fn($v) => $v > 0)),
-            'avgActivity' => !empty($actividadNormalizada) ? round(array_sum($actividadNormalizada) / count($actividadNormalizada)) : 0,
-            'totalUbicaciones' => count($ubicaciones),
-            'ocupadas' => $ubicaciones->where('estado_ocupacion', '!=', 'vacio')->count(),
-        ];
+
+       // Stats finales 
+$stats = [
+    'totalRacks' => count($rackGroups),
+    'activeRacks' => count(array_filter($actividadPorRack)), // ✅ Usar actividadPorRack, no normalizada
+    'avgActivity' => $avgActivity, // ✅ Usar el nuevo cálculo (39%)
+    'totalUbicaciones' => count($ubicaciones),
+    'ocupadas' => $ubicaciones->where('estado_ocupacion', '!=', 'vacio')->count(),
+];
 
         Log::debug('=== FINAL getDatosRacks ===', [
             'total_data_points' => count($data),
@@ -2249,7 +2339,7 @@ class UbicacionesVistaController extends Controller
     }
 
 
-   public function actualizarDimensionesRack(Request $request, $rackId)
+public function actualizarDimensionesRack(Request $request, $rackId)
 {
     DB::beginTransaction();
 
@@ -2278,6 +2368,24 @@ class UbicacionesVistaController extends Controller
             ], 404);
         }
 
+        // ✅ VALIDACIÓN: Verificar si se intenta disminuir dimensiones y si hay productos
+        $intentaDisminuirFilas = $request->filas < $rack->filas;
+        $intentaDisminuirColumnas = $request->columnas < $rack->columnas;
+
+        if ($intentaDisminuirFilas || $intentaDisminuirColumnas) {
+            $ubicacionesConProductos = $this->verificarUbicacionesConProductos($rackId, $request->filas, $request->columnas);
+            
+            if ($ubicacionesConProductos) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pueden disminuir las dimensiones porque hay ubicaciones con productos que serían eliminadas',
+                    'data' => [
+                        'ubicaciones_afectadas' => $ubicacionesConProductos
+                    ]
+                ], 422);
+            }
+        }
+
         // Obtener las ubicaciones existentes
         $ubicacionesExistentes = DB::table('rack_ubicaciones')
             ->where('rack_id', $rackId)
@@ -2303,18 +2411,35 @@ class UbicacionesVistaController extends Controller
 
         // Obtener el rack actualizado para sincronizar ubicaciones
         $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
-        $nuevasUbicacionesGeneradas = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+        $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
 
         DB::commit();
 
+        // Mensaje según lo que se hizo
+        $mensaje = 'Dimensiones actualizadas exitosamente. ';
+        
+        if ($resultadoSincronizacion['creadas'] > 0) {
+            $mensaje .= $resultadoSincronizacion['creadas'] . ' nuevas ubicaciones generadas. ';
+        }
+        
+        if ($resultadoSincronizacion['eliminadas'] > 0) {
+            $mensaje .= $resultadoSincronizacion['eliminadas'] . ' ubicaciones eliminadas. ';
+        }
+        
+        if ($resultadoSincronizacion['creadas'] == 0 && $resultadoSincronizacion['eliminadas'] == 0) {
+            $mensaje .= 'No hubo cambios en las ubicaciones.';
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'Dimensiones actualizadas exitosamente. ' . $nuevasUbicacionesGeneradas . ' nuevas ubicaciones generadas.',
+            'message' => trim($mensaje),
             'data' => [
                 'rack_id' => $rackId,
-                'nuevas_ubicaciones' => $nuevasUbicacionesGeneradas,
+                'nuevas_ubicaciones' => $resultadoSincronizacion['creadas'],
+                'ubicaciones_eliminadas' => $resultadoSincronizacion['eliminadas'],
                 'total_filas' => $request->filas,
-                'total_columnas' => $request->columnas
+                'total_columnas' => $request->columnas,
+                'se_disminuyo_dimensiones' => ($intentaDisminuirFilas || $intentaDisminuirColumnas)
             ]
         ]);
     } catch (\Exception $e) {
@@ -2327,12 +2452,61 @@ class UbicacionesVistaController extends Controller
     }
 }
 
+/**
+ * Verifica si hay productos en ubicaciones que serían eliminadas al disminuir dimensiones
+ */
+private function verificarUbicacionesConProductos($rackId, $nuevasFilas, $nuevasColumnas)
+{
+    // Obtener todas las ubicaciones actuales del rack
+    $ubicacionesActuales = DB::table('rack_ubicaciones')
+        ->where('rack_id', $rackId)
+        ->get();
 
-    private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 100)
+    // Identificar ubicaciones que estarían fuera de los nuevos límites
+    $ubicacionesFueraDeLimites = $ubicacionesActuales->filter(function ($ubicacion) use ($nuevasFilas, $nuevasColumnas) {
+        return $ubicacion->nivel > $nuevasFilas || $ubicacion->posicion > $nuevasColumnas;
+    });
+
+    if ($ubicacionesFueraDeLimites->isEmpty()) {
+        return false;
+    }
+
+    // Verificar si alguna de estas ubicaciones tiene productos
+    $ubicacionesIds = $ubicacionesFueraDeLimites->pluck('idRackUbicacion')->toArray();
+
+    $tieneProductos = DB::table('rack_ubicacion_articulos')
+        ->whereIn('rack_ubicacion_id', $ubicacionesIds)
+        ->exists();
+
+    if ($tieneProductos) {
+        // Obtener detalles de las ubicaciones afectadas
+        return DB::table('rack_ubicaciones as ru')
+            ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+            ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+            ->whereIn('ru.idRackUbicacion', $ubicacionesIds)
+            ->whereNotNull('rua.articulo_id')
+            ->select(
+                'ru.idRackUbicacion',
+                'ru.codigo_unico',
+                'ru.nivel',
+                'ru.posicion',
+                'a.nombre as producto',
+                'rua.cantidad'
+            )
+            ->get()
+            ->toArray();
+    }
+
+    return false;
+}
+
+
+private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 10000)
 {
     $nuevasUbicaciones = [];
     $now = now();
     $ubicacionesCreadas = 0;
+    $ubicacionesEliminadas = 0;
 
     // Crear un mapa de ubicaciones existentes
     $mapaExistente = [];
@@ -2341,7 +2515,44 @@ class UbicacionesVistaController extends Controller
         $mapaExistente[$clave] = $ubicacion;
     }
 
-    // Generar nuevas ubicaciones si no existen
+    // ✅ NUEVO: Identificar ubicaciones que deben ELIMINARSE (fuera de los nuevos límites)
+    $ubicacionesAEliminar = [];
+    foreach ($ubicacionesExistentes as $ubicacion) {
+        if ($ubicacion->nivel > $rack->filas || $ubicacion->posicion > $rack->columnas) {
+            $ubicacionesAEliminar[] = $ubicacion->idRackUbicacion;
+        }
+    }
+
+    // ✅ NUEVO: Eliminar ubicaciones sobrantes (solo si no tienen productos)
+    if (!empty($ubicacionesAEliminar)) {
+        // Verificar que ninguna de estas ubicaciones tenga productos
+        $ubicacionesConProductos = DB::table('rack_ubicacion_articulos')
+            ->whereIn('rack_ubicacion_id', $ubicacionesAEliminar)
+            ->exists();
+
+        if (!$ubicacionesConProductos) {
+            // Eliminar las ubicaciones sobrantes
+            $ubicacionesEliminadas = DB::table('rack_ubicaciones')
+                ->whereIn('idRackUbicacion', $ubicacionesAEliminar)
+                ->delete();
+
+            Log::debug('Ubicaciones eliminadas por reducción de dimensiones', [
+                'rack_id' => $rack->idRack,
+                'ubicaciones_eliminadas' => $ubicacionesAEliminar,
+                'total_eliminadas' => $ubicacionesEliminadas
+            ]);
+        } else {
+            Log::warning('No se pueden eliminar ubicaciones porque tienen productos', [
+                'rack_id' => $rack->idRack,
+                'ubicaciones_con_productos' => $ubicacionesAEliminar
+            ]);
+            
+            // Lanzar excepción para revertir la transacción
+            throw new \Exception('No se pueden eliminar ubicaciones porque algunas contienen productos');
+        }
+    }
+
+    // Generar nuevas ubicaciones si no existen (dentro de los nuevos límites)
     for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
         for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
             $clave = "{$nivel}-{$posicion}";
@@ -2358,8 +2569,6 @@ class UbicacionesVistaController extends Controller
                     'posicion' => $posicion,
                     'estado_ocupacion' => 'vacio',
                     'capacidad_maxima' => $capacidadMaxima,
-                    'articulo_id' => null,
-                    'cantidad_actual' => 0,
                     'created_at' => $now,
                     'updated_at' => $now
                 ];
@@ -2381,54 +2590,56 @@ class UbicacionesVistaController extends Controller
         ]);
     }
 
-    return $ubicacionesCreadas;
+    return [
+        'creadas' => $ubicacionesCreadas,
+        'eliminadas' => $ubicacionesEliminadas
+    ];
 }
 
 
     /**
      * Genera ubicaciones automáticamente para un rack
      */
-    private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 100)
-    {
-        $ubicaciones = [];
-        $now = now();
+   private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 10000)
+{
+    $ubicaciones = [];
+    $now = now();
 
-        // Generar ubicaciones basadas en filas y columnas
-        for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
-            for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
-                // Generar código automático (ej: A1-01, A1-02, etc.)
-                $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
-                $codigoUnico = $rack->nombre . '-' . $codigo;
+    // Generar ubicaciones basadas en filas y columnas
+    for ($nivel = 1; $nivel <= $rack->filas; $nivel++) {
+        for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
+            $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
+            $codigoUnico = $rack->nombre . '-' . $codigo;
 
-                $ubicaciones[] = [
-                    'rack_id' => $rack->idRack,
-                    'codigo' => $codigo,
-                    'codigo_unico' => $codigoUnico,
-                    'nivel' => $nivel,
-                    'posicion' => $posicion,
-                    'estado_ocupacion' => 'vacio',
-                    'capacidad_maxima' => $capacidadMaxima,
-
-                    'created_at' => $now,
-                    'updated_at' => $now
-                ];
-            }
+            // ✅ CORREGIDO: Quitar articulo_id y cantidad_actual
+            $ubicaciones[] = [
+                'rack_id' => $rack->idRack,
+                'codigo' => $codigo,
+                'codigo_unico' => $codigoUnico,
+                'nivel' => $nivel,
+                'posicion' => $posicion,
+                'estado_ocupacion' => 'vacio',
+                'capacidad_maxima' => $capacidadMaxima,
+                'created_at' => $now,
+                'updated_at' => $now
+            ];
         }
-
-        // Insertar todas las ubicaciones en lote
-        if (!empty($ubicaciones)) {
-            DB::table('rack_ubicaciones')->insert($ubicaciones);
-        }
-
-        Log::debug('Ubicaciones generadas automáticamente', [
-            'rack_id' => $rack->idRack,
-            'rack_nombre' => $rack->nombre,
-            'total_ubicaciones' => count($ubicaciones),
-            'filas' => $rack->filas,
-            'columnas' => $rack->columnas,
-            'capacidad_maxima' => $capacidadMaxima
-        ]);
     }
+
+    // Insertar todas las ubicaciones en lote
+    if (!empty($ubicaciones)) {
+        DB::table('rack_ubicaciones')->insert($ubicaciones);
+    }
+
+    Log::debug('Ubicaciones generadas automáticamente', [
+        'rack_id' => $rack->idRack,
+        'rack_nombre' => $rack->nombre,
+        'total_ubicaciones' => count($ubicaciones),
+        'filas' => $rack->filas,
+        'columnas' => $rack->columnas,
+        'capacidad_maxima' => $capacidadMaxima
+    ]);
+}
 
     /**
      * Genera el código de ubicación basado en el formato existente
