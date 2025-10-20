@@ -1066,7 +1066,7 @@
                                                 :key="ubicacion.id">
                                                 <option :value="ubicacion.id"
                                                     class="text-gray-700 dark:text-gray-300 text-sm"
-                                                    x-text="ubicacion.codigo + ' • Capacidad: ' + ubicacion.capacidad_maxima + ' und'">
+                                                    x-text="ubicacion.codigo + ' • Capacidad: ' + ubicacion.capacidad + ' und'">
                                                 </option>
                                             </template>
                                         </select>
