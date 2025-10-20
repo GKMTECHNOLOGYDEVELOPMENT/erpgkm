@@ -1330,6 +1330,571 @@ $stats = [
             ], 500);
         }
     }
+
+    public function iniciarReubicacionMultiple(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            Log::info('🚀 ========== INICIO iniciarReubicacionMultiple ==========');
+            Log::debug('📥 DATOS RECIBIDOS para reubicación múltiple:', $request->all());
+
+            // Validar datos
+            $validator = Validator::make($request->all(), [
+                'ubicacion_origen_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+            ]);
+
+            if ($validator->fails()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $ubicacionOrigenId = (int) $request->ubicacion_origen_id;
+
+            // Obtener información de la ubicación origen
+            $ubicacionOrigen = DB::table('rack_ubicaciones as ru')
+                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->select('ru.*', 'r.nombre as rack_nombre')
+                ->where('ru.idRackUbicacion', $ubicacionOrigenId)
+                ->first();
+
+            if (!$ubicacionOrigen) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ubicación origen no encontrada'
+                ], 404);
+            }
+
+            // Obtener TODOS los productos de la ubicación (normales y custodias)
+            $productosEnUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+                ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+                ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
+                ->leftJoin('clientegeneral as cg_articulo', 'rua.cliente_general_id', '=', 'cg_articulo.idClienteGeneral')
+                ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
+                ->leftJoin('clientegeneral as cg_custodia', 't_cust.idClienteGeneral', '=', 'cg_custodia.idClienteGeneral')
+                ->where('rua.rack_ubicacion_id', $ubicacionOrigenId)
+                ->select(
+                    'rua.idRackUbicacionArticulo',
+                    'rua.articulo_id',
+                    'rua.custodia_id',
+                    'rua.cliente_general_id',
+                    'rua.cantidad',
+                    'a.nombre as nombre_articulo',
+                    'a.codigo_repuesto',
+                    'ta.nombre as tipo_articulo',
+                    'ta.idTipoArticulo',
+                    'cust.serie as serie_custodia',
+                    'cust.codigocustodias as codigo_custodia',
+                    'cg_articulo.descripcion as cliente_articulo',
+                    'cg_custodia.descripcion as cliente_custodia'
+                )
+                ->get();
+
+            if ($productosEnUbicacion->isEmpty()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay productos para reubicar en esta ubicación'
+                ], 404);
+            }
+
+            // Preparar datos para la respuesta
+            $productosAgrupados = [];
+            $cantidadTotal = 0;
+
+            foreach ($productosEnUbicacion as $producto) {
+                $nombreProducto = '';
+                $clienteNombre = 'Sin cliente';
+                $esCustodia = !is_null($producto->custodia_id);
+
+                if ($esCustodia) {
+                    // Es una custodia
+                    $nombreProducto = $producto->serie_custodia ?: $producto->codigo_custodia ?: 'Custodia ' . $producto->custodia_id;
+                    $clienteNombre = $producto->cliente_custodia ?: 'Sin cliente';
+                } else {
+                    // Es un producto normal
+                    $mostrandoCodigoRepuesto = ($producto->idTipoArticulo == 2 && !empty($producto->codigo_repuesto));
+                    $nombreProducto = $mostrandoCodigoRepuesto ? $producto->codigo_repuesto : $producto->nombre_articulo;
+                    $clienteNombre = $producto->cliente_articulo ?: 'Sin cliente';
+                }
+
+                $productosAgrupados[] = [
+                    'articulo_id' => $producto->articulo_id,
+                    'custodia_id' => $producto->custodia_id,
+                    'cliente_general_id' => $producto->cliente_general_id,
+                    'nombre' => $nombreProducto,
+                    'cliente_nombre' => $clienteNombre,
+                    'cantidad' => $producto->cantidad,
+                    'es_custodia' => $esCustodia,
+                    'tipo_articulo' => $esCustodia ? 'CUSTODIA' : $producto->tipo_articulo
+                ];
+
+                $cantidadTotal += $producto->cantidad;
+            }
+
+            $responseData = [
+                'ubicacion_origen' => [
+                    'id' => $ubicacionOrigen->idRackUbicacion,
+                    'codigo' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                    'rack_nombre' => $ubicacionOrigen->rack_nombre,
+                    'productos' => $productosAgrupados,
+                    'cantidad_total' => $cantidadTotal,
+                    'total_productos' => count($productosAgrupados)
+                ]
+            ];
+
+            Log::info('🎉 REUBICACIÓN MÚLTIPLE INICIADA EXITOSAMENTE:', [
+                'ubicacion_origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                'total_productos' => count($productosAgrupados),
+                'cantidad_total' => $cantidadTotal
+            ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'Modo reubicación múltiple activado',
+                'data' => $responseData
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('💥 ERROR en iniciarReubicacionMultiple:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function confirmarReubicacionMultiple(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            Log::info('🚀 ========== INICIO confirmarReubicacionMultiple ==========');
+            Log::debug('📥 DATOS RECIBIDOS para confirmar reubicación múltiple:', $request->all());
+
+            // Validar datos
+            $validator = Validator::make($request->all(), [
+                'ubicacion_origen_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+                'ubicacion_destino_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+            ]);
+
+            if ($validator->fails()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $ubicacionOrigenId = (int) $request->ubicacion_origen_id;
+            $ubicacionDestinoId = (int) $request->ubicacion_destino_id;
+
+            // Verificar que las ubicaciones sean diferentes
+            if ($ubicacionOrigenId == $ubicacionDestinoId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No puedes reubicar a la misma ubicación'
+                ], 422);
+            }
+
+            // Obtener información de ambas ubicaciones
+            $ubicacionOrigen = DB::table('rack_ubicaciones as ru')
+                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+                ->where('ru.idRackUbicacion', $ubicacionOrigenId)
+                ->first();
+
+            $ubicacionDestino = DB::table('rack_ubicaciones as ru')
+                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+                ->where('ru.idRackUbicacion', $ubicacionDestinoId)
+                ->first();
+
+            // Verificar si la ubicación destino está vacía
+            $productosEnDestino = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionDestinoId)
+                ->exists();
+
+            if ($productosEnDestino) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La ubicación destino ya está ocupada'
+                ], 422);
+            }
+
+            // Obtener todos los productos de la ubicación origen
+            $productosEnOrigen = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionOrigenId)
+                ->get();
+
+            if ($productosEnOrigen->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay productos para reubicar en la ubicación origen'
+                ], 404);
+            }
+
+            $productosMovidos = [];
+            $cantidadTotalMovida = 0;
+
+            // Mover cada producto individualmente
+            foreach ($productosEnOrigen as $producto) {
+                if ($producto->custodia_id) {
+                    // Mover custodia
+                    DB::table('rack_ubicacion_articulos')
+                        ->where('rack_ubicacion_id', $ubicacionOrigenId)
+                        ->where('custodia_id', $producto->custodia_id)
+                        ->update([
+                            'rack_ubicacion_id' => $ubicacionDestinoId,
+                            'updated_at' => now()
+                        ]);
+
+                    // ✅ CORREGIDO: Usar 'reubicacion_custodia' que ya existe en el ENUM
+                    DB::table('rack_movimientos')->insert([
+                        'articulo_id' => null,
+                        'custodia_id' => $producto->custodia_id,
+                        'ubicacion_origen_id' => $ubicacionOrigenId,
+                        'ubicacion_destino_id' => $ubicacionDestinoId,
+                        'rack_origen_id' => $ubicacionOrigen->rack_id,
+                        'rack_destino_id' => $ubicacionDestino->rack_id,
+                        'cantidad' => 1,
+                        'tipo_movimiento' => 'reubicacion_custodia', // ✅ TIPO EXISTENTE
+                        'usuario_id' => auth()->id() ?? 1,
+                        'observaciones' => 'Reubicación múltiple - Custodia: ' . ($producto->custodia_id),
+                        'codigo_ubicacion_origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                        'codigo_ubicacion_destino' => $ubicacionDestino->codigo_unico ?? $ubicacionDestino->codigo,
+                        'nombre_rack_origen' => $ubicacionOrigen->rack_nombre,
+                        'nombre_rack_destino' => $ubicacionDestino->rack_nombre,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    $productosMovidos[] = [
+                        'tipo' => 'custodia',
+                        'custodia_id' => $producto->custodia_id,
+                        'cantidad' => 1
+                    ];
+                    $cantidadTotalMovida += 1;
+                } else {
+                    // Mover producto normal
+                    DB::table('rack_ubicacion_articulos')
+                        ->where('rack_ubicacion_id', $ubicacionOrigenId)
+                        ->where('articulo_id', $producto->articulo_id)
+                        ->where('cliente_general_id', $producto->cliente_general_id)
+                        ->update([
+                            'rack_ubicacion_id' => $ubicacionDestinoId,
+                            'updated_at' => now()
+                        ]);
+
+                    // Obtener nombre del cliente para el historial
+                    $clienteInfo = DB::table('clientegeneral')
+                        ->where('idClienteGeneral', $producto->cliente_general_id)
+                        ->first();
+
+                    // ✅ CORREGIDO: Usar 'reubicacion' que ya existe en el ENUM
+                    DB::table('rack_movimientos')->insert([
+                        'articulo_id' => $producto->articulo_id,
+                        'custodia_id' => null,
+                        'ubicacion_origen_id' => $ubicacionOrigenId,
+                        'ubicacion_destino_id' => $ubicacionDestinoId,
+                        'rack_origen_id' => $ubicacionOrigen->rack_id,
+                        'rack_destino_id' => $ubicacionDestino->rack_id,
+                        'cantidad' => $producto->cantidad,
+                        'tipo_movimiento' => 'reubicacion', // ✅ TIPO EXISTENTE
+                        'usuario_id' => auth()->id() ?? 1,
+                        'observaciones' => 'Reubicación múltiple - Producto: ' . ($producto->articulo_id ?? 'N/A') . ' - Cliente: ' . ($clienteInfo->descripcion ?? 'Sin cliente'),
+                        'codigo_ubicacion_origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                        'codigo_ubicacion_destino' => $ubicacionDestino->codigo_unico ?? $ubicacionDestino->codigo,
+                        'nombre_rack_origen' => $ubicacionOrigen->rack_nombre,
+                        'nombre_rack_destino' => $ubicacionDestino->rack_nombre,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+
+                    $productosMovidos[] = [
+                        'tipo' => 'producto',
+                        'articulo_id' => $producto->articulo_id,
+                        'cliente_general_id' => $producto->cliente_general_id,
+                        'cantidad' => $producto->cantidad
+                    ];
+                    $cantidadTotalMovida += $producto->cantidad;
+                }
+            }
+
+            // Actualizar estados de ocupación
+            $this->actualizarEstadoOcupacion($ubicacionOrigenId);
+            $this->actualizarEstadoOcupacion($ubicacionDestinoId);
+
+            // Obtener datos actualizados
+            $ubicacionOrigenActualizada = $this->obtenerUbicacionConProductos($ubicacionOrigenId);
+            $ubicacionDestinoActualizada = $this->obtenerUbicacionConProductos($ubicacionDestinoId);
+
+            DB::commit();
+
+            Log::info('🎉 REUBICACIÓN MÚLTIPLE COMPLETADA EXITOSAMENTE:', [
+                'productos_movidos' => count($productosMovidos),
+                'cantidad_total_movida' => $cantidadTotalMovida
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reubicación múltiple completada exitosamente',
+                'data' => [
+                    'origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                    'destino' => $ubicacionDestino->codigo_unico ?? $ubicacionDestino->codigo,
+                    'productos_movidos' => $productosMovidos,
+                    'cantidad_total' => $cantidadTotalMovida,
+                    'total_productos' => count($productosMovidos),
+                    'ubicaciones_actualizadas' => [
+                        'origen' => $ubicacionOrigenActualizada,
+                        'destino' => $ubicacionDestinoActualizada
+                    ]
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('💥 ERROR en confirmarReubicacionMultiple:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function confirmarReubicacionEntreRacks(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            Log::info('🚀 ========== INICIO confirmarReubicacionEntreRacks ==========');
+            Log::debug('📥 DATOS RECIBIDOS para reubicación entre racks:', $request->all());
+
+            // Validar datos
+            $validator = Validator::make($request->all(), [
+                'ubicacion_origen_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+                'ubicacion_destino_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
+                'producto' => 'required|string|min:1|max:255',
+                'cantidad' => 'required|integer|min:1',
+                'tipo_reubicacion' => 'required|in:otro_rack'
+            ]);
+
+            if ($validator->fails()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $ubicacionOrigenId = (int) $request->ubicacion_origen_id;
+            $ubicacionDestinoId = (int) $request->ubicacion_destino_id;
+
+            // Obtener información de ambas ubicaciones
+            $ubicacionOrigen = DB::table('rack_ubicaciones as ru')
+                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+                ->where('ru.idRackUbicacion', $ubicacionOrigenId)
+                ->first();
+
+            $ubicacionDestino = DB::table('rack_ubicaciones as ru')
+                ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->select('ru.*', 'r.nombre as rack_nombre', 'r.idRack as rack_id')
+                ->where('ru.idRackUbicacion', $ubicacionDestinoId)
+                ->first();
+
+            if (!$ubicacionOrigen || !$ubicacionDestino) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Una de las ubicaciones no existe'
+                ], 404);
+            }
+
+            // Verificar que la ubicación destino esté vacía
+            $productosEnDestino = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionDestinoId)
+                ->exists();
+
+            if ($productosEnDestino) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La ubicación destino ya está ocupada'
+                ], 422);
+            }
+
+            // Mover todos los productos de la ubicación origen a la destino
+            $productosMovidos = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionOrigenId)
+                ->update([
+                    'rack_ubicacion_id' => $ubicacionDestinoId,
+                    'updated_at' => now()
+                ]);
+
+            if ($productosMovidos === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay productos para mover en la ubicación origen'
+                ], 404);
+            }
+
+            // Registrar movimiento
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => null, // Se mueven todos los productos
+                'custodia_id' => null,
+                'ubicacion_origen_id' => $ubicacionOrigenId,
+                'ubicacion_destino_id' => $ubicacionDestinoId,
+                'rack_origen_id' => $ubicacionOrigen->rack_id,
+                'rack_destino_id' => $ubicacionDestino->rack_id,
+                'cantidad' => $request->cantidad,
+                'tipo_movimiento' => 'reubicacion_entre_racks',
+                'usuario_id' => auth()->id() ?? 1,
+                'observaciones' => 'Reubicación completa entre racks - Producto: ' . $request->producto,
+                'codigo_ubicacion_origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                'codigo_ubicacion_destino' => $ubicacionDestino->codigo_unico ?? $ubicacionDestino->codigo,
+                'nombre_rack_origen' => $ubicacionOrigen->rack_nombre,
+                'nombre_rack_destino' => $ubicacionDestino->rack_nombre,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Actualizar estados de ocupación
+            $this->actualizarEstadoOcupacion($ubicacionOrigenId);
+            $this->actualizarEstadoOcupacion($ubicacionDestinoId);
+
+            DB::commit();
+
+            Log::info('🎉 REUBICACIÓN ENTRE RACKS COMPLETADA EXITOSAMENTE');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reubicación entre racks completada exitosamente',
+                'data' => [
+                    'productos_movidos' => $productosMovidos,
+                    'origen' => $ubicacionOrigen->codigo_unico ?? $ubicacionOrigen->codigo,
+                    'destino' => $ubicacionDestino->codigo_unico ?? $ubicacionDestino->codigo
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('💥 ERROR en confirmarReubicacionEntreRacks:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error interno del servidor: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function obtenerRacksDisponibles()
+    {
+        try {
+            $racks = DB::table('racks as r')
+                ->select('r.idRack as id', 'r.nombre', 'r.sede')
+                ->where('r.estado', 'activo')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $racks
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar racks: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerUbicacionesVacias($rackId)
+    {
+        try {
+            $ubicaciones = DB::table('rack_ubicaciones as ru')
+                ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+                ->select('ru.idRackUbicacion as id', 'ru.codigo_unico as codigo', 'ru.capacidad_maxima as capacidad')
+                ->where('ru.rack_id', $rackId)
+                ->whereNull('rua.rack_ubicacion_id') // Ubicaciones sin productos
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $ubicaciones
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar ubicaciones: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    // En el controlador
+    public function obtenerArticulosUbicacion($ubicacionId)
+    {
+        try {
+            $articulos = DB::table('rack_ubicacion_articulos as rua')
+                ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+                ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+                ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
+                ->leftJoin('custodias as c', 'rua.custodia_id', '=', 'c.id')
+                ->where('rua.rack_ubicacion_id', $ubicacionId)
+                ->select(
+                    'rua.idRackUbicacionArticulo as id',
+                    'rua.articulo_id',
+                    'rua.custodia_id',
+                    'rua.cliente_general_id',
+                    'rua.cantidad',
+                    'a.nombre',
+                    'a.codigo_repuesto',
+                    'ta.nombre as tipo_articulo',
+                    'cg.descripcion as cliente_nombre',
+                    'c.serie as serie_custodia',
+                    'c.codigocustodias as codigo_custodia',
+                    DB::raw('CASE 
+                    WHEN rua.custodia_id IS NOT NULL THEN 
+                        COALESCE(c.serie, c.codigocustodias, CONCAT("Custodia ", c.id))
+                    WHEN a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" THEN 
+                        a.codigo_repuesto
+                    WHEN a.nombre IS NOT NULL AND a.nombre != "" THEN 
+                        a.nombre
+                    ELSE 
+                        CONCAT("Artículo ", a.idArticulos)
+                END as nombre_mostrar')
+                )
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $articulos
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar artículos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
     // ✅ NUEVO: Método para reubicar custodias
     private function reubicarCustodia($request, $ubicacionOrigen, $ubicacionDestino)
     {
@@ -2400,13 +2965,62 @@ public function actualizarDimensionesRack(Request $request, $rackId)
                 'updated_at' => now()
             ]);
 
-        // Actualizar capacidad máxima de todas las ubicaciones existentes (en lote)
-        DB::table('rack_ubicaciones')
-            ->where('rack_id', $rackId)
-            ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
-            ->update([
-                'capacidad_maxima' => $request->capacidad_maxima,
-                'updated_at' => now()
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos inválidos',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Obtener el rack actual
+            $rack = DB::table('racks')->where('idRack', $rackId)->first();
+
+            if (!$rack) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rack no encontrado'
+                ], 404);
+            }
+
+            // Obtener las ubicaciones existentes
+            $ubicacionesExistentes = DB::table('rack_ubicaciones')
+                ->where('rack_id', $rackId)
+                ->get();
+
+            // Actualizar dimensiones del rack
+            DB::table('racks')
+                ->where('idRack', $rackId)
+                ->update([
+                    'filas' => $request->filas,
+                    'columnas' => $request->columnas,
+                    'updated_at' => now()
+                ]);
+
+            // Actualizar capacidad máxima de todas las ubicaciones existentes (en lote)
+            DB::table('rack_ubicaciones')
+                ->where('rack_id', $rackId)
+                ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
+                ->update([
+                    'capacidad_maxima' => $request->capacidad_maxima,
+                    'updated_at' => now()
+                ]);
+
+            // Obtener el rack actualizado para sincronizar ubicaciones
+            $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
+            $nuevasUbicacionesGeneradas = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Dimensiones actualizadas exitosamente. ' . $nuevasUbicacionesGeneradas . ' nuevas ubicaciones generadas.',
+                'data' => [
+                    'rack_id' => $rackId,
+                    'nuevas_ubicaciones' => $nuevasUbicacionesGeneradas,
+                    'total_filas' => $request->filas,
+                    'total_columnas' => $request->columnas
+                ]
             ]);
 
         // Obtener el rack actualizado para sincronizar ubicaciones
@@ -2508,12 +3122,12 @@ private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacida
     $ubicacionesCreadas = 0;
     $ubicacionesEliminadas = 0;
 
-    // Crear un mapa de ubicaciones existentes
-    $mapaExistente = [];
-    foreach ($ubicacionesExistentes as $ubicacion) {
-        $clave = "{$ubicacion->nivel}-{$ubicacion->posicion}";
-        $mapaExistente[$clave] = $ubicacion;
-    }
+        // Crear un mapa de ubicaciones existentes
+        $mapaExistente = [];
+        foreach ($ubicacionesExistentes as $ubicacion) {
+            $clave = "{$ubicacion->nivel}-{$ubicacion->posicion}";
+            $mapaExistente[$clave] = $ubicacion;
+        }
 
     // ✅ NUEVO: Identificar ubicaciones que deben ELIMINARSE (fuera de los nuevos límites)
     $ubicacionesAEliminar = [];
@@ -2557,9 +3171,9 @@ private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacida
         for ($posicion = 1; $posicion <= $rack->columnas; $posicion++) {
             $clave = "{$nivel}-{$posicion}";
 
-            if (!isset($mapaExistente[$clave])) {
-                $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
-                $codigoUnico = $rack->nombre . '-' . $codigo;
+                if (!isset($mapaExistente[$clave])) {
+                    $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
+                    $codigoUnico = $rack->nombre . '-' . $codigo;
 
                 $nuevasUbicaciones[] = [
                     'rack_id' => $rack->idRack,
@@ -2573,28 +3187,25 @@ private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacida
                     'updated_at' => $now
                 ];
 
-                $ubicacionesCreadas++;
+                    $ubicacionesCreadas++;
+                }
             }
         }
+
+        if (!empty($nuevasUbicaciones)) {
+            DB::table('rack_ubicaciones')->insert($nuevasUbicaciones);
+
+            Log::debug('Nuevas ubicaciones generadas', [
+                'rack_id' => $rack->idRack,
+                'rack_nombre' => $rack->nombre,
+                'nuevas_ubicaciones' => count($nuevasUbicaciones),
+                'filas' => $rack->filas,
+                'columnas' => $rack->columnas
+            ]);
+        }
+
+        return $ubicacionesCreadas;
     }
-
-    if (!empty($nuevasUbicaciones)) {
-        DB::table('rack_ubicaciones')->insert($nuevasUbicaciones);
-
-        Log::debug('Nuevas ubicaciones generadas', [
-            'rack_id' => $rack->idRack,
-            'rack_nombre' => $rack->nombre,
-            'nuevas_ubicaciones' => count($nuevasUbicaciones),
-            'filas' => $rack->filas,
-            'columnas' => $rack->columnas
-        ]);
-    }
-
-    return [
-        'creadas' => $ubicacionesCreadas,
-        'eliminadas' => $ubicacionesEliminadas
-    ];
-}
 
 
     /**

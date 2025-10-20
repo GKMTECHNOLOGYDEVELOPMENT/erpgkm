@@ -1461,6 +1461,15 @@ Route::post('/almacen/ubicaciones/vaciar', [UbicacionesVistaController::class, '
 // Rutas para reubicación entre racks
 Route::get('/almacen/racks/disponibles', [UbicacionesVistaController::class, 'listarRacksDisponibles']);
 Route::get('/almacen/racks/{id}/ubicaciones-vacias', [UbicacionesVistaController::class, 'listarUbicacionesVacias']);
+Route::post('/almacen/reubicacion/iniciar-multiple', [UbicacionesVistaController::class, 'iniciarReubicacionMultiple']);
+Route::post('/almacen/reubicacion/confirmar-multiple', [UbicacionesVistaController::class, 'confirmarReubicacionMultiple']);
+
+// Rutas para reubicación entre racks
+Route::get('/almacen/racks/disponibles', [UbicacionesVistaController::class, 'obtenerRacksDisponibles']);
+Route::get('/almacen/racks/{id}/ubicaciones-vacias', [UbicacionesVistaController::class, 'obtenerUbicacionesVacias']);
+Route::post('/almacen/reubicacion/confirmar-entre-racks', [UbicacionesVistaController::class, 'confirmarReubicacionEntreRacks']);
+Route::get('/almacen/ubicaciones/{id}/articulos', [UbicacionesVistaController::class, 'obtenerArticulosUbicacion']);
+
 // Rutas para gestión de racks y ubicaciones
 Route::post('/almacen/racks/crear', [UbicacionesVistaController::class, 'crearRack']);
 Route::post('/almacen/racks/{rackId}/actualizar-dimensiones', [UbicacionesVistaController::class, 'actualizarDimensionesRack']);
