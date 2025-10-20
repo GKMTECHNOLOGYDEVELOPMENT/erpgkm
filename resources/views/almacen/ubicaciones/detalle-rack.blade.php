@@ -719,14 +719,14 @@
                                 <div class="grid grid-cols-2 gap-3 pt-4">
                                     <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                         class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-arrows-alt text-xs"></i>
+                                        <i class="fas fa-boxes text-xs"></i>
                                         Reubicar Todo
                                     </button>
 
-                                    <button @click="iniciarReubicacionRack(modal.ubi)"
-                                        class="bg-secondary hover:bg-purple-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-exchange-alt text-xs"></i>
-                                        Otro Rack
+                                    <button @click="abrirModalReubicacionRack(modal.ubi)"
+                                        class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                        <i class="fas fa-exchange-alt"></i>
+                                        Mover a Otro Rack
                                     </button>
 
                                     <button @click="abrirModalAgregarProducto(modal.ubi)"
@@ -786,95 +786,376 @@
         </div>
 
 
-        <!-- Modal para Reubicación entre Racks -->
+        <!-- Modal para Reubicación entre Racks - DISEÑO 2 COLUMNAS -->
         <div x-show="modalReubicacionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="modalReubicacionRack.open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalReubicacionRack()">
                 <div x-show="modalReubicacionRack.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-4xl my-8 bg-white dark:bg-[#1b2e4b]">
 
                     <!-- Header -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-800">
-                            Reubicar a Otro Rack
+                    <div
+                        class="flex bg-gradient-to-r from-blue-500 to-purple-600 items-center justify-between px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exchange-alt text-lg text-white"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-lg text-white">Reubicar a Otro Rack</h5>
+                                <p class="text-blue-100 text-xs">Seleccionar artículos para mover</p>
+                            </div>
                         </div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700"
+                        <button type="button" class="text-white-dark hover:text-dark"
                             @click="cerrarModalReubicacionRack()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
 
-                    <!-- Body -->
-                    <div class="p-5">
-                        <!-- Información del producto origen -->
-                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <label class="font-medium text-gray-600">Producto</label>
-                                    <p class="font-bold text-gray-800"
-                                        x-text="modalReubicacionRack.ubicacionOrigen.producto"></p>
+                    <!-- Body - 2 Columnas -->
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                            <!-- COLUMNA IZQUIERDA - INFORMACIÓN Y ARTÍCULOS -->
+                            <div class="space-y-6">
+
+                                <!-- Información de la Ubicación Origen -->
+                                <div
+                                    class="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border border-blue-200 dark:border-blue-700 p-4">
+                                    <h3
+                                        class="font-semibold text-gray-800 dark:text-white text-sm mb-3 flex items-center gap-2">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        Ubicación Origen
+                                    </h3>
+
+                                    <div class="space-y-3">
+                                        <!-- Ubicación -->
+                                        <div
+                                            class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700">
+                                            <div class="flex items-center gap-2">
+                                                <div
+                                                    class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                    <i
+                                                        class="fas fa-map-marker-alt text-blue-600 dark:text-blue-400 text-sm"></i>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                                        Ubicación Actual</p>
+                                                    <p class="font-bold text-gray-800 dark:text-white text-sm"
+                                                        x-text="modalReubicacionRack.ubicacionOrigen.codigo"></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Estadísticas -->
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 text-center">
+                                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">Total
+                                                    Artículos</p>
+                                                <p class="font-bold text-blue-600 dark:text-blue-400"
+                                                    x-text="modalReubicacionRack.articulos.length + ' tipos'"></p>
+                                            </div>
+                                            <div
+                                                class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 text-center">
+                                                <p class="text-xs font-medium text-gray-600 dark:text-gray-400">
+                                                    Cantidad Total</p>
+                                                <p class="font-bold text-purple-600 dark:text-purple-400"
+                                                    x-text="modalReubicacionRack.ubicacionOrigen.cantidad + ' und'">
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="font-medium text-gray-600">Cantidad</label>
-                                    <p class="font-bold text-gray-800"
-                                        x-text="modalReubicacionRack.ubicacionOrigen.cantidad + ' unidades'"></p>
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="font-medium text-gray-600">Ubicación origen</label>
-                                    <p class="font-bold text-gray-800"
-                                        x-text="modalReubicacionRack.ubicacionOrigen.codigo"></p>
+
+                                <!-- Selección de Artículos -->
+                                <div class="space-y-3">
+                                    <label
+                                        class="block text-sm font-semibold text-gray-700 dark:text-white mb-2 flex items-center gap-2">
+                                        <i class="fas fa-boxes text-orange-500"></i>
+                                        Seleccionar Artículos a Mover
+                                    </label>
+
+                                    <!-- Lista de Artículos en 2 columnas -->
+                                    <div
+                                        class="border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800">
+                                        <div class="max-h-80 overflow-y-auto custom-scrollbar">
+                                            <template x-if="modalReubicacionRack.articulos.length === 0">
+                                                <div class="p-6 text-center text-gray-500 dark:text-gray-400">
+                                                    <i class="fas fa-inbox text-3xl mb-3"></i>
+                                                    <p class="text-sm font-medium">No hay artículos en esta ubicación
+                                                    </p>
+                                                    <p class="text-xs mt-1">La ubicación seleccionada está vacía</p>
+                                                </div>
+                                            </template>
+
+                                            <!-- Grid de artículos en 2 columnas -->
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 p-3">
+                                                <template x-for="(articulo, index) in modalReubicacionRack.articulos"
+                                                    :key="articulo.id">
+                                                    <div
+                                                        class="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 p-3 hover:shadow-md transition-all duration-200">
+                                                        <!-- Header del artículo -->
+                                                        <div class="flex items-center justify-between mb-2">
+                                                            <div class="flex items-center gap-2 flex-1">
+                                                                <input type="checkbox" x-model="articulo.seleccionado"
+                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+
+                                                                <div class="flex-1 min-w-0">
+                                                                    <p class="font-medium text-gray-800 dark:text-white text-sm truncate"
+                                                                        x-text="articulo.nombre_mostrar || articulo.nombre || articulo.codigo_repuesto || 'Sin nombre'">
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Cantidad badge -->
+                                                            <div
+                                                                class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-bold">
+                                                                <span x-text="articulo.cantidad"></span> und
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Información adicional -->
+                                                        <div
+                                                            class="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                                            <div class="flex items-center gap-1">
+                                                                <i class="fas fa-user text-gray-400"></i>
+                                                                <span x-text="articulo.cliente_nombre || 'Sin cliente'"
+                                                                    class="truncate"></span>
+                                                            </div>
+                                                            <div class="flex items-center gap-1">
+                                                                <i class="fas fa-tag text-gray-400"></i>
+                                                                <span
+                                                                    x-text="articulo.tipo_articulo || 'Sin tipo'"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Selector de cantidad si está seleccionado -->
+                                                        <div x-show="articulo.seleccionado"
+                                                            class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                                            <div class="space-y-2">
+                                                                <label
+                                                                    class="text-xs text-gray-600 dark:text-gray-400 font-medium block">
+                                                                    Cantidad a mover:
+                                                                </label>
+                                                                <div class="flex items-center justify-between">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <button type="button"
+                                                                            @click="decrementarCantidadArticulo(index)"
+                                                                            class="w-6 h-6 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                                                            :disabled="articulo.cantidad_a_mover <= 1">
+                                                                            <i class="fas fa-minus text-xs"></i>
+                                                                        </button>
+                                                                        <input type="number"
+                                                                            x-model="articulo.cantidad_a_mover"
+                                                                            min="1" :max="articulo.cantidad"
+                                                                            class="w-16 text-center border border-gray-300 dark:border-gray-600 rounded py-1 px-2 text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-white">
+                                                                        <button type="button"
+                                                                            @click="incrementarCantidadArticulo(index)"
+                                                                            class="w-6 h-6 bg-gray-200 dark:bg-gray-600 rounded flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+                                                                            :disabled="articulo.cantidad_a_mover >= articulo
+                                                                                .cantidad">
+                                                                            <i class="fas fa-plus text-xs"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <span
+                                                                        class="text-xs text-gray-500 dark:text-gray-400">
+                                                                        de <span x-text="articulo.cantidad"></span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <!-- Indicador de scroll -->
+                                        <div x-show="modalReubicacionRack.articulos.length > 4"
+                                            class="border-t border-gray-200 dark:border-gray-700 px-4 py-2 bg-gray-100 dark:bg-gray-800">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                                <i class="fas fa-arrows-up-down mr-1"></i>
+                                                Desplázate para ver más artículos
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resumen de selección -->
+                                    <div x-show="articulosSeleccionados.length > 0"
+                                        class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-3">
+                                        <div class="flex items-center justify-between">
+                                            <span
+                                                class="text-orange-700 dark:text-orange-400 font-medium flex items-center gap-2">
+                                                <i class="fas fa-check-circle"></i>
+                                                Resumen de selección
+                                            </span>
+                                            <span
+                                                class="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold"
+                                                x-text="articulosSeleccionados.length + ' / ' + modalReubicacionRack.articulos.length">
+                                            </span>
+                                        </div>
+                                        <div class="mt-2 text-sm text-orange-600 dark:text-orange-300">
+                                            <div class="flex justify-between items-center">
+                                                <span>Total a mover:</span>
+                                                <span class="font-bold text-lg"
+                                                    x-text="cantidadTotalSeleccionada + ' unidades'"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Selección de rack destino -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Rack
-                                Destino:</label>
-                            <select x-model="modalReubicacionRack.rackDestinoSeleccionado"
-                                @change="cargarUbicacionesDestino()"
-                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Seleccione un rack</option>
-                                <template x-for="rack in modalReubicacionRack.racksDisponibles"
-                                    :key="rack.id">
-                                    <option :value="rack.id" x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
-                                    </option>
-                                </template>
-                            </select>
-                        </div>
+                            <!-- COLUMNA DERECHA - DESTINO Y CONFIRMACIÓN -->
+                            <div class="space-y-6">
 
-                        <!-- Selección de ubicación destino -->
-                        <div class="mb-4" x-show="modalReubicacionRack.rackDestinoSeleccionado">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Ubicación
-                                Destino:</label>
-                            <select x-model="modalReubicacionRack.ubicacionDestinoSeleccionada"
-                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Seleccione una ubicación</option>
-                                <template x-for="ubicacion in modalReubicacionRack.ubicacionesDestino"
-                                    :key="ubicacion.id">
-                                    <option :value="ubicacion.id"
-                                        x-text="ubicacion.codigo + ' (Capacidad: ' + ubicacion.capacidad_maxima + ')'">
-                                    </option>
-                                </template>
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1"
-                                x-text="modalReubicacionRack.ubicacionesDestino.length + ' ubicaciones vacías disponibles'"
-                                x-show="modalReubicacionRack.rackDestinoSeleccionado"></p>
-                        </div>
+                                <!-- Flecha de Dirección -->
+                                <div class="flex justify-center">
+                                    <div
+                                        class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg border-4 border-white dark:border-gray-800">
+                                        <i class="fas fa-arrow-right text-white text-lg"></i>
+                                    </div>
+                                </div>
 
-                        <div class="flex gap-3 pt-4">
-                            <button @click="cerrarModalReubicacionRack()"
-                                class="flex-1 bg-gray-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-600 transition">
-                                Cancelar
-                            </button>
-                            <button @click="confirmarReubicacionRack()"
-                                :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada"
-                                :class="!modalReubicacionRack.ubicacionDestinoSeleccionada ? 'bg-gray-400 cursor-not-allowed' :
-                                    'bg-primary hover:bg-purple-700'"
-                                class="flex-1 text-white py-3 px-4 rounded-xl font-medium transition flex items-center justify-center gap-2">
-                                <i class="fas fa-check"></i>
-                                Confirmar Reubicación
-                            </button>
+                                <!-- Selección de Rack Destino -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
+                                            <i class="fas fa-warehouse text-blue-500"></i>
+                                            Seleccionar Rack Destino
+                                        </label>
+                                        <select x-model="modalReubicacionRack.rackDestinoSeleccionado"
+                                            @change="cargarUbicacionesDestino()"
+                                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm">
+                                            <option value="" class="text-gray-400 text-sm">Seleccione un rack
+                                                destino</option>
+                                            <template x-for="rack in modalReubicacionRack.racksDisponibles"
+                                                :key="rack.id">
+                                                <option :value="rack.id"
+                                                    class="text-gray-700 dark:text-gray-300 text-sm"
+                                                    x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
+                                                </option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Selección de Ubicación Destino -->
+                                    <div x-show="modalReubicacionRack.rackDestinoSeleccionado" class="space-y-3">
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
+                                            <i class="fas fa-map-marker-alt text-green-500"></i>
+                                            Seleccionar Ubicación Destino
+                                        </label>
+
+                                        <select x-model="modalReubicacionRack.ubicacionDestinoSeleccionada"
+                                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm">
+                                            <option value="" class="text-gray-400 text-sm">Seleccione una
+                                                ubicación destino</option>
+                                            <template x-for="ubicacion in modalReubicacionRack.ubicacionesDestino"
+                                                :key="ubicacion.id">
+                                                <option :value="ubicacion.id"
+                                                    class="text-gray-700 dark:text-gray-300 text-sm"
+                                                    x-text="ubicacion.codigo + ' • Capacidad: ' + ubicacion.capacidad_maxima + ' und'">
+                                                </option>
+                                            </template>
+                                        </select>
+
+                                        <!-- Contador de ubicaciones disponibles -->
+                                        <div
+                                            class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                                            <div class="flex items-center justify-between">
+                                                <span
+                                                    class="text-green-700 dark:text-green-400 font-medium flex items-center gap-2">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Ubicaciones disponibles
+                                                </span>
+                                                <span
+                                                    class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold"
+                                                    x-text="modalReubicacionRack.ubicacionesDestino.length">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estado cuando no hay rack seleccionado -->
+                                    <div x-show="!modalReubicacionRack.rackDestinoSeleccionado"
+                                        class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 text-center">
+                                        <i class="fas fa-warehouse text-3xl text-gray-400 dark:text-gray-500 mb-3"></i>
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Selecciona un
+                                            rack destino</p>
+                                        <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Para ver las
+                                            ubicaciones disponibles</p>
+                                    </div>
+                                </div>
+
+                                <!-- Información Adicional -->
+                                <div
+                                    class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                                    <div class="flex items-start gap-3">
+                                        <div
+                                            class="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <i class="fas fa-lightbulb text-blue-500 dark:text-blue-400"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-semibold text-blue-800 dark:text-blue-300 text-sm mb-2">
+                                                Información importante</h4>
+                                            <ul class="text-blue-700 dark:text-blue-400 text-xs space-y-2">
+                                                <li class="flex items-start gap-2">
+                                                    <i
+                                                        class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                                                    <span>Selecciona los artículos específicos que deseas mover</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <i
+                                                        class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                                                    <span>Puedes mover cantidades parciales de cada artículo</span>
+                                                </li>
+                                                <li class="flex items-start gap-2">
+                                                    <i
+                                                        class="fas fa-check-circle text-green-500 mt-0.5 flex-shrink-0"></i>
+                                                    <span>La ubicación destino debe tener capacidad suficiente</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Estado del Formulario -->
+                                <div
+                                    class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
+                                    <p class="text-sm font-medium mb-2"
+                                        :class="modalReubicacionRack.ubicacionDestinoSeleccionada && articulosSeleccionados
+                                            .length > 0 ?
+                                            'text-green-600 dark:text-green-400' :
+                                            'text-amber-600 dark:text-amber-400'"
+                                        x-text="modalReubicacionRack.ubicacionDestinoSeleccionada && articulosSeleccionados.length > 0 ? 
+                                    '✅ Todo listo para reubicar' : 
+                                    '⏳ Completa la selección'">
+                                    </p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400"
+                                        x-text="modalReubicacionRack.ubicacionDestinoSeleccionada && articulosSeleccionados.length > 0 ? 
+                                    articulosSeleccionados.length + ' artículo(s) seleccionados • ' + cantidadTotalSeleccionada + ' unidades' :
+                                    'Selecciona artículos y ubicación destino'">
+                                    </p>
+                                </div>
+
+                                <!-- Botones de Acción -->
+                                <div class="flex gap-3">
+                                    <button type="button" class="btn btn-outline-danger flex-1 py-3 text-sm"
+                                        @click="cerrarModalReubicacionRack()">
+                                        <i class="fas fa-times ltr:mr-2 rtl:ml-2"></i>
+                                        Cancelar
+                                    </button>
+                                    <button type="button" @click="confirmarReubicacionRack()"
+                                        :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
+                                            .length === 0"
+                                        class="btn btn-primary flex-1 py-3 text-sm"
+                                        :class="(!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
+                                            .length === 0) ? 'opacity-50 cursor-not-allowed' : ''">
+                                        <i class="fas fa-check ltr:mr-2 rtl:ml-2"></i>
+                                        Confirmar Reubicación
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1272,74 +1553,6 @@
             </div>
         </div>
 
-        <!-- Modal para selección de rack destino -->
-        <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
-            :class="modalSeleccionRack.open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4"
-                @click.self="modalSeleccionRack.open = false">
-                <div x-show="modalSeleccionRack.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg relative">
-
-                    <!-- Header -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-800">
-                            Mover a Otro Rack
-                        </div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700"
-                            @click="modalSeleccionRack.open = false">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-
-                    <!-- Body -->
-                    <div class="p-5">
-                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <label class="font-medium text-gray-600">Producto</label>
-                                    <p class="font-bold text-gray-800" x-text="modalSeleccionRack.producto"></p>
-                                </div>
-                                <div>
-                                    <label class="font-medium text-gray-600">Cantidad</label>
-                                    <p class="font-bold text-gray-800"
-                                        x-text="modalSeleccionRack.cantidad + ' unidades'"></p>
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="font-medium text-gray-600">Ubicación origen</label>
-                                    <p class="font-bold text-gray-800" x-text="modalSeleccionRack.origen"></p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Rack
-                                Destino:</label>
-                            <select x-model="modalSeleccionRack.rackDestino"
-                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <template x-for="(rack, index) in racks" :key="index">
-                                    <option :value="index" :disabled="index === modoReubicacion.rackOrigen"
-                                        x-text="'Rack ' + rack.nombre + (index === modoReubicacion.rackOrigen ? ' (Actual)' : '')">
-                                    </option>
-                                </template>
-                            </select>
-                        </div>
-
-                        <div class="flex gap-3 pt-2">
-                            <button @click="modalSeleccionRack.open = false"
-                                class="flex-1 bg-gray-500 text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-600 transition">
-                                Cancelar
-                            </button>
-                            <button @click="confirmarReubicacionRack()"
-                                class="flex-1 bg-primary text-white py-3 px-4 rounded-xl font-medium hover:bg-purple-700 transition">
-                                Continuar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal Historial -->
         <!-- Modal Historial Mejorado -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="modalHistorial.open && '!block'">
@@ -1646,76 +1859,219 @@
         </div>
 
 
-
-        <!-- Modal -->
-        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+        <!-- Modal Confirmar Reubicación - DISEÑO MEJORADO -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] hidden overflow-y-auto"
             :class="modalReubicacion.open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="cancelarReubicacion()">
+            <div class="flex items-start justify-center min-h-screen px-4 py-8" @click.self="cancelarReubicacion()">
                 <div x-show="modalReubicacion.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-md relative">
-                    <!-- Header -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-800">Confirmar Reubicación</div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700"
-                            @click="modalReubicacion.open = false; cancelarReubicacion()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    class="bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-md transform transition-all">
 
-                    </div>
-
-                    <!-- Body -->
-                    <div class="p-5">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center text-white">
-                                <i class="fas fa-arrows-alt text-2xl"></i>
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-bold text-gray-800">Mover producto</h2>
-                                <p class="text-gray-600">Entre ubicaciones</p>
-                            </div>
-                        </div>
-
-                        <!-- Info producto -->
-                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-200 mb-4">
-                            <div class="grid grid-cols-2 gap-4">
+                    <!-- Header Mejorado -->
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-5 relative">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas text-xl text-white"
+                                        :class="modalReubicacion.tipo === 'multiple' ? 'fa-boxes' : 'fa-arrows-alt'"></i>
+                                </div>
                                 <div>
-                                    <label class="text-sm font-medium text-gray-600">Producto</label>
-                                    <p class="text-lg font-bold text-gray-800" x-text="modalReubicacion.producto">
+                                    <h2 class="text-xl font-bold text-white"
+                                        x-text="modalReubicacion.tipo === 'multiple' ? 'Reubicación Múltiple' : 'Reubicación'">
+                                    </h2>
+                                    <p class="text-blue-100 text-sm"
+                                        x-text="modalReubicacion.tipo === 'multiple' ? 'Mover todos los productos' : 'Mover producto específico'">
                                     </p>
                                 </div>
+                            </div>
+                            <button type="button"
+                                class="text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+                                @click="modalReubicacion.open = false; cancelarReubicacion()">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Body Mejorado -->
+                    <div class="p-6 space-y-6">
+
+                        <!-- Resumen de la Operación -->
+                        <div class="text-center">
+                            <div
+                                class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-3 rounded-full border border-blue-200">
+                                <div class="text-center">
+                                    <div class="text-xs font-semibold text-blue-600 uppercase tracking-wide">Desde
+                                    </div>
+                                    <div class="text-lg font-bold text-gray-800" x-text="modalReubicacion.origen">
+                                    </div>
+                                </div>
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-arrow-right text-white text-sm"></i>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-xs font-semibold text-purple-600 uppercase tracking-wide">Hacia
+                                    </div>
+                                    <div class="text-lg font-bold text-gray-800" x-text="modalReubicacion.destino">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información del Producto/Productos -->
+                        <div
+                            class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <template x-if="modalReubicacion.tipo === 'multiple'">
+                                <div class="space-y-4">
+                                    <!-- Estadísticas Rápidas -->
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="text-center bg-white rounded-lg p-3 shadow-sm border">
+                                            <div class="text-2xl font-bold text-purple-600"
+                                                x-text="modalReubicacion.productos.length"></div>
+                                            <div class="text-xs font-medium text-gray-600 mt-1">Total Artículos</div>
+                                        </div>
+                                        <div class="text-center bg-white rounded-lg p-3 shadow-sm border">
+                                            <div class="text-2xl font-bold text-blue-600"
+                                                x-text="modalReubicacion.cantidad"></div>
+                                            <div class="text-xs font-medium text-gray-600 mt-1">Unidades Totales</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lista de Productos con Scroll Mejorado -->
+                                    <div>
+                                        <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                                            <i class="fas fa-list-ul text-blue-500"></i>
+                                            Productos a mover:
+                                        </h3>
+                                        <div
+                                            class="max-h-48 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                                            <!-- Scroll Container Mejorado -->
+                                            <div class="max-h-48 overflow-y-auto custom-scrollbar">
+                                                <div class="divide-y divide-gray-100">
+                                                    <template x-for="(producto, index) in modalReubicacion.productos"
+                                                        :key="index">
+                                                        <div class="p-3 hover:bg-blue-50 transition-colors group">
+                                                            <div class="flex items-center justify-between">
+                                                                <div class="flex items-center gap-3 flex-1 min-w-0">
+                                                                    <!-- Icono según tipo -->
+                                                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                                                                        :class="producto.es_custodia ?
+                                                                            'bg-purple-100 text-purple-600' :
+                                                                            'bg-blue-100 text-blue-600'">
+                                                                        <i class="fas text-xs"
+                                                                            :class="producto.es_custodia ? 'fa-shield-alt' :
+                                                                                'fa-box'"></i>
+                                                                    </div>
+
+                                                                    <!-- Información del producto -->
+                                                                    <div class="flex-1 min-w-0">
+                                                                        <p class="font-medium text-gray-800 text-sm truncate"
+                                                                            x-text="producto.nombre"></p>
+                                                                        <div class="flex items-center gap-2 mt-1">
+                                                                            <span
+                                                                                class="text-xs px-2 py-1 rounded-full font-medium"
+                                                                                :class="producto.es_custodia ?
+                                                                                    'bg-purple-100 text-purple-700' :
+                                                                                    'bg-blue-100 text-blue-700'"
+                                                                                x-text="producto.es_custodia ? 'Custodia' : producto.tipo_articulo">
+                                                                            </span>
+                                                                            <span class="text-xs text-gray-500"
+                                                                                x-text="'Cliente: ' + producto.cliente_nombre"></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Cantidad -->
+                                                                <div class="flex items-center gap-2 ml-3">
+                                                                    <span
+                                                                        class="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full min-w-[60px] text-center">
+                                                                        <span x-text="producto.cantidad"></span> und
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+
+                                            <!-- Contador de productos -->
+                                            <div class="bg-gray-50 px-4 py-2 border-t border-gray-200">
+                                                <div class="flex justify-between items-center text-xs text-gray-600">
+                                                    <span>Total de articulos listados</span>
+                                                    <span class="font-semibold"
+                                                        x-text="modalReubicacion.productos.length"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template x-if="modalReubicacion.tipo === 'simple'">
+                                <div class="space-y-4">
+                                    <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                                        <div class="flex items-center gap-4">
+                                            <div
+                                                class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                                <i class="fas fa-box text-blue-600"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <h3 class="font-semibold text-gray-800"
+                                                    x-text="modalReubicacion.producto"></h3>
+                                                <div class="flex items-center gap-3 mt-2">
+                                                    <span
+                                                        class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                                                        <i class="fas fa-cube mr-1"></i>
+                                                        <span x-text="modalReubicacion.cantidad + ' unidades'"></span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Advertencia para Múltiples Productos -->
+                        <div x-show="modalReubicacion.tipo === 'multiple'"
+                            class="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                                </div>
                                 <div>
-                                    <label class="text-sm font-medium text-gray-600">Cantidad</label>
-                                    <p class="text-lg font-bold text-gray-800"
-                                        x-text="modalReubicacion.cantidad + ' unidades'"></p>
+                                    <h4 class="font-semibold text-yellow-800 text-sm">Reubicación completa</h4>
+                                    <p class="text-yellow-700 text-xs mt-1 leading-relaxed">
+                                        Todos los productos serán movidos a la ubicación destino seleccionada.
+                                        La ubicación origen quedará completamente vacía después de esta operación.
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Desde / Hacia -->
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl mb-4">
-                            <div class="text-center">
-                                <div class="text-sm font-medium text-gray-600">Desde</div>
-                                <div class="text-lg font-bold text-gray-800" x-text="modalReubicacion.origen">
-                                </div>
-                            </div>
-                            <i class="fas fa-arrow-right text-gray-400"></i>
-                            <div class="text-center">
-                                <div class="text-sm font-medium text-gray-600">Hacia</div>
-                                <div class="text-lg font-bold text-gray-800" x-text="modalReubicacion.destino">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botones -->
+                        <!-- Botones de Acción Mejorados -->
                         <div class="flex gap-3 pt-2">
                             <button @click="cancelarReubicacion()"
-                                class="flex-1 btn btn-outline-danger">Cancelar</button>
-                            <button @click="confirmarReubicacion()"
-                                class="flex-1 btn btn-primary flex items-center justify-center gap-2">
-                                <i class="fas fa-check"></i>
-                                Confirmar
+                                class="flex-1 bg-danger text-white py-3.5 px-6 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
+                                <i class="fas fa-times"></i>
+                                Cancelar
                             </button>
+                            <button @click="confirmarReubicacion()"
+                                class="flex-1 text-white py-3.5 px-6 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                                :class="modalReubicacion.tipo === 'multiple' ?
+                                    'bg-primary' : 'bg-success'">
+                                <i class="fas fa-check"></i>
+                                <span
+                                    x-text="modalReubicacion.tipo === 'multiple' ? 'Reubicar Todo' : 'Confirmar'"></span>
+                            </button>
+                        </div>
 
+                        <!-- Información Adicional -->
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Esta acción no se puede deshacer automáticamente
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -1763,6 +2119,7 @@
                 modalReubicacionRack: {
                     open: false,
                     ubicacionOrigen: {},
+                    articulos: [], // ✅ AGREGAR ESTA LÍNEA
                     racksDisponibles: [],
                     rackDestinoSeleccionado: '',
                     ubicacionDestinoSeleccionada: '',
@@ -1937,7 +2294,14 @@
                         if (ubi.codigo === this.modoReubicacion.origen) {
                             this.cancelarReubicacion();
                         } else if (this.esDestinoValido(ubi)) {
-                            if (!this.modoReubicacion.producto) {
+                            // ✅ VERIFICAR QUE TENEMOS LOS DATOS NECESARIOS
+                            if (this.modoReubicacion.tipo === 'multiple' && !this.modoReubicacion.productos) {
+                                this.error('No hay productos para reubicar');
+                                this.cancelarReubicacion();
+                                return;
+                            }
+
+                            if (this.modoReubicacion.tipo === 'simple' && !this.modoReubicacion.producto) {
                                 this.error('No se ha seleccionado un producto para reubicar');
                                 this.cancelarReubicacion();
                                 return;
@@ -1950,14 +2314,31 @@
                                 return;
                             }
 
+                            // ✅ PREPARAR DATOS PARA EL MODAL DE CONFIRMACIÓN
                             this.modalReubicacion.origen = this.modoReubicacion.origen;
                             this.modalReubicacion.destino = ubi.codigo;
-                            this.modalReubicacion.producto = this.modoReubicacion.producto;
+                            this.modalReubicacion.tipo = this.modoReubicacion.tipo;
 
-                            // ✅ CORREGIDO: Usar la cantidad específica del modoReubicacion
-                            this.modalReubicacion.cantidad = this.modoReubicacion.cantidad; // ← CAMBIO AQUÍ
+                            if (this.modoReubicacion.tipo === 'multiple') {
+                                this.modalReubicacion.producto = 'Todos los productos';
+                                this.modalReubicacion.cantidad = this.modoReubicacion.cantidad;
+                                this.modalReubicacion.productos = this.modoReubicacion.productos;
+                            } else {
+                                this.modalReubicacion.producto = this.modoReubicacion.producto;
+                                this.modalReubicacion.cantidad = this.modoReubicacion.cantidad;
+                            }
+
+                            // ✅ SOLO AHORA ABRIR EL MODAL DE CONFIRMACIÓN
+                            console.log('📋 Abriendo modal de confirmación con datos:', {
+                                tipo: this.modalReubicacion.tipo,
+                                origen: this.modalReubicacion.origen,
+                                destino: this.modalReubicacion.destino,
+                                productos: this.modalReubicacion.productos?.length
+                            });
 
                             this.modalReubicacion.open = true;
+                        } else {
+                            this.error('La ubicación destino no es válida para esta reubicación');
                         }
                     } else {
                         this.verDetalle(ubi);
@@ -2083,31 +2464,78 @@
                         });
                 },
 
-                iniciarReubicacionMultiple(ubi) {
+                async iniciarReubicacionMultiple(ubi) {
                     if (!ubi.productos || ubi.productos.length === 0) {
                         this.error('No hay productos para reubicar');
                         return;
                     }
 
-                    this.modoReubicacion.activo = true;
-                    this.modoReubicacion.origen = ubi.codigo;
-                    this.modoReubicacion.producto = 'Todos los productos';
-                    this.modoReubicacion.ubicacionOrigenId = ubi.id;
-                    this.modoReubicacion.cantidad = ubi.cantidad_total;
-                    this.modoReubicacion.tipo = 'todos_los_productos';
-                    this.modal.open = false;
-                    this.success('Modo reubicación activado para todos los productos');
+                    this.loading = true;
+
+                    try {
+                        const response = await fetch('/almacen/reubicacion/iniciar-multiple', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify({
+                                ubicacion_origen_id: ubi.id
+                            })
+                        });
+
+                        const result = await response.json();
+                        console.log('📥 Respuesta reubicación múltiple:', result);
+
+                        if (result.success) {
+                            const data = result.data.ubicacion_origen;
+
+                            // ✅ CORREGIDO: Solo configurar el modo reubicación, NO abrir el modal todavía
+                            this.modoReubicacion.activo = true;
+                            this.modoReubicacion.tipo = 'multiple';
+                            this.modoReubicacion.origen = data.codigo;
+                            this.modoReubicacion.ubicacionOrigenId = data.id;
+                            this.modoReubicacion.productos = data.productos;
+                            this.modoReubicacion.cantidad = data.cantidad_total;
+                            this.modoReubicacion.totalProductos = data.total_productos;
+
+                            // ✅ NO abrir modalReubicacion todavía - solo cerrar modal principal
+                            this.modal.open = false;
+
+                            this.success(
+                                `Modo reubicación activado para ${data.total_productos} productos. Selecciona una ubicación destino.`
+                            );
+
+                            console.log('✅ Modo reubicación múltiple activado. Esperando selección de destino...');
+                        } else {
+                            this.error(result.message || 'Error al iniciar reubicación múltiple');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    } finally {
+                        this.loading = false;
+                    }
                 },
+
 
                 esDestinoValido(ubi) {
                     if (ubi.codigo === this.modoReubicacion.origen) {
                         return false;
                     }
 
+                    // Para reubicación múltiple, la ubicación destino debe estar vacía
+                    if (this.modoReubicacion.tipo === 'multiple') {
+                        return (!ubi.productos || ubi.productos.length === 0);
+                    }
+
+                    // Para custodias individuales, la ubicación destino debe estar vacía
                     if (this.modoReubicacion.esCustodia) {
                         return (!ubi.productos || ubi.productos.length === 0);
                     }
 
+                    // Para productos normales individuales, verificar que no exista el mismo producto
                     if (this.modoReubicacion.tipo === 'producto_especifico') {
                         const productoExistente = ubi.productos?.find(p => p.id === this.modoReubicacion.productoId);
                         return !productoExistente;
@@ -2118,8 +2546,8 @@
 
                 async confirmarReubicacion() {
                     try {
-                        if (!this.modalReubicacion.producto || this.modalReubicacion.producto.trim() === '') {
-                            this.error('El producto no está definido. Por favor, cancela y reinicia la reubicación.');
+                        if (!this.modalReubicacion.destino) {
+                            this.error('Por favor selecciona una ubicación destino');
                             return;
                         }
 
@@ -2129,35 +2557,43 @@
                             return;
                         }
 
-                        const cantidad = parseInt(this.modalReubicacion.cantidad);
-                        if (cantidad <= 0 || isNaN(cantidad)) {
-                            this.error('Cantidad inválida para reubicación');
-                            return;
-                        }
+                        // Determinar qué endpoint usar según el tipo
+                        const url = this.modoReubicacion.tipo === 'multiple' ?
+                            '/almacen/reubicacion/confirmar-multiple' :
+                            '/almacen/reubicacion/confirmar';
 
-                        // En confirmarReubicacion(), dentro del payload:
-                        const payload = {
+                        // Preparar payload según el tipo
+                        let payload = {
                             ubicacion_origen_id: Number(this.modoReubicacion.ubicacionOrigenId),
                             ubicacion_destino_id: ubicacionDestino.id,
-                            producto: this.modalReubicacion.producto.toString().trim(),
-                            cantidad: cantidad,
-                            tipo_reubicacion: 'mismo_rack',
-                            es_custodia: this.modoReubicacion.esCustodia || false,
+                            tipo_reubicacion: 'mismo_rack'
                         };
 
-                        // ✅ AGREGAR LOS CAMPOS SEGÚN EL TIPO
-                        if (this.modoReubicacion.esCustodia) {
-                            payload.custodia_id = this.modoReubicacion.productoId;
-                            payload.articulo_id = null;
-                            payload.cliente_general_id = null;
+                        if (this.modoReubicacion.tipo === 'multiple') {
+                            // Payload para reubicación múltiple
+                            payload.producto = 'Todos los productos';
+                            payload.cantidad = this.modoReubicacion.cantidad;
                         } else {
-                            payload.custodia_id = null;
-                            payload.articulo_id = this.modoReubicacion.articuloId;
-                            payload.cliente_general_id = this.modoReubicacion.clienteGeneralId;
-                        }
-                        console.log('📤 PAYLOAD COMPLETO enviado al backend:', payload);
+                            // Payload para reubicación simple
+                            payload.producto = this.modalReubicacion.producto.toString().trim();
+                            payload.cantidad = parseInt(this.modalReubicacion.cantidad);
+                            payload.es_custodia = this.modoReubicacion.esCustodia || false;
 
-                        const response = await fetch('/almacen/reubicacion/confirmar', {
+                            // Agregar campos según el tipo
+                            if (this.modoReubicacion.esCustodia) {
+                                payload.custodia_id = this.modoReubicacion.productoId;
+                                payload.articulo_id = null;
+                                payload.cliente_general_id = null;
+                            } else {
+                                payload.custodia_id = null;
+                                payload.articulo_id = this.modoReubicacion.articuloId;
+                                payload.cliente_general_id = this.modoReubicacion.clienteGeneralId;
+                            }
+                        }
+
+                        console.log('📤 PAYLOAD enviado al backend:', payload);
+
+                        const response = await fetch(url, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -2168,19 +2604,23 @@
                         });
 
                         const result = await response.json();
-                        console.log('Respuesta confirmación:', result);
+                        console.log('📥 Respuesta confirmación:', result);
 
                         if (result.success) {
-                            this.success(result.message);
+                            const mensaje = this.modoReubicacion.tipo === 'multiple' ?
+                                `✅ ${result.data.total_productos} productos reubicados exitosamente` :
+                                result.message;
 
-                            // ✅ ESPERAR A QUE SE COMPLETE LA RECARGA ANTES DE CERRAR MODALES
+                            this.success(mensaje);
+
+                            // Recargar datos completos
                             const recargaExitosa = await this.recargarDatosRackCompletos();
 
                             if (recargaExitosa) {
                                 this.cancelarReubicacion();
                                 this.modalReubicacion.open = false;
 
-                                // ✅ CERRAR MODAL DE DETALLE SI ESTÁ ABIERTO
+                                // Cerrar modal de detalle si está abierto
                                 if (this.modal.open) {
                                     this.modal.open = false;
                                 }
@@ -2189,7 +2629,7 @@
                             let errorMessage = result.message || 'Error al confirmar reubicación';
                             if (result.errors) {
                                 console.error('Errores de validación:', result.errors);
-                                // ... manejo de errores ...
+                                errorMessage = Object.values(result.errors).flat().join(', ');
                             }
                             this.error(errorMessage);
                         }
@@ -2199,60 +2639,60 @@
                     }
                 },
                 // En tu Alpine.js - MÉTODO MEJORADO
-async recargarDatosRackCompletos() {
-    try {
-        console.log('🔄 Recargando datos del rack desde servidor...');
+                async recargarDatosRackCompletos() {
+                    try {
+                        console.log('🔄 Recargando datos del rack desde servidor...');
 
-        const rackNombre = this.rack.nombre;
-        const sede = this.rack.sede;
+                        const rackNombre = this.rack.nombre;
+                        const sede = this.rack.sede;
 
-        const timestamp = new Date().getTime();
-        const response = await fetch(
-            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}&_t=${timestamp}`
-        );
+                        const timestamp = new Date().getTime();
+                        const response = await fetch(
+                            `/almacen/racks/${rackNombre}/datos-actualizados?sede=${encodeURIComponent(sede)}&_t=${timestamp}`
+                        );
 
-        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                        if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
 
-        const result = await response.json();
+                        const result = await response.json();
 
-        if (result.success && result.data) {
-            console.log('📥 Datos COMPLETOS recibidos del servidor:', result.data);
-            
-            // ✅ DEBUG ESPECÍFICO
-            const ubicacionEspecifica = result.data.niveles?.flatMap(n => n.ubicaciones)
-                .find(u => u.codigo === 'A-A2-01');
-            
-            if (ubicacionEspecifica) {
-                console.log('🔍 DEBUG A-A2-01 desde servidor:', {
-                    productosCount: ubicacionEspecifica.productos?.length || 0,
-                    productos: ubicacionEspecifica.productos
-                });
-            }
+                        if (result.success && result.data) {
+                            console.log('📥 Datos COMPLETOS recibidos del servidor:', result.data);
 
-            // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
-            this.rack = JSON.parse(JSON.stringify(result.data));
+                            // ✅ DEBUG ESPECÍFICO
+                            const ubicacionEspecifica = result.data.niveles?.flatMap(n => n.ubicaciones)
+                                .find(u => u.codigo === 'A-A2-01');
 
-            // ✅ REPROCESAR DATOS
-            this.procesarDatosRack();
+                            if (ubicacionEspecifica) {
+                                console.log('🔍 DEBUG A-A2-01 desde servidor:', {
+                                    productosCount: ubicacionEspecifica.productos?.length || 0,
+                                    productos: ubicacionEspecifica.productos
+                                });
+                            }
 
-            await this.$nextTick();
-            await this.$nextTick();
+                            // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
+                            this.rack = JSON.parse(JSON.stringify(result.data));
 
-            setTimeout(() => {
-                this.initSwipers();
-            }, 150);
+                            // ✅ REPROCESAR DATOS
+                            this.procesarDatosRack();
 
-            console.log('✅ Datos recargados exitosamente');
-            return true;
-        } else {
-            throw new Error(result.message || 'Error en la respuesta');
-        }
-    } catch (error) {
-        console.error('❌ Error recargando datos:', error);
-        this.error('Error al actualizar datos: ' + error.message);
-        return false;
-    }
-},
+                            await this.$nextTick();
+                            await this.$nextTick();
+
+                            setTimeout(() => {
+                                this.initSwipers();
+                            }, 150);
+
+                            console.log('✅ Datos recargados exitosamente');
+                            return true;
+                        } else {
+                            throw new Error(result.message || 'Error en la respuesta');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error recargando datos:', error);
+                        this.error('Error al actualizar datos: ' + error.message);
+                        return false;
+                    }
+                },
 
                 async cancelarReubicacion() {
                     try {
@@ -2265,7 +2705,7 @@ async recargarDatosRackCompletos() {
                             }
                         });
 
-                        // ✅ LIMPIAR ESTADO EXISTENTE
+                        // Limpiar estado existente
                         this.modoReubicacion.activo = false;
                         this.modoReubicacion.origen = '';
                         this.modoReubicacion.producto = '';
@@ -2274,16 +2714,20 @@ async recargarDatosRackCompletos() {
                         this.modoReubicacion.tipo = '';
                         this.modoReubicacion.esCustodia = false;
                         this.modoReubicacion.productoId = null;
-                        this.modoReubicacion.articuloId = null; // ✅ NUEVO
-                        this.modoReubicacion.clienteGeneralId = null; // ✅ NUEVO
+                        this.modoReubicacion.articuloId = null;
+                        this.modoReubicacion.clienteGeneralId = null;
+                        this.modoReubicacion.productos = [];
+                        this.modoReubicacion.totalProductos = 0;
 
                         this.modalReubicacion.open = false;
                         this.modalReubicacion.origen = '';
                         this.modalReubicacion.destino = '';
                         this.modalReubicacion.producto = '';
                         this.modalReubicacion.cantidad = 0;
+                        this.modalReubicacion.tipo = 'simple';
+                        this.modalReubicacion.productos = [];
 
-                        // ✅ RECARGAR DATOS PARA ASEGURAR CONSISTENCIA
+                        // Recargar datos para asegurar consistencia
                         await this.recargarDatosRackCompletos();
                     } catch (error) {
                         console.error('Error:', error);
@@ -2291,7 +2735,7 @@ async recargarDatosRackCompletos() {
                         this.modoReubicacion.activo = false;
                         this.modalReubicacion.open = false;
 
-                        // ✅ INTENTAR RECARGAR A PESAR DEL ERROR
+                        // Intentar recargar a pesar del error
                         try {
                             await this.recargarDatosRackCompletos();
                         } catch (e) {
@@ -2542,7 +2986,21 @@ async recargarDatosRackCompletos() {
 
                     // Filtrar por tipo
                     if (this.modalHistorial.filtroTipo !== 'todos') {
-                        filtered = filtered.filter(mov => mov.tipo === this.modalHistorial.filtroTipo);
+                        filtered = filtered.filter(mov => {
+                            switch (this.modalHistorial.filtroTipo) {
+                                case 'reubicacion':
+                                    // Incluir reubicaciones normales (las múltiples también usan 'reubicacion')
+                                    return mov.tipo === 'reubicacion';
+                                case 'reubicacion_custodia':
+                                    // Incluir reubicaciones de custodia (las múltiples también usan 'reubicacion_custodia')
+                                    return mov.tipo === 'reubicacion_custodia';
+                                case 'custodia':
+                                    // Todas las custodias
+                                    return mov.tipo === 'reubicacion_custodia';
+                                default:
+                                    return mov.tipo === this.modalHistorial.filtroTipo;
+                            }
+                        });
                     }
 
                     // Filtrar por búsqueda
@@ -3129,6 +3587,238 @@ async recargarDatosRackCompletos() {
                     });
                 },
 
+                // ========== MÉTODOS PARA REUBICACIÓN ENTRE RACKS ==========
+                abrirModalReubicacionRack(ubicacion) {
+                    console.log('📍 Abriendo modal reubicación entre racks:', ubicacion);
+
+                    this.modalReubicacionRack.open = true;
+                    this.modalReubicacionRack.ubicacionOrigen = {
+                        id: ubicacion.id,
+                        codigo: ubicacion.codigo,
+                        cantidad: ubicacion.cantidad_total || 0
+                    };
+
+                    // ✅ Cargar artículos de la ubicación
+                    this.cargarArticulosUbicacion(ubicacion.id);
+
+                    // Cargar racks disponibles (excluyendo el rack actual)
+                    this.cargarRacksDisponibles();
+                    this.modalReubicacionRack.rackDestinoSeleccionado = '';
+                    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+                    this.modalReubicacionRack.ubicacionesDestino = [];
+                },
+
+                async cargarRacksDisponibles() {
+                    try {
+                        console.log('🔄 Cargando racks disponibles...');
+
+                        const response = await fetch('/almacen/racks/disponibles', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Filtrar para excluir el rack actual
+                            this.modalReubicacionRack.racksDisponibles = result.data.filter(rack =>
+                                rack.id !== this.rack.idRack
+                            );
+                            console.log('✅ Racks disponibles cargados:', this.modalReubicacionRack.racksDisponibles);
+                        } else {
+                            this.error('Error al cargar racks disponibles');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
+                },
+
+                async cargarUbicacionesDestino() {
+                    if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
+                        this.modalReubicacionRack.ubicacionesDestino = [];
+                        return;
+                    }
+
+                    try {
+                        console.log('🔄 Cargando ubicaciones para rack:', this.modalReubicacionRack
+                            .rackDestinoSeleccionado);
+
+                        const response = await fetch(
+                            `/almacen/racks/${this.modalReubicacionRack.rackDestinoSeleccionado}/ubicaciones-vacias`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                        'content')
+                                }
+                            });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.modalReubicacionRack.ubicacionesDestino = result.data;
+                            console.log('✅ Ubicaciones destino cargadas:', this.modalReubicacionRack
+                                .ubicacionesDestino);
+                        } else {
+                            this.error('Error al cargar ubicaciones destino');
+                            this.modalReubicacionRack.ubicacionesDestino = [];
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                        this.modalReubicacionRack.ubicacionesDestino = [];
+                    }
+                },
+
+                async confirmarReubicacionRack() {
+                    try {
+                        if (!this.modalReubicacionRack.ubicacionDestinoSeleccionada) {
+                            this.error('Por favor selecciona una ubicación destino');
+                            return;
+                        }
+
+                        console.log('📤 Confirmando reubicación entre racks:', {
+                            origen: this.modalReubicacionRack.ubicacionOrigen.id,
+                            destino: this.modalReubicacionRack.ubicacionDestinoSeleccionada
+                        });
+
+                        const payload = {
+                            ubicacion_origen_id: this.modalReubicacionRack.ubicacionOrigen.id,
+                            ubicacion_destino_id: this.modalReubicacionRack.ubicacionDestinoSeleccionada,
+                            producto: this.modalReubicacionRack.ubicacionOrigen.producto,
+                            cantidad: this.modalReubicacionRack.ubicacionOrigen.cantidad,
+                            tipo_reubicacion: 'otro_rack'
+                        };
+
+                        const response = await fetch('/almacen/reubicacion/confirmar-entre-racks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+                        console.log('📥 Respuesta reubicación entre racks:', result);
+
+                        if (result.success) {
+                            this.success('✅ Reubicación entre racks completada exitosamente');
+
+                            // Recargar datos del rack actual
+                            await this.recargarDatosRackCompletos();
+
+                            this.cerrarModalReubicacionRack();
+
+                            // Cerrar modales abiertos
+                            if (this.modal.open) {
+                                this.modal.open = false;
+                            }
+                        } else {
+                            this.error(result.message || 'Error al confirmar reubicación entre racks');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                    }
+                },
+
+
+                // ========== MÉTODOS PARA REUBICACIÓN ENTRE RACKS ==========
+                iniciarReubicacionRack(ubicacion) {
+                    console.log('📍 Abriendo modal reubicación entre racks:', ubicacion);
+
+                    this.modalReubicacionRack.open = true;
+                    this.modalReubicacionRack.ubicacionOrigen = {
+                        id: ubicacion.id,
+                        codigo: ubicacion.codigo,
+                        cantidad: ubicacion.cantidad_total || 0
+                    };
+
+                    // Cargar artículos de la ubicación
+                    this.cargarArticulosUbicacion(ubicacion.id);
+
+                    // Cargar racks disponibles
+                    this.cargarRacksDisponibles();
+                    this.modalReubicacionRack.rackDestinoSeleccionado = '';
+                    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+                    this.modalReubicacionRack.ubicacionesDestino = [];
+                },
+
+                async cargarArticulosUbicacion(ubicacionId) {
+                    try {
+                        console.log('🔄 Cargando artículos de la ubicación:', ubicacionId);
+
+                        const response = await fetch(`/almacen/ubicaciones/${ubicacionId}/articulos`, {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            }
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Preparar artículos con propiedades de selección
+                            this.modalReubicacionRack.articulos = result.data.map(articulo => ({
+                                ...articulo,
+                                seleccionado: false,
+                                cantidad_a_mover: articulo.cantidad // Por defecto mover toda la cantidad
+                            }));
+                            console.log('✅ Artículos cargados:', this.modalReubicacionRack.articulos);
+                        } else {
+                            this.error('Error al cargar artículos de la ubicación');
+                            this.modalReubicacionRack.articulos = [];
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                        this.modalReubicacionRack.articulos = [];
+                    }
+                },
+
+                // Computed properties para artículos seleccionados
+                get articulosSeleccionados() {
+                    return this.modalReubicacionRack.articulos.filter(articulo => articulo.seleccionado);
+                },
+
+                get cantidadTotalSeleccionada() {
+                    return this.articulosSeleccionados.reduce((total, articulo) => total + articulo.cantidad_a_mover,
+                        0);
+                },
+
+                // Métodos para manejar cantidades
+                incrementarCantidadArticulo(index) {
+                    const articulo = this.modalReubicacionRack.articulos[index];
+                    if (articulo.cantidad_a_mover < articulo.cantidad) {
+                        articulo.cantidad_a_mover++;
+                    }
+                },
+
+                decrementarCantidadArticulo(index) {
+                    const articulo = this.modalReubicacionRack.articulos[index];
+                    if (articulo.cantidad_a_mover > 1) {
+                        articulo.cantidad_a_mover--;
+                    }
+                },
+
+                cerrarModalReubicacionRack() {
+                    this.modalReubicacionRack.open = false;
+                    this.modalReubicacionRack.ubicacionOrigen = {};
+                    this.modalReubicacionRack.articulos = [];
+                    this.modalReubicacionRack.racksDisponibles = [];
+                    this.modalReubicacionRack.rackDestinoSeleccionado = '';
+                    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+                    this.modalReubicacionRack.ubicacionesDestino = [];
+                },
                 // ========== MÉTODOS DE NAVEGACIÓN Y UTILIDAD ==========
                 cambiarRack(direccion) {
                     let nuevoIdx = this.idxRackActual;
