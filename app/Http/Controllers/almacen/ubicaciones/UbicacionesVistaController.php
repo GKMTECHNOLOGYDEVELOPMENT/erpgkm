@@ -734,84 +734,102 @@ $stats = [
         $rackId = $rackData->first()->idRack;
         $ubicacionesIds = $rackData->pluck('idRackUbicacion')->unique();
 
-        // Obtener historial de movimientos (mantener igual)
-        $historialPorUbicacion = [];
-        if ($ubicacionesIds->isNotEmpty()) {
-            $movimientos = DB::table('rack_movimientos')
-                ->where(function ($query) use ($ubicacionesIds) {
-                    $query->whereIn('ubicacion_origen_id', $ubicacionesIds)
-                        ->orWhereIn('ubicacion_destino_id', $ubicacionesIds);
-                })
-                ->orWhere('rack_origen_id', $rackId)
-                ->orWhere('rack_destino_id', $rackId)
-                ->select(
-                    'idMovimiento',
-                    'articulo_id',
-                    'ubicacion_origen_id',
-                    'ubicacion_destino_id',
-                    'rack_origen_id',
-                    'rack_destino_id',
-                    'cantidad',
-                    'tipo_movimiento',
-                    'observaciones',
-                    'created_at',
-                    'codigo_ubicacion_origen',
-                    'codigo_ubicacion_destino',
-                    'nombre_rack_origen',
-                    'nombre_rack_destino'
-                )
-                ->orderBy('created_at', 'desc')
-                ->get();
+// Obtener historial de movimientos - MODIFICADO PARA LIMPIAR OBSERVACIONES
+$historialPorUbicacion = [];
+if ($ubicacionesIds->isNotEmpty()) {
+    $movimientos = DB::table('rack_movimientos')
+        ->where(function ($query) use ($ubicacionesIds) {
+            $query->whereIn('ubicacion_origen_id', $ubicacionesIds)
+                ->orWhereIn('ubicacion_destino_id', $ubicacionesIds);
+        })
+        ->orWhere('rack_origen_id', $rackId)
+        ->orWhere('rack_destino_id', $rackId)
+        ->select(
+            'idMovimiento',
+            'articulo_id',
+            'ubicacion_origen_id',
+            'ubicacion_destino_id',
+            'rack_origen_id',
+            'rack_destino_id',
+            'cantidad',
+            'tipo_movimiento',
+            'observaciones',
+            'created_at',
+            'codigo_ubicacion_origen',
+            'codigo_ubicacion_destino',
+            'nombre_rack_origen',
+            'nombre_rack_destino'
+        )
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-            // Procesar movimientos para cada ubicación (mantener igual)
-            foreach ($movimientos as $mov) {
-                if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
-                    $historialPorUbicacion[$mov->ubicacion_origen_id][] = [
-                        'fecha' => $mov->created_at,
-                        'producto' => 'Producto Movido',
-                        'cantidad' => $mov->cantidad,
-                        'tipo' => $mov->tipo_movimiento,
-                        'desde' => $mov->codigo_ubicacion_origen,
-                        'hacia' => $mov->codigo_ubicacion_destino,
-                        'rack_origen' => $mov->nombre_rack_origen,
-                        'rack_destino' => $mov->nombre_rack_destino,
-                        'observaciones' => $mov->observaciones
-                    ];
-                }
-
-                if ($mov->ubicacion_destino_id && in_array($mov->ubicacion_destino_id, $ubicacionesIds->toArray())) {
-                    $historialPorUbicacion[$mov->ubicacion_destino_id][] = [
-                        'fecha' => $mov->created_at,
-                        'producto' => 'Producto Movido',
-                        'cantidad' => $mov->cantidad,
-                        'tipo' => $mov->tipo_movimiento,
-                        'desde' => $mov->codigo_ubicacion_origen,
-                        'hacia' => $mov->codigo_ubicacion_destino,
-                        'rack_origen' => $mov->nombre_rack_origen,
-                        'rack_destino' => $mov->nombre_rack_destino,
-                        'observaciones' => $mov->observaciones
-                    ];
-                }
-
-                if ((!$mov->ubicacion_origen_id && !$mov->ubicacion_destino_id) &&
-                    ($mov->rack_origen_id == $rackId || $mov->rack_destino_id == $rackId)
-                ) {
-                    foreach ($ubicacionesIds as $ubicacionId) {
-                        $historialPorUbicacion[$ubicacionId][] = [
-                            'fecha' => $mov->created_at,
-                            'producto' => 'Movimiento de Rack',
-                            'cantidad' => $mov->cantidad,
-                            'tipo' => $mov->tipo_movimiento,
-                            'desde' => $mov->nombre_rack_origen,
-                            'hacia' => $mov->nombre_rack_destino,
-                            'rack_origen' => $mov->nombre_rack_origen,
-                            'rack_destino' => $mov->nombre_rack_destino,
-                            'observaciones' => $mov->observaciones
-                        ];
-                    }
-                }
+    // Procesar movimientos para cada ubicación - MODIFICADO
+    foreach ($movimientos as $mov) {
+        // ✅ LIMPIAR OBSERVACIONES: Eliminar referencias a Producto/Artículo con ID
+        $observacionesLimpias = $mov->observaciones;
+        if ($mov->observaciones) {
+            // Eliminar "Producto: [número]" o "Artículo: [número]"
+            $observacionesLimpias = preg_replace('/Producto:\s*\d+\s*-?\s*/', '', $mov->observaciones);
+            $observacionesLimpias = preg_replace('/Artículo:\s*\d+\s*-?\s*/', '', $observacionesLimpias);
+            
+            // Limpiar espacios extras y guiones sobrantes
+            $observacionesLimpias = preg_replace('/\s*-\s*$/','', $observacionesLimpias); // Quitar guión final
+            $observacionesLimpias = preg_replace('/^\s*-\s*/','', $observacionesLimpias); // Quitar guión inicial
+            $observacionesLimpias = trim($observacionesLimpias);
+            
+            // Si solo queda "Reubicación múltiple", dejarlo limpio
+            if ($observacionesLimpias === 'Reubicación múltiple') {
+                $observacionesLimpias = 'Reubicación múltiple';
             }
         }
+
+        if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
+            $historialPorUbicacion[$mov->ubicacion_origen_id][] = [
+                'fecha' => $mov->created_at,
+                'producto' => 'Artículo Movido',
+                'cantidad' => $mov->cantidad,
+                'tipo' => $mov->tipo_movimiento,
+                'desde' => $mov->codigo_ubicacion_origen,
+                'hacia' => $mov->codigo_ubicacion_destino,
+                'rack_origen' => $mov->nombre_rack_origen,
+                'rack_destino' => $mov->nombre_rack_destino,
+                'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+            ];
+        }
+
+        if ($mov->ubicacion_destino_id && in_array($mov->ubicacion_destino_id, $ubicacionesIds->toArray())) {
+            $historialPorUbicacion[$mov->ubicacion_destino_id][] = [
+                'fecha' => $mov->created_at,
+                'producto' => 'Artículo Movido',
+                'cantidad' => $mov->cantidad,
+                'tipo' => $mov->tipo_movimiento,
+                'desde' => $mov->codigo_ubicacion_origen,
+                'hacia' => $mov->codigo_ubicacion_destino,
+                'rack_origen' => $mov->nombre_rack_origen,
+                'rack_destino' => $mov->nombre_rack_destino,
+                'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+            ];
+        }
+
+        if ((!$mov->ubicacion_origen_id && !$mov->ubicacion_destino_id) &&
+            ($mov->rack_origen_id == $rackId || $mov->rack_destino_id == $rackId)
+        ) {
+            foreach ($ubicacionesIds as $ubicacionId) {
+                $historialPorUbicacion[$ubicacionId][] = [
+                    'fecha' => $mov->created_at,
+                    'producto' => 'Movimiento de Rack',
+                    'cantidad' => $mov->cantidad,
+                    'tipo' => $mov->tipo_movimiento,
+                    'desde' => $mov->nombre_rack_origen,
+                    'hacia' => $mov->nombre_rack_destino,
+                    'rack_origen' => $mov->nombre_rack_origen,
+                    'rack_destino' => $mov->nombre_rack_destino,
+                    'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+                ];
+            }
+        }
+    }
+}
 
         // Estructurar datos para la vista
         $rackEstructurado = [
