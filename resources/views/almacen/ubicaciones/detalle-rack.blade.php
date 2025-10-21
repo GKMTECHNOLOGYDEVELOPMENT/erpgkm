@@ -696,18 +696,6 @@
                                                                     <span
                                                                         x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
                                                                 </button>
-
-                                                                <button @click="eliminarProductoIndividual(idx)"
-                                                                    :disabled="producto.custodia_id"
-                                                                    :class="producto.custodia_id ?
-                                                                        'bg-gray-400 cursor-not-allowed' :
-                                                                        'bg-red-500 hover:bg-red-600'"
-                                                                    class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                                                                    :title="producto.custodia_id ?
-                                                                        'No se puede eliminar - En custodia' :
-                                                                        'Eliminar producto'">
-                                                                    <i class="fas fa-trash text-xs"></i>
-                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -781,18 +769,6 @@
                                         class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                                         <i class="fas fa-exchange-alt"></i>
                                         Mover a Otro Rack
-                                    </button>
-
-                                    <button @click="abrirModalAgregarProducto(modal.ubi)"
-                                        class="bg-green-500 hover:bg-green-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-plus text-xs"></i>
-                                        Agregar Más
-                                    </button>
-
-                                    <button @click="vaciarUbicacion(modal.ubi)"
-                                        class="bg-red-500 hover:bg-red-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
-                                        <i class="fas fa-trash text-xs"></i>
-                                        Vaciar Todo
                                     </button>
 
                                     <button @click="abrirHistorial(modal.ubi)"
@@ -2453,10 +2429,19 @@ actualizarSelectUbicacionesDestino() {
                 },
 
                 abrirHistorial(ubi) {
-                    this.modalHistorial.ubi = ubi;
-                    this.modalHistorial.open = true;
-                },
+                    console.log('🔍 DEBUG - Datos de ubicación al abrir historial:', ubi);
+                    console.log('📊 DEBUG - Historial disponible:', ubi.historial);
 
+                    this.modalHistorial.ubi = ubi;
+                    this.modalHistorial.filtroTipo = 'todos';
+                    this.modalHistorial.busqueda = '';
+                    this.modalHistorial.open = true;
+
+                    // Inicializar historial filtrado
+                    this.$nextTick(() => {
+                        this.filtrarHistorial();
+                    });
+                },
                 // ========== MÉTODOS DE REUBICACIÓN ==========
                 iniciarReubicacionProducto(ubi, producto) {
                     if (!producto) {
@@ -3030,52 +3015,6 @@ actualizarSelectUbicacionesDestino() {
                     delete producto.cantidadOriginal;
                 },
 
-                async eliminarProductoIndividual(index) {
-                    if (!this.modal.ubi || !this.modal.ubi.productos) return;
-
-                    const producto = this.modal.ubi.productos[index];
-
-                    if (!confirm(`¿Está seguro de que desea eliminar ${producto.nombre} de esta ubicación?`)) {
-                        return;
-                    }
-
-                    try {
-                        const payload = {
-                            ubicacion_id: this.modal.ubi.id,
-                            articulo_id: producto.id,
-                            accion: 'eliminar'
-                        };
-
-                        console.log('Eliminando producto:', payload);
-
-                        const response = await fetch('/almacen/ubicaciones/eliminar-producto', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                    'content')
-                            },
-                            body: JSON.stringify(payload)
-                        });
-
-                        const result = await response.json();
-
-                        if (result.success) {
-                            this.success(`${producto.nombre} eliminado exitosamente`);
-                            this.modal.ubi.productos.splice(index, 1);
-                            this.actualizarInterfazDespuesCambio(this.modal.ubi.id);
-
-                            if (this.modal.ubi.productos.length === 0) {
-                                this.modal.open = false;
-                            }
-                        } else {
-                            this.error(`Error al eliminar ${producto.nombre}: ${result.message}`);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    }
-                },
 
                 async vaciarUbicacion(ubi) {
                     if (!confirm('¿Está seguro de que desea vaciar esta ubicación?')) {
@@ -3116,28 +3055,36 @@ actualizarSelectUbicacionesDestino() {
                 },
 
                 filtrarHistorial() {
-                    if (!this.modalHistorial.ubi.historial) {
+                    console.log('🔄 Filtrando historial...');
+
+                    if (!this.modalHistorial.ubi || !this.modalHistorial.ubi.historial) {
+                        console.warn('❌ No hay historial disponible');
                         this.modalHistorial.historialFiltrado = [];
                         return;
                     }
+
+                    console.log('📋 Historial completo:', this.modalHistorial.ubi.historial);
 
                     let filtered = [...this.modalHistorial.ubi.historial];
 
                     // Filtrar por tipo
                     if (this.modalHistorial.filtroTipo !== 'todos') {
                         filtered = filtered.filter(mov => {
+                            if (!mov.tipo) return false;
+
                             switch (this.modalHistorial.filtroTipo) {
+                                case 'ingreso':
+                                case 'salida':
+                                case 'ajuste':
+                                    return mov.tipo === this.modalHistorial.filtroTipo;
                                 case 'reubicacion':
-                                    // Incluir reubicaciones normales (las múltiples también usan 'reubicacion')
                                     return mov.tipo === 'reubicacion';
                                 case 'reubicacion_custodia':
-                                    // Incluir reubicaciones de custodia (las múltiples también usan 'reubicacion_custodia')
                                     return mov.tipo === 'reubicacion_custodia';
                                 case 'custodia':
-                                    // Todas las custodias
                                     return mov.tipo === 'reubicacion_custodia';
                                 default:
-                                    return mov.tipo === this.modalHistorial.filtroTipo;
+                                    return true;
                             }
                         });
                     }
@@ -3149,13 +3096,16 @@ actualizarSelectUbicacionesDestino() {
                             (mov.producto && mov.producto.toLowerCase().includes(busqueda)) ||
                             (mov.observaciones && mov.observaciones.toLowerCase().includes(busqueda)) ||
                             (mov.serie && mov.serie.toLowerCase().includes(busqueda)) ||
-                            (mov.codigocustodias && mov.codigocustodias.toLowerCase().includes(busqueda))
+                            (mov.codigocustodias && mov.codigocustodias.toLowerCase().includes(busqueda)) ||
+                            (mov.usuario && mov.usuario.toLowerCase().includes(busqueda)) ||
+                            (mov.numero_ticket && mov.numero_ticket.toLowerCase().includes(busqueda))
                         );
                     }
 
                     // Ordenar por fecha (más reciente primero)
                     filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
+                    console.log('✅ Historial filtrado:', filtered);
                     this.modalHistorial.historialFiltrado = filtered;
                 },
 
