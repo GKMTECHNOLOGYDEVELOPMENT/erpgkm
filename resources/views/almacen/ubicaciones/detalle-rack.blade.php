@@ -197,58 +197,58 @@
         }
 
         /* Estilos para Select2 en modales */
-.select2-container--bootstrap4 .select2-selection--single {
-    height: 48px !important;
-    padding: 10px 12px;
-    border: 1px solid #d1d5db !important;
-    border-radius: 0.5rem !important;
-    background-color: white !important;
-}
+        .select2-container--bootstrap4 .select2-selection--single {
+            height: 48px !important;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            background-color: white !important;
+        }
 
-.select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-    padding-left: 0 !important;
-    color: #374151 !important;
-    font-size: 0.875rem !important;
-}
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            padding-left: 0 !important;
+            color: #374151 !important;
+            font-size: 0.875rem !important;
+        }
 
-.select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
-    height: 46px !important;
-}
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+        }
 
-.select2-container--bootstrap4 .select2-dropdown {
-    border: 1px solid #d1d5db !important;
-    border-radius: 0.5rem !important;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
+        .select2-container--bootstrap4 .select2-dropdown {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
 
-.select2-container--bootstrap4 .select2-results__option--highlighted {
-    background-color: #3b82f6 !important;
-    color: white !important;
-}
+        .select2-container--bootstrap4 .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
 
-/* Para modo oscuro */
-.dark .select2-container--bootstrap4 .select2-selection--single {
-    background-color: #1f2937 !important;
-    border-color: #4b5563 !important;
-    color: #f9fafb !important;
-}
+        /* Para modo oscuro */
+        .dark .select2-container--bootstrap4 .select2-selection--single {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+            color: #f9fafb !important;
+        }
 
-.dark .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
-    color: #f9fafb !important;
-}
+        .dark .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            color: #f9fafb !important;
+        }
 
-.dark .select2-container--bootstrap4 .select2-dropdown {
-    background-color: #1f2937 !important;
-    border-color: #4b5563 !important;
-}
+        .dark .select2-container--bootstrap4 .select2-dropdown {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+        }
 
-.dark .select2-container--bootstrap4 .select2-results__option {
-    color: #f9fafb !important;
-}
+        .dark .select2-container--bootstrap4 .select2-results__option {
+            color: #f9fafb !important;
+        }
 
-.dark .select2-container--bootstrap4 .select2-results__option:hover {
-    background-color: #374151 !important;
-}
+        .dark .select2-container--bootstrap4 .select2-results__option:hover {
+            background-color: #374151 !important;
+        }
     </style>
 
     <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
@@ -1057,67 +1057,78 @@
 
                             <!-- COLUMNA DERECHA - DESTINO Y CONFIRMACIÓN -->
                             <div class="space-y-6">
-                             <!-- Selección de Rack Destino -->
-<div class="space-y-4">
-    <div>
-        <label class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
-            <i class="fas fa-warehouse text-blue-500"></i>
-            Seleccionar Rack Destino
-        </label>
-        <select 
-            x-model="modalReubicacionRack.rackDestinoSeleccionado"
-            x-ref="rackDestinoSelect"
-            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm select2-rack-destino">
-            <option value="" class="text-gray-400 text-sm">Seleccione un rack destino</option>
-            <template x-for="rack in modalReubicacionRack.racksDisponibles" :key="rack.id">
-                <option :value="rack.id" class="text-gray-700 dark:text-gray-300 text-sm"
-                    x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
-                </option>
-            </template>
-        </select>
-    </div>
+                                <!-- Selección de Rack Destino -->
+                                <div class="space-y-4">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
+                                            <i class="fas fa-warehouse text-blue-500"></i>
+                                            Seleccionar Rack Destino
+                                        </label>
+                                        <select x-model="modalReubicacionRack.rackDestinoSeleccionado"
+                                            x-ref="rackDestinoSelect"
+                                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm select2-rack-destino">
+                                            <option value="" class="text-gray-400 text-sm">Seleccione un rack
+                                                destino</option>
+                                            <template x-for="rack in modalReubicacionRack.racksDisponibles"
+                                                :key="rack.id">
+                                                <option :value="rack.id"
+                                                    class="text-gray-700 dark:text-gray-300 text-sm"
+                                                    x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
+                                                </option>
+                                            </template>
+                                        </select>
+                                    </div>
 
-    <!-- Selección de Ubicación Destino -->
-    <div x-show="modalReubicacionRack.rackDestinoSeleccionado" class="space-y-3">
-        <label class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
-            <i class="fas fa-map-marker-alt text-green-500"></i>
-            Seleccionar Ubicación Destino
-        </label>
+                                    <!-- Selección de Ubicación Destino -->
+                                    <div x-show="modalReubicacionRack.rackDestinoSeleccionado" class="space-y-3">
+                                        <label
+                                            class="block text-sm font-semibold text-gray-700 dark:text-white mb-3 flex items-center gap-2">
+                                            <i class="fas fa-map-marker-alt text-green-500"></i>
+                                            Seleccionar Ubicación Destino
+                                        </label>
 
-        <select 
-            x-model="modalReubicacionRack.ubicacionDestinoSeleccionada"
-            x-ref="ubicacionDestinoSelect"
-            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm select2-ubicacion-destino">
-            <option value="" class="text-gray-400 text-sm">Seleccione una ubicación destino</option>
-            <template x-for="ubicacion in modalReubicacionRack.ubicacionesDestino" :key="ubicacion.id">
-                <option :value="ubicacion.id" class="text-gray-700 dark:text-gray-300 text-sm"
-                    x-text="ubicacion.codigo + ' • Ocupado: ' + ubicacion.cantidad_total_articulos + '/' + ubicacion.capacidad_maxima + ' und • Disponible: ' + ubicacion.espacio_disponible + ' und'">
-                </option>
-            </template>
-        </select>
+                                        <select x-model="modalReubicacionRack.ubicacionDestinoSeleccionada"
+                                            x-ref="ubicacionDestinoSelect"
+                                            class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 dark:focus:ring-green-800 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-white text-sm select2-ubicacion-destino">
+                                            <option value="" class="text-gray-400 text-sm">Seleccione una
+                                                ubicación destino</option>
+                                            <template x-for="ubicacion in modalReubicacionRack.ubicacionesDestino"
+                                                :key="ubicacion.id">
+                                                <option :value="ubicacion.id"
+                                                    class="text-gray-700 dark:text-gray-300 text-sm"
+                                                    x-text="ubicacion.codigo + ' • Ocupado: ' + ubicacion.cantidad_total_articulos + '/' + ubicacion.capacidad_maxima + ' und • Disponible: ' + ubicacion.espacio_disponible + ' und'">
+                                                </option>
+                                            </template>
+                                        </select>
 
-        <!-- Contador de ubicaciones disponibles -->
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
-            <div class="flex items-center justify-between">
-                <span class="text-green-700 dark:text-green-400 font-medium flex items-center gap-2">
-                    <i class="fas fa-check-circle"></i>
-                    Ubicaciones disponibles
-                </span>
-                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold"
-                    x-text="modalReubicacionRack.ubicacionesDestino.length">
-                </span>
-            </div>
-        </div>
-    </div>
+                                        <!-- Contador de ubicaciones disponibles -->
+                                        <div
+                                            class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                                            <div class="flex items-center justify-between">
+                                                <span
+                                                    class="text-green-700 dark:text-green-400 font-medium flex items-center gap-2">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    Ubicaciones disponibles
+                                                </span>
+                                                <span
+                                                    class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold"
+                                                    x-text="modalReubicacionRack.ubicacionesDestino.length">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
 
-    <!-- Estado cuando no hay rack seleccionado -->
-    <div x-show="!modalReubicacionRack.rackDestinoSeleccionado"
-        class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 text-center">
-        <i class="fas fa-warehouse text-3xl text-gray-400 dark:text-gray-500 mb-3"></i>
-        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Selecciona un rack destino</p>
-        <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Para ver las ubicaciones disponibles</p>
-    </div>
-</div>
+                                    <!-- Estado cuando no hay rack seleccionado -->
+                                    <div x-show="!modalReubicacionRack.rackDestinoSeleccionado"
+                                        class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-5 text-center">
+                                        <i class="fas fa-warehouse text-3xl text-gray-400 dark:text-gray-500 mb-3"></i>
+                                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Selecciona un
+                                            rack destino</p>
+                                        <p class="text-gray-500 dark:text-gray-500 text-xs mt-1">Para ver las
+                                            ubicaciones disponibles</p>
+                                    </div>
+                                </div>
 
                                 <!-- Información Adicional -->
                                 <div
@@ -2221,49 +2232,50 @@
                 },
 
                 // ========== MÉTODOS PARA SELECT2 ==========
-initSelect2() {
-    // Inicializar Select2 para rack destino
-    $(this.$refs.rackDestinoSelect).select2({
-        placeholder: "Seleccione un rack destino",
-        allowClear: true,
-        width: '100%',
-        theme: 'bootstrap4',
-        dropdownParent: this.$refs.rackDestinoSelect.closest('.modal-content') || document.body
-    }).on('change', (e) => {
-        this.modalReubicacionRack.rackDestinoSeleccionado = e.target.value;
-        this.cargarUbicacionesDestino();
-    });
+                initSelect2() {
+                    // Inicializar Select2 para rack destino
+                    $(this.$refs.rackDestinoSelect).select2({
+                        placeholder: "Seleccione un rack destino",
+                        allowClear: true,
+                        width: '100%',
+                        theme: 'bootstrap4',
+                        dropdownParent: this.$refs.rackDestinoSelect.closest('.modal-content') || document.body
+                    }).on('change', (e) => {
+                        this.modalReubicacionRack.rackDestinoSeleccionado = e.target.value;
+                        this.cargarUbicacionesDestino();
+                    });
 
-    // Inicializar Select2 para ubicación destino
-    $(this.$refs.ubicacionDestinoSelect).select2({
-        placeholder: "Seleccione una ubicación destino",
-        allowClear: true,
-        width: '100%',
-        theme: 'bootstrap4',
-        dropdownParent: this.$refs.ubicacionDestinoSelect.closest('.modal-content') || document.body
-    }).on('change', (e) => {
-        this.modalReubicacionRack.ubicacionDestinoSeleccionada = e.target.value;
-    });
-},
+                    // Inicializar Select2 para ubicación destino
+                    $(this.$refs.ubicacionDestinoSelect).select2({
+                        placeholder: "Seleccione una ubicación destino",
+                        allowClear: true,
+                        width: '100%',
+                        theme: 'bootstrap4',
+                        dropdownParent: this.$refs.ubicacionDestinoSelect.closest('.modal-content') || document.body
+                    }).on('change', (e) => {
+                        this.modalReubicacionRack.ubicacionDestinoSeleccionada = e.target.value;
+                    });
+                },
 
-destroySelect2() {
-    // Destruir Select2 al cerrar el modal
-    if (this.$refs.rackDestinoSelect) {
-        $(this.$refs.rackDestinoSelect).select2('destroy');
-    }
-    if (this.$refs.ubicacionDestinoSelect) {
-        $(this.$refs.ubicacionDestinoSelect).select2('destroy');
-    }
-},
+                destroySelect2() {
+                    // Destruir Select2 al cerrar el modal
+                    if (this.$refs.rackDestinoSelect) {
+                        $(this.$refs.rackDestinoSelect).select2('destroy');
+                    }
+                    if (this.$refs.ubicacionDestinoSelect) {
+                        $(this.$refs.ubicacionDestinoSelect).select2('destroy');
+                    }
+                },
 
-// Actualizar Select2 cuando cambian los datos
-actualizarSelectUbicacionesDestino() {
-    this.$nextTick(() => {
-        if (this.$refs.ubicacionDestinoSelect && $(this.$refs.ubicacionDestinoSelect).hasClass('select2-hidden-accessible')) {
-            $(this.$refs.ubicacionDestinoSelect).trigger('change.select2');
-        }
-    });
-},
+                // Actualizar Select2 cuando cambian los datos
+                actualizarSelectUbicacionesDestino() {
+                    this.$nextTick(() => {
+                        if (this.$refs.ubicacionDestinoSelect && $(this.$refs.ubicacionDestinoSelect).hasClass(
+                                'select2-hidden-accessible')) {
+                            $(this.$refs.ubicacionDestinoSelect).trigger('change.select2');
+                        }
+                    });
+                },
 
                 // ========== MÉTODOS DE INICIALIZACIÓN ==========
                 procesarDatosRack() {
@@ -2702,6 +2714,11 @@ actualizarSelectUbicacionesDestino() {
                             // Recargar datos completos
                             const recargaExitosa = await this.recargarDatosRackCompletos();
 
+                            // ✅ ACTUALIZAR HISTORIAL EN TIEMPO REAL
+                            if (recargaExitosa) {
+                                await this.actualizarHistorialEnTiempoReal();
+                            }
+
                             if (recargaExitosa) {
                                 this.cancelarReubicacion();
                                 this.modalReubicacion.open = false;
@@ -2744,15 +2761,13 @@ actualizarSelectUbicacionesDestino() {
                         if (result.success && result.data) {
                             console.log('📥 Datos COMPLETOS recibidos del servidor:', result.data);
 
-                            // ✅ DEBUG ESPECÍFICO
-                            const ubicacionEspecifica = result.data.niveles?.flatMap(n => n.ubicaciones)
-                                .find(u => u.codigo === 'A-A2-01');
+                            // ✅ DEBUG: Verificar si viene el historial
+                            const ubicacionesConHistorial = result.data.niveles?.flatMap(n => n.ubicaciones)
+                                .filter(u => u.historial && u.historial.length > 0);
 
-                            if (ubicacionEspecifica) {
-                                console.log('🔍 DEBUG A-A2-01 desde servidor:', {
-                                    productosCount: ubicacionEspecifica.productos?.length || 0,
-                                    productos: ubicacionEspecifica.productos
-                                });
+                            console.log('📊 Ubicaciones con historial:', ubicacionesConHistorial?.length || 0);
+                            if (ubicacionesConHistorial && ubicacionesConHistorial.length > 0) {
+                                console.log('🔍 Ejemplo de historial:', ubicacionesConHistorial[0].historial);
                             }
 
                             // ✅ REEMPLAZAR COMPLETAMENTE LOS DATOS
@@ -2985,8 +3000,11 @@ actualizarSelectUbicacionesDestino() {
                             this.success(`Cantidad de ${producto.nombre} actualizada exitosamente`);
                             producto.cantidadOriginal = producto.cantidad;
 
-                            // ✅ RECARGAR DATOS COMPLETOS EN LUGAR DE ACTUALIZACIÓN PARCIAL
+                            // ✅ RECARGAR DATOS COMPLETOS
                             await this.recargarDatosRackCompletos();
+
+                            // ✅ ACTUALIZAR HISTORIAL EN TIEMPO REAL
+                            await this.actualizarHistorialEnTiempoReal();
 
                             // ✅ CERRAR MODAL Y REABRIR CON DATOS ACTUALIZADOS
                             if (this.modal.open) {
@@ -3677,32 +3695,33 @@ actualizarSelectUbicacionesDestino() {
                 },
 
                 // ========== MÉTODOS PARA REUBICACIÓN ENTRE RACKS ==========
-abrirModalReubicacionRack(ubicacion) {
-    console.log('📍 Abriendo modal reubicación entre racks:', ubicacion);
+                abrirModalReubicacionRack(ubicacion) {
+                    console.log('📍 Abriendo modal reubicación entre racks:', ubicacion);
 
-    this.modalReubicacionRack.open = true;
-    this.modalReubicacionRack.ubicacionOrigen = {
-        id: ubicacion.id,
-        codigo: ubicacion.codigo,
-        cantidad: ubicacion.cantidad_total || 0
-    };
+                    this.modalReubicacionRack.open = true;
+                    this.modalReubicacionRack.ubicacionOrigen = {
+                        id: ubicacion.id,
+                        codigo: ubicacion.codigo,
+                        cantidad: ubicacion.cantidad_total || 0,
+                        producto: ubicacion.producto || 'Artículos varios' // ✅ AGREGAR ESTA LÍNEA
+                    };
 
-    // Cargar artículos de la ubicación
-    this.cargarArticulosUbicacion(ubicacion.id);
+                    // Cargar artículos de la ubicación
+                    this.cargarArticulosUbicacion(ubicacion.id);
 
-    // Cargar racks disponibles
-    this.cargarRacksDisponibles();
-    this.modalReubicacionRack.rackDestinoSeleccionado = '';
-    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
-    this.modalReubicacionRack.ubicacionesDestino = [];
+                    // Cargar racks disponibles
+                    this.cargarRacksDisponibles();
+                    this.modalReubicacionRack.rackDestinoSeleccionado = '';
+                    this.modalReubicacionRack.ubicacionDestinoSeleccionada = '';
+                    this.modalReubicacionRack.ubicacionesDestino = [];
 
-    // Inicializar Select2 después de que el modal esté visible
-    this.$nextTick(() => {
-        setTimeout(() => {
-            this.initSelect2();
-        }, 100);
-    });
-},
+                    // Inicializar Select2 después de que el modal esté visible
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            this.initSelect2();
+                        }, 100);
+                    });
+                },
                 async cargarRacksDisponibles() {
                     try {
                         console.log('🔄 Cargando racks disponibles...');
@@ -3734,44 +3753,47 @@ abrirModalReubicacionRack(ubicacion) {
                 },
 
                 async cargarUbicacionesDestino() {
-    if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
-        this.modalReubicacionRack.ubicacionesDestino = [];
-        this.actualizarSelectUbicacionesDestino();
-        return;
-    }
+                    if (!this.modalReubicacionRack.rackDestinoSeleccionado) {
+                        this.modalReubicacionRack.ubicacionesDestino = [];
+                        this.actualizarSelectUbicacionesDestino();
+                        return;
+                    }
 
-    try {
-        console.log('🔄 Cargando ubicaciones para rack:', this.modalReubicacionRack.rackDestinoSeleccionado);
+                    try {
+                        console.log('🔄 Cargando ubicaciones para rack:', this.modalReubicacionRack
+                            .rackDestinoSeleccionado);
 
-        const response = await fetch(
-            `/almacen/racks/${this.modalReubicacionRack.rackDestinoSeleccionado}/ubicaciones-vacias`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            });
+                        const response = await fetch(
+                            `/almacen/racks/${this.modalReubicacionRack.rackDestinoSeleccionado}/ubicaciones-vacias`, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                        'content')
+                                }
+                            });
 
-        const result = await response.json();
+                        const result = await response.json();
 
-        if (result.success) {
-            this.modalReubicacionRack.ubicacionesDestino = result.data;
-            console.log('✅ Ubicaciones destino cargadas:', this.modalReubicacionRack.ubicacionesDestino);
-            
-            // Actualizar Select2 después de cargar las ubicaciones
-            this.actualizarSelectUbicacionesDestino();
-        } else {
-            this.error('Error al cargar ubicaciones destino');
-            this.modalReubicacionRack.ubicacionesDestino = [];
-            this.actualizarSelectUbicacionesDestino();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        this.error('Error de conexión al servidor');
-        this.modalReubicacionRack.ubicacionesDestino = [];
-        this.actualizarSelectUbicacionesDestino();
-    }
-},
+                        if (result.success) {
+                            this.modalReubicacionRack.ubicacionesDestino = result.data;
+                            console.log('✅ Ubicaciones destino cargadas:', this.modalReubicacionRack
+                                .ubicacionesDestino);
+
+                            // Actualizar Select2 después de cargar las ubicaciones
+                            this.actualizarSelectUbicacionesDestino();
+                        } else {
+                            this.error('Error al cargar ubicaciones destino');
+                            this.modalReubicacionRack.ubicacionesDestino = [];
+                            this.actualizarSelectUbicacionesDestino();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.error('Error de conexión al servidor');
+                        this.modalReubicacionRack.ubicacionesDestino = [];
+                        this.actualizarSelectUbicacionesDestino();
+                    }
+                },
 
                 async confirmarReubicacionRack() {
                     try {
@@ -3782,16 +3804,21 @@ abrirModalReubicacionRack(ubicacion) {
 
                         console.log('📤 Confirmando reubicación entre racks:', {
                             origen: this.modalReubicacionRack.ubicacionOrigen.id,
-                            destino: this.modalReubicacionRack.ubicacionDestinoSeleccionada
+                            destino: this.modalReubicacionRack.ubicacionDestinoSeleccionada,
+                            producto: this.modalReubicacionRack.ubicacionOrigen.producto
                         });
+
+                        const productoValue = this.modalReubicacionRack.ubicacionOrigen.producto || 'Artículos varios';
 
                         const payload = {
                             ubicacion_origen_id: this.modalReubicacionRack.ubicacionOrigen.id,
                             ubicacion_destino_id: this.modalReubicacionRack.ubicacionDestinoSeleccionada,
-                            producto: this.modalReubicacionRack.ubicacionOrigen.producto,
+                            producto: productoValue,
                             cantidad: this.modalReubicacionRack.ubicacionOrigen.cantidad,
                             tipo_reubicacion: 'otro_rack'
                         };
+
+                        console.log('📤 PAYLOAD enviado:', payload);
 
                         const response = await fetch('/almacen/reubicacion/confirmar-entre-racks', {
                             method: 'POST',
@@ -3809,12 +3836,14 @@ abrirModalReubicacionRack(ubicacion) {
                         if (result.success) {
                             this.success('✅ Reubicación entre racks completada exitosamente');
 
-                            // Recargar datos del rack actual
+                            // ✅ RECARGAR DATOS COMPLETOS
                             await this.recargarDatosRackCompletos();
+
+                            // ✅ ACTUALIZAR HISTORIAL EN TIEMPO REAL
+                            await this.actualizarHistorialEnTiempoReal();
 
                             this.cerrarModalReubicacionRack();
 
-                            // Cerrar modales abiertos
                             if (this.modal.open) {
                                 this.modal.open = false;
                             }
@@ -3827,6 +3856,73 @@ abrirModalReubicacionRack(ubicacion) {
                     }
                 },
 
+
+                // ✅ MÉTODO MEJORADO: Actualizar historial en tiempo real con más debug
+                async actualizarHistorialEnTiempoReal() {
+                    try {
+                        console.log('🔄 Actualizando historial en tiempo real...');
+                        console.log('🔍 Estado del modal historial:', {
+                            abierto: this.modalHistorial.open,
+                            tiene_ubi: !!this.modalHistorial.ubi,
+                            ubi_id: this.modalHistorial.ubi?.id,
+                            ubi_codigo: this.modalHistorial.ubi?.codigo
+                        });
+
+                        // Si el modal de historial está abierto, actualizar sus datos
+                        if (this.modalHistorial.open && this.modalHistorial.ubi) {
+                            const ubicacionId = this.modalHistorial.ubi.id;
+                            console.log('📍 Buscando ubicación actualizada para ID:', ubicacionId);
+
+                            // Buscar la ubicación actualizada en los datos recargados
+                            const ubicacionActualizada = this.buscarUbicacionPorId(ubicacionId);
+
+                            if (ubicacionActualizada) {
+                                console.log('📍 Ubicación actualizada encontrada:', {
+                                    codigo: ubicacionActualizada.codigo,
+                                    historial_count: ubicacionActualizada.historial?.length || 0,
+                                    historial: ubicacionActualizada.historial
+                                });
+
+                                // ✅ ACTUALIZAR COMPLETAMENTE EL OBJETO UBI
+                                this.modalHistorial.ubi = JSON.parse(JSON.stringify(ubicacionActualizada));
+
+                                // Re-filtrar el historial
+                                this.filtrarHistorial();
+
+                                console.log('✅ Historial actualizado en tiempo real:', {
+                                    nuevo_count: this.modalHistorial.ubi.historial?.length || 0,
+                                    historial_filtrado: this.modalHistorial.historialFiltrado?.length || 0
+                                });
+                            } else {
+                                console.warn('❌ No se encontró la ubicación actualizada para el historial con ID:',
+                                    ubicacionId);
+                                console.log('📋 Ubicaciones disponibles:', this.rack.niveles.flatMap(n => n.ubicaciones)
+                                    .map(u => ({
+                                        id: u.id,
+                                        codigo: u.codigo
+                                    })));
+                            }
+                        } else {
+                            console.log('ℹ️ Modal de historial no está abierto o no tiene ubicación');
+                        }
+
+                        // Si el modal principal está abierto, también actualizar su historial
+                        if (this.modal.open && this.modal.ubi) {
+                            const ubicacionId = this.modal.ubi.id;
+                            const ubicacionActualizada = this.buscarUbicacionPorId(ubicacionId);
+
+                            if (ubicacionActualizada) {
+                                this.modal.ubi = {
+                                    ...this.modal.ubi,
+                                    historial: ubicacionActualizada.historial || []
+                                };
+                                console.log('✅ Historial del modal principal actualizado');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Error actualizando historial en tiempo real:', error);
+                    }
+                },
 
                 // ========== MÉTODOS PARA REUBICACIÓN ENTRE RACKS ==========
                 iniciarReubicacionRack(ubicacion) {
@@ -3909,7 +4005,7 @@ abrirModalReubicacionRack(ubicacion) {
                 },
 
                 cerrarModalReubicacionRack() {
-                        this.destroySelect2();
+                    this.destroySelect2();
 
                     this.modalReubicacionRack.open = false;
                     this.modalReubicacionRack.ubicacionOrigen = {};
@@ -3983,13 +4079,22 @@ abrirModalReubicacionRack(ubicacion) {
                 },
 
                 buscarUbicacionPorId(ubicacionId) {
+                    console.log('🔍 Buscando ubicación por ID:', ubicacionId);
+
                     for (const nivel of this.rack.niveles) {
                         for (const ubi of nivel.ubicaciones) {
                             if (ubi.id === ubicacionId) {
+                                console.log('✅ Ubicación encontrada:', {
+                                    id: ubi.id,
+                                    codigo: ubi.codigo,
+                                    historial_count: ubi.historial?.length || 0
+                                });
                                 return ubi;
                             }
                         }
                     }
+
+                    console.warn('❌ Ubicación no encontrada con ID:', ubicacionId);
                     return null;
                 },
                 buscarUbicacionPorCodigo(codigo) {
