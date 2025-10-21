@@ -1826,27 +1826,38 @@ $stats = [
         }
     }
 
-    public function obtenerUbicacionesVacias($rackId)
-    {
-        try {
-            $ubicaciones = DB::table('rack_ubicaciones as ru')
-                ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
-                ->select('ru.idRackUbicacion as id', 'ru.codigo_unico as codigo', 'ru.capacidad_maxima as capacidad')
-                ->where('ru.rack_id', $rackId)
-                ->whereNull('rua.rack_ubicacion_id') // Ubicaciones sin productos
-                ->get();
+public function obtenerUbicacionesVacias($rackId)
+{
+    try {
+        $ubicaciones = DB::table('rack_ubicaciones as ru')
+            ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+            ->select(
+                'ru.idRackUbicacion as id', 
+                'ru.codigo_unico as codigo', 
+                'ru.capacidad_maxima as capacidad_maxima',
+                DB::raw('COALESCE(SUM(rua.cantidad), 0) as cantidad_total_articulos'),
+                DB::raw('(ru.capacidad_maxima - COALESCE(SUM(rua.cantidad), 0)) as espacio_disponible')
+            )
+            ->where('ru.rack_id', $rackId)
+            ->groupBy('ru.idRackUbicacion', 'ru.codigo_unico', 'ru.capacidad_maxima')
+            ->get()
+            ->filter(function($ubicacion) {
+                // Filtrar solo ubicaciones que tienen espacio disponible
+                return $ubicacion->espacio_disponible > 0;
+            })
+            ->values();
 
-            return response()->json([
-                'success' => true,
-                'data' => $ubicaciones
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al cargar ubicaciones: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'data' => $ubicaciones
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar ubicaciones: ' . $e->getMessage()
+        ], 500);
     }
+}
 
 
     // En el controlador
