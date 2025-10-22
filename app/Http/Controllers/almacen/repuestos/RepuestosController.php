@@ -549,60 +549,6 @@ public function deleteFoto($id)
     }
 
 
-// public function getAll(Request $request)
-// {
-//     $query = Articulo::with(['unidad', 'tipoarticulo', 'subcategoria', 'modelos']) // 👈 cambiamos modelos.categoria por subcategoria
-//         ->where('idTipoArticulo', 2); // Solo repuestos
-
-//     $total = $query->count();
-
-//     if ($search = $request->input('search.value')) {
-//         $query->where(function ($q) use ($search) {
-//             $q->where('codigo_repuesto', 'like', "%$search%")
-//               ->orWhere('stock_total', 'like', "%$search%")
-//               ->orWhere('estado', 'like', "%$search%")
-//               ->orWhereHas('modelos', fn($sub) => $sub->where('nombre', 'like', "%$search%"))
-//               ->orWhereHas('subcategoria', fn($sub) => $sub->where('nombre', 'like', "%$search%")); // 👈 buscar por subcategoría
-//         });
-//     }
-
-//     $filtered = $query->count();
-
-//     $articulos = $query
-//         ->skip($request->start)
-//         ->take($request->length)
-//         ->get();
-
-//     $data = $articulos->map(function ($articulo) {
-//         $modeloNombres = $articulo->modelos->pluck('nombre')->join(' / ');
-//         $subcategoriaNombre = $articulo->subcategoria->nombre ?? 'Sin Subcategoría';
-
-//         return [
-//             'idArticulos' => $articulo->idArticulos,
-//             'foto' => $articulo->foto ? 'data:image/jpeg;base64,' . base64_encode($articulo->foto) : null,
-//             'nombre' => $articulo->nombre,
-//             'codigo_repuesto' => $articulo->codigo_repuesto,
-//             'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
-//             'codigo_barras' => $articulo->codigo_barras,
-//             'stock_total' => $articulo->stock_total,
-//             'sku' => $articulo->sku,
-//             'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
-//             'modelo' => $modeloNombres ?: 'Sin Modelo',
-//             'subcategoria' => $subcategoriaNombre, // 👈 nuevo campo
-//             'estado' => $articulo->estado ? 'Activo' : 'Inactivo',
-//             'cliente_general_select' => '', // 👈 campo vacío para el select
-//         ];
-//     });
-
-//     return response()->json([
-//         'draw' => intval($request->draw),
-//         'recordsTotal' => $total,
-//         'recordsFiltered' => $filtered,
-//         'data' => $data,
-//     ]);
-// }
-
-
 
 
 
