@@ -1173,21 +1173,17 @@
                     <li>
                         <a href="{{ route('solicitudingreso.index') }}">Solicitud de Ingreso</a>
                     </li>
-                    <!-- <li>
+                    <li>
                             <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
-                        </li> -->
+                        </li>
                     <li>
                         <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
                     </li>
+                      <li>
+                        <a href="{{ route('solicitud.repuesto.index') }}">Solicitud de Repuesto</a>
+                    </li>
                 </ul>
             </li>
-
-
-
-
-
-
-
             <li class="menu nav-item">
                 <button type="button" class="nav-link group"
                     :class="{ 'active': activeDropdown === 'ventas' }"

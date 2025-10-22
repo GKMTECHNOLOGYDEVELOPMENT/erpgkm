@@ -85,6 +85,7 @@ use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\solicitud\SolicitudingresoController;
+use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Models\Cliente;
@@ -1488,3 +1489,7 @@ Route::get('/custodia/{id}/ubicacion-actual', [CustodiaController::class, 'obten
 
 // routes/web.php
 Route::get('/almacen/clientes-generales/listar', [UbicacionesVistaController::class, 'listarClientesGenerales']);
+
+
+
+Route::get('/solicitud/repuestos', [SolicitudrepuestoController::class, 'index'])->name('solicitud.repuesto.index');
