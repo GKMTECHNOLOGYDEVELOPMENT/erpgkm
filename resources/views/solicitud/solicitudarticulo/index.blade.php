@@ -1,13 +1,13 @@
 <x-layout.default>
     <div class="container mx-auto px-4 py-8">
         <!-- Debug temporal -->
-        @if (env('APP_DEBUG'))
+        <!-- @if (env('APP_DEBUG'))
         <div class="bg-blue-50 p-4 mb-6 rounded-lg border border-blue-200">
             <p class="font-bold text-blue-800">Debug Info:</p>
             <p class="text-sm text-blue-700">Total solicitudes: {{ $solicitudes->total() }}</p>
             <p class="text-sm text-blue-700">Filtros activos: {{ json_encode(request()->all()) }}</p>
         </div>
-        @endif
+        @endif -->
 
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800">Solicitudes de Artículos</h1>

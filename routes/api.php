@@ -32,6 +32,7 @@ use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\areacomercial\ScrumboarddController;
 use App\Http\Controllers\areacomercial\SeleccionSeguimientoController;
+use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
 use App\Http\Controllers\tickets\OrdenesTrabajoController;
 use App\Http\Controllers\usuario\UsuarioController;
@@ -498,3 +499,8 @@ Route::post('/ubicacion/vaciar', [UbicacionesVistaController::class, 'vaciarUbic
 // Ruta API para obtener datos dinámicos de los racks
 Route::get('/almacen/racks/datos', [UbicacionesVistaController::class, 'getDatosRacks'])
     ->name('api.almacen.racks.datos');
+
+
+    Route::get('/ticket-info/{ticketId}', [SolicitudrepuestoController::class, 'getTicketInfo'])->name('api.ticket-info');
+    Route::get('/tipos-repuesto/{modeloId}', [SolicitudRepuestoController::class, 'getTiposRepuesto'])->name('api.tipos-repuesto');
+Route::get('/codigos-repuesto/{modeloId}/{subcategoriaId}', [SolicitudRepuestoController::class, 'getCodigosRepuesto'])->name('api.codigos-repuesto');
