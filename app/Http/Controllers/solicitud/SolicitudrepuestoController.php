@@ -49,4 +49,44 @@ class SolicitudrepuestoController extends Controller
 
         return view("solicitud.solicitudrepuesto.index", compact('estadisticas', 'solicitudes'));
     }
+
+    public function create()
+    {
+        return view("solicitud.solicitudrepuesto.create");
+    }
+
+    public function store(Request $request)
+    {
+        // Aquí va la lógica para guardar la solicitud de repuesto
+        // Por ahora solo redirigimos al index
+        return redirect()->route('solicitudrepuesto.index')
+            ->with('success', 'Solicitud de repuesto creada exitosamente');
+    }
+
+    // Puedes agregar los demás métodos después
+    public function edit($id)
+    {
+        // Lógica para editar
+        return view("solicitud.solicitudrepuesto.edit");
+    }
+
+    public function show($id)
+    {
+        // Lógica para mostrar
+        return view("solicitud.solicitudrepuesto.show");
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Lógica para actualizar
+        return redirect()->route('solicitudrepuesto.index')
+            ->with('success', 'Solicitud de repuesto actualizada exitosamente');
+    }
+
+    public function destroy($id)
+    {
+        // Lógica para eliminar
+        return redirect()->route('solicitudrepuesto.index')
+            ->with('success', 'Solicitud de repuesto eliminada exitosamente');
+    }
 }

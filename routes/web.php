@@ -575,6 +575,11 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     })->name('exportExcel');
 });
 
+Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
+    Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
+    Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
+});
+
 
 // INICIO CATEGORIA ///
 Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () {
@@ -1432,7 +1437,7 @@ Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verifi
 //     // Vistas
 //     Route::get('/vista-almacen', [UbicacionesVistaController::class, 'vistaAlmacen'])->name('almacen.ubicaciones.vista');
 //     Route::get('/detalle-rack/{rackNombre}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
-    
+
 //     // APIs
 //     Route::get('/heatmap-data', [UbicacionesVistaController::class, 'getHeatmapData'])->name('almacen.ubicaciones.heatmap-data');
 //     Route::get('/rack-data/{rackNombre}', [UbicacionesVistaController::class, 'getRackData'])->name('almacen.ubicaciones.rack-data');
