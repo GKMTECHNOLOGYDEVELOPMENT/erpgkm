@@ -449,4 +449,12 @@ class SolicitudarticuloController extends Controller
 
         return $tipos[$tipoServicio] ?? 5;
     }
+
+
+    public function opciones($id)
+    {
+        // Lógica para aceptar la solicitud
+        return view('solicitud.solicitudarticulo.opciones', compact('id'));
+    }
+
 }

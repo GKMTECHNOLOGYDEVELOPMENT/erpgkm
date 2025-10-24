@@ -346,6 +346,28 @@
                             </a>
                         @endif
 
+
+                         <!-- Botón Opciones - reemplaza al botón Ver -->
+                        @if ($solicitud->tipoorden == 'solicitud_articulo')
+                            <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                Opciones
+                            </a>
+                        @else
+                            <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                Opciones
+                            </a>
+                        @endif
+
                         <!-- Botón Editar - solo para pendientes -->
                         @if ($solicitud->estado == 'pendiente')
                             @if ($solicitud->tipoorden == 'solicitud_articulo')
