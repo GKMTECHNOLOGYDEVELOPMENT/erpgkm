@@ -392,14 +392,13 @@
                                                 <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Tipo de Repuesto</th>
                                                 <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Código</th>
                                                 <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Cantidad</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Fecha Requerida</th>
                                                 <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-blue-100">
                                             <template x-if="products.length === 0">
                                                 <tr>
-                                                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                                         <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -452,14 +451,6 @@
                                                         </div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-base">
-                                                        <input type="date" x-model="product.fechaRequerida" 
-                                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                                                               :min="minDate">
-                                                        <div class="text-xs text-gray-500 mt-1" x-show="product.fechaRequerida">
-                                                            <span x-text="formatDateForDisplay(product.fechaRequerida)"></span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
                                                         <button @click="removeProduct(index)"
                                                             class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
                                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -483,7 +474,7 @@
                             <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
                                 <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Producto</h3>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                                     <!-- Modelo (se llena automáticamente desde el ticket) -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-3">Modelo</label>
@@ -545,15 +536,6 @@
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2 text-center">Mín: 1 - Máx: 100</div>
                                     </div>
-
-                                    <!-- Fecha Requerida -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Fecha Requerida</label>
-                                        <input type="date" x-model="newProduct.fechaRequerida" 
-                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
-                                               :min="minDate">
-                                        <div class="text-xs text-gray-500 mt-2">Fecha límite para tener el repuesto</div>
-                                    </div>
                                 </div>
 
                                 <button @click="addProduct()" :disabled="!canAddProduct"
@@ -603,70 +585,82 @@
                                     </select>
                                 </div>
 
-                                <!-- Nivel de Urgencia - Versión Cards -->
-                                <div class="space-y-4">
-                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Nivel de
-                                        Urgencia</label>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
-                                            <button type="button" @click="orderInfo.urgencia = urgencia.value"
-                                                class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-                                                <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full
-                            bg-white shadow-sm hover:shadow-md"
-                                                    :class="{
-                                                        'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-green-100': orderInfo
-                                                            .urgencia === urgencia.value && urgencia
-                                                            .value === 'baja',
-                                                        'border-yellow-500 bg-gradient-to-r from-yellow-50 to-amber-50 shadow-yellow-100': orderInfo
-                                                            .urgencia === urgencia.value && urgencia
-                                                            .value === 'media',
-                                                        'border-red-500 bg-gradient-to-r from-red-50 to-rose-50 shadow-red-100': orderInfo
-                                                            .urgencia === urgencia.value && urgencia
-                                                            .value === 'alta',
-                                                        'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
-                                                            .urgencia !== urgencia.value
-                                                    }">
-
-                                                    <!-- Header con emoji y título -->
-                                                    <div class="flex items-center justify-between mb-3">
-                                                        <span class="text-2xl" x-text="urgencia.emoji"></span>
-                                                        <div class="w-6 h-6 flex items-center justify-center transition-all duration-300"
-                                                            :class="{
-                                                                'text-green-600': orderInfo.urgencia === urgencia
-                                                                    .value && urgencia.value === 'baja',
-                                                                'text-yellow-600': orderInfo.urgencia === urgencia
-                                                                    .value && urgencia.value === 'media',
-                                                                'text-red-600': orderInfo.urgencia === urgencia.value &&
-                                                                    urgencia.value === 'alta',
-                                                                'text-gray-400': orderInfo.urgencia !== urgencia.value
-                                                            }">
-                                                            <svg class="w-5 h-5" fill="currentColor"
-                                                                viewBox="0 0 20 20">
-                                                                <path x-show="orderInfo.urgencia === urgencia.value"
-                                                                    fill-rule="evenodd"
-                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                    clip-rule="evenodd" />
-                                                                <path x-show="orderInfo.urgencia !== urgencia.value"
-                                                                    fill-rule="evenodd"
-                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                                                                    clip-rule="evenodd" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Contenido -->
-                                                    <div class="space-y-2">
-                                                        <h3 class="font-bold text-gray-900 text-lg"
-                                                            x-text="urgencia.text"></h3>
-                                                        <p class="text-sm text-gray-600 leading-relaxed"
-                                                            x-text="urgencia.description"></p>
-                                                    </div>
-
-                                                </div>
-                                            </button>
-                                        </template>
+                                <!-- Fecha Requerida -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Fecha Requerida</label>
+                                    <input type="date" x-model="orderInfo.fechaRequerida" 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
+                                           :min="minDate">
+                                    <div class="text-xs text-gray-500 mt-2">Fecha límite para tener todos los repuestos</div>
+                                    <div class="text-sm text-blue-600 font-medium mt-2" x-show="orderInfo.fechaRequerida">
+                                        📅 Fecha establecida: <span x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Nivel de Urgencia - Versión Cards -->
+                            <div class="mt-8 space-y-4">
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">Nivel de
+                                    Urgencia</label>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
+                                        <button type="button" @click="orderInfo.urgencia = urgencia.value"
+                                            class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                            <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full
+                            bg-white shadow-sm hover:shadow-md"
+                                                :class="{
+                                                    'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-green-100': orderInfo
+                                                        .urgencia === urgencia.value && urgencia
+                                                        .value === 'baja',
+                                                    'border-yellow-500 bg-gradient-to-r from-yellow-50 to-amber-50 shadow-yellow-100': orderInfo
+                                                        .urgencia === urgencia.value && urgencia
+                                                        .value === 'media',
+                                                    'border-red-500 bg-gradient-to-r from-red-50 to-rose-50 shadow-red-100': orderInfo
+                                                        .urgencia === urgencia.value && urgencia
+                                                        .value === 'alta',
+                                                    'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
+                                                        .urgencia !== urgencia.value
+                                                }">
+
+                                                <!-- Header con emoji y título -->
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <span class="text-2xl" x-text="urgencia.emoji"></span>
+                                                    <div class="w-6 h-6 flex items-center justify-center transition-all duration-300"
+                                                        :class="{
+                                                            'text-green-600': orderInfo.urgencia === urgencia
+                                                                .value && urgencia.value === 'baja',
+                                                            'text-yellow-600': orderInfo.urgencia === urgencia
+                                                                .value && urgencia.value === 'media',
+                                                            'text-red-600': orderInfo.urgencia === urgencia.value &&
+                                                                urgencia.value === 'alta',
+                                                            'text-gray-400': orderInfo.urgencia !== urgencia.value
+                                                        }">
+                                                        <svg class="w-5 h-5" fill="currentColor"
+                                                            viewBox="0 0 20 20">
+                                                            <path x-show="orderInfo.urgencia === urgencia.value"
+                                                                fill-rule="evenodd"
+                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                clip-rule="evenodd" />
+                                                            <path x-show="orderInfo.urgencia !== urgencia.value"
+                                                                fill-rule="evenodd"
+                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contenido -->
+                                                <div class="space-y-2">
+                                                    <h3 class="font-bold text-gray-900 text-lg"
+                                                        x-text="urgencia.text"></h3>
+                                                    <p class="text-sm text-gray-600 leading-relaxed"
+                                                        x-text="urgencia.description"></p>
+                                                </div>
+
+                                            </div>
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
 
@@ -695,6 +689,11 @@
                             <div class="flex justify-between items-center py-3 border-b border-blue-100">
                                 <span class="text-gray-700 font-medium">Total Cantidad</span>
                                 <span class="text-2xl font-bold text-green-600" x-text="totalQuantity"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium">Fecha Requerida</span>
+                                <span class="text-lg font-bold text-orange-600" 
+                                      x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
                             </div>
                             <div class="flex justify-between items-center py-3">
                                 <span class="text-gray-700 font-medium">Estado</span>
@@ -837,13 +836,14 @@
                     modelo: '',
                     tipo: '',
                     codigo: '',
-                    cantidad: 1,
-                    fechaRequerida: '' // Nuevo campo
+                    cantidad: 1
+                    // Removido fechaRequerida del producto individual
                 },
                 orderInfo: {
                     tipoServicio: '',
                     urgencia: '',
-                    observaciones: ''
+                    observaciones: '',
+                    fechaRequerida: '' // Fecha requerida global para toda la orden
                 },
                 notification: {
                     show: false,
@@ -877,17 +877,20 @@
                 nivelesUrgencia: [{
                         value: 'baja',
                         text: 'Baja',
-                        emoji: '🟢'
+                        emoji: '🟢',
+                        description: 'Sin urgencia específica'
                     },
                     {
                         value: 'media',
-                        text: 'Media',
-                        emoji: '🟡'
+                        text: 'Media', 
+                        emoji: '🟡',
+                        description: 'Necesario en los próximos días'
                     },
                     {
                         value: 'alta',
                         text: 'Alta',
-                        emoji: '🔴'
+                        emoji: '🔴',
+                        description: 'Urgente - necesario inmediatamente'
                     }
                 ],
 
@@ -910,7 +913,6 @@
                            this.newProduct.tipo && 
                            this.newProduct.codigo && 
                            this.newProduct.cantidad > 0 && 
-                           this.newProduct.fechaRequerida && // Nuevo requerimiento
                            this.selectedTicket;
                 },
                 get canCreateOrder() {
@@ -918,7 +920,7 @@
                            this.selectedTicket && 
                            this.orderInfo.tipoServicio && 
                            this.orderInfo.urgencia &&
-                           this.products.every(product => product.fechaRequerida); // Verificar que todos tengan fecha requerida
+                           this.orderInfo.fechaRequerida; // Solo verificar la fecha global
                 },
 
                 // Métodos
@@ -1216,7 +1218,6 @@
                     this.clearModeloSelect();
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
-                    this.newProduct.fechaRequerida = ''; // Limpiar fecha
 
                     if (this.$refs.ticketSelect) {
                         $(this.$refs.ticketSelect).val('').trigger('change');
@@ -1279,7 +1280,7 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto, incluyendo la fecha requerida',
+                        this.showNotification('Por favor complete todos los campos del producto',
                             'error');
                         return;
                     }
@@ -1323,17 +1324,16 @@
                             tipoId: this.newProduct.tipo,
                             codigo: codigoText,
                             codigoId: this.newProduct.codigo,
-                            cantidad: this.newProduct.cantidad,
-                            fechaRequerida: this.newProduct.fechaRequerida // Nuevo campo
+                            cantidad: this.newProduct.cantidad
+                            // No incluir fechaRequerida en el producto individual
                         };
 
                         this.products.push(product);
                         this.showNotification('✅ Producto agregado correctamente', 'success');
                     }
 
-                    // Reset form - mantener el modelo pero limpiar tipo, código y fecha
+                    // Reset form - mantener el modelo pero limpiar tipo y código
                     this.newProduct.cantidad = 1;
-                    this.newProduct.fechaRequerida = '';
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
 
@@ -1375,7 +1375,7 @@
                 createOrder() {
                     if (!this.canCreateOrder) {
                         this.showNotification(
-                            '❌ Complete todos los campos requeridos para crear la orden, incluyendo las fechas requeridas de todos los productos', 'error');
+                            '❌ Complete todos los campos requeridos para crear la orden', 'error');
                         return;
                     }
 
@@ -1397,7 +1397,8 @@
                         this.orderInfo = {
                             tipoServicio: '',
                             urgencia: '',
-                            observaciones: ''
+                            observaciones: '',
+                            fechaRequerida: ''
                         };
                         this.orderNumber++;
                     }, 2000);
