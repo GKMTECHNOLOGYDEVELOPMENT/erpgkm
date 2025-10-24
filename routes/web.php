@@ -579,6 +579,10 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
         Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
+        Route::get('/{id}', [SolicitudrepuestoController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
+    Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
 
 });
 
