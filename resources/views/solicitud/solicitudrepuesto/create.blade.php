@@ -387,30 +387,19 @@
                                     <table class="w-full">
                                         <thead class="bg-blue-50">
                                             <tr>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Ticket</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Modelo</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Tipo de Repuesto</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Código</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Cantidad</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Acciones</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Ticket</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Modelo</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Tipo de Repuesto</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Código</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Cantidad</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Fecha Requerida</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-blue-100">
                                             <template x-if="products.length === 0">
                                                 <tr>
-                                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
                                                         <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
                                                             stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -463,6 +452,14 @@
                                                         </div>
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-base">
+                                                        <input type="date" x-model="product.fechaRequerida" 
+                                                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                               :min="minDate">
+                                                        <div class="text-xs text-gray-500 mt-1" x-show="product.fechaRequerida">
+                                                            <span x-text="formatDateForDisplay(product.fechaRequerida)"></span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
                                                         <button @click="removeProduct(index)"
                                                             class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
                                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -486,7 +483,7 @@
                             <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
                                 <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Producto</h3>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
                                     <!-- Modelo (se llena automáticamente desde el ticket) -->
                                     <div>
                                         <label class="block text-sm font-semibold text-gray-700 mb-3">Modelo</label>
@@ -548,12 +545,20 @@
                                         </div>
                                         <div class="text-xs text-gray-500 mt-2 text-center">Mín: 1 - Máx: 100</div>
                                     </div>
+
+                                    <!-- Fecha Requerida -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Fecha Requerida</label>
+                                        <input type="date" x-model="newProduct.fechaRequerida" 
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
+                                               :min="minDate">
+                                        <div class="text-xs text-gray-500 mt-2">Fecha límite para tener el repuesto</div>
+                                    </div>
                                 </div>
 
                                 <button @click="addProduct()" :disabled="!canAddProduct"
                                     :class="{
-                                        'opacity-50 cursor-not-allowed': !
-                                            canAddProduct,
+                                        'opacity-50 cursor-not-allowed': !canAddProduct,
                                         'hover:scale-[1.02]': canAddProduct
                                     }"
                                     class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
@@ -832,7 +837,8 @@
                     modelo: '',
                     tipo: '',
                     codigo: '',
-                    cantidad: 1
+                    cantidad: 1,
+                    fechaRequerida: '' // Nuevo campo
                 },
                 orderInfo: {
                     tipoServicio: '',
@@ -845,6 +851,7 @@
                     type: 'info'
                 },
                 notificationTimeout: null,
+                minDate: '', // Para la fecha mínima
 
                 // Tickets desde Laravel
                 tickets: @json($tickets),
@@ -899,12 +906,19 @@
                     return uniqueProducts.size;
                 },
                 get canAddProduct() {
-                    return this.newProduct.modelo && this.newProduct.tipo && this.newProduct
-                        .codigo && this.newProduct.cantidad > 0 && this.selectedTicket;
+                    return this.newProduct.modelo && 
+                           this.newProduct.tipo && 
+                           this.newProduct.codigo && 
+                           this.newProduct.cantidad > 0 && 
+                           this.newProduct.fechaRequerida && // Nuevo requerimiento
+                           this.selectedTicket;
                 },
                 get canCreateOrder() {
-                    return this.products.length > 0 && this.selectedTicket && this.orderInfo
-                        .tipoServicio && this.orderInfo.urgencia;
+                    return this.products.length > 0 && 
+                           this.selectedTicket && 
+                           this.orderInfo.tipoServicio && 
+                           this.orderInfo.urgencia &&
+                           this.products.every(product => product.fechaRequerida); // Verificar que todos tengan fecha requerida
                 },
 
                 // Métodos
@@ -915,6 +929,9 @@
                         month: 'long',
                         day: 'numeric'
                     });
+
+                    // Establecer fecha mínima como hoy
+                    this.minDate = new Date().toISOString().split('T')[0];
 
                     // Inicializar Select2 después de que Alpine haya renderizado
                     this.$nextTick(() => {
@@ -1007,6 +1024,16 @@
                         default:
                             return 'ℹ️';
                     }
+                },
+
+                formatDateForDisplay(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
                 },
 
                 async loadTicketInfo(ticketId) {
@@ -1189,6 +1216,7 @@
                     this.clearModeloSelect();
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
+                    this.newProduct.fechaRequerida = ''; // Limpiar fecha
 
                     if (this.$refs.ticketSelect) {
                         $(this.$refs.ticketSelect).val('').trigger('change');
@@ -1251,7 +1279,7 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto',
+                        this.showNotification('Por favor complete todos los campos del producto, incluyendo la fecha requerida',
                             'error');
                         return;
                     }
@@ -1295,15 +1323,17 @@
                             tipoId: this.newProduct.tipo,
                             codigo: codigoText,
                             codigoId: this.newProduct.codigo,
-                            cantidad: this.newProduct.cantidad
+                            cantidad: this.newProduct.cantidad,
+                            fechaRequerida: this.newProduct.fechaRequerida // Nuevo campo
                         };
 
                         this.products.push(product);
                         this.showNotification('✅ Producto agregado correctamente', 'success');
                     }
 
-                    // Reset form - mantener el modelo pero limpiar tipo y código
+                    // Reset form - mantener el modelo pero limpiar tipo, código y fecha
                     this.newProduct.cantidad = 1;
+                    this.newProduct.fechaRequerida = '';
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
 
@@ -1345,9 +1375,19 @@
                 createOrder() {
                     if (!this.canCreateOrder) {
                         this.showNotification(
-                            '❌ Complete todos los campos requeridos para crear la orden', 'error');
+                            '❌ Complete todos los campos requeridos para crear la orden, incluyendo las fechas requeridas de todos los productos', 'error');
                         return;
                     }
+
+                    // Preparar datos para enviar
+                    const orderData = {
+                        ticketId: this.selectedTicket,
+                        orderInfo: this.orderInfo,
+                        products: this.products,
+                        orderNumber: this.orderNumber
+                    };
+
+                    console.log('Datos de la orden:', orderData);
 
                     this.showNotification('🎉 ¡Orden creada exitosamente!', 'success');
 
