@@ -86,7 +86,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">Artículos Solicitados</h2>
+                                    <h2 class="text-2xl font-bold text-gray-900">Repuestos Solicitados</h2>
                                     <p class="text-gray-600 text-sm">Lista completa de repuestos requeridos</p>
                                 </div>
                             </div>
