@@ -5,6 +5,7 @@ namespace App\Http\Controllers\solicitud;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SolicitudrepuestoController extends Controller
 {
@@ -86,9 +87,31 @@ public function create()
         ->orderBy('t.fecha_creacion', 'desc')
         ->get();
 
-    return view("solicitud.solicitudrepuesto.create", compact('tickets'));
+    // Obtener el último número de orden
+    $lastOrder = DB::table('solicitudesordenes')
+        ->orderBy('idsolicitudesordenes', 'desc')
+        ->first();
+
+    $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+
+    return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
 }
 
+
+// En el controlador
+public function getNextOrderNumber()
+{
+    $lastOrder = DB::table('solicitudesordenes')
+        ->orderBy('idsolicitudesordenes', 'desc')
+        ->first();
+
+    $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+
+    return response()->json([
+        'success' => true,
+        'nextOrderNumber' => $nextOrderNumber
+    ]);
+}
 // Nuevo endpoint para buscar ticket por ID
 public function getTicketInfo($ticketId)
 {
@@ -178,39 +201,153 @@ public function getCodigosRepuesto($modeloId, $subcategoriaId)
 
     return response()->json($codigos);
 }
+public function store(Request $request)
+{
+    try {
+        DB::beginTransaction();
 
-    public function store(Request $request)
-    {
-        // Aquí va la lógica para guardar la solicitud de repuesto
-        // Por ahora solo redirigimos al index
-        return redirect()->route('solicitudrepuesto.index')
-            ->with('success', 'Solicitud de repuesto creada exitosamente');
+        // Validar los datos requeridos
+        $validated = $request->validate([
+            'ticketId' => 'required|exists:tickets,idTickets',
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.ticketId' => 'required|exists:tickets,idTickets',
+            'products.*.modeloId' => 'required|exists:modelo,idModelo',
+            'products.*.tipoId' => 'required|exists:subcategorias,id',
+            'products.*.codigoId' => 'required',
+            'products.*.cantidad' => 'required|integer|min:1|max:100'
+        ]);
+
+        // Obtener información del ticket
+        $ticket = DB::table('tickets')
+            ->where('idTickets', $validated['ticketId'])
+            ->first();
+
+        if (!$ticket) {
+            throw new \Exception('Ticket no encontrado');
+        }
+
+        // Calcular estadísticas de productos
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
+            return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
+        })->count();
+
+        // Generar código de orden
+        $nextOrderNumber = DB::table('solicitudesordenes')->count() + 1;
+        $codigoOrden = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
+
+        // 1. Insertar en solicitudesordenes con TODOS los campos
+        $solicitudId = DB::table('solicitudesordenes')->insertGetId([
+            'fechacreacion' => now(),
+            'estado' => 'pendiente',
+            'tipoorden' => 'solicitud_repuesto',
+            // 'idticket' => $validated['ticketId'], // ID del ticket
+            'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+            'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+            // 'numeroticket' => $ticket->numero_ticket, // Número de ticket
+            'codigo' => $codigoOrden,
+            'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+            'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+            'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+            'cantidad' => $totalProductosUnicos,
+            'canproduuni' => $totalProductosUnicos,
+            'totalcantidadproductos' => $totalCantidad,
+            'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+            'idtecnico' => auth()->id(),
+            'idusuario' => auth()->id(),
+            'urgencia' => $validated['orderInfo']['urgencia']
+        ]);
+
+        // 2. Insertar los artículos en ordenesarticulos CON EL IDTICKET
+        foreach ($validated['products'] as $product) {
+            // Buscar el idArticulos basado en el código
+            $articulo = DB::table('articulos')
+                ->where('codigo_repuesto', $product['codigoId'])
+                ->first();
+
+            if ($articulo) {
+                DB::table('ordenesarticulos')->insert([
+                    'cantidad' => $product['cantidad'],
+                    'estado' => 0, // 0 = pendiente
+                    'observacion' => null,
+                    'fotorepuesto' => null,
+                    'fechausado' => null,
+                    'fechasinusar' => null,
+                    'idsolicitudesordenes' => $solicitudId,
+                    'idticket' => $product['ticketId'], // Guardar el idticket en cada artículo
+                    'idarticulos' => $articulo->idArticulos,
+                    'idubicacion' => null
+                ]);
+            } else {
+                // Log de artículo no encontrado pero continuar con los demás
+                Log::warning("Artículo no encontrado con código: " . $product['codigoId']);
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Orden creada exitosamente',
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'numeroticket' => $ticket->numero_ticket,
+            'idticket' => $validated['ticketId'],
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        Log::error('Error al crear orden: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear la orden: ' . $e->getMessage()
+        ], 500);
     }
+}
+
+/**
+ * Obtener el ID del tipo de servicio basado en el valor
+ */
+private function getTipoServicioId($tipoServicio)
+{
+    $tipos = [
+        'mantenimiento' => 1,
+        'reparacion' => 2, 
+        'instalacion' => 3,
+        'garantia' => 4
+    ];
+
+    return $tipos[$tipoServicio] ?? 1; // Default a mantenimiento
+}
 
     // Puedes agregar los demás métodos después
     public function edit($id)
     {
-        // Lógica para editar
-        return view("solicitud.solicitudrepuesto.edit");
+       
     }
 
     public function show($id)
     {
-        // Lógica para mostrar
-        return view("solicitud.solicitudrepuesto.show");
+      
     }
 
     public function update(Request $request, $id)
     {
-        // Lógica para actualizar
-        return redirect()->route('solicitudrepuesto.index')
-            ->with('success', 'Solicitud de repuesto actualizada exitosamente');
+        
     }
 
     public function destroy($id)
     {
-        // Lógica para eliminar
-        return redirect()->route('solicitudrepuesto.index')
-            ->with('success', 'Solicitud de repuesto eliminada exitosamente');
+        
     }
 }

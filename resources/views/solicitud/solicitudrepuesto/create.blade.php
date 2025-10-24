@@ -588,9 +588,9 @@
                                 <!-- Fecha Requerida -->
                                 <div>
                                     <label class="block text-lg font-semibold text-gray-900 mb-4">Fecha Requerida</label>
-                                    <input type="date" x-model="orderInfo.fechaRequerida" 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
-                                           :min="minDate">
+                                    <input type="date" x-model="orderInfo.fechaRequerida"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
+                                        :min="minDate">
                                     <div class="text-xs text-gray-500 mt-2">Fecha límite para tener todos los repuestos</div>
                                     <div class="text-sm text-blue-600 font-medium mt-2" x-show="orderInfo.fechaRequerida">
                                         📅 Fecha establecida: <span x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
@@ -692,8 +692,8 @@
                             </div>
                             <div class="flex justify-between items-center py-3 border-b border-blue-100">
                                 <span class="text-gray-700 font-medium">Fecha Requerida</span>
-                                <span class="text-lg font-bold text-orange-600" 
-                                      x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
+                                <span class="text-lg font-bold text-orange-600"
+                                    x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
                             </div>
                             <div class="flex justify-between items-center py-3">
                                 <span class="text-gray-700 font-medium">Estado</span>
@@ -707,9 +707,9 @@
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
                         <div class="space-y-4">
-                            <button @click="clearAll()" :disabled="products.length === 0"
-                                :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 }"
-                                class="w-full px-6 py-4 bg-warning text-white rounded-lg font-bold hover:bg-warning-dark transition-all duration-200 flex items-center justify-center space-x-3">
+                            <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
+                                :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder }"
+                                class="w-full px-6 py-4 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -718,17 +718,22 @@
                                 <span>Limpiar Todo</span>
                             </button>
 
-                            <button @click="createOrder()" :disabled="!canCreateOrder"
+                            <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
                                 :class="{
-                                    'opacity-50 cursor-not-allowed': !canCreateOrder,
-                                    'hover:scale-[1.02]': canCreateOrder
-                                }"
+                'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
+                'hover:scale-[1.02]': canCreateOrder && !isCreatingOrder
+            }"
                                 class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="text-lg">Crear Orden</span>
+                                <template x-if="!isCreatingOrder">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="isCreatingOrder">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                </template>
+                                <span class="text-lg" x-text="isCreatingOrder ? 'Creando Orden...' : 'Crear Orden'"></span>
                             </button>
                         </div>
                     </div>
@@ -825,7 +830,7 @@
             Alpine.data('solicitudRepuesto', () => ({
                 // Estado de la aplicación
                 currentDate: '',
-                orderNumber: 1,
+                orderNumber: {{ $nextOrderNumber ?? 1 }}, // Número desde la base de datos
                 selectedTicket: '',
                 selectedTicketInfo: null,
                 loadingTicket: false,
@@ -837,13 +842,12 @@
                     tipo: '',
                     codigo: '',
                     cantidad: 1
-                    // Removido fechaRequerida del producto individual
                 },
                 orderInfo: {
                     tipoServicio: '',
                     urgencia: '',
                     observaciones: '',
-                    fechaRequerida: '' // Fecha requerida global para toda la orden
+                    fechaRequerida: ''
                 },
                 notification: {
                     show: false,
@@ -851,7 +855,8 @@
                     type: 'info'
                 },
                 notificationTimeout: null,
-                minDate: '', // Para la fecha mínima
+                minDate: '',
+                isCreatingOrder: false, // Nuevo estado para el preloader
 
                 // Tickets desde Laravel
                 tickets: @json($tickets),
@@ -882,7 +887,7 @@
                     },
                     {
                         value: 'media',
-                        text: 'Media', 
+                        text: 'Media',
                         emoji: '🟡',
                         description: 'Necesario en los próximos días'
                     },
@@ -899,28 +904,26 @@
                     return this.products.reduce((sum, product) => sum + product.cantidad, 0);
                 },
                 get totalUniqueProducts() {
-                    // Contar productos únicos por combinación de ticket + modelo + tipo + código
                     const uniqueProducts = new Set();
                     this.products.forEach(product => {
-                        const key =
-                            `${product.ticketId}-${product.modeloId}-${product.tipoId}-${product.codigoId}`;
+                        const key = `${product.ticketId}-${product.modeloId}-${product.tipoId}-${product.codigoId}`;
                         uniqueProducts.add(key);
                     });
                     return uniqueProducts.size;
                 },
                 get canAddProduct() {
-                    return this.newProduct.modelo && 
-                           this.newProduct.tipo && 
-                           this.newProduct.codigo && 
-                           this.newProduct.cantidad > 0 && 
-                           this.selectedTicket;
+                    return this.newProduct.modelo &&
+                        this.newProduct.tipo &&
+                        this.newProduct.codigo &&
+                        this.newProduct.cantidad > 0 &&
+                        this.selectedTicket;
                 },
                 get canCreateOrder() {
-                    return this.products.length > 0 && 
-                           this.selectedTicket && 
-                           this.orderInfo.tipoServicio && 
-                           this.orderInfo.urgencia &&
-                           this.orderInfo.fechaRequerida; // Solo verificar la fecha global
+                    return this.products.length > 0 &&
+                        this.selectedTicket &&
+                        this.orderInfo.tipoServicio &&
+                        this.orderInfo.urgencia &&
+                        this.orderInfo.fechaRequerida;
                 },
 
                 // Métodos
@@ -932,14 +935,29 @@
                         day: 'numeric'
                     });
 
-                    // Establecer fecha mínima como hoy
                     this.minDate = new Date().toISOString().split('T')[0];
 
-                    // Inicializar Select2 después de que Alpine haya renderizado
+                    // Obtener el próximo número de orden
+                    this.getNextOrderNumber();
+
                     this.$nextTick(() => {
                         this.initSelect2();
                     });
                 },
+
+                async getNextOrderNumber() {
+                try {
+                    const response = await fetch('/api/next-order-number');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.orderNumber = data.nextOrderNumber;
+                    }
+                } catch (error) {
+                    console.error('Error obteniendo número de orden:', error);
+                    // Si falla, usar el número por defecto
+                    this.orderNumber = {{ $nextOrderNumber ?? 1 }};
+                }
+            },
 
                 initSelect2() {
                     // Ticket Select
@@ -980,8 +998,7 @@
                         }).on('change', (e) => {
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
-                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target
-                                    .value);
+                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target.value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -1049,23 +1066,19 @@
                         if (ticketData) {
                             this.selectedTicketInfo = ticketData;
 
-                            // Cargar modelo automáticamente desde el ticket
                             if (ticketData.idModelo && ticketData.modelo_nombre) {
                                 this.newProduct.modelo = ticketData.idModelo;
-                                this.updateModeloSelect(ticketData.idModelo, ticketData
-                                    .modelo_nombre);
+                                this.updateModeloSelect(ticketData.idModelo, ticketData.modelo_nombre);
                                 this.loadTiposRepuesto(ticketData.idModelo);
                             }
 
                             this.showNotification('✅ Información del ticket cargada', 'success');
                         } else {
-                            this.showNotification('❌ No se encontró información del ticket',
-                                'error');
+                            this.showNotification('❌ No se encontró información del ticket', 'error');
                         }
                     } catch (error) {
                         console.error('Error loading ticket info:', error);
-                        this.showNotification('❌ Error al cargar la información del ticket',
-                            'error');
+                        this.showNotification('❌ Error al cargar la información del ticket', 'error');
                     } finally {
                         this.loadingTicket = false;
                     }
@@ -1073,15 +1086,12 @@
 
                 updateModeloSelect(modeloId, modeloNombre) {
                     if (this.$refs.modeloSelect) {
-                        // Limpiar y agregar nueva opción
                         $(this.$refs.modeloSelect).empty().append(
                             $('<option>', {
                                 value: modeloId,
                                 text: modeloNombre
                             })
                         ).val(modeloId).trigger('change');
-
-                        // Habilitar el select (aunque sea solo lectura)
                         $(this.$refs.modeloSelect).prop('disabled', false);
                     }
                 },
@@ -1098,10 +1108,8 @@
                         }
 
                         const tipos = await response.json();
-                        console.log('Tipos cargados:', tipos);
 
                         if (this.$refs.tipoSelect && tipos.length > 0) {
-                            // Limpiar el select
                             $(this.$refs.tipoSelect).empty().append(
                                 $('<option>', {
                                     value: '',
@@ -1109,7 +1117,6 @@
                                 })
                             );
 
-                            // Agregar las opciones de tipos
                             tipos.forEach(tipo => {
                                 $(this.$refs.tipoSelect).append(
                                     $('<option>', {
@@ -1119,11 +1126,8 @@
                                 );
                             });
 
-                            // Habilitar el select
                             $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
-
-                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`,
-                                'success');
+                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`, 'success');
                         } else {
                             $(this.$refs.tipoSelect).empty().append(
                                 $('<option>', {
@@ -1131,9 +1135,7 @@
                                     text: 'No hay tipos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron tipos de repuesto para este modelo',
-                                'warning');
+                            this.showNotification('⚠️ No se encontraron tipos de repuesto para este modelo', 'warning');
                         }
                     } catch (error) {
                         console.error('Error loading tipos repuesto:', error);
@@ -1154,17 +1156,14 @@
                     this.clearCodigoSelect();
 
                     try {
-                        const response = await fetch(
-                            `/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
+                        const response = await fetch(`/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
                         const codigos = await response.json();
-                        console.log('Códigos cargados:', codigos);
 
                         if (this.$refs.codigoSelect && codigos.length > 0) {
-                            // Limpiar el select
                             $(this.$refs.codigoSelect).empty().append(
                                 $('<option>', {
                                     value: '',
@@ -1172,7 +1171,6 @@
                                 })
                             );
 
-                            // Agregar las opciones de códigos
                             codigos.forEach(codigo => {
                                 $(this.$refs.codigoSelect).append(
                                     $('<option>', {
@@ -1182,11 +1180,8 @@
                                 );
                             });
 
-                            // Habilitar el select
                             $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
-
-                            this.showNotification(`✅ ${codigos.length} códigos cargados`,
-                                'success');
+                            this.showNotification(`✅ ${codigos.length} códigos cargados`, 'success');
                         } else {
                             $(this.$refs.codigoSelect).empty().append(
                                 $('<option>', {
@@ -1194,9 +1189,7 @@
                                     text: 'No hay códigos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron códigos para este tipo de repuesto',
-                                'warning');
+                            this.showNotification('⚠️ No se encontraron códigos para este tipo de repuesto', 'warning');
                         }
                     } catch (error) {
                         console.error('Error loading codigos:', error);
@@ -1280,25 +1273,15 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto',
-                            'error');
+                        this.showNotification('Por favor complete todos los campos del producto', 'error');
                         return;
                     }
 
-                    // Obtener los textos de los selects
-                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this
-                        .newProduct.modelo;
-                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this
-                        .newProduct.tipo;
-                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this
-                        .newProduct.codigo;
+                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this.newProduct.modelo;
+                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this.newProduct.tipo;
+                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this.newProduct.codigo;
                     const ticketText = this.selectedTicketInfo?.numero_ticket || 'N/A';
 
-                    // Crear una clave única para este producto
-                    const productKey =
-                        `${this.selectedTicket}-${this.newProduct.modelo}-${this.newProduct.tipo}-${this.newProduct.codigo}`;
-
-                    // Buscar si ya existe un producto igual
                     const existingProductIndex = this.products.findIndex(product =>
                         product.ticketId === this.selectedTicket &&
                         product.modeloId === this.newProduct.modelo &&
@@ -1307,13 +1290,9 @@
                     );
 
                     if (existingProductIndex !== -1) {
-                        // Si existe, sumar la cantidad
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(
-                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
-                            'success');
+                        this.showNotification(`✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`, 'success');
                     } else {
-                        // Si no existe, agregar nuevo producto
                         const product = {
                             uniqueId: Date.now() + Math.random(),
                             ticket: ticketText,
@@ -1325,19 +1304,16 @@
                             codigo: codigoText,
                             codigoId: this.newProduct.codigo,
                             cantidad: this.newProduct.cantidad
-                            // No incluir fechaRequerida en el producto individual
                         };
 
                         this.products.push(product);
                         this.showNotification('✅ Producto agregado correctamente', 'success');
                     }
 
-                    // Reset form - mantener el modelo pero limpiar tipo y código
                     this.newProduct.cantidad = 1;
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
 
-                    // Recargar tipos de repuesto para el modelo actual
                     if (this.newProduct.modelo) {
                         this.loadTiposRepuesto(this.newProduct.modelo);
                     }
@@ -1361,48 +1337,81 @@
                         return;
                     }
 
-                    if (confirm(
-                            '¿Está seguro de que desea eliminar todos los productos de la orden?')) {
+                    if (confirm('¿Está seguro de que desea eliminar todos los productos de la orden?')) {
                         this.products = [];
                         this.showNotification('🗑️ Todos los productos han sido eliminados', 'info');
                     }
                 },
 
-                saveDraft() {
-                    this.showNotification('📝 Borrador guardado correctamente', 'success');
-                },
+                async createOrder() {
+    if (!this.canCreateOrder) {
+        this.showNotification('❌ Complete todos los campos requeridos para crear la orden', 'error');
+        return;
+    }
 
-                createOrder() {
-                    if (!this.canCreateOrder) {
-                        this.showNotification(
-                            '❌ Complete todos los campos requeridos para crear la orden', 'error');
-                        return;
-                    }
+    // Mostrar preloader
+    this.isCreatingOrder = true;
+    
+    try {
+        // Preparar datos para enviar
+        const orderData = {
+            ticketId: this.selectedTicket,
+            orderInfo: this.orderInfo,
+            products: this.products,
+            orderNumber: this.orderNumber
+        };
 
-                    // Preparar datos para enviar
-                    const orderData = {
-                        ticketId: this.selectedTicket,
-                        orderInfo: this.orderInfo,
-                        products: this.products,
-                        orderNumber: this.orderNumber
-                    };
+        console.log('Enviando datos de la orden:', orderData);
 
-                    console.log('Datos de la orden:', orderData);
+        // Enviar datos al servidor
+        const response = await fetch('/solicitudrepuesto/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(orderData)
+        });
 
-                    this.showNotification('🎉 ¡Orden creada exitosamente!', 'success');
+        const result = await response.json();
 
-                    setTimeout(() => {
-                        this.products = [];
-                        this.clearTicketSelection();
-                        this.orderInfo = {
-                            tipoServicio: '',
-                            urgencia: '',
-                            observaciones: '',
-                            fechaRequerida: ''
-                        };
-                        this.orderNumber++;
-                    }, 2000);
-                },
+        if (result.success) {
+            this.showNotification(`🎉 ¡Orden ${result.codigo_orden} creada exitosamente!`, 'success');
+            
+            console.log('Orden guardada:', {
+                id: result.solicitud_id,
+                codigo: result.codigo_orden,
+                numeroticket: result.numeroticket,
+                productos_unicos: result.estadisticas.productos_unicos,
+                total_cantidad: result.estadisticas.total_cantidad
+            });
+            
+            // Obtener el próximo número de orden después de guardar
+            await this.getNextOrderNumber();
+            
+            // Limpiar formulario después de éxito
+            setTimeout(() => {
+                this.products = [];
+                this.clearTicketSelection();
+                this.orderInfo = {
+                    tipoServicio: '',
+                    urgencia: '',
+                    observaciones: '',
+                    fechaRequerida: ''
+                };
+                // No incrementar manualmente, ya se obtuvo el nuevo número
+            }, 3000);
+        } else {
+            throw new Error(result.message);
+        }
+
+    } catch (error) {
+        console.error('Error al crear la orden:', error);
+        this.showNotification(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        this.isCreatingOrder = false;
+    }
+},
 
                 showNotification(message, type = 'info') {
                     this.notification.message = message;

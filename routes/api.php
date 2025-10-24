@@ -504,3 +504,4 @@ Route::get('/almacen/racks/datos', [UbicacionesVistaController::class, 'getDatos
     Route::get('/ticket-info/{ticketId}', [SolicitudrepuestoController::class, 'getTicketInfo'])->name('api.ticket-info');
     Route::get('/tipos-repuesto/{modeloId}', [SolicitudRepuestoController::class, 'getTiposRepuesto'])->name('api.tipos-repuesto');
 Route::get('/codigos-repuesto/{modeloId}/{subcategoriaId}', [SolicitudRepuestoController::class, 'getCodigosRepuesto'])->name('api.codigos-repuesto');
+Route::get('/next-order-number', [SolicitudrepuestoController::class, 'getNextOrderNumber']);

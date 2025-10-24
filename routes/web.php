@@ -578,6 +578,8 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
+        Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
+
 });
 
 
