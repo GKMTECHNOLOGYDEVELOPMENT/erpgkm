@@ -373,154 +373,209 @@ private function getTipoServicioId($tipoServicio)
     }
 
     public function edit($id)
-    {
-        $solicitud = DB::table('solicitudesordenes as so')
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_repuesto')
+{
+    $userId = auth()->id();
+    
+    // Obtener la solicitud existente
+    $solicitud = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.tiposervicio',
+            'so.niveldeurgencia as urgencia',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.idticket',
+            't.numero_ticket',
+            't.idModelo'
+        )
+        ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
+        ->where('so.idsolicitudesordenes', $id)
+        ->first();
+
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
+    }
+
+    // Obtener los productos actuales de la orden
+    $productosActuales = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad',
+            'oa.idticket',
+            'oa.idarticulos',
+            'a.codigo_repuesto',
+            'a.nombre as articulo_nombre',
+            'a.idsubcategoria',
+            'sc.nombre as tipo_repuesto',
+            'm.idModelo',
+            'm.nombre as modelo_nombre',
+            't.numero_ticket'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->join('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->join('tickets as t', 'oa.idticket', '=', 't.idTickets')
+        ->join('modelo as m', 't.idModelo', '=', 'm.idModelo')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->where('oa.estado', 0) // Solo productos pendientes
+        ->get();
+
+    // Obtener tickets disponibles (misma condición que en create)
+    $tickets = DB::table('tickets as t')
+        ->select(
+            't.idTickets',
+            't.numero_ticket',
+            't.idModelo',
+            'm.nombre as modelo_nombre'
+        )
+        ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
+        ->where('t.idTipotickets', 1)
+        ->where(function($query) use ($userId) {
+            if ($userId == 1) {
+                return $query;
+            } else {
+                return $query->whereExists(function($subQuery) use ($userId) {
+                    $subQuery->select(DB::raw(1))
+                            ->from('visitas as v')
+                            ->whereColumn('v.idTickets', 't.idTickets')
+                            ->where('v.idUsuario', $userId)
+                            ->where('v.estado', 1)
+                            ->whereExists(function($flujoQuery) {
+                                $flujoQuery->select(DB::raw(1))
+                                         ->from('ticketflujo as tf')
+                                         ->whereColumn('tf.idTicket', 't.idTickets')
+                                         ->where('tf.idestadflujo', 2);
+                            });
+                });
+            }
+        })
+        ->orderBy('t.fecha_creacion', 'desc')
+        ->get();
+
+    return view('solicitud.solicitudrepuesto.edit', compact('solicitud', 'productosActuales', 'tickets'));
+}
+
+public function update(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+
+        // Validar que la solicitud existe
+        $solicitud = DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
             ->first();
 
         if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
         }
 
-        // Obtener tickets para el select
-        $userId = auth()->id();
-        $tickets = DB::table('tickets as t')
-            ->select(
-                't.idTickets',
-                't.numero_ticket',
-                't.idModelo',
-                'm.nombre as modelo_nombre'
-            )
-            ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
-            ->where('t.idTipotickets', 1)
-            ->where(function($query) use ($userId) {
-                if ($userId == 1) {
-                    return $query;
-                } else {
-                    return $query->whereExists(function($subQuery) use ($userId) {
-                        $subQuery->select(DB::raw(1))
-                                ->from('visitas as v')
-                                ->whereColumn('v.idTickets', 't.idTickets')
-                                ->where('v.idUsuario', $userId)
-                                ->where('v.estado', 1)
-                                ->whereExists(function($flujoQuery) {
-                                    $flujoQuery->select(DB::raw(1))
-                                             ->from('ticketflujo as tf')
-                                             ->whereColumn('tf.idTicket', 't.idTickets')
-                                             ->where('tf.idestadflujo', 2);
-                                });
-                    });
-                }
-            })
-            ->orderBy('t.fecha_creacion', 'desc')
-            ->get();
+        // Validar los datos
+        $validated = $request->validate([
+            'ticketId' => 'required|exists:tickets,idTickets',
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.ticketId' => 'required|exists:tickets,idTickets',
+            'products.*.modeloId' => 'required|exists:modelo,idModelo',
+            'products.*.tipoId' => 'required|exists:subcategorias,id',
+            'products.*.codigoId' => 'required',
+            'products.*.cantidad' => 'required|integer|min:1|max:100'
+        ]);
 
-        $articulosSolicitud = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.*',
-                'a.nombre as nombre_articulo',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.precio_compra',
-                'sc.nombre as tipo_articulo'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->get();
+        // Obtener información del ticket
+        $ticket = DB::table('tickets')
+            ->where('idTickets', $validated['ticketId'])
+            ->first();
 
-        return view('solicitud.solicitudrepuesto.edit', compact('solicitud', 'tickets', 'articulosSolicitud'));
-    }
+        if (!$ticket) {
+            throw new \Exception('Ticket no encontrado');
+        }
 
-    public function update(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
+        // Calcular nuevas estadísticas de productos
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
+            return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
+        })->count();
 
-            $validated = $request->validate([
-                'ticketId' => 'required|exists:tickets,idTickets',
-                'orderInfo.tipoServicio' => 'required|string',
-                'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
-                'orderInfo.fechaRequerida' => 'required|date',
-                'orderInfo.observaciones' => 'nullable|string',
-                'products' => 'required|array|min:1',
-                'products.*.articuloId' => 'required|exists:articulos,idArticulos',
-                'products.*.cantidad' => 'required|integer|min:1|max:1000'
+        // 1. Actualizar la solicitud principal
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+                'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+                'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+                'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+                'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+                'cantidad' => $totalProductosUnicos,
+                'canproduuni' => $totalProductosUnicos,
+                'totalcantidadproductos' => $totalCantidad,
+                'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+                'urgencia' => $validated['orderInfo']['urgencia'],
+                'fechaactualizacion' => now()
             ]);
 
-            // Verificar que la solicitud existe y es del tipo correcto
-            $solicitud = DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_repuesto')
+        // 2. Eliminar los productos actuales (solo los pendientes)
+        DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0) // Solo eliminar los pendientes
+            ->delete();
+
+        // 3. Insertar los nuevos productos
+        foreach ($validated['products'] as $product) {
+            // Buscar el idArticulos basado en el código
+            $articulo = DB::table('articulos')
+                ->where('codigo_repuesto', $product['codigoId'])
                 ->first();
 
-            if (!$solicitud) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
-
-            // Obtener información del ticket
-            $ticket = DB::table('tickets')
-                ->where('idTickets', $validated['ticketId'])
-                ->first();
-
-            // Calcular nuevas estadísticas
-            $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = count($validated['products']);
-
-            // Actualizar la solicitud
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'idticket' => $validated['ticketId'],
-                    'numeroticket' => $ticket->numero_ticket,
-                    'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
-                    'niveldeurgencia' => $validated['orderInfo']['urgencia'],
-                    'tiposervicio' => $validated['orderInfo']['tipoServicio'],
-                    'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                    'cantidad' => $totalProductosUnicos,
-                    'canproduuni' => $totalProductosUnicos,
-                    'totalcantidadproductos' => $totalCantidad,
-                    'urgencia' => $validated['orderInfo']['urgencia']
-                ]);
-
-            // Eliminar artículos existentes y agregar nuevos
-            DB::table('ordenesarticulos')->where('idsolicitudesordenes', $id)->delete();
-
-            foreach ($validated['products'] as $product) {
+            if ($articulo) {
                 DB::table('ordenesarticulos')->insert([
                     'cantidad' => $product['cantidad'],
-                    'estado' => 0,
+                    'estado' => 0, // 0 = pendiente
                     'observacion' => null,
                     'fotorepuesto' => null,
                     'fechausado' => null,
                     'fechasinusar' => null,
                     'idsolicitudesordenes' => $id,
-                    'idticket' => $validated['ticketId'],
-                    'idarticulos' => $product['articuloId'],
+                    'idticket' => $product['ticketId'],
+                    'idarticulos' => $articulo->idArticulos,
                     'idubicacion' => null
                 ]);
+            } else {
+                Log::warning("Artículo no encontrado con código: " . $product['codigoId']);
             }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Solicitud de repuesto actualizada exitosamente'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al actualizar la solicitud: ' . $e->getMessage()
-            ], 500);
         }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Orden actualizada exitosamente',
+            'solicitud_id' => $id,
+            'codigo_orden' => $solicitud->codigo,
+            'numeroticket' => $ticket->numero_ticket,
+            'idticket' => $validated['ticketId'],
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        Log::error('Error al actualizar orden: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la orden: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function destroy($id)
     {
