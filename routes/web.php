@@ -573,6 +573,8 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
+
+    
 });
 
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
@@ -583,6 +585,8 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
+
 
 });
 

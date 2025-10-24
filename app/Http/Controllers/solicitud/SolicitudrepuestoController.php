@@ -618,4 +618,12 @@ public function update(Request $request, $id)
         }
     }
 
+
+
+     public function opciones($id)
+    {
+        // Lógica para aceptar la solicitud
+        return view('solicitud.solicitudrepuesto.opciones', compact('id'));
+    }
+
 }

@@ -432,4 +432,11 @@ public function update(Request $request, $id)
         return $tipos[$tipoServicio] ?? 5;
     }
 
+
+    public function opciones($id)
+    {
+        // Lógica para aceptar la solicitud
+        return view('solicitud.solicitudarticulo.opciones', compact('id'));
+    }
+
 }
