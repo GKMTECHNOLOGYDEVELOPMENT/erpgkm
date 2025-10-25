@@ -573,6 +573,12 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
+
+
+        Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
+Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
+
+    
 });
 
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
@@ -583,7 +589,9 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
-    Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
+        Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
+Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
+Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 });
 
 
@@ -605,6 +613,8 @@ Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () 
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
+
+
 });
 
 Route::get('/solicitudes-ingreso/por-compra/{compraId}', [SolicitudIngresoController::class, 'porCompra'])->name('solicitudes.por-compra');
