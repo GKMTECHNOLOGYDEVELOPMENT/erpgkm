@@ -3329,7 +3329,10 @@ class OrdenesTrabajoController extends Controller
         $firma = DB::table('firmas')->where('idTickets', $idOt)
             ->where('idVisitas', $idVisitasSeleccionada)  // Filtrar por la visita seleccionada
             ->first();
-
+        // 🔹 Agregar esto
+        $condicion = DB::table('condicionesticket')
+            ->where('idTickets', $idOt)
+            ->first();
         // Aplicar optimización de imágenes a las firmas
         // $firmaTecnico = $firma && !empty($firma->firma_tecnico)
         //     ? $this->optimizeBase64Image('data:image/png;base64,' . base64_encode($firma->firma_tecnico))
@@ -3389,6 +3392,18 @@ class OrdenesTrabajoController extends Controller
         // 🔹 Determinar vista según tipo de servicio
         $tipoServicio = $visitaSeleccionada->tipoServicio ?? null;
         $nombreVisita = Str::lower($visitaSeleccionada->nombre ?? '');
+        // 🔹 Datos del cliente por defecto
+        $nombreCliente = $orden->cliente->nombre ?? 'N/A';
+        $tipoDocCliente = $orden->cliente->tipodocumento->nombre ?? 'Documento';
+        $docCliente = $orden->cliente->documento ?? 'No disponible';
+
+        // 🔹 Si el cliente no es titular, tomar los datos desde condicionesticket
+        if ($condicion && $condicion->titular == 0) {
+            $nombreCliente = $condicion->nombre ?? $nombreCliente;
+            $tipoDocCliente = 'DNI';
+            $docCliente = $condicion->dni ?? $docCliente;
+        }
+
 
         if (Str::contains($nombreVisita, 'laboratorio')) {
             // 🔸 No se toca: laboratorio mantiene su vista
@@ -3418,7 +3433,11 @@ class OrdenesTrabajoController extends Controller
             'logoGKM' => $logoGKM,
             'motivoCondicion' => $motivoCondicion,
             'modoVistaPrevia' => false,
+            'condicion' => $condicion, // 👈 AGREGA ESTO
             'firma' => $firma, // ✅ AÑADE ESTO
+            'nombreCliente' => $nombreCliente,
+            'tipoDocCliente' => $tipoDocCliente,
+            'docCliente' => $docCliente,
         ])->render();
 
         // 1. Guardar PDF temporal
