@@ -403,6 +403,25 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
         return Excel::download(new ArticuloExport, 'ventas.xlsx');
     })->name('exportExcel');
 });
+
+/// INICIO VENTAS ///
+Route::prefix('cotizaciones')->name('cotizaciones.')->group(function () {
+    Route::get('/', [cotizacionController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [cotizacionController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [cotizacionController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/imagen', [cotizacionController::class, 'imagen'])->name('imagen'); // Editar un artículo
+    Route::post('/{id}/fotoupdate', [cotizacionController::class, 'updateFoto']);
+    Route::get('/{id}/edit', [cotizacionController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [cotizacionController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [cotizacionController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [cotizacionController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [cotizacionController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    Route::post('/check-nombre', [cotizacionController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new ArticuloExport, 'cotizaciones.xlsx');
+    })->name('exportExcel');
+});
 /// INICIO COMPRAS ///
 Route::prefix('compras')->name('compras.')->group(function () {
     Route::get('/', [ComprasController::class, 'index'])->name('index'); // Mostrar la vista principal
