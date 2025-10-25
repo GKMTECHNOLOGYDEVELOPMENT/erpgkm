@@ -573,21 +573,17 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
-
-    
 });
 
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
-        Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
-        Route::get('/{id}', [SolicitudrepuestoController::class, 'show'])->name('show');
+    Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
+    Route::get('/{id}', [SolicitudrepuestoController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
-
-
+    Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
 });
 
 
