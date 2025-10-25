@@ -86,7 +86,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">Artículos Solicitados</h2>
+                                    <h2 class="text-2xl font-bold text-gray-900">Repuestos Solicitados</h2>
                                     <p class="text-gray-600 text-sm">Lista completa de repuestos requeridos</p>
                                 </div>
                             </div>
@@ -103,9 +103,6 @@
                                         <th
                                             class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                             Código</th>
-                                        <th
-                                            class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                            Artículo</th>
                                         <th
                                             class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                             Tipo</th>
@@ -132,15 +129,6 @@
                                                         </span>
                                                     @endif
                                                 </div>
-                                            </td>
-                                            <td class="px-4 py-3">
-                                                <p class="font-semibold text-gray-900 text-sm">
-                                                    {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}</p>
-                                                @if ($articulo->precio_compra)
-                                                    <p class="text-xs text-green-600 font-medium mt-1">
-                                                        ${{ number_format($articulo->precio_compra, 2) }}
-                                                    </p>
-                                                @endif
                                             </td>
                                             <td class="px-4 py-3">
                                                 <span

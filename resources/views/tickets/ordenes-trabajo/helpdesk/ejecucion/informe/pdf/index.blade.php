@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe Técnico</title>
+    <title>Informe Técnicoss</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         body {
@@ -80,15 +80,12 @@
 
 
         .footer {
-            position: absolute;
-            bottom: 40px;
-            /* Lo sube un poco */
-            left: 0;
+            position: relative;
             width: 100%;
             padding: 6px 10px !important;
-            /* Reducir espacio */
             page-break-before: avoid;
             page-break-after: avoid;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -205,7 +202,53 @@
                     @endforeach
                 </div>
             @endif
+            <!-- FOOTER -->
+            <div class="footer text-center text-gray-500 text-xs">
+                <div class="flex justify-between mt-6 page-break-inside-avoid">
+                    <!-- Firma del Técnico -->
+                    <div class="w-1/2 text-center flex flex-col items-center">
+                        <div class="h-24 flex items-end justify-center mb-1">
+                            @if ($firmaTecnico)
+                                <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
+                            @else
+                                <span class="text-xs text-gray-500">N/A</span>
+                            @endif
+                        </div>
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
+                        <p class="text-xs text-gray-600 uppercase tracking-wide">
+                            {{ $visita['tecnico'] ?? 'NOMBRE NO DISPONIBLE' }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
+                        </p>
+                    </div>
 
+                    <!-- Firma del Cliente -->
+                    <div class="w-1/2 text-center flex flex-col items-center">
+                        <div class="h-24 flex items-end justify-center mb-1">
+                            @if ($firmaCliente)
+                                <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
+                                    class="w-[90%] h-20 mx-auto object-contain"
+                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
+                            @else
+                                <span class="text-xs text-gray-500 font-bold">Cliente no firmó</span>
+                            @endif
+                        </div>
+                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
+                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
+                        <p class="text-xs text-gray-600 uppercase tracking-wide">
+                            {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                            {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
+                            {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
             @php
                 $instaladosCount = $equiposInstalados->count();
@@ -272,53 +315,6 @@
                     </table>
                 </div>
             @endif
-            <!-- FOOTER -->
-            <div class="footer text-center text-gray-500 text-xs">
-                <div class="flex justify-between mt-6 page-break-inside-avoid">
-                    <!-- Firma del Técnico -->
-                    <div class="w-1/2 text-center flex flex-col items-center">
-                        <div class="h-24 flex items-end justify-center mb-1">
-                            @if ($firmaTecnico)
-                                <img src="{{ $firmaTecnico }}" alt="Firma del Técnico"
-                                    class="w-[90%] h-20 mx-auto object-contain"
-                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -30px; position: relative;">
-                            @else
-                                <span class="text-xs text-gray-500">N/A</span>
-                            @endif
-                        </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL TÉCNICO</p>
-                        <p class="text-xs text-gray-600 uppercase tracking-wide">
-                            {{ $visita['tecnico'] ?? 'NOMBRE NO DISPONIBLE' }}
-                        </p>
-                        <p class="text-xs text-gray-500">
-                            {{ $visita['tipo_documento'] ?? 'Documento' }}: {{ $visita['documento'] ?? 'N/A' }}
-                        </p>
-                    </div>
-
-                    <!-- Firma del Cliente -->
-                    <div class="w-1/2 text-center flex flex-col items-center">
-                        <div class="h-24 flex items-end justify-center mb-1">
-                            @if ($firmaCliente)
-                                <img src="{{ $firmaCliente }}" alt="Firma del Cliente"
-                                    class="w-[90%] h-20 mx-auto object-contain"
-                                    style="transform: scale(1.5); transform-origin: bottom center; bottom: -40px; position: relative;">
-                            @else
-                                <span class="text-xs text-gray-500 font-bold">Cliente no firmó</span>
-                            @endif
-                        </div>
-                        <hr class="w-48 border-t-2 border-gray-700 mx-auto mb-1">
-                        <p class="text-xs font-semibold text-gray-700">FIRMA DEL CLIENTE</p>
-                        <p class="text-xs text-gray-600 uppercase tracking-wide">
-                            {{ $firma->nombreencargado ?? ($orden->cliente->nombre ?? 'N/A') }}
-                        </p>
-                        <p class="text-xs text-gray-500">
-                            {{ mb_strtoupper($firma->tipodocumento ?? ($orden->cliente->tipodocumento->nombre ?? 'Documento')) }}:
-                            {{ mb_strtoupper($firma->documento ?? ($orden->cliente->documento ?? 'No disponible')) }}
-                        </p>
-                    </div>
-                </div>
-            </div>
 
 
 
