@@ -1,83 +1,135 @@
 <x-layout.default>
     <div class="container mx-auto px-4 py-8">
-        <!-- Debug temporal -->
-        <!-- @if(env('APP_DEBUG'))
-        <div class="bg-blue-50 p-4 mb-6 rounded-lg border border-blue-200">
-            <p class="font-bold text-blue-800">Debug Info:</p>
-            <p class="text-sm text-blue-700">Total solicitudes: {{ $solicitudes->total() }}</p>
-            <p class="text-sm text-blue-700">Filtros activos: {{ json_encode(request()->all()) }}</p>
-        </div>
-        @endif -->
 
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Solicitudes de Artículos</h1>
-            <a href="{{ route('solicitudarticulo.create') }}" 
-               class="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
+            <h1 class="text-3xl font-bold text-gray-800">Solicitudes</h1>
+            <button id="openModalBtn"
+                class="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
                 Nueva Solicitud
-            </a>
+            </button>
+        </div>
+
+        <!-- Modal para seleccionar tipo de solicitud -->
+        <div id="solicitudModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <!-- Header del Modal -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">Crear Nueva Solicitud</h3>
+                    <p class="text-sm text-gray-600 mt-1">Selecciona el tipo de solicitud que deseas crear</p>
+                </div>
+                
+                <!-- Opciones del Modal -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- Opción para solicitud de artículo -->
+                        <a href="{{ route('solicitudarticulo.create') }}" 
+                           class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+                            <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Solicitud de Artículo</h4>
+                                <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un artículo general</p>
+                            </div>
+                        </a>
+                        
+                        <!-- Opción para solicitud de repuesto -->
+                        <a href="{{ route('solicitudrepuesto.create') }}" 
+                           class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-all duration-200">
+                            <div class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Solicitud de Repuesto</h4>
+                                <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un repuesto específico</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Footer del Modal -->
+                <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
+                    <button id="closeModalBtn" class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Filtros y búsqueda FUNCIONALES -->
-        <form method="GET" action="{{ route('solicitudarticulo.index') }}" class="bg-white p-4 rounded-lg shadow-sm mb-6">
+        <form method="GET" action="{{ route('solicitudarticulo.index') }}"
+            class="bg-white p-4 rounded-lg shadow-sm mb-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex flex-wrap gap-2">
-    <button 
-        type="submit"
-        name="estado"
-        value=""
-        class="px-4 py-2 {{ empty(request('estado')) && empty(request('urgencia')) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-        Todas
-    </button>
-    <button 
-        type="submit"
-        name="estado"
-        value="pendiente"
-        class="px-4 py-2 {{ request('estado') == 'pendiente' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-        Pendientes
-    </button>
-    <button 
-        type="submit"
-        name="estado"
-        value="completada"
-        class="px-4 py-2 {{ request('estado') == 'completada' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-        Completadas
-    </button>
+                    <!-- Filtro por tipo de solicitud -->
+                    <button type="submit" name="tipo" value=""
+                        class="px-4 py-2 {{ empty(request('tipo')) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
+                        Todas
+                    </button>
+                    <button type="submit" name="tipo" value="solicitud_articulo"
+                        class="px-4 py-2 {{ request('tipo') == 'solicitud_articulo' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
+                        Artículos
+                    </button>
+                    <button type="submit" name="tipo" value="solicitud_repuesto"
+                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
+                        Repuestos
+                    </button>
 
-    <!-- Filtros por urgencia -->
-    <button 
-        type="submit"
-        name="urgencia"
-        value="1"
-        class="px-4 py-2 {{ request('urgencia') == '1' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green-600 transition">
-        Baja
-    </button>
-    <button 
-        type="submit"
-        name="urgencia"
-        value="2"
-        class="px-4 py-2 {{ request('urgencia') == '2' ? 'bg-green -500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green -600 transition">
-        Media
-    </button>
-    <button 
-        type="submit"
-        name="urgencia"
-        value="3"
-        class="px-4 py-2 {{ request('urgencia') == '3' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-red-600 transition">
-        Alta
-    </button>
-</div>
+                    <!-- Filtro por estado -->
+                    <button type="submit" name="estado" value=""
+                        class="px-4 py-2 {{ empty(request('estado')) ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
+                        Todos
+                    </button>
+                    <button type="submit" name="estado" value="pendiente"
+                        class="px-4 py-2 {{ request('estado') == 'pendiente' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
+                        Pendientes
+                    </button>
+                    <button type="submit" name="estado" value="aprobada"
+                        class="px-4 py-2 {{ request('estado') == 'aprobada' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
+                        Aprobadas
+                    </button>
+                    <button type="submit" name="estado" value="rechazada"
+                        class="px-4 py-2 {{ request('estado') == 'rechazada' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
+                        Rechazadas
+                    </button>
+
+                    <!-- Filtros por urgencia -->
+                    <button type="submit" name="urgencia" value=""
+                        class="px-4 py-2 {{ empty(request('urgencia')) ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-orange-600 transition">
+                        Todas
+                    </button>
+                    <button type="submit" name="urgencia" value="baja"
+                        class="px-4 py-2 {{ request('urgencia') == 'baja' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green-600 transition">
+                        Baja
+                    </button>
+                    <button type="submit" name="urgencia" value="media"
+                        class="px-4 py-2 {{ request('urgencia') == 'media' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-yellow-600 transition">
+                        Media
+                    </button>
+                    <button type="submit" name="urgencia" value="alta"
+                        class="px-4 py-2 {{ request('urgencia') == 'alta' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-red-600 transition">
+                        Alta
+                    </button>
+                </div>
                 <div class="relative w-full md:w-64">
-                    <input 
-                        type="text" 
-                        name="search"
-                        placeholder="Buscar solicitud..." 
+                    <input type="text" name="search" placeholder="Buscar por código..."
                         value="{{ request('search') }}"
                         class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                 </div>
             </div>
@@ -86,216 +138,369 @@
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($solicitudes as $solicitud)
-                <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
-                    @if($solicitud->estado == 'pendiente') border-green-500 
-                    @elseif($solicitud->nivelUrgencia == 1) border-red-500 
-                    @elseif($solicitud->nivelUrgencia == 2) border-yellow-500 
-                    @else border-blue-500 @endif transition transform hover:scale-[1.02] hover:shadow-lg">
-                    
+                <div
+                    class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
+                    @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
+                    @else border-green-500 @endif
+                    transition transform hover:scale-[1.02] hover:shadow-lg">
+
                     <!-- Header de la Card -->
                     <div class="px-6 py-4 bg-gray-50 border-b flex justify-between items-start">
                         <div>
-                            <h3 class="font-bold text-lg text-gray-800 flex items-center">
-                                @if($solicitud->nivelUrgencia == 3)
-                                    <svg class="w-5 h-5 mr-1 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                    </svg>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <!-- Badge de tipo de solicitud -->
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                    @if ($solicitud->tipoorden == 'solicitud_articulo') bg-blue-100 text-blue-800
+                                    @else bg-green-100 text-green-800 @endif">
+                                    @if ($solicitud->tipoorden == 'solicitud_articulo')
+                                        📦 Artículo
+                                    @else
+                                        🔧 Repuesto
+                                    @endif
+                                </span>
+                                
+                                <!-- Badge de urgencia -->
+                                @if ($solicitud->niveldeurgencia == 'alta')
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                        🔴 Alta
+                                    </span>
+                                @elseif($solicitud->niveldeurgencia == 'media')
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        🟡 Media
+                                    </span>
                                 @endif
-                                {{ $solicitud->codigoSolicitud ?? 'Sin código' }}
+                            </div>
+                            
+                            <h3 class="font-bold text-lg text-gray-800">
+                                {{ $solicitud->codigo ?? 'Sin código' }}
                             </h3>
                             <p class="text-sm text-gray-600 mt-1">
-                                <span class="font-medium">Solicitante:</span> {{ $solicitud->nombre_solicitante ?? 'No especificado' }}
+                                <span class="font-medium">Solicitante:</span>
+                                {{ $solicitud->nombre_solicitante ?? 'No especificado' }}
                             </p>
                         </div>
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full 
-                            @if($solicitud->estado == 'completada') bg-green-100 text-green-800 
-                            @elseif($solicitud->nivelUrgencia == 1) bg-red-100 text-red-800 
-                            @elseif($solicitud->nivelUrgencia == 2) bg-yellow-100 text-yellow-800 
+                        <span
+                            class="px-3 py-1 text-xs font-semibold rounded-full 
+                            @if ($solicitud->estado == 'aprobada') bg-green-100 text-green-800 
+                            @elseif($solicitud->estado == 'rechazada') bg-red-100 text-red-800 
+                            @elseif($solicitud->estado == 'pendiente') bg-yellow-100 text-yellow-800 
                             @else bg-blue-100 text-blue-800 @endif">
                             {{ ucfirst($solicitud->estado ?? 'pendiente') }}
                         </span>
                     </div>
-                    
+
                     <!-- Contenido de la Card -->
                     <div class="px-6 py-4">
+                        <!-- Información de Productos -->
                         <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium">Encargado</p>
-                            <p class="font-medium text-gray-800">{{ $solicitud->nombre_encargado ?? 'No asignado' }}</p>
+                            <p class="text-sm text-gray-500 font-medium">
+                                @if ($solicitud->tipoorden == 'solicitud_articulo')
+                                    Artículos
+                                @else
+                                    Repuestos
+                                @endif
+                            </p>
+                            <p class="font-medium text-gray-800">
+                                {{ $solicitud->total_productos ?? 0 }} productos 
+                                ({{ $solicitud->totalcantidadproductos ?? 0 }} unidades)
+                            </p>
                         </div>
-                        
+
+                        <!-- Tipo de Servicio -->
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 font-medium">Tipo de Servicio</p>
+                            <p class="font-medium text-gray-800">
+                                @switch($solicitud->tiposervicio)
+                                    @case('solicitud_articulo')
+                                        📦 Solicitud de Artículo
+                                    @break
+                                    @case('solicitud_repuesto')
+                                        🔧 Solicitud de Repuesto
+                                    @break
+                                    @case('mantenimiento')
+                                        🛠️ Mantenimiento
+                                    @break
+                                    @case('reparacion')
+                                        🔧 Reparación
+                                    @break
+                                    @case('instalacion')
+                                        ⚡ Instalación
+                                    @break
+                                    @case('garantia')
+                                        📋 Garantía
+                                    @break
+                                    @default
+                                        {{ $solicitud->tiposervicio ?? 'No especificado' }}
+                                @endswitch
+                            </p>
+                        </div>
+
+                        <!-- Fecha de Creación -->
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-500 font-medium">Fecha de Creación</p>
+                            <p class="font-medium text-gray-800">
+                                @if ($solicitud->fechacreacion)
+                                    {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
+                                @else
+                                    No especificada
+                                @endif
+                            </p>
+                        </div>
+
+                        <!-- Fecha Requerida -->
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 font-medium">Fecha Requerida</p>
                             <p class="font-medium text-gray-800">
-                                @if($solicitud->fecharequerida)
+                                @if ($solicitud->fecharequerida)
                                     {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
                                 @else
                                     No especificada
                                 @endif
                             </p>
                         </div>
-                        
-@php
-    $fechaSolicitud = $solicitud->fechasolicitud ? \Carbon\Carbon::parse($solicitud->fechasolicitud) : now();
-    $fechaRequerida = $solicitud->fecharequerida ? \Carbon\Carbon::parse($solicitud->fecharequerida) : now();
 
-    $totalDias = intval($fechaSolicitud->diffInDays($fechaRequerida, false));
-    $diasRestantes = intval(now()->diffInDays($fechaRequerida, false));
+                        @php
+                            $fechaCreacion = $solicitud->fechacreacion
+                                ? \Carbon\Carbon::parse($solicitud->fechacreacion)
+                                : now();
+                            $fechaRequerida = $solicitud->fecharequerida
+                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)
+                                : now()->addDays(7);
 
-    $progreso = 0;
-    if ($totalDias > 0) {
-        $progreso = intval(round(100 - ($diasRestantes / max($totalDias, 1) * 100)));
-    } elseif ($diasRestantes <= 0) {
-        $progreso = 100;
-    }
+                            $diasRestantes = intval(now()->diffInDays($fechaRequerida, false));
+                            
+                            $totalDias = intval($fechaCreacion->diffInDays($fechaRequerida, false));
+                            $diasTranscurridos = intval($fechaCreacion->diffInDays(now(), false));
+                            
+                            $progreso = 0;
+                            if ($totalDias > 0) {
+                                $progreso = intval(round(($diasTranscurridos / $totalDias) * 100));
+                            }
+                            
+                            $progreso = max(0, min(100, $progreso));
+                        @endphp
 
-    $progreso = max(0, min(100, $progreso));
-@endphp
-
-
-
-<div class="mb-4">
-    <div class="flex justify-between items-center mb-1">
-        <p class="text-sm text-gray-500 font-medium">Días Restantes</p>
-        <p class="text-xs font-semibold 
-            @if($diasRestantes <= 0) text-gray-500
-            @elseif($diasRestantes <= 2) text-red-500 
-            @elseif($diasRestantes <= 5) text-red-500 
-            @else text-green-500 
-            @endif">
-            {{ $diasRestantes > 0 ? $diasRestantes . ' días' : 'Vencida' }}
-        </p>
-    </div>
-
-    <div class="w-full bg-gray-200 rounded-full h-2">
-        <div class="h-2 rounded-full transition-all duration-500 ease-in-out
-            @if($diasRestantes <= 0) bg-gray-400 
-            @elseif($diasRestantes <= 2) bg-red-500 
-            @elseif($diasRestantes <= 5) bg-red-500 
-            @else bg-green-500 
-            @endif" 
-            style="width: {{ $progreso }}%;">
-        </div>
-    </div>
-</div>
-
-
-
-
-                        
-        <!-- Nivel de urgencia -->
-        <div class="mb-4">
-            <p class="text-sm text-gray-500 font-medium">Nivel de Urgencia</p>
-            <p class="font-medium 
-                @if($solicitud->nivelUrgencia == 3) text-red-600
-                @elseif($solicitud->nivelUrgencia == 2) text-yellow-600
-                @else text-green-600
-                @endif">
-                @switch($solicitud->nivelUrgencia)
-                    @case(1)
-                        Baja
-                        @break
-                    @case(2)
-                        Media
-                        @break
-                    @case(3)
-                        Alta
-                        @break
-                    @default
-                        No especificado
-                @endswitch
-            </p>
-        </div>
-                        
-                        @if(!empty($solicitud->comentario))
+                        <!-- Progreso de Tiempo -->
                         <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium">Comentario</p>
-                            <p class="text-sm text-gray-700">{{ Str::limit($solicitud->comentario, 100) }}</p>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-sm text-gray-500 font-medium">Tiempo Restante</p>
+                                <p
+                                    class="text-xs font-semibold 
+                                    @if ($diasRestantes <= 0) text-red-500
+                                    @elseif($diasRestantes <= 2) text-red-500 
+                                    @elseif($diasRestantes <= 5) text-yellow-500 
+                                    @else text-green-500 @endif">
+                                    @if ($diasRestantes > 0)
+                                        {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }}
+                                    @else
+                                        Vencida
+                                    @endif
+                                </p>
+                            </div>
+
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full transition-all duration-500 ease-in-out
+                                    @if ($diasRestantes <= 0) bg-red-500 
+                                    @elseif($diasRestantes <= 2) bg-red-500 
+                                    @elseif($diasRestantes <= 5) bg-yellow-500 
+                                    @else bg-green-500 @endif"
+                                    style="width: {{ $progreso }}%;">
+                                </div>
+                            </div>
                         </div>
+
+                        @if (!empty($solicitud->observaciones))
+                            <div class="mb-4">
+                                <p class="text-sm text-gray-500 font-medium">Observaciones</p>
+                                <p class="text-sm text-gray-700">{{ Str::limit($solicitud->observaciones, 100) }}</p>
+                            </div>
                         @endif
                     </div>
-                    
+
                     <!-- Footer de la Card -->
                     <div class="px-6 py-3 bg-gray-50 border-t flex justify-end space-x-2">
-                        <a href="{{ route('solicitudarticulo.show', $solicitud->idSolicitud) }}" 
-                           class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            Ver
-                        </a>
+                        <!-- Botón Ver - diferente según el tipo -->
+                        @if ($solicitud->tipoorden == 'solicitud_articulo')
+                            <a href="{{ route('solicitudarticulo.show', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                                Ver
+                            </a>
+                        @else
+                            <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                                Ver
+                            </a>
+                        @endif
 
-                         <a href="{{ route('solicitudarticulo.opciones', $solicitud->idSolicitud) }}" 
-                           class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            Opciones
-                        </a>
-                        @if(($solicitud->estado ?? '') != 'completada')
-                        <a href="{{ route('solicitudarticulo.edit', $solicitud->idSolicitud) }}" 
-                           class="flex items-center px-3 py-1.5 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                            </svg>
-                            Editar
-                        </a>
+
+                         <!-- Botón Opciones - reemplaza al botón Ver -->
+                        @if ($solicitud->tipoorden == 'solicitud_articulo')
+                            <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                Opciones
+                            </a>
+                        @else
+                            <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                Opciones
+                            </a>
+                        @endif
+
+                        <!-- Botón Editar - solo para pendientes -->
+                        @if ($solicitud->estado == 'pendiente')
+                            @if ($solicitud->tipoorden == 'solicitud_articulo')
+                                <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                    Editar
+                                </a>
+                            @else
+                                <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                    Editar
+                                </a>
+                            @endif
                         @endif
                     </div>
                 </div>
             @empty
                 <div class="col-span-full py-12 text-center bg-white rounded-lg shadow-sm">
-                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
                     </svg>
                     <h3 class="mt-2 text-lg font-medium text-gray-900">No hay solicitudes registradas</h3>
                     <p class="mt-1 text-gray-500 mb-4">Parece que no hay ninguna solicitud en el sistema.</p>
-                    <a href="{{ route('solicitudarticulo.create') }}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                    <button id="openModalBtnEmpty"
+                        class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
                         Crear primera solicitud
-                    </a>
+                    </button>
                 </div>
             @endforelse
         </div>
-        
+
         <!-- Paginación con parámetros de filtro -->
-        @if($solicitudes->hasPages())
-        <div class="mt-8">
-            {{ $solicitudes->appends(request()->query())->links() }}
-        </div>
+        @if ($solicitudes->hasPages())
+            <div class="mt-8">
+                {{ $solicitudes->appends(request()->query())->links() }}
+            </div>
         @endif
+
+        <!-- Estilos adicionales para la paginación -->
+        <style>
+            .pagination {
+                display: flex;
+                justify-content: center;
+                list-style: none;
+                padding: 0;
+            }
+
+            .page-item {
+                margin: 0 4px;
+            }
+
+            .page-link {
+                display: block;
+                padding: 8px 16px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                color: #4b5563;
+                text-decoration: none;
+            }
+
+            .page-item.active .page-link {
+                background-color: #3b82f6;
+                color: white;
+                border-color: #3b82f6;
+            }
+
+            .page-link:hover:not(.active) {
+                background-color: #f3f4f6;
+            }
+        </style>
     </div>
 
-    <!-- Estilos adicionales para la paginación -->
-    <style>
-        .pagination {
-            display: flex;
-            justify-content: center;
-            list-style: none;
-            padding: 0;
-        }
-        .page-item {
-            margin: 0 4px;
-        }
-        .page-link {
-            display: block;
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            color: #4b5563;
-            text-decoration: none;
-        }
-        .page-item.active .page-link {
-            background-color: #3b82f6;
-            color: white;
-            border-color: #3b82f6;
-        }
-        .page-link:hover:not(.active) {
-            background-color: #f3f4f6;
-        }
-    </style>
-
+    <!-- JavaScript para manejar el modal -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('solicitudModal');
+            const openModalBtn = document.getElementById('openModalBtn');
+            const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            
+            // Abrir modal desde el botón principal
+            if (openModalBtn) {
+                openModalBtn.addEventListener('click', function() {
+                    modal.classList.remove('hidden');
+                });
+            }
+            
+            // Abrir modal desde el botón cuando no hay solicitudes
+            if (openModalBtnEmpty) {
+                openModalBtnEmpty.addEventListener('click', function() {
+                    modal.classList.remove('hidden');
+                });
+            }
+            
+            // Cerrar modal con el botón cancelar
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', function() {
+                    modal.classList.add('hidden');
+                });
+            }
+            
+            // Cerrar modal al hacer clic fuera del contenido
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // Cerrar modal con la tecla Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
 </x-layout.default>

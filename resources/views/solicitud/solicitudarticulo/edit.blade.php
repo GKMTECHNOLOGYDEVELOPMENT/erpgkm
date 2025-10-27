@@ -1,634 +1,756 @@
 <x-layout.default>
-    <!-- jQuery (requerido por Select2) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
-    
-    <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-blue-500 to-purple-600 py-8 text-white">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-            <div class="flex justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-            </div>
-            <h1 class="text-3xl font-bold mb-2">Editar Solicitud de Artículos</h1>
-            <p class="text-blue-100 max-w-2xl mx-auto">Modifique los datos de la solicitud según sea necesario</p>
-        </div>
-    </div>
+    <!-- Incluir Select2 CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            height: 48px;
+            padding: 8px 12px;
+        }
 
-    <!-- Form Container -->
-    <div class="max-w-6x2 mx-auto px-4 py-8 -mt-10">
-        <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
-            <!-- Form Content -->
-            <form id="solicitudForm" method="POST" action="{{ route('solicitudarticulo.update', $solicitud->idSolicitud) }}" class="p-6 space-y-8">
-                @csrf
-                @method('PUT')
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 32px;
+            padding-left: 0;
+        }
 
-                <!-- Sección 1: Información del Solicitante -->
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-blue-100 p-2 rounded-lg dark:bg-blue-900/30">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600 dark:text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 46px;
+        }
+
+        .select2-container--default.select2-container--disabled .select2-selection--single {
+            background-color: #f9fafb;
+            opacity: 0.6;
+        }
+    </style>
+
+    <div x-data="solicitudArticuloEdit({{ Js::from($solicitud) }}, {{ Js::from($productosActuales) }}, {{ Js::from($articulos) }})" 
+         class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+        <div class="container mx-auto px-4 w-full">
+            <!-- Header Principal -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+                    <!-- Contenido Principal -->
+                    <div class="flex-1">
+                        <!-- Título y Descripción -->
+                        <div class="mb-4">
+                            <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                                Editar Solicitud de Artículos
+                            </h1>
+                            <p class="text-gray-600 text-lg">Actualice la información de la solicitud de artículos existente</p>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Información del Solicitante</h2>
+
+                        <!-- Información en Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Usuario</p>
+                                    <p class="font-semibold text-gray-900">{{ auth()->user()->name ?? 'Administrador' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Fecha Actualización</p>
+                                    <p x-text="currentDate" class="font-semibold text-gray-900"></p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Estado</p>
+                                    <p class="font-semibold text-gray-900" x-text="solicitud.estado"></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Campo Código de Solicitud (solo lectura) -->
-                        <div class="relative">
-                            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m9 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Código de Solicitud
-                                </span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m9 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <input type="text" readonly
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    id="codigoSolicitud" name="codigoSolicitud" value="{{ $solicitud->codigoSolicitud }}">
-                            </div>
-                        </div>
-
-                        <!-- Campo Nombre (solo lectura) -->
-                        <div class="relative">
-                            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    Nombre Completo
-                                </span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <input type="text" readonly
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    value="{{ auth()->user()->Nombre }} {{ auth()->user()->apellidoPaterno }} {{ auth()->user()->apellidoMaterno }}">
-                                <input type="hidden" name="nombre" value="{{ auth()->user()->Nombre }} {{ auth()->user()->apellidoPaterno }} {{ auth()->user()->apellidoMaterno }}">
-                            </div>
-                        </div>
-
-                        <!-- Campo Departamento (solo lectura) -->
-                        <div class="relative">
-                            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    Departamento/Área
-                                </span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                @if(auth()->user()->tipoArea)
-                                <input type="text" readonly
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    value="{{ auth()->user()->tipoArea->nombre }}">
-                                <input type="hidden" name="departamento" value="{{ auth()->user()->tipoArea->nombre }}">
-                                @else
-                                <input type="text" readonly
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    value="No asignado">
-                                <input type="hidden" name="departamento" value="">
-                                @endif
-                            </div>
+                    <!-- Número de Solicitud -->
+                    <div class="mt-6 lg:mt-0 lg:ml-6">
+                        <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl p-6 text-center shadow-lg border border-blue-200">
+                            <p class="text-white/80 text-sm font-medium mb-1">Solicitud N°</p>
+                            <div class="text-2xl lg:text-3xl font-black text-white tracking-wide" x-text="solicitud.codigo"></div>
+                            <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mt-2"></div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Sección 2: Detalles del Artículo -->
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-purple-100 p-2 rounded-lg dark:bg-purple-900/30">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                <!-- Columna Principal -->
+                <div class="xl:col-span-3 space-y-8">
+                    <!-- Selección de Artículos -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center justify-center w-10 h-10 bg-white text-purple-600 rounded-full font-bold shadow-md">
+                                    📦
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-bold text-white">Selección de Artículos</h2>
+                                    <p class="text-purple-100 text-sm">Actualice los artículos o materiales que necesita</p>
+                                </div>
+                            </div>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Detalles del Artículo</h2>
+
+                        <div class="p-6">
+                            <!-- Tabla de Artículos -->
+                            <div class="mb-8">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-xl font-semibold text-gray-900">Artículos Seleccionados</h3>
+                                    <div class="flex items-center space-x-4">
+                                        <span class="text-sm text-gray-600" x-text="`${totalUniqueProducts} artículo${totalUniqueProducts !== 1 ? 's' : ''}`"></span>
+                                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse" x-show="products.length > 0"></div>
+                                    </div>
+                                </div>
+
+                                <div class="overflow-hidden rounded-xl border border-blue-100">
+                                    <table class="w-full">
+                                        <thead class="bg-blue-50">
+                                            <tr>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Artículo</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Código</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Tipo</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Cantidad</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Descripción</th>
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-blue-100">
+                                            <template x-if="products.length === 0">
+                                                <tr>
+                                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                                        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                                                        </svg>
+                                                        <p class="mt-4 text-lg font-medium text-gray-900">No hay artículos agregados</p>
+                                                        <p class="text-sm mt-2">Agregue artículos usando el formulario inferior</p>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                            <template x-for="(product, index) in products" :key="product.uniqueId">
+                                                <tr class="product-row hover:bg-blue-50 transition-all duration-200">
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base font-semibold text-gray-900" x-text="product.nombre"></td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-blue-600 font-mono font-bold" x-text="product.codigo"></td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-700" x-text="product.tipo"></td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
+                                                        <div class="flex items-center space-x-3">
+                                                            <span class="font-bold" x-text="product.cantidad"></span>
+                                                            <div class="flex space-x-1">
+                                                                <button @click="updateQuantity(index, -1)" class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <button @click="updateQuantity(index, 1)" class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4 text-base text-gray-700" x-text="product.descripcion || 'Sin descripción'"></td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
+                                                        <button @click="removeProduct(index)" class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                            <span>Eliminar</span>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Formulario para Agregar Artículo -->
+                            <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Artículo</h3>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                                    <!-- Artículo -->
+                                    <div class="lg:col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Artículo</label>
+                                        <select x-model="newProduct.articuloId" x-ref="articuloSelect" class="w-full">
+                                            <option value="">Seleccione un artículo...</option>
+                                            <template x-for="articulo in articulos" :key="articulo.idArticulos">
+                                                <option :value="articulo.idArticulos" 
+                                                        :data-codigo="articulo.codigo_barras || articulo.codigo_repuesto"
+                                                        :data-tipo="articulo.tipo_articulo"
+                                                        :data-stock="articulo.stock_total"
+                                                        x-text="`${articulo.nombre} (${articulo.codigo_barras || articulo.codigo_repuesto})`"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Cantidad -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Cantidad</label>
+                                        <div class="flex w-full">
+                                            <button @click="decreaseQuantity()" class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                </svg>
+                                            </button>
+                                            <input type="number" x-model="newProduct.cantidad" min="1" max="1000" class="w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold" readonly />
+                                            <button @click="increaseQuantity()" class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-2 text-center">Mín: 1 - Máx: 1000</div>
+                                    </div>
+
+                                    <!-- Descripción -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Descripción</label>
+                                        <input type="text" x-model="newProduct.descripcion" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Descripción adicional...">
+                                    </div>
+                                </div>
+
+                                <button @click="addProduct()" :disabled="!canAddProduct" :class="{
+                                    'opacity-50 cursor-not-allowed': !canAddProduct,
+                                    'hover:scale-[1.02]': canAddProduct
+                                }" class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    <span class="text-lg">Agregar Artículo a la Solicitud</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Contenedor para artículos -->
-                    <div id="articulos-container">
-                        @foreach($solicitud->solicitudArticulos as $index => $articuloSolicitud)
-                        <div class="articulo-item bg-gray-50 p-6 rounded-xl dark:bg-gray-700/30 mb-4">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <!-- Selección de Artículo con Select2 -->
-                                <div class="md:col-span-2">
-                                    <label for="articulo_id_{{ $index }}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                        <span class="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
-                                            Artículo/Producto
-                                        </span>
-                                    </label>
-                                    <select id="articulo_id_{{ $index }}" name="articulos[{{ $index }}][articulo_id]" required
-                                        class="select2-articulo w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                        <option value="">Seleccione un artículo...</option>
-                                        @foreach($articulos as $articulo)
-                                        <option value="{{ $articulo->idArticulos }}"
-                                            data-stock="{{ $articulo->stock_total }}"
-                                            data-codigo="{{ $articulo->codigo_barras }}"
-                                            data-precio="{{ $articulo->precio_compra }}"
-                                            data-tipo="{{ $articulo->tipoArticulo->nombre ?? 'N/A' }}"
-                                            {{ $articuloSolicitud->idArticulo == $articulo->idArticulos ? 'selected' : '' }}>
-                                            {{ $articulo->nombre }} (Código: {{ $articulo->codigo_barras }})
-                                        </option>
-                                        @endforeach
+                    <!-- Información Adicional -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex items-center justify-center w-10 h-10 bg-white text-cyan-600 rounded-full font-bold shadow-md">
+                                    ⚡
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-bold text-white">Información Adicional</h2>
+                                    <p class="text-blue-100 text-sm">Actualice los detalles de la solicitud</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Tipo de Servicio -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Tipo de Servicio</label>
+                                    <select x-model="orderInfo.tipoServicio" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                                        <option value="solicitud_articulo">📦 Solicitud de Artículo</option>
+                                        <option value="mantenimiento">🛠️ Mantenimiento</option>
+                                        <option value="reparacion">🔧 Reparación</option>
+                                        <option value="instalacion">⚡ Instalación</option>
+                                        <option value="garantia">📋 Garantía</option>
                                     </select>
                                 </div>
 
-                                <!-- Cantidad -->
+                                <!-- Fecha Requerida -->
                                 <div>
-                                    <label for="cantidad_{{ $index }}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                        <span class="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                            </svg>
-                                            Cantidad
-                                        </span>
-                                    </label>
-                                    <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 000 4zM10 18a2 2 0 110-4 2 2 0 000 4z" />
-                                            </svg>
-                                        </div>
-                                        <input type="number" id="cantidad_{{ $index }}" name="articulos[{{ $index }}][cantidad]" min="1" 
-                                            value="{{ $articuloSolicitud->cantidad }}" required
-                                            class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                        <small class="stock-disponible text-xs text-gray-500 dark:text-gray-400 mt-1 block"></small>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Fecha Requerida</label>
+                                    <input type="date" x-model="orderInfo.fechaRequerida" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200" :min="minDate">
+                                    <div class="text-xs text-gray-500 mt-2">Fecha límite para tener todos los artículos</div>
+                                    <div class="text-sm text-blue-600 font-medium mt-2" x-show="orderInfo.fechaRequerida">
+                                        📅 Fecha establecida: <span x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Información adicional del artículo seleccionado -->
-                            <div class="info-articulo mt-4">
+                            <!-- Nivel de Urgencia -->
+                            <div class="mt-8 space-y-4">
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">Nivel de Urgencia</label>
+
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Código:</span>
-                                        <span class="codigo-articulo block font-medium">{{ $articuloSolicitud->articulo->codigo_barras ?? '' }}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Precio:</span>
-                                        <span class="precio-articulo block font-medium">
-                                            @if(isset($articuloSolicitud->articulo->precio_compra))
-                                                S/ {{ $articuloSolicitud->articulo->precio_compra }}
-                                            @endif
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Tipo de artículo:</span>
-                                        <span class="unidad-articulo block font-medium">
-                                            {{ $articuloSolicitud->articulo->tipoArticulo->nombre ?? 'N/A' }}
-                                        </span>
-                                    </div>
+                                    <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
+                                        <button type="button" @click="orderInfo.urgencia = urgencia.value" class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                            <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full bg-white shadow-sm hover:shadow-md" :class="{
+                                                    'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-green-100': orderInfo.urgencia === urgencia.value && urgencia.value === 'baja',
+                                                    'border-yellow-500 bg-gradient-to-r from-yellow-50 to-amber-50 shadow-yellow-100': orderInfo.urgencia === urgencia.value && urgencia.value === 'media',
+                                                    'border-red-500 bg-gradient-to-r from-red-50 to-rose-50 shadow-red-100': orderInfo.urgencia === urgencia.value && urgencia.value === 'alta',
+                                                    'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo.urgencia !== urgencia.value
+                                                }">
+
+                                                <!-- Header con emoji y título -->
+                                                <div class="flex items-center justify-between mb-3">
+                                                    <span class="text-2xl" x-text="urgencia.emoji"></span>
+                                                    <div class="w-6 h-6 flex items-center justify-center transition-all duration-300" :class="{
+                                                            'text-green-600': orderInfo.urgencia === urgencia.value && urgencia.value === 'baja',
+                                                            'text-yellow-600': orderInfo.urgencia === urgencia.value && urgencia.value === 'media',
+                                                            'text-red-600': orderInfo.urgencia === urgencia.value && urgencia.value === 'alta',
+                                                            'text-gray-400': orderInfo.urgencia !== urgencia.value
+                                                        }">
+                                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path x-show="orderInfo.urgencia === urgencia.value" fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                            <path x-show="orderInfo.urgencia !== urgencia.value" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contenido -->
+                                                <div class="space-y-2">
+                                                    <h3 class="font-bold text-gray-900 text-lg" x-text="urgencia.text"></h3>
+                                                    <p class="text-sm text-gray-600 leading-relaxed" x-text="urgencia.description"></p>
+                                                </div>
+
+                                            </div>
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
 
-                            <!-- Descripción -->
-                            <div class="mt-6">
-                                <label for="descripcion_{{ $index }}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                    <span class="flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                        </svg>
-                                        Descripción/Especificaciones
-                                    </span>
-                                </label>
-                                <textarea id="descripcion_{{ $index }}" name="articulos[{{ $index }}][descripcion]" rows="3"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Proporcione detalles adicionales como modelo, color, características técnicas...">{{ $articuloSolicitud->descripcion }}</textarea>
-                            </div>
-                            
-                            <!-- Botón para eliminar artículo -->
-                            @if($index > 0)
-                            <div class="mt-4 flex justify-end">
-                                <button type="button" class="eliminar-articulo text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    Eliminar artículo
-                                </button>
-                            </div>
-                            @endif
-                        </div>
-                        @endforeach
-                    </div>
-
-                    <!-- Botón para agregar más artículos -->
-                    <button type="button" id="agregar-articulo"
-                        class="flex items-center justify-center w-full py-2 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-blue-500 hover:text-blue-600 transition-colors dark:border-gray-600 dark:text-gray-400 dark:hover:border-blue-500 dark:hover:text-blue-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-                        </svg>
-                        Agregar otro artículo
-                    </button>
-                </div>
-
-                <!-- Sección 3: Información Adicional -->
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-yellow-100 p-2 rounded-lg dark:bg-yellow-900/30">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600 dark:text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Información Adicional</h2>
-                    </div>
-
-                    <div class="bg-gray-50 p-6 rounded-xl dark:bg-gray-700/30">
-                        <!-- Urgencia -->
-                        <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Nivel de Urgencia
-                                </span>
-                            </label>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <!-- Opción Baja -->
-                                <label
-                                    class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $solicitud->nivelUrgencia == 1 ? 'border-blue-500 bg-blue-50 dark:border-blue-500 dark:bg-blue-900/20' : 'border-gray-300 hover:border-blue-500 dark:border-gray-600 dark:hover:border-blue-500' }}">
-                                    <input type="radio" name="urgencia" value="1" class="hidden" {{ $solicitud->nivelUrgencia == 1 ? 'checked' : '' }}>
-                                    <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 dark:bg-blue-800 dark:text-blue-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Baja</h4>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Sin prisa, puede esperar</p>
-                                    </div>
-                                </label>
-
-                                <!-- Opción Media -->
-                                <label
-                                    class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $solicitud->nivelUrgencia == 2 ? 'border-yellow-500 bg-yellow-50 dark:border-yellow-500 dark:bg-yellow-900/20' : 'border-gray-300 hover:border-yellow-500 dark:border-gray-600 dark:hover:border-yellow-500' }}">
-                                    <input type="radio" name="urgencia" value="2" class="hidden" {{ $solicitud->nivelUrgencia == 2 ? 'checked' : '' }}>
-                                    <div class="bg-yellow-100 text-yellow-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 dark:bg-yellow-800 dark:text-yellow-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Media</h4>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Necesario pronto</p>
-                                    </div>
-                                </label>
-
-                                <!-- Opción Alta -->
-                                <label
-                                    class="flex items-center p-3 border rounded-lg cursor-pointer transition-colors {{ $solicitud->nivelUrgencia == 3 ? 'border-red-500 bg-red-50 dark:border-red-500 dark:bg-red-900/20' : 'border-gray-300 hover:border-red-500 dark:border-gray-600 dark:hover:border-red-500' }}">
-                                    <input type="radio" name="urgencia" value="3" class="hidden" {{ $solicitud->nivelUrgencia == 3 ? 'checked' : '' }}>
-                                    <div class="bg-red-100 text-red-600 w-8 h-8 rounded-full flex items-center justify-center mr-3 dark:bg-red-800 dark:text-red-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-medium text-gray-800 dark:text-gray-200">Alta</h4>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Urgente, prioridad máxima</p>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Fecha Requerida -->
-                        <div>
-                            <label for="fecha_requerida" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Fecha Requerida
-                                </span>
-                            </label>
-                            <div class="relative max-w-xs">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <input type="date" id="fecha_requerida" name="fecha_requerida"
-                                    value="{{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('Y-m-d') }}"
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                            <!-- Observaciones -->
+                            <div class="mt-8">
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">Observaciones y Comentarios</label>
+                                <textarea x-model="orderInfo.observaciones" rows="5" class="w-full px-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 resize-none transition-all duration-200" placeholder="Describa cualquier observación, comentario adicional o instrucción especial para esta solicitud..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección 4: Notas Adicionales -->
-                <div class="space-y-6">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-green-100 p-2 rounded-lg dark:bg-green-900/30">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600 dark:text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                <!-- Sidebar -->
+                <div class="xl:col-span-1 space-y-8">
+                    <!-- Resumen de la Solicitud -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Resumen de Solicitud</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium">Artículos Únicos</span>
+                                <span class="text-2xl font-bold text-blue-600" x-text="totalUniqueProducts"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium">Total Cantidad</span>
+                                <span class="text-2xl font-bold text-green-600" x-text="totalQuantity"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium">Fecha Requerida</span>
+                                <span class="text-lg font-bold text-orange-600" x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
+                            </div>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="text-gray-700 font-medium">Estado</span>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold" x-text="solicitud.estado"></span>
+                            </div>
                         </div>
-                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Notas Adicionales</h2>
                     </div>
 
-                    <div class="relative">
-                        <label for="notas" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                            <span class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    <!-- Acciones Rápidas -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
+                        <div class="space-y-4">
+                            <button @click="clearAll()" :disabled="products.length === 0 || isUpdatingSolicitud" :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isUpdatingSolicitud }" class="w-full px-6 py-4 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
-                                Comentarios o Información Adicional
-                            </span>
-                        </label>
-                        <textarea id="notas" name="notas" rows="3"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="¿Alguna información adicional que debamos considerar?">{{ $solicitud->comentario }}</textarea>
+                                <span>Limpiar Todo</span>
+                            </button>
+
+                            <button @click="updateSolicitud()" :disabled="!canCreateSolicitud || isUpdatingSolicitud" :class="{
+                                'opacity-50 cursor-not-allowed': !canCreateSolicitud || isUpdatingSolicitud,
+                                'hover:scale-[1.02]': canCreateSolicitud && !isUpdatingSolicitud
+                            }" class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
+                                <template x-if="!isUpdatingSolicitud">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </template>
+                                <template x-if="isUpdatingSolicitud">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                </template>
+                                <span class="text-lg" x-text="isUpdatingSolicitud ? 'Actualizando Solicitud...' : 'Actualizar Solicitud'"></span>
+                            </button>
+
+                            <a href="{{ route('solicitudarticulo.index') }}" class="w-full px-6 py-4 bg-gray-500 text-white rounded-lg font-bold hover:bg-gray-600 transition-all duration-200 flex items-center justify-center space-x-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                <span>Volver al Listado</span>
+                            </a>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Botones de Acción -->
-                <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6">
-                    <a href="{{ route('solicitudarticulo.index') }}" class="px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 transition-colors text-center">
-                        <span class="flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                            Cancelar
-                        </span>
-                    </a>
-                    <button type="submit" id="submitBtn" class="px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                        <span class="flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Actualizar Solicitud
-                        </span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+                    <!-- Información de Contacto -->
+                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+                        <h4 class="text-lg font-bold text-blue-700 mb-6 text-center">¿Necesita Ayuda?</h4>
+                        <div class="space-y-4">
+                            <!-- Teléfono -->
+                            <div class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
+                                <div class="flex-shrink-0 w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-600">Soporte Técnico</p>
+                                    <p class="text-lg font-bold text-gray-900">+1 (555) 123-4567</p>
+                                </div>
+                            </div>
 
-    <!-- Agrega este modal para mostrar mensajes -->
-    <div id="responseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md w-full dark:bg-gray-800">
-            <div id="modalContent" class="text-center">
-                <div id="modalIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-                    <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h3 id="modalTitle" class="text-lg font-medium text-gray-900 dark:text-white mb-2">Éxito</h3>
-                <p id="modalMessage" class="text-sm text-gray-500 dark:text-gray-300">La solicitud se ha actualizado correctamente.</p>
-                <div class="mt-4">
-                    <button id="modalCloseBtn" type="button" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Aceptar
-                    </button>
+                            <!-- Email -->
+                            <div class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
+                                <div class="flex-shrink-0 w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-600">Email</p>
+                                    <p class="text-lg font-bold text-gray-900">soporte@empresa.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Notificación Toast -->
+        <div x-show="notification.show" x-transition:enter="transition ease-out duration-300 transform"
+            x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+            x-transition:leave="transition ease-in duration-200 transform"
+            x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+            :class="getNotificationClass()"
+            class="fixed top-6 right-6 text-white px-6 py-4 rounded-xl shadow-2xl z-50 max-w-sm">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0 text-xl" x-html="getNotificationIcon()"></div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium" x-text="notification.message"></p>
+                </div>
+                <button @click="notification.show = false" class="flex-shrink-0 text-white hover:text-gray-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
     </div>
-    
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- Incluir jQuery y Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"></script>
 
     <script>
-        // Definir funciones en el ámbito global
-        window.formatArticulo = function(articulo) {
-            if (!articulo.id) {
-                return articulo.text;
-            }
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('solicitudArticuloEdit', (solicitud, productosActuales, articulos) => ({
+                // Estado de la aplicación
+                currentDate: '',
+                solicitud: solicitud,
+                products: [],
+                newProduct: {
+                    articuloId: '',
+                    cantidad: 1,
+                    descripcion: ''
+                },
+                orderInfo: {
+                    tipoServicio: solicitud.tiposervicio || 'solicitud_articulo',
+                    urgencia: solicitud.urgencia || '',
+                    observaciones: solicitud.observaciones || '',
+                    fechaRequerida: solicitud.fecharequerida ? solicitud.fecharequerida.split(' ')[0] : ''
+                },
+                notification: {
+                    show: false,
+                    message: '',
+                    type: 'info'
+                },
+                notificationTimeout: null,
+                minDate: '',
+                isUpdatingSolicitud: false,
+                articulos: articulos,
 
-            var $container = $(
-                '<div class="flex items-center">' +
-                '<div class="flex-1">' +
-                '<div class="font-medium">' + articulo.text + '</div>' +
-                '<div class="text-xs text-gray-500">Código: ' + $(articulo.element).data('codigo') + '</div>' +
-                '</div>' +
-                '<div class="text-xs text-gray-400 ml-2">Stock: ' + $(articulo.element).data('stock') + '</div>' +
-                '</div>'
-            );
-            return $container;
-        };
-
-        window.formatArticuloSelection = function(articulo) {
-            if (!articulo.id) {
-                return articulo.text;
-            }
-            return articulo.text.split(' (')[0]; // Mostrar solo el nombre sin el código
-        };
-
-        // Función para inicializar Select2 en un elemento
-        function initSelect2(element) {
-            $(element).select2({
-                theme: 'bootstrap-5',
-                placeholder: 'Seleccione un artículo...',
-                allowClear: true,
-                width: '100%',
-                templateResult: window.formatArticulo,
-                templateSelection: window.formatArticuloSelection
-            });
-        }
-
-        // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar Select2 para todos los selects de artículos
-            document.querySelectorAll('.select2-articulo').forEach(function(select) {
-                initSelect2(select);
-                
-                // Evento change para actualizar información del artículo
-                $(select).on('change', function() {
-                    const selectedOption = $(this).find('option:selected');
-                    const articuloItem = $(this).closest('.articulo-item');
-                    const infoDiv = articuloItem.find('.info-articulo');
-                    const stockDisponible = articuloItem.find('.stock-disponible');
-
-                    if (selectedOption.val()) {
-                        articuloItem.find('.codigo-articulo').text(selectedOption.data('codigo'));
-                        articuloItem.find('.precio-articulo').text('S/ ' + selectedOption.data('precio'));
-                        articuloItem.find('.unidad-articulo').text(selectedOption.data('tipo'));
-                        stockDisponible.text('Stock disponible: ' + selectedOption.data('stock'));
-                        infoDiv.removeClass('hidden');
-
-                        // Establecer cantidad máxima según stock
-                        articuloItem.find('input[type="number"]').attr('max', selectedOption.data('stock'));
-                    } else {
-                        infoDiv.addClass('hidden');
-                        stockDisponible.text('');
+                // Niveles de urgencia
+                nivelesUrgencia: [{
+                        value: 'baja',
+                        text: 'Baja',
+                        emoji: '🟢',
+                        description: 'Sin urgencia específica'
+                    },
+                    {
+                        value: 'media',
+                        text: 'Media', 
+                        emoji: '🟡',
+                        description: 'Necesario en los próximos días'
+                    },
+                    {
+                        value: 'alta',
+                        text: 'Alta',
+                        emoji: '🔴',
+                        description: 'Urgente - necesario inmediatamente'
                     }
-                });
-            });
+                ],
 
-            // Función para agregar artículos adicionales
-            document.getElementById('agregar-articulo').addEventListener('click', function() {
-                const contenedor = document.getElementById('articulos-container');
-                const count = contenedor.children.length;
-                const nuevoIndex = count;
+                // Computed properties
+                get totalQuantity() {
+                    return this.products.reduce((sum, product) => sum + product.cantidad, 0);
+                },
+                get totalUniqueProducts() {
+                    return this.products.length;
+                },
+                get canAddProduct() {
+                    return this.newProduct.articuloId && 
+                           this.newProduct.cantidad > 0;
+                },
+                get canCreateSolicitud() {
+                    return this.products.length > 0 && 
+                           this.orderInfo.tipoServicio && 
+                           this.orderInfo.urgencia &&
+                           this.orderInfo.fechaRequerida;
+                },
 
-                const nuevoArticulo = document.createElement('div');
-                nuevoArticulo.className = 'articulo-item bg-white p-6 rounded-xl shadow-sm dark:bg-gray-700 mb-4';
-                nuevoArticulo.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Selección de Artículo con Select2 -->
-                        <div class="md:col-span-2">
-                            <label for="articulo_id_${nuevoIndex}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
-                                    Artículo/Producto
-                                </span>
-                            </label>
-                            <select id="articulo_id_${nuevoIndex}" name="articulos[${nuevoIndex}][articulo_id]" required
-                                class="select2-articulo w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <option value="">Seleccione un artículo...</option>
-                                @foreach($articulos as $articulo)
-                                    <option value="{{ $articulo->idArticulos }}"
-                                        data-stock="{{ $articulo->stock_total }}"
-                                        data-codigo="{{ $articulo->codigo_barras }}"
-                                        data-precio="{{ $articulo->precio_compra }}"
-                                        data-tipo="{{ $articulo->tipoArticulo->nombre ?? 'N/A' }}">
-                                        {{ $articulo->nombre }} (Código: {{ $articulo->codigo_barras }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                // Métodos
+                init() {
+                    this.currentDate = new Date().toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
 
-                        <!-- Cantidad -->
-                        <div>
-                            <label for="cantidad_${nuevoIndex}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                                <span class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
-                                    Cantidad
-                                </span>
-                            </label>
-                            <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                    </svg>
-                                </div>
-                                <input type="number" id="cantidad_${nuevoIndex}" name="articulos[${nuevoIndex}][cantidad]" min="1" value="1" required
-                                    class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <small class="stock-disponible text-xs text-gray-500 dark:text-gray-400 mt-1 block"></small>
-                            </div>
-                        </div>
-                    </div>
+                    this.minDate = new Date().toISOString().split('T')[0];
 
-                    <!-- Información adicional del artículo seleccionado -->
-                    <div class="info-articulo mt-4 hidden">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Código:</span>
-                                <span class="codigo-articulo block font-medium"></span>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Precio:</span>
-                                <span class="precio-articulo block font-medium"></span>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Tipo de artículo:</span>
-                                <span class="unidad-articulo block font-medium"></span>
-                            </div>
-                        </div>
-                    </div>
+                    // Cargar productos actuales
+                    this.loadExistingProducts();
 
-                    <!-- Descripción -->
-                    <div class="mt-6">
-                        <label for="descripcion_${nuevoIndex}" class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
-                            <span class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                                </svg>
-                                Descripción/Especificaciones
-                            </span>
-                        </label>
-                        <textarea id="descripcion_${nuevoIndex}" name="articulos[${nuevoIndex}][descripcion]" rows="3"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Proporcione detalles adicionales como modelo, color, características técnicas..."></textarea>
-                    </div>
-                    
-                    <!-- Botón para eliminar artículo -->
-                    <div class="mt-4 flex justify-end">
-                        <button type="button" class="eliminar-articulo text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Eliminar artículo
-                        </button>
-                    </div>
-                `;
+                    this.$nextTick(() => {
+                        this.initSelect2();
+                    });
+                },
 
-                contenedor.appendChild(nuevoArticulo);
-
-                // Inicializar Select2 para el nuevo select
-                initSelect2(`#articulo_id_${nuevoIndex}`);
-
-                // Agregar evento al botón de eliminar
-                $(nuevoArticulo).find('.eliminar-articulo').on('click', function() {
-                    $(nuevoArticulo).remove();
-                });
-            });
-
-            // Agregar eventos a los botones de eliminar existentes
-            document.querySelectorAll('.eliminar-articulo').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    if (document.querySelectorAll('.articulo-item').length > 1) {
-                        this.closest('.articulo-item').remove();
-                    } else {
-                        alert('Debe haber al menos un artículo en la solicitud.');
+                loadExistingProducts() {
+                    if (productosActuales && productosActuales.length > 0) {
+                        this.products = productosActuales.map(product => ({
+                            uniqueId: Date.now() + Math.random(),
+                            articuloId: product.idarticulos,
+                            nombre: product.nombre,
+                            codigo: product.codigo_barras || product.codigo_repuesto,
+                            tipo: product.tipo_articulo,
+                            cantidad: product.cantidad,
+                            descripcion: product.descripcion
+                        }));
                     }
-                });
-            });
-        });
+                },
 
-        // Función para mostrar el modal de respuesta
-        function showModal(title, message, isSuccess) {
-            const modal = document.getElementById('responseModal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalIcon = document.getElementById('modalIcon');
+                initSelect2() {
+                    // Artículo Select
+                    if (this.$refs.articuloSelect) {
+                        $(this.$refs.articuloSelect).select2({
+                            placeholder: 'Buscar artículo...',
+                            language: 'es',
+                            width: '100%'
+                        }).on('change', (e) => {
+                            this.newProduct.articuloId = e.target.value;
+                        });
+                    }
+                },
 
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
+                // Métodos para notificación
+                getNotificationClass() {
+                    switch (this.notification.type) {
+                        case 'success':
+                            return 'bg-green-500';
+                        case 'error':
+                            return 'bg-red-500';
+                        case 'warning':
+                            return 'bg-yellow-500';
+                        default:
+                            return 'bg-blue-500';
+                    }
+                },
 
-            // Cambiar el icono según si es éxito o error
-            modalIcon.className = 'mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4';
-            if (isSuccess) {
-                modalIcon.classList.add('bg-green-100');
-                modalIcon.innerHTML = '<svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>';
-            } else {
-                modalIcon.classList.add('bg-red-100');
-                modalIcon.innerHTML = '<svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>';
-            }
+                getNotificationIcon() {
+                    switch (this.notification.type) {
+                        case 'success':
+                            return '✅';
+                        case 'error':
+                            return '❌';
+                        case 'warning':
+                            return '⚠️';
+                        default:
+                            return 'ℹ️';
+                    }
+                },
 
-            modal.classList.remove('hidden');
-        }
+                formatDateForDisplay(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
+                },
 
-        // Cerrar modal
-        document.getElementById('modalCloseBtn').addEventListener('click', function() {
-            document.getElementById('responseModal').classList.add('hidden');
+                increaseQuantity() {
+                    if (this.newProduct.cantidad < 1000) {
+                        this.newProduct.cantidad++;
+                    }
+                },
+
+                decreaseQuantity() {
+                    if (this.newProduct.cantidad > 1) {
+                        this.newProduct.cantidad--;
+                    }
+                },
+
+                addProduct() {
+                    if (!this.canAddProduct) {
+                        this.showNotification('Por favor seleccione un artículo y cantidad', 'error');
+                        return;
+                    }
+
+                    // Obtener información del artículo seleccionado
+                    const articuloData = this.articulos.find(a => a.idArticulos == this.newProduct.articuloId);
+
+                    if (!articuloData) {
+                        this.showNotification('Error al obtener información del artículo', 'error');
+                        return;
+                    }
+
+                    // Verificar si ya existe el artículo
+                    const existingProductIndex = this.products.findIndex(product =>
+                        product.articuloId === this.newProduct.articuloId
+                    );
+
+                    if (existingProductIndex !== -1) {
+                        // Si existe, sumar la cantidad
+                        this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
+                        this.showNotification(
+                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
+                            'success');
+                    } else {
+                        // Si no existe, agregar nuevo producto
+                        const product = {
+                            uniqueId: Date.now() + Math.random(),
+                            articuloId: this.newProduct.articuloId,
+                            nombre: articuloData.nombre,
+                            codigo: articuloData.codigo_barras || articuloData.codigo_repuesto,
+                            tipo: articuloData.tipo_articulo,
+                            cantidad: this.newProduct.cantidad,
+                            descripcion: this.newProduct.descripcion
+                        };
+
+                        this.products.push(product);
+                        this.showNotification('✅ Artículo agregado correctamente', 'success');
+                    }
+
+                    // Reset form
+                    this.newProduct = {
+                        articuloId: '',
+                        cantidad: 1,
+                        descripcion: ''
+                    };
+
+                    // Reset Select2
+                    if (this.$refs.articuloSelect) {
+                        $(this.$refs.articuloSelect).val('').trigger('change');
+                    }
+                },
+
+                removeProduct(index) {
+                    this.products.splice(index, 1);
+                    this.showNotification('🗑️ Artículo eliminado de la solicitud', 'info');
+                },
+
+                updateQuantity(index, change) {
+                    const newQuantity = this.products[index].cantidad + change;
+                    if (newQuantity >= 1 && newQuantity <= 1000) {
+                        this.products[index].cantidad = newQuantity;
+                    }
+                },
+
+                clearAll() {
+                    if (this.products.length === 0) {
+                        this.showNotification('No hay artículos para limpiar', 'info');
+                        return;
+                    }
+
+                    if (confirm('¿Está seguro de que desea eliminar todos los artículos de la solicitud?')) {
+                        this.products = [];
+                        this.showNotification('🗑️ Todos los artículos han sido eliminados', 'info');
+                    }
+                },
+
+                async updateSolicitud() {
+                    if (!this.canCreateSolicitud) {
+                        this.showNotification('❌ Complete todos los campos requeridos para actualizar la solicitud', 'error');
+                        return;
+                    }
+
+                    this.isUpdatingSolicitud = true;
+
+                    try {
+                        const solicitudData = {
+                            orderInfo: this.orderInfo,
+                            products: this.products
+                        };
+
+                        console.log('Actualizando solicitud:', solicitudData);
+
+                        const response = await fetch(`/solicitudarticulo/update/${this.solicitud.idsolicitudesordenes}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(solicitudData)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            this.showNotification(`🎉 ¡Solicitud ${result.codigo_orden} actualizada exitosamente!`, 'success');
+                            
+                            // Redirigir después de 2 segundos
+                            setTimeout(() => {
+                                window.location.href = '/solicitudarticulo';
+                            }, 2000);
+                        } else {
+                            throw new Error(result.message);
+                        }
+
+                    } catch (error) {
+                        console.error('Error al actualizar la solicitud:', error);
+                        this.showNotification(`❌ Error: ${error.message}`, 'error');
+                    } finally {
+                        this.isUpdatingSolicitud = false;
+                    }
+                },
+
+                showNotification(message, type = 'info') {
+                    this.notification.message = message;
+                    this.notification.type = type;
+                    this.notification.show = true;
+
+                    if (this.notificationTimeout) {
+                        clearTimeout(this.notificationTimeout);
+                    }
+
+                    this.notificationTimeout = setTimeout(() => {
+                        this.notification.show = false;
+                    }, 4000);
+                }
+            }));
         });
     </script>
 </x-layout.default>

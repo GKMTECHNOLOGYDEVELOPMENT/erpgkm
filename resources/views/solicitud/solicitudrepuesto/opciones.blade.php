@@ -15,13 +15,14 @@
                                 </svg>
                             </div>
                             <div>
-                                <h1 class="text-3xl font-bold text-gray-900">Gestión de Artículos</h1>
-                                <p class="text-gray-600 text-lg">Procese artículos individualmente o en grupo</p>
+                                <h1 class="text-3xl font-bold text-gray-900">Gestión de Repuestos</h1>
+                                <p class="text-gray-600 text-lg">Procese repuestos individualmente o en grupo</p>
                             </div>
                         </div>
 
                         <!-- Resumen de Progreso -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+
 
                             <!-- Código de Solicitud -->
                             <div class="flex items-center space-x-3 p-4 bg-green-50 rounded-xl">
@@ -39,12 +40,12 @@
 
                             <div class="flex items-center space-x-3 p-4 bg-green-50 rounded-xl">
                                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-green-600 font-bold text-sm">{{ $articulos_procesados }}/{{ $total_articulos }}</span>
+                                    <span class="text-green-600 font-bold text-sm">{{ $repuestos_procesados }}/{{ $total_repuestos }}</span>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Procesados</p>
                                     <p class="font-semibold text-gray-900">
-                                        @if($articulos_procesados == $total_articulos)
+                                        @if($repuestos_procesados == $total_repuestos)
                                         ✅ Completado
                                         @else
                                         ⏳ En progreso
@@ -55,12 +56,12 @@
 
                             <div class="flex items-center space-x-3 p-4 bg-blue-50 rounded-xl">
                                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-blue-600 font-bold text-sm">{{ $articulos_disponibles }}/{{ $total_articulos }}</span>
+                                    <span class="text-blue-600 font-bold text-sm">{{ $repuestos_disponibles }}/{{ $total_repuestos }}</span>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Disponibles</p>
                                     <p class="font-semibold text-gray-900">
-                                        @if($articulos_disponibles == $total_articulos)
+                                        @if($repuestos_disponibles == $total_repuestos)
                                         ✅ Listos
                                         @else
                                         ⚡ Parcial
@@ -94,7 +95,7 @@
                                     <p class="font-semibold text-gray-900 capitalize">
                                         @if($solicitud->estado == 'aprobada')
                                         ✅ Aprobada
-                                        @elseif($articulos_procesados > 0)
+                                        @elseif($repuestos_procesados > 0)
                                         ⚡ Parcial
                                         @else
                                         ⏳ Pendiente
@@ -107,9 +108,9 @@
                 </div>
             </div>
 
-            <!-- Verificar si hay artículos -->
-            @if(!$articulos || $articulos->count() == 0)
-            <!-- Mensaje cuando no hay artículos -->
+            <!-- Verificar si hay repuestos -->
+            @if(!$repuestos || $repuestos->count() == 0)
+            <!-- Mensaje cuando no hay repuestos -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-yellow-200 mb-8">
                 <div class="bg-gradient-to-r from-yellow-400 to-orange-500 px-6 py-4">
                     <div class="flex items-center space-x-3">
@@ -117,8 +118,8 @@
                             ⚠️
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-white">No hay artículos</h2>
-                            <p class="text-yellow-100 text-sm">No se encontraron artículos en esta solicitud</p>
+                            <h2 class="text-xl font-bold text-white">No hay repuestos</h2>
+                            <p class="text-yellow-100 text-sm">No se encontraron repuestos en esta solicitud</p>
                         </div>
                     </div>
                 </div>
@@ -127,8 +128,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                     </svg>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No se encontraron artículos</h3>
-                    <p class="text-gray-600 mb-6">Esta solicitud no contiene artículos para gestionar.</p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No se encontraron repuestos</h3>
+                    <p class="text-gray-600 mb-6">Esta solicitud no contiene repuestos para gestionar.</p>
                     <a href="{{ route('solicitudrepuesto.index') }}"
                         class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,16 +140,16 @@
                 </div>
             </div>
             @else
-            <!-- Panel de Artículos con Acciones Individuales y Grupales -->
+            <!-- Panel de Repuestos con Acciones Individuales y Grupales -->
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-green-100 mb-8">
                 <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold shadow-md">
-                            📦
+                            🔧
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-white">Gestión de Artículos</h2>
-                            <p class="text-green-100 text-sm">Procese artículos individualmente o en grupo</p>
+                            <h2 class="text-xl font-bold text-white">Gestión de Repuestos</h2>
+                            <p class="text-green-100 text-sm">Procese repuestos individualmente o en grupo</p>
                         </div>
                     </div>
                 </div>
@@ -156,12 +157,12 @@
                 <div class="p-6">
                     <!-- Formulario para selección grupal -->
                     <form id="formUbicaciones" @submit.prevent="procesarSeleccion">
-                        <!-- Tabla de Artículos con ambas opciones -->
+                        <!-- Tabla de Repuestos con ambas opciones -->
                         <div class="overflow-hidden rounded-xl border border-gray-200 mb-6">
                             <table class="w-full">
                                 <thead class="bg-gradient-to-r from-gray-50 to-green-50">
                                     <tr>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículo</th>
+                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Repuesto</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Solicitado</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Disponible</th>
                                         <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
@@ -170,47 +171,47 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($articulos as $articulo)
+                                    @foreach($repuestos as $repuesto)
                                     <tr class="hover:bg-green-50 transition-colors duration-200 
-                                            @if($articulo->ya_procesado) bg-green-50 @endif">
+                                            @if($repuesto->ya_procesado) bg-green-50 @endif">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div>
-                                                <p class="font-semibold text-gray-900 text-base">{{ $articulo->nombre }}</p>
-                                                <p class="text-sm text-gray-500 mt-1">{{ $articulo->codigo_repuesto ?: $articulo->codigo_barras }}</p>
-                                                <p class="text-xs text-gray-400">{{ $articulo->tipo_articulo }}</p>
+                                                <p class="font-semibold text-gray-900 text-base">{{ $repuesto->nombre }}</p>
+                                                <p class="text-sm text-gray-500 mt-1">{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}</p>
+                                                <p class="text-xs text-gray-400">{{ $repuesto->tipo_repuesto }}</p>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                {{ $articulo->cantidad_solicitada }} unidades
+                                                {{ $repuesto->cantidad_solicitada }} unidades
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-center">
                                                 <span class="text-lg font-bold 
-                                                        @if($articulo->suficiente_stock) text-green-600
+                                                        @if($repuesto->suficiente_stock) text-green-600
                                                         @else text-red-600 @endif">
-                                                    {{ $articulo->stock_disponible }}
+                                                    {{ $repuesto->stock_disponible }}
                                                 </span>
                                                 <span class="text-sm text-gray-500 block">unidades</span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="max-w-xs">
-                                                @if($articulo->ya_procesado)
+                                                @if($repuesto->ya_procesado)
                                                 <div class="text-center">
                                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                                         ✅ Procesado
                                                     </span>
                                                 </div>
-                                                @elseif(isset($articulo->ubicaciones_detalle) && count($articulo->ubicaciones_detalle) > 0)
+                                                @elseif(isset($repuesto->ubicaciones_detalle) && count($repuesto->ubicaciones_detalle) > 0)
                                                 <select
-                                                    name="ubicaciones[{{ $articulo->idArticulos }}]"
+                                                    name="ubicaciones[{{ $repuesto->idArticulos }}]"
                                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                    x-model="selecciones[{{ $articulo->idArticulos }}]"
-                                                    :disabled="procesandoIndividual[{{ $articulo->idArticulos }}]">
+                                                    x-model="selecciones[{{ $repuesto->idArticulos }}]"
+                                                    :disabled="procesandoIndividual[{{ $repuesto->idArticulos }}]">
                                                     <option value="">-- Seleccione ubicación --</option>
-                                                    @foreach($articulo->ubicaciones_detalle as $ubicacion)
+                                                    @foreach($repuesto->ubicaciones_detalle as $ubicacion)
                                                     <option value="{{ $ubicacion->rack_ubicacion_id }}">
                                                         {{ $ubicacion->ubicacion_codigo }} ({{ $ubicacion->stock_ubicacion }} uds)
                                                     </option>
@@ -222,11 +223,11 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($articulo->ya_procesado)
+                                            @if($repuesto->ya_procesado)
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                                 ✅ Procesado
                                             </span>
-                                            @elseif($articulo->suficiente_stock)
+                                            @elseif($repuesto->suficiente_stock)
                                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                                                 ⏳ Pendiente
                                             </span>
@@ -237,21 +238,21 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($articulo->ya_procesado)
+                                            @if($repuesto->ya_procesado)
                                             <span class="text-green-600 font-medium">Completado</span>
-                                            @elseif($articulo->suficiente_stock)
+                                            @elseif($repuesto->suficiente_stock)
                                             <button
                                                 type="button"
-                                                @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }})"
-                                                :disabled="!selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}]"
+                                                @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                                                :disabled="!selecciones[{{ $repuesto->idArticulos }}] || procesandoIndividual[{{ $repuesto->idArticulos }}]"
                                                 :class="{
-                                                            'opacity-50 cursor-not-allowed': !selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}],
-                                                            'bg-green-500 hover:bg-green-600': selecciones[{{ $articulo->idArticulos }}] && !procesandoIndividual[{{ $articulo->idArticulos }}],
-                                                            'bg-gray-400': !selecciones[{{ $articulo->idArticulos }}]
+                                                            'opacity-50 cursor-not-allowed': !selecciones[{{ $repuesto->idArticulos }}] || procesandoIndividual[{{ $repuesto->idArticulos }}],
+                                                            'bg-green-500 hover:bg-green-600': selecciones[{{ $repuesto->idArticulos }}] && !procesandoIndividual[{{ $repuesto->idArticulos }}],
+                                                            'bg-gray-400': !selecciones[{{ $repuesto->idArticulos }}]
                                                         }"
                                                 class="px-4 py-2 text-white rounded-lg font-medium transition-colors duration-200">
-                                                <span x-show="!procesandoIndividual[{{ $articulo->idArticulos }}]">Procesar</span>
-                                                <span x-show="procesandoIndividual[{{ $articulo->idArticulos }}]">Procesando...</span>
+                                                <span x-show="!procesandoIndividual[{{ $repuesto->idArticulos }}]">Procesar</span>
+                                                <span x-show="procesandoIndividual[{{ $repuesto->idArticulos }}]">Procesando...</span>
                                             </button>
                                             @else
                                             <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
@@ -295,7 +296,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-bold text-blue-900">Procesamiento Individual</h3>
-                                    <p class="text-blue-700 text-sm">Procese cada artículo por separado</p>
+                                    <p class="text-blue-700 text-sm">Procese cada repuesto por separado</p>
                                 </div>
                             </div>
                             <ul class="space-y-2 mb-4">
@@ -303,7 +304,7 @@
                                     <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                    Seleccione ubicación para cada artículo
+                                    Seleccione ubicación para cada repuesto
                                 </li>
                                 <li class="flex items-center text-sm text-blue-700">
                                     <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +320,7 @@
                                 </li>
                             </ul>
                             <div class="text-center text-sm text-blue-600 font-medium">
-                                Progreso: {{ $articulos_procesados }} de {{ $total_articulos }}
+                                Progreso: {{ $repuestos_procesados }} de {{ $total_repuestos }}
                             </div>
                         </div>
 
@@ -334,7 +335,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-bold text-green-900">Procesamiento Grupal</h3>
-                                    <p class="text-green-700 text-sm">Procese todos los artículos disponibles</p>
+                                    <p class="text-green-700 text-sm">Procese todos los repuestos disponibles</p>
                                 </div>
                             </div>
                             <ul class="space-y-2 mb-4">
@@ -342,7 +343,7 @@
                                     <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
-                                    Seleccione ubicaciones para todos los artículos
+                                    Seleccione ubicaciones para todos los repuestos
                                 </li>
                                 <li class="flex items-center text-sm text-green-700">
                                     <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,9 +378,9 @@
                                 <div class="text-center text-sm 
                                         @if($puede_aceptar) text-green-600 @else text-red-600 @endif font-medium">
                                     @if($puede_aceptar)
-                                    ✅ Todos los artículos están disponibles
+                                    ✅ Todos los repuestos están disponibles
                                     @else
-                                    ⚠️ Algunos artículos no tienen stock suficiente
+                                    ⚠️ Algunos repuestos no tienen stock suficiente
                                     @endif
                                 </div>
                             </div>
@@ -395,10 +396,10 @@
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <p class="text-sm font-medium">
-                                    @if($articulos_procesados == $total_articulos)
-                                    ✅ Todos los artículos han sido procesados
+                                    @if($repuestos_procesados == $total_repuestos)
+                                    ✅ Todos los repuestos han sido procesados
                                     @else
-                                    📊 Progreso: {{ $articulos_procesados }} de {{ $total_articulos }} artículos procesados
+                                    📊 Progreso: {{ $repuestos_procesados }} de {{ $total_repuestos }} repuestos procesados
                                     @endif
                                 </p>
                             </div>
@@ -426,13 +427,13 @@
                 isLoadingGrupal: false,
 
                 get todasUbicacionesSeleccionadas() {
-                    const articulos = @json($articulos);
-                    return articulos.every(articulo => {
-                        // Solo verificar artículos no procesados y con stock suficiente
-                        if (articulo.ya_procesado || !articulo.suficiente_stock) {
+                    const repuestos = @json($repuestos);
+                    return repuestos.every(repuesto => {
+                        // Solo verificar repuestos no procesados y con stock suficiente
+                        if (repuesto.ya_procesado || !repuesto.suficiente_stock) {
                             return true;
                         }
-                        return this.selecciones[articulo.idArticulos] && this.selecciones[articulo.idArticulos] !== '';
+                        return this.selecciones[repuesto.idArticulos] && this.selecciones[repuesto.idArticulos] !== '';
                     });
                 },
 
@@ -444,18 +445,18 @@
                     const ubicacionId = this.selecciones[articuloId];
 
                     if (!ubicacionId) {
-                        this.mostrarNotificacion('error', 'Seleccione una ubicación para este artículo');
+                        this.mostrarNotificacion('error', 'Seleccione una ubicación para este repuesto');
                         return;
                     }
 
-                    if (!confirm(`¿Está seguro de que desea procesar este artículo?\n\nEl stock será descontado de la ubicación seleccionada.`)) {
+                    if (!confirm(`¿Está seguro de que desea procesar este repuesto?\n\nEl stock será descontado de la ubicación seleccionada.`)) {
                         return;
                     }
 
                     this.procesandoIndividual[articuloId] = true;
 
                     try {
-                        const response = await fetch(`/solicitudarticulo/${solicitudId}/aceptar-individual`, {
+                        const response = await fetch(`/solicitudrepuesto/${solicitudId}/aceptar-individual`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -485,7 +486,7 @@
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        this.mostrarNotificacion('error', 'Error al procesar el artículo');
+                        this.mostrarNotificacion('error', 'Error al procesar el repuesto');
                     } finally {
                         this.procesandoIndividual[articuloId] = false;
                     }
@@ -493,23 +494,23 @@
 
                 async validarYProcesarGrupal(id) {
                     if (!this.todasUbicacionesSeleccionadas) {
-                        this.mostrarNotificacion('error', 'Debe seleccionar una ubicación para todos los artículos disponibles');
+                        this.mostrarNotificacion('error', 'Debe seleccionar una ubicación para todos los repuestos disponibles');
                         return;
                     }
 
                     if (!this.todosDisponibles) {
-                        this.mostrarNotificacion('error', 'No todos los artículos tienen stock suficiente para procesamiento grupal');
+                        this.mostrarNotificacion('error', 'No todos los repuestos tienen stock suficiente para procesamiento grupal');
                         return;
                     }
 
-                    if (!confirm('¿Está seguro de que desea procesar TODOS los artículos?\n\nEl stock será descontado de las ubicaciones seleccionadas para cada artículo.')) {
+                    if (!confirm('¿Está seguro de que desea procesar TODOS los repuestos?\n\nEl stock será descontado de las ubicaciones seleccionadas para cada repuesto.')) {
                         return;
                     }
 
                     this.isLoadingGrupal = true;
 
                     try {
-                        const response = await fetch(`/solicitudarticulo/${id}/aceptar`, {
+                        const response = await fetch(`/solicitudrepuesto/${id}/aceptar`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

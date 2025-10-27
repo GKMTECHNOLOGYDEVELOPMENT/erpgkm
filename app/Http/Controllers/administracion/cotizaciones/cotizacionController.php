@@ -8,6 +8,12 @@ use Illuminate\Http\Request;
 class cotizacionController extends Controller
 {
     public function index () {
-        return view('cotizaciones.agregar-cotizacion');
+
+
+        return view('cotizaciones.index');
+    }
+
+    public function create () {
+        return view('cotizaciones.create');
     }
 }
