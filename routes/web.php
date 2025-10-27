@@ -98,8 +98,24 @@ use App\Models\Tienda;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Controllers\unity\UnityController;
 
 Auth::routes();
+
+Route::prefix('unity')->name('unity.')->group(function () {
+    Route::get('/{id}/solicitud', [UnityController::class, 'solicitud'])
+        ->whereNumber('id')->name('solicitud.byId');
+
+    Route::get('/solicitud', [UnityController::class, 'solicitud'])
+        ->name('solicitud.byQuery');
+
+    Route::get('/{id}/solicitud/data', [UnityController::class, 'solicitudData'])
+        ->whereNumber('id')->name('solicitud.data');
+
+    Route::post('/{id}/solicitud/registrar', [UnityController::class, 'registrarAccion'])
+        ->whereNumber('id')->name('solicitud.registrar');
+});
+
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Ruta para mostrar el formulario de login
 // Route::get('/login', function () { return view('auth.login'); })->name('login');
@@ -233,6 +249,9 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
         return Excel::download(new CategoriaExport, 'categorias.xlsx');
     })->name('exportExcel');
 });
+
+
+
 // INICIO UBICACIONES ///
 Route::prefix('ubicaciones')->name('ubicaciones.')->group(function () {
     Route::get('/', [UbicacionesController::class, 'index'])->name('index'); // Mostrar la vista principal
