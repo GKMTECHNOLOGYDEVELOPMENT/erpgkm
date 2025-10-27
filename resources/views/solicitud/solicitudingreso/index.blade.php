@@ -321,6 +321,20 @@
                                             :class="getBotonGrupalClasses(grupo, 'actualizar')">
                                             Todos Actualizar
                                         </button>
+
+                                        <!-- NUEVO: Botón Ubicar Panel que abre Unity en pestaña nueva -->
+                                        <template x-if="grupo.tiene_panel">
+                                            <button
+                                                @click="ubicarPrimerPanelEnUnity(grupo)"
+                                                :disabled="grupo.paneles_pendientes === 0"
+                                                class="px-3 py-1 text-xs rounded-lg transition-colors bg-purple-100 text-purple-800 hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                                <i class="fas fa-tv mr-1"></i>
+                                                Ubicar Panel
+                                                <span class="ml-1 text-[10px] px-2 py-[2px] rounded bg-white/60 text-purple-700"
+                                                    x-text="`(${grupo.paneles_pendientes})`"></span>
+                                            </button>
+                                        </template>
+
                                     </div>
                                 </div>
                             </div>
@@ -661,8 +675,8 @@
                                         x-text="solicitudActualizar?.origen === 'compra' ? 'Compra' : 'Entrada Proveedor'">
                                     </p>
                                     <p class="text-sm text-gray-600"
-                                        x-text="solicitudActualizar?.origen === 'compra' ? 
-                                       solicitudActualizar?.origen_especifico?.codigocompra : 
+                                        x-text="solicitudActualizar?.origen === 'compra' ?
+                                       solicitudActualizar?.origen_especifico?.codigocompra :
                                        solicitudActualizar?.origen_especifico?.codigo_entrada">
                                     </p>
                                 </div>
@@ -773,10 +787,32 @@
                     };
                 },
 
+                // Construye la URL hacia Unity: /unity/{idSolicitudIngreso}/solicitud
+                buildUnityUrlForSolicitud(idSolicitudIngreso) {
+                    const base = (typeof window !== 'undefined' && window.UNITY_BASE_URL) ? window.UNITY_BASE_URL : '/unity';
+                    const baseClean = (base || '/unity').replace(/\/$/, ''); // sin barra final
+                    return `${baseClean}/${encodeURIComponent(idSolicitudIngreso)}/solicitud`;
+                },
 
-                // Computed property para validar
-                get puedeActualizar() {
-                    return this.formActualizar.cantidad > 0;
+                // Abre Unity en una pestaña nueva con el primer panel NO ubicado del grupo
+                ubicarPrimerPanelEnUnity(grupo) {
+                    if (!grupo || !Array.isArray(grupo.solicitudes)) return;
+
+                    // Busca el primer artículo del grupo que sea panel y no esté 'ubicado'
+                    const panelPendiente = grupo.solicitudes.find(s => s.es_panel === true && s.estado !== 'ubicado');
+
+                    if (!panelPendiente) {
+                        this.mostrarNotificacion('Todos los paneles de este grupo ya están ubicados', 'info');
+                        return;
+                    }
+
+                    const url = this.buildUnityUrlForSolicitud(panelPendiente.idSolicitudIngreso);
+                    // Abre en nueva pestaña con seguridad
+                    const w = window.open(url, '_blank', 'noopener');
+                    if (!w) {
+                        // Si el navegador bloqueó popups:
+                        this.mostrarNotificacion('Permite ventanas emergentes para abrir Unity.', 'warning');
+                    }
                 },
 
                 // Método para abrir el modal de actualización con validación
@@ -861,8 +897,6 @@
                         this.mostrarNotificacion(message, 'error');
                     }
                 },
-
-
 
 
                 get solicitudesAgrupadasFiltradas() {
