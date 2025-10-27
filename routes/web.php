@@ -371,10 +371,13 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
 Route::prefix('despacho')->name('despacho.')->group(function () {
     Route::get('/', [DespachoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [DespachoController::class, 'create'])->name('create'); // Formulario de creación
-    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+        Route::get('/show', [DespachoController::class, 'show'])->name('show'); // Formulario de creación
+    Route::get('/pdf', [DespachoController::class, 'pdf'])->name('pdf'); // Formulario de creación
+
+    Route::post('/store', [DespachoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
-    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/edit', [DespachoController::class, 'edit'])->name('edit'); // Editar un artículo
     Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
     Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
     Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo

@@ -8,6 +8,7 @@ use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\almacen\custodia\CustodiaController;
+use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kits\KitsController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
@@ -509,3 +510,10 @@ Route::get('/next-order-number', [SolicitudrepuestoController::class, 'getNextOr
 
   // API para obtener próximo número de orden
     Route::get('/next-order-number-ar', [SolicitudarticuloController::class, 'getNextOrderNumber']);
+
+
+    // routes/api.php
+Route::get('/clientesdespacho', [DespachoController::class, 'getClientes']);
+Route::get('/usuariosdespacho', [DespachoController::class, 'getUsuarios']);
+Route::get('/articulosdespacho', [DespachoController::class, 'getArticulos']);
+Route::get('/departamentosdespacho', [DespachoController::class, 'getDepartamentos']);
