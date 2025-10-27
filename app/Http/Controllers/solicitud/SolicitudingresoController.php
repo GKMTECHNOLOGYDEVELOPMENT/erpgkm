@@ -18,10 +18,7 @@ class SolicitudingresoController extends Controller
         Log::info('=== INICIANDO INDEX DE SOLICITUDES INGRESO ===');
 
         $solicitudes = SolicitudIngreso::with([
-            // ⬇️ Aseguramos subcategoría y el idsubcategoria
-            'articulo:idArticulos,nombre,codigo_barras,codigo_repuesto,idTipoArticulo,maneja_serie,idsubcategoria',
-            'articulo.subcategoria:id,nombre',
-
+            'articulo:idArticulos,nombre,codigo_barras,codigo_repuesto,idTipoArticulo,maneja_serie',
             'proveedor:idProveedor,nombre,numeroDocumento',
             'clienteGeneral:idClienteGeneral,descripcion,estado',
             'compra:idCompra,codigocompra,estado,fechaEmision,proveedor_id',
@@ -31,14 +28,15 @@ class SolicitudingresoController extends Controller
 
         Log::info('Total de solicitudes encontradas: ' . $solicitudes->count());
 
-        // Filtrar: Solo compras con estado 'enviado_almacen' / 'actualizado_almacen' y todas las entradas proveedor
+        // Filtrar: Solo compras con estado 'enviado_almacen' y todas las entradas proveedor
         $solicitudesFiltradas = $solicitudes->filter(function ($solicitud) {
             if ($solicitud->origen === 'compra') {
                 return $solicitud->compra &&
                     ($solicitud->compra->estado === 'enviado_almacen' ||
                         $solicitud->compra->estado === 'actualizado_almacen');
+            } else {
+                return true;
             }
-            return true;
         });
 
         Log::info('Solicitudes después del filtro: ' . $solicitudesFiltradas->count());
@@ -47,88 +45,70 @@ class SolicitudingresoController extends Controller
         $solicitudesAgrupadas = $solicitudesFiltradas->groupBy(function ($solicitud) {
             return $solicitud->origen . '_' . $solicitud->origen_id;
         })->map(function ($grupo) {
-
             $primeraSolicitud = $grupo->first();
-            $mostrarCliente   = $primeraSolicitud->origen === 'entrada_proveedor' && $primeraSolicitud->cliente_general_id;
 
-            // Mapear solicitudes y marcar si son "panel"
-            $solicitudesMap = $grupo->map(function ($solicitud) {
-
-                Log::info("Solicitud ID: {$solicitud->idSolicitudIngreso}, Ubicaciones count: " . $solicitud->ubicaciones->count());
-                if ($solicitud->ubicaciones->count() > 0) {
-                    Log::info("Ubicaciones para solicitud {$solicitud->idSolicitudIngreso}:", $solicitud->ubicaciones->toArray());
-                }
-
-                // Series existentes
-                $series = ArticuloSerie::where('origen', $solicitud->origen)
-                    ->where('origen_id', $solicitud->origen_id)
-                    ->where('articulo_id', $solicitud->articulo_id)
-                    ->get();
-
-                // ========= NUEVO: detectar si el artículo es PANEL por subcategoría =========
-                $subNombre = optional(optional($solicitud->articulo)->subcategoria)->nombre;
-                $esPanel   = is_string($subNombre) && trim(mb_strtoupper($subNombre)) === 'PANEL';
-
-                return [
-                    'idSolicitudIngreso' => $solicitud->idSolicitudIngreso,
-                    'origen'             => $solicitud->origen,
-                    'origen_id'          => $solicitud->origen_id,
-                    'articulo_id'        => $solicitud->articulo_id,
-                    'articulo'           => $solicitud->articulo,          // incluye subcategoria si viene cargada
-                    'subcategoria_nombre' => $subNombre,                     // ✅ expuesto directo
-                    'es_panel'           => $esPanel,                       // ✅ flag listo para el front
-                    'cantidad'           => $solicitud->cantidad,
-                    'estado'             => $solicitud->estado,
-                    'ubicacion'          => $solicitud->ubicacion,
-                    'ubicaciones'        => $solicitud->ubicaciones->map(function ($ubicacion) {
-                        return [
-                            'idArticuloUbicacion' => $ubicacion->idArticuloUbicacion,
-                            'ubicacion_id'        => $ubicacion->ubicacion_id,
-                            'cantidad'            => $ubicacion->cantidad,
-                            'nombre_ubicacion'    => $ubicacion->ubicacion ? $ubicacion->ubicacion->nombre : 'Ubicación no encontrada',
-                        ];
-                    }),
-                    'series' => $series->map(function ($serie) {
-                        return [
-                            'idArticuloSerie' => $serie->idArticuloSerie,
-                            'numero_serie'    => $serie->numero_serie,
-                            'ubicacion_id'    => $serie->ubicacion_id,
-                        ];
-                    }),
-                ];
-            });
-
-            // ========= NUEVO: resumen de paneles por grupo =========
-            $tienePanel         = $solicitudesMap->contains(function ($s) {
-                return $s['es_panel'] === true;
-            });
-            $panelesPendientes  = $solicitudesMap->filter(function ($s) {
-                return $s['es_panel'] === true && $s['estado'] !== 'ubicado';
-            })->count();
+            $mostrarCliente = $primeraSolicitud->origen === 'entrada_proveedor' && $primeraSolicitud->cliente_general_id;
 
             return [
-                'origen'            => $primeraSolicitud->origen,
-                'origen_id'         => $primeraSolicitud->origen_id,
+                'origen' => $primeraSolicitud->origen,
+                'origen_id' => $primeraSolicitud->origen_id,
                 'origen_especifico' => $primeraSolicitud->origen === 'compra' ? $primeraSolicitud->compra : $primeraSolicitud->entradaProveedor,
-                'proveedor'         => $primeraSolicitud->proveedor,
-                'cliente_general'   => $primeraSolicitud->clienteGeneral,
-                'mostrar_cliente'   => $mostrarCliente,
-                'fecha_origen'      => $primeraSolicitud->fecha_origen,
-                'estado_general'    => $this->calcularEstadoGeneral($grupo),
-                'solicitudes'       => $solicitudesMap,
-                'total_articulos'   => $grupo->count(),
-                'total_cantidad'    => $grupo->sum('cantidad'),
-                'created_at'        => $grupo->max('created_at'),
+                'proveedor' => $primeraSolicitud->proveedor,
+                'cliente_general' => $primeraSolicitud->clienteGeneral,
+                'mostrar_cliente' => $mostrarCliente,
+                'fecha_origen' => $primeraSolicitud->fecha_origen,
+                'estado_general' => $this->calcularEstadoGeneral($grupo),
+                'solicitudes' => $grupo->map(function ($solicitud) {
+                    Log::info("Solicitud ID: {$solicitud->idSolicitudIngreso}, Ubicaciones count: " . $solicitud->ubicaciones->count());
 
-                // ✅ Campos extra para el front
-                'tiene_panel'       => $tienePanel,
-                'paneles_pendientes' => $panelesPendientes,
+                    if ($solicitud->ubicaciones->count() > 0) {
+                        Log::info(
+                            "Ubicaciones para solicitud {$solicitud->idSolicitudIngreso}:",
+                            $solicitud->ubicaciones->toArray()
+                        );
+                    }
+
+                    // Cargar series existentes para esta solicitud
+                    $series = ArticuloSerie::where('origen', $solicitud->origen)
+                        ->where('origen_id', $solicitud->origen_id)
+                        ->where('articulo_id', $solicitud->articulo_id)
+                        ->get();
+
+                    return [
+                        'idSolicitudIngreso' => $solicitud->idSolicitudIngreso,
+                        'origen' => $solicitud->origen,
+                        'origen_id' => $solicitud->origen_id,
+                        'articulo_id' => $solicitud->articulo_id,
+                        'articulo' => $solicitud->articulo,
+                        'cantidad' => $solicitud->cantidad,
+                        'estado' => $solicitud->estado,
+                        'ubicacion' => $solicitud->ubicacion,
+                        'ubicaciones' => $solicitud->ubicaciones->map(function ($ubicacion) {
+                            return [
+                                'idArticuloUbicacion' => $ubicacion->idArticuloUbicacion,
+                                'ubicacion_id' => $ubicacion->ubicacion_id,
+                                'cantidad' => $ubicacion->cantidad,
+                                'nombre_ubicacion' => $ubicacion->ubicacion ? $ubicacion->ubicacion->nombre : 'Ubicación no encontrada'
+                            ];
+                        }),
+                        'series' => $series->map(function ($serie) {
+                            return [
+                                'idArticuloSerie' => $serie->idArticuloSerie,
+                                'numero_serie' => $serie->numero_serie,
+                                'ubicacion_id' => $serie->ubicacion_id
+                            ];
+                        })
+                    ];
+                }),
+                'total_articulos' => $grupo->count(),
+                'total_cantidad' => $grupo->sum('cantidad'),
+                'created_at' => $grupo->max('created_at')
             ];
         })->values();
 
         Log::info('Grupos de solicitudes creados: ' . $solicitudesAgrupadas->count());
 
-        // Ubicaciones activas
+        // Obtener todas las ubicaciones activas
         $ubicaciones = \App\Models\Ubicacion::whereHas('sucursal', function ($query) {
             $query->where('estado', true);
         })->get();
@@ -140,45 +120,31 @@ class SolicitudingresoController extends Controller
 
 
 
-public function guardarUbicacion(Request $request)
-{
-    try {
-        Log::info("=== 🚀 INICIANDO guardarUbicacion ===");
-        DB::beginTransaction();
+    public function guardarUbicacion(Request $request)
+    {
+        try {
+            Log::info("=== 🚀 INICIANDO guardarUbicacion ===");
+            DB::beginTransaction();
 
-        $solicitud = SolicitudIngreso::findOrFail($request->solicitud_id);
-        $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
+            $solicitud = SolicitudIngreso::findOrFail($request->solicitud_id);
+            $articulo = \App\Models\Articulo::find($solicitud->articulo_id);
 
-        Log::info("Solicitud ID: {$solicitud->idSolicitudIngreso}, Artículo ID: {$solicitud->articulo_id}, Cliente General ID: {$solicitud->cliente_general_id}");
+            Log::info("Solicitud ID: {$solicitud->idSolicitudIngreso}, Artículo ID: {$solicitud->articulo_id}, Cliente General ID: {$solicitud->cliente_general_id}");
 
-        // ✅ Validar que la suma de las cantidades sea igual a la cantidad total
-        $totalDistribuido = collect($request->ubicaciones)->sum('cantidad');
-        if ($totalDistribuido != $solicitud->cantidad) {
-            return response()->json([
-                'success' => false,
-                'message' => "La suma de las cantidades distribuidas ($totalDistribuido) debe ser igual a la cantidad total ({$solicitud->cantidad})"
-            ], 422);
-        }
-
-        // ✅ Verificar si el artículo requiere series
-        $requiereSeries = $articulo && $articulo->maneja_serie === 1;
-        Log::info("Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
-
-        // 🔍 Validar series si se requiere
-        if ($requiereSeries) {
-            if (!$request->has('series') || empty($request->series)) {
+            // ✅ Validar que la suma de las cantidades sea igual a la cantidad total
+            $totalDistribuido = collect($request->ubicaciones)->sum('cantidad');
+            if ($totalDistribuido != $solicitud->cantidad) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La suma de las cantidades distribuidas (' . $totalDistribuido . ') debe ser igual a la cantidad total (' . $solicitud->cantidad . ')'
+                    'message' => "La suma de las cantidades distribuidas ($totalDistribuido) debe ser igual a la cantidad total ({$solicitud->cantidad})"
                 ], 422);
             }
 
-            // Verificar si el artículo requiere seriesobtenerSugerenciasUbicaciones
+            // ✅ Verificar si el artículo requiere series
             $requiereSeries = $articulo && $articulo->maneja_serie === 1;
+            Log::info("Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
 
-            Log::info("Artículo ID: {$solicitud->articulo_id}, Maneja serie: " . ($articulo ? $articulo->maneja_serie : 'N/A') . ", Requiere series: " . ($requiereSeries ? 'SÍ' : 'NO'));
-
-            // Validar series si es requerido
+            // 🔍 Validar series si se requiere
             if ($requiereSeries) {
                 if (!$request->has('series') || empty($request->series)) {
                     return response()->json([
@@ -195,7 +161,7 @@ public function guardarUbicacion(Request $request)
                     ], 422);
                 }
 
-                // Validar que no haya series duplicadas
+                // Validar duplicados
                 $seriesNumeros = array_column($request->series, 'numero_serie');
                 $seriesUnicas = array_unique($seriesNumeros);
                 if (count($seriesUnicas) != count($seriesNumeros)) {
@@ -205,201 +171,167 @@ public function guardarUbicacion(Request $request)
                     ], 422);
                 }
 
-                // Validar que las series no existan ya en la base de datos para este artículo
+                // Validar si ya existen
                 $seriesExistentes = ArticuloSerie::where('articulo_id', $solicitud->articulo_id)
                     ->whereIn('numero_serie', $seriesNumeros)
-                    ->where(function ($query) use ($solicitud) {
-                        $query->where('origen', '!=', $solicitud->origen)
-                            ->orWhere('origen_id', '!=', $solicitud->origen_id);
-                    })
                     ->pluck('numero_serie')
                     ->toArray();
 
                 if (!empty($seriesExistentes)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Los siguientes números de serie ya existen para este artículo: ' . implode(', ', $seriesExistentes)
+                        'message' => 'Los siguientes números de serie ya existen: ' . implode(', ', $seriesExistentes)
                     ], 422);
                 }
             }
 
-            // Validar duplicados
-            $seriesNumeros = array_column($request->series, 'numero_serie');
-            $seriesUnicas = array_unique($seriesNumeros);
-            if (count($seriesUnicas) != count($seriesNumeros)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No puede haber números de serie duplicados'
-                ], 422);
-            }
+            $esPrimeraUbicacion = ($solicitud->estado !== 'ubicado');
+            Log::info("¿Primera ubicación?: " . ($esPrimeraUbicacion ? 'Sí' : 'No'));
 
-            // Validar si ya existen
-            $seriesExistentes = ArticuloSerie::where('articulo_id', $solicitud->articulo_id)
-                ->whereIn('numero_serie', $seriesNumeros)
-                ->pluck('numero_serie')
-                ->toArray();
-
-            if (!empty($seriesExistentes)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Los siguientes números de serie ya existen: ' . implode(', ', $seriesExistentes)
-                ], 422);
-            }
-        }
-
-        $esPrimeraUbicacion = ($solicitud->estado !== 'ubicado');
-        Log::info("¿Primera ubicación?: " . ($esPrimeraUbicacion ? 'Sí' : 'No'));
-
-        // ⚙️ Eliminar solo ubicaciones con cantidad = 0 para este artículo y cliente
-        Log::info("🔍 Buscando ubicaciones con cantidad 0 para eliminar...");
-        $ubicacionesCero = DB::table('rack_ubicacion_articulos')
-            ->where('articulo_id', $solicitud->articulo_id)
-            ->where('cliente_general_id', $solicitud->cliente_general_id)
-            ->where('cantidad', '<=', 0)
-            ->pluck('idRackUbicacionArticulo')
-            ->toArray();
-
-        if (!empty($ubicacionesCero)) {
-            Log::info("🗑️ Eliminando ubicaciones vacías: " . implode(', ', $ubicacionesCero));
-            DB::table('rack_ubicacion_articulos')
-                ->whereIn('idRackUbicacionArticulo', $ubicacionesCero)
-                ->delete();
-        } else {
-            Log::info("✅ No hay ubicaciones con cantidad 0 para eliminar.");
-        }
-
-        // 🧾 Eliminar series existentes de esta solicitud
-        ArticuloSerie::where('origen', $solicitud->origen)
-            ->where('articulo_id', $solicitud->articulo_id)
-            ->where('origen_id', $solicitud->origen_id)
-            ->delete();
-
-        $nombresUbicaciones = [];
-
-        // 🔁 Recorrer ubicaciones enviadas
-        foreach ($request->ubicaciones as $ubicacionData) {
-            $rackUbicacionId = $ubicacionData['ubicacion_id'];
-            Log::info("➡️ Procesando ubicación {$rackUbicacionId} para artículo {$solicitud->articulo_id}");
-
-            $rackUbicacion = DB::table('rack_ubicaciones')
-                ->where('idRackUbicacion', $rackUbicacionId)
-                ->first();
-
-            if (!$rackUbicacion) {
-                throw new Exception("La ubicación del rack no existe");
-            }
-
-            // Verificar capacidad
-            $cantidadActualEnUbicacion = DB::table('rack_ubicacion_articulos')
-                ->where('rack_ubicacion_id', $rackUbicacionId)
-                ->sum('cantidad');
-
-            $capacidadDisponible = $rackUbicacion->capacidad_maxima - $cantidadActualEnUbicacion;
-            Log::info("Capacidad disponible en {$rackUbicacion->codigo}: {$capacidadDisponible}");
-
-            if ($ubicacionData['cantidad'] > $capacidadDisponible) {
-                throw new Exception("La cantidad excede la capacidad disponible de la ubicación {$rackUbicacion->codigo}. Capacidad disponible: {$capacidadDisponible}");
-            }
-
-            // 🧩 Verificar si ya existe combinación (ubicación + artículo + cliente)
-            $articuloExistente = DB::table('rack_ubicacion_articulos')
-                ->where('rack_ubicacion_id', $rackUbicacionId)
+            // ⚙️ Eliminar solo ubicaciones con cantidad = 0 para este artículo y cliente
+            Log::info("🔍 Buscando ubicaciones con cantidad 0 para eliminar...");
+            $ubicacionesCero = DB::table('rack_ubicacion_articulos')
                 ->where('articulo_id', $solicitud->articulo_id)
                 ->where('cliente_general_id', $solicitud->cliente_general_id)
-                ->first();
+                ->where('cantidad', '<=', 0)
+                ->pluck('idRackUbicacionArticulo')
+                ->toArray();
 
-            if ($articuloExistente) {
-                Log::info("🔄 Actualizando cantidad existente en ubicación {$rackUbicacionId}");
+            if (!empty($ubicacionesCero)) {
+                Log::info("🗑️ Eliminando ubicaciones vacías: " . implode(', ', $ubicacionesCero));
                 DB::table('rack_ubicacion_articulos')
-                    ->where('idRackUbicacionArticulo', $articuloExistente->idRackUbicacionArticulo)
-                    ->update([
-                        'cantidad' => $articuloExistente->cantidad + $ubicacionData['cantidad'],
-                        'updated_at' => now()
-                    ]);
+                    ->whereIn('idRackUbicacionArticulo', $ubicacionesCero)
+                    ->delete();
             } else {
-                Log::info("🆕 Insertando nuevo registro (Ubicación {$rackUbicacionId}, Artículo {$solicitud->articulo_id}, Cliente {$solicitud->cliente_general_id})");
-                DB::table('rack_ubicacion_articulos')->insert([
-                    'rack_ubicacion_id' => $rackUbicacionId,
-                    'articulo_id' => $solicitud->articulo_id,
-                    'cliente_general_id' => $solicitud->cliente_general_id,
-                    'cantidad' => $ubicacionData['cantidad'],
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+                Log::info("✅ No hay ubicaciones con cantidad 0 para eliminar.");
             }
 
-            // 🧮 Actualizar estado de ocupación
-            $nuevaCantidadTotalUbicacion = $cantidadActualEnUbicacion + $ubicacionData['cantidad'];
-            $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotalUbicacion, $rackUbicacion->capacidad_maxima);
+            // 🧾 Eliminar series existentes de esta solicitud
+            ArticuloSerie::where('origen', $solicitud->origen)
+                ->where('articulo_id', $solicitud->articulo_id)
+                ->where('origen_id', $solicitud->origen_id)
+                ->delete();
 
-            $solicitud->ubicacion = $ubicacionTexto;
+            $nombresUbicaciones = [];
+
+            // 🔁 Recorrer ubicaciones enviadas
+            foreach ($request->ubicaciones as $ubicacionData) {
+                $rackUbicacionId = $ubicacionData['ubicacion_id'];
+                Log::info("➡️ Procesando ubicación {$rackUbicacionId} para artículo {$solicitud->articulo_id}");
+
+                $rackUbicacion = DB::table('rack_ubicaciones')
+                    ->where('idRackUbicacion', $rackUbicacionId)
+                    ->first();
+
+                if (!$rackUbicacion) {
+                    throw new Exception("La ubicación del rack no existe");
+                }
+
+                // Verificar capacidad
+                $cantidadActualEnUbicacion = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $rackUbicacionId)
+                    ->sum('cantidad');
+
+                $capacidadDisponible = $rackUbicacion->capacidad_maxima - $cantidadActualEnUbicacion;
+                Log::info("Capacidad disponible en {$rackUbicacion->codigo}: {$capacidadDisponible}");
+
+                if ($ubicacionData['cantidad'] > $capacidadDisponible) {
+                    throw new Exception("La cantidad excede la capacidad disponible de la ubicación {$rackUbicacion->codigo}. Capacidad disponible: {$capacidadDisponible}");
+                }
+
+                // 🧩 Verificar si ya existe combinación (ubicación + artículo + cliente)
+                $articuloExistente = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $rackUbicacionId)
+                    ->where('articulo_id', $solicitud->articulo_id)
+                    ->where('cliente_general_id', $solicitud->cliente_general_id)
+                    ->first();
+
+                if ($articuloExistente) {
+                    Log::info("🔄 Actualizando cantidad existente en ubicación {$rackUbicacionId}");
+                    DB::table('rack_ubicacion_articulos')
+                        ->where('idRackUbicacionArticulo', $articuloExistente->idRackUbicacionArticulo)
+                        ->update([
+                            'cantidad' => $articuloExistente->cantidad + $ubicacionData['cantidad'],
+                            'updated_at' => now()
+                        ]);
+                } else {
+                    Log::info("🆕 Insertando nuevo registro (Ubicación {$rackUbicacionId}, Artículo {$solicitud->articulo_id}, Cliente {$solicitud->cliente_general_id})");
+                    DB::table('rack_ubicacion_articulos')->insert([
+                        'rack_ubicacion_id' => $rackUbicacionId,
+                        'articulo_id' => $solicitud->articulo_id,
+                        'cliente_general_id' => $solicitud->cliente_general_id,
+                        'cantidad' => $ubicacionData['cantidad'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                // 🧮 Actualizar estado de ocupación
+                $nuevaCantidadTotalUbicacion = $cantidadActualEnUbicacion + $ubicacionData['cantidad'];
+                $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotalUbicacion, $rackUbicacion->capacidad_maxima);
+
+                DB::table('rack_ubicaciones')
+                    ->where('idRackUbicacion', $rackUbicacionId)
+                    ->update([
+                        'estado_ocupacion' => $nuevoEstado,
+                        'updated_at' => now()
+                    ]);
+
+                $nombresUbicaciones[] = $rackUbicacion->codigo . " ({$ubicacionData['cantidad']})";
+            }
+
+            // 🧾 Guardar series si aplica
+            $seriesGuardadas = [];
+            if ($requiereSeries && !empty($request->series)) {
+                foreach ($request->series as $serieData) {
+                    $serieBD = ArticuloSerie::create([
+                        'origen' => $solicitud->origen,
+                        'origen_id' => $solicitud->origen_id,
+                        'articulo_id' => $solicitud->articulo_id,
+                        'numero_serie' => $serieData['numero_serie'],
+                        'estado' => 'activo'
+                    ]);
+                    $seriesGuardadas[] = ['numero_serie' => $serieBD->numero_serie];
+                }
+            }
+
+            // 📈 Actualizar stock si es primera ubicación
+            if ($esPrimeraUbicacion && $articulo) {
+                $stockAnterior = $articulo->stock_total;
+                $nuevoStock = $stockAnterior + $solicitud->cantidad;
+                $articulo->stock_total = $nuevoStock;
+                $articulo->save();
+                Log::info("📈 Stock actualizado: de {$stockAnterior} a {$nuevoStock}");
+            }
+
+            // 🧾 Actualizar solicitud
+            $solicitud->ubicacion = implode(', ', $nombresUbicaciones);
             $solicitud->estado = 'ubicado';
             $solicitud->save();
 
-            $nombresUbicaciones[] = $rackUbicacion->codigo . " ({$ubicacionData['cantidad']})";
+            DB::commit();
+            Log::info("✅ Finalizado correctamente guardarUbicacion");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Artículo ubicado correctamente',
+                'ubicacion_texto' => $solicitud->ubicacion,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('❌ Error en guardarUbicacion: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la ubicación: ' . $e->getMessage()
+            ], 500);
         }
-
-        // 🧾 Guardar series si aplica
-        $seriesGuardadas = [];
-        if ($requiereSeries && !empty($request->series)) {
-            foreach ($request->series as $serieData) {
-                $serieBD = ArticuloSerie::create([
-                    'origen' => $solicitud->origen,
-                    'origen_id' => $solicitud->origen_id,
-                    'articulo_id' => $solicitud->articulo_id,
-                    'numero_serie' => $serieData['numero_serie'],
-                    'estado' => 'activo'
-                ]);
-                $seriesGuardadas[] = ['numero_serie' => $serieBD->numero_serie];
-            }
-
-        // 📈 Actualizar stock si es primera ubicación
-        if ($esPrimeraUbicacion && $articulo) {
-            $stockAnterior = $articulo->stock_total;
-            $nuevoStock = $stockAnterior + $solicitud->cantidad;
-            $articulo->stock_total = $nuevoStock;
-            $articulo->save();
-            Log::info("📈 Stock actualizado: de {$stockAnterior} a {$nuevoStock}");
-        }
-
-        // 🧾 Actualizar solicitud
-        $solicitud->ubicacion = implode(', ', $nombresUbicaciones);
-        $solicitud->estado = 'ubicado';
-        $solicitud->save();
-
-        DB::commit();
-        Log::info("✅ Finalizado correctamente guardarUbicacion");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Artículo ubicado correctamente',
-            'ubicacion_texto' => $solicitud->ubicacion,
-        ]);
     }
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('❌ Error en guardarUbicacion: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar la ubicación: ' . $e->getMessage()
-        ], 500);
-    }
-}
 
 
 
-private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
-{
-    if ($capacidadMaxima <= 0) return 'vacio';
-
-    $porcentaje = ($cantidad / $capacidadMaxima) * 100;
-
-    if ($porcentaje == 0) return 'vacio';
-    if ($porcentaje <= 24) return 'bajo';
-    if ($porcentaje <= 49) return 'medio';
-    if ($porcentaje <= 74) return 'alto';
-    return 'muy_alto';
-
+    private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
+    {
+        if ($capacidadMaxima <= 0) return 'vacio';
 
         $porcentaje = ($cantidad / $capacidadMaxima) * 100;
 
@@ -409,7 +341,7 @@ private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
         if ($porcentaje <= 74) return 'alto';
         return 'muy_alto';
     }
-}
+
 
 
     private function verificarTodosArticulosUbicados($solicitud)
