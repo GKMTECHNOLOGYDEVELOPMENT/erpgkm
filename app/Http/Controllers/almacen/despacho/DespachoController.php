@@ -29,14 +29,9 @@ class DespachoController extends Controller
 
     public function create()
     {
-        // Obtener los artículos activos para el select
-        $articulos = Articulo::where('estado', 1)->get();
-        $unidades = Unidad::all();
-        $modelos = Modelo::all();
-    $monedas = Moneda::all();
-    $productos = Articulo::all();
+        
         // Cargar la vista de creación
-        return view('almacen.kits-articulos.create', compact('articulos', 'unidades', 'modelos', 'monedas', 'productos'));
+        return view('almacen.despacho.create');
     }
 
      public function store(Request $request)
