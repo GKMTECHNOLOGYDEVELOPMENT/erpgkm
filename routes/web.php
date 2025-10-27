@@ -370,7 +370,7 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
 /// INICIO DESPACHO ///
 Route::prefix('despacho')->name('despacho.')->group(function () {
     Route::get('/', [DespachoController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
+    Route::get('/create', [DespachoController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
     Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
