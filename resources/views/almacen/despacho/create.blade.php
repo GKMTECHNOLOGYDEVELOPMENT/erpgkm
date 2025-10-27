@@ -818,488 +818,494 @@
     </div>
 
     <!-- Alpine.js al FINAL y con defer -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <script>
-        // Definir el componente ANTES de que Alpine.js se inicialice
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('wizardDespacho', () => ({
-                currentStep: 0,
-                articulos: [],
-                searchTerm: '',
-                subtotal: 0,
-                igv: 0,
-                total: 0,
-                departamentos: [],
-                clientes: [],
-                usuarios: [],
-                articulosDisponibles: [],
-                datosCargados: false,
-                errors: {},
-                submitting: false,
-                initCalled: false, // Bandera para controlar múltiples llamadas a init
-
-                async init() {
-                    // Prevenir múltiples inicializaciones
-                    if (this.initCalled) {
-                        console.log('Init ya fue llamado, ignorando...');
-                        return;
-                    }
-                    
-                    this.initCalled = true;
-                    console.log('=== INICIALIZANDO WIZARD UNA SOLA VEZ ===');
-                    
-                    await this.cargarDatosIniciales();
-                    this.inicializarSelect2();
-                    this.calcularTotales();
-                    this.datosCargados = true;
-                },
-
-                async cargarDatosIniciales() {
-                    try {
-                        console.log('Cargando datos iniciales...');
-                        
-                        // Cargar departamentos
-                        const deptResponse = await fetch('/api/departamentosdespacho');
-                        if (deptResponse.ok) {
-                            this.departamentos = await deptResponse.json();
-                            console.log('Departamentos cargados:', this.departamentos.length);
-                        }
-
-                        // Cargar clientes
-                        const clientesResponse = await fetch('/api/clientesdespacho');
-                        if (clientesResponse.ok) {
-                            const clientesData = await clientesResponse.json();
-                            this.clientes = clientesData.map(cliente => ({
-                                id: cliente.id,
-                                text: cliente.text || `${cliente.nombre} - ${cliente.documento}`
-                            }));
-                            console.log('Clientes cargados:', this.clientes.length);
-                        }
-
-                        // Cargar usuarios
-                        const usuariosResponse = await fetch('/api/usuariosdespacho');
-                        if (usuariosResponse.ok) {
-                            this.usuarios = await usuariosResponse.json();
-                            console.log('Usuarios cargados:', this.usuarios.length);
-                        }
-
-                        // Cargar artículos
-                        const articulosResponse = await fetch('/api/articulosdespacho');
-                        if (articulosResponse.ok) {
-                            this.articulosDisponibles = await articulosResponse.json();
-                            console.log('Artículos cargados:', this.articulosDisponibles.length);
-                        }
-
-                        console.log('=== DATOS CARGADOS EXITOSAMENTE ===');
-
-                    } catch (error) {
-                        console.error('Error cargando datos:', error);
-                    }
-                },
-
-                inicializarSelect2() {
-                    // Usar setTimeout para asegurar que el DOM esté listo
-                    setTimeout(() => {
-                        try {
-                            console.log('Inicializando Select2...');
-
-                            // Clientes
-                            if ($('#cliente_select').length && !$('#cliente_select').hasClass('select2-hidden-accessible')) {
-                                $('#cliente_select').select2({
-                                    data: this.clientes,
-                                    placeholder: 'Seleccionar cliente',
-                                    width: '100%',
-                                    allowClear: true
-                                }).on('change', () => this.validarPasoActual());
-                            }
-
-                            // Vendedores
-                            if ($('#vendedor_select').length && !$('#vendedor_select').hasClass('select2-hidden-accessible')) {
-                                $('#vendedor_select').select2({
-                                    data: this.usuarios,
-                                    placeholder: 'Seleccionar vendedor',
-                                    width: '100%',
-                                    allowClear: true
-                                }).on('change', () => this.validarPasoActual());
-                            }
-
-                            // Conductores
-                            if ($('#conductor_select').length && !$('#conductor_select').hasClass('select2-hidden-accessible')) {
-                                $('#conductor_select').select2({
-                                    data: this.usuarios,
-                                    placeholder: 'Seleccionar conductor',
-                                    width: '100%',
-                                    allowClear: true
-                                }).on('change', () => this.validarPasoActual());
-                            }
-
-                            console.log('Select2 inicializado correctamente');
-
-                        } catch (error) {
-                            console.error('Error inicializando Select2:', error);
-                        }
-                    }, 500);
-                },
-
-                // ... (el resto de tus métodos se mantienen igual)
-                validarPaso0() {
-                    this.errors = {};
-                    let isValid = true;
-
-                    const tipoGuia = document.querySelector('input[name="tipo_guia"]');
-                    if (!tipoGuia.value.trim()) {
-                        this.errors.tipo_guia = 'El tipo de guía es requerido';
-                        isValid = false;
-                    }
-
-                    const numero = document.querySelector('input[name="numero"]');
-                    if (!numero.value.trim()) {
-                        this.errors.numero = 'El número es requerido';
-                        isValid = false;
-                    }
-
-                    const documento = document.querySelector('select[name="documento"]');
-                    if (!documento.value) {
-                        this.errors.documento = 'El documento es requerido';
-                        isValid = false;
-                    }
-
-                    const fechaEntrega = document.querySelector('input[name="fecha_entrega"]');
-                    if (!fechaEntrega.value) {
-                        this.errors.fecha_entrega = 'La fecha de entrega es requerida';
-                        isValid = false;
-                    }
-
-                    const fechaTraslado = document.querySelector('input[name="fecha_traslado"]');
-                    if (!fechaTraslado.value) {
-                        this.errors.fecha_traslado = 'La fecha de traslado es requerida';
-                        isValid = false;
-                    }
-
-                    return isValid;
-                },
-
-                validarPaso1() {
-                    this.errors = {};
-                    let isValid = true;
-
-                    const dirPartida = document.querySelector('input[name="direccion_partida"]');
-                    if (!dirPartida.value.trim()) {
-                        this.errors.direccion_partida = 'La dirección de partida es requerida';
-                        isValid = false;
-                    }
-
-                    const dptoPartida = document.querySelector('select[name="dpto_partida"]');
-                    if (!dptoPartida.value) {
-                        this.errors.dpto_partida = 'El departamento de partida es requerido';
-                        isValid = false;
-                    }
-
-                    const provinciaPartida = document.querySelector('input[name="provincia_partida"]');
-                    if (!provinciaPartida.value.trim()) {
-                        this.errors.provincia_partida = 'La provincia de partida es requerida';
-                        isValid = false;
-                    }
-
-                    const distritoPartida = document.querySelector('input[name="distrito_partida"]');
-                    if (!distritoPartida.value.trim()) {
-                        this.errors.distrito_partida = 'El distrito de partida es requerido';
-                        isValid = false;
-                    }
-
-                    const dirLlegada = document.querySelector('input[name="direccion_llegada"]');
-                    if (!dirLlegada.value.trim()) {
-                        this.errors.direccion_llegada = 'La dirección de llegada es requerida';
-                        isValid = false;
-                    }
-
-                    const dptoLlegada = document.querySelector('select[name="dpto_llegada"]');
-                    if (!dptoLlegada.value) {
-                        this.errors.dpto_llegada = 'El departamento de llegada es requerido';
-                        isValid = false;
-                    }
-
-                    const provinciaLlegada = document.querySelector('input[name="provincia_llegada"]');
-                    if (!provinciaLlegada.value.trim()) {
-                        this.errors.provincia_llegada = 'La provincia de llegada es requerida';
-                        isValid = false;
-                    }
-
-                    const distritoLlegada = document.querySelector('input[name="distrito_llegada"]');
-                    if (!distritoLlegada.value.trim()) {
-                        this.errors.distrito_llegada = 'El distrito de llegada es requerido';
-                        isValid = false;
-                    }
-
-                    return isValid;
-                },
-
-                validarPaso2() {
-                    this.errors = {};
-                    let isValid = true;
-
-                    const cliente = document.querySelector('select[name="cliente_id"]');
-                    if (!cliente.value) {
-                        this.errors.cliente_id = 'El cliente es requerido';
-                        isValid = false;
-                    }
-
-                    const vendedor = document.querySelector('select[name="vendedor_id"]');
-                    if (!vendedor.value) {
-                        this.errors.vendedor_id = 'El vendedor es requerido';
-                        isValid = false;
-                    }
-
-                    const conductor = document.querySelector('select[name="conductor_id"]');
-                    if (!conductor.value) {
-                        this.errors.conductor_id = 'El conductor es requerido';
-                        isValid = false;
-                    }
-
-                    const modoTraslado = document.querySelector('select[name="modo_traslado"]');
-                    if (!modoTraslado.value) {
-                        this.errors.modo_traslado = 'El modo de traslado es requerido';
-                        isValid = false;
-                    }
-
-                    const condiciones = document.querySelector('select[name="condiciones"]');
-                    if (!condiciones.value) {
-                        this.errors.condiciones = 'Las condiciones son requeridas';
-                        isValid = false;
-                    }
-
-                    const tipoTraslado = document.querySelector('select[name="tipo_traslado"]');
-                    if (!tipoTraslado.value) {
-                        this.errors.tipo_traslado = 'El tipo de traslado es requerido';
-                        isValid = false;
-                    }
-
-                    return isValid;
-                },
-
-                validarPaso3() {
-                    this.errors = {};
-                    let isValid = true;
-
-                    if (this.articulos.length === 0) {
-                        this.errors.articulos = 'Debe agregar al menos un artículo';
-                        isValid = false;
-                        return isValid;
-                    }
-
-                    this.articulos.forEach((articulo, index) => {
-                        if (!articulo.codigo || articulo.codigo.trim() === '') {
-                            this.errors[`articulo_${index}_codigo`] = `El artículo ${index + 1} debe tener un código`;
-                            isValid = false;
-                        }
-
-                        if (!articulo.descripcion || articulo.descripcion.trim() === '') {
-                            this.errors[`articulo_${index}_descripcion`] = `El artículo ${index + 1} debe tener una descripción`;
-                            isValid = false;
-                        }
-
-                        if (articulo.cantidad <= 0) {
-                            this.errors[`articulo_${index}_cantidad`] = `La cantidad del artículo ${index + 1} debe ser mayor a 0`;
-                            isValid = false;
-                        }
-
-                        if (articulo.precio < 0) {
-                            this.errors[`articulo_${index}_precio`] = `El precio del artículo ${index + 1} no puede ser negativo`;
-                            isValid = false;
-                        }
-                    });
-
-                    return isValid;
-                },
-
-                validarPasoActual() {
-                    switch(this.currentStep) {
-                        case 0: return this.validarPaso0();
-                        case 1: return this.validarPaso1();
-                        case 2: return this.validarPaso2();
-                        case 3: return this.validarPaso3();
-                        default: return true;
-                    }
-                },
-
-                mostrarErrores() {
-                    document.querySelectorAll('.error-message').forEach(el => el.remove());
-                    
-                    Object.keys(this.errors).forEach(field => {
-                        const errorMessage = this.errors[field];
-                        let inputElement;
-
-                        if (field.startsWith('articulo_')) {
-                            const [_, index, fieldName] = field.split('_');
-                            const articleElement = document.querySelectorAll('.article-item')[index];
-                            if (articleElement) {
-                                const input = articleElement.querySelector(`[x-model="articulo.${fieldName}"]`);
-                                if (input) {
-                                    inputElement = input;
-                                }
-                            }
-                        } else {
-                            inputElement = document.querySelector(`[name="${field}"]`);
-                        }
-
-                        if (inputElement) {
-                            inputElement.classList.add('border-red-500', 'border-2');
-                            
-                            const errorDiv = document.createElement('div');
-                            errorDiv.className = 'error-message text-red-500 text-sm mt-1 flex items-center';
-                            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${errorMessage}`;
-                            
-                            inputElement.parentNode.appendChild(errorDiv);
-                        }
-                    });
-
-                    if (Object.keys(this.errors).length > 0) {
-                        const errorCount = Object.keys(this.errors).length;
-                        alert(`❌ Tienes ${errorCount} error(es) que debes corregir antes de continuar. Revisa los campos marcados en rojo.`);
-                    }
-                },
-
-                async nextStep() {
-                    if (!this.validarPasoActual()) {
-                        this.mostrarErrores();
-                        return;
-                    }
-
-                    this.errors = {};
-                    document.querySelectorAll('.error-message').forEach(el => el.remove());
-                    document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500', 'border-2'));
-
-                    if (this.currentStep < 3) {
-                        this.currentStep++;
-                    }
-                },
-
-                previousStep() {
-                    this.errors = {};
-                    document.querySelectorAll('.error-message').forEach(el => el.remove());
-                    document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500', 'border-2'));
-
-                    if (this.currentStep > 0) {
-                        this.currentStep--;
-                    }
-                },
-
-                async cargarArticuloPorCodigo(index) {
-                    const articulo = this.articulos[index];
-                    if (!articulo.codigo || articulo.codigo.trim() === '') return;
-
-                    let articuloEncontrado = this.articulosDisponibles.find(a => 
-                        a.codigo && a.codigo.toString().trim() === articulo.codigo.toString().trim()
-                    );
-
-                    if (!articuloEncontrado) {
-                        articuloEncontrado = this.articulosDisponibles.find(a => 
-                            a.text && a.text.toString().toLowerCase().includes(articulo.codigo.toString().toLowerCase())
-                        );
-                    }
-
-                    if (articuloEncontrado) {
-                        this.articulos[index] = {
-                            ...this.articulos[index],
-                            descripcion: articuloEncontrado.text || articuloEncontrado.descripcion || articuloEncontrado.nombre || 'Sin descripción',
-                            precio: articuloEncontrado.precio || 0,
-                            stock: articuloEncontrado.stock || 0
-                        };
-                        this.calcularTotales();
-                    }
-                },
-
-                agregarArticulo() {
-                    const nuevoId = this.articulos.length > 0 ? Math.max(...this.articulos.map(a => a.id)) + 1 : 1;
-
-                    this.articulos.push({
-                        id: nuevoId,
-                        codigo: '',
-                        descripcion: '',
-                        stock: 0,
-                        unidad: 'Unidad',
-                        precio: 0,
-                        cantidad: 1,
-                    });
-                    
-                    this.calcularTotales();
-                },
-
-                eliminarArticulo(index) {
-                    if (confirm('¿Está seguro de eliminar este artículo?')) {
-                        this.articulos.splice(index, 1);
-                        this.calcularTotales();
-                    }
-                },
-
-                calcularTotales() {
-                    this.subtotal = this.articulos.reduce((sum, articulo) => {
-                        return sum + (articulo.precio * articulo.cantidad);
-                    }, 0);
-
-                    this.igv = this.subtotal * 0.18;
-                    this.total = this.subtotal + this.igv;
-                },
-
-                async submitForm() {
-                    console.log('=== INICIANDO SUBMIT ===');
-                    
-                    if (this.submitting) {
-                        console.log('Submit ya en proceso, ignorando...');
-                        return;
-                    }
-                    
-                    this.submitting = true;
-
-                    if (!this.validarPaso0() || !this.validarPaso1() || !this.validarPaso2() || !this.validarPaso3()) {
-                        this.mostrarErrores();
-                        alert('❌ Por favor completa todos los campos requeridos antes de enviar el formulario.');
-                        this.submitting = false;
-                        return;
-                    }
-
-                    const form = document.getElementById('despachoForm');
-                    const formData = new FormData(form);
-                    
-                    try {
-                        console.log('Enviando formulario...');
-                        const response = await fetch(form.action, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                'Accept': 'application/json',
-                            },
-                            body: formData
-                        });
-
-                        const result = await response.json();
-                        console.log('Respuesta del servidor:', result);
-
-                        if (result.success) {
-                            alert('✅ Despacho creado exitosamente');
-                            window.location.href = '/despacho';
-                        } else {
-                            let errorMessage = result.message || 'Error desconocido';
-                            if (result.errors) {
-                                errorMessage = Object.values(result.errors).flat().join(', ');
-                            }
-                            alert('❌ Error: ' + errorMessage);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('❌ Error al crear el despacho: ' + error.message);
-                    } finally {
-                        this.submitting = false;
-                    }
-                },
-
-                cancelar() {
-                    if (confirm('¿Está seguro de cancelar el despacho? Se perderán todos los datos.')) {
-                        window.location.href = '/';
-                    }
+    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script> -->
+
+   <script>
+document.addEventListener('alpine:init', () => {
+    // Verificar si ya está inicializado
+    if (window.wizardDespachoInitialized) {
+        console.log('Wizard ya fue inicializado, ignorando...');
+        return;
+    }
+    window.wizardDespachoInitialized = true;
+    
+    console.log('=== INICIALIZANDO WIZARD UNA SOLA VEZ ===');
+
+    Alpine.data('wizardDespacho', () => ({
+        currentStep: 0,
+        articulos: [],
+        searchTerm: '',
+        subtotal: 0,
+        igv: 0,
+        total: 0,
+        departamentos: [],
+        clientes: [],
+        usuarios: [],
+        articulosDisponibles: [],
+        datosCargados: false,
+        errors: {},
+        submitting: false,
+        initCalled: false,
+
+        async init() {
+            if (this.initCalled) {
+                console.log('Init ya fue llamado, ignorando...');
+                return;
+            }
+            
+            this.initCalled = true;
+            console.log('=== INICIALIZANDO COMPONENTE ===');
+            
+            await this.cargarDatosIniciales();
+            this.inicializarSelect2();
+            this.calcularTotales();
+            this.datosCargados = true;
+        },
+
+        async cargarDatosIniciales() {
+            try {
+                console.log('Cargando datos iniciales...');
+                
+                // Cargar departamentos
+                const deptResponse = await fetch('/api/departamentosdespacho');
+                if (deptResponse.ok) {
+                    this.departamentos = await deptResponse.json();
+                    console.log('Departamentos cargados:', this.departamentos.length);
                 }
-            }));
-        });
-    </script>
+
+                // Cargar clientes
+                const clientesResponse = await fetch('/api/clientesdespacho');
+                if (clientesResponse.ok) {
+                    const clientesData = await clientesResponse.json();
+                    this.clientes = clientesData.map(cliente => ({
+                        id: cliente.id,
+                        text: cliente.text || `${cliente.nombre} - ${cliente.documento}`
+                    }));
+                    console.log('Clientes cargados:', this.clientes.length);
+                }
+
+                // Cargar usuarios
+                const usuariosResponse = await fetch('/api/usuariosdespacho');
+                if (usuariosResponse.ok) {
+                    this.usuarios = await usuariosResponse.json();
+                    console.log('Usuarios cargados:', this.usuarios.length);
+                }
+
+                // Cargar artículos
+                const articulosResponse = await fetch('/api/articulosdespacho');
+                if (articulosResponse.ok) {
+                    this.articulosDisponibles = await articulosResponse.json();
+                    console.log('Artículos cargados:', this.articulosDisponibles.length);
+                }
+
+                console.log('=== DATOS CARGADOS EXITOSAMENTE ===');
+
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+            }
+        },
+
+        inicializarSelect2() {
+            setTimeout(() => {
+                try {
+                    console.log('Inicializando Select2...');
+
+                    // Clientes
+                    if ($('#cliente_select').length && !$('#cliente_select').hasClass('select2-hidden-accessible')) {
+                        $('#cliente_select').select2({
+                            data: this.clientes,
+                            placeholder: 'Seleccionar cliente',
+                            width: '100%',
+                            allowClear: true
+                        }).on('change', () => this.validarPasoActual());
+                    }
+
+                    // Vendedores
+                    if ($('#vendedor_select').length && !$('#vendedor_select').hasClass('select2-hidden-accessible')) {
+                        $('#vendedor_select').select2({
+                            data: this.usuarios,
+                            placeholder: 'Seleccionar vendedor',
+                            width: '100%',
+                            allowClear: true
+                        }).on('change', () => this.validarPasoActual());
+                    }
+
+                    // Conductores
+                    if ($('#conductor_select').length && !$('#conductor_select').hasClass('select2-hidden-accessible')) {
+                        $('#conductor_select').select2({
+                            data: this.usuarios,
+                            placeholder: 'Seleccionar conductor',
+                            width: '100%',
+                            allowClear: true
+                        }).on('change', () => this.validarPasoActual());
+                    }
+
+                    console.log('Select2 inicializado correctamente');
+
+                } catch (error) {
+                    console.error('Error inicializando Select2:', error);
+                }
+            }, 500);
+        },
+
+        // ... (el resto de tus métodos se mantienen igual)
+        validarPaso0() {
+            this.errors = {};
+            let isValid = true;
+
+            const tipoGuia = document.querySelector('input[name="tipo_guia"]');
+            if (!tipoGuia.value.trim()) {
+                this.errors.tipo_guia = 'El tipo de guía es requerido';
+                isValid = false;
+            }
+
+            const numero = document.querySelector('input[name="numero"]');
+            if (!numero.value.trim()) {
+                this.errors.numero = 'El número es requerido';
+                isValid = false;
+            }
+
+            const documento = document.querySelector('select[name="documento"]');
+            if (!documento.value) {
+                this.errors.documento = 'El documento es requerido';
+                isValid = false;
+            }
+
+            const fechaEntrega = document.querySelector('input[name="fecha_entrega"]');
+            if (!fechaEntrega.value) {
+                this.errors.fecha_entrega = 'La fecha de entrega es requerida';
+                isValid = false;
+            }
+
+            const fechaTraslado = document.querySelector('input[name="fecha_traslado"]');
+            if (!fechaTraslado.value) {
+                this.errors.fecha_traslado = 'La fecha de traslado es requerida';
+                isValid = false;
+            }
+
+            return isValid;
+        },
+
+        validarPaso1() {
+            this.errors = {};
+            let isValid = true;
+
+            const dirPartida = document.querySelector('input[name="direccion_partida"]');
+            if (!dirPartida.value.trim()) {
+                this.errors.direccion_partida = 'La dirección de partida es requerida';
+                isValid = false;
+            }
+
+            const dptoPartida = document.querySelector('select[name="dpto_partida"]');
+            if (!dptoPartida.value) {
+                this.errors.dpto_partida = 'El departamento de partida es requerido';
+                isValid = false;
+            }
+
+            const provinciaPartida = document.querySelector('input[name="provincia_partida"]');
+            if (!provinciaPartida.value.trim()) {
+                this.errors.provincia_partida = 'La provincia de partida es requerida';
+                isValid = false;
+            }
+
+            const distritoPartida = document.querySelector('input[name="distrito_partida"]');
+            if (!distritoPartida.value.trim()) {
+                this.errors.distrito_partida = 'El distrito de partida es requerido';
+                isValid = false;
+            }
+
+            const dirLlegada = document.querySelector('input[name="direccion_llegada"]');
+            if (!dirLlegada.value.trim()) {
+                this.errors.direccion_llegada = 'La dirección de llegada es requerida';
+                isValid = false;
+            }
+
+            const dptoLlegada = document.querySelector('select[name="dpto_llegada"]');
+            if (!dptoLlegada.value) {
+                this.errors.dpto_llegada = 'El departamento de llegada es requerido';
+                isValid = false;
+            }
+
+            const provinciaLlegada = document.querySelector('input[name="provincia_llegada"]');
+            if (!provinciaLlegada.value.trim()) {
+                this.errors.provincia_llegada = 'La provincia de llegada es requerida';
+                isValid = false;
+            }
+
+            const distritoLlegada = document.querySelector('input[name="distrito_llegada"]');
+            if (!distritoLlegada.value.trim()) {
+                this.errors.distrito_llegada = 'El distrito de llegada es requerido';
+                isValid = false;
+            }
+
+            return isValid;
+        },
+
+        validarPaso2() {
+            this.errors = {};
+            let isValid = true;
+
+            const cliente = document.querySelector('select[name="cliente_id"]');
+            if (!cliente.value) {
+                this.errors.cliente_id = 'El cliente es requerido';
+                isValid = false;
+            }
+
+            const vendedor = document.querySelector('select[name="vendedor_id"]');
+            if (!vendedor.value) {
+                this.errors.vendedor_id = 'El vendedor es requerido';
+                isValid = false;
+            }
+
+            const conductor = document.querySelector('select[name="conductor_id"]');
+            if (!conductor.value) {
+                this.errors.conductor_id = 'El conductor es requerido';
+                isValid = false;
+            }
+
+            const modoTraslado = document.querySelector('select[name="modo_traslado"]');
+            if (!modoTraslado.value) {
+                this.errors.modo_traslado = 'El modo de traslado es requerido';
+                isValid = false;
+            }
+
+            const condiciones = document.querySelector('select[name="condiciones"]');
+            if (!condiciones.value) {
+                this.errors.condiciones = 'Las condiciones son requeridas';
+                isValid = false;
+            }
+
+            const tipoTraslado = document.querySelector('select[name="tipo_traslado"]');
+            if (!tipoTraslado.value) {
+                this.errors.tipo_traslado = 'El tipo de traslado es requerido';
+                isValid = false;
+            }
+
+            return isValid;
+        },
+
+        validarPaso3() {
+            this.errors = {};
+            let isValid = true;
+
+            if (this.articulos.length === 0) {
+                this.errors.articulos = 'Debe agregar al menos un artículo';
+                isValid = false;
+                return isValid;
+            }
+
+            this.articulos.forEach((articulo, index) => {
+                if (!articulo.codigo || articulo.codigo.trim() === '') {
+                    this.errors[`articulo_${index}_codigo`] = `El artículo ${index + 1} debe tener un código`;
+                    isValid = false;
+                }
+
+                if (!articulo.descripcion || articulo.descripcion.trim() === '') {
+                    this.errors[`articulo_${index}_descripcion`] = `El artículo ${index + 1} debe tener una descripción`;
+                    isValid = false;
+                }
+
+                if (articulo.cantidad <= 0) {
+                    this.errors[`articulo_${index}_cantidad`] = `La cantidad del artículo ${index + 1} debe ser mayor a 0`;
+                    isValid = false;
+                }
+
+                if (articulo.precio < 0) {
+                    this.errors[`articulo_${index}_precio`] = `El precio del artículo ${index + 1} no puede ser negativo`;
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        },
+
+        validarPasoActual() {
+            switch(this.currentStep) {
+                case 0: return this.validarPaso0();
+                case 1: return this.validarPaso1();
+                case 2: return this.validarPaso2();
+                case 3: return this.validarPaso3();
+                default: return true;
+            }
+        },
+
+        mostrarErrores() {
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            Object.keys(this.errors).forEach(field => {
+                const errorMessage = this.errors[field];
+                let inputElement;
+
+                if (field.startsWith('articulo_')) {
+                    const [_, index, fieldName] = field.split('_');
+                    const articleElement = document.querySelectorAll('.article-item')[index];
+                    if (articleElement) {
+                        const input = articleElement.querySelector(`[x-model="articulo.${fieldName}"]`);
+                        if (input) {
+                            inputElement = input;
+                        }
+                    }
+                } else {
+                    inputElement = document.querySelector(`[name="${field}"]`);
+                }
+
+                if (inputElement) {
+                    inputElement.classList.add('border-red-500', 'border-2');
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message text-red-500 text-sm mt-1 flex items-center';
+                    errorDiv.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${errorMessage}`;
+                    
+                    inputElement.parentNode.appendChild(errorDiv);
+                }
+            });
+
+            if (Object.keys(this.errors).length > 0) {
+                const errorCount = Object.keys(this.errors).length;
+                alert(`❌ Tienes ${errorCount} error(es) que debes corregir antes de continuar. Revisa los campos marcados en rojo.`);
+            }
+        },
+
+        async nextStep() {
+            if (!this.validarPasoActual()) {
+                this.mostrarErrores();
+                return;
+            }
+
+            this.errors = {};
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500', 'border-2'));
+
+            if (this.currentStep < 3) {
+                this.currentStep++;
+            }
+        },
+
+        previousStep() {
+            this.errors = {};
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            document.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500', 'border-2'));
+
+            if (this.currentStep > 0) {
+                this.currentStep--;
+            }
+        },
+
+        async cargarArticuloPorCodigo(index) {
+            const articulo = this.articulos[index];
+            if (!articulo.codigo || articulo.codigo.trim() === '') return;
+
+            let articuloEncontrado = this.articulosDisponibles.find(a => 
+                a.codigo && a.codigo.toString().trim() === articulo.codigo.toString().trim()
+            );
+
+            if (!articuloEncontrado) {
+                articuloEncontrado = this.articulosDisponibles.find(a => 
+                    a.text && a.text.toString().toLowerCase().includes(articulo.codigo.toString().toLowerCase())
+                );
+            }
+
+            if (articuloEncontrado) {
+                this.articulos[index] = {
+                    ...this.articulos[index],
+                    descripcion: articuloEncontrado.text || articuloEncontrado.descripcion || articuloEncontrado.nombre || 'Sin descripción',
+                    precio: articuloEncontrado.precio || 0,
+                    stock: articuloEncontrado.stock || 0
+                };
+                this.calcularTotales();
+            }
+        },
+
+        agregarArticulo() {
+            const nuevoId = this.articulos.length > 0 ? Math.max(...this.articulos.map(a => a.id)) + 1 : 1;
+
+            this.articulos.push({
+                id: nuevoId,
+                codigo: '',
+                descripcion: '',
+                stock: 0,
+                unidad: 'Unidad',
+                precio: 0,
+                cantidad: 1,
+            });
+            
+            this.calcularTotales();
+        },
+
+        eliminarArticulo(index) {
+            if (confirm('¿Está seguro de eliminar este artículo?')) {
+                this.articulos.splice(index, 1);
+                this.calcularTotales();
+            }
+        },
+
+        calcularTotales() {
+            this.subtotal = this.articulos.reduce((sum, articulo) => {
+                return sum + (articulo.precio * articulo.cantidad);
+            }, 0);
+
+            this.igv = this.subtotal * 0.18;
+            this.total = this.subtotal + this.igv;
+        },
+
+        async submitForm() {
+            console.log('=== INICIANDO SUBMIT ===');
+            
+            if (this.submitting) {
+                console.log('Submit ya en proceso, ignorando...');
+                return;
+            }
+            
+            this.submitting = true;
+
+            if (!this.validarPaso0() || !this.validarPaso1() || !this.validarPaso2() || !this.validarPaso3()) {
+                this.mostrarErrores();
+                alert('❌ Por favor completa todos los campos requeridos antes de enviar el formulario.');
+                this.submitting = false;
+                return;
+            }
+
+            const form = document.getElementById('despachoForm');
+            const formData = new FormData(form);
+            
+            try {
+                console.log('Enviando formulario...');
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Respuesta del servidor:', result);
+
+                if (result.success) {
+                    alert('✅ Despacho creado exitosamente');
+                    window.location.href = '/despacho';
+                } else {
+                    let errorMessage = result.message || 'Error desconocido';
+                    if (result.errors) {
+                        errorMessage = Object.values(result.errors).flat().join(', ');
+                    }
+                    alert('❌ Error: ' + errorMessage);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al crear el despacho: ' + error.message);
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        cancelar() {
+            if (confirm('¿Está seguro de cancelar el despacho? Se perderán todos los datos.')) {
+                window.location.href = '/';
+            }
+        }
+    }));
+});
+</script>
 </x-layout.default>
