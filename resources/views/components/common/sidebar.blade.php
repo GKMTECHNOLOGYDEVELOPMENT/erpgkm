@@ -1178,9 +1178,9 @@
                     <li>
                         <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
                     </li>
-                      <li>
+                      <!-- <li>
                         <a href="{{ route('solicitud.repuesto.index') }}">Solicitud de Repuesto</a>
-                    </li>
+                    </li> -->
                 </ul>
             </li>
             <li class="menu nav-item">
