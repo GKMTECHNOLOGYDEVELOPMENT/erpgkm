@@ -1,5 +1,8 @@
 <x-layout.default>
-    <div x-data="solicitudRepuestoOpciones()" class="min-h-screen bg-gradient-to-br from-gray-50 to-green-50 py-8">
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <div x-data="solicitudRepuestoOpciones()" class="min-h-screen py-8">
         <div class="container mx-auto px-4 max-w-7xl">
 
             <!-- Header Mejorado -->
@@ -7,12 +10,9 @@
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
                         <div class="flex items-center space-x-4 mb-4">
-                            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
+                            <div
+                                class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-cogs text-white text-lg"></i>
                             </div>
                             <div>
                                 <h1 class="text-3xl font-bold text-gray-900">Gestión de Artículos</h1>
@@ -26,10 +26,7 @@
                             <!-- Código de Solicitud -->
                             <div class="flex items-center space-x-3 p-4 bg-green-50 rounded-xl">
                                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                                    </svg>
+                                    <i class="fas fa-hashtag text-green-600"></i>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Código</p>
@@ -39,15 +36,16 @@
 
                             <div class="flex items-center space-x-3 p-4 bg-green-50 rounded-xl">
                                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-green-600 font-bold text-sm">{{ $articulos_procesados }}/{{ $total_articulos }}</span>
+                                    <span
+                                        class="text-green-600 font-bold text-sm">{{ $articulos_procesados }}/{{ $total_articulos }}</span>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Procesados</p>
                                     <p class="font-semibold text-gray-900">
-                                        @if($articulos_procesados == $total_articulos)
-                                        ✅ Completado
+                                        @if ($articulos_procesados == $total_articulos)
+                                            Completado
                                         @else
-                                        ⏳ En progreso
+                                            En progreso
                                         @endif
                                     </p>
                                 </div>
@@ -55,49 +53,34 @@
 
                             <div class="flex items-center space-x-3 p-4 bg-blue-50 rounded-xl">
                                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-blue-600 font-bold text-sm">{{ $articulos_disponibles }}/{{ $total_articulos }}</span>
+                                    <span
+                                        class="text-blue-600 font-bold text-sm">{{ $articulos_disponibles }}/{{ $total_articulos }}</span>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Disponibles</p>
                                     <p class="font-semibold text-gray-900">
-                                        @if($articulos_disponibles == $total_articulos)
-                                        ✅ Listos
+                                        @if ($articulos_disponibles == $total_articulos)
+                                            Listos
                                         @else
-                                        ⚡ Parcial
+                                            Parcial
                                         @endif
                                     </p>
                                 </div>
                             </div>
 
-                            <!-- <div class="flex items-center space-x-3 p-4 bg-purple-50 rounded-xl">
-                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Ticket</p>
-                                    <p class="font-semibold text-gray-900">{{ $solicitud->numero_ticket ?? 'N/A' }}</p>
-                                </div>
-                            </div> -->
-
                             <div class="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl">
                                 <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                                    </svg>
+                                    <i class="fas fa-info-circle text-orange-600"></i>
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Estado General</p>
                                     <p class="font-semibold text-gray-900 capitalize">
-                                        @if($solicitud->estado == 'aprobada')
-                                        ✅ Aprobada
+                                        @if ($solicitud->estado == 'aprobada')
+                                            Aprobada
                                         @elseif($articulos_procesados > 0)
-                                        ⚡ Parcial
+                                            Parcial
                                         @else
-                                        ⏳ Pendiente
+                                            Pendiente
                                         @endif
                                     </p>
                                 </div>
@@ -108,312 +91,410 @@
             </div>
 
             <!-- Verificar si hay artículos -->
-            @if(!$articulos || $articulos->count() == 0)
-            <!-- Mensaje cuando no hay artículos -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-yellow-200 mb-8">
-                <div class="bg-gradient-to-r from-yellow-400 to-orange-500 px-6 py-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-white text-yellow-600 rounded-full flex items-center justify-center font-bold shadow-md">
-                            ⚠️
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-white">No hay artículos</h2>
-                            <p class="text-yellow-100 text-sm">No se encontraron artículos en esta solicitud</p>
+            @if (!$articulos || $articulos->count() == 0)
+                <!-- Mensaje cuando no hay artículos -->
+                <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-yellow-200 mb-8">
+                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div
+                                class="w-10 h-10 bg-white text-yellow-600 rounded-full flex items-center justify-center font-bold shadow-md">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-white">No hay artículos</h2>
+                                <p class="text-yellow-100 text-sm">No se encontraron artículos en esta solicitud</p>
+                            </div>
                         </div>
                     </div>
+                    <div class="p-8 text-center">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-box-open text-yellow-500 text-2xl"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">No se encontraron artículos</h3>
+                        <p class="text-gray-600 mb-6">Esta solicitud no contiene artículos para gestionar.</p>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Volver al Listado
+                        </a>
+                    </div>
                 </div>
-                <div class="p-8 text-center">
-                    <svg class="w-16 h-16 text-yellow-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                    </svg>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">No se encontraron artículos</h3>
-                    <p class="text-gray-600 mb-6">Esta solicitud no contiene artículos para gestionar.</p>
-                    <a href="{{ route('solicitudrepuesto.index') }}"
-                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Volver al Listado
-                    </a>
-                </div>
-            </div>
             @else
-            <!-- Panel de Artículos con Acciones Individuales y Grupales -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-green-100 mb-8">
-                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold shadow-md">
-                            📦
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Gestión de Artículos</h2>
-                            <p class="text-green-100 text-sm">Procese artículos individualmente o en grupo</p>
+                <!-- Panel Principal de Gestión -->
+                <div
+                    class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden border border-white/20 mb-8">
+                    <div class="bg-blue-600 px-8 py-6">
+                        <div class="flex items-center space-x-4">
+                            <div
+                                class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                                <i class="fas fa-clipboard-list text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">Gestión de Artículos</h2>
+                                <p class="text-blue-100 text-base">Seleccione ubicaciones y procese los artículos</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="p-6">
-                    <!-- Formulario para selección grupal -->
-                    <form id="formUbicaciones" @submit.prevent="procesarSeleccion">
-                        <!-- Tabla de Artículos con ambas opciones -->
-                        <div class="overflow-hidden rounded-xl border border-gray-200 mb-6">
-                            <table class="w-full">
-                                <thead class="bg-gradient-to-r from-gray-50 to-green-50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Artículo</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Solicitado</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Disponible</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Ubicación</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">Acción Individual</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($articulos as $articulo)
-                                    <tr class="hover:bg-green-50 transition-colors duration-200 
-                                            @if($articulo->ya_procesado) bg-green-50 @endif">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div>
-                                                <p class="font-semibold text-gray-900 text-base">{{ $articulo->nombre }}</p>
-                                                <p class="text-sm text-gray-500 mt-1">{{ $articulo->codigo_repuesto ?: $articulo->codigo_barras }}</p>
-                                                <p class="text-xs text-gray-400">{{ $articulo->tipo_articulo }}</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                {{ $articulo->cantidad_solicitada }} unidades
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-center">
-                                                <span class="text-lg font-bold 
-                                                        @if($articulo->suficiente_stock) text-green-600
-                                                        @else text-red-600 @endif">
-                                                    {{ $articulo->stock_disponible }}
-                                                </span>
-                                                <span class="text-sm text-gray-500 block">unidades</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="max-w-xs">
-                                                @if($articulo->ya_procesado)
-                                                <div class="text-center">
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                        ✅ Procesado
-                                                    </span>
+                    <div class="p-8">
+                        <!-- Formulario para selección -->
+                        <form id="formUbicaciones" @submit.prevent="procesarSeleccion">
+                            <!-- Tabla Mejorada -->
+                            <div class="overflow-hidden rounded-2xl border border-slate-200/60 shadow-sm mb-8">
+                                <table class="w-full">
+                                    <thead class="bg-gradient-to-r from-slate-50 to-blue-50/30">
+                                        <tr>
+                                            <th
+                                                class="px-8 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <div class="flex items-center space-x-2">
+                                                    <i class="fas fa-box text-slate-500"></i>
+                                                    <span>Artículo</span>
                                                 </div>
-                                                @elseif(isset($articulo->ubicaciones_detalle) && count($articulo->ubicaciones_detalle) > 0)
-                                                <select
-                                                    name="ubicaciones[{{ $articulo->idArticulos }}]"
-                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                                    x-model="selecciones[{{ $articulo->idArticulos }}]"
-                                                    :disabled="procesandoIndividual[{{ $articulo->idArticulos }}]">
-                                                    <option value="">-- Seleccione ubicación --</option>
-                                                    @foreach($articulo->ubicaciones_detalle as $ubicacion)
-                                                    <option value="{{ $ubicacion->rack_ubicacion_id }}">
-                                                        {{ $ubicacion->ubicacion_codigo }} ({{ $ubicacion->stock_ubicacion }} uds)
-                                                    </option>
-                                                    @endforeach
-                                                </select>
-                                                @else
-                                                <p class="text-sm text-red-500 italic">Sin ubicaciones</p>
-                                                @endif
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($articulo->ya_procesado)
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                                ✅ Procesado
-                                            </span>
-                                            @elseif($articulo->suficiente_stock)
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                                ⏳ Pendiente
-                                            </span>
-                                            @else
-                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                                ❌ Insuficiente
-                                            </span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @if($articulo->ya_procesado)
-                                            <span class="text-green-600 font-medium">Completado</span>
-                                            @elseif($articulo->suficiente_stock)
-                                            <button
-                                                type="button"
-                                                @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }})"
-                                                :disabled="!selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}]"
-                                                :class="{
-                                                            'opacity-50 cursor-not-allowed': !selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}],
-                                                            'bg-green-500 hover:bg-green-600': selecciones[{{ $articulo->idArticulos }}] && !procesandoIndividual[{{ $articulo->idArticulos }}],
-                                                            'bg-gray-400': !selecciones[{{ $articulo->idArticulos }}]
-                                                        }"
-                                                class="px-4 py-2 text-white rounded-lg font-medium transition-colors duration-200">
-                                                <span x-show="!procesandoIndividual[{{ $articulo->idArticulos }}]">Procesar</span>
-                                                <span x-show="procesandoIndividual[{{ $articulo->idArticulos }}]">Procesando...</span>
-                                            </button>
-                                            @else
-                                            <button disabled class="px-4 py-2 bg-gray-400 text-white rounded-lg font-medium cursor-not-allowed">
-                                                Sin Stock
-                                            </button>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                Solicitado
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
 
-            <!-- Panel de Acciones - Individual y Grupal -->
-            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-green-100">
-                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold shadow-md">
-                            ⚡
-                        </div>
-                        <div>
-                            <h2 class="text-xl font-bold text-white">Opciones de Procesamiento</h2>
-                            <p class="text-green-100 text-sm">Elija procesar individualmente o todo el grupo</p>
-                        </div>
+                                                Disponible
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <i class="fas fa-map-marker-alt mr-1 text-slate-500"></i>
+                                                Ubicación
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <i class="fas fa-tasks mr-1 text-slate-500"></i>
+                                                Estado
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <i class="fas fa-play-circle mr-1 text-slate-500"></i>
+                                                Acción
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-200/40">
+                                        @foreach ($articulos as $articulo)
+                                            <tr
+                                                class="transition-all duration-200 hover:bg-blue-50/30 @if ($articulo->ya_procesado) bg-emerald-50/50 @endif">
+                                                <!-- Información del Artículo -->
+                                                <td class="px-8 py-6">
+                                                    <div class="flex items-center space-x-4">
+                                                        <div
+                                                            class="w-10 h-10 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl flex items-center justify-center">
+                                                            <i class="fas fa-box text-blue-600"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p class="font-semibold text-slate-900 text-base">
+                                                                {{ $articulo->nombre }}</p>
+                                                            <p class="text-sm text-slate-500 mt-1">
+                                                                {{ $articulo->codigo_repuesto ?: $articulo->codigo_barras }}
+                                                            </p>
+                                                            <p class="text-xs text-slate-400 font-medium">
+                                                                {{ $articulo->tipo_articulo }}</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Cantidad Solicitada -->
+                                                <td class="px-6 py-6">
+                                                    <span
+                                                        class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-blue-100 text-blue-700">
+                                                        <i class="fas fa-sort-numeric-up mr-1"></i>
+                                                        {{ $articulo->cantidad_solicitada }} unidades
+                                                    </span>
+                                                </td>
+
+                                                <!-- Stock Disponible -->
+                                                <td class="px-6 py-6">
+                                                    <div class="text-center">
+                                                        <span
+                                                            class="text-lg font-bold @if ($articulo->suficiente_stock) text-emerald-600 @else text-rose-600 @endif">
+                                                            {{ $articulo->stock_disponible }}
+                                                        </span>
+                                                        <span class="text-sm text-slate-500 block">disponibles</span>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Selección de Ubicación -->
+                                                <td class="px-6 py-6">
+                                                    <div class="max-w-xs">
+                                                        @if ($articulo->ya_procesado)
+                                                            <div class="text-center">
+                                                                <span
+                                                                    class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-emerald-100 text-emerald-700">
+                                                                    <i class="fas fa-check-circle mr-1"></i>
+                                                                    Procesado
+                                                                </span>
+                                                            </div>
+                                                        @elseif(isset($articulo->ubicaciones_detalle) && count($articulo->ubicaciones_detalle) > 0)
+                                                            <select name="ubicaciones[{{ $articulo->idArticulos }}]"
+                                                                class="w-full border border-slate-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                                                                x-model="selecciones[{{ $articulo->idArticulos }}]"
+                                                                :disabled="procesandoIndividual[{{ $articulo->idArticulos }}]">
+                                                                <option value=""><i
+                                                                        class="fas fa-map-marker-alt mr-2"></i>Seleccione
+                                                                    ubicación</option>
+                                                                @foreach ($articulo->ubicaciones_detalle as $ubicacion)
+                                                                    <option
+                                                                        value="{{ $ubicacion->rack_ubicacion_id }}">
+                                                                        <i class="fas fa-location-arrow mr-2"></i>
+                                                                        {{ $ubicacion->ubicacion_codigo }}
+                                                                        ({{ $ubicacion->stock_ubicacion }} uds)
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                        @else
+                                                            <p class="text-sm text-rose-500 italic font-medium">
+                                                                <i class="fas fa-times-circle mr-1"></i>
+                                                                Sin ubicaciones disponibles
+                                                            </p>
+                                                        @endif
+                                                    </div>
+                                                </td>
+
+                                                <!-- Estado -->
+                                                <td class="px-6 py-6">
+                                                    @if ($articulo->ya_procesado)
+                                                        <span
+                                                            class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-green-100 text-green-700 border border-green-200 shadow-sm">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Completado
+                                                        </span>
+                                                    @elseif($articulo->suficiente_stock)
+                                                        <span
+                                                            class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
+                                                            <i class="fas fa-clock mr-1"></i>
+                                                            Pendiente
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-red-100 text-red-700 border border-red-200 shadow-sm">
+                                                            <i class="fas fa-times-circle mr-1"></i>
+                                                            Insuficiente
+                                                        </span>
+                                                    @endif
+                                                </td>
+
+                                                <!-- Acción -->
+                                                <td class="px-6 py-6">
+                                                    @if ($articulo->ya_procesado)
+                                                        <span class="text-green-600 font-semibold">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Completado
+                                                        </span>
+                                                    @elseif($articulo->suficiente_stock)
+                                                        <button type="button"
+                                                            @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }})"
+                                                            :disabled="!selecciones[{{ $articulo->idArticulos }}] ||
+                                                                procesandoIndividual[{{ $articulo->idArticulos }}]"
+                                                            :class="{
+                                                                'opacity-50 cursor-not-allowed': !selecciones[
+                                                                        {{ $articulo->idArticulos }}] ||
+                                                                    procesandoIndividual[{{ $articulo->idArticulos }}]
+                                                            }"
+                                                            class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+                                                            <span
+                                                                x-show="!procesandoIndividual[{{ $articulo->idArticulos }}]">
+                                                                <i class="fas fa-play-circle mr-2"></i>
+                                                                Procesar
+                                                            </span>
+                                                            <span
+                                                                x-show="procesandoIndividual[{{ $articulo->idArticulos }}]"
+                                                                class="flex items-center space-x-2">
+                                                                <i class="fas fa-spinner fa-spin mr-2"></i>
+                                                                <span>Procesando...</span>
+                                                            </span>
+                                                        </button>
+                                                    @else
+                                                        <button disabled
+                                                            class="px-6 py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300">
+                                                            <i class="fas fa-ban mr-2"></i>
+                                                            Sin Stock
+                                                        </button>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="p-6">
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Procesamiento Individual -->
-                        <div class="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-blue-900">Procesamiento Individual</h3>
-                                    <p class="text-blue-700 text-sm">Procese cada artículo por separado</p>
-                                </div>
+                <!-- Panel de Estrategias de Procesamiento -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden border border-white/20">
+                    <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-8 py-6">
+                        <div class="flex items-center space-x-4">
+                            <div
+                                class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                                <i class="fas fa-rocket text-white text-xl"></i>
                             </div>
-                            <ul class="space-y-2 mb-4">
-                                <li class="flex items-center text-sm text-blue-700">
-                                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Seleccione ubicación para cada artículo
-                                </li>
-                                <li class="flex items-center text-sm text-blue-700">
-                                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Use el botón "Procesar" en cada fila
-                                </li>
-                                <li class="flex items-center text-sm text-blue-700">
-                                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Ideal para procesamiento parcial
-                                </li>
-                            </ul>
-                            <div class="text-center text-sm text-blue-600 font-medium">
-                                Progreso: {{ $articulos_procesados }} de {{ $total_articulos }}
+                            <div>
+                                <h2 class="text-2xl font-bold text-white">Estrategias de Procesamiento</h2>
+                                <p class="text-slate-300 text-base">Elija el método que mejor se adapte a sus
+                                    necesidades</p>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Procesamiento Grupal -->
-                        <div class="bg-green-50 rounded-xl p-6 border border-green-200">
-                            <div class="flex items-center space-x-3 mb-4">
-                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
+                    <div class="p-8">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                            <!-- Procesamiento Individual -->
+                            <div
+                                class="group bg-white rounded-2xl p-8 border border-blue-200 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                <div class="flex items-start gap-4 mb-6">
+                                    <div
+                                        class="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center shadow-inner">
+                                        <i class="fas fa-user-cog text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-slate-800 tracking-tight">Procesamiento
+                                            Individual</h3>
+                                        <p class="text-slate-600 text-sm mt-1">Procese cada artículo de forma
+                                            independiente según necesidad.</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-green-900">Procesamiento Grupal</h3>
-                                    <p class="text-green-700 text-sm">Procese todos los artículos disponibles</p>
+
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-blue-500 mr-3 flex-shrink-0"></i>
+                                        Seleccione ubicación específica para cada artículo.
+                                    </li>
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-blue-500 mr-3 flex-shrink-0"></i>
+                                        Use el botón <span class="font-semibold text-blue-700">"Procesar"</span> en
+                                        cada fila.
+                                    </li>
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-blue-500 mr-3 flex-shrink-0"></i>
+                                        Ideal para procesamiento parcial o selectivo.
+                                    </li>
+                                </ul>
+
+                                <div class="bg-blue-50 rounded-xl p-4 border border-blue-100 text-center">
+                                    <p class="text-sm font-semibold text-blue-700">
+                                        <i class="fas fa-chart-line mr-2"></i>
+                                        Progreso: <span class="font-bold">{{ $articulos_procesados }}</span> de
+                                        <span class="font-bold">{{ $total_articulos }}</span> artículos
+                                    </p>
                                 </div>
                             </div>
-                            <ul class="space-y-2 mb-4">
-                                <li class="flex items-center text-sm text-green-700">
-                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Seleccione ubicaciones para todos los artículos
-                                </li>
-                                <li class="flex items-center text-sm text-green-700">
-                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Procese todo en una sola acción
-                                </li>
-                                <li class="flex items-center text-sm text-green-700">
-                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Requiere que todos tengan stock suficiente
-                                </li>
-                            </ul>
-                            <div class="flex flex-col space-y-3">
-                                <button
-                                    @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
-                                    :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
-                                    :class="{ 
-                                            'opacity-50 cursor-not-allowed': isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles,
-                                            'bg-gradient-to-r from-green-500 to-emerald-600': todasUbicacionesSeleccionadas && todosDisponibles,
-                                            'bg-gradient-to-r from-gray-400 to-gray-500': !todasUbicacionesSeleccionadas || !todosDisponibles
+
+                            <!-- Procesamiento Grupal -->
+                            <div
+                                class="group bg-white rounded-2xl p-8 border border-emerald-200 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                <div class="flex items-start gap-4 mb-6">
+                                    <div
+                                        class="w-14 h-14 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-2xl flex items-center justify-center shadow-inner">
+                                        <i class="fas fa-users-cog text-emerald-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-slate-800 tracking-tight">Procesamiento
+                                            Grupal</h3>
+                                        <p class="text-slate-600 text-sm mt-1">Procese todos los artículos en una sola
+                                            acción eficiente.</p>
+                                    </div>
+                                </div>
+
+                                <ul class="space-y-3 mb-8">
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-emerald-500 mr-3"></i>
+                                        Seleccione ubicaciones para todos los artículos.
+                                    </li>
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-emerald-500 mr-3"></i>
+                                        Procese todo el lote con un solo clic.
+                                    </li>
+                                    <li class="flex items-center text-sm text-slate-700">
+                                        <i class="fas fa-check-circle text-emerald-500 mr-3"></i>
+                                        Requiere stock completo en todos los artículos.
+                                    </li>
+                                </ul>
+
+                                <div class="space-y-4">
+                                    <button @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
+                                        :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
+                                        :class="{
+                                            'opacity-50 cursor-not-allowed': isLoadingGrupal || !
+                                                todasUbicacionesSeleccionadas || !todosDisponibles,
+                                            'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 shadow-lg hover:shadow-xl': todasUbicacionesSeleccionadas &&
+                                                todosDisponibles,
+                                            'bg-gradient-to-r from-slate-400 to-slate-500': !
+                                                todasUbicacionesSeleccionadas || !todosDisponibles
                                         }"
-                                    class="flex items-center justify-center px-6 py-3 text-white rounded-xl font-bold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                                    <svg x-show="!isLoadingGrupal" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    <div x-show="isLoadingGrupal" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                    <span x-text="isLoadingGrupal ? 'Procesando...' : 'Procesar Todo'"></span>
-                                </button>
+                                        class="w-full flex items-center justify-center px-8 py-4 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
+                                        <i x-show="!isLoadingGrupal" class="fas fa-play-circle mr-3"></i>
+                                        <i x-show="isLoadingGrupal" class="fas fa-spinner fa-spin mr-3"></i>
+                                        <span
+                                            x-text="isLoadingGrupal ? 'Procesando...' : 'Procesar Todo el Lote'"></span>
+                                    </button>
 
-                                <div class="text-center text-sm 
-                                        @if($puede_aceptar) text-green-600 @else text-red-600 @endif font-medium">
-                                    @if($puede_aceptar)
-                                    ✅ Todos los artículos están disponibles
-                                    @else
-                                    ⚠️ Algunos artículos no tienen stock suficiente
-                                    @endif
+                                    <div
+                                        class="text-center text-sm font-semibold @if ($puede_aceptar) text-success @else text-danger @endif">
+                                        @if ($puede_aceptar)
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Condiciones óptimas para procesamiento grupal
+                                        @else
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Algunos artículos no cumplen las condiciones
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Información de Estado -->
-                    <div class="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2 text-gray-700">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <p class="text-sm font-medium">
-                                    @if($articulos_procesados == $total_articulos)
-                                    ✅ Todos los artículos han sido procesados
-                                    @else
-                                    📊 Progreso: {{ $articulos_procesados }} de {{ $total_articulos }} artículos procesados
-                                    @endif
-                                </p>
+                        <!-- Barra de Estado Mejorada -->
+                        <div
+                            class="mt-10 p-6 bg-gradient-to-r from-blue-50 to-slate-50 rounded-2xl border border-slate-200 shadow-sm">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                                <!-- Estado -->
+                                <div class="flex items-start gap-4">
+                                    <div
+                                        class="flex-shrink-0 w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center shadow-sm">
+                                        <i class="fas fa-info-circle text-blue-600"></i>
+                                    </div>
+
+                                    <div>
+                                        @if ($articulos_procesados == $total_articulos)
+                                            <p class="text-sm font-semibold text-green-600 flex items-center gap-1">
+                                                <i class="fas fa-check-circle"></i>
+                                                Procesamiento completado exitosamente
+                                            </p>
+                                        @else
+                                            <p class="text-sm font-semibold text-blue-600 flex items-center gap-1">
+                                                <i class="fas fa-chart-bar"></i>
+                                                Progreso general:
+                                                <span class="text-slate-700">{{ $articulos_procesados }}</span>
+                                                <span class="text-slate-500">de</span>
+                                                <span class="text-slate-700">{{ $total_articulos }}</span> artículos
+                                            </p>
+                                        @endif
+
+                                        <p class="text-xs text-slate-500 mt-1">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Última actualización:
+                                            <span
+                                                class="font-medium text-slate-600">{{ now()->format('d/m/Y H:i') }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Botón -->
+                                <a href="{{ route('solicitudarticulo.index') }}"
+                                    class="inline-flex items-center px-5 py-2.5 bg-dark text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                                    <i class="fas fa-arrow-left mr-2"></i>
+                                    Volver al Listado Principal
+                                </a>
                             </div>
-
-                            <a href="{{ route('solicitudrepuesto.index') }}"
-                                class="flex items-center px-4 py-2 bg-gradient-to-r from-gray-500 to-gray-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-300">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                                </svg>
-                                Volver al Listado
-                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
             @endif
         </div>
     </div>
@@ -428,11 +509,11 @@
                 get todasUbicacionesSeleccionadas() {
                     const articulos = @json($articulos);
                     return articulos.every(articulo => {
-                        // Solo verificar artículos no procesados y con stock suficiente
                         if (articulo.ya_procesado || !articulo.suficiente_stock) {
                             return true;
                         }
-                        return this.selecciones[articulo.idArticulos] && this.selecciones[articulo.idArticulos] !== '';
+                        return this.selecciones[articulo.idArticulos] && this.selecciones[
+                            articulo.idArticulos] !== '';
                     });
                 },
 
@@ -444,28 +525,33 @@
                     const ubicacionId = this.selecciones[articuloId];
 
                     if (!ubicacionId) {
-                        this.mostrarNotificacion('error', 'Seleccione una ubicación para este artículo');
+                        this.mostrarNotificacion('error',
+                            'Seleccione una ubicación para este artículo');
                         return;
                     }
 
-                    if (!confirm(`¿Está seguro de que desea procesar este artículo?\n\nEl stock será descontado de la ubicación seleccionada.`)) {
+                    if (!confirm(
+                            `¿Está seguro de que desea procesar este artículo?\n\nEl stock será descontado de la ubicación seleccionada.`
+                        )) {
                         return;
                     }
 
                     this.procesandoIndividual[articuloId] = true;
 
                     try {
-                        const response = await fetch(`/solicitudarticulo/${solicitudId}/aceptar-individual`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({
-                                articulo_id: articuloId,
-                                ubicacion_id: ubicacionId
-                            })
-                        });
+                        const response = await fetch(
+                            `/solicitudarticulo/${solicitudId}/aceptar-individual`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    articulo_id: articuloId,
+                                    ubicacion_id: ubicacionId
+                                })
+                            });
 
                         const data = await response.json();
 
@@ -493,16 +579,22 @@
 
                 async validarYProcesarGrupal(id) {
                     if (!this.todasUbicacionesSeleccionadas) {
-                        this.mostrarNotificacion('error', 'Debe seleccionar una ubicación para todos los artículos disponibles');
+                        this.mostrarNotificacion('error',
+                            'Debe seleccionar una ubicación para todos los artículos disponibles'
+                        );
                         return;
                     }
 
                     if (!this.todosDisponibles) {
-                        this.mostrarNotificacion('error', 'No todos los artículos tienen stock suficiente para procesamiento grupal');
+                        this.mostrarNotificacion('error',
+                            'No todos los artículos tienen stock suficiente para procesamiento grupal'
+                        );
                         return;
                     }
 
-                    if (!confirm('¿Está seguro de que desea procesar TODOS los artículos?\n\nEl stock será descontado de las ubicaciones seleccionadas para cada artículo.')) {
+                    if (!confirm(
+                            '¿Está seguro de que desea procesar TODOS los artículos?\n\nEl stock será descontado de las ubicaciones seleccionadas para cada artículo.'
+                        )) {
                         return;
                     }
 
@@ -513,7 +605,8 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
                             },
                             body: JSON.stringify({
                                 ubicaciones: this.selecciones
@@ -540,9 +633,9 @@
 
                 mostrarNotificacion(tipo, mensaje) {
                     const iconos = {
-                        success: '✅',
-                        error: '❌',
-                        info: 'ℹ️'
+                        success: '<i class="fas fa-check-circle mr-2"></i>',
+                        error: '<i class="fas fa-exclamation-triangle mr-2"></i>',
+                        info: '<i class="fas fa-info-circle mr-2"></i>'
                     };
 
                     const alerta = document.createElement('div');
@@ -553,7 +646,7 @@
                     }`;
                     alerta.innerHTML = `
                         <div class="flex items-center space-x-2">
-                            <span class="text-lg">${iconos[tipo]}</span>
+                            ${iconos[tipo]}
                             <span class="font-medium">${mensaje}</span>
                         </div>
                     `;

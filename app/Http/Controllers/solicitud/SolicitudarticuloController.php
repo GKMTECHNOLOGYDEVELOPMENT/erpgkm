@@ -13,7 +13,7 @@ class SolicitudarticuloController extends Controller
 {
     public function index()
     {
-        $solicitudes = DB::table('solicitudesordenes as so')
+        $query = DB::table('solicitudesordenes as so')
             ->select(
                 'so.idsolicitudesordenes',
                 'so.codigo',
@@ -29,9 +29,30 @@ class SolicitudarticuloController extends Controller
                 DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante")
             )
             ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
-            ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto'])
-            ->orderBy('so.fechacreacion', 'desc')
-            ->paginate(10);
+            ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto']);
+
+        // Aplicar filtro por tipo
+        if (request()->has('tipo') && !empty(request('tipo'))) {
+            $query->where('so.tipoorden', request('tipo'));
+        }
+
+        // Aplicar filtro por estado
+        if (request()->has('estado') && !empty(request('estado'))) {
+            $query->where('so.estado', request('estado'));
+        }
+
+        // Aplicar filtro por urgencia
+        if (request()->has('urgencia') && !empty(request('urgencia'))) {
+            $query->where('so.niveldeurgencia', request('urgencia'));
+        }
+
+        // Aplicar filtro por búsqueda
+        if (request()->has('search') && !empty(request('search'))) {
+            $search = request('search');
+            $query->where('so.codigo', 'LIKE', "%{$search}%");
+        }
+
+        $solicitudes = $query->orderBy('so.fechacreacion', 'desc')->paginate(10);
 
         return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
     }
@@ -450,7 +471,7 @@ class SolicitudarticuloController extends Controller
         return $tipos[$tipoServicio] ?? 5;
     }
 
-public function opciones($id)
+    public function opciones($id)
     {
         // Obtener la solicitud con sus artículos
         $solicitud = DB::table('solicitudesordenes as so')
@@ -524,7 +545,7 @@ public function opciones($id)
             $articulo->ubicaciones_detalle = $ubicaciones;
             $articulo->suficiente_stock = $stockDisponible >= $articulo->cantidad_solicitada;
             $articulo->diferencia_stock = $stockDisponible - $articulo->cantidad_solicitada;
-            
+
             // Verificar si ya fue procesado individualmente
             $articulo->ya_procesado = DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $articulo->idordenesarticulos)
@@ -543,8 +564,8 @@ public function opciones($id)
         $total_articulos = $articulos->count();
 
         return view('solicitud.solicitudarticulo.opciones', compact(
-            'solicitud', 
-            'articulos', 
+            'solicitud',
+            'articulos',
             'puede_aceptar',
             'articulos_procesados',
             'articulos_disponibles',
@@ -620,7 +641,7 @@ public function opciones($id)
             // Verificar stock en la ubicación seleccionada
             $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
                 ->select(
-                    'rua.cantidad', 
+                    'rua.cantidad',
                     'rua.idRackUbicacionArticulo',
                     'rua.cliente_general_id',
                     'ru.codigo as ubicacion_codigo',
@@ -747,7 +768,7 @@ public function opciones($id)
                         'fechaaprobacion' => now(),
                         'idaprobador' => auth()->id()
                     ]);
-                
+
                 Log::info("✅ TODOS los artículos procesados - Solicitud marcada como APROBADA");
             }
 
@@ -758,14 +779,13 @@ public function opciones($id)
                 'message' => 'Artículo procesado correctamente',
                 'todos_procesados' => $todosProcesados
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al procesar artículo individual: ' . $e->getMessage());
             Log::error('File: ' . $e->getFile());
             Log::error('Line: ' . $e->getLine());
             Log::error('Trace: ' . $e->getTraceAsString());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al procesar el artículo: ' . $e->getMessage()
@@ -853,7 +873,7 @@ public function opciones($id)
                 // Verificar stock en la ubicación seleccionada
                 $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
                     ->select(
-                        'rua.cantidad', 
+                        'rua.cantidad',
                         'rua.idRackUbicacionArticulo',
                         'rua.cliente_general_id',
                         'ru.codigo as ubicacion_codigo',
@@ -965,14 +985,13 @@ public function opciones($id)
                 'success' => true,
                 'message' => 'Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.'
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error al aceptar solicitud de artículos (grupal): ' . $e->getMessage());
             Log::error('File: ' . $e->getFile());
             Log::error('Line: ' . $e->getLine());
             Log::error('Trace: ' . $e->getTraceAsString());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
@@ -988,7 +1007,7 @@ public function opciones($id)
             $fechaActual = now();
             $mesActual = $fechaActual->format('m');
             $anioActual = $fechaActual->format('Y');
-            
+
             Log::info("📅 Procesando kardex para artículo - mes: {$mesActual}, año: {$anioActual}");
 
             // Buscar si existe un registro de kardex para este artículo, cliente y mes actual
@@ -1001,11 +1020,11 @@ public function opciones($id)
 
             if ($kardexMesActual) {
                 Log::info("✅ Kardex del mes actual encontrado - ID: {$kardexMesActual->id}, actualizando...");
-                
+
                 // ACTUALIZAR registro existente del mes
                 $nuevoInventarioActual = $kardexMesActual->inventario_actual - $cantidadSalida;
                 $nuevoCostoInventario = max(0, $kardexMesActual->costo_inventario - ($cantidadSalida * $costoUnitario));
-                
+
                 DB::table('kardex')
                     ->where('id', $kardexMesActual->id)
                     ->update([
@@ -1016,12 +1035,11 @@ public function opciones($id)
                         'updated_at' => now()
                     ]);
 
-                Log::info("✅ Kardex actualizado - Salidas: " . ($kardexMesActual->unidades_salida + $cantidadSalida) . 
-                         ", Inventario: {$nuevoInventarioActual}, Costo: {$nuevoCostoInventario}");
-
+                Log::info("✅ Kardex actualizado - Salidas: " . ($kardexMesActual->unidades_salida + $cantidadSalida) .
+                    ", Inventario: {$nuevoInventarioActual}, Costo: {$nuevoCostoInventario}");
             } else {
                 Log::info("📝 No hay kardex para este mes, creando nuevo registro...");
-                
+
                 // Obtener el último registro de kardex (de cualquier mes) para calcular inventario inicial
                 $ultimoKardex = DB::table('kardex')
                     ->where('idArticulo', $articuloId)
@@ -1033,13 +1051,13 @@ public function opciones($id)
                 // Calcular valores iniciales para el nuevo mes
                 $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : 0;
                 $inventarioActual = $inventarioInicial - $cantidadSalida;
-                
+
                 // Calcular costo del inventario
                 $costoInventarioAnterior = $ultimoKardex ? $ultimoKardex->costo_inventario : 0;
                 $costoInventarioActual = max(0, $costoInventarioAnterior - ($cantidadSalida * $costoUnitario));
 
                 Log::info("📊 Valores calculados - Inicial: {$inventarioInicial}, Actual: {$inventarioActual}, " .
-                         "Costo anterior: {$costoInventarioAnterior}, Costo actual: {$costoInventarioActual}");
+                    "Costo anterior: {$costoInventarioAnterior}, Costo actual: {$costoInventarioActual}");
 
                 // CREAR nuevo registro de kardex para el nuevo mes
                 DB::table('kardex')->insert([
@@ -1061,7 +1079,6 @@ public function opciones($id)
             }
 
             Log::info("✅ Kardex procesado correctamente - Artículo: {$articuloId}, Salida: {$cantidadSalida}");
-
         } catch (\Exception $e) {
             Log::error('❌ Error al actualizar kardex para salida: ' . $e->getMessage());
             Log::error('File: ' . $e->getFile());

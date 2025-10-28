@@ -31,7 +31,7 @@
                     </div>
 
                     <div class="flex flex-wrap gap-3 mt-4 lg:mt-0">
-                        <a href="{{ route('solicitudrepuesto.index') }}"
+                        <a href="{{ route('solicitudarticulo.index') }}"
                             class="flex items-center px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
