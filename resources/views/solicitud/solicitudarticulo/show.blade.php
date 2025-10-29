@@ -512,7 +512,7 @@
                                     Días Restantes
                                 </label>
                                 <p class="text-2xl font-bold">
-                                    {{ $diasRestantes > 0 ? $diasRestantes . ' días' : 'Vencida' }}
+                                    {{ $diasRestantes > 0 ? floor($diasRestantes) . ' días' : 'Vencida' }}
                                 </p>
                                 @if ($diasRestantes <= 2 && $diasRestantes > 0)
                                     <p
