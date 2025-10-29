@@ -527,6 +527,9 @@ Route::get('/tickets/{ticketId}/detalle', [cotizacionController::class, 'getTick
 Route::get('/tickets/{ticketId}/visitas', [cotizacionController::class, 'getVisitas']);
 Route::get('/tickets/{ticketId}/equipo/{visitaId?}', [cotizacionController::class, 'getEquipo']);
 
+Route::get('/racks/tipo-rack', [UbicacionesVistaController::class, 'obtenerTipoRack']);
+
+
 // En tu API de Laravel
 Route::get('/articulos/cotizaciones', function () {
     try {
