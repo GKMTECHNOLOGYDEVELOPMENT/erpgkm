@@ -1505,8 +1505,12 @@ Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verifi
 
 
 // Ruta para el detalle de un rack específico
-Route::get('/almacen/ubicaciones/detalle/{rack}', [UbicacionesVistaController::class, 'detalleRack'])
-    ->name('almacen.ubicaciones.detalle');
+Route::get('/almacen/ubicaciones/detalle-rack/{rack}', [UbicacionesVistaController::class, 'detalleRack'])
+    ->name('almacen.detalle-rack');
+
+    // Para racks panel  
+Route::get('/almacen/ubicaciones/detalle-rack-panel/{rack}', [UbicacionesVistaController::class, 'detalleRackPanel'])
+    ->name('almacen.detalle-rack-panel');
 
 
 
@@ -1555,3 +1559,7 @@ Route::get('/almacen/clientes-generales/listar', [UbicacionesVistaController::cl
 
 
 Route::get('/solicitud/repuestos', [SolicitudrepuestoController::class, 'index'])->name('solicitud.repuesto.index');
+
+
+// En routes/web.php o donde tengas tus rutas
+Route::get('/almacen/racks/{id}/tiene-productos', [UbicacionesVistaController::class, 'verificarProductosEnRack']);

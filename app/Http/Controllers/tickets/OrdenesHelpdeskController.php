@@ -1567,9 +1567,10 @@ class OrdenesHelpdeskController extends Controller
 
         // Obtener los articulos según el idTipoArticulo
         $articulos = DB::table('articulos')
-            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
-            ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 'tipoarticulos.nombre as tipo_nombre')
-            ->get();
+    ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+    ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 
+             'articulos.codigo_repuesto', 'tipoarticulos.nombre as tipo_nombre') // ← Agregado
+    ->get();
 
 
 
