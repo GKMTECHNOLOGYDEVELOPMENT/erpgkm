@@ -22,6 +22,7 @@ use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
 use App\Http\Controllers\almacen\productos\CategoriasController;
 use App\Http\Controllers\configuracion\ConfiguracionController;
+use App\Http\Controllers\permisos\PermisosController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
 use App\Http\Controllers\PasswordResetController;
@@ -51,8 +52,11 @@ use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
 use App\Http\Controllers\administracion\compras\ComprasController;
+use App\Http\Controllers\administracion\cotizacionesl\cotizacionlController as CotizacioneslCotizacionlController;
+use App\Http\Controllers\administracion\cotizacionesls\cotizacionlController;
 use App\Http\Controllers\administracion\movimiento\entrada\EntradaController;
 use App\Http\Controllers\administracion\movimiento\salida\SalidaController;
+use App\Http\Controllers\administracion\permisos\PermisosController as PermisosPermisosController;
 use App\Http\Controllers\almacen\custodia\CustodiaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\devoluciones\DevolucionesController;
@@ -616,7 +620,7 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     })->name('exportExcel');
 
 
-        Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
+Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
 Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
     
@@ -678,6 +682,23 @@ Route::prefix('entradasproveedores')->name('entradasproveedores.')->group(functi
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
 });
+
+//ENTRADAS DE PROVEEDORES
+Route::prefix('cotizacionesL')->name('cotizacionesL.')->group(function () {
+    Route::get('/', [CotizacioneslCotizacionlController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [EntradasproveedoresController::class, 'create'])->name('create'); // Guardar una nueva categoría
+    Route::post('/store', [EntradasproveedoresController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/{id}/edit', [EntradasproveedoresController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [EntradasproveedoresController::class, 'update'])->name('update'); // Actualizar una categoría
+    Route::delete('/{id}', [EntradasproveedoresController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
+    })->name('exportExcel');
+});
+
 
 
 // Ruta para obtener los clientes generales asociados a un cliente
@@ -930,7 +951,7 @@ Route::put('/solicitudentrega/aceptar/{id}', [OrdenesTrabajoController::class, '
 Route::post('/suministros/store', [OrdenesHelpdeskController::class, 'store']);
 Route::post('/guardar-suministros', [OrdenesHelpdeskController::class, 'guardarSuministros'])->middleware('auth');
 Route::get('/get-suministros/{ticketId}/{visitaId}', [OrdenesHelpdeskController::class, 'getSuministros']);
-Route::delete('/eliminar-suministro/{idSuministro}', [OrdenesHelpdeskController::class, 'eliminarSuministros']);
+Route::delete('/eliminar-suministro/{id}', [OrdenesHelpdeskController::class, 'eliminarSuministros']);
 Route::patch('/actualizar-suministro/{id}', [OrdenesHelpdeskController::class, 'actualizarCantidad']);
 Route::get('/clientes/{idClienteGeneral}', [OrdenesHelpdeskController::class, 'obtenerClientes']);
 Route::view('/apps/invoice/list', 'apps.invoice.list');
@@ -1483,7 +1504,26 @@ Route::get('/custodia/fotos/{id}/descargar', [CustodiaController::class, 'descar
 Route::delete('/custodia/fotos/{id}', [CustodiaController::class, 'eliminarFoto'])->name('custodia.fotos.eliminar');
 Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verificarIntegridad'])->name('custodia.fotos.verificar');
 
-
+Route::prefix('permisos')->group(function () {
+    // Vista principal
+    Route::get('/', [PermisosPermisosController::class, 'index'])->name('permisos.index');
+    
+    // APIs
+    Route::get('/data', [PermisosPermisosController::class, 'getData'])->name('permisos.data');
+    
+    // Permisos
+    Route::post('/permisos', [PermisosPermisosController::class, 'storePermiso'])->name('permisos.store-permiso');
+    Route::put('/permisos/{id}', [PermisosPermisosController::class, 'updatePermiso'])->name('permisos.update-permiso');
+    Route::delete('/permisos/{id}', [PermisosPermisosController::class, 'destroyPermiso'])->name('permisos.destroy-permiso');
+    
+    // Combinaciones
+    Route::post('/combinaciones', [PermisosPermisosController::class, 'storeCombinacion'])->name('permisos.store-combinacion');
+    Route::delete('/combinaciones/{id}', [PermisosPermisosController::class, 'destroyCombinacion'])->name('permisos.destroy-combinacion');
+    
+    // Permisos de combinaciones
+    Route::get('/combinaciones/{idCombinacion}/permisos', [PermisosPermisosController::class, 'getPermisosCombinacion'])->name('permisos.get-permisos-combinacion');
+    Route::post('/combinaciones/{idCombinacion}/permisos', [PermisosPermisosController::class, 'guardarPermisosCombinacion'])->name('permisos.guardar-permisos-combinacion');
+});
 
 
 // Rutas para el sistema de racks
@@ -1563,3 +1603,12 @@ Route::get('/solicitud/repuestos', [SolicitudrepuestoController::class, 'index']
 
 // En routes/web.php o donde tengas tus rutas
 Route::get('/almacen/racks/{id}/tiene-productos', [UbicacionesVistaController::class, 'verificarProductosEnRack']);
+
+
+
+// Rutas para suministros
+// Route::post('/guardar-suministros', [OrdenesHelpdeskController::class, 'guardarSuministros'])->name('guardar.suministros');
+// Route::get('/get-suministros/{ticketId}/{visitaId}', [OrdenesHelpdeskController::class, 'obtenerSuministros'])->name('get.suministros');
+// Route::patch('/actualizar-suministro/{id}', [OrdenesHelpdeskController::class, 'actualizarSuministro'])->name('actualizar.suministro');
+// Route::delete('/eliminar-suministro/{id}', [OrdenesHelpdeskController::class, 'eliminarSuministro'])->name('eliminar.suministro');
+

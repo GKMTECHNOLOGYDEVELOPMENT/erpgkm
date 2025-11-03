@@ -1,5 +1,9 @@
 <div :class="{ 'dark text-white-dark': $store.app.semidark }">
-    <nav x-data="sidebar"
+
+           @php
+use App\Helpers\PermisoHelper;
+@endphp
+<nav x-data="sidebar"
         class="sidebar fixed min-h-screen h-full top-0 bottom-0 w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] z-50 transition-all duration-300">
         <div class="bg-white dark:bg-[#0e1726] h-full">
             <div class="flex justify-between items-center px-4 py-3">
@@ -23,49 +27,54 @@
             </div>
             <ul class="perfect-scrollbar relative font-semibold space-y-0.5 h-[calc(100vh-80px)] overflow-y-auto overflow-x-hidden  p-4 py-0"
                 x-data="{ activeDropdown: null }">
-                <li class="menu nav-item">
-                    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'dashboard' }"
-                        @click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
-                        <div class="flex items-center">
+               
+               
+     
 
-                            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path opacity="0.5"
-                                    d="M2 12.2039C2 9.91549 2 8.77128 2.5192 7.82274C3.0384 6.87421 3.98695 6.28551 5.88403 5.10813L7.88403 3.86687C9.88939 2.62229 10.8921 2 12 2C13.1079 2 14.1106 2.62229 16.116 3.86687L18.116 5.10812C20.0131 6.28551 20.9616 6.87421 21.4808 7.82274C22 8.77128 22 9.91549 22 12.2039V13.725C22 17.6258 22 19.5763 20.8284 20.7881C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.7881C2 19.5763 2 17.6258 2 13.725V12.2039Z"
-                                    fill="currentColor" />
-                                <path
-                                    d="M9 17.25C8.58579 17.25 8.25 17.5858 8.25 18C8.25 18.4142 8.58579 18.75 9 18.75H15C15.4142 18.75 15.75 18.4142 15.75 18C15.75 17.5858 15.4142 17.25 15 17.25H9Z"
-                                    fill="currentColor" />
-                            </svg>
+<li class="menu nav-item">
+    @if(PermisoHelper::tienePermiso('Ver Dashboard'))
+    <button type="button" class="nav-link group" :class="{ 'active': activeDropdown === 'dashboard' }"
+        @click="activeDropdown === 'dashboard' ? activeDropdown = null : activeDropdown = 'dashboard'">
+        <div class="flex items-center">
+            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path opacity="0.5"
+                    d="M2 12.2039C2 9.91549 2 8.77128 2.5192 7.82274C3.0384 6.87421 3.98695 6.28551 5.88403 5.10813L7.88403 3.86687C9.88939 2.62229 10.8921 2 12 2C13.1079 2 14.1106 2.62229 16.116 3.86687L18.116 5.10812C20.0131 6.28551 20.9616 6.87421 21.4808 7.82274C22 8.77128 22 9.91549 22 12.2039V13.725C22 17.6258 22 19.5763 20.8284 20.7881C19.6569 22 17.7712 22 14 22H10C6.22876 22 4.34315 22 3.17157 20.7881C2 19.5763 2 17.6258 2 13.725V12.2039Z"
+                    fill="currentColor" />
+                <path
+                    d="M9 17.25C8.58579 17.25 8.25 17.5858 8.25 18C8.25 18.4142 8.58579 18.75 9 18.75H15C15.4142 18.75 15.75 18.4142 15.75 18C15.75 17.5858 15.4142 17.25 15 17.25H9Z"
+                    fill="currentColor" />
+            </svg>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Dashboard</span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'dashboard' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+        @endif
 
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Dashboard</span>
-                        </div>
-                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'dashboard' }">
-
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-cloak x-show="activeDropdown === 'dashboard'" x-collapse class="sub-menu text-gray-500">
-                        <li>
-                            <a href="{{ route('index') }}">Administracion</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('almacen') }}">Almacen</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('tickets') }}">Tickets</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('commercial') }}">Comercial</a>
-                        </li>
-                    </ul>
-                </li>
-
+    <ul x-cloak x-show="activeDropdown === 'dashboard'" x-collapse class="sub-menu text-gray-500">
+        <li>
+            <a href="{{ route('index') }}">Administracion</a>
+        </li>
+        
+        <li>
+            <a href="{{ route('almacen') }}">Almacen</a>
+        </li>
+        
+        <li>
+            <a href="{{ route('tickets') }}">Tickets</a>
+        </li>
+        
+        <li>
+            <a href="{{ route('commercial') }}">Comercial</a>
+        </li>
+    </ul>
+</li>
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
@@ -163,6 +172,12 @@
                                 </div>
                             </a>
                         </li>
+
+                     
+
+
+
+
                         <li class="nav-item">
                             <a href="/apps/scrumboard" class="group">
                                 <div class="flex items-center">
@@ -402,6 +417,26 @@
                         </li>
                     </ul>
                 </li>
+
+
+                   <li class="nav-item">
+                            <a href="{{ route('cotizacionesL.index') }}" class="group">
+                                <div class="flex items-center">
+                                    <!-- Nuevo ícono (clipboard con check, más relacionado con cotizaciones / levantamientos) -->
+                                    <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path opacity="0.5" d="M8 3H16C17.1046 3 18 3.89543 18 5V21C18 22.1046 17.1046 23 16 23H8C6.89543 23 6 22.1046 6 21V5C6 3.89543 6.89543 3 8 3Z" fill="currentColor"/>
+                                        <path d="M9 2C8.44772 2 8 2.44772 8 3V4H16V3C16 2.44772 15.5523 2 15 2H9Z" fill="currentColor"/>
+                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M10 12C10 11.5858 10.3358 11.25 10.75 11.25H13.25C13.6642 11.25 14 11.5858 14 12C14 12.4142 13.6642 12.75 13.25 12.75H10.75C10.3358 12.75 10 12.4142 10 12ZM10 16C10 15.5858 10.3358 15.25 10.75 15.25H12.25C12.6642 15.25 13 15.5858 13 16C13 16.4142 12.6642 16.75 12.25 16.75H10.75C10.3358 16.75 10 16.4142 10 16Z" fill="currentColor"/>
+                                        <path d="M9 8.5L10.5 10L14 6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+
+                                    <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                        Cotizar levantamiento
+                                    </span>
+                                </div>
+                            </a>
+                        </li>
 
                 <li class="menu nav-item">
                     <a href="{{ route('asistencias.index') }}" class="nav-link group">
@@ -1145,6 +1180,11 @@
                     </li>
                 </ul>
             </li>
+
+
+
+
+            
             <li class="menu nav-item">
                 <button type="button" class="nav-link group"
                     :class="{ 'active': activeDropdown === 'solicitud' }"
@@ -1315,7 +1355,7 @@
                         </svg>
 
                         <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Despacho</span>
+                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Despacho </span>
                     </div>
                     <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'despacho' }">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"

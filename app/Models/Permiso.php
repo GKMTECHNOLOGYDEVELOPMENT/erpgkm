@@ -1,41 +1,26 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Permiso
- * 
- * @property int $idPermisos
- * @property string|null $nombre
- * @property int $idRol
- * 
- * @property Rol $rol
- *
- * @package App\Models
- */
 class Permiso extends Model
 {
-	protected $table = 'permisos';
-	protected $primaryKey = 'idPermisos';
-	public $timestamps = false;
+    use HasFactory;
 
-	protected $casts = [
-		'idRol' => 'int'
-	];
+    protected $table = 'permisos';
+    protected $primaryKey = 'idPermiso';
 
-	protected $fillable = [
-		'nombre',
-		'idRol'
-	];
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'modulo',
+        'estado'
+    ];
 
-	public function rol()
-	{
-		return $this->belongsTo(Rol::class, 'idRol');
-	}
+    public function combinaciones()
+    {
+        return $this->belongsToMany(CombinacionPermiso::class, 'combinacion_permisos', 'idPermiso', 'idCombinacion');
+    }
 }
