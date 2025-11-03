@@ -437,95 +437,68 @@
                             <h3 class="text-xl font-bold text-gray-900">Tiempos</h3>
                         </div>
 
-                        <div class="space-y-5">
-                            <!-- Fecha Requerida -->
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-200 hover:border-blue-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3 mb-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Fecha
-                                        Requerida</label>
+                        <!-- Días Restantes -->
+                        @php
+                            $fechaRequerida = $solicitud->fecharequerida
+                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)
+                                : now();
+
+                            // Redondear a entero sin decimales
+                            $diasRestantes = (int) now()->diffInDays($fechaRequerida, false);
+
+                            $diasConfig = [
+                                'vencida' => [
+                                    'class' => 'bg-red-100 border-red-200 text-red-800',
+                                    'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                                    'text' => 'Vencida',
+                                ],
+                                'urgente' => [
+                                    'class' => 'bg-orange-100 border-orange-200 text-orange-800',
+                                    'icon' =>
+                                        'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+                                    'text' => $diasRestantes . ' días',
+                                ],
+                                'normal' => [
+                                    'class' => 'bg-green-100 border-green-200 text-green-800',
+                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                    'text' => $diasRestantes . ' días',
+                                ],
+                            ];
+
+                            $diasEstado =
+                                $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
+                        @endphp
+
+                        <div
+                            class="bg-white rounded-xl p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
+                            <div class="flex items-center space-x-3 mb-3">
+                                <div
+                                    class="w-8 h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center">
+                                    <svg class="w-4 h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="{{ $diasConfig[$diasEstado]['icon'] }}" />
+                                    </svg>
                                 </div>
-                                <p class="text-lg font-bold text-gray-900 pl-11">
-                                    @if ($solicitud->fecharequerida)
-                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
-                                    @else
-                                        <span class="text-red-500 flex items-center space-x-2">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                            </svg>
-                                            <span>No definida</span>
-                                        </span>
-                                    @endif
-                                </p>
+                                <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Días
+                                    Restantes</label>
                             </div>
 
-                            <!-- Días Restantes -->
-                            @php
-                                $fechaRequerida = $solicitud->fecharequerida
-                                    ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                                    : now();
-                                $diasRestantes = now()->diffInDays($fechaRequerida, false);
+                            <div class="flex items-center justify-between pl-11">
+                                <p
+                                    class="text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }}">
+                                    {{ $diasConfig[$diasEstado]['text'] }}
+                                </p>
 
-                                $diasConfig = [
-                                    'vencida' => [
-                                        'class' => 'bg-red-100 border-red-200 text-red-800',
-                                        'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-                                        'text' => 'Vencida',
-                                    ],
-                                    'urgente' => [
-                                        'class' => 'bg-orange-100 border-orange-200 text-orange-800',
-                                        'icon' =>
-                                            'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
-                                        'text' => $diasRestantes . ' días',
-                                    ],
-                                    'normal' => [
-                                        'class' => 'bg-green-100 border-green-200 text-green-800',
-                                        'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-                                        'text' => $diasRestantes . ' días',
-                                    ],
-                                ];
-
-                                $diasEstado =
-                                    $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
-                            @endphp
-
-                            <div
-                                class="bg-white rounded-xl p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3 mb-3">
-                                    <div
-                                        class="w-8 h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="{{ $diasConfig[$diasEstado]['icon'] }}" />
-                                        </svg>
+                                @if ($diasRestantes > 0 && $diasRestantes <= 7)
+                                    <div class="w-16 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-2 rounded-full"
+                                            style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
                                     </div>
-                                    <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Días
-                                        Restantes</label>
-                                </div>
-                                <div class="flex items-center justify-between pl-11">
-                                    <p
-                                        class="text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }}">
-                                        {{ $diasConfig[$diasEstado]['text'] }}
-                                    </p>
-                                    @if ($diasRestantes > 0 && $diasRestantes <= 7)
-                                        <div class="w-16 bg-gray-200 rounded-full h-2">
-                                            <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-2 rounded-full"
-                                                style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
-                                        </div>
-                                    @endif
-                                </div>
+                                @endif
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
