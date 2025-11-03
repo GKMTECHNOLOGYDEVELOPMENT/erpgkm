@@ -154,9 +154,9 @@
     }
 
     .badge-producto { background: #10b981; color: white; }
-    .badge-repuesto { background: #f59e0b; color: white; }
     .badge-herramienta { background: #ef4444; color: white; }
     .badge-suministro { background: #8b5cf6; color: white; }
+    .badge-sin-tipo { background: #6b7280; color: white; }
 
     .btn-eliminar {
         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -175,6 +175,23 @@
         box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
 
+    .btn-quitar {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-quitar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
     .btn-guardar {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
@@ -190,6 +207,13 @@
     .btn-guardar:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .estado-no-guardado {
+        font-size: 0.7rem;
+        color: #d97706;
+        font-weight: 600;
+        margin-top: 2px;
     }
 
     /* ======== Select2 Mejorado ======== */
@@ -255,15 +279,16 @@
         <select id="articuloSelect" class="select-articulo herramienta-select">
             <option selected disabled value="">🔍 Seleccione un artículo</option>
             @foreach ($articulos as $articulo)
-            @php
-                // Determinar qué campo usar para el nombre según el tipo
-                $nombreMostrar = $articulo->idTipoArticulo == 2 ? ($articulo->codigo_repuesto ?? 'Sin código') : ($articulo->nombre ?? 'Sin nombre');
-            @endphp
-            <option value="{{ $articulo->idArticulos }}" 
-                    data-tipo="{{ $articulo->idTipoArticulo }}"
-                    data-nombre="{{ $nombreMostrar }}">
-                {{ strtoupper($nombreMostrar) }} - {{ strtoupper($articulo->tipo_nombre) }}
-            </option>
+                @if($articulo->idTipoArticulo != 2) {{-- Excluir repuestos --}}
+                @php
+                    $nombreMostrar = $articulo->nombre ?? 'Sin nombre';
+                @endphp
+                <option value="{{ $articulo->idArticulos }}" 
+                        data-tipo="{{ $articulo->idTipoArticulo }}"
+                        data-nombre="{{ $nombreMostrar }}">
+                    {{ strtoupper($nombreMostrar) }} - {{ strtoupper($articulo->tipo_nombre) }}
+                </option>
+                @endif
             @endforeach
         </select>
 
@@ -317,20 +342,14 @@
                     return articulo.text;
                 }
                 
-                // Obtener el tipo del artículo desde data-tipo
                 const tipo = $(articulo.element).data('tipo');
                 let badgeClass = '';
                 let tipoText = '';
                 
-                // Asignar clases según el tipo
                 switch(parseInt(tipo)) {
                     case 1:
                         badgeClass = 'badge-producto';
                         tipoText = 'PRODUCTO';
-                        break;
-                    case 2:
-                        badgeClass = 'badge-repuesto';
-                        tipoText = 'REPUESTO';
                         break;
                     case 3:
                         badgeClass = 'badge-herramienta';
@@ -341,7 +360,7 @@
                         tipoText = 'SUMINISTRO';
                         break;
                     default:
-                        badgeClass = 'badge-suministro';
+                        badgeClass = 'badge-sin-tipo';
                         tipoText = 'SIN TIPO';
                 }
                 
@@ -354,7 +373,7 @@
             }
         });
 
-        const articuloSelect = document.getElementById("articuloSelect");
+    const articuloSelect = document.getElementById("articuloSelect");
         const articuloCantidad = document.getElementById("articuloCantidad");
         const tablaBody = document.getElementById("tablaResumenHerramientas");
         let articulosSeleccionados = [];
@@ -362,19 +381,63 @@
         const ticketId = document.getElementById("ticketId").value;
         const visitaId = document.getElementById("visitaId").value;
 
+        console.log('🔧 Configuración inicial:', { ticketId, visitaId });
+
+        // Función para verificar si un artículo ya existe (tanto en frontend como en backend)
+        function articuloYaExiste(idArticulo) {
+            // Verificar en artículos del frontend (no guardados)
+            const existeEnFrontend = articulosSeleccionados.some(art => 
+                art.id == idArticulo && !art.idSuministros
+            );
+            
+            // Verificar en artículos guardados en BD
+            const existeEnBackend = articulosSeleccionados.some(art => 
+                art.id == idArticulo && art.idSuministros
+            );
+
+            console.log(`🔍 Verificando artículo ${idArticulo}:`, {
+                existeEnFrontend,
+                existeEnBackend,
+                articulosSeleccionados: articulosSeleccionados.map(a => ({ id: a.id, idSuministros: a.idSuministros }))
+            });
+
+            return existeEnFrontend || existeEnBackend;
+        }
+
         // Función para obtener el nombre del tipo de artículo
         function obtenerTipoArticulo(idTipo) {
-            switch(parseInt(idTipo)) {
-                case 1: return { texto: 'PRODUCTO', clase: 'badge-producto' };
-                case 2: return { texto: 'REPUESTO', clase: 'badge-repuesto' };
-                case 3: return { texto: 'HERRAMIENTA', clase: 'badge-herramienta' };
-                case 4: return { texto: 'SUMINISTRO', clase: 'badge-suministro' };
-                default: return { texto: 'SIN TIPO', clase: 'badge-suministro' };
+            console.log('📋 Obteniendo tipo para:', idTipo, 'tipo:', typeof idTipo);
+            
+            // Asegurarnos de que sea un número
+            const tipoNumero = parseInt(idTipo);
+            console.log('🔢 Tipo convertido a número:', tipoNumero);
+            
+            // Si es NaN, usar default
+            if (isNaN(tipoNumero)) {
+                console.warn('⚠️ Tipo inválido, usando SUMINISTRO como default');
+                return { texto: 'SUMINISTRO', clase: 'badge-suministro' };
+            }
+            
+            switch(tipoNumero) {
+                case 1: 
+                    console.log('✅ Tipo identificado: PRODUCTO (1)');
+                    return { texto: 'PRODUCTO', clase: 'badge-producto' };
+                case 3: 
+                    console.log('✅ Tipo identificado: HERRAMIENTA (3)');
+                    return { texto: 'HERRAMIENTA', clase: 'badge-herramienta' };
+                case 4: 
+                    console.log('✅ Tipo identificado: SUMINISTRO (4)');
+                    return { texto: 'SUMINISTRO', clase: 'badge-suministro' };
+                default: 
+                    console.warn('⚠️ Tipo desconocido:', tipoNumero);
+                    return { texto: 'SUMINISTRO', clase: 'badge-suministro' };
             }
         }
 
-        // Función para renderizar la tabla
+            // Función para renderizar la tabla
         function renderTabla() {
+            console.log('🎨 Renderizando tabla con', articulosSeleccionados.length, 'artículos:', articulosSeleccionados);
+            
             tablaBody.innerHTML = "";
 
             if (articulosSeleccionados.length === 0) {
@@ -393,13 +456,21 @@
             }
 
             articulosSeleccionados.forEach((art, index) => {
+                console.log(`📝 Procesando artículo ${index}:`, art);
+                
                 const tipo = obtenerTipoArticulo(art.tipo);
+                const estaGuardado = art.idSuministros !== null && art.idSuministros !== undefined;
+                
+                console.log(`   - Tipo calculado:`, tipo);
+                console.log(`   - Está guardado:`, estaGuardado);
+                console.log(`   - idTipoArticulo del artículo:`, art.tipo);
+                
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td class="font-medium text-gray-900 dark:text-white">
                         <div class="flex flex-col">
                             <span>${art.nombre}</span>
-                            ${art.tipo == 2 ? '<span class="text-xs text-gray-500 dark:text-gray-400">Código Repuesto</span>' : ''}
+                            ${!estaGuardado ? '<span class="estado-no-guardado">⚠️ No guardado</span>' : ''}
                         </div>
                     </td>
                     <td class="text-center">
@@ -407,36 +478,93 @@
                     </td>
                     <td class="text-center">
                         <input type="number" min="1" value="${art.cantidad}" 
-                            class="cantidad-input actualizarCantidad" data-index="${index}" />
+                            class="cantidad-input actualizarCantidad" data-index="${index}" 
+                            data-guardado="${estaGuardado}" />
                     </td>
                     <td class="text-center">
-                        <button class="btn-eliminar eliminarArticulo" data-id="${art.idSuministros}">
-                            🗑️ Eliminar
-                        </button>
+                        ${estaGuardado ? 
+                            `<button class="btn-eliminar eliminarArticulo" data-id="${art.idSuministros}">
+                                🗑️ Eliminar
+                            </button>` :
+                            `<button class="btn-quitar quitarArticulo" data-index="${index}">
+                                ❌ Quitar
+                            </button>`
+                        }
                     </td>
                 `;
                 tablaBody.appendChild(tr);
             });
+            
+            console.log('✅ Tabla renderizada correctamente');
         }
-
         function obtenerSuministros() {
+            console.log('🔄 Obteniendo suministros del servidor...');
+            
             fetch(`/get-suministros/${ticketId}/${visitaId}`)
                 .then(response => response.json())
                 .then(data => {
-                    articulosSeleccionados = data.map(item => ({
-                        idSuministros: item.idSuministros,
-                        id: item.idArticulos,
-                        nombre: item.nombre || item.codigo_repuesto || 'Sin nombre', // Fallback para ambos campos
-                        cantidad: item.cantidad,
-                        tipo: item.idTipoArticulo || 4
-                    }));
+                    console.log('📊 DATOS CRUDOS RECIBIDOS DEL SERVIDOR:', data);
+                    
+                    if (!Array.isArray(data)) {
+                        console.error('❌ ERROR: Los datos no son un array:', typeof data, data);
+                        return;
+                    }
+
+                    console.log(`✅ Se recibieron ${data.length} artículos del servidor`);
+
+                    // SOLUCIÓN: Usar tipo_nombre para inferir el idTipoArticulo
+                    const suministrosGuardados = data.map((item, index) => {
+                        console.log(`📦 Procesando item ${index}:`, item);
+                        
+                        // INFERIR idTipoArticulo DESDE tipo_nombre
+                        let tipoArticulo = inferirTipoDesdeNombre(item.tipo_nombre);
+                        console.log(`   - tipo_nombre: "${item.tipo_nombre}" → idTipoArticulo inferido: ${tipoArticulo}`);
+                        
+                        const suministro = {
+                            idSuministros: item.idSuministros,
+                            id: item.idArticulos,
+                            nombre: item.nombre || 'Sin nombre',
+                            cantidad: item.cantidad,
+                            tipo: tipoArticulo
+                        };
+                        
+                        console.log(`   - Suministro final:`, suministro);
+                        
+                        return suministro;
+                    });
+
+                    console.log('💾 Suministros guardados procesados:', suministrosGuardados);
+
+                    // Mantener los artículos no guardados que estaban en el frontend
+                    const articulosNoGuardados = articulosSeleccionados.filter(art => !art.idSuministros);
+                    
+                    // Combinar ambos
+                    articulosSeleccionados = [...suministrosGuardados, ...articulosNoGuardados];
+                    
                     renderTabla();
                 })
                 .catch(error => {
-                    console.error('Error al obtener los suministros:', error);
+                    console.error('❌ Error al obtener los suministros:', error);
                 });
         }
 
+        // Función para inferir el tipo desde el nombre
+        function inferirTipoDesdeNombre(tipoNombre) {
+            if (!tipoNombre) return 4; // Default a suministro
+            
+            const nombreLower = tipoNombre.toLowerCase();
+            
+            if (nombreLower.includes('producto')) return 1;
+            if (nombreLower.includes('herramienta')) return 3;
+            if (nombreLower.includes('suministro')) return 4;
+            
+            // Si no coincide, usar default basado en el nombre
+            if (nombreLower.includes('prod')) return 1;
+            if (nombreLower.includes('herr')) return 3;
+            if (nombreLower.includes('sum')) return 4;
+            
+            return 4; // Default a suministro
+        }
         // Llamada inicial
         obtenerSuministros();
 
@@ -452,10 +580,23 @@
                 return;
             }
 
+
+            // ✅ NUEVA VALIDACIÓN: Verificar si el artículo ya existe
+            if (articuloYaExiste(id)) {
+                const articuloExistente = articulosSeleccionados.find(art => art.id == id);
+                const estado = articuloExistente.idSuministros ? 'guardado en el sistema' : 'agregado en esta sesión';
+                
+                toastr.error(`❌ El artículo "${nombre}" ya ha sido ${estado} para este ticket y visita.`);
+                return;
+            }
+
             const indexExistente = articulosSeleccionados.findIndex(a => a.id === id);
 
             if (indexExistente !== -1) {
                 articulosSeleccionados[indexExistente].cantidad = cantidad;
+                if (!articulosSeleccionados[indexExistente].idSuministros) {
+                    toastr.info('Cantidad actualizada. Guarda los cambios para persistir.');
+                }
             } else {
                 const articuloRepetido = articulosSeleccionados.find(art => art.id === id);
                 if (articuloRepetido) {
@@ -467,8 +608,8 @@
                     id: id,
                     nombre: nombre,
                     cantidad: cantidad,
-                    tipo: tipo,
-                    idSuministros: null
+                    tipo: tipo, // ← Mantiene el tipo original del artículo
+                    idSuministros: null // ← null indica que no está guardado en BD
                 });
             }
 
@@ -481,10 +622,11 @@
         // Event listeners
         document.getElementById("agregarArticulo").addEventListener("click", agregarOActualizarArticulo);
 
-        // Los demás event listeners y funciones se mantienen igual...
+        // Eliminar artículo guardado en BD
         tablaBody.addEventListener("click", function(e) {
             if (e.target.classList.contains("eliminarArticulo")) {
                 const idSuministro = e.target.dataset.id;
+                
                 if (!idSuministro) {
                     console.error('idSuministro no encontrado');
                     return;
@@ -500,10 +642,12 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.message === 'Artículo eliminado correctamente.') {
+                            // Filtrar el artículo eliminado
                             articulosSeleccionados = articulosSeleccionados.filter(art => art.idSuministros !== idSuministro);
                             renderTabla();
+                            toastr.success('Artículo eliminado correctamente.');
                         } else {
-                            toastr.error('Por favor actualice la página');
+                            toastr.error('Error al eliminar el artículo.');
                         }
                     })
                     .catch(error => {
@@ -513,46 +657,76 @@
             }
         });
 
+        // Quitar artículo no guardado (solo frontend)
+        tablaBody.addEventListener("click", function(e) {
+            if (e.target.classList.contains("quitarArticulo")) {
+                const index = e.target.dataset.index;
+                
+                if (index !== undefined && articulosSeleccionados[index]) {
+                    const articuloEliminado = articulosSeleccionados[index];
+                    articulosSeleccionados.splice(index, 1);
+                    renderTabla();
+                    toastr.info(`"${articuloEliminado.nombre}" quitado del listado.`);
+                }
+            }
+        });
+
         tablaBody.addEventListener("input", function(e) {
             if (e.target.classList.contains("actualizarCantidad")) {
                 const index = e.target.dataset.index;
                 const nuevaCantidad = parseInt(e.target.value);
+                const estaGuardado = e.target.getAttribute('data-guardado') === 'true';
 
                 if (nuevaCantidad > 0) {
                     articulosSeleccionados[index].cantidad = nuevaCantidad;
-                    const idSuministro = articulosSeleccionados[index].idSuministros;
-                    const url = `/actualizar-suministro/${idSuministro}`;
 
-                    fetch(url, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            },
-                            body: JSON.stringify({ cantidad: nuevaCantidad })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.message) {
-                                toastr.success(data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error al actualizar cantidad:', error);
-                            toastr.error('Hubo un error al actualizar la cantidad.');
-                        });
+                    // Solo actualizar en BD si el artículo ya está guardado
+                    if (estaGuardado) {
+                        const idSuministro = articulosSeleccionados[index].idSuministros;
+                        const url = `/actualizar-suministro/${idSuministro}`;
+
+                        fetch(url, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                },
+                                body: JSON.stringify({ cantidad: nuevaCantidad })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.message) {
+                                    toastr.success(data.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error al actualizar cantidad:', error);
+                                toastr.error('Hubo un error al actualizar la cantidad.');
+                            });
+                    } else {
+                        toastr.info('Cantidad actualizada. Guarda los cambios para persistir.');
+                    }
                 }
             }
         });
 
         document.querySelector(".btn-guardar").addEventListener("click", function(e) {
             e.preventDefault();
-            const articulosData = articulosSeleccionados.map(art => ({
-                id: art.id,
-                cantidad: art.cantidad
-            }));
+            
+            // Filtrar solo los artículos que no están guardados (idSuministros es null)
+            const articulosParaGuardar = articulosSeleccionados
+                .filter(art => !art.idSuministros)
+                .map(art => ({
+                    id: art.id,
+                    cantidad: art.cantidad
+                }));
 
-            const articulosInvalidos = articulosData.filter(articulo => !articulo.id);
+            if (articulosParaGuardar.length === 0) {
+                toastr.info('No hay artículos nuevos para guardar.');
+                return;
+            }
+
+            const articulosInvalidos = articulosParaGuardar.filter(articulo => !articulo.id);
             if (articulosInvalidos.length > 0) {
                 toastr.error('Por favor actualice la página.');
                 return;
@@ -565,7 +739,7 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        articulos: articulosData,
+                        articulos: articulosParaGuardar,
                         ticketId: ticketId,
                         visitaId: visitaId
                     })
@@ -576,6 +750,8 @@
                         const jsonResponse = JSON.parse(data);
                         if (jsonResponse.message) {
                             toastr.success(jsonResponse.message);
+                            // Recargar los suministros después de guardar
+                            obtenerSuministros();
                         }
                     } catch (error) {
                         console.error('Error al parsear JSON:', error);

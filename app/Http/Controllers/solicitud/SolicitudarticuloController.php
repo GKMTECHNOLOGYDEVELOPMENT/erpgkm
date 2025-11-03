@@ -475,26 +475,26 @@ class SolicitudarticuloController extends Controller
     {
         // Obtener la solicitud con sus artículos
         $solicitud = DB::table('solicitudesordenes as so')
-            ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.estado',
-                'so.tiposervicio',
-                'so.niveldeurgencia',
-                'so.fechacreacion',
-                'so.fecharequerida',
-                'so.observaciones',
-                'so.cantidad',
-                'so.totalcantidadproductos',
-                'so.idticket',
-                't.numero_ticket',
-                'u.name as nombre_solicitante'
-            )
-            ->leftJoin('users as u', 'so.idusuario', '=', 'u.id')
-            ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_articulo') // Cambiado a solicitud_articulo
-            ->first();
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.estado',
+            'so.tiposervicio',
+            'so.niveldeurgencia',
+            'so.fechacreacion',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.cantidad',
+            'so.totalcantidadproductos',
+            'so.idticket',
+            't.numero_ticket',
+            'u.Nombre as nombre_solicitante'
+        )
+        ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+        ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
+        ->where('so.idsolicitudesordenes', $id)
+        ->where('so.tipoorden', 'solicitud_articulo')
+        ->first();
 
         if (!$solicitud) {
             abort(404, 'Solicitud no encontrada');
