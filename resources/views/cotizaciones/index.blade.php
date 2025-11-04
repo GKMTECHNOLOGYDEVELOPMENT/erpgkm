@@ -385,39 +385,36 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <div class="flex justify-center space-x-1">
                                         <!-- Vista -->
-                                        <button @click="verCotizacion(cotizacion.id)"
-                                            class="inline-flex items-center p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-200"
+                                        <button @click="verCotizacion(cotizacion.id)" class="btn btn-primary"
                                             title="Ver detalles">
                                             <i class="fas fa-eye w-4 h-4"></i>
                                         </button>
 
                                         <!-- Editar -->
-                                        <button @click="editarCotizacion(cotizacion.id)"
-                                            class="inline-flex items-center p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-md transition-colors duration-200"
+                                        <button @click="editarCotizacion(cotizacion.id)" class="btn btn-warning"
                                             title="Editar">
                                             <i class="fas fa-edit w-4 h-4"></i>
                                         </button>
 
                                         <!-- PDF -->
-                                        <button @click="generarPDF(cotizacion.id)"
-                                            class="inline-flex items-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
+                                        <button @click="generarPDF(cotizacion.id)" class="btn btn-danger"
                                             title="Descargar PDF">
                                             <i class="fas fa-file-pdf w-4 h-4"></i>
                                         </button>
 
                                         <!-- Email -->
-                                        <button @click="enviarEmail(cotizacion.id)"
-                                            class="inline-flex items-center p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors duration-200"
+                                        <button @click="enviarEmail(cotizacion.id)" class="btn btn-success"
                                             title="Enviar por email">
                                             <i class="fas fa-paper-plane w-4 h-4"></i>
                                         </button>
 
                                         <!-- Eliminar -->
-                                        <button @click="eliminarCotizacion(cotizacion.id)"
-                                            class="inline-flex items-center p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
+                                        <button @click="eliminarCotizacion(cotizacion.id)" class="btn btn-danger"
                                             title="Eliminar">
                                             <i class="fas fa-trash w-4 h-4"></i>
                                         </button>
+
+
                                     </div>
                                 </td>
                             </tr>
