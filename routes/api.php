@@ -564,3 +564,5 @@ Route::get('/articulos/cotizaciones', function () {
 });
 
 Route::get('/tickets/{ticketId}/suministros/{visitaId?}', [cotizacionController::class, 'getSuministrosPorVisita']);
+
+
