@@ -1,4 +1,4 @@
-<x-layout.default>
+<x-layout.default title="Crear Cotizacion - ERP Solutions Force">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -187,26 +187,35 @@
                             x-transition:enter-end="opacity-100 transform translate-y-0" class="mb-8">
 
                             <!-- Campos NGR: Ticket, Visita, Técnico, Tienda y Serie -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-xl border border-blue-200 mb-4">
+                            <div
+                                class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-blue-50 rounded-xl border border-blue-200 mb-4">
                                 <!-- Ticket - Select2 -->
                                 <div class="md:col-span-2">
-                                    <label class="form-label">Seleccionar Ticket <span class="text-red-500">*</span></label>
+                                    <label class="form-label">Seleccionar Ticket <span
+                                            class="text-red-500">*</span></label>
                                     <select id="ticketSelect" class="form-control w-full">
                                         <option value="">Seleccionar ticket...</option>
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">Seleccione un ticket para cargar automáticamente técnico y tienda</p>
+                                    <p class="text-xs text-gray-500 mt-1">Seleccione un ticket para cargar
+                                        automáticamente técnico y tienda</p>
                                 </div>
 
                                 <!-- Visita - Select2 (se muestra cuando hay visitas) -->
-                                <div class="md:col-span-2" x-show="params.ticket.id && params.ticket.visitas && params.ticket.visitas.length > 1">
-                                    <label class="form-label">Seleccionar Visita <span class="text-red-500">*</span></label>
-                                    <select id="visitaSelect" class="form-control w-full" x-model="params.visita_seleccionada">
+                                <div class="md:col-span-2"
+                                    x-show="params.ticket.id && params.ticket.visitas && params.ticket.visitas.length > 1">
+                                    <label class="form-label">Seleccionar Visita <span
+                                            class="text-red-500">*</span></label>
+                                    <select id="visitaSelect" class="form-control w-full"
+                                        x-model="params.visita_seleccionada">
                                         <option value="">Seleccionar visita...</option>
                                         <template x-for="visita in params.ticket.visitas" :key="visita.idVisitas">
-                                            <option :value="visita.idVisitas" x-text="'Visita: ' + visita.Nombre + ' - ' + (visita.fecha_llegada ? new Date(visita.fecha_llegada).toLocaleDateString() : 'Sin fecha')"></option>
+                                            <option :value="visita.idVisitas"
+                                                x-text="'Visita: ' + visita.Nombre + ' - ' + (visita.fecha_llegada ? new Date(visita.fecha_llegada).toLocaleDateString() : 'Sin fecha')">
+                                            </option>
                                         </template>
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1" x-text="params.ticket.visitas.length + ' visitas encontradas'"></p>
+                                    <p class="text-xs text-gray-500 mt-1"
+                                        x-text="params.ticket.visitas.length + ' visitas encontradas'"></p>
                                 </div>
                             </div>
 
@@ -219,8 +228,8 @@
                                 <!-- OT - Solo lectura -->
                                 <div>
                                     <label class="form-label">OT</label>
-                                    <input type="text" class="form-control bg-gray-100"
-                                        x-model="params.ot" readonly>
+                                    <input type="text" class="form-control bg-gray-100" x-model="params.ot"
+                                        readonly>
                                     <p class="text-xs text-gray-500 mt-1">Número de orden de trabajo</p>
                                 </div>
 
@@ -253,7 +262,9 @@
                                     <label class="form-label">Serie</label>
                                     <input type="text" class="form-control" placeholder="Ej: SER-001-2024"
                                         x-model="params.serie">
-                                    <p class="text-xs text-gray-500 mt-1" x-text="params.ticket.serie_equipo ? 'Serie del equipo: ' + params.ticket.serie_equipo : 'Ingrese número de serie'"></p>
+                                    <p class="text-xs text-gray-500 mt-1"
+                                        x-text="params.ticket.serie_equipo ? 'Serie del equipo: ' + params.ticket.serie_equipo : 'Ingrese número de serie'">
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -262,9 +273,7 @@
 
                         <!-- En la sección NGR, después de la información del ticket -->
                         <div x-show="params.ticket.id" class="flex justify-end mt-4">
-                            <button type="button" 
-                                    @click="cargarSuministrosManual()"
-                                    class="btn btn-info btn-sm">
+                            <button type="button" @click="cargarSuministrosManual()" class="btn btn-info btn-sm">
                                 <i class="fas fa-refresh mr-2"></i> Cargar Suministros del Ticket
                             </button>
                         </div>
@@ -291,27 +300,40 @@
                                 <table class="min-w-full">
                                     <thead class="sticky top-0 bg-white z-10">
                                         <tr>
-                                            <th class="w-12 text-center py-4 px-4 bg-white font-semibold text-gray-700">#</th>
-                                            <th class="min-w-[300px] py-4 px-4 bg-white font-semibold text-gray-700">Descripción</th>
-                                            <th class="w-24 text-center py-4 px-4 bg-white font-semibold text-gray-700">Cantidad</th>
-                                            <th class="w-32 text-right py-4 px-4 bg-white font-semibold text-gray-700">Precio Unit.</th>
-                                            <th class="w-32 text-right py-4 px-4 bg-white font-semibold text-gray-700">Total</th>
-                                            <th class="w-16 text-center py-4 px-4 bg-white font-semibold text-gray-700">Acciones</th>
+                                            <th
+                                                class="w-12 text-center py-4 px-4 bg-white font-semibold text-gray-700">
+                                                #</th>
+                                            <th class="min-w-[300px] py-4 px-4 bg-white font-semibold text-gray-700">
+                                                Descripción</th>
+                                            <th
+                                                class="w-24 text-center py-4 px-4 bg-white font-semibold text-gray-700">
+                                                Cantidad</th>
+                                            <th class="w-32 text-right py-4 px-4 bg-white font-semibold text-gray-700">
+                                                Precio Unit.</th>
+                                            <th class="w-32 text-right py-4 px-4 bg-white font-semibold text-gray-700">
+                                                Total</th>
+                                            <th
+                                                class="w-16 text-center py-4 px-4 bg-white font-semibold text-gray-700">
+                                                Acciones</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <template x-if="items.length <= 0">
                                             <tr>
                                                 <td colspan="6" class="text-center py-12 text-gray-500">
-                                                    <i class="fas fa-clipboard-list text-5xl mb-4 block text-gray-300"></i>
-                                                    <p class="font-medium text-gray-600 text-lg">No hay items agregados</p>
-                                                    <p class="text-gray-500 mt-2">Comience agregando productos o servicios</p>
+                                                    <i
+                                                        class="fas fa-clipboard-list text-5xl mb-4 block text-gray-300"></i>
+                                                    <p class="font-medium text-gray-600 text-lg">No hay items agregados
+                                                    </p>
+                                                    <p class="text-gray-500 mt-2">Comience agregando productos o
+                                                        servicios</p>
                                                 </td>
                                             </tr>
                                         </template>
                                         <template x-for="(item, index) in items" :key="item.id">
                                             <tr class="group hover:bg-gray-50 transition-all duration-200">
-                                                <td class="text-center text-gray-600 font-medium py-4 px-4" x-text="index + 1"></td>
+                                                <td class="text-center text-gray-600 font-medium py-4 px-4"
+                                                    x-text="index + 1"></td>
                                                 <td class="py-4 px-4">
                                                     <!-- 🔥 CORREGIDO: Removido x-model y @change, se maneja solo con Select2 -->
                                                     <select class="form-control w-full articulo-select"
@@ -332,7 +354,8 @@
                                                 </td>
                                                 <td class="py-4 px-4">
                                                     <div class="relative">
-                                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"
+                                                        <span
+                                                            class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm"
                                                             x-text="obtenerSimboloMoneda()"></span>
                                                         <input type="number"
                                                             class="form-control text-right border-gray-200 group-hover:border-gray-300 transition-colors pl-8 w-full"
@@ -364,9 +387,9 @@
                                 <div class="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg">
                                     <span class="text-gray-700 font-medium">Configuración de Impuestos:</span>
                                     <div class="flex items-center space-x-4">
-                                        <span class="text-sm text-gray-600" x-text="incluirIGV ? 'CON IGV' : 'SIN IGV'"></span>
-                                        <button type="button"
-                                            @click="toggleIGV()"
+                                        <span class="text-sm text-gray-600"
+                                            x-text="incluirIGV ? 'CON IGV' : 'SIN IGV'"></span>
+                                        <button type="button" @click="toggleIGV()"
                                             class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                             :class="incluirIGV ? 'bg-blue-600' : 'bg-gray-200'">
                                             <span class="sr-only">Toggle IGV</span>
@@ -407,8 +430,8 @@
 
                                         <!-- 🔥 MEJORADO: Nota sobre el IGV -->
                                         <div class="text-xs text-gray-500 mt-2 text-center border-t pt-2"
-                                            x-text="incluirIGV ? 
-                    '✅ Precios incluyen IGV 18%' : 
+                                            x-text="incluirIGV ?
+                    '✅ Precios incluyen IGV 18%' :
                     'ℹ️ Precios no incluyen IGV. Se agregará 18% al momento del pago'">
                                         </div>
                                     </div>
@@ -441,25 +464,28 @@
                     </div>
                     <div class="p-6 space-y-6">
 
-                       <!-- 🔥 MEJORADO: Campo CON IGV / SIN IGV -->
-<div>
-    <label class="form-label">Tipo de Cotización</label>
-    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <span class="text-sm font-medium text-gray-700" x-text="incluirIGV ? 'CON IGV' : 'SIN IGV'"></span>
-        <button type="button" 
-                @click="toggleIGV()"
-                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                :class="incluirIGV ? 'bg-blue-600' : 'bg-gray-200'">
-            <span class="sr-only">Toggle IGV</span>
-            <span aria-hidden="true" 
-                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                  :class="incluirIGV ? 'translate-x-5' : 'translate-x-0'"></span>
-        </button>
-    </div>
-    <p class="text-xs text-gray-500 mt-2" x-text="incluirIGV ? 
-        'Los precios incluyen IGV 18%' : 
-        'Los precios NO incluyen IGV 18%'"></p>
-</div>
+                        <!-- 🔥 MEJORADO: Campo CON IGV / SIN IGV -->
+                        <div>
+                            <label class="form-label">Tipo de Cotización</label>
+                            <div
+                                class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                <span class="text-sm font-medium text-gray-700"
+                                    x-text="incluirIGV ? 'CON IGV' : 'SIN IGV'"></span>
+                                <button type="button" @click="toggleIGV()"
+                                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    :class="incluirIGV ? 'bg-blue-600' : 'bg-gray-200'">
+                                    <span class="sr-only">Toggle IGV</span>
+                                    <span aria-hidden="true"
+                                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                        :class="incluirIGV ? 'translate-x-5' : 'translate-x-0'"></span>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2"
+                                x-text="incluirIGV ?
+        'Los precios incluyen IGV 18%' :
+        'Los precios NO incluyen IGV 18%'">
+                            </p>
+                        </div>
                         <!-- Moneda -->
                         <div>
                             <label class="form-label">Moneda</label>
@@ -479,7 +505,8 @@
                         <!-- Validez -->
                         <div>
                             <label class="form-label">Validez (días)</label>
-                            <input type="number" class="form-control" x-model="params.diasValidez" min="1" max="90">
+                            <input type="number" class="form-control" x-model="params.diasValidez" min="1"
+                                max="90">
                         </div>
                     </div>
                 </div>
