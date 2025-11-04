@@ -24,16 +24,18 @@ function cotizacionesIndex() {
             this.loading = true;
             try {
                 const params = new URLSearchParams();
-                
+
                 if (this.searchTerm) params.append('search', this.searchTerm);
                 if (this.filtroEstado) params.append('estado', this.filtroEstado);
                 if (this.filtroMes) params.append('mes', this.filtroMes);
 
+                // CORREGIDO: Usar la ruta API
                 const response = await fetch(`/api/cotizaciones?${params}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
 
@@ -42,6 +44,7 @@ function cotizacionesIndex() {
                 if (data.success) {
                     this.cotizaciones = data.cotizaciones;
                     this.cotizacionesFiltradas = data.cotizaciones;
+                    this.calcularEstadisticasLocales(); // Calcular stats con los datos cargados
                 } else {
                     this.mostrarError(data.message || 'Error al cargar cotizaciones');
                 }
@@ -55,6 +58,7 @@ function cotizacionesIndex() {
 
         async cargarEstadisticas() {
             try {
+                // CORREGIDO: Usar endpoint API de estadísticas
                 const response = await fetch('/api/cotizaciones/estadisticas', {
                     method: 'GET',
                     headers: {
@@ -70,24 +74,54 @@ function cotizacionesIndex() {
                 }
             } catch (error) {
                 console.error('Error cargando estadísticas:', error);
+                // Si falla, calcular localmente
+                this.calcularEstadisticasLocales();
             }
         },
 
-        // Método para mostrar errores (reemplaza toastr)
+        calcularEstadisticasLocales() {
+            const total = this.cotizaciones.length;
+            const aprobadas = this.cotizaciones.filter(c => c.estado === 'aprobada').length;
+            const pendientes = this.cotizaciones.filter(c => c.estado === 'pendiente').length;
+
+            // Calcular vencidas (fecha validaHasta menor a hoy)
+            const vencidas = this.cotizaciones.filter(c => {
+                if (!c.validaHasta) return false;
+                return new Date(c.validaHasta) < new Date() && c.estado !== 'aprobada';
+            }).length;
+
+            this.stats = {
+                total: total,
+                aprobadas: aprobadas,
+                pendientes: pendientes,
+                venciadas: vencidas
+            };
+        },
+
+        // Método para mostrar errores
         mostrarError(mensaje) {
-            // Puedes usar alert temporalmente o implementar tu propio sistema de notificaciones
-            console.error('Error:', mensaje);
-            alert('Error: ' + mensaje); // Temporal - luego lo mejoramos
+            if (typeof toastr !== 'undefined') {
+                toastr.error(mensaje);
+            } else {
+                console.error('Error:', mensaje);
+                alert('Error: ' + mensaje);
+            }
         },
 
         mostrarInfo(mensaje) {
-            console.info('Info:', mensaje);
-            // Temporal también
+            if (typeof toastr !== 'undefined') {
+                toastr.info(mensaje);
+            } else {
+                console.info('Info:', mensaje);
+            }
         },
 
         mostrarExito(mensaje) {
-            console.success('Éxito:', mensaje);
-            // Temporal también
+            if (typeof toastr !== 'undefined') {
+                toastr.success(mensaje);
+            } else {
+                console.success('Éxito:', mensaje);
+            }
         },
 
         filtrarCotizaciones() {
@@ -131,8 +165,9 @@ function cotizacionesIndex() {
             return meses[parseInt(mes)] || '';
         },
 
+        // CORREGIDO: Rutas web (no API) con prefijo administracion/cotizaciones
         verCotizacion(id) {
-            window.location.href = `/administracion/cotizaciones/${id}`;
+            window.location.href = `/administracion/cotizaciones/${id}/detalles`;
         },
 
         editarCotizacion(id) {
@@ -142,37 +177,11 @@ function cotizacionesIndex() {
         async generarPDF(id) {
             try {
                 this.mostrarInfo('Generando PDF...');
-                
-                const response = await fetch(`/administracion/cotizaciones/${id}/pdf`, {
-                    method: 'GET'
-                });
 
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    
-                    const contentDisposition = response.headers.get('Content-Disposition');
-                    let filename = `cotizacion-${id}.pdf`;
-                    if (contentDisposition) {
-                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
-                        if (filenameMatch && filenameMatch.length === 2) {
-                            filename = filenameMatch[1];
-                        }
-                    }
-                    
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    
-                    this.mostrarExito('PDF generado correctamente');
-                } else {
-                    this.mostrarError('Error al generar PDF');
-                }
+                // CORREGIDO: Usar la ruta web para PDF
+                window.open(`/administracion/cotizaciones/${id}/pdf`, '_blank');
+
+                this.mostrarExito('PDF generado correctamente');
             } catch (error) {
                 console.error('Error al generar PDF:', error);
                 this.mostrarError('Error al generar PDF');
@@ -186,6 +195,7 @@ function cotizacionesIndex() {
 
                 this.mostrarInfo('Enviando email...');
 
+                // CORREGIDO: Usar la ruta web para email
                 const response = await fetch(`/administracion/cotizaciones/${id}/enviar-email`, {
                     method: 'POST',
                     headers: {
@@ -200,6 +210,8 @@ function cotizacionesIndex() {
 
                 if (data.success) {
                     this.mostrarExito(data.message || 'Email enviado correctamente');
+                    // Recargar para actualizar estado
+                    this.cargarCotizaciones();
                 } else {
                     this.mostrarError(data.message || 'Error al enviar email');
                 }
@@ -215,6 +227,7 @@ function cotizacionesIndex() {
             }
 
             try {
+                // CORREGIDO: Usar la ruta web DELETE
                 const response = await fetch(`/administracion/cotizaciones/${id}`, {
                     method: 'DELETE',
                     headers: {
@@ -228,6 +241,7 @@ function cotizacionesIndex() {
 
                 if (data.success) {
                     this.mostrarExito(data.message || 'Cotización eliminada correctamente');
+                    // Recargar la lista
                     this.cargarCotizaciones();
                     this.cargarEstadisticas();
                 } else {
