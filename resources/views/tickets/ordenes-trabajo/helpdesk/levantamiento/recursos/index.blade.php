@@ -710,58 +710,68 @@
             }
         });
 
-        document.querySelector(".btn-guardar").addEventListener("click", function(e) {
-            e.preventDefault();
-            
-            // Filtrar solo los artículos que no están guardados (idSuministros es null)
-            const articulosParaGuardar = articulosSeleccionados
-                .filter(art => !art.idSuministros)
-                .map(art => ({
-                    id: art.id,
-                    cantidad: art.cantidad
-                }));
+      document.querySelector(".btn-guardar").addEventListener("click", function(e) {
+    e.preventDefault();
+    
+    const ticketId = document.getElementById("ticketId").value;
+    const visitaId = document.getElementById("visitaId").value;
 
-            if (articulosParaGuardar.length === 0) {
-                toastr.info('No hay artículos nuevos para guardar.');
-                return;
-            }
+    console.log('🔍 IDs enviados al servidor:', {
+        ticketId: ticketId,
+        visitaId: visitaId
+    });
 
-            const articulosInvalidos = articulosParaGuardar.filter(articulo => !articulo.id);
-            if (articulosInvalidos.length > 0) {
-                toastr.error('Por favor actualice la página.');
-                return;
-            }
+    // Filtrar solo los artículos que no están guardados
+    const articulosParaGuardar = articulosSeleccionados
+        .filter(art => !art.idSuministros)
+        .map(art => ({
+            id: art.id,
+            cantidad: art.cantidad
+        }));
 
-            fetch('/guardar-suministros', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        articulos: articulosParaGuardar,
-                        ticketId: ticketId,
-                        visitaId: visitaId
-                    })
-                })
-                .then(response => response.text())
-                .then(data => {
-                    try {
-                        const jsonResponse = JSON.parse(data);
-                        if (jsonResponse.message) {
-                            toastr.success(jsonResponse.message);
-                            // Recargar los suministros después de guardar
-                            obtenerSuministros();
-                        }
-                    } catch (error) {
-                        console.error('Error al parsear JSON:', error);
-                        toastr.error('Error en la respuesta del servidor.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la solicitud AJAX:', error);
-                    toastr.error('Hubo un error al guardar los suministros.');
+    console.log('📦 Artículos a guardar:', articulosParaGuardar);
+
+    if (articulosParaGuardar.length === 0) {
+        toastr.info('No hay artículos nuevos para guardar.');
+        return;
+    }
+
+    fetch('/guardar-suministros', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                articulos: articulosParaGuardar,
+                ticketId: ticketId,
+                visitaId: visitaId
+            })
+        })
+        .then(response => {
+            console.log('📨 Respuesta del servidor:', response.status);
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.error || 'Error del servidor');
                 });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Respuesta exitosa:', data);
+            if (data.message) {
+                toastr.success(data.message);
+                obtenerSuministros();
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error en la solicitud AJAX:', error);
+            toastr.error('❌ ' + error.message, 'Error de Validación', {
+                timeOut: 5000,
+                closeButton: true,
+                progressBar: true
+            });
         });
+});
     });
 </script>

@@ -5367,13 +5367,42 @@ public function obtenerSuministros($ticketId, $visitaId)
         return response()->json([], 500);
     }
 }
-
 public function guardarSuministros(Request $request)
 {
     try {
         $articulos = $request->input('articulos');
         $ticketId = $request->input('ticketId');
         $visitaId = $request->input('visitaId');
+
+        Log::info('🔍 Validando visita seleccionada:', [
+            'ticketId' => $ticketId,
+            'visitaId' => $visitaId,
+            'articulos_count' => count($articulos)
+        ]);
+
+        // SOLO verificar por ticket y visita, sin importar el valor de vistaseleccionada
+        $visitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)
+            ->where('idVisitas', $visitaId)
+            ->first();
+
+        Log::info('🔍 Resultado de la consulta:', [
+            'existe_visita' => $visitaSeleccionada ? 'SÍ' : 'NO',
+            'datos_visita' => $visitaSeleccionada
+        ]);
+
+        if (!$visitaSeleccionada) {
+            Log::warning('❌ No se encontró visita seleccionada', [
+                'ticketId' => $ticketId,
+                'visitaId' => $visitaId
+            ]);
+            
+            return response()->json([
+                'error' => 'No existe una visita seleccionada para este ticket.'
+            ], 422);
+        }
+
+        Log::info('✅ Visita validada correctamente, procediendo a guardar suministros...');
 
         foreach ($articulos as $articulo) {
             // Verificar si ya existe el suministro
@@ -5392,16 +5421,20 @@ public function guardarSuministros(Request $request)
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
+                
+                Log::info('📦 Suministro insertado:', [
+                    'articulo_id' => $articulo['id'],
+                    'cantidad' => $articulo['cantidad']
+                ]);
             }
         }
 
         return response()->json(['message' => 'Artículos guardados correctamente.']);
     } catch (\Exception $e) {
-        Log::error('Error al guardar suministros: ' . $e->getMessage());
+        Log::error('❌ Error al guardar suministros: ' . $e->getMessage());
         return response()->json(['error' => 'Error al guardar los artículos.'], 500);
     }
 }
-
 public function actualizarSuministro(Request $request, $id)
 {
     try {
