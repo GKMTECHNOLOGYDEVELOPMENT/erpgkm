@@ -260,6 +260,15 @@
 
                         <div class="section-divider"></div>
 
+                        <!-- En la sección NGR, después de la información del ticket -->
+                        <div x-show="params.ticket.id" class="flex justify-end mt-4">
+                            <button type="button" 
+                                    @click="cargarSuministrosManual()"
+                                    class="btn btn-info btn-sm">
+                                <i class="fas fa-refresh mr-2"></i> Cargar Suministros del Ticket
+                            </button>
+                        </div>
+
                         <!-- Items de la Cotización -->
                         <div>
                             <div class="flex items-center justify-between mb-8">

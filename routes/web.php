@@ -1612,3 +1612,19 @@ Route::get('/almacen/racks/{id}/tiene-productos', [UbicacionesVistaController::c
 // Route::patch('/actualizar-suministro/{id}', [OrdenesHelpdeskController::class, 'actualizarSuministro'])->name('actualizar.suministro');
 // Route::delete('/eliminar-suministro/{id}', [OrdenesHelpdeskController::class, 'eliminarSuministro'])->name('eliminar.suministro');
 
+// Rutas para cotizaciones desde tickets
+Route::prefix('cotizaciones-tickets')->group(function () {
+    Route::get('/', [cotizacionController::class, 'index'])->name('cotizaciones-tickets.index');
+    Route::get('/datos-cotizacion/{ticketId}', [cotizacionController::class, 'getDatosCotizacion'])->name('cotizaciones-tickets.datos');
+    Route::post('/generar-individual', [cotizacionController::class, 'generarCotizacionIndividual'])->name('cotizaciones-tickets.generar-individual');
+    Route::post('/generar-multiple', [cotizacionController::class, 'generarCotizacionMultiple'])->name('cotizaciones-tickets.generar-multiple');
+
+// Nuevas rutas para las funcionalidades
+    Route::post('/vista-previa-temporal', [cotizacionController::class, 'vistaPreviaTemporal'])->name('cotizaciones.vista-previa-temporal');
+    Route::post('/generar-pdf-temporal', [cotizacionController::class, 'generarPDFTemporal'])->name('cotizaciones.generar-pdf-temporal');
+    Route::post('/enviar-email-temporal', [cotizacionController::class, 'enviarEmailTemporal'])->name('cotizaciones.enviar-email-temporal');
+    // Rutas para cotizaciones guardadas
+    Route::get('/{id}/vista-previa', [cotizacionController::class, 'vistaPrevia'])->name('cotizaciones.vista-previa');
+    Route::get('/{id}/generar-pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.generar-pdf');
+    Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
+});
