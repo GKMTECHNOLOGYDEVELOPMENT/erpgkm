@@ -25,6 +25,107 @@ class cotizacionController extends Controller
         return view('cotizaciones.index');
     }
 
+   /**
+ * Obtener todas las cotizaciones para el index (API)
+ */
+public function getCotizaciones(Request $request)
+{
+    try {
+        $query = Cotizacion::with(['cliente', 'moneda'])
+            ->select('*')
+            ->orderBy('fecha_emision', 'desc');
+
+        // Filtro por estado
+        if ($request->has('estado') && $request->estado != '') {
+            $query->where('estado_cotizacion', $request->estado);
+        }
+
+        // Filtro por mes
+        if ($request->has('mes') && $request->mes != '') {
+            $query->whereMonth('fecha_emision', $request->mes);
+        }
+
+        // Filtro por búsqueda - CORREGIDO: sin columna empresa
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('numero_cotizacion', 'LIKE', "%{$search}%")
+                  ->orWhereHas('cliente', function($q2) use ($search) {
+                      $q2->where('nombre', 'LIKE', "%{$search}%")
+                         ->orWhere('documento', 'LIKE', "%{$search}%") // Buscar por documento también
+                         ->orWhere('email', 'LIKE', "%{$search}%");
+                  });
+            });
+        }
+
+        $cotizaciones = $query->get()->map(function($cotizacion) {
+            return [
+                'id' => $cotizacion->idCotizaciones,
+                'cotizacionNo' => $cotizacion->numero_cotizacion,
+                'cliente' => [
+                    'nombre' => $cotizacion->cliente->nombre ?? 'N/A',
+                    'documento' => $cotizacion->cliente->documento ?? 'N/A', // Usar documento en lugar de empresa
+                    'email' => $cotizacion->cliente->email ?? 'N/A'
+                ],
+                'fechaEmision' => $cotizacion->fecha_emision,
+                'validaHasta' => $cotizacion->valida_hasta,
+                'total' => (float) $cotizacion->total,
+                'moneda' => $cotizacion->moneda->simbolo ?? 'PEN',
+                'incluirIGV' => (bool) $cotizacion->incluir_igv,
+                'estado' => $cotizacion->estado_cotizacion
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'cotizaciones' => $cotizaciones
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al obtener cotizaciones: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar las cotizaciones'
+        ], 500);
+    }
+}
+
+    /**
+     * Obtener estadísticas para el dashboard
+     */
+    public function getEstadisticas()
+    {
+        try {
+            $total = Cotizacion::count();
+            $aprobadas = Cotizacion::where('estado_cotizacion', 'aprobada')->count();
+            $pendientes = Cotizacion::where('estado_cotizacion', 'pendiente')->count();
+            
+            // Cotizaciones vencidas (valida_hasta menor a hoy)
+            $vencidas = Cotizacion::where('valida_hasta', '<', now()->format('Y-m-d'))
+                ->where('estado_cotizacion', '!=', 'aprobada')
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'stats' => [
+                    'total' => $total,
+                    'aprobadas' => $aprobadas,
+                    'pendientes' => $pendientes,
+                    'vencidas' => $vencidas
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al obtener estadísticas: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar estadísticas'
+            ], 500);
+        }
+    }
+
+  
+
     public function create(Request $request)
     {
         $ticketId = $request->get('ticket_id');

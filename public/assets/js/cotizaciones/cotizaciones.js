@@ -267,7 +267,7 @@ document.addEventListener('alpine:init', () => {
 
         // MÉTODOS DE MONEDA
         obtenerSimboloMoneda() {
-            if (!this.params.moneda) return '$';
+            if (!this.params.moneda) return 'S/ ';
             const monedaSeleccionada = this.monedas.find(m => m.idMonedas == this.params.moneda);
             return monedaSeleccionada ? monedaSeleccionada.simbolo : 'S/';
         },

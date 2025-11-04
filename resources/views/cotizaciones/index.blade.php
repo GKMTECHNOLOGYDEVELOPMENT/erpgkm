@@ -3,6 +3,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/index-cotizaciones.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <div x-data="cotizacionesIndex" x-init="init()" class="fade-in">
         <!-- Header con Estadísticas -->
@@ -102,8 +103,8 @@
                                     class="fas fa-search text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
                             </div>
                             <input type="text" x-model="searchTerm" @input="filtrarCotizaciones()"
-                                placeholder="Buscar por número, cliente, empresa..."
-                                class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm hover:border-gray-300 placeholder-gray-400">
+    placeholder="Buscar por número, cliente, documento..."
+    class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm hover:border-gray-300 placeholder-gray-400">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full"
                                     x-text="`${cotizacionesFiltradas.length} resultados`"></span>
@@ -338,7 +339,8 @@
                                     <div>
                                         <div class="text-sm font-medium text-gray-900"
                                             x-text="cotizacion.cliente.nombre"></div>
-                                        <div class="text-xs text-gray-500 mt-1" x-text="cotizacion.cliente.empresa">
+                                        <div class="text-xs text-gray-500 mt-1" x-text="cotizacion.cliente.documento">
+
                                         </div>
                                     </div>
                                 </td>
@@ -464,4 +466,15 @@
     </div>
 
     <script src="{{ asset('assets/js/cotizaciones/index-cotizaciones.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+    // Configuración de toastr
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "timeOut": "5000"
+    };
+</script>
 </x-layout.default>

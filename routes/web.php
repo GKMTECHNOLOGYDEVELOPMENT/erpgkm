@@ -1628,3 +1628,17 @@ Route::prefix('cotizaciones-tickets')->group(function () {
     Route::get('/{id}/generar-pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.generar-pdf');
     Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
 });
+
+
+// Rutas principales de cotizaciones
+Route::prefix('administracion/cotizaciones')->group(function () {
+    Route::get('/', [cotizacionController::class, 'index'])->name('cotizaciones.index');
+    Route::get('/create', [cotizacionController::class, 'create'])->name('cotizaciones.create');
+    Route::post('/', [cotizacionController::class, 'store'])->name('cotizaciones.store');
+    Route::get('/{id}', [cotizacionController::class, 'show'])->name('cotizaciones.show');
+    Route::get('/{id}/edit', [cotizacionController::class, 'edit'])->name('cotizaciones.edit');
+    Route::put('/{id}', [cotizacionController::class, 'update'])->name('cotizaciones.update');
+    Route::delete('/{id}', [cotizacionController::class, 'destroy'])->name('cotizaciones.delete');
+    Route::get('/{id}/pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.pdf');
+    Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
+});

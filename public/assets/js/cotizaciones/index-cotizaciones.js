@@ -1,4 +1,3 @@
-
 function cotizacionesIndex() {
     return {
         cotizaciones: [],
@@ -12,177 +11,241 @@ function cotizacionesIndex() {
             total: 0,
             aprobadas: 0,
             pendientes: 0,
-            vencidas: 0
+            venciadas: 0
         },
+        loading: false,
 
         init() {
+            this.cargarEstadisticas();
             this.cargarCotizaciones();
         },
 
         async cargarCotizaciones() {
+            this.loading = true;
             try {
-                // Simulación de datos - reemplazar con llamada real a tu API
-                this.cotizaciones = [{
-                    id: 1,
-                    cotizacionNo: 'COT-2024-001',
-                    cliente: {
-                        nombre: 'Juan Pérez',
-                        empresa: 'Tech Solutions SAC',
-                        email: 'juan@techsolutions.com'
-                    },
-                    fechaEmision: '2024-01-15',
-                    validaHasta: '2024-02-15',
-                    total: 2500.00,
-                    moneda: 'PEN',
-                    incluirIGV: true,
-                    estado: 'aprobada'
-                },
-                {
-                    id: 2,
-                    cotizacionNo: 'COT-2024-002',
-                    cliente: {
-                        nombre: 'María García',
-                        empresa: 'Innovation Corp',
-                        email: 'maria@innovation.com'
-                    },
-                    fechaEmision: '2024-01-20',
-                    validaHasta: '2024-02-20',
-                    total: 1800.50,
-                    moneda: 'USD',
-                    incluirIGV: false,
-                    estado: 'pendiente'
-                },
-                {
-                    id: 3,
-                    cotizacionNo: 'COT-2024-003',
-                    cliente: {
-                        nombre: 'Carlos López',
-                        empresa: 'Digital Systems',
-                        email: 'carlos@digitalsystems.com'
-                    },
-                    fechaEmision: '2024-01-10',
-                    validaHasta: '2024-01-25',
-                    total: 3200.75,
-                    moneda: 'PEN',
-                    incluirIGV: true,
-                    estado: 'vencida'
-                }
-                ];
+                const params = new URLSearchParams();
+                
+                if (this.searchTerm) params.append('search', this.searchTerm);
+                if (this.filtroEstado) params.append('estado', this.filtroEstado);
+                if (this.filtroMes) params.append('mes', this.filtroMes);
 
-                this.actualizarEstadisticas();
-                this.filtrarCotizaciones();
+                const response = await fetch(`/api/cotizaciones?${params}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.cotizaciones = data.cotizaciones;
+                    this.cotizacionesFiltradas = data.cotizaciones;
+                } else {
+                    this.mostrarError(data.message || 'Error al cargar cotizaciones');
+                }
             } catch (error) {
                 console.error('Error cargando cotizaciones:', error);
-                toastr.error('Error al cargar las cotizaciones');
+                this.mostrarError('Error de conexión al cargar las cotizaciones');
+            } finally {
+                this.loading = false;
             }
+        },
+
+        async cargarEstadisticas() {
+            try {
+                const response = await fetch('/api/cotizaciones/estadisticas', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.stats = data.stats;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        },
+
+        // Método para mostrar errores (reemplaza toastr)
+        mostrarError(mensaje) {
+            // Puedes usar alert temporalmente o implementar tu propio sistema de notificaciones
+            console.error('Error:', mensaje);
+            alert('Error: ' + mensaje); // Temporal - luego lo mejoramos
+        },
+
+        mostrarInfo(mensaje) {
+            console.info('Info:', mensaje);
+            // Temporal también
+        },
+
+        mostrarExito(mensaje) {
+            console.success('Éxito:', mensaje);
+            // Temporal también
         },
 
         filtrarCotizaciones() {
-            let filtered = this.cotizaciones;
-
-            // Filtro por búsqueda
-            if (this.searchTerm) {
-                const term = this.searchTerm.toLowerCase();
-                filtered = filtered.filter(cotizacion =>
-                    cotizacion.cotizacionNo.toLowerCase().includes(term) ||
-                    cotizacion.cliente.nombre.toLowerCase().includes(term) ||
-                    cotizacion.cliente.empresa.toLowerCase().includes(term)
-                );
-            }
-
-            // Filtro por estado
-            if (this.filtroEstado) {
-                filtered = filtered.filter(cotizacion =>
-                    cotizacion.estado === this.filtroEstado
-                );
-            }
-
-            // Filtro por mes
-            if (this.filtroMes) {
-                filtered = filtered.filter(cotizacion => {
-                    const fecha = new Date(cotizacion.fechaEmision);
-                    return (fecha.getMonth() + 1) === parseInt(this.filtroMes);
-                });
-            }
-
-            this.cotizacionesFiltradas = filtered;
-            this.paginaActual = 1;
+            this.cargarCotizaciones();
         },
 
-        actualizarEstadisticas() {
-            this.stats.total = this.cotizaciones.length;
-            this.stats.aprobadas = this.cotizaciones.filter(c => c.estado === 'aprobada').length;
-            this.stats.pendientes = this.cotizaciones.filter(c => c.estado === 'pendiente').length;
-            this.stats.vencidas = this.cotizaciones.filter(c => c.estado === 'vencida').length;
+        limpiarFiltros() {
+            this.searchTerm = '';
+            this.filtroEstado = '';
+            this.filtroMes = '';
+            this.cargarCotizaciones();
         },
 
         formatearFecha(fecha) {
-            return new Date(fecha).toLocaleDateString('es-ES');
+            if (!fecha) return 'N/A';
+            return new Date(fecha).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
         },
 
         formatearMoneda(monto) {
             return new Intl.NumberFormat('es-PE', {
                 style: 'currency',
-                currency: 'PEN'
+                currency: 'PEN',
+                minimumFractionDigits: 2
             }).format(monto);
         },
 
         esVencida(fechaVencimiento) {
+            if (!fechaVencimiento) return false;
             return new Date(fechaVencimiento) < new Date();
         },
 
-        obtenerClaseEstado(estado) {
-            const clases = {
-                'pendiente': 'status-pendiente',
-                'aprobada': 'status-aprobada',
-                'rechazada': 'status-rechazada',
-                'enviada': 'status-enviada',
-                'vencida': 'status-vencida'
-            };
-            return clases[estado] || 'status-pendiente';
+        obtenerNombreMes(mes) {
+            const meses = [
+                '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            return meses[parseInt(mes)] || '';
         },
 
         verCotizacion(id) {
-            window.location.href = `/cotizaciones/${id}`;
+            window.location.href = `/administracion/cotizaciones/${id}`;
         },
 
         editarCotizacion(id) {
-            window.location.href = `/cotizaciones/${id}/edit`;
+            window.location.href = `/administracion/cotizaciones/${id}/edit`;
         },
 
         async generarPDF(id) {
             try {
-                toastr.info('Generando PDF...');
-                // Lógica para generar PDF
+                this.mostrarInfo('Generando PDF...');
+                
+                const response = await fetch(`/administracion/cotizaciones/${id}/pdf`, {
+                    method: 'GET'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    
+                    const contentDisposition = response.headers.get('Content-Disposition');
+                    let filename = `cotizacion-${id}.pdf`;
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch && filenameMatch.length === 2) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    this.mostrarExito('PDF generado correctamente');
+                } else {
+                    this.mostrarError('Error al generar PDF');
+                }
             } catch (error) {
-                toastr.error('Error al generar PDF');
+                console.error('Error al generar PDF:', error);
+                this.mostrarError('Error al generar PDF');
             }
         },
 
         async enviarEmail(id) {
             try {
-                toastr.info('Enviando email...');
-                // Lógica para enviar email
+                const email = prompt('Ingrese el email destinatario:');
+                if (!email) return;
+
+                this.mostrarInfo('Enviando email...');
+
+                const response = await fetch(`/administracion/cotizaciones/${id}/enviar-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.mostrarExito(data.message || 'Email enviado correctamente');
+                } else {
+                    this.mostrarError(data.message || 'Error al enviar email');
+                }
             } catch (error) {
-                toastr.error('Error al enviar email');
+                console.error('Error al enviar email:', error);
+                this.mostrarError('Error al enviar email');
             }
         },
 
         async eliminarCotizacion(id) {
-            if (confirm('¿Está seguro de eliminar esta cotización?')) {
-                try {
-                    toastr.success('Cotización eliminada');
-                    this.cotizaciones = this.cotizaciones.filter(c => c.id !== id);
-                    this.filtrarCotizaciones();
-                    this.actualizarEstadisticas();
-                } catch (error) {
-                    toastr.error('Error al eliminar cotización');
+            if (!confirm('¿Está seguro de eliminar esta cotización? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/administracion/cotizaciones/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.mostrarExito(data.message || 'Cotización eliminada correctamente');
+                    this.cargarCotizaciones();
+                    this.cargarEstadisticas();
+                } else {
+                    this.mostrarError(data.message || 'Error al eliminar cotización');
                 }
+            } catch (error) {
+                console.error('Error al eliminar cotización:', error);
+                this.mostrarError('Error al eliminar cotización');
             }
         },
 
         get totalPaginas() {
             return Math.ceil(this.cotizacionesFiltradas.length / this.itemsPorPagina);
+        },
+
+        get cotizacionesPaginadas() {
+            const startIndex = (this.paginaActual - 1) * this.itemsPorPagina;
+            return this.cotizacionesFiltradas.slice(startIndex, startIndex + this.itemsPorPagina);
         }
     }
 }

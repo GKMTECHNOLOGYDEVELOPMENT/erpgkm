@@ -566,3 +566,6 @@ Route::get('/articulos/cotizaciones', function () {
 Route::get('/tickets/{ticketId}/suministros/{visitaId?}', [cotizacionController::class, 'getSuministrosPorVisita']);
 
 
+// Rutas API para cotizaciones
+    Route::get('/cotizaciones', [cotizacionController::class, 'getCotizaciones'])->name('api.cotizaciones.index');
+    Route::get('/cotizaciones/estadisticas', [cotizacionController::class, 'getEstadisticas'])->name('api.cotizaciones.estadisticas');
