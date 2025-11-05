@@ -78,7 +78,7 @@ class CustodiaController extends Controller
             $custodias->appends(['estado' => $request->estado]);
         }
 
-        return view('solicitud.solicitudcustodia.index', compact(
+        return view('almacen.solicitud.solicitudcustodia.index', compact(
             'custodias',
             'totalSolicitudes',
             'pendientes',
@@ -110,7 +110,7 @@ public function harvest($id)
         ->with(['responsable', 'articulo.modelos', 'articulo.subcategoria'])
         ->get();
 
-    return view('solicitud.solicitudcustodia.harvest', compact(
+    return view('almacen.solicitud.solicitudcustodia.harvest', compact(
         'custodia', 
         'repuestos',
         'retiros'
@@ -348,7 +348,7 @@ public function getRepuestosCompatibles($idModelo)
         $ubicaciones = Ubicacion::with('sucursal')->get();
 
 
-        return view('solicitud.solicitudcustodia.opciones', compact('custodia', 'ubicaciones'));
+        return view('almacen.solicitud.solicitudcustodia.opciones', compact('custodia', 'ubicaciones'));
     }
 
  public function update(Request $request, $id)
@@ -691,7 +691,7 @@ private function obtenerSugerenciasUbicaciones($cantidad)
    public function create()
     {
         // Ya no necesitamos pasar los datos aquí, se cargarán via AJAX
-        return view('solicitud.solicitudcustodia.create');
+        return view('almacen.solicitud.solicitudcustodia.create');
     }
 
     public function store(Request $request)
@@ -1056,4 +1056,17 @@ private function obtenerSugerenciasUbicaciones($cantidad)
             'hash_actual' => $hashActual
         ]);
     }
+
+
+
+
+
+
+    
+
+
+
+
+
+
 }

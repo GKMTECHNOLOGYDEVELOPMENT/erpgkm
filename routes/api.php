@@ -7,7 +7,9 @@ use App\Http\Controllers\administracion\asociados\ProveedoresController;
 use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\administracion\compras\ComprasController;
+use App\Http\Controllers\administracion\cotizaciones\cotizacionController;
 use App\Http\Controllers\almacen\custodia\CustodiaController;
+use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kits\KitsController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
@@ -509,3 +511,61 @@ Route::get('/next-order-number', [SolicitudrepuestoController::class, 'getNextOr
 
   // API para obtener próximo número de orden
     Route::get('/next-order-number-ar', [SolicitudarticuloController::class, 'getNextOrderNumber']);
+
+
+    // routes/api.php
+Route::get('/clientesdespacho', [DespachoController::class, 'getClientes']);
+Route::get('/usuariosdespacho', [DespachoController::class, 'getUsuarios']);
+Route::get('/articulosdespacho', [DespachoController::class, 'getArticulos']);
+Route::get('/departamentosdespacho', [DespachoController::class, 'getDepartamentos']);
+
+Route::get('/clientescotizaciones', [cotizacionController::class, 'search']);
+Route::get('/configuracion', [cotizacionController::class, 'getConfiguracion']);
+// 🔥 NUEVAS RUTAS PARA TICKETS INDEPENDIENTES
+Route::get('/tickets/disponibles', [cotizacionController::class, 'getTicketsDisponibles']);
+Route::get('/tickets/{ticketId}/detalle', [cotizacionController::class, 'getTicketDetalle']);
+Route::get('/tickets/{ticketId}/visitas', [cotizacionController::class, 'getVisitas']);
+Route::get('/tickets/{ticketId}/equipo/{visitaId?}', [cotizacionController::class, 'getEquipo']);
+
+Route::get('/racks/tipo-rack', [UbicacionesVistaController::class, 'obtenerTipoRack']);
+
+
+// En tu API de Laravel
+Route::get('/articulos/cotizaciones', function () {
+    try {
+        $articulos = DB::table('articulos')
+            ->where('estado', 1)
+            ->select(
+                'idArticulos',
+                'nombre',
+                'codigo_repuesto',
+                'precio_venta',
+                'idTipoArticulo', // 🔥 Asegúrate de incluir este campo
+                'sku',
+                'codigo_barras',
+                'stock_total'
+            )
+            ->orderBy('idTipoArticulo')
+            ->orderBy('nombre')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'articulos' => $articulos,
+            'total' => $articulos->count()
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar artículos: ' . $e->getMessage()
+        ], 500);
+    }
+});
+
+Route::get('/tickets/{ticketId}/suministros/{visitaId?}', [cotizacionController::class, 'getSuministrosPorVisita']);
+
+
+// Rutas API para cotizaciones
+    Route::get('/cotizaciones', [cotizacionController::class, 'getCotizaciones'])->name('api.cotizaciones.index');
+    Route::get('/cotizaciones/estadisticas', [cotizacionController::class, 'getEstadisticas'])->name('api.cotizaciones.estadisticas');

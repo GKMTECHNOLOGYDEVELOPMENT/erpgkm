@@ -310,17 +310,16 @@
         }
     </style>
 
-    <div x-data="wizardDespacho" class="min-h-screen py-8">
+    <div x-data="wizardDespachoEdit" class="min-h-screen py-8">
         <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
             <!-- Header -->
             <div class="text-center mb-12 fade-in">
                 <div
                     class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-6 border border-gray-200">
-                    <i class="fas fa-file-export text-3xl text-primary"></i>
+                    <i class="fas fa-edit text-3xl text-primary"></i>
                 </div>
-                <h1 class="text-4xl font-bold text-gray-800 mb-3">Documento de Salida</h1>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Complete la información requerida paso a paso para
-                    generar su documento de salida</p>
+                <h1 class="text-4xl font-bold text-gray-800 mb-3">Editar Documento de Salida</h1>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">Modifique la información del documento de salida existente</p>
             </div>
 
             <!-- Progress Bar -->
@@ -394,8 +393,9 @@
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('despacho.store') }}" id="despachoForm" @submit.prevent="submitForm">
+            <form method="POST" action="{{ route('despacho.update', $despacho->id) }}" id="despachoForm" @submit.prevent="submitForm">
                 @csrf
+                @method('PUT')
 
                 <!-- Step 1: Información del Documento -->
                 <div x-show="currentStep === 0" class="step-content fade-in" x-transition>
@@ -414,32 +414,32 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div class="lg:col-span-3">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo Guía</label>
-                                    <input type="text" name="tipo_guia" value="GR_Electronica_TI01"
+                                    <input type="text" name="tipo_guia" value="{{ old('tipo_guia', $despacho->tipo_guia) }}"
                                         class="form-control" required>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Número</label>
-                                    <input type="text" name="numero" value="5778" class="form-control" required>
+                                    <input type="text" name="numero" value="{{ old('numero', $despacho->numero) }}" class="form-control" required>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Documento</label>
                                     <select name="documento" class="form-control" required>
-                                        <option value="guia">Guía</option>
-                                        <option value="factura">Factura</option>
+                                        <option value="guia" {{ old('documento', $despacho->documento) == 'guia' ? 'selected' : '' }}>Guía</option>
+                                        <option value="factura" {{ old('documento', $despacho->documento) == 'factura' ? 'selected' : '' }}>Factura</option>
                                     </select>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Entrega</label>
-                                    <input type="date" name="fecha_entrega" value="{{ date('Y-m-d') }}"
+                                    <input type="date" name="fecha_entrega" value="{{ old('fecha_entrega', $despacho->fecha_entrega) }}"
                                         class="form-control" required>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Traslado</label>
-                                    <input type="date" name="fecha_traslado" value="{{ date('Y-m-d') }}"
+                                    <input type="date" name="fecha_traslado" value="{{ old('fecha_traslado', $despacho->fecha_traslado) }}"
                                         class="form-control" required>
                                 </div>
                             </div>
@@ -467,7 +467,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
                                         <input type="text" name="direccion_partida"
-                                            value="AV SANTA ELVIRA E MZ B LOTE 8 URBA SAN ELÍAS" class="form-control"
+                                            value="{{ old('direccion_partida', $despacho->direccion_partida) }}" class="form-control"
                                             required>
                                     </div>
 
@@ -479,20 +479,20 @@
                                                 <option value="">Seleccionar</option>
                                                 <template x-for="departamento in departamentos" :key="departamento">
                                                     <option :value="departamento" x-text="departamento"
-                                                        :selected="departamento === 'Lima'"></option>
+                                                        :selected="departamento === '{{ old('dpto_partida', $despacho->dpto_partida) }}'"></option>
                                                 </template>
                                             </select>
                                         </div>
                                         <div>
                                             <label
                                                 class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
-                                            <input type="text" name="provincia_partida" value="Lima"
+                                            <input type="text" name="provincia_partida" value="{{ old('provincia_partida', $despacho->provincia_partida) }}"
                                                 class="form-control" required>
                                         </div>
                                         <div>
                                             <label
                                                 class="block text-sm font-medium text-gray-700 mb-2">Distrito</label>
-                                            <input type="text" name="distrito_partida" value="Los Olivos"
+                                            <input type="text" name="distrito_partida" value="{{ old('distrito_partida', $despacho->distrito_partida) }}"
                                                 class="form-control" required>
                                         </div>
                                     </div>
@@ -517,7 +517,7 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
                                         <input type="text" name="direccion_llegada"
-                                            placeholder="Ingrese dirección de llegada" class="form-control" required>
+                                            value="{{ old('direccion_llegada', $despacho->direccion_llegada) }}" class="form-control" required>
                                     </div>
 
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -528,7 +528,8 @@
                                                 <option value="">Seleccionar</option>
                                                 <template x-for="departamento in departamentos"
                                                     :key="departamento">
-                                                    <option :value="departamento" x-text="departamento"></option>
+                                                    <option :value="departamento" x-text="departamento"
+                                                        :selected="departamento === '{{ old('dpto_llegada', $despacho->dpto_llegada) }}'"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -536,13 +537,13 @@
                                             <label
                                                 class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
                                             <input type="text" name="provincia_llegada"
-                                                placeholder="Ingrese provincia" class="form-control" required>
+                                                value="{{ old('provincia_llegada', $despacho->provincia_llegada) }}" class="form-control" required>
                                         </div>
                                         <div>
                                             <label
                                                 class="block text-sm font-medium text-gray-700 mb-2">Distrito</label>
                                             <input type="text" name="distrito_llegada"
-                                                placeholder="Ingrese distrito" class="form-control" required>
+                                                value="{{ old('distrito_llegada', $despacho->distrito_llegada) }}" class="form-control" required>
                                         </div>
                                     </div>
                                 </div>
@@ -583,8 +584,8 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Trasbordo</label>
                                         <select name="trasbordo" class="form-control" required>
-                                            <option value="si">Sí</option>
-                                            <option value="no">No</option>
+                                            <option value="si" {{ old('trasbordo', $despacho->trasbordo) == 'si' ? 'selected' : '' }}>Sí</option>
+                                            <option value="no" {{ old('trasbordo', $despacho->trasbordo) == 'no' ? 'selected' : '' }}>No</option>
                                         </select>
                                     </div>
                                 </div>
@@ -594,8 +595,8 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Modo
                                             Traslado</label>
                                         <select name="modo_traslado" class="form-control" required>
-                                            <option value="publico">Público</option>
-                                            <option value="privado">Privado</option>
+                                            <option value="publico" {{ old('modo_traslado', $despacho->modo_traslado) == 'publico' ? 'selected' : '' }}>Público</option>
+                                            <option value="privado" {{ old('modo_traslado', $despacho->modo_traslado) == 'privado' ? 'selected' : '' }}>Privado</option>
                                         </select>
                                     </div>
                                     <div>
@@ -610,18 +611,17 @@
                                             <label
                                                 class="block text-sm font-medium text-gray-700 mb-2">Condiciones</label>
                                             <select name="condiciones" class="form-control" required>
-                                                <option value="contado">Contado</option>
-                                                <option value="contrato">Contrato</option>
+                                                <option value="contado" {{ old('condiciones', $despacho->condiciones) == 'contado' ? 'selected' : '' }}>Contado</option>
+                                                <option value="contrato" {{ old('condiciones', $despacho->condiciones) == 'contrato' ? 'selected' : '' }}>Contrato</option>
                                             </select>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Tipo
                                                 Traslado</label>
                                             <select name="tipo_traslado" class="form-control" required>
-                                                <option value="venta_sujeta_confirmacion">Venta sujeta a confirmación
-                                                </option>
-                                                <option value="traslado_interno">Traslado interno</option>
-                                                <option value="importacion">Importación</option>
+                                                <option value="venta_sujeta_confirmacion" {{ old('tipo_traslado', $despacho->tipo_traslado) == 'venta_sujeta_confirmacion' ? 'selected' : '' }}>Venta sujeta a confirmación</option>
+                                                <option value="traslado_interno" {{ old('tipo_traslado', $despacho->tipo_traslado) == 'traslado_interno' ? 'selected' : '' }}>Traslado interno</option>
+                                                <option value="importacion" {{ old('tipo_traslado', $despacho->tipo_traslado) == 'importacion' ? 'selected' : '' }}>Importación</option>
                                             </select>
                                         </div>
                                     </div>
@@ -643,8 +643,7 @@
                                     </div>
                                     <div>
                                         <h3 class="text-xl font-semibold text-white">Gestión de Artículos</h3>
-                                        <p class="text-white text-opacity-80 text-sm mt-1">Agrega y gestiona los
-                                            productos del despacho</p>
+                                        <p class="text-white text-opacity-80 text-sm mt-1">Modifica y gestiona los productos del despacho</p>
                                     </div>
                                 </div>
                                 <button type="button" @click="agregarArticulo()"
@@ -870,14 +869,15 @@
 
                         <button type="submit" x-show="currentStep === 3" class="btn btn-success"
                             :disabled="articulos.length === 0 || submitting">
-                            <i class="fas fa-check mr-2"></i>
-                            <span x-text="submitting ? 'Guardando...' : 'Guardar Documento'"></span>
+                            <i class="fas fa-save mr-2"></i>
+                            <span x-text="submitting ? 'Actualizando...' : 'Actualizar Documento'"></span>
                         </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+
     <!-- Scripts en el orden correcto - SOLO UNA VEZ -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -914,21 +914,21 @@
     <script>
         document.addEventListener('alpine:init', () => {
             // Verificar si ya está inicializado
-            if (window.wizardDespachoInitialized) {
-                console.log('Wizard ya fue inicializado, ignorando...');
+            if (window.wizardDespachoEditInitialized) {
+                console.log('Wizard Edit ya fue inicializado, ignorando...');
                 return;
             }
-            window.wizardDespachoInitialized = true;
+            window.wizardDespachoEditInitialized = true;
 
-            console.log('=== INICIALIZANDO WIZARD UNA SOLA VEZ ===');
+            console.log('=== INICIALIZANDO WIZARD EDIT UNA SOLA VEZ ===');
 
-            Alpine.data('wizardDespacho', () => ({
+            Alpine.data('wizardDespachoEdit', () => ({
                 currentStep: 0,
-                articulos: [],
+                articulos: @json($despacho->articulos ?? []),
                 searchTerm: '',
-                subtotal: 0,
-                igv: 0,
-                total: 0,
+                subtotal: {{ $despacho->subtotal ?? 0 }},
+                igv: {{ $despacho->igv ?? 0 }},
+                total: {{ $despacho->total ?? 0 }},
                 departamentos: [],
                 clientes: [],
                 usuarios: [],
@@ -945,7 +945,7 @@
                     }
 
                     this.initCalled = true;
-                    console.log('=== INICIALIZANDO COMPONENTE ===');
+                    console.log('=== INICIALIZANDO COMPONENTE EDIT ===');
 
                     await this.cargarDatosIniciales();
                     this.inicializarSelect2();
@@ -955,7 +955,7 @@
 
                 async cargarDatosIniciales() {
                     try {
-                        console.log('Cargando datos iniciales...');
+                        console.log('Cargando datos iniciales para edición...');
 
                         // Cargar departamentos
                         const deptResponse = await fetch('/api/departamentosdespacho');
@@ -990,7 +990,7 @@
                             console.log('Artículos cargados:', this.articulosDisponibles.length);
                         }
 
-                        console.log('=== DATOS CARGADOS EXITOSAMENTE ===');
+                        console.log('=== DATOS CARGADOS EXITOSAMENTE PARA EDICIÓN ===');
 
                     } catch (error) {
                         console.error('Error cargando datos:', error);
@@ -1000,9 +1000,9 @@
                 inicializarSelect2() {
                     setTimeout(() => {
                         try {
-                            console.log('Inicializando Select2...');
+                            console.log('Inicializando Select2 para edición...');
 
-                            // Clientes
+                            // Clientes - establecer valor actual
                             if ($('#cliente_select').length && !$('#cliente_select').hasClass(
                                     'select2-hidden-accessible')) {
                                 $('#cliente_select').select2({
@@ -1010,10 +1010,10 @@
                                     placeholder: 'Seleccionar cliente',
                                     width: '100%',
                                     allowClear: true
-                                }).on('change', () => this.validarPasoActual());
+                                }).val('{{ $despacho->cliente_id }}').trigger('change');
                             }
 
-                            // Vendedores
+                            // Vendedores - establecer valor actual
                             if ($('#vendedor_select').length && !$('#vendedor_select').hasClass(
                                     'select2-hidden-accessible')) {
                                 $('#vendedor_select').select2({
@@ -1021,10 +1021,10 @@
                                     placeholder: 'Seleccionar vendedor',
                                     width: '100%',
                                     allowClear: true
-                                }).on('change', () => this.validarPasoActual());
+                                }).val('{{ $despacho->vendedor_id }}').trigger('change');
                             }
 
-                            // Conductores
+                            // Conductores - establecer valor actual
                             if ($('#conductor_select').length && !$('#conductor_select')
                                 .hasClass('select2-hidden-accessible')) {
                                 $('#conductor_select').select2({
@@ -1032,10 +1032,10 @@
                                     placeholder: 'Seleccionar conductor',
                                     width: '100%',
                                     allowClear: true
-                                }).on('change', () => this.validarPasoActual());
+                                }).val('{{ $despacho->conductor_id }}').trigger('change');
                             }
 
-                            console.log('Select2 inicializado correctamente');
+                            console.log('Select2 para edición inicializado correctamente');
 
                         } catch (error) {
                             console.error('Error inicializando Select2:', error);
@@ -1043,8 +1043,13 @@
                     }, 500);
                 },
 
+                // Los métodos validarPaso0, validarPaso1, validarPaso2, validarPaso3, 
+                // mostrarErrores, nextStep, previousStep, cargarArticuloPorCodigo,
+                // agregarArticulo, eliminarArticulo, calcularTotales se mantienen igual
+                // que en el create (omitiéndolos por brevedad, pero debes copiarlos)
+
                 validarPaso0() {
-                    /* igual que tu código original */
+                    /* igual que tu código original del create */
                     this.errors = {};
                     let isValid = true;
 
@@ -1347,7 +1352,7 @@
                 },
 
                 async submitForm() {
-                    console.log('=== INICIANDO SUBMIT ===');
+                    console.log('=== INICIANDO ACTUALIZACIÓN ===');
 
                     if (this.submitting) return;
                     this.submitting = true;
@@ -1356,7 +1361,7 @@
                         this.validarPaso3()) {
                         this.mostrarErrores();
                         toastr.error(
-                            'Por favor completa todos los campos requeridos antes de enviar.');
+                            'Por favor completa todos los campos requeridos antes de actualizar.');
                         this.submitting = false;
                         return;
                     }
@@ -1378,7 +1383,7 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            toastr.success('Despacho creado exitosamente.');
+                            toastr.success('Despacho actualizado exitosamente.');
                             setTimeout(() => window.location.href = '/despacho', 1000);
                         } else {
                             let errorMessage = result.message || 'Error desconocido';
@@ -1388,15 +1393,15 @@
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        toastr.error('Error al crear el despacho: ' + error.message);
+                        toastr.error('Error al actualizar el despacho: ' + error.message);
                     } finally {
                         this.submitting = false;
                     }
                 },
 
                 cancelar() {
-                    if (confirm('¿Está seguro de cancelar el despacho? Se perderán todos los datos.')) {
-                        window.location.href = '/';
+                    if (confirm('¿Está seguro de cancelar la edición? Se perderán todos los cambios no guardados.')) {
+                        window.location.href = '/despacho';
                     }
                 }
             }));

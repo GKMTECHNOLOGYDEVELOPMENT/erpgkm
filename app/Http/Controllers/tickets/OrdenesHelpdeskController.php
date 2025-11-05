@@ -1567,9 +1567,10 @@ class OrdenesHelpdeskController extends Controller
 
         // Obtener los articulos según el idTipoArticulo
         $articulos = DB::table('articulos')
-            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
-            ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 'tipoarticulos.nombre as tipo_nombre')
-            ->get();
+    ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+    ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 
+             'articulos.codigo_repuesto', 'tipoarticulos.nombre as tipo_nombre') // ← Agregado
+    ->get();
 
 
 
@@ -1691,40 +1692,6 @@ class OrdenesHelpdeskController extends Controller
 
 
 
-    public function guardarSuministros(Request $request)
-    {
-        $articulos = $request->articulos;
-        $ticketId = $request->ticketId;
-        $visitaId = $request->visitaId;
-
-        foreach ($articulos as $articulo) {
-            // Verificar si el artículo ya está guardado para este ticket y visita
-            $existe = DB::table('suministros')
-                ->where('idTickets', $ticketId)
-                ->where('idVisitas', $visitaId)
-                ->where('idArticulos', $articulo['id'])
-                ->exists();
-
-            if ($existe) {
-                // Si existe, actualizar la cantidad del artículo
-                DB::table('suministros')
-                    ->where('idTickets', $ticketId)
-                    ->where('idVisitas', $visitaId)
-                    ->where('idArticulos', $articulo['id'])
-                    ->update(['cantidad' => DB::raw('cantidad + ' . $articulo['cantidad'])]);
-            } else {
-                // Si no existe, insertar el artículo nuevo
-                DB::table('suministros')->insert([
-                    'idTickets' => $ticketId,
-                    'idVisitas' => $visitaId,
-                    'idArticulos' => $articulo['id'],
-                    'cantidad' => $articulo['cantidad'],
-                ]);
-            }
-        }
-
-        return response()->json(['message' => 'Suministros guardados correctamente.']);
-    }
 
 
 
@@ -5367,4 +5334,136 @@ class OrdenesHelpdeskController extends Controller
             return response()->json(['error' => 'Error al guardar las condiciones.'], 500);
         }
     }
+
+
+// En tu controlador, agrega estos métodos:
+
+public function obtenerSuministros($ticketId, $visitaId)
+{
+    try {
+        Log::info("🔍 Obteniendo suministros para ticket: $ticketId, visita: $visitaId");
+
+        // Usar select raw para forzar los nombres de campos
+        $suministros = DB::table('suministros')
+            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+            ->where('suministros.idTickets', $ticketId)
+            ->where('suministros.idVisitas', $visitaId)
+            ->select(
+                'suministros.idSuministros',
+                'suministros.idArticulos',
+                'suministros.cantidad',
+                'articulos.nombre',
+                DB::raw('articulos.idTipoArticulo as idTipoArticulo'), // ← FORZAR el nombre
+                'tipoarticulos.nombre as tipo_nombre'
+            )
+            ->get();
+
+        Log::info("📊 Suministros obtenidos:", $suministros->toArray());
+
+        return response()->json($suministros);
+    } catch (\Exception $e) {
+        Log::error('❌ Error al obtener suministros: ' . $e->getMessage());
+        return response()->json([], 500);
+    }
+}
+public function guardarSuministros(Request $request)
+{
+    try {
+        $articulos = $request->input('articulos');
+        $ticketId = $request->input('ticketId');
+        $visitaId = $request->input('visitaId');
+
+        Log::info('🔍 Validando visita seleccionada:', [
+            'ticketId' => $ticketId,
+            'visitaId' => $visitaId,
+            'articulos_count' => count($articulos)
+        ]);
+
+        // SOLO verificar por ticket y visita, sin importar el valor de vistaseleccionada
+        $visitaSeleccionada = DB::table('seleccionarvisita')
+            ->where('idTickets', $ticketId)
+            ->where('idVisitas', $visitaId)
+            ->first();
+
+        Log::info('🔍 Resultado de la consulta:', [
+            'existe_visita' => $visitaSeleccionada ? 'SÍ' : 'NO',
+            'datos_visita' => $visitaSeleccionada
+        ]);
+
+        if (!$visitaSeleccionada) {
+            Log::warning('❌ No se encontró visita seleccionada', [
+                'ticketId' => $ticketId,
+                'visitaId' => $visitaId
+            ]);
+            
+            return response()->json([
+                'error' => 'No existe una visita seleccionada para este ticket.'
+            ], 422);
+        }
+
+        Log::info('✅ Visita validada correctamente, procediendo a guardar suministros...');
+
+        foreach ($articulos as $articulo) {
+            // Verificar si ya existe el suministro
+            $existe = DB::table('suministros')
+                ->where('idTickets', $ticketId)
+                ->where('idVisitas', $visitaId)
+                ->where('idArticulos', $articulo['id'])
+                ->first();
+
+            if (!$existe) {
+                DB::table('suministros')->insert([
+                    'idArticulos' => $articulo['id'],
+                    'idTickets' => $ticketId,
+                    'idVisitas' => $visitaId,
+                    'cantidad' => $articulo['cantidad'],
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                Log::info('📦 Suministro insertado:', [
+                    'articulo_id' => $articulo['id'],
+                    'cantidad' => $articulo['cantidad']
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Artículos guardados correctamente.']);
+    } catch (\Exception $e) {
+        Log::error('❌ Error al guardar suministros: ' . $e->getMessage());
+        return response()->json(['error' => 'Error al guardar los artículos.'], 500);
+    }
+}
+public function actualizarSuministro(Request $request, $id)
+{
+    try {
+        DB::table('suministros')
+            ->where('idSuministros', $id)
+            ->update([
+                'cantidad' => $request->input('cantidad'),
+                'updated_at' => now()
+            ]);
+
+        return response()->json(['message' => 'Cantidad actualizada correctamente.']);
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar suministro: ' . $e->getMessage());
+        return response()->json(['error' => 'Error al actualizar la cantidad.'], 500);
+    }
+}
+
+public function eliminarSuministro($id)
+{
+    try {
+        DB::table('suministros')
+            ->where('idSuministros', $id)
+            ->delete();
+
+        return response()->json(['message' => 'Artículo eliminado correctamente.']);
+    } catch (\Exception $e) {
+        Log::error('Error al eliminar suministro: ' . $e->getMessage());
+        return response()->json(['error' => 'Error al eliminar el artículo.'], 500);
+    }
+}
+
 }

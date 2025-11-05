@@ -67,9 +67,14 @@
             </div>
         </div>
 
-        <!-- Filtros y búsqueda FUNCIONALES -->
-        <form method="GET" action="{{ route('solicitudarticulo.index') }}"
-            class="bg-white p-4 rounded-lg shadow-sm mb-6">
+        <!-- Filtros y búsqueda - SOLUCIÓN SIMPLIFICADA -->
+        <form method="GET" action="{{ route('solicitudarticulo.index') }}" class="bg-white p-4 rounded-lg shadow-sm mb-6">
+            <!-- Inputs hidden para mantener todos los filtros -->
+            <input type="hidden" name="tipo" value="{{ request('tipo') }}">
+            <input type="hidden" name="estado" value="{{ request('estado') }}">
+            <input type="hidden" name="urgencia" value="{{ request('urgencia') }}">
+            <input type="hidden" name="search" value="{{ request('search') }}">
+            
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex flex-wrap gap-2">
                     <!-- Filtro por tipo de solicitud -->
@@ -122,19 +127,69 @@
                         Alta
                     </button>
                 </div>
-                <div class="relative w-full md:w-64">
-                    <input type="text" name="search" placeholder="Buscar por código..."
-                        value="{{ request('search') }}"
-                        class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+                
+                <!-- Búsqueda -->
+                <div class="flex gap-2">
+                    <div class="relative w-full md:w-64">
+                        <input type="text" name="search" placeholder="Buscar por código..."
+                            value="{{ request('search') }}"
+                            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <button type="submit" 
+                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                        Buscar
+                    </button>
+                    @if(request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+                    <a href="{{ route('solicitudarticulo.index') }}" 
+                        class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+                        Limpiar
+                    </a>
+                    @endif
                 </div>
             </div>
+            
+            <!-- Mostrar filtros activos -->
+            @if(request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                    <span class="font-medium">Filtros activos:</span>
+                    <div class="flex flex-wrap gap-2">
+                        @if(request('tipo'))
+                            <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                Tipo: {{ request('tipo') == 'solicitud_articulo' ? 'Artículos' : 'Repuestos' }}
+                                <a href="{{ request()->fullUrlWithoutQuery('tipo') }}" class="ml-1 text-blue-600 hover:text-blue-800">×</a>
+                            </span>
+                        @endif
+                        @if(request('estado'))
+                            <span class="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                                Estado: {{ ucfirst(request('estado')) }}
+                                <a href="{{ request()->fullUrlWithoutQuery('estado') }}" class="ml-1 text-purple-600 hover:text-purple-800">×</a>
+                            </span>
+                        @endif
+                        @if(request('urgencia'))
+                            <span class="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
+                                Urgencia: {{ ucfirst(request('urgencia')) }}
+                                <a href="{{ request()->fullUrlWithoutQuery('urgencia') }}" class="ml-1 text-orange-600 hover:text-orange-800">×</a>
+                            </span>
+                        @endif
+                        @if(request('search'))
+                            <span class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                                Búsqueda: "{{ request('search') }}"
+                                <a href="{{ request()->fullUrlWithoutQuery('search') }}" class="ml-1 text-gray-600 hover:text-gray-800">×</a>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
         </form>
 
+        <!-- Resto del código permanece igual -->
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @forelse($solicitudes as $solicitud)
@@ -319,8 +374,9 @@
 
                     <!-- Footer de la Card -->
                     <div class="px-6 py-3 bg-gray-50 border-t flex justify-end space-x-2">
-                        <!-- Botón Ver - diferente según el tipo -->
+                        <!-- Botones para Artículos (AZUL) -->
                         @if ($solicitud->tipoorden == 'solicitud_articulo')
+                            <!-- Botón Ver -->
                             <a href="{{ route('solicitudarticulo.show', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,7 +388,33 @@
                                 </svg>
                                 Ver
                             </a>
+
+                            <!-- Botón Opciones -->
+                            <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                Opciones
+                            </a>
+
+                            <!-- Botón Editar - solo para pendientes -->
+                            @if ($solicitud->estado == 'pendiente')
+                                <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                    Editar
+                                </a>
+                            @endif
+
+                        <!-- Botones para Repuestos (VERDE) -->
                         @else
+                            <!-- Botón Ver -->
                             <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,20 +426,8 @@
                                 </svg>
                                 Ver
                             </a>
-                        @endif
 
-
-                         <!-- Botón Opciones - reemplaza al botón Ver -->
-                        @if ($solicitud->tipoorden == 'solicitud_articulo')
-                            <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
-                                class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-                                </svg>
-                                Opciones
-                            </a>
-                        @else
+                            <!-- Botón Opciones -->
                             <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,21 +436,9 @@
                                 </svg>
                                 Opciones
                             </a>
-                        @endif
 
-                        <!-- Botón Editar - solo para pendientes -->
-                        @if ($solicitud->estado == 'pendiente')
-                            @if ($solicitud->tipoorden == 'solicitud_articulo')
-                                <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
-                                    Editar
-                                </a>
-                            @else
+                            <!-- Botón Editar - solo para pendientes -->
+                            @if ($solicitud->estado == 'pendiente')
                                 <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
                                     class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,8 +460,20 @@
                             d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
                         </path>
                     </svg>
-                    <h3 class="mt-2 text-lg font-medium text-gray-900">No hay solicitudes registradas</h3>
-                    <p class="mt-1 text-gray-500 mb-4">Parece que no hay ninguna solicitud en el sistema.</p>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">
+                        @if(request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+                            No se encontraron solicitudes con los filtros aplicados
+                        @else
+                            No hay solicitudes registradas
+                        @endif
+                    </h3>
+                    <p class="mt-1 text-gray-500 mb-4">
+                        @if(request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+                            Intenta ajustar los filtros de búsqueda
+                        @else
+                            Parece que no hay ninguna solicitud en el sistema.
+                        @endif
+                    </p>
                     <button id="openModalBtnEmpty"
                         class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -412,6 +482,12 @@
                         </svg>
                         Crear primera solicitud
                     </button>
+                    @if(request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+                    <a href="{{ route('solicitudarticulo.index') }}" 
+                        class="ml-2 inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+                        Limpiar filtros
+                    </a>
+                    @endif
                 </div>
             @endforelse
         </div>
