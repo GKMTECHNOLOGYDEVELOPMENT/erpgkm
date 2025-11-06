@@ -89,6 +89,7 @@ use App\Helpers\PermisoHelper;
         </ul>
     @endif
 </li>
+        @if(PermisoHelper::tienePermiso('VER APPS GKM'))
 
                 <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
@@ -99,6 +100,9 @@ use App\Helpers\PermisoHelper;
                     </svg>
                     <span>Apps GKM</span>
                 </h2>
+
+                        @endif
+
 
                 <li class="nav-item">
                     <ul>
@@ -339,68 +343,90 @@ use App\Helpers\PermisoHelper;
                     </ul>
                 </li> 
 
-                <li class="menu nav-item">
-                    <button type="button" class="nav-link group"
-                        :class="{ 'active': activeDropdown === 'asociados' }"
-                        @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
-                        <div class="flex items-center">
+               @if(PermisoHelper::tienePermiso('VER ASOCIADOS'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'asociados' }"
+        @click="activeDropdown === 'asociados' ? activeDropdown = null : activeDropdown = 'asociados'">
+        <div class="flex items-center">
 
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17.25 6.75a3 3 0 11-6 0 3 3 0 016 0zM12 14.25a7.5 7.5 0 00-6 3.25M12 14.25a7.5 7.5 0 016 3.25M12 14.25v6.75M6.75 6.75a3 3 0 100 6 3 3 0 000-6zm10.5 0a3 3 0 100 6 3 3 0 000-6zM6.75 12.75V21m10.5-8.25v8.25" />
-                            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M17.25 6.75a3 3 0 11-6 0 3 3 0 016 0zM12 14.25a7.5 7.5 0 00-6 3.25M12 14.25a7.5 7.5 0 016 3.25M12 14.25v6.75M6.75 6.75a3 3 0 100 6 3 3 0 000-6zm10.5 0a3 3 0 100 6 3 3 0 000-6zM6.75 12.75V21m10.5-8.25v8.25" />
+            </svg>
 
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark ">Asociados</span>
-                        </div>
-                        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Asociados
+            </span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'asociados' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
 
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </div>
-                    </button>
-                    <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
-                        <li>
-                            <a href="{{ route('administracion.cliente-general') }}">Cliente General</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('administracion.tienda') }}">Tienda</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('administracion.cast') }}">Cast</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('administracion.clientes') }}">Clientes</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
-                        </li>
-                    </ul>
-                </li>
+    <ul x-cloak x-show="activeDropdown === 'asociados'" x-collapse class="sub-menu text-gray-500">
+
+        @if(PermisoHelper::tienePermiso('VER CLIENTE GENERAL'))
+        <li>
+            <a href="{{ route('administracion.cliente-general') }}">Cliente General</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER TIENDA'))
+        <li>
+            <a href="{{ route('administracion.tienda') }}">Tienda</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER CAST'))
+        <li>
+            <a href="{{ route('administracion.cast') }}">Cast</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER CLIENTES'))
+        <li>
+            <a href="{{ route('administracion.clientes') }}">Clientes</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER PROVEEDORES'))
+        <li>
+            <a href="{{ route('administracion.proveedores') }}">Proveedores</a>
+        </li>
+        @endif
+
+    </ul>
+</li>
+@endif
+
 
 
                  
 
-                <li class="menu nav-item">
-                    <a href="{{ route('asistencias.index') }}" class="nav-link group">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:!text-primary">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3.75 3.75h5.25v5.25H3.75V3.75zM14.25 3.75h6v6h-6V3.75zM3.75 14.25h5.25v6H3.75v-6zM14.25 14.25h2.25v2.25h-2.25v2.25h2.25v2.25h2.25v-2.25h2.25v-2.25h-2.25v-2.25h-2.25z" />
-                            </svg>
+          @if(PermisoHelper::tienePermiso('VER ASISTENCIAS'))
+<li class="menu nav-item">
+    <a href="{{ route('asistencias.index') }}" class="nav-link group">
+        <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:!text-primary">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3.75 3.75h5.25v5.25H3.75V3.75zM14.25 3.75h6v6h-6V3.75zM3.75 14.25h5.25v6H3.75v-6zM14.25 14.25h2.25v2.25h-2.25v2.25h2.25v2.25h2.25v-2.25h2.25v-2.25h-2.25v-2.25h-2.25z" />
+            </svg>
 
-                            <span
-                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                                Asistencias
-                            </span>
-                        </div>
-                    </a>
-                </li>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Asistencias
+            </span>
+        </div>
+    </a>
+</li>
+@endif
+
 
 
                 {{-- <li class="menu nav-item">
@@ -540,25 +566,29 @@ use App\Helpers\PermisoHelper;
                 </a>
             </li>
 
-            <li class="menu nav-item">
-                <a href="{{ route('usuario') }}" class="nav-link group">
-                    <div class="flex items-center">
+           @if(PermisoHelper::tienePermiso('VER USUARIOS'))
+<li class="menu nav-item">
+    <a href="{{ route('usuario') }}" class="nav-link group">
+        <div class="flex items-center">
 
-                        <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
-                            width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path
-                                d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12z"
-                                fill="currentColor" />
-                            <path opacity="0.7"
-                                d="M12 14c-3.314 0-6 2.686-6 6 0 .552.448 1 1 1h10c.552 0 1-.448 1-1 0-3.314-2.686-6-6-6z"
-                                fill="currentColor" />
-                        </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                    d="M12 12c2.485 0 4.5-2.015 4.5-4.5S14.485 3 12 3 7.5 5.015 7.5 7.5 9.515 12 12 12z"
+                    fill="currentColor" />
+                <path opacity="0.7"
+                    d="M12 14c-3.314 0-6 2.686-6 6 0 .552.448 1 1 1h10c.552 0 1-.448 1-1 0-3.314-2.686-6-6-6z"
+                    fill="currentColor" />
+            </svg>
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Usuarios</span>
-                    </div>
-                </a>
-            </li>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Usuarios
+            </span>
+        </div>
+    </a>
+</li>
+@endif
+
 
             {{-- <li class="menu nav-item">
                     <a href="{{ route('administracion.compra') }}" class="nav-link group">
@@ -849,53 +879,64 @@ use App\Helpers\PermisoHelper;
                         </li>
                     </ul>
                 </li> 
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'caracteristicas' }"
-                    @click="activeDropdown === 'caracteristicas' ? activeDropdown = null : activeDropdown = 'caracteristicas'">
-                    <div class="flex items-center">
+            @if(PermisoHelper::tienePermiso('VER DETALLES DEL ARTICULO'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'caracteristicas' }"
+        @click="activeDropdown === 'caracteristicas' ? activeDropdown = null : activeDropdown = 'caracteristicas'">
+        <div class="flex items-center">
 
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <rect x="3" y="4" width="18" height="2" rx="1"
-                                fill="currentColor" />
-                            <rect x="3" y="11" width="18" height="2" rx="1"
-                                fill="currentColor" />
-                            <rect x="3" y="18" width="18" height="2" rx="1"
-                                fill="currentColor" />
-                        </svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="4" width="18" height="2" rx="1" fill="currentColor" />
+                <rect x="3" y="11" width="18" height="2" rx="1" fill="currentColor" />
+                <rect x="3" y="18" width="18" height="2" rx="1" fill="currentColor" />
+            </svg>
 
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Detalles del Articulo
+            </span>
+        </div>
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Detalles
-                            del Articulo</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'caracteristicas' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
 
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'caracteristicas'" x-collapse
-                    class="sub-menu text-gray-500">
+    <ul x-cloak x-show="activeDropdown === 'caracteristicas'" x-collapse class="sub-menu text-gray-500">
 
-                    <li>
-                        <a href="{{ route('modelos.index') }}">Modelos</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('marcas.index') }}">Marcas</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('categorias.index') }}">Categoria</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('subcategoria.index') }}">Sub Categoria</a>
-                    </li>
-                </ul>
-            </li>
+        @if(PermisoHelper::tienePermiso('VER MODELOS'))
+        <li>
+            <a href="{{ route('modelos.index') }}">Modelos</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER MARCAS'))
+        <li>
+            <a href="{{ route('marcas.index') }}">Marcas</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER CATEGORIA'))
+        <li>
+            <a href="{{ route('categorias.index') }}">Categoria</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER SUB CATEGORIA'))
+        <li>
+            <a href="{{ route('subcategoria.index') }}">Sub Categoria</a>
+        </li>
+        @endif
+
+    </ul>
+</li>
+@endif
+
 
 
 
@@ -928,60 +969,67 @@ use App\Helpers\PermisoHelper;
                 </li> -->
 
 
-            <!--nuevo--->
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'productos' }"
-                    @click="activeDropdown === 'productos' ? activeDropdown = null : activeDropdown = 'productos'">
-                    <div class="flex items-center">
+         @if(PermisoHelper::tienePermiso('VER ARTICULOS'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'productos' }"
+        @click="activeDropdown === 'productos' ? activeDropdown = null : activeDropdown = 'productos'">
+        <div class="flex items-center">
 
-                        <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 8V6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V8"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path
-                                d="M4 8H20C20.5304 8 21.0391 8.21071 21.4142 8.58579C21.7893 8.96086 22 9.46957 22 10V18C22 18.5304 21.7893 19.0391 21.4142 19.4142C21.0391 19.7893 20.5304 20 20 20H4C3.46957 20 2.96086 19.7893 2.58579 19.4142C2.21071 19.0391 2 18.5304 2 18V10C2 9.46957 2.21071 8.96086 2.58579 8.58579C2.96086 8.21071 3.46957 8 4 8Z"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M16 13C16 14.6569 14.6569 16 13 16C11.3431 16 10 14.6569 10 13"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+            <svg class="group-hover:!text-primary shrink-0" width="20" height="20"
+                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 8V6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V8"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path
+                    d="M4 8H20C20.5304 8 21.0391 8.21071 21.4142 8.58579C21.7893 8.96086 22 9.46957 22 10V18C22 18.5304 21.7893 19.0391 21.4142 19.4142C21.0391 19.7893 20.5304 20 20 20H4C3.46957 20 2.96086 19.7893 2.58579 19.4142C2.21071 19.0391 2 18.5304 2 18V10C2 9.46957 2.21071 8.96086 2.58579 8.58579C2.96086 8.21071 3.46957 8 4 8Z"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M16 13C16 14.6569 14.6569 16 13 16C11.3431 16 10 14.6569 10 13"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Articulos</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
+            <span
+                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Articulos</span>
+        </div>
 
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
-                    <li>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'productos' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
 
-                        <a href="{{ route('producto.index') }}">Productos</a>
-                    </li>
-                    <li> <a href="{{ route('repuestos.index') }}">Repuestos</a></li>
-                    <li>
-                        <a href="{{ route('suministros.index') }}">Suministros</a>
-                    </li>
+    <ul x-cloak x-show="activeDropdown === 'productos'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER PRODUCTOS'))
+        <li>
+            <a href="{{ route('producto.index') }}">Productos</a>
+        </li>
+        @endif
 
-                    <li>
-                        <a href="{{ route('heramientas.index') }}">Heramientas</a>
-                    </li>
+        @if(PermisoHelper::tienePermiso('VER REPUESTOS'))
+        <li>
+            <a href="{{ route('repuestos.index') }}">Repuestos</a>
+        </li>
+        @endif
 
+        @if(PermisoHelper::tienePermiso('VER SUMINISTROS'))
+        <li>
+            <a href="{{ route('suministros.index') }}">Suministros</a>
+        </li>
+        @endif
 
-
-
-
-
-                </ul>
-            </li>
+        @if(PermisoHelper::tienePermiso('VER HERRAMIENTAS'))
+        <li>
+            <a href="{{ route('heramientas.index') }}">Herramientas</a>
+        </li>
+        @endif
+    </ul>
+</li>
+@endif
 
             {{--
                 <li class="menu nav-item">
@@ -1096,228 +1144,264 @@ use App\Helpers\PermisoHelper;
 
 
 
+@if(PermisoHelper::tienePermiso('VER ALMACEN'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'ubicaciones' }"
+        @click="activeDropdown === 'ubicaciones' ? activeDropdown = null : activeDropdown = 'ubicaciones'">
+        <div class="flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 2C8.686 2 6 4.686 6 8C6 12.6667 12 21 12 21C12 21 18 12.6667 18 8C18 4.686 15.314 2 12 2Z"
+                    stroke="currentColor" stroke-width="1.5" fill="none" />
+                <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.5" fill="none" />
+            </svg>
 
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'ubicaciones' }"
-                    @click="activeDropdown === 'ubicaciones' ? activeDropdown = null : activeDropdown = 'ubicaciones'">
-                    <div class="flex items-center">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 2C8.686 2 6 4.686 6 8C6 12.6667 12 21 12 21C12 21 18 12.6667 18 8C18 4.686 15.314 2 12 2Z"
-                                stroke="currentColor" stroke-width="1.5" fill="none" />
-                            <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="1.5"
-                                fill="none" />
-                        </svg>
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Almacen</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ubicaciones' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'ubicaciones'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('almacen.vista') }}">Vista</a>
-                    </li>
-                </ul>
-            </li>
+            <span
+                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Almacen</span>
+        </div>
+
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ubicaciones' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+
+    <ul x-cloak x-show="activeDropdown === 'ubicaciones'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER VISTA ALMACEN'))
+        <li>
+            <a href="{{ route('almacen.vista') }}">Vista</a>
+        </li>
+        @endif
+    </ul>
+</li>
+@endif
+
 
 
 
 
             
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'solicitud' }"
-                    @click="activeDropdown === 'solicitud' ? activeDropdown = null : activeDropdown = 'solicitud'">
-                    <div class="flex items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Solicitudes</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'solicitud' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'solicitud'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('solicitudingreso.index') }}">Solicitud de Ingreso</a>
-                    </li>
-                    <li>
-                            <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
-                        </li>
-                    <li>
-                        <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
-                    </li>
-                      <!-- <li>
-                        <a href="{{ route('solicitud.repuesto.index') }}">Solicitud de Repuesto</a>
-                    </li> -->
-                </ul>
-            </li>
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'ventas' }"
-                    @click="activeDropdown === 'ventas' ? activeDropdown = null : activeDropdown = 'ventas'">
-                    <div class="flex items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+       @if(PermisoHelper::tienePermiso('VER SOLICITUDES'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'solicitud' }"
+        @click="activeDropdown === 'solicitud' ? activeDropdown = null : activeDropdown = 'solicitud'">
+        <div class="flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Solicitudes
+            </span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'solicitud' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
 
+    <ul x-cloak x-show="activeDropdown === 'solicitud'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER SOLICITUD DE INGRESO'))
+        <li>
+            <a href="{{ route('solicitudingreso.index') }}">Solicitud de Ingreso</a>
+        </li>
+        @endif
 
+        @if(PermisoHelper::tienePermiso('VER SOLICITUD DE ARTICULO'))
+        <li>
+            <a href="{{ route('solicitudarticulo.index') }}">Solicitud de Articulo</a>
+        </li>
+        @endif
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ventas</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ventas' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'ventas'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('ventas.index') }}">Ventas</a>
-                    </li>
-                </ul>
-            </li>
-
-
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'compras' }"
-                    @click="activeDropdown === 'compras' ? activeDropdown = null : activeDropdown = 'compras'">
-                    <div class="flex items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M6 7L6 6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V7"
-                                stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M4 7H20L19 21H5L4 7Z" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M9 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                            <path d="M15 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
-
-
-
-
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Compras</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'compras' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'compras'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('compras.index') }}">Compras</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('entradasproveedores.index') }}">Entradas de proveedores</a>
-                    </li>
-                </ul>
-            </li>
-
-
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'devoluciones' }"
-                    @click="activeDropdown === 'devoluciones' ? activeDropdown = null : activeDropdown = 'devoluciones'">
-                    <div class="flex items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M8 12L5 15L8 18" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M5 15H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                stroke-linejoin="round" />
-                        </svg>
+        @if(PermisoHelper::tienePermiso('VER SOLICITUD DE CUSTODIA'))
+        <li>
+            <a href="{{ route('solicitudcustodia.index') }}">Solicitud de Custodia</a>
+        </li>
+        @endif
+    </ul>
+</li>
+@endif
 
 
 
 
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Devoluciones</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'devoluciones' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'devoluciones'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('devoluciones.index') }}">Devoluciones</a>
-                    </li>
-                </ul>
-            </li>
+        @if(PermisoHelper::tienePermiso('VER VENTAS'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'ventas' }"
+        @click="activeDropdown === 'ventas' ? activeDropdown = null : activeDropdown = 'ventas'">
+        <div class="flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17L9 11L13 15L21 7" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M21 17V7H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Ventas
+            </span>
+        </div>
+
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'ventas' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+
+    <ul x-cloak x-show="activeDropdown === 'ventas'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER VENTAS'))
+        <li>
+            <a href="{{ route('ventas.index') }}">Ventas</a>
+        </li>
+        @endif
+    </ul>
+</li>
+@endif
+
+
+@if(PermisoHelper::tienePermiso('VER COMPRAS'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'compras' }"
+        @click="activeDropdown === 'compras' ? activeDropdown = null : activeDropdown = 'compras'">
+        <div class="flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 7L6 6C6 4.34315 7.34315 3 9 3H15C16.6569 3 18 4.34315 18 6V7"
+                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M4 7H20L19 21H5L4 7Z" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M9 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                <path d="M15 11V13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Compras
+            </span>
+        </div>
+
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'compras' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+
+    <ul x-cloak x-show="activeDropdown === 'compras'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER COMPRAS'))
+        <li>
+            <a href="{{ route('compras.index') }}">Compras</a>
+        </li>
+        @endif
+        @if(PermisoHelper::tienePermiso('VER ENTRADAS PROVEEDORES'))
+        <li>
+            <a href="{{ route('entradasproveedores.index') }}">Entradas de proveedores</a>
+        </li>
+        @endif
+    </ul>
+</li>
+@endif
 
 
 
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'despacho' }"
-                    @click="activeDropdown === 'despacho' ? activeDropdown = null : activeDropdown = 'despacho'">
-                    <div class="flex items-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3 6H16V17H3V6Z" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M16 10H20L21.5 13V17H16V10Z" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                            <circle cx="6.5" cy="18.5" r="1.5" fill="currentColor" />
-                            <circle cx="18" cy="18.5" r="1.5" fill="currentColor" />
-                        </svg>
+          @if(PermisoHelper::tienePermiso('VER DEVOLUCIONES'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'devoluciones' }"
+        @click="activeDropdown === 'devoluciones' ? activeDropdown = null : activeDropdown = 'devoluciones'">
+        <div class="flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7L12 2L21 7V17L12 22L3 17V7Z" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8 12L5 15L8 18" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M5 15H13" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Despacho </span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'despacho' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'despacho'" x-collapse class="sub-menu text-gray-500">
-                    <li>
-                        <a href="{{ route('despacho.index') }}">Despacho</a>
-                    </li>
-                </ul>
-            </li>
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Devoluciones
+            </span>
+        </div>
+
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'devoluciones' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+
+    <ul x-cloak x-show="activeDropdown === 'devoluciones'" x-collapse class="sub-menu text-gray-500">
+        <li>
+            <a href="{{ route('devoluciones.index') }}">Devoluciones</a>
+        </li>
+    </ul>
+</li>
+@endif
+
+         @if(PermisoHelper::tienePermiso('VER DESPACHO'))
+<li class="menu nav-item">
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'despacho' }"
+        @click="activeDropdown === 'despacho' ? activeDropdown = null : activeDropdown = 'despacho'">
+        <div class="flex items-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 6H16V17H3V6Z" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M16 10H20L21.5 13V17H16V10Z" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="6.5" cy="18.5" r="1.5" fill="currentColor" />
+                <circle cx="18" cy="18.5" r="1.5" fill="currentColor" />
+            </svg>
+
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Despacho
+            </span>
+        </div>
+
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'despacho' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+
+    <ul x-cloak x-show="activeDropdown === 'despacho'" x-collapse class="sub-menu text-gray-500">
+        <li>
+            <a href="{{ route('despacho.index') }}">Despacho</a>
+        </li>
+    </ul>
+</li>
+@endif
 
 
             <!-- <li class="menu nav-item">
@@ -1353,64 +1437,83 @@ use App\Helpers\PermisoHelper;
                 </li> -->
 
 
-            <h2
-                class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
+            
+            @if(PermisoHelper::tienePermiso('VER TICKETS'))
 
-                <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
-                    stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                <span>TICKETS</span>
-            </h2>
+          <h2
+    class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'users' }"
-                    @click="activeDropdown === 'users' ? activeDropdown = null : activeDropdown = 'users'">
-                    <div class="flex items-center">
+    <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+    <span>TICKETS</span>
+</h2>
 
-                        <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0 w-6 h-6"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 2h6a2 2 0 012 2v2h-2V4H9v2H7V4a2 2 0 012-2zM5 8h14v12a2 2 0 01-2 2H7a2 2 0 01-2-2V8zm7 4a3 3 0 110 6 3 3 0 010-6zm0 0v-2m0 8v2" />
-                        </svg>
+            @endif
 
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
-                            de Trabajo</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'users' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'users'" x-collapse class="sub-menu text-gray-500">
-                    @if (Auth::check() && Auth::user()->idRol != 6)
-                    <li>
-                        <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
-                    </li>
-                    @endif
+<li class="menu nav-item">
+            @if(PermisoHelper::tienePermiso('VER ORDENES DE TRABAJO'))
 
-                    <li>
-                        <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
-                    </li>
-                    {{-- <li>
-                            <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
-            </li>
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'tickets' }"
+        @click="activeDropdown === 'tickets' ? activeDropdown = null : activeDropdown = 'tickets'">
+        <div class="flex items-center">
 
-            <li>
-                <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
-            </li> --}}
-            </ul>
-            </li>
+            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0 w-6 h-6"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 2h6a2 2 0 012 2v2h-2V4H9v2H7V4a2 2 0 012-2zM5 8h14v12a2 2 0 01-2 2H7a2 2 0 01-2-2V8zm7 4a3 3 0 110 6 3 3 0 010-6zm0 0v-2m0 8v2" />
+            </svg>
+
+            <span
+                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Ordenes
+                de Trabajo</span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'tickets' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+            @endif
+
+    <ul x-cloak x-show="activeDropdown === 'tickets'" x-collapse class="sub-menu text-gray-500">
+
+        @if(PermisoHelper::tienePermiso('VER SMART-TV'))
+        <li>
+            <a href="{{ route('ordenes.smart') }}">Smart-Tv</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER HELPDESK'))
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">HelpDesk</a>
+        </li>
+        @endif
+
+        {{-- @if(PermisoHelper::tienePermiso('VER_TEC_LABORATORIO'))
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
+        </li>
+        @endif
+
+        @if(PermisoHelper::tienePermiso('VER_TEC_LABOR_SMART'))
+        <li>
+            <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
+        </li>
+        @endif --}}
+    </ul>
+</li>
 
 
 
 
+
+                    @if(PermisoHelper::tienePermiso('VER AREA COMERCIAL'))
 
             <h2
                 class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
@@ -1422,42 +1525,51 @@ use App\Helpers\PermisoHelper;
                 <span>AREA COMERCIAL</span>
             </h2>
 
-            <li class="menu nav-item">
-                <button type="button" class="nav-link group"
-                    :class="{ 'active': activeDropdown === 'seguimiento' }"
-                    @click="activeDropdown === 'seguimiento' ? activeDropdown = null : activeDropdown = 'seguimiento'">
-                    <div class="flex items-center">
 
-                        <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
-                        <svg class="group-hover:!text-primary shrink-0 w-6 h-6" fill="none"
-                            stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16 16l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
-                            <circle cx="8" cy="7" r="3" />
-                            <path d="M4 21c0-2.5 2-4.5 4.5-4.5S13 18.5 13 21" stroke-linecap="round" />
-                        </svg>
+                        @endif
+
+        <li class="menu nav-item">
+                    @if(PermisoHelper::tienePermiso('VER SEGUIMIENTO CLIENTE'))
+
+    <button type="button" class="nav-link group"
+        :class="{ 'active': activeDropdown === 'seguimiento' }"
+        @click="activeDropdown === 'seguimiento' ? activeDropdown = null : activeDropdown = 'seguimiento'">
+        <div class="flex items-center">
+
+            <!-- Icono relacionado con Ordenes de Trabajo (Martillo - Trabajo manual) -->
+            <svg class="group-hover:!text-primary shrink-0 w-6 h-6" fill="none"
+                stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 16l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="8" cy="7" r="3" />
+                <path d="M4 21c0-2.5 2-4.5 4.5-4.5S13 18.5 13 21" stroke-linecap="round" />
+            </svg>
+
+            <span
+                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Seguimiento Cliente
+            </span>
+        </div>
+        <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'seguimiento' }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+    </button>
+            @endif
+
+    <ul x-cloak x-show="activeDropdown === 'seguimiento'" x-collapse class="sub-menu text-gray-500">
+        @if(PermisoHelper::tienePermiso('VER SEGUIMIENTO CLIENTE'))
+        <li>
+            <a href="{{ route('Seguimiento.index') }}">Clientes</a>
+        </li>
+        @endif
+    </ul>
+</li>
 
 
-                        <span
-                            class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Seguimiento
-                            Cliente</span>
-                    </div>
-                    <div class="rtl:rotate-180" :class="{ '!rotate-90': activeDropdown === 'seguimiento' }">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                </button>
-                <ul x-cloak x-show="activeDropdown === 'seguimiento'" x-collapse class="sub-menu text-gray-500">
-                    @if (Auth::check() && Auth::user()->idRol != 6)
-                    <li>
-                        <a href="{{ route('Seguimiento.index') }}">Clientes</a>
-                    </li>
-                    @endif
-                </ul>
-            </li>
 
             {{-- <li class="menu nav-item">
                     <button type="button" class="nav-link group"
@@ -1612,7 +1724,7 @@ use App\Helpers\PermisoHelper;
                     </ul>
                 </li> --}}
 
-            @if (Auth::check() && Auth::user()->idRol != 6)
+                    @if(PermisoHelper::tienePermiso('VER CONFIGURACION'))
             <h2
                 class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 

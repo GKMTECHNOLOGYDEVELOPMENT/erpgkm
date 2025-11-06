@@ -309,6 +309,7 @@
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             <path d="M12 6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                         </svg>
+                        
                         <!-- 🟢 Ping animado si hay notificaciones -->
                         <template x-if="notifications.length">
                             <span class="flex absolute w-3 h-3 ltr:right-0 rtl:left-0 top-0">

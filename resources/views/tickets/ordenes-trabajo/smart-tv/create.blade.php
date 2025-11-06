@@ -331,9 +331,9 @@
                                 <select id="idClienteGeneraloption" name="idClienteGeneraloption[]"
                                     placeholder="Seleccionar Cliente General" multiple>
                                     @foreach ($clientesGenerales as $clienteGeneral)
-                                        <option value="{{ $clienteGeneral->idClienteGeneral }}">
-                                            {{ $clienteGeneral->descripcion }}
-                                        </option>
+                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                        {{ $clienteGeneral->descripcion }}
+                                    </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -365,9 +365,9 @@
                                     <select id="idTipoDocumento" name="idTipoDocumento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Tipo Documento</option>
                                         @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
+                                        <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                            {{ $tipoDocumento->nombre }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -413,9 +413,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full">
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">
-                                                {{ $departamento['nombre_ubigeo'] }}
-                                            </option>
+                                        <option value="{{ $departamento['id_ubigeo'] }}">
+                                            {{ $departamento['nombre_ubigeo'] }}
+                                        </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -668,12 +668,10 @@
                             <!-- Categoría -->
                             <div>
                                 <label for="idCategoria" class="block text-sm font-medium">Categoria</label>
-                                <select id="idCategoria" name="idCategoria" class="select2 w-full"
-                                    style="display:none" required>
+                                <select id="idCategoria" name="idCategoria" class="w-full" style="width: 100%">
                                     <option value="" disabled selected>Seleccione la Categoría</option>
                                     @foreach ($categorias as $categoria)
-                                        <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}
-                                        </option>
+                                    <option value="{{ $categoria->idCategoria }}">{{ $categoria->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -1140,41 +1138,41 @@
         });
 
         // Función para validar un campo (compatible con Select2)
-function validateCampo(input) {
-    const errorId = `error-${input.id}`;
-    let errorText = document.getElementById(errorId);
-    
-    // Obtener valor de manera diferente para Select2
-    let valor;
-    if ($(input).hasClass('select2-hidden-accessible')) {
-        valor = $(input).select2('val');
-    } else {
-        valor = input.value;
-    }
+        function validateCampo(input) {
+            const errorId = `error-${input.id}`;
+            let errorText = document.getElementById(errorId);
 
-    if (!valor || valor.length === 0 || valor === "") {
-        $(input).addClass('border-red-500');
-        if (!errorText) {
-            errorText = document.createElement('p');
-            errorText.id = errorId;
-            errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
-            $(input).parent().append(errorText);
+            // Obtener valor de manera diferente para Select2
+            let valor;
+            if ($(input).hasClass('select2-hidden-accessible')) {
+                valor = $(input).select2('val');
+            } else {
+                valor = input.value;
+            }
+
+            if (!valor || valor.length === 0 || valor === "") {
+                $(input).addClass('border-red-500');
+                if (!errorText) {
+                    errorText = document.createElement('p');
+                    errorText.id = errorId;
+                    errorText.classList.add('text-sm', 'text-red-500', 'mt-1');
+                    $(input).parent().append(errorText);
+                }
+                errorText.textContent = "Campo vacío";
+            } else {
+                $(input).removeClass('border-red-500');
+                if (errorText) {
+                    errorText.remove();
+                }
+            }
         }
-        errorText.textContent = "Campo vacío";
-    } else {
-        $(input).removeClass('border-red-500');
-        if (errorText) {
-            errorText.remove();
-        }
-    }
-}
-// Para cada select con Select2
-$('#idCliente, #idClienteGeneral, #idTienda, #idMarca, #idModelo').on('select2:select', function(e) {
-    validateCampo(this);
-    // Fuerza la actualización del error
-    $(`#error-${this.id}`).remove();
-    $(this).removeClass('border-red-500');
-});
+        // Para cada select con Select2
+        $('#idCliente, #idClienteGeneral, #idTienda, #idMarca, #idModelo').on('select2:select', function(e) {
+            validateCampo(this);
+            // Fuerza la actualización del error
+            $(`#error-${this.id}`).remove();
+            $(this).removeClass('border-red-500');
+        });
         // Validación específica para fecha de compra
         function validateFechaCompra(input) {
             const fechaCompra = new Date(input.value);
@@ -1237,70 +1235,73 @@ $('#idCliente, #idClienteGeneral, #idTienda, #idMarca, #idModelo').on('select2:s
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Evento para cuando se ingresa un número de serie
-            document.getElementById('serie').addEventListener('input', function() {
-                let serie = this.value.trim(); // Obtener el valor de la serie
-                let select = document.getElementById(
-                    'selectTickets'); // El select donde se mostrarán los tickets
-                let label = document.querySelector("label[for='selectTickets']"); // Seleccionamos el label
+            // Inicializar Select2 para categoría cuando el modal se abre
+            const modeloModal = document.querySelector('[x-show="openModeloModal"]');
 
-                // Si el campo serie no está vacío
-                if (serie.length > 0) {
-                    fetch(`/tickets-por-serie/${serie}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            // Limpiar las opciones previas
-                            select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
-
-                            if (data.length > 0) {
-                                // Mostrar el select y el label
-                                select.style.display = 'block';
-                                label.style.display = 'block';
-
-                                data.forEach(ticket => {
-                                    let option = document.createElement('option');
-                                    option.value = ticket
-                                        .idTickets; // El valor será el id del ticket
-
-                                    // Formatear la fecha de creación
-                                    let fecha = new Date(ticket.fecha_creacion)
-                                        .toLocaleDateString('es-ES', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            year: 'numeric'
-                                        });
-
-                                    option.textContent =
-                                        `Ticket N°: ${ticket.numero_ticket} - Fecha: ${fecha}`;
-                                    select.appendChild(option);
-                                });
-                            } else {
-                                // Si no hay tickets, ocultar el select y el label
-                                select.style.display = 'none';
-                                label.style.display = 'none';
-
-                                let option = document.createElement('option');
-                                option.value = "";
-                                option.textContent = "No hay tickets asociados a esta serie";
-                                select.appendChild(option);
-                            }
-                        })
-                        .catch(error => console.error('Error al cargar los tickets:', error));
-                } else {
-                    // Limpiar el select y ocultarlo junto con el label si no se ingresa una serie
-                    select.style.display = 'none';
-                    label.style.display = 'none';
-                    select.innerHTML = '<option value="" selected>Seleccionar Ticket</option>';
-                }
+            // Observar cuando el modal se abre
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const isModalOpen = !modeloModal.style.display || modeloModal.style.display !== 'none';
+                        if (isModalOpen) {
+                            initializeModeloModal();
+                        }
+                    }
+                });
             });
 
-            // Evento para cuando se selecciona un ticket
-            document.getElementById('selectTickets').addEventListener('change', function() {
-                let ticketId = this.value;
-                if (ticketId) {
-                    window.open(`/ordenes/smart/${ticketId}/edit`, '_blank');
+            if (modeloModal) {
+                observer.observe(modeloModal, {
+                    attributes: true
+                });
+            }
+
+            function initializeModeloModal() {
+                // Inicializar Select2 para categoría
+                const categoriaSelect = document.getElementById('idCategoria');
+                if (categoriaSelect && !$(categoriaSelect).hasClass('select2-hidden-accessible')) {
+                    $(categoriaSelect).select2({
+                        placeholder: 'Seleccione la Categoría',
+                        width: '100%',
+                        dropdownParent: $(categoriaSelect).closest('.modal-scroll')
+                    });
+                    // Mostrar el select después de inicializar
+                    categoriaSelect.style.display = 'block';
                 }
-            });
+
+                // Cargar marcas si no se han cargado
+                const marcasSelect = document.getElementById('idMarcas');
+                if (marcasSelect && marcasSelect.children.length <= 1) {
+                    cargarMarcasModal();
+                }
+            }
+
+            function cargarMarcasModal() {
+                const $select = $('#idMarcas');
+
+                fetch('/get-marcas')
+                    .then(response => response.json())
+                    .then(data => {
+                        $select.empty();
+                        $select.append('<option value="" disabled selected>Seleccione la Marca</option>');
+
+                        data.forEach(marca => {
+                            $select.append(new Option(marca.nombre, marca.idMarca));
+                        });
+
+                        // Inicializar Select2 para marcas
+                        if (!$select.hasClass('select2-hidden-accessible')) {
+                            $select.select2({
+                                placeholder: 'Seleccione la Marca',
+                                width: '100%',
+                                dropdownParent: $select.closest('.modal-scroll')
+                            });
+                        }
+
+                        $select.show();
+                    })
+                    .catch(error => console.error('Error al cargar las marcas:', error));
+            }
         });
     </script>
 
@@ -1331,6 +1332,6 @@ $('#idCliente, #idClienteGeneral, #idTienda, #idMarca, #idModelo').on('select2:s
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
-    {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}
+   {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}
 
 </x-layout.default>

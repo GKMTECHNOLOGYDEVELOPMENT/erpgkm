@@ -133,23 +133,34 @@ Route::post('/check-email', [AuthController::class, 'checkEmail']);
 Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->name('auth.lockscreen');
 // Ruta para la pantalla de restablecimiento de contraseña
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
-Route::get('/', [AdministracionController::class, 'index'])->name('index')->middleware('auth');
-Route::get('/configuracion', [ConfiguracionController::class, 'index'])->name('configuracion')->middleware('auth');
+Route::middleware(['auth', 'permiso:VER DASHBOARD ADMINISTRACION'])->group(function () {
+    Route::get('/', [AdministracionController::class, 'index'])->name('index');
+});
+Route::get('/configuracion', [ConfiguracionController::class, 'index'])
+    ->name('configuracion')
+    ->middleware(['auth', 'permiso:VER CONFIGURACION']);
+
 Route::post('/configuracion', [ConfiguracionController::class, 'store'])->name('configuracion.store')->middleware('auth');
 Route::post('/configuracion/delete', [ConfiguracionController::class, 'delete'])->name('configuracion.delete');
 // Ruta para el dashboard de almacén
-Route::get('/almacen', [AlmacenController::class, 'index'])->name('almacen')->middleware('auth');
-// Ruta para el dashboard comercial
-Route::get('/comercial', [ComercialController::class, 'index'])->name('commercial')->middleware('auth');
+Route::middleware(['auth', 'permiso:VER DASHBOARD ALMACEN'])->group(function () {
+    Route::get('/almacen', [AlmacenController::class, 'index'])->name('almacen');
+});// Ruta para el dashboard comercial
+Route::middleware(['auth', 'permiso:VER DASHBOARD COMERCIAL'])->group(function () {
+    Route::get('/comercial', [ComercialController::class, 'index'])->name('commercial');
+});
 // Ruta para el dashboard de tickets
-Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets')->middleware('auth');
+Route::middleware(['auth', 'permiso:VER DASHBOARD TICKETS'])->group(function () {
+    Route::get('/tickets', [TicketsController::class, 'index'])->name('tickets');
+});
 // Ruta para Administración de Usuarios
 Route::get('/administracion/usuarios', [UsuariosController::class, 'index'])->name('administracion.usuarios')->middleware('auth');
 // Ruta para Administración de Compras
 Route::get('/administracion/compras', [ComprasController::class, 'index'])->name('administracion.compra')->middleware('auth');
 //Rutas para Clientes Generales
-Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])->name('administracion.cliente-general')->middleware('auth');
-Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])
+    ->name('administracion.cliente-general')
+    ->middleware(['auth', 'permiso:VER CLIENTE GENERAL']);Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 Route::get('/exportar-clientes-general', function () {
     return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
 })->name('clientes-general.exportExcel');
@@ -162,8 +173,9 @@ Route::get('/ubigeo/distritos/{provincia_id}', [UbigeoController::class, 'getDis
 Route::get('/get-provincia/{departamentoId}', [UbigeoController::class, 'getProvincias']);
 Route::get('/get-distrito/{provinciaId}', [UbigeoController::class, 'getDistritos']);
 //Rutas para Tiendas
-Route::get('/tienda', [TiendaController::class, 'index'])->name('administracion.tienda')->middleware('auth');
-Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
+Route::get('/tienda', [TiendaController::class, 'index'])
+    ->name('administracion.tienda')
+    ->middleware(['auth', 'permiso:VER TIENDA']);Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
@@ -185,7 +197,10 @@ Route::post('/check-nombre', function (Request $request) {
 // Ruta para Administracion de tiendas
 // Ruta para Administracion Subsidiario
 //Ruta para Administracion Cast
-Route::get('/cast', [CastController::class, 'index'])->name('administracion.cast')->middleware('auth');
+Route::get('/cast', [CastController::class, 'index'])
+    ->name('administracion.cast')
+    ->middleware(['auth', 'permiso:VER CAST']);
+
 Route::post('/cast/store', [CastController::class, 'store'])->name('cast.store');
 Route::get('/cast/{idCast}/edit', [CastController::class, 'edit'])->name('cast.edit');
 Route::put('/cast/{idCast}', [CastController::class, 'update'])->name('casts.update');
@@ -197,7 +212,9 @@ Route::get('/reporte-cast', [CastController::class, 'exportAllPDF'])->name('repo
 // Ruta para Administracion Subsidiario
 // Route::get('/sub-sidiario/create', [SubsidiarioController::class, 'create'])->name('administracion.create')->middleware('auth');
 //Ruta para Administracion Clientes
-Route::get('/clientes', [ClientesController::class, 'index'])->name('administracion.clientes');
+Route::get('/clientes', [ClientesController::class, 'index'])
+    ->name('administracion.clientes')
+    ->middleware(['auth', 'permiso:VER CLIENTES']);
 Route::post('/cliente/store', [ClientesController::class, 'store'])->name('cliente.store');
 Route::get('/cliente/{idCliente}/edit', [ClientesController::class, 'edit'])->name('cliente.edit');
 Route::put('/clientes/{idCliente}', [ClientesController::class, 'update'])->name('clientes.update');
@@ -206,7 +223,9 @@ Route::get('/exportar-clientes', function () {
 })->name('clientes.exportExcel');
 Route::get('/reporte-clientes', [ClientesController::class, 'exportAllPDF'])->name('reporte.clientes');
 //Ruta para Administracion Asistencia
-Route::get('/asistencias', [AsistenciaController::class, 'index'])->name('asistencias.index');
+Route::get('/usuario', [UsuarioController::class, 'index'])
+    ->name('usuario')
+    ->middleware(['auth', 'permiso:VER USUARIOS']);
 Route::post('/asistencias/actualizar-observacion', [AsistenciaController::class, 'actualizarEstadoObservacion']);
 Route::get('/asistencias/observacion/{id}', [AsistenciaController::class, 'obtenerImagenesObservacion']);
 Route::get('/asistencias/historial/{id}', [AsistenciaController::class, 'verHistorialUsuario'])->name('asistencias.historial.usuario');
@@ -214,7 +233,9 @@ Route::post('/asistencias/responder-observacion', [AsistenciaController::class, 
 Route::get('/asistencias/observaciones-dia/{idUsuario}/{fecha}', [AsistenciaController::class, 'observacionesPorDia']);
 Route::get('/asistencias/listado', [AsistenciaController::class, 'getAsistencias'])->name('asistencias.listado');
 //Ruta para Administracion Proveedores
-Route::get('/proveedores', [ProveedoresController::class, 'index'])->name('administracion.proveedores')->middleware('auth');
+Route::get('/proveedores', [ProveedoresController::class, 'index'])
+    ->name('administracion.proveedores')
+    ->middleware(['auth', 'permiso:VER PROVEEDORES']);
 Route::post('/proveedores/store', [ProveedoresController::class, 'store'])->name('proveedor.store');
 Route::get('/proveedores/{idProveedor}/edit', [ProveedoresController::class, 'edit'])->name('proveedor.edit');
 Route::put('/proveedores/{idProveedor}', [ProveedoresController::class, 'update'])->name('proveedores.update');
@@ -224,13 +245,34 @@ Route::get('/exportar-proveedores', function () {
 Route::get('/reporte-proveedores', [ProveedoresController::class, 'exportAllPDF'])->name('proveedores.pdf');
 //Ruta para administracion cotizaciones
 Route::get('/cotizaciones/crear-cotizacion', [cotizacionController::class, 'index'])->name('cotizaciones.crear-cotizacion')->middleware('auth');
-Route::get('/apps/chat', [ChatController::class, 'index'])->name('apps.chat');
-Route::get('/apps/mailbox', [MailboxController::class, 'index'])->name('apps.mailbox');
-Route::get('/apps/todolist', [TodolistController::class, 'index'])->name('apps.todolist');
-Route::get('/apps/notes', [NotesController::class, 'index'])->name('apps.notes');
-Route::get('/apps/scrumboard', [ScrumboardController::class, 'index'])->name('apps.scrumboard');
-Route::get('/apps/contacts', [ContactsController::class, 'index'])->name('apps.contacts');
-Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.calendar');
+Route::get('/apps/chat', [ChatController::class, 'index'])
+    ->name('apps.chat')
+    ->middleware(['auth', 'permiso:VER CHAT']);
+
+Route::get('/apps/mailbox', [MailboxController::class, 'index'])
+    ->name('apps.mailbox')
+    ->middleware(['auth', 'permiso:VER CORREO']);
+
+Route::get('/apps/todolist', [TodolistController::class, 'index'])
+    ->name('apps.todolist')
+    ->middleware(['auth', 'permiso:VER LISTA CORREO']);
+
+Route::get('/apps/notes', [NotesController::class, 'index'])
+    ->name('apps.notes')
+    ->middleware(['auth', 'permiso:VER NOTAS']);
+
+Route::get('/apps/scrumboard', [ScrumboardController::class, 'index'])
+    ->name('apps.scrumboard')
+    ->middleware(['auth', 'permiso:VER SCRUMBOARD']);
+
+Route::get('/apps/contacts', [ContactsController::class, 'index'])
+    ->name('apps.contacts')
+    ->middleware(['auth', 'permiso:VER CONTACTOS']);
+
+Route::get('/apps/calendar', [CalendarController::class, 'index'])
+    ->name('apps.calendar')
+    ->middleware(['auth', 'permiso:VER CALENDARIO']);
+
 // Route::view('/apps/chat', 'apps.chat');
 // Route::view('/apps/mailbox', 'apps.mailbox');
 // Route::view('/apps/todolist', 'apps.todolist');
@@ -241,7 +283,6 @@ Route::get('/apps/calendar', [CalendarController::class, 'index'])->name('apps.c
 /// MODULO DE ALMACEN ///
 // INICIO CATEGORIA ///
 Route::prefix('categoria')->name('categorias.')->group(function () {
-    Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [CategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [CategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
     Route::put('/update/{id}', [CategoriaController::class, 'update'])->name('update'); // Actualizar una categoría
@@ -253,6 +294,13 @@ Route::prefix('categoria')->name('categorias.')->group(function () {
         return Excel::download(new CategoriaExport, 'categorias.xlsx');
     })->name('exportExcel');
 });
+
+Route::prefix('categoria')->name('categorias.')->middleware('permiso:VER CATEGORIA')->group(function () {
+    Route::get('/', [CategoriaController::class, 'index'])->name('index'); // Index
+});
+
+
+
 
 
 
@@ -302,7 +350,6 @@ Route::delete('categorias/{id}', [CategoriaController::class, 'destroy'])->name(
 /// FIN CATEGORIA ///
 /// INICIO MARCA ///
 Route::prefix('marcas')->name('marcas.')->group(function () {
-    Route::get('/', [MarcaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [MarcaController::class, 'store'])->name('store'); // Guardar una nueva marca
     Route::get('/{id}/edit', [MarcaController::class, 'edit'])->name('edit'); // Editar una marca
     Route::put('/update/{id}', [MarcaController::class, 'update'])->name('update'); // Actualizar una marca
@@ -315,11 +362,15 @@ Route::prefix('marcas')->name('marcas.')->group(function () {
     })->name('exportExcel');
 });
 
+Route::prefix('marcas')->name('marcas.')->middleware('permiso:VER MARCAS')->group(function () {
+    Route::get('/', [MarcaController::class, 'index'])->name('index'); // Index
+});
+
+
 /// FI
 /// FIN MARCA ///
 /// INICIO MODELO ///
 Route::prefix('modelos')->name('modelos.')->group(function () {
-    Route::get('/', [ModelosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::post('/store', [ModelosController::class, 'store'])->name('store'); // Guardar un nuevo modelo
     Route::get('/{id}/edit', [ModelosController::class, 'edit'])->name('edit'); // Editar un modelo
     Route::put('/update/{id}', [ModelosController::class, 'update'])->name('update'); // Actualizar un modelo
@@ -331,6 +382,15 @@ Route::prefix('modelos')->name('modelos.')->group(function () {
         return Excel::download(new ModeloExport, 'modelos.xlsx');
     })->name('exportExcel');
 });
+
+Route::prefix('modelos')->name('modelos.')->middleware('permiso:VER MODELOS')->group(function () {
+    Route::get('/', [ModelosController::class, 'index'])->name('index'); // Index
+});
+
+
+
+
+
 /// FIN MODELO ///
 /// INICIO ARTICULOS ///
 Route::prefix('articulos')->name('articulos.')->group(function () {
@@ -353,7 +413,6 @@ Route::prefix('articulos')->name('articulos.')->group(function () {
 });
 /// INICIO ARTICULOS ///
 Route::prefix('repuestos')->name('repuestos.')->group(function () {
-    Route::get('/', [RepuestosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/entrada', [EntradaController::class, 'entrada'])->name('entrada');
@@ -371,6 +430,12 @@ Route::prefix('repuestos')->name('repuestos.')->group(function () {
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'repuestos.xlsx');
     })->name('exportExcel');
+});
+
+Route::prefix('repuestos')->name('repuestos.')->group(function () {
+    Route::get('/', [RepuestosController::class, 'index'])
+        ->name('index')
+        ->middleware('permiso:VER REPUESTOS');
 });
 /// INICIO KARDEX ///
 Route::prefix('kardex')->name('kardex.')->group(function () {
@@ -501,7 +566,6 @@ Route::prefix('devoluciones')->name('devoluciones.')->group(function () {
 });
 /// INICIO ARTICULOS ///
 Route::prefix('heramientas')->name('heramientas.')->group(function () {
-    Route::get('/', [HeramientasController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [HeramientasController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [HeramientasController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
@@ -517,9 +581,15 @@ Route::prefix('heramientas')->name('heramientas.')->group(function () {
         return Excel::download(new ArticuloExport, 'heramientas.xlsx');
     })->name('exportExcel');
 });
+
+
+Route::prefix('heramientas')->name('heramientas.')->group(function () {
+    Route::get('/', [HeramientasController::class, 'index'])
+        ->name('index')
+        ->middleware('permiso:VER HERRAMIENTAS');
+});
 /// INICIO ARTICULOS ///
 Route::prefix('suministros')->name('suministros.')->group(function () {
-    Route::get('/', [SuministrosController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [SuministrosController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store/suministro', [SuministrosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [SuministrosController::class, 'edit'])->name('edit'); // Editar un artículo
@@ -535,9 +605,14 @@ Route::prefix('suministros')->name('suministros.')->group(function () {
         return Excel::download(new ArticuloExport, 'suministros.xlsx');
     })->name('exportExcel');
 });
+
+Route::prefix('suministros')->name('suministros.')->group(function () {
+    Route::get('/', [SuministrosController::class, 'index'])
+        ->name('index')
+        ->middleware('permiso:VER SUMINISTROS');
+});
 /// INICIO ARTICULOS ///
 Route::prefix('producto')->name('producto.')->group(function () {
-    Route::get('/', [ProductoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [ProductoController::class, 'create'])->name('create'); // Formulario de creación
     Route::post('/store', [ProductoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
     Route::get('/{id}/edit', [ProductoController::class, 'edit'])->name('edit'); // Editar un artículo
@@ -553,6 +628,12 @@ Route::prefix('producto')->name('producto.')->group(function () {
     Route::get('/exportar-excel', function () {
         return Excel::download(new ArticuloExport, 'producto.xlsx');
     })->name('exportExcel');
+});
+
+Route::prefix('producto')->name('producto.')->group(function () {
+    Route::get('/', [ProductoController::class, 'index'])
+        ->name('index')
+        ->middleware('permiso:VER PRODUCTOS'); // Solo quien tenga permiso
 });
 
 Route::prefix('kardex')->name('kardex.')->group(function () {
@@ -584,7 +665,6 @@ Route::prefix('kits')->name('almacen.kits.')->group(function () {
 });
 // INICIO CATEGORIA ///
 Route::prefix('subcategoria')->name('subcategoria.')->group(function () {
-    Route::get('/', [SubcategoriaController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [SubcategoriaController::class, 'create'])->name('create'); // Guardar una nueva categoría
     Route::post('/store', [SubcategoriaController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SubcategoriaController::class, 'edit'])->name('edit'); // Editar una categoría
@@ -599,10 +679,13 @@ Route::prefix('subcategoria')->name('subcategoria.')->group(function () {
     })->name('exportExcel');
 });
 
+Route::prefix('subcategoria')->name('subcategoria.')->middleware('permiso:VER SUB CATEGORIA')->group(function () {
+    Route::get('/', [SubcategoriaController::class, 'index'])->name('index'); // Index
+});
+
 
 // INICIO CATEGORIA ///
 Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function () {
-    Route::get('/', [SolicitudarticuloController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [SolicitudarticuloController::class, 'create'])->name('create'); // Guardar una nueva categoría
     Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
@@ -626,6 +709,10 @@ Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'ac
     
 });
 
+    Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])
+        ->name('solicitudarticulo.index')
+        ->middleware('permiso:VER SOLICITUD DE ARTICULO');
+
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
@@ -642,7 +729,6 @@ Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'ac
 
 // INICIO CATEGORIA ///
 Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () {
-    Route::get('/', [SolicitudingresoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [SolicitudarticuloController::class, 'create'])->name('create'); // Guardar una nueva categoría
     Route::post('/store', [SolicitudarticuloController::class, 'store'])->name('store'); // Guardar una nueva categoría
     Route::get('/{id}/edit', [SolicitudarticuloController::class, 'edit'])->name('edit'); // Editar una categoría
@@ -658,9 +744,11 @@ Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () 
     Route::get('/exportar-excel', function () {
         return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
     })->name('exportExcel');
-
-
 });
+
+   Route::get('solicitudingreso/', [SolicitudingresoController::class, 'index'])
+        ->name('solicitudingreso.index')
+        ->middleware('permiso:VER SOLICITUD DE INGRESO');
 
 Route::get('/solicitudes-ingreso/por-compra/{compraId}', [SolicitudIngresoController::class, 'porCompra'])->name('solicitudes.por-compra');
 Route::post('/solicitudes-ingreso/procesar', [SolicitudIngresoController::class, 'procesar'])->name('solicitudes.procesar');
@@ -763,12 +851,13 @@ Route::get('/desplazamiento-imagen/{idVisita}', [OrdenesTrabajoController::class
 Route::get('/api/obtenerVisitas/{ticketId}', [OrdenesTrabajoController::class, 'obtenerVisitas']);
 Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', 'TicketFlujoController@update')->name('ticketflujo.update');
 //INICIO TICKETS///
+
+
 /// INICIO ÓRDENES DE TRABAJO ///
 Route::prefix('ordenes')->name('ordenes.')->group(function () {
     // Vista principal de órdenes de trabajo
     Route::get('/', [OrdenesTrabajoController::class, 'index'])->name('index');
     // ***** RUTAS PARA SMART-TV *****
-    Route::get('/smart', [OrdenesTrabajoController::class, 'smarttable'])->name('smart');
     Route::get('/create-smart/', [OrdenesTrabajoController::class, 'createsmart'])->name('createsmart')->middleware('auth');
     Route::post('/storesmart', [OrdenesTrabajoController::class, 'storesmart'])->name('storesmart')->middleware('auth');
     Route::get('smart/{id}/edit', [OrdenesTrabajoController::class, 'edit'])->name('edit')->middleware('auth');
@@ -798,7 +887,6 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     Route::get('/{idOt}/check-updates', [OrdenesTrabajoController::class, 'checkUpdates'])
         ->name('checkUpdates');
     // ***** RUTAS PARA HELPDESK *****
-    Route::get('/helpdesk', [OrdenesHelpdeskController::class, 'helpdesk'])->name('helpdesk');
     Route::get('/create-helpdesk', [OrdenesHelpdeskController::class, 'createhelpdesk'])->name('createhelpdesk');
     Route::post('/storehelpdesk', [OrdenesHelpdeskController::class, 'storehelpdesk'])->name('storehelpdesk')->middleware('auth');
     Route::get('/helpdesk/levantamiento/{id}/edit', [OrdenesHelpdeskController::class, 'editHelpdesk'])->name('helpdesk.levantamiento.edit');
@@ -839,6 +927,16 @@ Route::prefix('ordenes')->name('ordenes.')->group(function () {
     // ***** VALIDACIONES *****
     Route::post('/check-nombre', [OrdenesTrabajoController::class, 'checkNombre'])->name('checkNombre');
 });
+
+Route::get('ordenes/smart', [OrdenesTrabajoController::class, 'smarttable'])
+    ->name('ordenes.smart')
+    ->middleware('permiso:VER SMART-TV');
+
+Route::get('ordenes/helpdesk', [OrdenesHelpdeskController::class, 'helpdesk'])
+    ->name('ordenes.helpdesk')
+    ->middleware('permiso:VER HELPDESK');
+
+
 
 Route::get('/informe/vista-previa-imagen/{idOt}/{idVisita}', [OrdenesTrabajoController::class, 'vistaPreviaImagen'])->name('informe.vista-previa.imagen');
 Route::get('/ordenes/helpdesk/soporte/{idOt}/vista-previa/{idVisita}/{tipo?}', [OrdenesHelpdeskController::class, 'vistaPreviaImagen'])
@@ -903,7 +1001,9 @@ Route::post('/usuarios/{id}/update', [UsuarioController::class, 'update'])->name
 // Rutas para obtener modelos por marca
 Route::get('/modelos/{idMarca}', [OrdenesTrabajoController::class, 'obtenerModelosPorMarca']);
 Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('perfil');
-Route::get('/usuario', [UsuarioController::class, 'index'])->name('usuario');
+Route::get('/asistencias', [AsistenciaController::class, 'index'])
+    ->name('asistencias.index')
+    ->middleware(['auth', 'permiso:VER ASISTENCIAS']);
 Route::get('/create/usuario', [UsuarioController::class, 'create'])->name('usuario.create');
 Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name('usuario.edit');
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
@@ -1205,7 +1305,10 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     // Rutas para tickets
-    Route::get('Seguimiento-Cliente/', [ClienteSeguimientoController::class, 'index'])->name('Seguimiento.index');
+ // Solo ver lista
+    Route::get('Seguimiento-Cliente/', [ClienteSeguimientoController::class, 'index'])
+        ->name('Seguimiento.index')
+        ->middleware('permiso:VER SEGUIMIENTO CLIENTE');
     Route::get('Seguimiento-Cliente/create', [ClienteSeguimientoController::class, 'tabsseguimiento'])->name('Seguimiento.create');
     Route::post('Seguimiento-Cliente/store', [ClienteSeguimientoController::class, 'store'])->name('Seguimiento.store');
     Route::get('Seguimiento-Cliente/{id}/edit', [ClienteSeguimientoController::class, 'edit'])->name('Seguimiento.edit');
@@ -1417,6 +1520,11 @@ if (app()->environment('local')) {
 
 
 Route::get('/preview/custodia', [CustodiaController::class, 'index'])->name('solicitudcustodia.index');
+
+Route::get('/preview/custodia', [CustodiaController::class, 'index'])
+    ->name('solicitudcustodia.index')
+    ->middleware('permiso:VER SOLICITUD DE CUSTODIA');
+
 Route::get('/custodia/create', [CustodiaController::class, 'create'])->name('solicitudcustodia.create');
 
 // Guardar nueva custodia
@@ -1493,7 +1601,9 @@ Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoControlle
 Route::post('/solicitud-ingreso/{id}/actualizar', [SolicitudIngresoController::class, 'actualizarSolicitud']);
 
 Route::get('/almacen/vista', [UbicacionesVistaController::class, 'vistaAlmacen'])
-    ->name('almacen.vista');
+    ->name('almacen.vista')
+    ->middleware('permiso:VER VISTA ALMACEN');
+
 Route::get('/almacen/ubicaciones/detalle/{rack}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
 
 // Rutas para fotos de custodia (BLOB en base de datos)
