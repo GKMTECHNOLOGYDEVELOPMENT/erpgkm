@@ -21,74 +21,254 @@ use Illuminate\Support\Facades\Validator;
 
 class cotizacionController extends Controller
 {
-    public function index () {
+    public function index()
+    {
         return view('cotizaciones.index');
     }
 
-   /**
- * Obtener todas las cotizaciones para el index (API)
- */
-public function getCotizaciones(Request $request)
-{
-    try {
-        $query = Cotizacion::with(['cliente', 'moneda'])
-            ->select('*')
-            ->orderBy('fecha_emision', 'desc');
+    /**
+     * Obtener todas las cotizaciones para el index (API)
+     */
 
-        // Filtro por estado
-        if ($request->has('estado') && $request->estado != '') {
-            $query->where('estado_cotizacion', $request->estado);
+    public function edit($id)
+    {
+        try {
+            // Buscar la cotización con todas sus relaciones
+            $cotizacion = Cotizacion::with([
+                'cliente',
+                'moneda',
+                'ticket',
+                'productos.articulo'
+            ])->findOrFail($id);
+
+            // Obtener datos adicionales para el formulario
+            $clientes = Cliente::where('estado', 1)->get();
+            $monedas = Moneda::all();
+            $terminosPago = Credito::all();
+
+            return view('cotizaciones.edit', compact(
+                'cotizacion',
+                'clientes',
+                'monedas',
+                'terminosPago'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error al cargar formulario de edición: ' . $e->getMessage());
+            return redirect()->route('cotizaciones.index')
+                ->with('error', 'Cotización no encontrada');
         }
-
-        // Filtro por mes
-        if ($request->has('mes') && $request->mes != '') {
-            $query->whereMonth('fecha_emision', $request->mes);
-        }
-
-        // Filtro por búsqueda - CORREGIDO: sin columna empresa
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('numero_cotizacion', 'LIKE', "%{$search}%")
-                  ->orWhereHas('cliente', function($q2) use ($search) {
-                      $q2->where('nombre', 'LIKE', "%{$search}%")
-                         ->orWhere('documento', 'LIKE', "%{$search}%") // Buscar por documento también
-                         ->orWhere('email', 'LIKE', "%{$search}%");
-                  });
-            });
-        }
-
-        $cotizaciones = $query->get()->map(function($cotizacion) {
-            return [
-                'id' => $cotizacion->idCotizaciones,
-                'cotizacionNo' => $cotizacion->numero_cotizacion,
-                'cliente' => [
-                    'nombre' => $cotizacion->cliente->nombre ?? 'N/A',
-                    'documento' => $cotizacion->cliente->documento ?? 'N/A', // Usar documento en lugar de empresa
-                    'email' => $cotizacion->cliente->email ?? 'N/A'
-                ],
-                'fechaEmision' => $cotizacion->fecha_emision,
-                'validaHasta' => $cotizacion->valida_hasta,
-                'total' => (float) $cotizacion->total,
-                'moneda' => $cotizacion->moneda->simbolo ?? 'PEN',
-                'incluirIGV' => (bool) $cotizacion->incluir_igv,
-                'estado' => $cotizacion->estado_cotizacion
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'cotizaciones' => $cotizaciones
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error al obtener cotizaciones: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al cargar las cotizaciones'
-        ], 500);
     }
-}
+
+    /**
+     * Actualizar cotización
+     */
+    public function update(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        try {
+            Log::info('Iniciando actualización de cotización', $request->all());
+
+            $cotizacion = Cotizacion::findOrFail($id);
+
+            $validator = Validator::make($request->all(), [
+                'numero_cotizacion' => 'required|string|max:255|unique:cotizaciones,numero_cotizacion,' . $id . ',idCotizaciones',
+                'fecha_emision' => 'required|date',
+                'valida_hasta' => 'required|date',
+                'idCliente' => 'required|exists:cliente,idCliente',
+                'idMonedas' => 'required|exists:monedas,idMonedas',
+                'subtotal' => 'required|numeric|min:0',
+                'igv' => 'required|numeric|min:0',
+                'total' => 'required|numeric|min:0',
+                'items' => 'required|array|min:1',
+                'items.*.articulo_id' => 'required|exists:articulos,idArticulos',
+                'items.*.cantidad' => 'required|integer|min:1',
+                'items.*.precio_unitario' => 'required|numeric|min:0',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errores de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Actualizar la cotización
+            $cotizacion->update([
+                'numero_cotizacion' => $request->numero_cotizacion,
+                'fecha_emision' => $request->fecha_emision,
+                'valida_hasta' => $request->valida_hasta,
+                'subtotal' => $request->subtotal,
+                'igv' => $request->igv,
+                'total' => $request->total,
+                'incluir_igv' => $request->incluir_igv ?? true,
+                'terminos_condiciones' => $request->terminos_condiciones,
+                'dias_validez' => $request->dias_validez ?? 30,
+                'terminos_pago' => $request->terminos_pago,
+                'estado_cotizacion' => $request->estado_cotizacion ?? 'pendiente',
+                'ot' => $request->ot,
+                'serie' => $request->serie,
+                'visita_id' => $request->visita_id,
+                'idCliente' => $request->idCliente,
+                'idMonedas' => $request->idMonedas,
+                'idTickets' => $request->idTickets,
+                'idTienda' => $request->idTienda,
+            ]);
+
+            // Eliminar productos existentes
+            CotizacionProducto::where('cotizacion_id', $cotizacion->idCotizaciones)->delete();
+
+            // Agregar nuevos productos
+            foreach ($request->items as $item) {
+                CotizacionProducto::create([
+                    'cotizacion_id' => $cotizacion->idCotizaciones,
+                    'articulo_id' => $item['articulo_id'],
+                    'descripcion' => $item['descripcion'],
+                    'codigo_repuesto' => $item['codigo_repuesto'] ?? null,
+                    'precio_unitario' => $item['precio_unitario'],
+                    'cantidad' => $item['cantidad'],
+                    'subtotal' => $item['subtotal'],
+                ]);
+            }
+
+            DB::commit();
+
+            Log::info('Cotización actualizada exitosamente', [
+                'cotizacion_id' => $cotizacion->idCotizaciones,
+                'numero_cotizacion' => $cotizacion->numero_cotizacion
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cotización actualizada correctamente',
+                'cotizacion_id' => $cotizacion->idCotizaciones
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error al actualizar cotización: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la cotización: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function detalle($id)
+    {
+        try {
+            $cotizacion = Cotizacion::with([
+                'cliente',
+                'moneda',
+                'ticket.tienda',
+                'productos.articulo'
+            ])->findOrFail($id);
+
+            return view('cotizaciones.detalle', compact('cotizacion'));
+        } catch (\Exception $e) {
+            Log::error('Error al cargar detalle de cotización: ' . $e->getMessage());
+            return redirect()->route('cotizaciones.index')
+                ->with('error', 'Cotización no encontrada');
+        }
+    }
+
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $cotizacion = Cotizacion::findOrFail($id);
+
+            // Eliminar productos relacionados
+            CotizacionProducto::where('cotizacion_id', $id)->delete();
+
+            // Eliminar la cotización
+            $cotizacion->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cotización eliminada correctamente'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error al eliminar cotización: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la cotización: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    public function getCotizaciones(Request $request)
+    {
+        try {
+            $query = Cotizacion::with(['cliente', 'moneda'])
+                ->select('*')
+                ->orderBy('fecha_emision', 'desc');
+
+            // Filtro por estado
+            if ($request->has('estado') && $request->estado != '') {
+                $query->where('estado_cotizacion', $request->estado);
+            }
+
+            // Filtro por mes
+            if ($request->has('mes') && $request->mes != '') {
+                $query->whereMonth('fecha_emision', $request->mes);
+            }
+
+            // Filtro por búsqueda - CORREGIDO: sin columna empresa
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('numero_cotizacion', 'LIKE', "%{$search}%")
+                        ->orWhereHas('cliente', function ($q2) use ($search) {
+                            $q2->where('nombre', 'LIKE', "%{$search}%")
+                                ->orWhere('documento', 'LIKE', "%{$search}%") // Buscar por documento también
+                                ->orWhere('email', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            $cotizaciones = $query->get()->map(function ($cotizacion) {
+                return [
+                    'id' => $cotizacion->idCotizaciones,
+                    'cotizacionNo' => $cotizacion->numero_cotizacion,
+                    'cliente' => [
+                        'nombre' => $cotizacion->cliente->nombre ?? 'N/A',
+                        'documento' => $cotizacion->cliente->documento ?? 'N/A', // Usar documento en lugar de empresa
+                        'email' => $cotizacion->cliente->email ?? 'N/A'
+                    ],
+                    'fechaEmision' => $cotizacion->fecha_emision,
+                    'validaHasta' => $cotizacion->valida_hasta,
+                    'total' => (float) $cotizacion->total,
+                    'moneda' => $cotizacion->moneda->simbolo ?? 'PEN',
+                    'incluirIGV' => (bool) $cotizacion->incluir_igv,
+                    'estado' => $cotizacion->estado_cotizacion
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'cotizaciones' => $cotizaciones
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener cotizaciones: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar las cotizaciones'
+            ], 500);
+        }
+    }
 
     /**
      * Obtener estadísticas para el dashboard
@@ -99,7 +279,7 @@ public function getCotizaciones(Request $request)
             $total = Cotizacion::count();
             $aprobadas = Cotizacion::where('estado_cotizacion', 'aprobada')->count();
             $pendientes = Cotizacion::where('estado_cotizacion', 'pendiente')->count();
-            
+
             // Cotizaciones vencidas (valida_hasta menor a hoy)
             $vencidas = Cotizacion::where('valida_hasta', '<', now()->format('Y-m-d'))
                 ->where('estado_cotizacion', '!=', 'aprobada')
@@ -114,7 +294,6 @@ public function getCotizaciones(Request $request)
                     'vencidas' => $vencidas
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al obtener estadísticas: ' . $e->getMessage());
             return response()->json([
@@ -124,14 +303,14 @@ public function getCotizaciones(Request $request)
         }
     }
 
-  
+
 
     public function create(Request $request)
     {
         $ticketId = $request->get('ticket_id');
         $ticketIds = $request->get('ticket_ids');
         $clienteId = $request->get('cliente_id');
-        
+
         $suministros = collect();
         $ticketsInfo = collect();
 
@@ -140,7 +319,7 @@ public function getCotizaciones(Request $request)
             $suministros = $this->obtenerSuministros($ticketId);
             $ticketsInfo = $this->obtenerInfoTickets([$ticketId]);
         }
-        
+
         // Si hay múltiples tickets
         if ($ticketIds) {
             $ticketArray = explode(',', $ticketIds);
@@ -149,33 +328,33 @@ public function getCotizaciones(Request $request)
         }
 
         return view('cotizaciones.create', compact(
-            'suministros', 
-            'ticketsInfo', 
-            'ticketId', 
+            'suministros',
+            'ticketsInfo',
+            'ticketId',
             'ticketIds',
             'clienteId'
         ));
     }
 
-// 🔥 MÉTODO CORREGIDO: Obtener suministros por ticket y visita
-public function getSuministrosPorVisita($ticketId, $visitaId = null)
-{
-    try {
-        Log::info('Buscando suministros', [
-            'ticketId' => $ticketId,
-            'visitaId' => $visitaId
-        ]);
+    // 🔥 MÉTODO CORREGIDO: Obtener suministros por ticket y visita
+    public function getSuministrosPorVisita($ticketId, $visitaId = null)
+    {
+        try {
+            Log::info('Buscando suministros', [
+                'ticketId' => $ticketId,
+                'visitaId' => $visitaId
+            ]);
 
-        $query = DB::table('suministros')
-            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
-            ->where('suministros.idTickets', $ticketId);
+            $query = DB::table('suministros')
+                ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+                ->where('suministros.idTickets', $ticketId);
 
-        // Si se proporciona una visita, filtrar por visita
-        if ($visitaId && $visitaId !== 'null' && $visitaId !== '') {
-            $query->where('suministros.idVisitas', $visitaId);
-        }
+            // Si se proporciona una visita, filtrar por visita
+            if ($visitaId && $visitaId !== 'null' && $visitaId !== '') {
+                $query->where('suministros.idVisitas', $visitaId);
+            }
 
-        $suministros = $query->select(
+            $suministros = $query->select(
                 'articulos.idArticulos',
                 'articulos.nombre', // 🔥 CAMBIADO: descripcion → nombre
                 'articulos.codigo_repuesto',
@@ -184,59 +363,58 @@ public function getSuministrosPorVisita($ticketId, $visitaId = null)
                 'suministros.cantidad as cantidad_suministro',
                 'suministros.idVisitas'
             )
-            ->get();
+                ->get();
 
-        Log::info('Suministros encontrados', [
-            'total' => $suministros->count(),
-            'ticketId' => $ticketId,
-            'visitaId' => $visitaId
-        ]);
+            Log::info('Suministros encontrados', [
+                'total' => $suministros->count(),
+                'ticketId' => $ticketId,
+                'visitaId' => $visitaId
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'suministros' => $suministros
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error al cargar suministros: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al cargar suministros'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'suministros' => $suministros
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al cargar suministros: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar suministros'
+            ], 500);
+        }
     }
-}
 
-// También corrige los métodos auxiliares:
-private function obtenerSuministros($ticketId)
-{
-    return DB::table('suministros')
-        ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
-        ->where('suministros.idTickets', $ticketId)
-        ->select(
-            'articulos.idArticulos',
-            'articulos.nombre', // 🔥 CAMBIADO
-            'articulos.codigo_repuesto',
-            'suministros.cantidad',
-            'articulos.precio_venta as precio_unitario'
-        )
-        ->get();
-}
+    // También corrige los métodos auxiliares:
+    private function obtenerSuministros($ticketId)
+    {
+        return DB::table('suministros')
+            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+            ->where('suministros.idTickets', $ticketId)
+            ->select(
+                'articulos.idArticulos',
+                'articulos.nombre', // 🔥 CAMBIADO
+                'articulos.codigo_repuesto',
+                'suministros.cantidad',
+                'articulos.precio_venta as precio_unitario'
+            )
+            ->get();
+    }
 
-private function obtenerSuministrosMultiples($ticketIds)
-{
-    return DB::table('suministros')
-        ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
-        ->whereIn('suministros.idTickets', $ticketIds)
-        ->select(
-            'articulos.idArticulos',
-            'articulos.nombre', // 🔥 CAMBIADO
-            'articulos.codigo_repuesto',
-            'suministros.cantidad',
-            'articulos.precio_venta as precio_unitario',
-            'suministros.idTickets'
-        )
-        ->get();
-}
+    private function obtenerSuministrosMultiples($ticketIds)
+    {
+        return DB::table('suministros')
+            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+            ->whereIn('suministros.idTickets', $ticketIds)
+            ->select(
+                'articulos.idArticulos',
+                'articulos.nombre', // 🔥 CAMBIADO
+                'articulos.codigo_repuesto',
+                'suministros.cantidad',
+                'articulos.precio_venta as precio_unitario',
+                'suministros.idTickets'
+            )
+            ->get();
+    }
 
     private function obtenerInfoTickets($ticketIds)
     {
@@ -249,12 +427,12 @@ private function obtenerSuministrosMultiples($ticketIds)
     public function search(Request $request)
     {
         $search = $request->get('search');
-        
+
         $clientes = Cliente::where('estado', 1)
-            ->where(function($query) use ($search) {
+            ->where(function ($query) use ($search) {
                 $query->where('nombre', 'LIKE', "%{$search}%")
-                      ->orWhere('documento', 'LIKE', "%{$search}%")
-                      ->orWhere('email', 'LIKE', "%{$search}%");
+                    ->orWhere('documento', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%");
             })
             ->orderBy('nombre')
             ->paginate(10);
@@ -390,7 +568,7 @@ private function obtenerSuministrosMultiples($ticketIds)
     {
         try {
             $query = Equipo::where('idTickets', $ticketId);
-            
+
             if ($visitaId) {
                 $query->where('idVisitas', $visitaId);
             }
@@ -410,17 +588,16 @@ private function obtenerSuministrosMultiples($ticketIds)
     }
 
 
-     // 🔥 NUEVO MÉTODO: Vista previa temporal (sin guardar)
+    // 🔥 NUEVO MÉTODO: Vista previa temporal (sin guardar)
     public function vistaPreviaTemporal(Request $request)
     {
         try {
             $datos = $request->all();
-            
+
             // Renderizar vista HTML para la vista previa
             $html = view('cotizaciones.pdf-temporal', compact('datos'))->render();
-            
-            return response($html);
 
+            return response($html);
         } catch (\Exception $e) {
             Log::error('Error al generar vista previa temporal: ' . $e->getMessage());
             return response()->json([
@@ -431,11 +608,11 @@ private function obtenerSuministrosMultiples($ticketIds)
     }
 
 
-  
+
     public function store(Request $request)
     {
         DB::beginTransaction();
-        
+
         try {
             Log::info('Iniciando guardado de cotización', $request->all());
 
@@ -494,11 +671,11 @@ private function obtenerSuministrosMultiples($ticketIds)
                 'dias_validez' => $request->dias_validez ?? 30,
                 'terminos_pago' => $request->terminos_pago,
                 'estado_cotizacion' => 'pendiente',
-                
+
                 'ot' => $request->ot,
                 'serie' => $request->serie,
                 'visita_id' => $request->visita_id,
-                
+
                 'idCliente' => $request->idCliente,
                 'idMonedas' => $request->idMonedas,
                 'idTickets' => $request->idTickets,
@@ -538,10 +715,9 @@ private function obtenerSuministrosMultiples($ticketIds)
                 'numero_cotizacion' => $cotizacion->numero_cotizacion,
                 'total' => $cotizacion->total
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::error('Error al guardar cotización: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
@@ -559,10 +735,10 @@ private function obtenerSuministrosMultiples($ticketIds)
         if (is_null($string)) {
             return '';
         }
-        
+
         $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
         $string = iconv('UTF-8', 'UTF-8//IGNORE', $string);
-        
+
         return $string;
     }
 
@@ -580,9 +756,8 @@ private function obtenerSuministrosMultiples($ticketIds)
             ])->findOrFail($id);
 
             $pdf = PDF::loadView('cotizaciones.pdf', compact('cotizacion'));
-            
-            return $pdf->download("cotizacion-{$cotizacion->numero_cotizacion}.pdf");
 
+            return $pdf->download("cotizacion-{$cotizacion->numero_cotizacion}.pdf");
         } catch (\Exception $e) {
             Log::error('Error al generar PDF: ' . $e->getMessage());
             return response()->json([
@@ -606,7 +781,6 @@ private function obtenerSuministrosMultiples($ticketIds)
             ])->findOrFail($id);
 
             return view('cotizaciones.vista-previa', compact('cotizacion'));
-
         } catch (\Exception $e) {
             Log::error('Error al cargar vista previa: ' . $e->getMessage());
             abort(404, 'Cotización no encontrada');
@@ -627,7 +801,7 @@ private function obtenerSuministrosMultiples($ticketIds)
             ])->findOrFail($id);
 
             $destinatario = $request->input('email', $cotizacion->cliente->email);
-            
+
             if (!$destinatario) {
                 return response()->json([
                     'success' => false,
@@ -639,10 +813,10 @@ private function obtenerSuministrosMultiples($ticketIds)
             $pdf = PDF::loadView('cotizaciones.pdf', compact('cotizacion'));
 
             // Enviar email
-            Mail::send('cotizaciones.email', compact('cotizacion'), function($message) use ($cotizacion, $destinatario, $pdf) {
+            Mail::send('cotizaciones.email', compact('cotizacion'), function ($message) use ($cotizacion, $destinatario, $pdf) {
                 $message->to($destinatario)
-                        ->subject("Cotización {$cotizacion->numero_cotizacion} - GKM Technology")
-                        ->attachData($pdf->output(), "cotizacion-{$cotizacion->numero_cotizacion}.pdf");
+                    ->subject("Cotización {$cotizacion->numero_cotizacion} - GKM Technology")
+                    ->attachData($pdf->output(), "cotizacion-{$cotizacion->numero_cotizacion}.pdf");
             });
 
             // Actualizar estado de la cotización
@@ -652,7 +826,6 @@ private function obtenerSuministrosMultiples($ticketIds)
                 'success' => true,
                 'message' => 'Cotización enviada por email correctamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al enviar email: ' . $e->getMessage());
             return response()->json([
@@ -669,11 +842,10 @@ private function obtenerSuministrosMultiples($ticketIds)
     {
         try {
             $datos = $request->all();
-            
-            $pdf = PDF::loadView('cotizaciones.pdf-temporal', compact('datos'));
-            
-            return $pdf->download("cotizacion-preview-{$datos['numero_cotizacion']}.pdf");
 
+            $pdf = PDF::loadView('cotizaciones.pdf-temporal', compact('datos'));
+
+            return $pdf->download("cotizacion-preview-{$datos['numero_cotizacion']}.pdf");
         } catch (\Exception $e) {
             Log::error('Error al generar PDF temporal: ' . $e->getMessage());
             return response()->json([
@@ -703,17 +875,16 @@ private function obtenerSuministrosMultiples($ticketIds)
             $pdf = PDF::loadView('cotizaciones.pdf-temporal', compact('datos'));
 
             // Enviar email
-            Mail::send('cotizaciones.email-temporal', compact('datos'), function($message) use ($datos, $destinatario, $pdf) {
+            Mail::send('cotizaciones.email-temporal', compact('datos'), function ($message) use ($datos, $destinatario, $pdf) {
                 $message->to($destinatario)
-                        ->subject("Cotización {$datos['numero_cotizacion']} - GKM Technology")
-                        ->attachData($pdf->output(), "cotizacion-{$datos['numero_cotizacion']}.pdf");
+                    ->subject("Cotización {$datos['numero_cotizacion']} - GKM Technology")
+                    ->attachData($pdf->output(), "cotizacion-{$datos['numero_cotizacion']}.pdf");
             });
 
             return response()->json([
                 'success' => true,
                 'message' => 'Cotización enviada por email correctamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al enviar email temporal: ' . $e->getMessage());
             return response()->json([

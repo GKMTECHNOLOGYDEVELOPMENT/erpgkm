@@ -118,6 +118,16 @@ Route::prefix('unity')->name('unity.')->group(function () {
 
     Route::post('/{id}/solicitud/registrar', [UnityController::class, 'registrarAccion'])
         ->whereNumber('id')->name('solicitud.registrar');
+
+    // ===== Nuevas rutas usando UnityController =====
+    Route::get('/racks/modelo/create', [UnityController::class, 'racksModeloCreate'])
+        ->name('racks.modelo.create');
+
+    Route::get('/racks/asignar', [UnityController::class, 'racksAsignarIndex'])
+        ->name('racks.asignar.index');
+
+    Route::get('/cajas/create', [UnityController::class, 'cajasCreate'])
+        ->name('cajas.create');
 });
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -459,7 +469,7 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
 Route::prefix('despacho')->name('despacho.')->group(function () {
     Route::get('/', [DespachoController::class, 'index'])->name('index'); // Mostrar la vista principal
     Route::get('/create', [DespachoController::class, 'create'])->name('create'); // Formulario de creación
-        Route::get('/show', [DespachoController::class, 'show'])->name('show'); // Formulario de creación
+    Route::get('/show', [DespachoController::class, 'show'])->name('show'); // Formulario de creación
     Route::get('/pdf', [DespachoController::class, 'pdf'])->name('pdf'); // Formulario de creación
 
     Route::post('/store', [DespachoController::class, 'store'])->name('store'); // Guardar un nuevo artículo
@@ -703,10 +713,8 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     })->name('exportExcel');
 
 
-Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
-Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
-
-    
+    Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
+    Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 });
 
     Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])
@@ -721,9 +729,9 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
-Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
-Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
+    Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
+    Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
+    Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 });
 
 
@@ -1617,19 +1625,19 @@ Route::get('/custodia/fotos/{id}/verificar', [CustodiaController::class, 'verifi
 Route::prefix('permisos')->group(function () {
     // Vista principal
     Route::get('/', [PermisosPermisosController::class, 'index'])->name('permisos.index');
-    
+
     // APIs
     Route::get('/data', [PermisosPermisosController::class, 'getData'])->name('permisos.data');
-    
+
     // Permisos
     Route::post('/permisos', [PermisosPermisosController::class, 'storePermiso'])->name('permisos.store-permiso');
     Route::put('/permisos/{id}', [PermisosPermisosController::class, 'updatePermiso'])->name('permisos.update-permiso');
     Route::delete('/permisos/{id}', [PermisosPermisosController::class, 'destroyPermiso'])->name('permisos.destroy-permiso');
-    
+
     // Combinaciones
     Route::post('/combinaciones', [PermisosPermisosController::class, 'storeCombinacion'])->name('permisos.store-combinacion');
     Route::delete('/combinaciones/{id}', [PermisosPermisosController::class, 'destroyCombinacion'])->name('permisos.destroy-combinacion');
-    
+
     // Permisos de combinaciones
     Route::get('/combinaciones/{idCombinacion}/permisos', [PermisosPermisosController::class, 'getPermisosCombinacion'])->name('permisos.get-permisos-combinacion');
     Route::post('/combinaciones/{idCombinacion}/permisos', [PermisosPermisosController::class, 'guardarPermisosCombinacion'])->name('permisos.guardar-permisos-combinacion');
@@ -1658,7 +1666,7 @@ Route::prefix('permisos')->group(function () {
 Route::get('/almacen/ubicaciones/detalle-rack/{rack}', [UbicacionesVistaController::class, 'detalleRack'])
     ->name('almacen.detalle-rack');
 
-    // Para racks panel  
+// Para racks panel
 Route::get('/almacen/ubicaciones/detalle-rack-panel/{rack}', [UbicacionesVistaController::class, 'detalleRackPanel'])
     ->name('almacen.detalle-rack-panel');
 
@@ -1729,7 +1737,7 @@ Route::prefix('cotizaciones-tickets')->group(function () {
     Route::post('/generar-individual', [cotizacionController::class, 'generarCotizacionIndividual'])->name('cotizaciones-tickets.generar-individual');
     Route::post('/generar-multiple', [cotizacionController::class, 'generarCotizacionMultiple'])->name('cotizaciones-tickets.generar-multiple');
 
-// Nuevas rutas para las funcionalidades
+    // Nuevas rutas para las funcionalidades
     Route::post('/vista-previa-temporal', [cotizacionController::class, 'vistaPreviaTemporal'])->name('cotizaciones.vista-previa-temporal');
     Route::post('/generar-pdf-temporal', [cotizacionController::class, 'generarPDFTemporal'])->name('cotizaciones.generar-pdf-temporal');
     Route::post('/enviar-email-temporal', [cotizacionController::class, 'enviarEmailTemporal'])->name('cotizaciones.enviar-email-temporal');
@@ -1751,4 +1759,6 @@ Route::prefix('administracion/cotizaciones')->group(function () {
     Route::delete('/{id}', [cotizacionController::class, 'destroy'])->name('cotizaciones.delete');
     Route::get('/{id}/pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.pdf');
     Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
+    // En tu grupo de rutas web de cotizaciones, agrega:
+    Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('cotizaciones.detalles');
 });

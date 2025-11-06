@@ -1,211 +1,11 @@
 function rackDetalle() {
     return {
-        // DATOS ESTÁTICOS PARA EL RACK - CON MÁS UBICACIONES
-        rack: {
-            nombre: 'PANEL-001',
-            sede: 'Principal',
-            niveles: [
-                {
-                    numero: 2, // Nivel 2 (arriba)
-                    ubicaciones: [
-                        {
-                            codigo: 'U005',
-                            productos: [
-                                {
-                                    nombre: 'PANEL SAMSUNG',
-                                    cantidad: 15,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'QLED',
-                                    pulgadas: '55"',
-                                },
-                            ],
-                            cantidad_total: 15,
-                            capacidad: 20,
-                            estado: 'medio',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '01:10',
-                            pulgadas_ubicacion: '55"', // Medida específica de esta ubicación
-                        },
-                        {
-                            codigo: 'U006',
-                            productos: [
-                                {
-                                    nombre: 'PANEL SONY',
-                                    cantidad: 12,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'LED',
-                                    pulgadas: '50"',
-                                },
-                            ],
-                            cantidad_total: 12,
-                            capacidad: 20,
-                            estado: 'medio',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '00:45',
-                            pulgadas_ubicacion: '50"',
-                        },
-                        {
-                            codigo: 'U007',
-                            productos: [
-                                {
-                                    nombre: 'PANEL TCL',
-                                    cantidad: 11,
-                                    categoria: 'Televisores',
-                                    subcategoria: '4K',
-                                    pulgadas: '43"',
-                                },
-                            ],
-                            cantidad_total: 11,
-                            capacidad: 20,
-                            estado: 'bajo',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '00:30',
-                            pulgadas_ubicacion: '43"',
-                        },
-                        {
-                            codigo: 'U008',
-                            productos: [
-                                {
-                                    nombre: 'PANEL PANASONIC',
-                                    cantidad: 9,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'SMART TV',
-                                    pulgadas: '58"',
-                                },
-                            ],
-                            cantidad_total: 9,
-                            capacidad: 20,
-                            estado: 'bajo',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '02:15',
-                            pulgadas_ubicacion: '58"',
-                        },
-                        {
-                            codigo: 'U009',
-                            productos: [],
-                            cantidad_total: 0,
-                            capacidad: 20,
-                            estado: null,
-                            tiempo: '--:--',
-                            pulgadas_ubicacion: '65"', // Ubicación vacía pero con medida asignada
-                        },
-                        {
-                            codigo: 'U010',
-                            productos: [],
-                            cantidad_total: 0,
-                            capacidad: 20,
-                            estado: null,
-                            tiempo: '--:--',
-                            pulgadas_ubicacion: '75"',
-                        },
-                    ],
-                },
-                {
-                    numero: 1, // Nivel 1 (abajo)
-                    ubicaciones: [
-                        {
-                            codigo: 'U001',
-                            productos: [
-                                {
-                                    nombre: 'PANEL SAMSUNG THE FRAME',
-                                    cantidad: 18,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'QLED',
-                                    pulgadas: '65"',
-                                },
-                            ],
-                            cantidad_total: 18,
-                            capacidad: 20,
-                            estado: 'alto',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '00:30',
-                            pulgadas_ubicacion: '65"',
-                        },
-                        {
-                            codigo: 'U002',
-                            productos: [
-                                {
-                                    nombre: 'PANEL SONY MASTER',
-                                    cantidad: 14,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'OLED',
-                                    pulgadas: '77"',
-                                },
-                            ],
-                            cantidad_total: 14,
-                            capacidad: 20,
-                            estado: 'medio',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '01:45',
-                            pulgadas_ubicacion: '77"',
-                        },
-                        {
-                            codigo: 'U003',
-                            productos: [
-                                {
-                                    nombre: 'PANEL TCL MINI LED',
-                                    cantidad: 7,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'MINI LED',
-                                    pulgadas: '75"',
-                                },
-                            ],
-                            cantidad_total: 7,
-                            capacidad: 20,
-                            estado: 'bajo',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '00:20',
-                            pulgadas_ubicacion: '75"',
-                        },
-                        {
-                            codigo: 'U004',
-                            productos: [],
-                            cantidad_total: 0,
-                            capacidad: 20,
-                            estado: null,
-                            tiempo: '--:--',
-                            pulgadas_ubicacion: '85"',
-                        },
-                        {
-                            codigo: 'U011',
-                            productos: [
-                                {
-                                    nombre: 'PANEL HISENSE LASER',
-                                    cantidad: 9,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'LASER TV',
-                                    pulgadas: '100"',
-                                },
-                            ],
-                            cantidad_total: 9,
-                            capacidad: 20,
-                            estado: 'bajo',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '00:55',
-                            pulgadas_ubicacion: '100"',
-                        },
-                        {
-                            codigo: 'U012',
-                            productos: [
-                                {
-                                    nombre: 'PANEL SAMSUNG NEO QLED',
-                                    cantidad: 11,
-                                    categoria: 'Televisores',
-                                    subcategoria: 'NEO QLED',
-                                    pulgadas: '85"',
-                                },
-                            ],
-                            cantidad_total: 11,
-                            capacidad: 20,
-                            estado: 'medio',
-                            categorias_acumuladas: 'Televisores',
-                            tiempo: '01:20',
-                            pulgadas_ubicacion: '85"',
-                        },
-                    ],
-                },
-            ],
-        },
+        // DATOS DINÁMICOS DESDE EL CONTROLADOR
+        rack: rackData,
+        todosRacks: todosRacks,
+        rackActual: rackActual,
+        sedeActual: sedeActual,
+
         // FUNCIONES AUXILIARES
         getUbicacion(codigo) {
             for (let nivel of this.rack.niveles) {
@@ -217,7 +17,7 @@ function rackDetalle() {
 
         getUbicacionesOcupadas(nivelNumero) {
             const nivel = this.rack.niveles.find((n) => n.numero === nivelNumero);
-            return nivel ? nivel.ubicaciones.filter((u) => u.productos && u.productos.length > 0).length : 0;
+            return nivel ? nivel.ubicaciones.filter((u) => u.estado !== 'vacio').length : 0;
         },
 
         getStats() {
@@ -228,7 +28,7 @@ function rackDetalle() {
             this.rack.niveles.forEach((nivel) => {
                 nivel.ubicaciones.forEach((ubi) => {
                     total++;
-                    if (ubi.productos && ubi.productos.length > 0) {
+                    if (ubi.estado !== 'vacio') {
                         ocupadas++;
                     } else {
                         vacias++;
@@ -253,83 +53,80 @@ function rackDetalle() {
                     return 'background-color: #f97316';
                 case 'muy_alto':
                     return 'background-color: #ef4444';
+                case 'vacio':
+                    return 'background-color: #6b7280';
                 default:
-                    return '';
+                    return 'background-color: #6b7280';
             }
         },
 
-        // FUNCIONES EXISTENTES (simplificadas para modo estático)
+        // Agrupar ubicaciones en slides
+        agruparUbicacionesEnSlides(ubicaciones, ubicacionesPorSlide) {
+            const slides = [];
+            for (let i = 0; i < ubicaciones.length; i += ubicacionesPorSlide) {
+                slides.push(ubicaciones.slice(i, i + ubicacionesPorSlide));
+            }
+            return slides;
+        },
+
+        // Agrupar ubicaciones en grupos (para mostrar 2 por grupo)
+        agruparUbicacionesEnGrupos(ubicaciones, ubicacionesPorGrupo) {
+            const grupos = [];
+            for (let i = 0; i < ubicaciones.length; i += ubicacionesPorGrupo) {
+                grupos.push(ubicaciones.slice(i, i + ubicacionesPorGrupo));
+            }
+            return grupos;
+        },
+
+        // FUNCIONES EXISTENTES (actualizadas para datos dinámicos)
         init() {
-            console.log('Rack Panel inicializado - Modo Estático');
+            console.log('Rack Panel inicializado - Datos Dinámicos', this.rack);
 
             // Inicializar Swiper después de que Alpine.js haya renderizado el DOM
             this.$nextTick(() => {
-                this.inicializarSwiper();
+                this.inicializarSwipers();
             });
         },
 
-        inicializarSwiper() {
-            // Inicializar Swiper para el nivel 2
-            const swiperRackNivel2 = new Swiper('#swiperRackNivel2', {
-                navigation: {
-                    nextEl: '.swiper-button-next-rack',
-                    prevEl: '.swiper-button-prev-rack',
-                },
-                pagination: {
-                    el: '.swiper-pagination-rack',
-                    clickable: true,
-                },
-                slidesPerView: 1,
-                spaceBetween: 20,
-                breakpoints: {
-                    1024: {
-                        slidesPerView: 1,
-                        spaceBetween: 30,
-                    },
-                    768: {
+        inicializarSwipers() {
+            // Inicializar Swiper para cada nivel
+            this.rack.niveles.forEach(nivel => {
+                const swiperId = `#swiperRackNivel${nivel.numero}`;
+                if (document.querySelector(swiperId)) {
+                    new Swiper(swiperId, {
+                        navigation: {
+                            nextEl: `${swiperId} .swiper-button-next-rack`,
+                            prevEl: `${swiperId} .swiper-button-prev-rack`,
+                        },
+                        pagination: {
+                            el: `${swiperId} .swiper-pagination-rack`,
+                            clickable: true,
+                        },
                         slidesPerView: 1,
                         spaceBetween: 20,
-                    },
-                    320: {
-                        slidesPerView: 1,
-                        spaceBetween: 10,
-                    },
-                },
-            });
-
-            // Inicializar Swiper para el nivel 1
-            const swiperRackNivel1 = new Swiper('#swiperRackNivel1', {
-                navigation: {
-                    nextEl: '.swiper-button-next-rack',
-                    prevEl: '.swiper-button-prev-rack',
-                },
-                pagination: {
-                    el: '.swiper-pagination-rack',
-                    clickable: true,
-                },
-                slidesPerView: 1,
-                spaceBetween: 20,
-                breakpoints: {
-                    1024: {
-                        slidesPerView: 1,
-                        spaceBetween: 30,
-                    },
-                    768: {
-                        slidesPerView: 1,
-                        spaceBetween: 20,
-                    },
-                    320: {
-                        slidesPerView: 1,
-                        spaceBetween: 10,
-                    },
-                },
+                        breakpoints: {
+                            1024: {
+                                slidesPerView: 1,
+                                spaceBetween: 30,
+                            },
+                            768: {
+                                slidesPerView: 1,
+                                spaceBetween: 20,
+                            },
+                            320: {
+                                slidesPerView: 1,
+                                spaceBetween: 10,
+                            },
+                        },
+                    });
+                }
             });
         },
 
         manejarClickUbicacion(ubi) {
             if (!ubi) return;
 
-            console.log('Click en ubicación:', ubi.codigo);
+            console.log('Click en ubicación:', ubi.codigo, ubi);
 
             // Buscar el modal de forma más robusta
             const modalElement = document.querySelector('[x-data="modalDetalleUbicacion()"]');
@@ -355,12 +152,26 @@ function rackDetalle() {
         },
 
         cambiarRack(direccion) {
-            // Simular cambio de rack
-            console.log('Cambiando rack:', direccion);
-            alert(`Funcionalidad de ${direccion} rack - En modo estático`);
+            const racks = this.todosRacks;
+            const currentIndex = racks.indexOf(this.rackActual);
+            let newIndex;
+
+            if (direccion === 'prev') {
+                newIndex = currentIndex > 0 ? currentIndex - 1 : racks.length - 1;
+            } else {
+                newIndex = currentIndex < racks.length - 1 ? currentIndex + 1 : 0;
+            }
+
+            const nuevoRack = racks[newIndex];
+            if (nuevoRack) {
+                // Redirigir al nuevo rack
+                const url = new URL(window.location.href);
+                url.searchParams.set('rack', nuevoRack);
+                window.location.href = url.toString();
+            }
         },
 
-        // MODALES Y ESTADOS (se mantienen para compatibilidad)
+        // MODALES Y ESTADOS
         modal: {
             open: false,
             ubi: {},
@@ -382,23 +193,23 @@ function rackDetalle() {
             open: false,
         },
 
-        // FUNCIONES DE LOS MODALES (simplificadas)
+        // FUNCIONES DE LOS MODALES
         cancelarReubicacion() {
             this.modoReubicacion.activo = false;
             this.modalReubicacion.open = false;
         },
 
         abrirModalAgregarProducto(ubi) {
-            alert('Modal agregar producto - En modo estático');
+            alert('Modal agregar producto - En desarrollo');
         },
 
         abrirHistorial(ubi) {
-            alert('Modal historial - En modo estático');
+            alert('Modal historial - En desarrollo');
         },
     };
 }
 
-// Modal para Detalles de Ubicación - VERSIÓN CORREGIDA
+// Modal para Detalles de Ubicación - ACTUALIZADO PARA DATOS DINÁMICOS
 function modalDetalleUbicacion() {
     return {
         open: false,
@@ -413,7 +224,7 @@ function modalDetalleUbicacion() {
             this.ubicacion = ubicacionData;
             this.open = true;
             document.body.style.overflow = 'hidden';
-            console.log('Modal abierto para:', ubicacionData?.codigo);
+            console.log('Modal abierto para:', ubicacionData?.codigo, ubicacionData);
         },
 
         // Cerrar modal
@@ -436,9 +247,10 @@ function modalDetalleUbicacion() {
                 medio: 'text-yellow-600',
                 alto: 'text-orange-600',
                 muy_alto: 'text-red-600',
+                vacio: 'text-gray-600',
                 null: 'text-gray-600',
             };
-            return colores[estado] || colores['null'];
+            return colores[estado] || colores['vacio'];
         },
 
         // Obtener texto del estado
@@ -448,39 +260,28 @@ function modalDetalleUbicacion() {
                 medio: 'Medio',
                 alto: 'Alto',
                 muy_alto: 'Muy Alto',
+                vacio: 'Vacío',
                 null: 'Vacío',
             };
-            return textos[estado] || textos['null'];
+            return textos[estado] || textos['vacio'];
         },
 
         // Obtener color del porcentaje
         getPorcentajeColor(ubicacion) {
             const porcentaje = this.calcularPorcentaje(ubicacion);
-            if (porcentaje < 50) return 'text-green-600';
-            if (porcentaje < 80) return 'text-yellow-600';
+            if (porcentaje < 25) return 'text-green-600';
+            if (porcentaje < 50) return 'text-yellow-600';
+            if (porcentaje < 75) return 'text-orange-600';
             return 'text-red-600';
         },
 
         // Obtener color de la barra de progreso
         getProgressBarColor(ubicacion) {
             const porcentaje = this.calcularPorcentaje(ubicacion);
-            if (porcentaje < 50) return 'bg-success';
-            if (porcentaje < 80) return 'bg-warning';
+            if (porcentaje < 25) return 'bg-success';
+            if (porcentaje < 50) return 'bg-warning';
+            if (porcentaje < 75) return 'bg-orange-500';
             return 'bg-danger';
-        },
-
-        // Obtener las pulgadas de la ubicación
-        getPulgadasUbicacion(ubicacion) {
-            // Si la ubicación tiene pulgadas definidas
-            if (ubicacion?.pulgadas_ubicacion) {
-                return ubicacion.pulgadas_ubicacion;
-            }
-            // Si tiene productos, tomar la medida del primer producto
-            if (ubicacion?.productos?.length > 0) {
-                return ubicacion.productos[0].pulgadas;
-            }
-            // Si está vacía, mostrar "N/A"
-            return 'N/A';
         },
     };
 }

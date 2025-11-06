@@ -1,4 +1,4 @@
-<x-layout.default>
+<x-layout.default title="Rack Spark - {{ $rack['nombre'] }} - ERP Solutions Force">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -271,10 +271,11 @@
                     </div>
                     <div>
                         <h1 class="text-3xl font-bold tracking-tight">
-                            Rack <span x-text="rack.nombre" class="text-yellow-300">{{ $rack['nombre'] }}</span>
+                            Rack Spark <span x-text="rack.nombre" class="text-success">{{ $rack['nombre'] }}</span>
                         </h1>
-                        <p class="text-white/80 text-base mt-1">Sede: {{ $rack['sede'] }} - Sistema de Gestión de
-                            Almacén</p>
+                        <p class="text-white/80 text-base mt-1">
+                            Sede: {{ $rack['sede'] }} - Sistema de Gestión de Almacén
+                        </p>
                     </div>
                 </div>
 
@@ -295,17 +296,15 @@
                     </div>
                 </div>
 
-                <!-- Navegación mejorada -->
+                <!-- Navegación invisible (mantiene espacio) -->
                 <div class="flex gap-3">
                     <button @click="cambiarRack('prev')"
-                        class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
-                        <i class="fas fa-chevron-left group-hover:-translate-x-1 transition-transform"></i>
-                        Anterior
+                        class="px-6 py-3 rounded-xl flex items-center gap-3 border border-transparent opacity-0 pointer-events-none select-none">
+                        <i class="fas fa-chevron-left"></i> Anterior
                     </button>
                     <button @click="cambiarRack('next')"
-                        class="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-300 flex items-center gap-3 group border border-white/20 backdrop-blur-sm hover:shadow-lg">
-                        Siguiente
-                        <i class="fas fa-chevron-right group-hover:translate-x-1 transition-transform"></i>
+                        class="px-6 py-3 rounded-xl flex items-center gap-3 border border-transparent opacity-0 pointer-events-none select-none">
+                        Siguiente <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
