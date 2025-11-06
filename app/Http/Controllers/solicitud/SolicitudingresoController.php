@@ -135,7 +135,7 @@ class SolicitudingresoController extends Controller
 
         Log::info('Ubicaciones finales a enviar a la vista: ' . $ubicaciones->count());
 
-        return view('almacen.solicitud.solicitudingreso.index', compact('solicitudesAgrupadas', 'ubicaciones'));
+        return view('solicitud.solicitudingreso.index', compact('solicitudesAgrupadas', 'ubicaciones'));
     }
 
 

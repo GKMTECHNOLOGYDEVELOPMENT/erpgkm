@@ -152,25 +152,32 @@
 
 /* TABLA DE MADERA (MANTENIENDO EL ESTILO ANTERIOR) */
 .rack-grupo-base {
-    background: linear-gradient(135deg, #8b7355, #a0522d);
-    border: 2px solid #5d4037;
-    border-radius: 8px;
-    height: 25px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #8b4513, #a0522d, #cd853f);
+    border: 2px solid #654321;
+    border-radius: 12px;
+    height: 28px;
+    box-shadow:
+        0 8px 25px rgba(139, 69, 19, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.3);
     position: relative;
     width: 100%;
-    margin-top: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
+/* Efecto de brillo en el centro */
 .rack-grupo-base::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #d7ccc8, transparent);
-    transform: translateY(-50%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    border-radius: 12px;
+    animation: wood-shine 4s ease-in-out infinite;
 }
 
 .ubicaciones-fila {
@@ -181,93 +188,219 @@
     padding: 0 20px;
 }
 
-/* CAJAS DE UBICACIÓN CON EL ESTILO QUE PREFIERES */
+/* CAJAS DE UBICACIÓN MODERNAS CON EFECTO 3D */
 .ubicacion-box {
     width: 180px;
     height: 120px;
-    border-radius: 12px;
+    border-radius: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     position: relative;
     overflow: hidden;
-    border: 3px solid transparent;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+.ubicacion-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .ubicacion-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-8px) scale(1.05) rotateX(5deg);
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
+.ubicacion-box:hover::before {
+    opacity: 1;
+}
+
+/* Estados de las cajas con colores específicos */
 .ubicacion-box.vacia {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    border-color: #dee2e6;
+    background: linear-gradient(135deg, #888ea8, #6c7293);
+    border-color: #5a5f7a;
 }
 
-.ubicacion-box.ocupada {
-    background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    border-color: #28a745;
+.ubicacion-box.ocupada[style*='background-color: #22c55e'] {
+    background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+    border-color: #15803d !important;
 }
 
-.ubicacion-box.llena {
-    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-    border-color: #dc3545;
+.ubicacion-box.ocupada[style*='background-color: #facc15'] {
+    background: linear-gradient(135deg, #facc15, #eab308) !important;
+    border-color: #ca8a04 !important;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #f97316'] {
+    background: linear-gradient(135deg, #f97316, #ea580c) !important;
+    border-color: #c2410c !important;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #ef4444'] {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    border-color: #b91c1c !important;
+}
+
+/* Efecto de brillo al hover */
+.ubicacion-box::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.ubicacion-box:hover::after {
+    opacity: 1;
+    transform: rotate(45deg) translate(20%, 20%);
 }
 
 .ubicacion-codigo {
-    font-weight: bold;
-    font-size: 14px;
-    margin-bottom: 10px;
-    color: #2c3e50;
-    background: rgba(255, 255, 255, 0.9);
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.4);
     padding: 4px 12px;
     border-radius: 20px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 2;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .ubicacion-icono {
     font-size: 24px;
-    margin-bottom: 10px;
-    color: #2c3e50;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    z-index: 2;
+    transition: transform 0.3s ease;
+}
+
+.ubicacion-box:hover .ubicacion-icono {
+    transform: scale(1.2) translateZ(10px);
 }
 
 .ubicacion-info {
-    font-size: 12px;
+    font-size: 11px;
     text-align: center;
-    color: #2c3e50;
     width: 100%;
-    padding: 0 10px;
+    padding: 0 12px;
+    z-index: 2;
 }
 
 .ubicacion-cantidad {
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 4px;
+    font-weight: 800;
+    font-size: 14px;
+    margin-bottom: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .ubicacion-categoria {
-    font-size: 11px;
-    opacity: 0.8;
+    font-size: 10px;
+    opacity: 0.9;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
+    max-width: 140px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
 }
 
-.nivel-indicator {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    padding: 15px 8px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    color: white;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 14px;
-    margin-right: 20px;
+/* Efecto de partículas para ubicaciones vacías */
+.ubicacion-box.vacia::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    border-radius: 16px;
+}
+
+/* Indicador de estado con animación sutil */
+.ubicacion-box::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.ubicacion-box.vacia::before {
+    background: rgba(255, 255, 255, 0.3);
+    animation: none;
+}
+
+/* Efecto de profundidad mejorado */
+.ubicacion-box {
+    background: linear-gradient(135deg, var(--primary-color, #6366f1), var(--secondary-color, #8b5cf6)),
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
+}
+
+/* Variables de color para diferentes estados */
+.ubicacion-box.vacia {
+    --primary-color: #888ea8;
+    --secondary-color: #6c7293;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #22c55e'] {
+    --primary-color: #22c55e;
+    --secondary-color: #16a34a;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #facc15'] {
+    --primary-color: #facc15;
+    --secondary-color: #eab308;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #f97316'] {
+    --primary-color: #f97316;
+    --secondary-color: #ea580c;
+}
+
+.ubicacion-box.ocupada[style*='background-color: #ef4444'] {
+    --primary-color: #ef4444;
+    --secondary-color: #dc2626;
 }
 
 .panel-header {
