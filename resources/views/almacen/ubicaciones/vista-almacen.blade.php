@@ -1,4 +1,4 @@
-<x-layout.default>
+<x-layout.default title="Vista Almacen - ERP Solutions Force">
     <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -162,10 +162,10 @@
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         @foreach ($sedes as $sede)
-                        <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
-                            <!-- ← Esto asegura que esté seleccionado -->
-                            {{ $sede }}
-                        </option>
+                            <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
+                                <!-- ← Esto asegura que esté seleccionado -->
+                                {{ $sede }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -262,16 +262,17 @@
                         </div>
                     </div>
 
-                    <!-- Tip -->
-                    <div
-                        class="flex items-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
+                    <!-- Tip Colores de Racks -->
+                    <div class="flex items-center gap-2 px-4 py-3 bg-white rounded-lg shadow-sm">
                         <div class="flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full">
-                            <span class="text-blue-600 text-sm">💡</span>
+                            <span class="text-primary text-sm">🎨</span>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:items-center gap-1">
-                            <span class="text-blue-800 font-semibold text-sm">Tip:</span>
-                            <span class="text-blue-700 text-sm">Haz click en cualquier rack para ver los
-                                detalles</span>
+                            <span class="text-primary font-semibold text-sm">Tip:</span>
+                            <span class="text-primary text-sm">
+                                Los racks en de letra <span class="font-bold text-green-600">VERDE</span> son Spark
+                                y en <span class="font-bold text-amber-500">AMARILLO</span> son Panel
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -417,7 +418,7 @@
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="">Seleccione una sede</option>
                                     @foreach ($sedes as $sede)
-                                    <option value="{{ $sede }}">{{ $sede }}</option>
+                                        <option value="{{ $sede }}">{{ $sede }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -425,7 +426,9 @@
 
                             <!-- NUEVO: Tipo de Rack -->
                             <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Tipo de Rack *</label>
+                                <label
+                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Tipo
+                                    de Rack *</label>
                                 <select x-model="modalCrearRack.form.tipo_rack" required
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                     <option value="">Seleccione tipo de rack</option> <!-- ✅ NUEVA OPCIÓN -->
@@ -698,14 +701,18 @@
                             <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg"
                                 x-show="modalEditarDimensiones.rack">
                                 <div class="text-sm text-blue-800 dark:text-blue-300">
-                                    <span x-text="'Rack: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.nombre : '')"></span>
+                                    <span
+                                        x-text="'Rack: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.nombre : '')"></span>
                                     <span x-show="modalEditarDimensiones.rack"> | </span>
-                                    <span x-text="'Sede: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.sede : '')"></span>
+                                    <span
+                                        x-text="'Sede: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.sede : '')"></span>
                                     <span x-show="modalEditarDimensiones.rack"> | </span>
-                                    <span x-text="'Tipo: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.tipo_rack.toUpperCase() : '')"></span>
+                                    <span
+                                        x-text="'Tipo: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.tipo_rack.toUpperCase() : '')"></span>
 
                                     <!-- NUEVO: Mensaje si tiene productos -->
-                                    <div x-show="modalEditarDimensiones.tieneProductos" class="mt-2 text-amber-700 dark:text-amber-300">
+                                    <div x-show="modalEditarDimensiones.tieneProductos"
+                                        class="mt-2 text-amber-700 dark:text-amber-300">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
                                         Este rack contiene productos. No se puede cambiar el tipo.
                                     </div>
@@ -716,7 +723,8 @@
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                     Tipo de Rack
-                                    <span x-show="!modalEditarDimensiones.puedeCambiarTipo" class="text-amber-600 text-xs ml-2">
+                                    <span x-show="!modalEditarDimensiones.puedeCambiarTipo"
+                                        class="text-amber-600 text-xs ml-2">
                                         (No se puede cambiar - rack con productos)
                                     </span>
                                 </label>
@@ -733,14 +741,20 @@
                             <!-- Configuración de dimensiones -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas *</label>
-                                    <input type="number" x-model="modalEditarDimensiones.form.filas" required min="1" max="12"
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas
+                                        *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.filas" required
+                                        min="1" max="12"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de filas">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas *</label>
-                                    <input type="number" x-model="modalEditarDimensiones.form.columnas" required min="1" max="24"
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas
+                                        *</label>
+                                    <input type="number" x-model="modalEditarDimensiones.form.columnas" required
+                                        min="1" max="24"
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de columnas">
                                 </div>
@@ -751,7 +765,8 @@
                                 <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                     Capacidad Máxima por Ubicación *
                                 </label>
-                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required min="1" max="10000"
+                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required
+                                    min="1" max="10000"
                                     class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                     placeholder="Ej: 100, 200, 500...">
                                 <p class="text-xs text-slate-500 mt-1">
@@ -763,11 +778,13 @@
                             <div x-show="modalEditarDimensiones.cambiosDetectados"
                                 :class="modalEditarDimensiones.puedeActualizar ? 'bg-amber-50' : 'bg-red-50'"
                                 class="p-3 rounded-lg">
-                                <div :class="modalEditarDimensiones.puedeActualizar ? 'text-amber-800' : 'text-red-800'" class="text-sm">
+                                <div :class="modalEditarDimensiones.puedeActualizar ? 'text-amber-800' : 'text-red-800'"
+                                    class="text-sm">
                                     <div class="font-medium mb-1">Resumen de cambios:</div>
                                     <div x-text="modalEditarDimensiones.resumenCambios"></div>
                                     <div x-show="!modalEditarDimensiones.puedeActualizar" class="mt-2 text-xs">
-                                        ⚠️ Para disminuir dimensiones, primero vacíe las ubicaciones que serían eliminadas.
+                                        ⚠️ Para disminuir dimensiones, primero vacíe las ubicaciones que serían
+                                        eliminadas.
                                     </div>
                                 </div>
                             </div>
@@ -781,11 +798,12 @@
                                 <button type="submit"
                                     :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
                                     :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        (!modalEditarDimensiones.puedeActualizar ? 'bg-gray-400 cursor-not-allowed' : 
-                                        'bg-indigo-600 hover:bg-indigo-700')"
+                                        (!modalEditarDimensiones.puedeActualizar ? 'bg-gray-400 cursor-not-allowed' :
+                                            'bg-indigo-600 hover:bg-indigo-700')"
                                     class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                     <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
-                                    <span x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 
+                                    <span
+                                        x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 
                                         (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
                                 </button>
                             </div>
@@ -794,8 +812,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
     </div>
 
     <script>
@@ -973,7 +989,8 @@
                             this.modalEditarDimensiones.form.columnas = result.data.columnas;
 
                             // ✅ Asegurar que tipo_rack siempre tenga un valor
-                            this.modalEditarDimensiones.form.tipo_rack = result.data.tipo_rack || 'panel';
+                            this.modalEditarDimensiones.form.tipo_rack = result.data.tipo_rack ||
+                                'panel';
 
                             this.modalEditarDimensiones.form.capacidad_maxima = 10000;
 
@@ -1011,12 +1028,15 @@
                         console.log('Respuesta verificación productos:', result);
 
                         if (result.success) {
-                            this.modalEditarDimensiones.tieneProductos = result.data.tiene_productos;
-                            this.modalEditarDimensiones.puedeCambiarTipo = !result.data.tiene_productos;
+                            this.modalEditarDimensiones.tieneProductos = result.data
+                                .tiene_productos;
+                            this.modalEditarDimensiones.puedeCambiarTipo = !result.data
+                                .tiene_productos;
 
                             console.log('Estado actualizado:', {
                                 tieneProductos: this.modalEditarDimensiones.tieneProductos,
-                                puedeCambiarTipo: this.modalEditarDimensiones.puedeCambiarTipo
+                                puedeCambiarTipo: this.modalEditarDimensiones
+                                    .puedeCambiarTipo
                             });
                         } else {
                             console.warn('Error en respuesta:', result.message);
@@ -1139,7 +1159,8 @@
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
                                 },
                                 body: JSON.stringify(this.modalEditarDimensiones.form)
                             });
@@ -1516,7 +1537,6 @@
 
                     const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
 
-                    // ✅ AGREGAR SEDE AL ARRAY DE DATOS (índice 10)
                     // ✅ AGREGAR TODOS LOS CAMPOS INCLUYENDO CUSTODIAS
                     const data = this.data.map(d => [
                         d.x || 0,
@@ -1533,10 +1553,41 @@
                         d.nivel || 1
                     ]);
 
-
                     // ✅ OBTENER DATOS DEL YAXIS CON VALIDACIÓN
                     const yAxisData = [...new Set(this.data.map(d => d.y))].filter(y => y !==
                         undefined);
+
+                    // ✅ PREPARAR DATOS PARA YAXIS CON COLORES
+                    const yAxisDataWithStyle = yAxisData.map(yValue => {
+                        const rackData = this.data.find(d => d.y == yValue);
+                        if (!rackData) return yValue;
+
+                        const letra = rackData.letra || yValue;
+                        const tipoRack = rackData.tipo_rack || 'spark';
+
+                        // ✅ ASIGNAR ESTILOS SEGÚN TIPO DE RACK
+                        if (tipoRack === 'spark') {
+                            return {
+                                value: letra,
+                                textStyle: {
+                                    color: '#10b981',
+                                    fontWeight: 'bold',
+                                    fontSize: 16
+                                }
+                            };
+                        } else if (tipoRack === 'panel') {
+                            return {
+                                value: letra,
+                                textStyle: {
+                                    color: '#f59e0b',
+                                    fontWeight: 'bold',
+                                    fontSize: 16
+                                }
+                            };
+                        } else {
+                            return letra;
+                        }
+                    });
 
                     return {
                         tooltip: {
@@ -1577,7 +1628,6 @@
                                     return '<div>Error al cargar información</div>';
                                 }
                             }
-
                         },
                         grid: {
                             left: 50,
@@ -1607,15 +1657,7 @@
                                 color: '#64748b',
                                 fontSize: 14,
                                 margin: 15,
-                                formatter: (value) => {
-                                    try {
-                                        // Encontrar la letra del rack para esta fila
-                                        const rackData = this.data.find(d => d.y == value);
-                                        return rackData ? (rackData.letra || value) : value;
-                                    } catch (error) {
-                                        return value;
-                                    }
-                                }
+                                // ✅ YA NO NECESITAMOS FORMatter - LOS ESTILOS ESTÁN EN LOS DATOS
                             },
                             axisLine: {
                                 lineStyle: {
@@ -1630,7 +1672,7 @@
                                 }
                             },
                             inverse: true,
-                            data: yAxisData, // ✅ Usar datos validados
+                            data: yAxisDataWithStyle, // ✅ USAR DATOS CON ESTILOS
                         },
                         visualMap: [],
                         series: [{
@@ -1674,7 +1716,6 @@
                         }]
                     };
                 },
-
                 updateChart() {
                     if (!this.chart) {
                         console.warn('Chart no inicializado');
@@ -1693,41 +1734,51 @@
                         });
 
                         this.chart.off('click');
-                       this.chart.on('click', async (p) => {
-    try {
-        if (!p.data || p.data.length < 12) {
-            console.warn('Datos incompletos en el click:', p.data);
-            return;
-        }
+                        this.chart.on('click', async (p) => {
+                            try {
+                                if (!p.data || p.data.length < 12) {
+                                    console.warn('Datos incompletos en el click:', p.data);
+                                    return;
+                                }
 
-        const rack = p.data[5];
-        const sede = p.data[9];
+                                const rack = p.data[5];
+                                const sede = p.data[9];
 
-        if (rack && sede && rack !== 'N/A' && sede !== 'N/A') {
-            // Hacer una consulta para obtener el tipo de rack
-            try {
-                const response = await fetch(`/api/racks/tipo-rack?nombre=${rack}&sede=${encodeURIComponent(sede)}`);
-                const result = await response.json();
-                
-                const tipoRack = result.success ? result.data.tipo_rack : 'spark';
-                console.log('🎯 Tipo de rack obtenido:', tipoRack);
+                                if (rack && sede && rack !== 'N/A' && sede !== 'N/A') {
+                                    // Hacer una consulta para obtener el tipo de rack
+                                    try {
+                                        const response = await fetch(
+                                            `/api/racks/tipo-rack?nombre=${rack}&sede=${encodeURIComponent(sede)}`
+                                        );
+                                        const result = await response.json();
 
-                let vista = 'detalle-rack';
-                if (tipoRack === 'panel') {
-                    vista = 'detalle-rack-panel';
-                }
-                
-                window.location.href = `/almacen/ubicaciones/${vista}/${rack}?sede=${encodeURIComponent(sede)}`;
-            } catch (error) {
-                console.error('Error al obtener tipo de rack:', error);
-                // Fallback a la vista por defecto
-                window.location.href = `/almacen/ubicaciones/detalle-rack/${rack}?sede=${encodeURIComponent(sede)}`;
-            }
-        }
-    } catch (error) {
-        console.error('Error en click handler:', error);
-    }
-});
+                                        const tipoRack = result.success ? result.data
+                                            .tipo_rack : 'spark';
+                                        console.log('🎯 Tipo de rack obtenido:', tipoRack);
+
+                                        let vista = 'detalle-rack';
+                                        if (tipoRack === 'panel') {
+                                            vista = 'detalle-rack-panel';
+                                        }
+
+                                        // ✅ CAMBIO: Abrir en nueva ventana/pestaña
+                                        const url =
+                                            `/almacen/ubicaciones/${vista}/${rack}?sede=${encodeURIComponent(sede)}`;
+                                        window.open(url, '_blank');
+
+                                    } catch (error) {
+                                        console.error('Error al obtener tipo de rack:',
+                                            error);
+                                        // ✅ CAMBIO: Fallback también en nueva ventana
+                                        const url =
+                                            `/almacen/ubicaciones/detalle-rack/${rack}?sede=${encodeURIComponent(sede)}`;
+                                        window.open(url, '_blank');
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Error en click handler:', error);
+                            }
+                        });
 
                         setTimeout(() => {
                             if (this.loading) {
