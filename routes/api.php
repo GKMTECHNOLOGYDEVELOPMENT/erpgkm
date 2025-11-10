@@ -569,3 +569,32 @@ Route::get('/tickets/{ticketId}/suministros/{visitaId?}', [cotizacionController:
 // Rutas API para cotizaciones
     Route::get('/cotizaciones', [cotizacionController::class, 'getCotizaciones'])->name('api.cotizaciones.index');
     Route::get('/cotizaciones/estadisticas', [cotizacionController::class, 'getEstadisticas'])->name('api.cotizaciones.estadisticas');
+
+    Route::get('/cotizacion-productos/{cotizacionId}', function ($cotizacionId) {
+    try {
+        $productos = DB::table('cotizacion_productos as cp')
+            ->select(
+                'cp.articulo_id',
+                'cp.descripcion',
+                'cp.codigo_repuesto',
+                'cp.cantidad',
+                'cp.precio_unitario',
+                'cp.subtotal',
+                'a.nombre as nombre_articulo'
+            )
+            ->leftJoin('articulos as a', 'cp.articulo_id', '=', 'a.idArticulos')
+            ->where('cp.cotizacion_id', $cotizacionId)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'products' => $productos
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar los productos: ' . $e->getMessage()
+        ], 500);
+    }
+});
+

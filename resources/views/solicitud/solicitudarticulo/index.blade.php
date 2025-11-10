@@ -261,6 +261,16 @@
                             </p>
                         </div>
 
+                        <!-- Código de Cotización -->
+                        @if($solicitud->codigo_cotizacion ?? false)
+                        <div class="mb-3">
+                            <p class="text-sm text-gray-500 font-medium">Cotización</p>
+                            <p class="font-medium text-purple-600">
+                                📋 {{ $solicitud->codigo_cotizacion }}
+                            </p>
+                        </div>
+                        @endif
+
                         <!-- Tipo de Servicio -->
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 font-medium">Tipo de Servicio</p>

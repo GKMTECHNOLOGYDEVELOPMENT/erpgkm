@@ -126,6 +126,88 @@
                         </div>
 
                         <div class="p-6">
+                            <!-- Selección de Cotización Aprobada -->
+                            <div class="bg-green-50 rounded-2xl p-6 border border-green-200 mb-6">
+                                <h3 class="text-xl font-semibold text-gray-900 mb-4">Cargar Artículos desde Cotización Aprobada</h3>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <!-- Selección de Cotización -->
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Seleccionar Cotización</label>
+                                        <select x-model="selectedCotizacion" x-ref="cotizacionSelect" class="w-full">
+                                            <option value="">Seleccione una cotización aprobada...</option>
+                                            <template x-for="cotizacion in cotizacionesAprobadas" :key="cotizacion.idCotizaciones">
+                                                <option :value="cotizacion.idCotizaciones" 
+                                                        x-text="`${cotizacion.numero_cotizacion} - ${cotizacion.cliente_nombre} (${formatDate(cotizacion.fecha_emision)})`"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+
+                                    <!-- Información de la Cotización Seleccionada -->
+                                    <div x-show="selectedCotizacionInfo" class="bg-white rounded-lg p-4 border border-green-300">
+                                        <h4 class="font-semibold text-green-700 mb-2">Información de Cotización</h4>
+                                        <div class="space-y-1 text-sm">
+                                            <p><span class="font-medium">Número:</span> 
+                                                <span x-text="selectedCotizacionInfo ? selectedCotizacionInfo.numero_cotizacion : ''"></span>
+                                            </p>
+                                            <p><span class="font-medium">Cliente:</span> 
+                                                <span x-text="selectedCotizacionInfo ? selectedCotizacionInfo.cliente_nombre : ''"></span>
+                                            </p>
+                                            <p><span class="font-medium">Fecha:</span> 
+                                                <span x-text="selectedCotizacionInfo ? formatDate(selectedCotizacionInfo.fecha_emision) : ''"></span>
+                                            </p>
+                                            <p><span class="font-medium">Artículos:</span> <span x-text="cotizacionProducts.length"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lista de Productos de la Cotización -->
+                                <div x-show="cotizacionProducts.length > 0" class="mt-6">
+                                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Artículos en la Cotización</h4>
+                                    <div class="overflow-hidden rounded-xl border border-green-200">
+                                        <table class="w-full">
+                                            <thead class="bg-green-50">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">Artículo</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">Código</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">Cantidad</th>
+                                                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-green-100">
+                                                <template x-for="(product, index) in cotizacionProducts" :key="index">
+                                                    <tr class="hover:bg-green-50 transition-colors">
+                                                        <td class="px-4 py-3 text-sm font-medium text-gray-900" x-text="product.nombre_articulo || product.descripcion"></td>
+                                                        <td class="px-4 py-3 text-sm text-green-600 font-mono" x-text="product.codigo_repuesto"></td>
+                                                        <td class="px-4 py-3 text-sm text-gray-700" x-text="product.cantidad"></td>
+                                                        <td class="px-4 py-3 text-sm">
+                                                            <button @click="addProductFromCotizacion(product)"
+                                                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center space-x-2">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                                </svg>
+                                                                <span>Agregar</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Botón para agregar todos los productos -->
+                                    <div class="mt-4 flex justify-end">
+                                        <button @click="addAllCotizacionProducts()"
+                                            class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-bold flex items-center space-x-2">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                            </svg>
+                                            <span>Agregar Todos los Artículos</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Tabla de Artículos -->
                             <div class="mb-8">
                                 <div class="flex justify-between items-center mb-6">
@@ -163,7 +245,7 @@
                                                         <p class="mt-4 text-lg font-medium text-gray-900">No hay
                                                             artículos agregados</p>
                                                         <p class="text-sm mt-2">Agregue artículos usando el formulario
-                                                            inferior</p>
+                                                            inferior o desde una cotización aprobada</p>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -224,7 +306,7 @@
 
                             <!-- Formulario para Agregar Artículo -->
                             <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Artículo</h3>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Artículo Manualmente</h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                                     <!-- Artículo -->
@@ -574,6 +656,12 @@
                 minDate: '',
                 isCreatingOrder: false,
 
+                // Nuevas variables para cotizaciones
+                cotizacionesAprobadas: @json($cotizacionesAprobadas ?? []),
+                selectedCotizacion: '',
+                selectedCotizacionInfo: null,
+                cotizacionProducts: [],
+
                 // Artículos desde Laravel
                 articulos: @json($articulos),
 
@@ -643,6 +731,165 @@
                             this.newProduct.articuloId = e.target.value;
                         });
                     }
+
+                    // Cotización Select
+                    if (this.$refs.cotizacionSelect) {
+                        $(this.$refs.cotizacionSelect).select2({
+                            placeholder: 'Buscar cotización...',
+                            language: 'es',
+                            width: '100%'
+                        }).on('change', (e) => {
+                            this.selectedCotizacion = e.target.value;
+                            this.loadCotizacionProducts();
+                        });
+                    }
+                },
+
+               async loadCotizacionProducts() {
+    if (!this.selectedCotizacion) {
+        this.cotizacionProducts = [];
+        this.selectedCotizacionInfo = null;
+        return;
+    }
+
+    try {
+        // Obtener información de la cotización seleccionada
+        this.selectedCotizacionInfo = this.cotizacionesAprobadas.find(
+            c => c.idCotizaciones == this.selectedCotizacion
+        );
+
+        if (!this.selectedCotizacionInfo) {
+            this.showNotification('❌ Cotización no encontrada', 'error');
+            return;
+        }
+
+        // Cargar productos de la cotización
+        const response = await fetch(`/api/cotizacion-productos/${this.selectedCotizacion}`);
+        
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+        
+        const data = await response.json();
+
+        if (data.success) {
+            this.cotizacionProducts = data.products;
+            this.showNotification(`✅ ${data.products.length} artículos cargados de la cotización`, 'success');
+        } else {
+            throw new Error(data.message || 'Error desconocido');
+        }
+    } catch (error) {
+        console.error('Error cargando productos de cotización:', error);
+        this.showNotification('❌ Error al cargar los productos de la cotización', 'error');
+        this.cotizacionProducts = [];
+        this.selectedCotizacionInfo = null;
+    }
+},
+
+               addProductFromCotizacion(cotizacionProduct) {
+    // Buscar el artículo completo en la lista de artículos
+    const articuloCompleto = this.articulos.find(
+        a => a.idArticulos == cotizacionProduct.articulo_id
+    );
+
+    if (!articuloCompleto) {
+        this.showNotification('❌ Artículo no encontrado en el catálogo', 'error');
+        return;
+    }
+
+    // Verificar si ya existe el artículo en la solicitud
+    const existingProductIndex = this.products.findIndex(
+        product => product.articuloId == cotizacionProduct.articulo_id
+    );
+
+    if (existingProductIndex !== -1) {
+        // Si existe, verificar que no exceda la cantidad de la cotización
+        const nuevaCantidad = this.products[existingProductIndex].cantidad + cotizacionProduct.cantidad;
+        if (nuevaCantidad > cotizacionProduct.cantidad) {
+            this.showNotification(
+                `❌ No puede exceder la cantidad de la cotización: ${cotizacionProduct.cantidad} unidades`,
+                'error'
+            );
+            return;
+        }
+        
+        this.products[existingProductIndex].cantidad = nuevaCantidad;
+        this.showNotification(
+            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
+            'success'
+        );
+    } else {
+        // Si no existe, agregar nuevo producto con la cantidad exacta de la cotización
+        const product = {
+            uniqueId: Date.now() + Math.random(),
+            articuloId: cotizacionProduct.articulo_id,
+            nombre: articuloCompleto.nombre,
+            codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
+            tipo: articuloCompleto.tipo_articulo,
+            cantidad: cotizacionProduct.cantidad, // Usar la cantidad exacta de la cotización
+            descripcion: cotizacionProduct.descripcion || 
+                (this.selectedCotizacionInfo ? 
+                 `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` : 
+                 'Desde cotización'),
+            cantidadCotizacion: cotizacionProduct.cantidad // Guardar la cantidad original
+        };
+
+        this.products.push(product);
+        this.showNotification('✅ Artículo agregado desde cotización', 'success');
+    }
+},
+
+                addAllCotizacionProducts() {
+    if (this.cotizacionProducts.length === 0) {
+        this.showNotification('No hay artículos para agregar', 'info');
+        return;
+    }
+
+    let addedCount = 0;
+
+    this.cotizacionProducts.forEach(cotizacionProduct => {
+        const articuloCompleto = this.articulos.find(
+            a => a.idArticulos == cotizacionProduct.articulo_id
+        );
+
+        if (articuloCompleto) {
+            const existingProductIndex = this.products.findIndex(
+                product => product.articuloId == cotizacionProduct.articulo_id
+            );
+
+            if (existingProductIndex !== -1) {
+                this.products[existingProductIndex].cantidad += cotizacionProduct.cantidad;
+            } else {
+                const product = {
+                    uniqueId: Date.now() + Math.random(),
+                    articuloId: cotizacionProduct.articulo_id,
+                    nombre: articuloCompleto.nombre,
+                    codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
+                    tipo: articuloCompleto.tipo_articulo,
+                    cantidad: cotizacionProduct.cantidad,
+                    descripcion: cotizacionProduct.descripcion || 
+                        (this.selectedCotizacionInfo ? 
+                         `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` : 
+                         'Desde cotización')
+                };
+
+                this.products.push(product);
+            }
+            addedCount++;
+        }
+    });
+
+    this.showNotification(`✅ ${addedCount} artículos agregados desde la cotización`, 'success');
+},
+
+                formatDate(dateString) {
+                    if (!dateString) return '';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    });
                 },
 
                 // Métodos para notificación
@@ -754,12 +1001,24 @@
                     this.showNotification('🗑️ Artículo eliminado de la solicitud', 'info');
                 },
 
-                updateQuantity(index, change) {
-                    const newQuantity = this.products[index].cantidad + change;
-                    if (newQuantity >= 1 && newQuantity <= 1000) {
-                        this.products[index].cantidad = newQuantity;
-                    }
-                },
+                // Modificar el método updateQuantity para limitar por cotización
+updateQuantity(index, change) {
+    const product = this.products[index];
+    const newQuantity = product.cantidad + change;
+    
+    // Si es de cotización, validar que no exceda la cantidad original
+    if (product.cantidadCotizacion && newQuantity > product.cantidadCotizacion) {
+        this.showNotification(
+            `❌ No puede exceder la cantidad de la cotización: ${product.cantidadCotizacion} unidades`,
+            'error'
+        );
+        return;
+    }
+    
+    if (newQuantity >= 1 && newQuantity <= 1000) {
+        this.products[index].cantidad = newQuantity;
+    }
+},
 
                 clearAll() {
                     if (this.products.length === 0) {
@@ -773,7 +1032,7 @@
                     }
                 },
 
-                async createSolicitud() {
+               async createSolicitud() {
                     if (!this.canCreateSolicitud) {
                         this.showNotification('❌ Complete todos los campos requeridos para crear la solicitud', 'error');
                         return;
@@ -787,7 +1046,8 @@
                         const solicitudData = {
                             orderInfo: this.orderInfo,
                             products: this.products,
-                            orderNumber: this.orderNumber
+                            orderNumber: this.orderNumber,
+                            selectedCotizacion: this.selectedCotizacion // Agregar este campo
                         };
 
                         console.log('Enviando datos de la solicitud:', solicitudData);
@@ -805,11 +1065,19 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            this.showNotification(`🎉 ¡Solicitud ${result.codigo_orden} creada exitosamente!`, 'success');
+                            let mensaje = `🎉 ¡Solicitud ${result.codigo_orden} creada exitosamente!`;
+                            
+                            // Si tiene código de cotización, agregar al mensaje
+                            if (result.codigo_cotizacion) {
+                                mensaje += ` (Cotización: ${result.codigo_cotizacion})`;
+                            }
+                            
+                            this.showNotification(mensaje, 'success');
                             
                             console.log('Solicitud guardada:', {
                                 id: result.solicitud_id,
                                 codigo: result.codigo_orden,
+                                codigo_cotizacion: result.codigo_cotizacion,
                                 productos_unicos: result.estadisticas.productos_unicos,
                                 total_cantidad: result.estadisticas.total_cantidad
                             });
@@ -826,6 +1094,9 @@
                                     observaciones: '',
                                     fechaRequerida: ''
                                 };
+                                this.selectedCotizacion = '';
+                                this.cotizacionProducts = [];
+                                this.selectedCotizacionInfo = null;
                             }, 3000);
                         } else {
                             throw new Error(result.message);

@@ -1762,3 +1762,5 @@ Route::prefix('administracion/cotizaciones')->group(function () {
     // En tu grupo de rutas web de cotizaciones, agrega:
     Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('cotizaciones.detalles');
 });
+
+// Route::get('/cotizacion-productos/{cotizacionId}', [SolicitudarticuloController::class, 'getCotizacionProductos']);

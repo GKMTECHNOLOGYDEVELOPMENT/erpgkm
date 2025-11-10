@@ -17,6 +17,7 @@ class SolicitudarticuloController extends Controller
             ->select(
                 'so.idsolicitudesordenes',
                 'so.codigo',
+                'so.codigo_cotizacion', // Asegúrate de incluir este campo
                 'so.estado',
                 'so.fechacreacion',
                 'so.fecharequerida',
@@ -57,130 +58,186 @@ class SolicitudarticuloController extends Controller
         return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
     }
 
-    public function create()
-    {
-        $usuario = auth()->user()->load('tipoArea');
+   public function create()
+{
+    $usuario = auth()->user()->load('tipoArea');
 
-        $articulos = DB::table('articulos as a')
-            ->select(
-                'a.idArticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.precio_compra',
-                'a.stock_total',
-                'sc.nombre as tipo_articulo'
-            )
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('a.estado', 1)
-            ->get();
+    $articulos = DB::table('articulos as a')
+        ->select(
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.precio_compra',
+            'a.stock_total',
+            'sc.nombre as tipo_articulo'
+        )
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('a.estado', 1)
+        ->get();
 
-        // Obtener el próximo número de orden
+    // Obtener solo cotizaciones aprobadas que NO tengan solicitudes
+    $cotizacionesAprobadas = DB::table('cotizaciones as c')
+        ->select(
+            'c.idCotizaciones',
+            'c.numero_cotizacion',
+            'c.fecha_emision',
+            'c.estado_cotizacion',
+            'cl.nombre as cliente_nombre'
+        )
+        ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+        ->where('c.estado_cotizacion', 'aprobada')
+        ->whereNotExists(function ($query) {
+            $query->select(DB::raw(1))
+                  ->from('solicitudesordenes as so')
+                  ->whereRaw('so.codigo_cotizacion = c.numero_cotizacion')
+                  ->where('so.tipoorden', 'solicitud_articulo');
+        })
+        ->orderBy('c.fecha_emision', 'desc')
+        ->get();
+
+    // Obtener el próximo número de orden
+    $lastOrder = DB::table('solicitudesordenes')
+        ->where('tipoorden', 'solicitud_articulo')
+        ->orderBy('idsolicitudesordenes', 'desc')
+        ->first();
+
+    $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+
+    return view("solicitud.solicitudarticulo.create", [
+        'usuario' => $usuario,
+        'articulos' => $articulos,
+        'cotizacionesAprobadas' => $cotizacionesAprobadas,
+        'nextOrderNumber' => $nextOrderNumber
+    ]);
+}
+    public function store(Request $request)
+{
+    try {
+        DB::beginTransaction();
+
+        // Validar los datos del formulario
+        $validated = $request->validate([
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.articuloId' => 'required|exists:articulos,idArticulos',
+            'products.*.cantidad' => 'required|integer|min:1|max:1000',
+            'products.*.descripcion' => 'nullable|string',
+            'selectedCotizacion' => 'nullable|exists:cotizaciones,idCotizaciones'
+        ]);
+
+        // Verificar si ya existe una solicitud para esta cotización
+        if (!empty($validated['selectedCotizacion'])) {
+            $solicitudExistente = DB::table('solicitudesordenes')
+                ->where('codigo_cotizacion', $validated['selectedCotizacion'])
+                ->where('tipoorden', 'solicitud_articulo')
+                ->first();
+
+            if ($solicitudExistente) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ya existe una solicitud para esta cotización. No se puede crear otra.'
+                ], 400);
+            }
+        }
+
+        // Calcular estadísticas de productos
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = count($validated['products']);
+
+        // Generar código de orden para solicitud de artículo
         $lastOrder = DB::table('solicitudesordenes')
             ->where('tipoorden', 'solicitud_articulo')
             ->orderBy('idsolicitudesordenes', 'desc')
             ->first();
 
         $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+        $codigoOrden = 'SOL-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
 
-        return view("solicitud.solicitudarticulo.create", [
-            'usuario' => $usuario,
-            'articulos' => $articulos,
-            'nextOrderNumber' => $nextOrderNumber
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-
-            // Validar los datos del formulario
-            $validated = $request->validate([
-                'orderInfo.tipoServicio' => 'required|string',
-                'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
-                'orderInfo.fechaRequerida' => 'required|date',
-                'orderInfo.observaciones' => 'nullable|string',
-                'products' => 'required|array|min:1',
-                'products.*.articuloId' => 'required|exists:articulos,idArticulos',
-                'products.*.cantidad' => 'required|integer|min:1|max:1000',
-                'products.*.descripcion' => 'nullable|string'
-            ]);
-
-            // Calcular estadísticas de productos
-            $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = count($validated['products']);
-
-            // Generar código de orden para solicitud de artículo
-            $lastOrder = DB::table('solicitudesordenes')
-                ->where('tipoorden', 'solicitud_articulo')
-                ->orderBy('idsolicitudesordenes', 'desc')
+        // Obtener información de la cotización si existe
+        $codigoCotizacion = null;
+        if (!empty($validated['selectedCotizacion'])) {
+            $cotizacion = DB::table('cotizaciones')
+                ->where('idCotizaciones', $validated['selectedCotizacion'])
                 ->first();
-
-            $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
-            $codigoOrden = 'SOL-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
-
-            // 1. Insertar en solicitudesordenes
-            $solicitudId = DB::table('solicitudesordenes')->insertGetId([
-                'fechacreacion' => now(),
-                'estado' => 'pendiente',
-                'tipoorden' => 'solicitud_articulo', // Tipo específico para artículos
-                'idticket' => null, // No hay ticket en solicitud de artículos
-                'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
-                'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
-                'numeroticket' => null, // No hay ticket
-                'codigo' => $codigoOrden,
-                'niveldeurgencia' => $validated['orderInfo']['urgencia'],
-                'tiposervicio' => $validated['orderInfo']['tipoServicio'],
-                'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                'cantidad' => $totalProductosUnicos,
-                'canproduuni' => $totalProductosUnicos,
-                'totalcantidadproductos' => $totalCantidad,
-                'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
-                'idtecnico' => null, // No hay técnico asignado inicialmente
-                'idusuario' => Auth::id(),
-                'urgencia' => $validated['orderInfo']['urgencia']
-            ]);
-
-            // 2. Insertar los artículos en ordenesarticulos
-            foreach ($validated['products'] as $product) {
-                DB::table('ordenesarticulos')->insert([
-                    'cantidad' => $product['cantidad'],
-                    'estado' => 0, // 0 = pendiente
-                    'observacion' => $product['descripcion'] ?? null,
-                    'fotorepuesto' => null,
-                    'fechausado' => null,
-                    'fechasinusar' => null,
-                    'idsolicitudesordenes' => $solicitudId,
-                    'idticket' => null, // No hay ticket en solicitud de artículos
-                    'idarticulos' => $product['articuloId'],
-                    'idubicacion' => null
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Solicitud de artículos creada exitosamente',
-                'solicitud_id' => $solicitudId,
-                'codigo_orden' => $codigoOrden,
-                'estadisticas' => [
-                    'productos_unicos' => $totalProductosUnicos,
-                    'total_cantidad' => $totalCantidad
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Error al crear solicitud de artículos: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear la solicitud: ' . $e->getMessage()
-            ], 500);
+            $codigoCotizacion = $cotizacion->numero_cotizacion;
         }
+
+        // 1. Insertar en solicitudesordenes
+        $solicitudId = DB::table('solicitudesordenes')->insertGetId([
+            'fechacreacion' => now(),
+            'estado' => 'pendiente',
+            'tipoorden' => 'solicitud_articulo',
+            'idticket' => null,
+            'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+            'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+            'numeroticket' => null,
+            'codigo' => $codigoOrden,
+            'codigo_cotizacion' => $codigoCotizacion, // Nuevo campo
+            'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+            'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+            'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+            'cantidad' => $totalProductosUnicos,
+            'canproduuni' => $totalProductosUnicos,
+            'totalcantidadproductos' => $totalCantidad,
+            'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+            'idtecnico' => null,
+            'idusuario' => Auth::id(),
+            'urgencia' => $validated['orderInfo']['urgencia']
+        ]);
+
+        // 2. Insertar los artículos en ordenesarticulos
+        foreach ($validated['products'] as $product) {
+            DB::table('ordenesarticulos')->insert([
+                'cantidad' => $product['cantidad'],
+                'estado' => 0,
+                'observacion' => $product['descripcion'] ?? null,
+                'fotorepuesto' => null,
+                'fechausado' => null,
+                'fechasinusar' => null,
+                'idsolicitudesordenes' => $solicitudId,
+                'idticket' => null,
+                'idarticulos' => $product['articuloId'],
+                'idubicacion' => null,
+                'codigo_cotizacion' => $codigoCotizacion // Nuevo campo
+            ]);
+        }
+
+        // 3. Actualizar estado de la cotización a "solicitado"
+        if (!empty($validated['selectedCotizacion'])) {
+            DB::table('cotizaciones')
+                ->where('idCotizaciones', $validated['selectedCotizacion'])
+                ->update([
+                    'estado_cotizacion' => 'solicitado',
+                    'updated_at' => now()
+                ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Solicitud de artículos creada exitosamente',
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'codigo_cotizacion' => $codigoCotizacion,
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al crear solicitud de artículos: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear la solicitud: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function show($id)
     {
@@ -191,6 +248,7 @@ class SolicitudarticuloController extends Controller
             ->select(
                 'so.idsolicitudesordenes',
                 'so.codigo',
+                'so.codigo_cotizacion', // Agregar este campo
                 'so.tiposervicio',
                 'so.niveldeurgencia as urgencia',
                 'so.fecharequerida',
@@ -238,6 +296,7 @@ class SolicitudarticuloController extends Controller
         ]);
     }
 
+   
     public function edit($id)
     {
         $usuario = auth()->user()->load('tipoArea');
@@ -1086,4 +1145,7 @@ class SolicitudarticuloController extends Controller
             throw $e;
         }
     }
+
+
+    
 }
