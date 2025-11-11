@@ -22,6 +22,49 @@ class ModelosController extends Controller
         return view('almacen.productos.modelos.index', compact('marcas', 'categorias'));
     }
 
+        public function storeMODELOSMART(Request $request)
+    {
+        try {
+            // Validar datos básicos
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'idMarca' => 'required|integer|exists:marca,idMarca',
+                'idCategoria' => 'required|integer|exists:categoria,idCategoria',
+            ]);
+
+            // Definir valores de checkboxes (si no están marcados, son 0)
+            $repuesto = $request->has('repuesto') ? 1 : 0;
+            $producto = $request->has('producto') ? 1 : 0;
+            $heramientas = $request->has('heramientas') ? 1 : 0;
+            $suministros = $request->has('suministros') ? 1 : 0;
+
+            $dataModelo = [
+                'nombre' => $validatedData['nombre'],
+                'idMarca' => $validatedData['idMarca'],
+                'idCategoria' => $validatedData['idCategoria'],
+                'estado' => 1,
+                'repuesto' => $repuesto,
+                'producto' => $producto,
+                'heramientas' => $heramientas,
+                'suministros' => $suministros,
+            ];
+
+            Modelo::create($dataModelo);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Modelo agregado correctamente',
+                'data' => $dataModelo,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar el modelo: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al guardar el modelo.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     public function store(Request $request)
     {

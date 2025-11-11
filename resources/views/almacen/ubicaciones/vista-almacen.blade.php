@@ -81,11 +81,6 @@
                         <i class="fas fa-plus"></i>
                         Crear Rack
                     </button>
-                    <!-- <button @click="abrirModalCrearUbicacion()"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
-                        <i class="fas fa-layer-group"></i>
-                        Crear Ubicación
-                    </button> -->
                 </div>
             </div>
         </div>
@@ -163,7 +158,6 @@
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         @foreach ($sedes as $sede)
                             <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
-                                <!-- ← Esto asegura que esté seleccionado -->
                                 {{ $sede }}
                             </option>
                         @endforeach
@@ -202,12 +196,6 @@
                     <i class="fas fa-edit"></i>
                     Editar Dimensiones
                 </button>
-
-                <!-- <button @click="resetFiltros()"
-                    class="inline-flex items-center gap-2 rounded-lg bg-red-500 text-white px-4 py-2 text-sm font-medium hover:bg-red-600 transition">
-                    <i class="fas fa-undo"></i>
-                    Resetear
-                </button> -->
 
                 <button @click="cargarDatos()"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
@@ -318,7 +306,6 @@
             </div>
         </div>
 
-
         <!-- Modal para Seleccionar Rack -->
         <div x-show="modalSeleccionRack.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="modalSeleccionRack.open && '!block'">
@@ -423,15 +410,14 @@
                                 </select>
                             </div>
 
-
-                            <!-- NUEVO: Tipo de Rack -->
+                            <!-- Tipo de Rack -->
                             <div>
                                 <label
                                     class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Tipo
                                     de Rack *</label>
                                 <select x-model="modalCrearRack.form.tipo_rack" required
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
-                                    <option value="">Seleccione tipo de rack</option> <!-- ✅ NUEVA OPCIÓN -->
+                                    <option value="">Seleccione tipo de rack</option>
                                     <option value="panel">Panel</option>
                                     <option value="spark">Spark</option>
                                 </select>
@@ -501,20 +487,6 @@
                                 </div>
                             </div>
 
-                            <!-- Capacidad Máxima -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
-                                    Capacidad Máxima por Ubicación *
-                                </label>
-                                <input type="number" x-model="modalCrearRack.form.capacidad_maxima" required
-                                    min="1" max="10000"
-                                    class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                    placeholder="Ej: 100, 200, 500...">
-                                <p class="text-xs text-slate-500 mt-1">
-                                    Esta capacidad se aplicará a todas las ubicaciones del rack
-                                </p>
-                            </div>
-
                             <!-- Estado -->
                             <div>
                                 <label
@@ -526,7 +498,6 @@
                                     <option value="inactivo">Inactivo</option>
                                 </select>
                             </div>
-
 
                             <!-- Botones -->
                             <div class="flex justify-end items-center mt-8 gap-4">
@@ -547,135 +518,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Modal para Crear Ubicación -->
-        <div x-show="modalCrearUbicacion.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
-            :class="modalCrearUbicacion.open && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click="cerrarModalCrearUbicacion()">
-                <div x-show="modalCrearUbicacion.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg" @click.stop>
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg">Crear Ubicación en Rack</div>
-                        <button type="button" class="text-white-dark hover:text-dark"
-                            @click="cerrarModalCrearUbicacion()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="p-5">
-                        <form @submit.prevent="crearUbicacion()" class="space-y-4">
-                            <!-- Selección de Rack -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Rack
-                                    *</label>
-                                <select x-model="modalCrearUbicacion.form.rack_id" required @change="cargarRackInfo()"
-                                    class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
-                                    <option value="">Seleccione un rack</option>
-                                    <template x-for="rack in modalCrearUbicacion.racks" :key="rack.idRack">
-                                        <option :value="rack.idRack"
-                                            x-text="'Rack ' + rack.nombre + ' - ' + rack.sede">
-                                        </option>
-                                    </template>
-                                </select>
-                            </div>
-
-                            <!-- Información del rack seleccionado - CORREGIDO -->
-                            <div x-show="modalCrearUbicacion.rackInfo"
-                                class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                                <div class="text-sm text-blue-800 dark:text-blue-300">
-                                    <span
-                                        x-text="'Rack: ' + (modalCrearUbicacion.rackInfo ? modalCrearUbicacion.rackInfo.nombre : '')"></span>
-                                    <span x-show="modalCrearUbicacion.rackInfo"> | </span>
-                                    <span
-                                        x-text="'Dimensiones: ' + (modalCrearUbicacion.rackInfo ? modalCrearUbicacion.rackInfo.filas + 'x' + modalCrearUbicacion.rackInfo.columnas : '')"></span>
-                                </div>
-                            </div>
-
-                            <!-- Nivel y Posición -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Nivel
-                                        *</label>
-                                    <input type="number" x-model="modalCrearUbicacion.form.nivel" required
-                                        min="1"
-                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                        placeholder="Nivel">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Posición
-                                        *</label>
-                                    <input type="number" x-model="modalCrearUbicacion.form.posicion" required
-                                        min="1"
-                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                        placeholder="Posición">
-                                </div>
-                            </div>
-
-                            <!-- Código y Capacidad -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Código
-                                        *</label>
-                                    <input type="text" x-model="modalCrearUbicacion.form.codigo" required
-                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                        placeholder="Ej: A1, B2...">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Capacidad
-                                        Máxima *</label>
-                                    <input type="number" x-model="modalCrearUbicacion.form.capacidad_maxima" required
-                                        min="1"
-                                        class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                        placeholder="Ej: 100">
-                                </div>
-                            </div>
-
-                            <!-- Estado Ocupación -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Estado
-                                    Inicial *</label>
-                                <select x-model="modalCrearUbicacion.form.estado_ocupacion" required
-                                    class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
-                                    <option value="vacio">Vacío</option>
-                                    <option value="bajo">Bajo</option>
-                                    <option value="medio">Medio</option>
-                                    <option value="alto">Alto</option>
-                                    <option value="muy_alto">Muy Alto</option>
-                                </select>
-                            </div>
-
-                            <!-- Botones -->
-                            <div class="flex justify-end items-center mt-8 gap-4">
-                                <button type="button" @click="cerrarModalCrearUbicacion()"
-                                    class="btn btn-outline-danger">
-                                    Cancelar
-                                </button>
-                                <button type="submit" :disabled="modalCrearUbicacion.loading"
-                                    :class="modalCrearUbicacion.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        'bg-indigo-600 hover:bg-indigo-700'"
-                                    class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-spinner fa-spin" x-show="modalCrearUbicacion.loading"></i>
-                                    <span
-                                        x-text="modalCrearUbicacion.loading ? 'Creando...' : 'Crear Ubicación'"></span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
 
         <!-- Modal para Editar Dimensiones del Rack -->
         <div x-show="modalEditarDimensiones.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
@@ -710,7 +552,7 @@
                                     <span
                                         x-text="'Tipo: ' + (modalEditarDimensiones.rack ? modalEditarDimensiones.rack.tipo_rack.toUpperCase() : '')"></span>
 
-                                    <!-- NUEVO: Mensaje si tiene productos -->
+                                    <!-- Mensaje si tiene productos -->
                                     <div x-show="modalEditarDimensiones.tieneProductos"
                                         class="mt-2 text-amber-700 dark:text-amber-300">
                                         <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -719,7 +561,7 @@
                                 </div>
                             </div>
 
-                            <!-- NUEVO: Tipo de Rack -->
+                            <!-- Tipo de Rack -->
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                     Tipo de Rack
@@ -732,7 +574,7 @@
                                     :disabled="!modalEditarDimensiones.puedeCambiarTipo"
                                     :class="!modalEditarDimensiones.puedeCambiarTipo ? 'bg-gray-100 cursor-not-allowed' : ''"
                                     class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
-                                    <option value="">Seleccione tipo de rack</option> <!-- ✅ NUEVA OPCIÓN -->
+                                    <option value="">Seleccione tipo de rack</option>
                                     <option value="panel">Panel</option>
                                     <option value="spark">Spark</option>
                                 </select>
@@ -758,20 +600,6 @@
                                         class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                         placeholder="Número de columnas">
                                 </div>
-                            </div>
-
-                            <!-- Capacidad Máxima -->
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
-                                    Capacidad Máxima por Ubicación *
-                                </label>
-                                <input type="number" x-model="modalEditarDimensiones.form.capacidad_maxima" required
-                                    min="1" max="10000"
-                                    class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                    placeholder="Ej: 100, 200, 500...">
-                                <p class="text-xs text-slate-500 mt-1">
-                                    Esta capacidad se aplicará a las nuevas ubicaciones generadas
-                                </p>
                             </div>
 
                             <!-- Resumen de cambios -->
@@ -834,21 +662,18 @@
                     form: {
                         nombre: '',
                         sede: '',
-                        tipo_rack: '', // ✅ CAMBIADO: string vacío en lugar de 'panel'
+                        tipo_rack: '',
                         filas: 1,
                         columnas: 1,
-                        capacidad_maxima: 10000,
                         estado: 'activo'
                     }
                 },
-                // Agrega este nuevo estado al inicio con los otros modales
                 modalSeleccionRack: {
                     open: false,
                     racks: [],
                     rackSeleccionado: null,
                     loading: false
                 },
-
                 modalEditarDimensiones: {
                     open: false,
                     loading: false,
@@ -860,24 +685,7 @@
                     form: {
                         filas: 1,
                         columnas: 1,
-                        tipo_rack: '', // ✅ CAMBIADO: string vacío en lugar de 'panel'
-                        capacidad_maxima: 10000
-                    }
-                },
-
-
-                modalCrearUbicacion: {
-                    open: false,
-                    loading: false,
-                    racks: [],
-                    rackInfo: null,
-                    form: {
-                        rack_id: '',
-                        codigo: '',
-                        nivel: 1,
-                        posicion: 1,
-                        capacidad_maxima: 10000,
-                        estado_ocupacion: 'vacio'
+                        tipo_rack: ''
                     }
                 },
                 dataOriginal: [],
@@ -902,15 +710,15 @@
                     this.modalCrearRack.form = {
                         nombre: '',
                         sede: '',
-                        tipo_rack: '', // ✅ CAMBIADO: string vacío
+                        tipo_rack: '',
                         filas: 1,
                         columnas: 1,
-                        capacidad_maxima: 10000,
                         estado: 'activo'
                     };
                     this.modalCrearRack.sugerencia = null;
                     this.modalCrearRack.letrasUsadas = [];
                 },
+
                 // Método para abrir modal de selección de rack
                 async abrirModalSeleccionRack() {
                     try {
@@ -934,6 +742,7 @@
                         this.modalSeleccionRack.loading = false;
                     }
                 },
+
                 // Método para seleccionar un rack y abrir el modal de edición
                 async seleccionarRackParaEdicion(rack) {
                     this.modalSeleccionRack.rackSeleccionado = rack;
@@ -944,112 +753,11 @@
                     // Abrir modal de edición con el rack seleccionado
                     await this.abrirModalEditarDimensiones(rack);
                 },
+
                 cerrarModalSeleccionRack() {
                     this.modalSeleccionRack.open = false;
                     this.modalSeleccionRack.racks = [];
                     this.modalSeleccionRack.rackSeleccionado = null;
-                },
-                async abrirModalCrearRack() {
-                    this.modalCrearRack.open = true;
-                    // Resetear formulario
-                    this.modalCrearRack.form = {
-                        nombre: '',
-                        sede: '',
-                        filas: 1,
-                        columnas: 1,
-                        estado: 'activo'
-                    };
-                    this.modalCrearRack.sugerencia = null;
-                    this.modalCrearRack.letrasUsadas = [];
-                },
-
-                // Método para abrir modal de edición
-                async abrirModalEditarDimensiones(rack) {
-                    try {
-                        console.log('Abriendo modal para rack:', rack);
-
-                        // Verificar que el rack existe
-                        if (!rack || !rack.idRack) {
-                            this.error('Rack no válido');
-                            return;
-                        }
-
-                        const response = await fetch(`/almacen/racks/${rack.idRack}/info`);
-
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-                        console.log('Info del rack:', result);
-
-                        if (result.success) {
-                            this.modalEditarDimensiones.rack = result.data;
-                            this.modalEditarDimensiones.form.filas = result.data.filas;
-                            this.modalEditarDimensiones.form.columnas = result.data.columnas;
-
-                            // ✅ Asegurar que tipo_rack siempre tenga un valor
-                            this.modalEditarDimensiones.form.tipo_rack = result.data.tipo_rack ||
-                                'panel';
-
-                            this.modalEditarDimensiones.form.capacidad_maxima = 10000;
-
-                            // Inicializar estados
-                            this.modalEditarDimensiones.tieneProductos = false;
-                            this.modalEditarDimensiones.puedeCambiarTipo = true;
-
-                            // Verificar si tiene productos para bloquear el cambio de tipo
-                            await this.verificarProductosEnRack(rack.idRack);
-
-                            this.modalEditarDimensiones.open = true;
-                            this.calcularCambios();
-                        } else {
-                            console.error('Error al cargar info del rack:', result.message);
-                            this.error('Error al cargar información del rack');
-                        }
-                    } catch (error) {
-                        console.error('Error al abrir modal:', error);
-                        this.error('Error de conexión al servidor');
-                    }
-                },
-
-                // NUEVO: Método para verificar si el rack tiene productos
-                async verificarProductosEnRack(rackId) {
-                    try {
-                        console.log('Verificando productos para rack ID:', rackId);
-
-                        const response = await fetch(`/almacen/racks/${rackId}/tiene-productos`);
-
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-                        console.log('Respuesta verificación productos:', result);
-
-                        if (result.success) {
-                            this.modalEditarDimensiones.tieneProductos = result.data
-                                .tiene_productos;
-                            this.modalEditarDimensiones.puedeCambiarTipo = !result.data
-                                .tiene_productos;
-
-                            console.log('Estado actualizado:', {
-                                tieneProductos: this.modalEditarDimensiones.tieneProductos,
-                                puedeCambiarTipo: this.modalEditarDimensiones
-                                    .puedeCambiarTipo
-                            });
-                        } else {
-                            console.warn('Error en respuesta:', result.message);
-                            // Por defecto, asumimos que no tiene productos para no bloquear la UI
-                            this.modalEditarDimensiones.tieneProductos = false;
-                            this.modalEditarDimensiones.puedeCambiarTipo = true;
-                        }
-                    } catch (error) {
-                        console.error('Error al verificar productos:', error);
-                        // Por defecto, asumimos que no tiene productos
-                        this.modalEditarDimensiones.tieneProductos = false;
-                        this.modalEditarDimensiones.puedeCambiarTipo = true;
-                    }
                 },
 
                 async sugerirSiguienteLetra() {
@@ -1115,7 +823,7 @@
                     const ubicacionesNuevas = nuevasFilas * nuevasColumnas;
                     const diferencia = ubicacionesNuevas - ubicacionesActuales;
 
-                    // ✅ NUEVO: Calcular ubicaciones que se eliminarían
+                    // Calcular ubicaciones que se eliminarían
                     const ubicacionesAEliminar = Math.max(0, -diferencia);
 
                     this.modalEditarDimensiones.cambiosDetectados = diferencia !== 0;
@@ -1144,6 +852,7 @@
                         this.modalEditarDimensiones.puedeActualizar = true;
                     }
                 },
+
                 // Método para actualizar dimensiones
                 async actualizarDimensionesRack() {
                     this.modalEditarDimensiones.loading = true;
@@ -1189,6 +898,7 @@
                         this.modalEditarDimensiones.loading = false;
                     }
                 },
+
                 cerrarModalEditarDimensiones() {
                     this.modalEditarDimensiones.open = false;
                     this.modalEditarDimensiones.loading = false;
@@ -1200,9 +910,8 @@
                 mostrarMensajeTemporal(mensaje, tipo = 'info') {
                     // Puedes implementar tu sistema de notificaciones aquí
                     console.log(`${tipo.toUpperCase()}: ${mensaje}`);
-                    // O usar alert temporal
-                    // alert(mensaje);
                 },
+
                 cerrarModalCrearRack() {
                     this.modalCrearRack.open = false;
                     this.modalCrearRack.loading = false;
@@ -1253,123 +962,91 @@
                     }
                 },
 
-                // MÉTODOS PARA CREAR UBICACIÓN
-                async abrirModalCrearUbicacion() {
+                // Método para abrir modal de edición
+                async abrirModalEditarDimensiones(rack) {
                     try {
-                        // Cargar lista de racks
-                        const response = await fetch('/almacen/racks/listar');
-                        const result = await response.json();
+                        console.log('Abriendo modal para rack:', rack);
 
-                        if (result.success) {
-                            this.modalCrearUbicacion.racks = result.data;
-                            this.modalCrearUbicacion.open = true;
-                            // Resetear formulario
-                            this.modalCrearUbicacion.form = {
-                                rack_id: '',
-                                codigo: '',
-                                nivel: 1,
-                                posicion: 1,
-                                capacidad_maxima: 10000,
-                                estado_ocupacion: 'vacio'
-                            };
-                            this.modalCrearUbicacion.rackInfo = null;
-                        } else {
-                            this.error('Error al cargar lista de racks');
+                        // Verificar que el rack existe
+                        if (!rack || !rack.idRack) {
+                            this.error('Rack no válido');
+                            return;
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    }
-                },
 
-                cerrarModalCrearUbicacion() {
-                    this.modalCrearUbicacion.open = false;
-                    this.modalCrearUbicacion.loading = false;
-                },
-
-                async cargarRackInfo() {
-                    if (!this.modalCrearUbicacion.form.rack_id) {
-                        this.modalCrearUbicacion.rackInfo = null;
-                        return;
-                    }
-
-                    try {
-                        console.log('Cargando información del rack:', this.modalCrearUbicacion.form
-                            .rack_id);
-
-                        const response = await fetch(
-                            `/almacen/racks/${this.modalCrearUbicacion.form.rack_id}/info`);
+                        const response = await fetch(`/almacen/racks/${rack.idRack}/info`);
 
                         if (!response.ok) {
                             throw new Error(`Error HTTP: ${response.status}`);
                         }
 
                         const result = await response.json();
-                        console.log('Respuesta info rack:', result);
+                        console.log('Info del rack:', result);
 
                         if (result.success) {
-                            this.modalCrearUbicacion.rackInfo = result.data;
-                            console.log('Info del rack cargada:', result.data);
+                            this.modalEditarDimensiones.rack = result.data;
+                            this.modalEditarDimensiones.form.filas = result.data.filas;
+                            this.modalEditarDimensiones.form.columnas = result.data.columnas;
+
+                            // Asegurar que tipo_rack siempre tenga un valor
+                            this.modalEditarDimensiones.form.tipo_rack = result.data.tipo_rack ||
+                                'panel';
+
+                            // Inicializar estados
+                            this.modalEditarDimensiones.tieneProductos = false;
+                            this.modalEditarDimensiones.puedeCambiarTipo = true;
+
+                            // Verificar si tiene productos para bloquear el cambio de tipo
+                            await this.verificarProductosEnRack(rack.idRack);
+
+                            this.modalEditarDimensiones.open = true;
+                            this.calcularCambios();
                         } else {
-                            console.warn('No se pudo cargar la info del rack:', result.message);
-                            this.modalCrearUbicacion.rackInfo = null;
+                            console.error('Error al cargar info del rack:', result.message);
+                            this.error('Error al cargar información del rack');
                         }
                     } catch (error) {
-                        console.error('Error al cargar info del rack:', error);
-                        this.modalCrearUbicacion.rackInfo = null;
-                        this.error('Error al cargar información del rack seleccionado');
+                        console.error('Error al abrir modal:', error);
+                        this.error('Error de conexión al servidor');
                     }
                 },
 
-                async crearUbicacion() {
-                    this.modalCrearUbicacion.loading = true;
-
+                // Método para verificar si el rack tiene productos
+                async verificarProductosEnRack(rackId) {
                     try {
-                        const response = await fetch('/almacen/ubicaciones/crear', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(this.modalCrearUbicacion.form)
-                        });
+                        console.log('Verificando productos para rack ID:', rackId);
+
+                        const response = await fetch(`/almacen/racks/${rackId}/tiene-productos`);
+
+                        if (!response.ok) {
+                            throw new Error(`Error HTTP: ${response.status}`);
+                        }
 
                         const result = await response.json();
+                        console.log('Respuesta verificación productos:', result);
 
                         if (result.success) {
-                            this.success('Ubicación creada exitosamente');
-                            this.cerrarModalCrearUbicacion();
-                            this.cargarDatos(); // Recargar datos para actualizar stats
+                            this.modalEditarDimensiones.tieneProductos = result.data
+                                .tiene_productos;
+                            this.modalEditarDimensiones.puedeCambiarTipo = !result.data
+                                .tiene_productos;
+
+                            console.log('Estado actualizado:', {
+                                tieneProductos: this.modalEditarDimensiones.tieneProductos,
+                                puedeCambiarTipo: this.modalEditarDimensiones
+                                    .puedeCambiarTipo
+                            });
                         } else {
-                            this.error(result.message || 'Error al crear ubicación');
-                            if (result.errors) {
-                                Object.values(result.errors).forEach(errorArray => {
-                                    errorArray.forEach(error => {
-                                        this.error(error);
-                                    });
-                                });
-                            }
+                            console.warn('Error en respuesta:', result.message);
+                            // Por defecto, asumimos que no tiene productos para no bloquear la UI
+                            this.modalEditarDimensiones.tieneProductos = false;
+                            this.modalEditarDimensiones.puedeCambiarTipo = true;
                         }
                     } catch (error) {
-                        console.error('Error:', error);
-                        this.error('Error de conexión al servidor');
-                    } finally {
-                        this.modalCrearUbicacion.loading = false;
+                        console.error('Error al verificar productos:', error);
+                        // Por defecto, asumimos que no tiene productos
+                        this.modalEditarDimensiones.tieneProductos = false;
+                        this.modalEditarDimensiones.puedeCambiarTipo = true;
                     }
-                },
-
-                // Método para mostrar notificaciones (si no lo tienes)
-                success(message) {
-                    // Puedes usar toastr, sweetalert, o console.log
-                    console.log('Éxito:', message);
-                    alert('Éxito: ' +
-                        message); // Temporal, puedes cambiar por tu sistema de notificaciones
-                },
-
-                error(message) {
-                    console.error('Error:', message);
-                    alert('Error: ' + message); // Temporal
                 },
 
                 async cargarDatos() {
@@ -1390,7 +1067,7 @@
                             this.data = result.data;
                             this.stats = result.stats;
 
-                            // ✅ DEBUG: Verificar que los datos tengan sede
+                            // DEBUG: Verificar que los datos tengan sede
                             console.log('Datos cargados:', {
                                 total: this.data.length,
                                 tieneSede: this.data.every(d => d.hasOwnProperty('sede')),
@@ -1413,6 +1090,7 @@
                         this.loading = false;
                     }
                 },
+
                 aplicarFiltros() {
                     this.cargarDatos();
                 },
@@ -1425,7 +1103,7 @@
                 resetFiltros() {
                     this.filtro = {
                         periodo: '30',
-                        sede: 'LOS OLIVOS', // ← Ahora tiene el valor por defecto
+                        sede: 'LOS OLIVOS',
                         buscar: ''
                     };
                     this.cargarDatos();
@@ -1466,7 +1144,7 @@
                 renderChart() {
                     const heatmapEl = document.getElementById('heatmap');
 
-                    // ✅ VALIDAR QUE HAY DATOS
+                    // VALIDAR QUE HAY DATOS
                     if (!this.data || this.data.length === 0) {
                         console.warn('No hay datos para renderizar el heatmap');
                         this.loading = false;
@@ -1520,7 +1198,7 @@
                 },
 
                 baseOption() {
-                    // ✅ VALIDAR QUE HAY DATOS ANTES DE PROCESAR
+                    // VALIDAR QUE HAY DATOS ANTES DE PROCESAR
                     if (!this.data || this.data.length === 0) {
                         return {
                             title: {
@@ -1537,7 +1215,7 @@
 
                     const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
 
-                    // ✅ AGREGAR TODOS LOS CAMPOS INCLUYENDO CUSTODIAS
+                    // AGREGAR TODOS LOS CAMPOS INCLUYENDO CUSTODIAS
                     const data = this.data.map(d => [
                         d.x || 0,
                         d.y || 0,
@@ -1547,17 +1225,16 @@
                         d.rack || 'N/A',
                         d.cantidad || 0,
                         d.categoria || 'Sin categoría',
-                        d.capacidad || 100,
                         d.sede || 'N/A',
                         d.tipo_articulo || 'Sin tipo',
                         d.nivel || 1
                     ]);
 
-                    // ✅ OBTENER DATOS DEL YAXIS CON VALIDACIÓN
+                    // OBTENER DATOS DEL YAXIS CON VALIDACIÓN
                     const yAxisData = [...new Set(this.data.map(d => d.y))].filter(y => y !==
                         undefined);
 
-                    // ✅ PREPARAR DATOS PARA YAXIS CON COLORES
+                    // PREPARAR DATOS PARA YAXIS CON COLORES
                     const yAxisDataWithStyle = yAxisData.map(yValue => {
                         const rackData = this.data.find(d => d.y == yValue);
                         if (!rackData) return yValue;
@@ -1565,7 +1242,7 @@
                         const letra = rackData.letra || yValue;
                         const tipoRack = rackData.tipo_rack || 'spark';
 
-                        // ✅ ASIGNAR ESTILOS SEGÚN TIPO DE RACK
+                        // ASIGNAR ESTILOS SEGÚN TIPO DE RACK
                         if (tipoRack === 'spark') {
                             return {
                                 value: letra,
@@ -1600,9 +1277,9 @@
                             },
                             formatter: (p) => {
                                 try {
-                                    // ✅ SOLO LOS CAMPOS QUE NECESITAMOS
+                                    // SOLO LOS CAMPOS QUE NECESITAMOS
                                     const [x, y, val, ubicacion, piso, rack, cantidad,
-                                        categoria, capacidad, sede, tipoArticulo, nivel
+                                        categoria, sede, tipoArticulo, nivel
                                     ] = p.data;
 
                                     return `
@@ -1614,7 +1291,7 @@
                 
                 <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
                 <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
-                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidad} / ${capacidad}</div>
+                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidad}</div>
                 <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
                 <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
                 <div style="margin-bottom:6px;">📈 <strong>${this.mode === 'heat' ? 'Actividad' : 'Ocupación'}:</strong> ${val}%</div>
@@ -1657,7 +1334,6 @@
                                 color: '#64748b',
                                 fontSize: 14,
                                 margin: 15,
-                                // ✅ YA NO NECESITAMOS FORMatter - LOS ESTILOS ESTÁN EN LOS DATOS
                             },
                             axisLine: {
                                 lineStyle: {
@@ -1672,7 +1348,7 @@
                                 }
                             },
                             inverse: true,
-                            data: yAxisDataWithStyle, // ✅ USAR DATOS CON ESTILOS
+                            data: yAxisDataWithStyle,
                         },
                         visualMap: [],
                         series: [{
@@ -1716,6 +1392,7 @@
                         }]
                     };
                 },
+
                 updateChart() {
                     if (!this.chart) {
                         console.warn('Chart no inicializado');
@@ -1736,13 +1413,13 @@
                         this.chart.off('click');
                         this.chart.on('click', async (p) => {
                             try {
-                                if (!p.data || p.data.length < 12) {
+                                if (!p.data || p.data.length < 11) {
                                     console.warn('Datos incompletos en el click:', p.data);
                                     return;
                                 }
 
                                 const rack = p.data[5];
-                                const sede = p.data[9];
+                                const sede = p.data[8];
 
                                 if (rack && sede && rack !== 'N/A' && sede !== 'N/A') {
                                     // Hacer una consulta para obtener el tipo de rack
@@ -1761,7 +1438,7 @@
                                             vista = 'detalle-rack-panel';
                                         }
 
-                                        // ✅ CAMBIO: Abrir en nueva ventana/pestaña
+                                        // Abrir en nueva ventana/pestaña
                                         const url =
                                             `/almacen/ubicaciones/${vista}/${rack}?sede=${encodeURIComponent(sede)}`;
                                         window.open(url, '_blank');
@@ -1769,7 +1446,7 @@
                                     } catch (error) {
                                         console.error('Error al obtener tipo de rack:',
                                             error);
-                                        // ✅ CAMBIO: Fallback también en nueva ventana
+                                        // Fallback también en nueva ventana
                                         const url =
                                             `/almacen/ubicaciones/detalle-rack/${rack}?sede=${encodeURIComponent(sede)}`;
                                         window.open(url, '_blank');
@@ -1790,6 +1467,17 @@
                         console.error('Error al actualizar chart:', error);
                         this.loading = false;
                     }
+                },
+
+                // Método para mostrar notificaciones
+                success(message) {
+                    console.log('Éxito:', message);
+                    alert('Éxito: ' + message);
+                },
+
+                error(message) {
+                    console.error('Error:', message);
+                    alert('Error: ' + message);
                 }
             }));
         });

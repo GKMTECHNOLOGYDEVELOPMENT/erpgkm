@@ -18,6 +18,7 @@ class InventarioIngresoCliente extends Model
         'tipo_ingreso',
         'ingreso_id',
         'cliente_general_id',
+        'numero_orden',
         'cantidad',
     ];
 

@@ -577,9 +577,29 @@ public function getAll(Request $request)
         ->take($request->length)
         ->get();
 
-    $data = $articulos->map(function ($articulo) {
+    // Obtener IDs de artículos para la consulta de movimientos
+    $articuloIds = $articulos->pluck('idArticulos')->toArray();
+
+    // Consulta para CONTAR movimientos (no sumar cantidades)
+    $movimientos = DB::table('inventario_ingresos_clientes')
+        ->select(
+            'articulo_id',
+            DB::raw("COUNT(CASE WHEN tipo_ingreso IN ('compra', 'ajuste', 'entrada_proveedor') THEN 1 END) as total_entradas"),
+            DB::raw("COUNT(CASE WHEN tipo_ingreso = 'salida' THEN 1 END) as total_salidas")
+        )
+        ->whereIn('articulo_id', $articuloIds)
+        ->groupBy('articulo_id')
+        ->get()
+        ->keyBy('articulo_id');
+
+    $data = $articulos->map(function ($articulo) use ($movimientos) {
         $modeloNombres = $articulo->modelos->pluck('nombre')->join(' / ');
         $subcategoriaNombre = $articulo->subcategoria->nombre ?? 'Sin Subcategoría';
+
+        // Obtener movimientos para este artículo
+        $movimiento = $movimientos->get($articulo->idArticulos);
+        $totalEntradas = $movimiento ? $movimiento->total_entradas : 0;
+        $totalSalidas = $movimiento ? $movimiento->total_salidas : 0;
 
         // 🔽 Agregamos la consulta para obtener los clientes generales con stock
         $clientes = DB::table('inventario_ingresos_clientes as iic')
@@ -594,8 +614,8 @@ public function getAll(Request $request)
             ->get();
 
         // 🔽 Construimos el select HTML
-$selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
-        $selectHtml .= '<option value="">Seleccionar cliente</option>'; // 👈 línea agregada
+        $selectHtml = '<select class="select-cliente-general w-full text-sm rounded" data-articulo-id="' . $articulo->idArticulos . '">';
+        $selectHtml .= '<option value="">Seleccionar cliente</option>';
 
         foreach ($clientes as $cliente) {
             $selectHtml .= '<option value="' . $cliente->idClienteGeneral . '">' .
@@ -613,6 +633,8 @@ $selectHtml = '<select class="select-cliente-general w-full text-sm rounded" dat
             'unidad' => $articulo->unidad->nombre ?? 'Sin Unidad',
             'codigo_barras' => $articulo->codigo_barras,
             'stock_total' => $articulo->stock_total,
+            'entradas' => $totalEntradas, // 👈 Cantidad de movimientos de entrada
+            'salidas' => $totalSalidas,   // 👈 Cantidad de movimientos de salida
             'sku' => $articulo->sku,
             'tipo_articulo' => $articulo->tipoarticulo->nombre ?? 'Sin Tipo',
             'modelo' => $modeloNombres ?: 'Sin Modelo',
@@ -629,6 +651,11 @@ $selectHtml = '<select class="select-cliente-general w-full text-sm rounded" dat
         'data' => $data,
     ]);
 }
+
+
+
+
+
 
 
     public function checkNombre(Request $request)

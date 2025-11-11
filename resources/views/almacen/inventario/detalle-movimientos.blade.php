@@ -58,7 +58,7 @@
                     <p class="text-gray-700 text-sm sm:text-base leading-relaxed">
                         Todos los movimientos del mes que generaron el kardex para
                         <span
-                            class="font-semibold text-white bg-dark px-2 py-1 rounded-lg">{{ $articulo->nombre }}</span>
+                            class="font-semibold text-white bg-dark px-2 py-1 rounded-lg">{{ $articulo->idTipoArticulo == 2 ? $articulo->codigo_repuesto : $articulo->nombre }}</span>
                         del cliente <span
                             class="font-semibold text-purple-600 bg-purple-50 px-2 py-1 rounded-lg">{{ $cliente->descripcion ?? 'Cliente' }}</span>
                     </p>
@@ -308,6 +308,14 @@
                                                 class="text-sm font-mono text-gray-700">{{ $movimiento->compra_id }}</span>
                                         </div>
                                     @endif
+                                    
+                                    @if ($movimiento->numero_orden)
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600 font-medium">Ticket Nº:</span>
+                                            <span class="text-sm font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded">{{ $movimiento->numero_orden }}</span>
+                                        </div>
+                                    @endif
+
 
                                     @if ($esMismoDia)
                                         <div
@@ -395,7 +403,7 @@
                                         Cantidad
                                     </div>
                                 </th>
-                                <th
+                                    <th
                                     class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor"
@@ -406,6 +414,17 @@
                                         Día
                                     </div>
                                 </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01" />
+                                        </svg>
+                                        Nº Ticket
+                                    </div>
+                                </th>
+
+                            
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200/40">
@@ -466,6 +485,15 @@
                                             {{ $fechaMovimiento->format('d') }}
                                         </span>
                                     </td>
+
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if ($movimiento->numero_orden)
+                                            <span
+                                                class="text-sm font-mono text-gray-700 bg-gray-100 px-2 py-1 rounded">{{ $movimiento->numero_orden }}</span>
+                                        @else
+                                            <span
+                                                class="text-sm font-mono text-gray-400 italic">N/A</span>
+                                        @endif
                                 </tr>
                             @empty
                                 <tr>

@@ -28,8 +28,8 @@ document.addEventListener('alpine:init', () => {
             });
         },
         
-        // Método para abrir modal de búsqueda
-       async abrirModalVerificacion() {
+      // En tu método abrirModalVerificacion, agrega más logs:
+async abrirModalVerificacion() {
     const busqueda = this.codigoBarras.trim();
     console.log('Búsqueda iniciada:', busqueda);
     
@@ -49,30 +49,41 @@ document.addEventListener('alpine:init', () => {
         const response = await fetch(`/buscar-producto-entrada?q=${encodeURIComponent(busqueda)}`);
         const data = await response.json();
         
-        console.log('Respuesta del servidor:', data);
+        console.log('Respuesta COMPLETA del servidor:', data);
         
         if (data.success && data.productos.length > 0) {
             this.productosEncontrados = data.productos;
-            console.log('Productos encontrados:', data.productos);
-            toastr.success(`Se encontraron ${data.productos.length} producto(s)`);
+            console.log('Productos encontrados - DETALLES:', data.productos);
             
-            // Log para verificar los campos
+            // Log detallado de cada producto encontrado
             data.productos.forEach((producto, index) => {
-                console.log(`Producto ${index}:`, {
+                console.log(`📦 Producto ${index + 1}:`, {
                     id: producto.id,
                     nombre: producto.nombre,
                     codigo_repuesto: producto.codigo_repuesto,
+                    modelo: producto.modelo,
+                    marca: producto.marca,
                     subcategoria: producto.subcategoria,
-                    idsubcategoria: producto.idsubcategoria
+                    codigo_barras: producto.codigo_barras,
+                    sku: producto.sku,
+                    stock_total: producto.stock_total
                 });
             });
+            
+            toastr.success(`Se encontraron ${data.productos.length} producto(s)`);
         } else {
-            console.log('No se encontraron productos o success=false');
+            console.log('❌ No se encontraron productos. Respuesta completa:', data);
+            console.log('🔍 Query utilizada:', busqueda);
+            
+            if (data.debug_verificacion) {
+                console.log('🐛 Datos de verificación:', data.debug_verificacion);
+            }
+            
             toastr.info('No se encontraron productos con ese criterio');
             this.productosEncontrados = [];
         }
     } catch (error) {
-        console.error('Error al buscar productos:', error);
+        console.error('💥 Error al buscar productos:', error);
         toastr.error('Error al buscar productos');
         this.productosEncontrados = [];
     } finally {

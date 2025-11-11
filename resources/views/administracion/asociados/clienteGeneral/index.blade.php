@@ -35,6 +35,8 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex items-center flex-wrap mb-5">
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CLIENTE GENERAL'))
+
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm m-1"
                         onclick="window.location='{{ route('clientes-general.exportExcel') }}'">
@@ -48,6 +50,11 @@
                         </svg>
                         Excel
                     </button>
+                     @endif
+
+
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF CLIENTE GENERAL'))
+
 
                     <!-- Botón Exportar a PDF -->
                     <button id="exportPdfBtn" class="btn btn-danger btn-sm"
@@ -61,6 +68,11 @@
                         </svg>
                         PDF
                     </button>
+                     @endif
+
+
+
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR CLIENTE GENERAL'))
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm m-1" @click="$dispatch('toggle-modal')">
@@ -75,6 +87,8 @@
                         </svg>
                         Agregar
                     </button>
+
+                     @endif
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
@@ -220,6 +234,13 @@
             });
         });
     </script>
+
+    <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CLIENTE GENERAL') ? 'true' : 'false' }},
+        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CLIENTE GENERAL') ? 'true' : 'false' }}
+    };
+</script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>

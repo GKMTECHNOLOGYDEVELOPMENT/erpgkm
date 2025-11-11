@@ -1,6 +1,7 @@
 document.addEventListener("alpine:init", () => {
     Alpine.data("multipleTable", () => ({
         datatable1: null,
+        permisos: window.permisosTiendas, // Acceder a los permisos definidos en Blade
 
         init() {
             this.fetchDataAndInitTable();
@@ -10,39 +11,48 @@ document.addEventListener("alpine:init", () => {
         },
 
         async fetchDataAndInitTable() {
-                this.datatable1 = $('#myTable1').DataTable({
-                    serverSide: true,
-                    processing: true,
-                    ajax: {
-                        url: '/api/tiendas/paginado',
-                        type: 'GET'
+            this.datatable1 = $('#myTable1').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '/api/tiendas/paginado',
+                    type: 'GET'
+                },
+                columns: [
+                    { data: 'ruc', className: 'text-center', render: ruc => `<div>${ruc || 'N/A'}</div>` },
+                    { data: 'nombre', className: 'text-center', render: nombre => `<div>${nombre || 'N/A'}</div>` },
+                    { data: 'celular', className: 'text-center', render: celular => `<div>${celular || 'N/A'}</div>` },
+                    { data: 'email', className: 'text-center', render: email => `<div>${email || 'N/A'}</div>` },
+                    {
+                        data: 'direccion',
+                        className: 'text-center',
+                        render: direccion => `
+                            <div style="max-width: 250px; overflow-wrap: break-word; white-space: normal; margin: 0 auto;">
+                                ${direccion || 'N/A'}
+                            </div>`
                     },
-                    columns: [
-                        { data: 'ruc', className: 'text-center', render: ruc => `<div>${ruc || 'N/A'}</div>` },
-                        { data: 'nombre', className: 'text-center', render: nombre => `<div>${nombre || 'N/A'}</div>` },
-                        { data: 'celular', className: 'text-center', render: celular => `<div>${celular || 'N/A'}</div>` },
-                        { data: 'email', className: 'text-center', render: email => `<div>${email || 'N/A'}</div>` },
-                        {
-                            data: 'direccion',
-                            className: 'text-center',
-                            render: direccion => `
-                                <div style="max-width: 250px; overflow-wrap: break-word; white-space: normal; margin: 0 auto;">
-                                    ${direccion || 'N/A'}
-                                </div>`
-                        },
-                        {
-                            data: null,
-                            orderable: false,
-                            searchable: false,
-                            className: 'text-center',
-                            render: (_, __, row) => `
-                                <div class="flex justify-center items-center gap-2">
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center',
+                        render: (_, __, row) => {
+                            let botones = '<div class="flex justify-center items-center gap-2">';
+                            
+                            // Botón Editar
+                            if (this.permisos.puedeEditar) {
+                                botones += `
                                     <a href="/tienda/${row.idTienda}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
                                             <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
                                             <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                         </svg>
-                                    </a>
+                                    </a>`;
+                            }
+                            
+                            // Botón Eliminar
+                            if (this.permisos.puedeEliminar) {
+                                botones += `
                                     <button type="button" x-tooltip="Eliminar" @click="deleteTienda(${row.idTienda})">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                             <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -51,81 +61,95 @@ document.addEventListener("alpine:init", () => {
                                             <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                             <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                         </svg>
-                                    </button>
-                                </div>
-                            `
-                        }
-                    ],
-                    order: [[0, 'desc']],
-                    responsive: false,
-                    autoWidth: false,
-                    pageLength: 10,
-                    language: {
-                        search: "Buscar...",
-                        zeroRecords: "No se encontraron registros",
-                        lengthMenu: "Mostrar _MENU_ registros por página",
-                        loadingRecords: "Cargando...",
-                        info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                        paginate: {
-                            first: "Primero",
-                            last: "Último",
-                            next: "Siguiente",
-                            previous: "Anterior",
-                        },
-                    },
-                    dom: 'rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
-                    initComplete: function () {
-                        const wrapper = document.querySelector('.dataTables_wrapper');
-                        const table = wrapper.querySelector('table');
-
-                        const scrollContainer = document.createElement('div');
-                        scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
-                        table.parentNode.insertBefore(scrollContainer, table);
-                        scrollContainer.appendChild(table);
-
-                        const scrollTop = document.createElement('div');
-                        scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
-                        scrollTop.style.height = '14px';
-
-                        const topInner = document.createElement('div');
-                        topInner.style.width = scrollContainer.scrollWidth + 'px';
-                        topInner.style.height = '1px';
-                        scrollTop.appendChild(topInner);
-
-                        scrollTop.addEventListener('scroll', () => {
-                            scrollContainer.scrollLeft = scrollTop.scrollLeft;
-                        });
-                        scrollContainer.addEventListener('scroll', () => {
-                            scrollTop.scrollLeft = scrollContainer.scrollLeft;
-                        });
-
-                        wrapper.insertBefore(scrollTop, scrollContainer);
-
-                        const floatingControls = document.createElement('div');
-                        floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
-                        Object.assign(floatingControls.style, {
-                            position: 'sticky',
-                            bottom: '0',
-                            left: '0',
-                            width: '100%',
-                            zIndex: '10'
-                        });
-
-                        const info = wrapper.querySelector('.dataTables_info');
-                        const length = wrapper.querySelector('.dataTables_length');
-                        const paginate = wrapper.querySelector('.dataTables_paginate');
-
-                        if (info && length && paginate) {
-                            floatingControls.appendChild(info);
-                            floatingControls.appendChild(length);
-                            floatingControls.appendChild(paginate);
-                            wrapper.appendChild(floatingControls);
+                                    </button>`;
+                            }
+                            
+                            // Si no tiene ningún permiso, mostrar mensaje
+                            if (!this.permisos.puedeEditar && !this.permisos.puedeEliminar) {
+                                botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
+                            }
+                            
+                            botones += '</div>';
+                            return botones;
                         }
                     }
-                });
+                ],
+                order: [[0, 'desc']],
+                responsive: false,
+                autoWidth: false,
+                pageLength: 10,
+                language: {
+                    search: "Buscar...",
+                    zeroRecords: "No se encontraron registros",
+                    lengthMenu: "Mostrar _MENU_ registros por página",
+                    loadingRecords: "Cargando...",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior",
+                    },
+                },
+                dom: 'rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
+                initComplete: function () {
+                    const wrapper = document.querySelector('.dataTables_wrapper');
+                    const table = wrapper.querySelector('table');
+
+                    const scrollContainer = document.createElement('div');
+                    scrollContainer.className = 'dataTables_scrollable overflow-x-auto border border-gray-200 rounded-md mb-3';
+                    table.parentNode.insertBefore(scrollContainer, table);
+                    scrollContainer.appendChild(table);
+
+                    const scrollTop = document.createElement('div');
+                    scrollTop.className = 'dataTables_scrollTop overflow-x-auto mb-2';
+                    scrollTop.style.height = '14px';
+
+                    const topInner = document.createElement('div');
+                    topInner.style.width = scrollContainer.scrollWidth + 'px';
+                    topInner.style.height = '1px';
+                    scrollTop.appendChild(topInner);
+
+                    scrollTop.addEventListener('scroll', () => {
+                        scrollContainer.scrollLeft = scrollTop.scrollLeft;
+                    });
+                    scrollContainer.addEventListener('scroll', () => {
+                        scrollTop.scrollLeft = scrollContainer.scrollLeft;
+                    });
+
+                    wrapper.insertBefore(scrollTop, scrollContainer);
+
+                    const floatingControls = document.createElement('div');
+                    floatingControls.className = 'floating-controls flex justify-between items-center border-t p-2 shadow-md bg-white dark:bg-[#121c2c]';
+                    Object.assign(floatingControls.style, {
+                        position: 'sticky',
+                        bottom: '0',
+                        left: '0',
+                        width: '100%',
+                        zIndex: '10'
+                    });
+
+                    const info = wrapper.querySelector('.dataTables_info');
+                    const length = wrapper.querySelector('.dataTables_length');
+                    const paginate = wrapper.querySelector('.dataTables_paginate');
+
+                    if (info && length && paginate) {
+                        floatingControls.appendChild(info);
+                        floatingControls.appendChild(length);
+                        floatingControls.appendChild(paginate);
+                        wrapper.appendChild(floatingControls);
+                    }
+                }
+            });
         },
 
         deleteTienda(idTienda) {
+            // Verificar permiso antes de eliminar (segunda validación por seguridad)
+            if (!this.permisos.puedeEliminar) {
+                Swal.fire('Error', 'No tienes permisos para eliminar tiendas.', 'error');
+                return;
+            }
+
             Swal.fire({
                 icon: "warning",
                 title: "¿Estás seguro?",
@@ -143,17 +167,17 @@ document.addEventListener("alpine:init", () => {
                             "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                         },
                     })
-                        .then(async res => {
-                            const data = await res.json();
-                            if (!res.ok) {
-                                throw new Error(data.message || "No puedes eliminar, la tienda está asociada a otras entidades.");
-                            }
+                    .then(async res => {
+                        const data = await res.json();
+                        if (!res.ok) {
+                            throw new Error(data.message || "No puedes eliminar, la tienda está asociada a otras entidades.");
+                        }
 
-                            Swal.fire("¡Eliminado!", data.message, "success").then(() => location.reload());
-                        })
-                        .catch(error => {
-                            Swal.fire("Error", error.message || "Ocurrió un error.", "error");
-                        });
+                        Swal.fire("¡Eliminado!", data.message, "success").then(() => location.reload());
+                    })
+                    .catch(error => {
+                        Swal.fire("Error", error.message || "Ocurrió un error.", "error");
+                    });
                 }
             });
         },

@@ -70,6 +70,9 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+
+
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('clientes.exportExcel') }}'">
@@ -83,6 +86,8 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+
+                    
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"

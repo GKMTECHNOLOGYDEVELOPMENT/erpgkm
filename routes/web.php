@@ -702,6 +702,10 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::get('/{id}/show', [SolicitudarticuloController::class, 'show'])->name('show'); // Editar una categoría
     Route::get('/{id}/opciones', [SolicitudarticuloController::class, 'opciones'])->name('opciones'); // Editar una categoría
 
+
+    Route::get('/{id}/gestionar', [SolicitudarticuloController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
+
+
     Route::put('/update/{id}', [SolicitudarticuloController::class, 'update'])->name('update'); // Actualizar una categoría
     // Route::delete('/{id}', [UbicacionesController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
     Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
@@ -730,10 +734,18 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
     Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
+
+Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
+
+
     Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 });
 
+
+// Rutas para gestión de estados de repuestos
+Route::post('/solicitudrepuesto/marcar-usado/{id}', [SolicitudRepuestoController::class, 'marcarUsado'])->name('solicitudrepuesto.marcar.usado');
+Route::post('/solicitudrepuesto/marcar-no-usado/{id}', [SolicitudRepuestoController::class, 'marcarNoUsado'])->name('solicitudrepuesto.marcar.no-usado');
 
 // INICIO CATEGORIA ///
 Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () {
@@ -989,7 +1001,7 @@ Route::post('/ticket/{ticketId}/ticketflujo/{flujoId}/update', [OrdenesTrabajoCo
 ///CLIENTE GENERAL POR CREATE-SMART
 Route::post('/guardar-cliente-general-smart', [ClienteGeneralController::class, 'guardarClienteSmart'])->name('guardar.cliente');
 Route::post('/guardar-marca-smart', [MarcaController::class, 'store'])->name('guardar.cliente');
-Route::post('/guardar-modelo-smart', [ModelosController::class, 'store'])->name('guardar.modelo');
+Route::post('/guardar-modelo-smart', [ModelosController::class, 'storeMODELOSMART'])->name('guardar.modelo');
 ///RUTAS
 Route::get('/clientes/generales/asociados/{idCliente}', [ClientesController::class, 'clientesGeneralesAsociados']);
 Route::post('/clientes/{idCliente}/agregar-cliente-general/{idClienteGeneral}', [ClientesController::class, 'agregarClienteGeneral']);

@@ -267,6 +267,8 @@ use App\Helpers\PermisoHelper;
                     <span>Administracion</span>
                 </h2>
 
+                 {{--
+
                 <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'components' }"
@@ -342,6 +344,10 @@ use App\Helpers\PermisoHelper;
                         </li>
                     </ul>
                 </li> 
+
+
+                    --}}
+                
 
                @if(PermisoHelper::tienePermiso('VER ASOCIADOS'))
 <li class="menu nav-item">
@@ -463,6 +469,8 @@ use App\Helpers\PermisoHelper;
             </ul>
             </li> --}}
 
+             {{--
+
             <li class="menu nav-item">
                 <button type="button" class="nav-link group"
                     :class="{ 'active': activeDropdown === 'elements' }"
@@ -566,6 +574,8 @@ use App\Helpers\PermisoHelper;
                 </a>
             </li>
 
+             --}}
+
            @if(PermisoHelper::tienePermiso('VER USUARIOS'))
 <li class="menu nav-item">
     <a href="{{ route('usuario') }}" class="nav-link group">
@@ -605,6 +615,8 @@ use App\Helpers\PermisoHelper;
             </a>
             </li> --}}
 
+
+             {{--
             <li class="menu nav-item">
                 <a href="/widgets" class="nav-link group">
                     <div class="flex items-center">
@@ -630,6 +642,10 @@ use App\Helpers\PermisoHelper;
                 </a>
             </li>
 
+                --}}
+
+
+                 {{--
             <li class="menu nav-item">
                 <a href="/font-icons" class="nav-link group">
                     <div class="flex items-center">
@@ -649,6 +665,8 @@ use App\Helpers\PermisoHelper;
                     </div>
                 </a>
             </li>
+
+            
 
 
 
@@ -682,6 +700,8 @@ use App\Helpers\PermisoHelper;
                 </a>
             </li>
 
+            --}}
+
 
             <h2
                 class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
@@ -693,6 +713,7 @@ use App\Helpers\PermisoHelper;
                 <span>ALMACEN</span>
             </h2>
 
+            {{--
             <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">
                         <div class="flex items-center">
@@ -798,6 +819,10 @@ use App\Helpers\PermisoHelper;
                     </ul>
                 </li>
 
+            --}}
+
+
+ {{--
              <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'forms' }"
@@ -879,6 +904,12 @@ use App\Helpers\PermisoHelper;
                         </li>
                     </ul>
                 </li> 
+
+--}}
+
+
+
+
             @if(PermisoHelper::tienePermiso('VER DETALLES DEL ARTICULO'))
 <li class="menu nav-item">
     <button type="button" class="nav-link group"

@@ -20,8 +20,7 @@ class EntradasproveedoresController extends Controller
     }
 
 
-    
-public function buscarProductoEntrada(Request $request)
+  public function buscarProductoEntrada(Request $request)
 {
     $query = $request->get('q', '');
     
@@ -36,9 +35,29 @@ public function buscarProductoEntrada(Request $request)
     }
 
     try {
+        // CONSULTA DE VERIFICACIÓN - Agrega esto temporalmente
+        $verificacion = DB::table('articulos as a')
+            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+            ->leftJoin('marca as mr', 'm.idMarca', '=', 'mr.idMarca')
+            ->select(
+                'a.idArticulos',
+                'a.nombre',
+                'a.codigo_repuesto',
+                'm.nombre as modelo_nombre',
+                'mr.nombre as marca_nombre',
+                'a.idModelo',
+                'm.idMarca'
+            )
+            ->where('a.estado', 1)
+            ->limit(5)
+            ->get();
+
+        Log::info('Verificación de datos de productos:', ['verificacion' => $verificacion->toArray()]);
+
+        // Tu consulta original aquí...
         $productos = DB::table('articulos as a')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo') // LEFT JOIN
-            ->leftJoin('marca as mr', 'm.idMarca', '=', 'mr.idMarca')  // LEFT JOIN
+            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+            ->leftJoin('marca as mr', 'm.idMarca', '=', 'mr.idMarca')
             ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
             ->select(
                 'a.idArticulos as id',
@@ -57,29 +76,78 @@ public function buscarProductoEntrada(Request $request)
             ->where('a.estado', 1)
             ->where(function($queryBuilder) use ($query) {
                 $queryBuilder->where('a.nombre', 'LIKE', "%{$query}%")
-                           ->orWhere('m.nombre', 'LIKE', "%{$query}%")
-                           ->orWhere('mr.nombre', 'LIKE', "%{$query}%")
+                           ->orWhere('a.codigo_repuesto', 'LIKE', "%{$query}%")
                            ->orWhere('a.codigo_barras', 'LIKE', "%{$query}%")
                            ->orWhere('a.sku', 'LIKE', "%{$query}%")
-                           ->orWhere('a.codigo_repuesto', 'LIKE', "%{$query}%")
+                           ->orWhere('m.nombre', 'LIKE', "%{$query}%")
+                           ->orWhere('mr.nombre', 'LIKE', "%{$query}%")
                            ->orWhere('sc.nombre', 'LIKE', "%{$query}%");
                 
                 if (is_numeric($query)) {
-                    $queryBuilder->orWhere('a.idsubcategoria', '=', (int)$query);
+                    $queryBuilder->orWhere('a.idsubcategoria', '=', (int)$query)
+                               ->orWhere('a.idArticulos', '=', (int)$query);
                 }
             })
             ->orderBy('a.nombre')
             ->limit(50)
             ->get();
 
-        Log::info('Resultados de la búsqueda después de LEFT JOIN', [
-            'total_resultados' => count($productos)
+        Log::info('Resultados de la búsqueda', [
+            'query' => $query,
+            'total_resultados' => count($productos),
+            'productos_encontrados' => $productos->pluck('nombre', 'id')
         ]);
+
+        // Si no hay resultados, intenta una búsqueda más flexible
+        if ($productos->isEmpty()) {
+            Log::info('Primera búsqueda sin resultados, intentando búsqueda flexible');
+            
+            $productos = DB::table('articulos as a')
+                ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+                ->leftJoin('marca as mr', 'm.idMarca', '=', 'mr.idMarca')
+                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+                ->select(
+                    'a.idArticulos as id',
+                    'a.codigo_barras',
+                    'a.nombre',
+                    'a.stock_total',
+                    'a.precio_compra',
+                    'a.precio_venta',
+                    'a.sku',
+                    'a.codigo_repuesto',
+                    'a.idsubcategoria',
+                    'm.nombre as modelo',
+                    'mr.nombre as marca',
+                    'sc.nombre as subcategoria'
+                )
+                ->where('a.estado', 1)
+                ->where(function($queryBuilder) use ($query) {
+                    $palabras = explode(' ', $query);
+                    
+                    foreach ($palabras as $palabra) {
+                        if (strlen($palabra) > 2) {
+                            $queryBuilder->orWhere('a.nombre', 'LIKE', "%{$palabra}%")
+                                       ->orWhere('a.codigo_repuesto', 'LIKE', "%{$palabra}%")
+                                       ->orWhere('m.nombre', 'LIKE', "%{$palabra}%")
+                                       ->orWhere('mr.nombre', 'LIKE', "%{$palabra}%")
+                                       ->orWhere('sc.nombre', 'LIKE', "%{$palabra}%");
+                        }
+                    }
+                })
+                ->orderBy('a.nombre')
+                ->limit(50)
+                ->get();
+                
+            Log::info('Resultados de búsqueda flexible', [
+                'total_resultados' => count($productos)
+            ]);
+        }
 
         return response()->json([
             'success' => true,
             'productos' => $productos,
-            'total' => count($productos)
+            'total' => count($productos),
+            'debug_verificacion' => $verificacion // Temporal para debug
         ]);
 
     } catch (\Exception $e) {
@@ -95,7 +163,6 @@ public function buscarProductoEntrada(Request $request)
         ]);
     }
 }
-
 
 private function generarCodigoEntrada()
 {
