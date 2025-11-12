@@ -1614,7 +1614,16 @@ Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [Solicitudingr
 Route::post('/solicitud-ingreso/cambiar-estado-grupo', [SolicitudIngresoController::class, 'cambiarEstadoGrupo'])->name('solicitud-ingreso.cambiar-estado-grupo');
 
 Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado']);
+
+
+
+
 Route::post('/solicitud-ingreso/guardar-ubicacion', [SolicitudIngresoController::class, 'guardarUbicacion']);
+
+
+
+
+
 
 
 Route::post('/solicitud-ingreso/{id}/cambiar-estado', [SolicitudIngresoController::class, 'cambiarEstado'])->name('solicitud-ingreso.cambiar-estado');
@@ -1716,7 +1725,13 @@ Route::post('/almacen/ubicaciones/crear', [UbicacionesVistaController::class, 'c
 Route::post('/almacen/racks/sugerir-letra', [UbicacionesVistaController::class, 'sugerirSiguienteLetra']);
 Route::get('/almacen/racks/{rack}/datos-actualizados', [UbicacionesVistaController::class, 'getDatosActualizados']);
 
+
+
 Route::get('/solicitud-ingreso/sugerir-ubicaciones/{articuloId}/{cantidad}', [SolicitudingresoController::class, 'sugerirUbicacionesMejorado']);
+
+
+
+
 Route::post('/almacen/ubicaciones/actualizar-producto', [UbicacionesVistaController::class, 'actualizarProducto'])->name('ubicaciones.actualizar-producto');
 Route::post('/almacen/ubicaciones/eliminar-producto', [UbicacionesVistaController::class, 'eliminarProducto'])->name('ubicaciones.eliminar-producto');
 

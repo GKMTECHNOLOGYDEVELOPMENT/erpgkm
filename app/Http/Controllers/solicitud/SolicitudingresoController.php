@@ -432,6 +432,11 @@ class SolicitudingresoController extends Controller
     }
 
 
+
+
+
+
+    
     public function sugerirUbicacionesMejorado($articuloId, $cantidad)
     {
         try {
@@ -479,8 +484,6 @@ class SolicitudingresoController extends Controller
             ], 500);
         }
     }
-
-
     private function obtenerTodasLasUbicacionesConEspacio($cantidad)
     {
         try {
@@ -520,6 +523,39 @@ class SolicitudingresoController extends Controller
             return collect([]);
         }
     }
+
+    
+    private function formatearRespuesta($sugerencias, $tipo, $mensaje)
+    {
+        $sugerenciasLimpias = $sugerencias->map(function ($item) {
+            return collect($item)->map(function ($valor) {
+                if (is_string($valor)) {
+                    // Convierte a UTF-8 y elimina caracteres inválidos
+                    return mb_convert_encoding($valor, 'UTF-8', 'UTF-8');
+                }
+                return $valor;
+            });
+        });
+
+        return response()->json([
+            'success' => true,
+            'sugerencias' => $sugerenciasLimpias,
+            'total_sugerencias' => $sugerenciasLimpias->count(),
+            'tipo_sugerencia' => $tipo,
+            'mensaje' => $mensaje,
+            'debug' => [
+                'tipo_caso' => $tipo,
+                'cantidad_sugerencias' => $sugerenciasLimpias->count()
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+    }
+
+
+
+
+
+
+
 
 
 
@@ -570,30 +606,6 @@ class SolicitudingresoController extends Controller
         }
     }
 
-    private function formatearRespuesta($sugerencias, $tipo, $mensaje)
-    {
-        $sugerenciasLimpias = $sugerencias->map(function ($item) {
-            return collect($item)->map(function ($valor) {
-                if (is_string($valor)) {
-                    // Convierte a UTF-8 y elimina caracteres inválidos
-                    return mb_convert_encoding($valor, 'UTF-8', 'UTF-8');
-                }
-                return $valor;
-            });
-        });
-
-        return response()->json([
-            'success' => true,
-            'sugerencias' => $sugerenciasLimpias,
-            'total_sugerencias' => $sugerenciasLimpias->count(),
-            'tipo_sugerencia' => $tipo,
-            'mensaje' => $mensaje,
-            'debug' => [
-                'tipo_caso' => $tipo,
-                'cantidad_sugerencias' => $sugerenciasLimpias->count()
-            ]
-        ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
-    }
 
     // Método para buscar combinación de ubicaciones vacías
     private function buscarCombinacionUbicaciones($cantidadRequerida)
