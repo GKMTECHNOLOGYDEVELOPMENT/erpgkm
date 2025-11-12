@@ -220,12 +220,12 @@
                                         x-text="getEstadoTexto(ubicacion?.estado)"></span>
                                 </div>
 
-                                <!-- <div
+                                <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Capacidad:</span>
                                     <span class="font-bold text-lg text-blue-600"
                                         x-text="ubicacion?.capacidad || 'N/A'"></span>
-                                </div> -->
+                                </div>
                             </div>
 
                             <!-- Columna Derecha - Estadísticas -->
@@ -234,14 +234,14 @@
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Productos Actuales:</span>
                                     <span class="font-bold text-lg text-green-600"
-                                        x-text="`${ubicacion?.cantidad_total || 0}`"></span>
+                                        x-text="`${ubicacion?.cantidad_total || 0}/${ubicacion?.capacidad || 0}`"></span>
                                 </div>
 
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Espacio Disponible:</span>
                                     <span class="font-bold text-lg text-purple-600"
-                                        x-text="(ubicacion?.cantidad_total) || 0"></span>
+                                        x-text="(ubicacion?.capacidad - ubicacion?.cantidad_total) || 0"></span>
                                 </div>
 
                                 <div
