@@ -22,8 +22,6 @@ class UbicacionesVistaController extends Controller
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 
-
-
     // En UbicacionesVistaController.php
     public function obtenerTipoRack(Request $request)
     {
@@ -55,8 +53,6 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-
-
     public function getDatosRacks(Request $request)
     {
         Log::debug('=== INICIO getDatosRacks ===', [
@@ -78,7 +74,6 @@ class UbicacionesVistaController extends Controller
                 'ru.codigo_unico',
                 'ru.nivel as piso',
                 'ru.posicion',
-                'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'r.nombre as rack_nombre',
                 'r.sede',
@@ -268,9 +263,6 @@ class UbicacionesVistaController extends Controller
                 $cantidadTotal = $productosUbicacion->sum('cantidad');
 
                 $porcentajeOcupacion = 0;
-                if ($ub->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = round(($cantidadTotal / $ub->capacidad_maxima) * 100);
-                }
 
                 // ✅ Obtener información AGRUPADA de productos
                 $producto = 'Vacío';
@@ -335,7 +327,6 @@ class UbicacionesVistaController extends Controller
                     'ubicacion' => $ub->codigo_unico ?? $ub->codigo,
                     'producto' => $producto,
                     'cantidad' => $cantidadTotal,
-                    'capacidad' => $ub->capacidad_maxima,
                     'categoria' => $categorias,
                     'tipo_articulo' => $tiposArticulo, // ✅ Aquí ya vendrá "CUSTODIA" si corresponde
                     'piso' => $ub->piso,
@@ -351,7 +342,6 @@ class UbicacionesVistaController extends Controller
             }
             $y++;
         }
-
 
         // Stats finales 
         $stats = [
@@ -433,7 +423,6 @@ class UbicacionesVistaController extends Controller
                 'ru.codigo_unico',
                 'ru.nivel',
                 'ru.posicion',
-                'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'r.nombre as rack_nombre',
                 'r.sede',
@@ -592,17 +581,9 @@ class UbicacionesVistaController extends Controller
                 })->values();
 
                 // Calcular estado
-                $porcentajeOcupacion = 0;
-                if ($ubicacion->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $ubicacion->capacidad_maxima) * 100;
-                }
-
                 $estado = $ubicacion->estado_ocupacion;
                 if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+                    $estado = 'ocupado';
                 } elseif ($cantidadTotal == 0) {
                     $estado = 'vacio';
                 }
@@ -636,7 +617,6 @@ class UbicacionesVistaController extends Controller
                     // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
                     'categoria' => $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null,
 
-                    'capacidad' => $ubicacion->capacidad_maxima,
                     'estado' => $estado,
                     'nivel' => $ubicacion->nivel,
                     'fecha' => now()->toISOString(),
@@ -710,7 +690,6 @@ class UbicacionesVistaController extends Controller
                 'ru.codigo_unico',
                 'ru.nivel',
                 'ru.posicion',
-                'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'ru.updated_at',
 
@@ -953,19 +932,10 @@ class UbicacionesVistaController extends Controller
                 // ✅ CALCULAR CANTIDAD TOTAL
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
 
-                // Determinar estado basado en porcentaje de ocupación
-                $porcentajeOcupacion = 0;
-                if ($primerArticulo->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
-                }
-
                 // Calcular estado
                 $estado = $primerArticulo->estado_ocupacion;
                 if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+                    $estado = 'ocupado';
                 } elseif ($cantidadTotal == 0) {
                     $estado = 'vacio';
                 }
@@ -1003,7 +973,6 @@ class UbicacionesVistaController extends Controller
                     'tipo_articulo' => $tipoArticuloDisplay,
                     'categoria' => $categoriaDisplay,
 
-                    'capacidad' => $primerArticulo->capacidad_maxima,
                     'estado' => $estado,
                     'nivel' => $primerArticulo->nivel,
                     'fecha' => $primerArticulo->updated_at,
@@ -1035,7 +1004,6 @@ class UbicacionesVistaController extends Controller
             'sedeActual' => $sede
         ]);
     }
-
 
     public function detalleRackPanel($rack)
     {
@@ -1104,7 +1072,6 @@ class UbicacionesVistaController extends Controller
                 'ru.codigo_unico',
                 'ru.nivel',
                 'ru.posicion',
-                'ru.capacidad_maxima',
                 'ru.estado_ocupacion',
                 'ru.updated_at',
 
@@ -1351,19 +1318,10 @@ class UbicacionesVistaController extends Controller
                 // ✅ CALCULAR CANTIDAD TOTAL
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
 
-                // Determinar estado basado en porcentaje de ocupación
-                $porcentajeOcupacion = 0;
-                if ($primerArticulo->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
-                }
-
                 // Calcular estado
                 $estado = $primerArticulo->estado_ocupacion;
                 if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+                    $estado = 'ocupado';
                 } elseif ($cantidadTotal == 0) {
                     $estado = 'vacio';
                 }
@@ -1401,7 +1359,6 @@ class UbicacionesVistaController extends Controller
                     'tipo_articulo' => $tipoArticuloDisplay,
                     'categoria' => $categoriaDisplay,
 
-                    'capacidad' => $primerArticulo->capacidad_maxima,
                     'estado' => $estado,
                     'nivel' => $primerArticulo->nivel,
                     'fecha' => $primerArticulo->updated_at,
@@ -1690,6 +1647,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     public function confirmarReubicacion(Request $request)
     {
         DB::beginTransaction();
@@ -2245,7 +2203,6 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-
     public function obtenerRacksDisponibles()
     {
         try {
@@ -2274,16 +2231,14 @@ class UbicacionesVistaController extends Controller
                 ->select(
                     'ru.idRackUbicacion as id',
                     'ru.codigo_unico as codigo',
-                    'ru.capacidad_maxima as capacidad_maxima',
-                    DB::raw('COALESCE(SUM(rua.cantidad), 0) as cantidad_total_articulos'),
-                    DB::raw('(ru.capacidad_maxima - COALESCE(SUM(rua.cantidad), 0)) as espacio_disponible')
+                    DB::raw('COALESCE(SUM(rua.cantidad), 0) as cantidad_total_articulos')
                 )
                 ->where('ru.rack_id', $rackId)
-                ->groupBy('ru.idRackUbicacion', 'ru.codigo_unico', 'ru.capacidad_maxima')
+                ->groupBy('ru.idRackUbicacion', 'ru.codigo_unico')
                 ->get()
                 ->filter(function ($ubicacion) {
-                    // Filtrar solo ubicaciones que tienen espacio disponible
-                    return $ubicacion->espacio_disponible > 0;
+                    // Filtrar solo ubicaciones vacías
+                    return $ubicacion->cantidad_total_articulos == 0;
                 })
                 ->values();
 
@@ -2298,7 +2253,6 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
-
 
     // En el controlador
     public function obtenerArticulosUbicacion($ubicacionId)
@@ -2346,6 +2300,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     // ✅ NUEVO: Método para reubicar custodias
     private function reubicarCustodia($request, $ubicacionOrigen, $ubicacionDestino)
     {
@@ -2638,6 +2593,7 @@ class UbicacionesVistaController extends Controller
             ]
         ]);
     }
+
     private function obtenerUbicacionConProductos($ubicacionId)
     {
         try {
@@ -2652,7 +2608,6 @@ class UbicacionesVistaController extends Controller
                     'ru.codigo_unico as codigo',
                     'ru.codigo',
                     'ru.nivel',
-                    'ru.capacidad_maxima as capacidad',
                     'ru.estado_ocupacion',
                     'r.nombre as rack_nombre'
                 )
@@ -2758,17 +2713,9 @@ class UbicacionesVistaController extends Controller
             $cantidadTotal = array_sum(array_column($todosLosProductos, 'cantidad'));
 
             // Calcular estado
-            $porcentajeOcupacion = 0;
-            if ($ubicacionBase->capacidad > 0) {
-                $porcentajeOcupacion = ($cantidadTotal / $ubicacionBase->capacidad) * 100;
-            }
-
             $estado = $ubicacionBase->estado_ocupacion;
             if ($estado == 'vacio' && $cantidadTotal > 0) {
-                if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+                $estado = 'ocupado';
             } elseif ($cantidadTotal == 0) {
                 $estado = 'vacio';
             }
@@ -2819,7 +2766,6 @@ class UbicacionesVistaController extends Controller
                 'tipo_articulo' => $tipoArticuloDisplay,
                 'categoria' => $categoriaDisplay,
 
-                'capacidad' => $ubicacionBase->capacidad,
                 'estado' => $estado,
                 'nivel' => $ubicacionBase->nivel,
                 'fecha' => now()->toISOString(),
@@ -2848,21 +2794,13 @@ class UbicacionesVistaController extends Controller
     }
 
     /**
-     * Calcular estado de ocupación basado en porcentaje
+     * Calcular estado de ocupación
      */
-    private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
+    private function calcularEstadoOcupacion($cantidad)
     {
-        if ($capacidadMaxima <= 0) return 'vacio';
-
-        $porcentaje = ($cantidad / $capacidadMaxima) * 100;
-
-        if ($porcentaje == 0) return 'vacio';
-        if ($porcentaje <= 24) return 'bajo';
-        if ($porcentaje <= 49) return 'medio';
-        if ($porcentaje <= 74) return 'alto';
-        return 'muy_alto';
+        if ($cantidad == 0) return 'vacio';
+        return 'ocupado';
     }
-
 
     public function listarProductos()
     {
@@ -2957,14 +2895,6 @@ class UbicacionesVistaController extends Controller
                 ->where('cliente_general_id', $request->cliente_general_id)
                 ->sum('cantidad');
 
-            // Verificar que la nueva cantidad no supere la capacidad
-            if (($cantidadTotalActual + $request->cantidad) > $ubicacion->capacidad_maxima) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'La cantidad supera la capacidad máxima de la ubicación. Espacio disponible: ' . ($ubicacion->capacidad_maxima - $cantidadTotalActual) . ' unidades'
-                ], 422);
-            }
-
             // Obtener información del producto
             $producto = DB::table('articulos')
                 ->where('idArticulos', $request->articulo_id)
@@ -3046,7 +2976,7 @@ class UbicacionesVistaController extends Controller
 
             // Actualizar estado de ocupación de la ubicación
             $nuevaCantidadTotal = $cantidadTotalActual + $request->cantidad;
-            $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotal, $ubicacion->capacidad_maxima);
+            $nuevoEstado = $this->calcularEstadoOcupacion($nuevaCantidadTotal);
 
             DB::table('rack_ubicaciones')
                 ->where('idRackUbicacion', $request->ubicacion_id)
@@ -3083,7 +3013,6 @@ class UbicacionesVistaController extends Controller
                         'stock_nuevo' => $nuevoStockTotal
                     ],
                     'cliente_general_id' => $request->cliente_general_id,
-                    'espacio_disponible' => $ubicacion->capacidad_maxima - $nuevaCantidadTotal,
                     'cantidad_total_ubicacion' => $nuevaCantidadTotal
                 ]
             ]);
@@ -3218,7 +3147,6 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-
     public function listarRacksDisponibles()
     {
         try {
@@ -3258,7 +3186,6 @@ class UbicacionesVistaController extends Controller
                     'ru.idRackUbicacion as id',
                     'ru.codigo',
                     'ru.codigo_unico',
-                    'ru.capacidad_maxima',
                     'ru.nivel',
                     'ru.posicion',
                     'r.nombre as rack_nombre'
@@ -3279,7 +3206,6 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
-
 
     public function crearRack(Request $request)
     {
@@ -3306,7 +3232,6 @@ class UbicacionesVistaController extends Controller
                 'tipo_rack' => 'required|in:panel,spark', // NUEVO: Validación del tipo
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000',
                 'estado' => 'required|in:activo,inactivo'
             ]);
 
@@ -3331,10 +3256,9 @@ class UbicacionesVistaController extends Controller
             ]);
 
             $rack = DB::table('racks')->where('idRack', $rackId)->first();
-            $capacidadMaxima = $request->input('capacidad_maxima', 100);
 
             // Generar ubicaciones automáticamente
-            $this->generarUbicacionesAutomaticas($rack, $capacidadMaxima);
+            $this->generarUbicacionesAutomaticas($rack);
 
             DB::commit();
 
@@ -3370,8 +3294,7 @@ class UbicacionesVistaController extends Controller
             $validator = Validator::make($request->all(), [
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
-                'tipo_rack' => 'required|in:panel,spark',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000'
+                'tipo_rack' => 'required|in:panel,spark'
             ]);
 
             if ($validator->fails()) {
@@ -3467,21 +3390,10 @@ class UbicacionesVistaController extends Controller
 
             Log::debug('Ubicaciones existentes:', ['count' => $ubicacionesExistentes->count()]);
 
-            // Actualizar capacidad máxima de ubicaciones existentes
-            $actualizadas = DB::table('rack_ubicaciones')
-                ->where('rack_id', $rackId)
-                ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
-                ->update([
-                    'capacidad_maxima' => $request->capacidad_maxima,
-                    'updated_at' => now()
-                ]);
-
-            Log::debug('Capacidades actualizadas:', ['count' => $actualizadas]);
-
             $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
 
             // ✅ CORREGIDO: Usar el array devuelto correctamente
-            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes);
             // ✅ DEBUG: Verificar qué devuelve
             Log::debug('RESULTADO SINCRONIZACION:', [
                 'resultado' => $resultadoSincronizacion,
@@ -3552,6 +3464,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     /**
      * Verifica si hay productos en ubicaciones que serían eliminadas al disminuir dimensiones
      */
@@ -3584,7 +3497,7 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-    private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 10000)
+    private function sincronizarUbicaciones($rack, $ubicacionesExistentes)
     {
         try {
             Log::debug('=== INICIO sincronizarUbicaciones DEBUG ===', [
@@ -3655,7 +3568,6 @@ class UbicacionesVistaController extends Controller
                             'nivel' => $nivel,
                             'posicion' => $posicion,
                             'estado_ocupacion' => 'vacio',
-                            'capacidad_maxima' => $capacidadMaxima,
                             'created_at' => $now,
                             'updated_at' => $now
                         ];
@@ -3687,11 +3599,10 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-
     /**
      * Genera ubicaciones automáticamente para un rack
      */
-    private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 10000)
+    private function generarUbicacionesAutomaticas($rack)
     {
         $ubicaciones = [];
         $now = now();
@@ -3710,7 +3621,6 @@ class UbicacionesVistaController extends Controller
                     'nivel' => $nivel,
                     'posicion' => $posicion,
                     'estado_ocupacion' => 'vacio',
-                    'capacidad_maxima' => $capacidadMaxima,
                     'created_at' => $now,
                     'updated_at' => $now
                 ];
@@ -3727,8 +3637,7 @@ class UbicacionesVistaController extends Controller
             'rack_nombre' => $rack->nombre,
             'total_ubicaciones' => count($ubicaciones),
             'filas' => $rack->filas,
-            'columnas' => $rack->columnas,
-            'capacidad_maxima' => $capacidadMaxima
+            'columnas' => $rack->columnas
         ]);
     }
 
@@ -3858,6 +3767,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     // En métodos como listarRacks, obtenerInfoRack, etc.
     public function listarRacks()
     {
@@ -3880,6 +3790,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     public function obtenerInfoRack($id)
     {
         try {
@@ -3963,7 +3874,6 @@ class UbicacionesVistaController extends Controller
                 'codigo' => 'required|string|max:20',
                 'nivel' => 'required|integer|min:1',
                 'posicion' => 'required|integer|min:1',
-                'capacidad_maxima' => 'required|integer|min:1',
                 'estado_ocupacion' => 'required|in:vacio,bajo,medio,alto,muy_alto'
             ]);
 
@@ -3999,7 +3909,6 @@ class UbicacionesVistaController extends Controller
                 'codigo_unico' => $codigoUnico,
                 'nivel' => $request->nivel,
                 'posicion' => $request->posicion,
-                'capacidad_maxima' => $request->capacidad_maxima,
                 'estado_ocupacion' => $request->estado_ocupacion,
                 'articulo_id' => null, // Siempre null al crear
                 'cantidad_actual' => 0, // Siempre 0 al crear
@@ -4026,7 +3935,6 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
-
 
     public function actualizarProducto(Request $request)
     {
@@ -4193,6 +4101,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     /**
      * Eliminar un producto específico de una ubicación
      */
@@ -4356,25 +4265,8 @@ class UbicacionesVistaController extends Controller
             ->where('rack_ubicacion_id', $ubicacionId)
             ->sum('cantidad');
 
-        // Calcular porcentaje de ocupación
-        $porcentajeOcupacion = $ubicacion->capacidad_maxima > 0
-            ? ($cantidadTotal / $ubicacion->capacidad_maxima) * 100
-            : 0;
-
-        // Determinar el estado basado en el porcentaje
-        $nuevoEstado = 'vacio';
-
-        if ($cantidadTotal > 0) {
-            if ($porcentajeOcupacion <= 25) {
-                $nuevoEstado = 'bajo';
-            } elseif ($porcentajeOcupacion <= 50) {
-                $nuevoEstado = 'medio';
-            } elseif ($porcentajeOcupacion <= 75) {
-                $nuevoEstado = 'alto';
-            } else {
-                $nuevoEstado = 'muy_alto';
-            }
-        }
+        // Determinar el estado basado en la cantidad
+        $nuevoEstado = $cantidadTotal > 0 ? 'ocupado' : 'vacio';
 
         // Actualizar el estado de la ubicación
         DB::table('rack_ubicaciones')
@@ -4384,7 +4276,6 @@ class UbicacionesVistaController extends Controller
                 'updated_at' => now()
             ]);
     }
-
 
     // Agrega este método al controlador para listar clientes generales
     public function listarClientesGenerales()

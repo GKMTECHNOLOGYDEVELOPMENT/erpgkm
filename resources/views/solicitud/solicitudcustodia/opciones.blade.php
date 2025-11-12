@@ -569,7 +569,7 @@
                         data.sugerencias.forEach(sugerencia => {
                             const option = document.createElement('option');
                             option.value = sugerencia.id;
-                            option.textContent = `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`;
+                            option.textContent = `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede})`;
                             option.setAttribute('data-capacidad', sugerencia.espacio_disponible);
                             selectUbicacion.appendChild(option);
                         });

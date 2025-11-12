@@ -1114,7 +1114,7 @@
                             if (response.data.sugerencias.length > 0) {
                                 this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
                                     idUbicacion: sugerencia.id,
-                                    nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`
+                                    nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede})`
                                 }));
                             }
                         }
@@ -1519,7 +1519,7 @@
                         if (response.data.success && response.data.sugerencias.length > 0) {
                             this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
                                 idUbicacion: sugerencia.id,
-                                nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`
+                                nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede})`
                             }));
 
                             this.mostrarNotificacion(`Se encontraron ${response.data.sugerencias.length} ubicaciones sugeridas`, 'success');
