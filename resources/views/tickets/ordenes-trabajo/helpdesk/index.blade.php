@@ -118,7 +118,7 @@
             
                         });
                 }
-            }">
+                }">
                 <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">
                     Filtrar por Cliente General
                 </label>
