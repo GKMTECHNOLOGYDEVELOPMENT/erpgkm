@@ -1,4 +1,4 @@
- <x-layout.default>
+ <x-layout.default title="Entrada Proveedores - ERP Solutions Force">
      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -119,7 +119,8 @@
                  Este módulo te permite registrar el ingreso de <span class="font-medium">productos o repuestos</span>
                  provenientes de nuestros <span class="font-medium">proveedores autorizados</span>.
                  Podrás ingresar la <span class="font-medium">cantidad recibida</span> y asignar la
-                 <span class="font-medium">ubicación de almacenamiento</span> correspondiente para mantener un control preciso del inventario.
+                 <span class="font-medium">ubicación de almacenamiento</span> correspondiente para mantener un control
+                 preciso del inventario.
              </p>
          </div>
 
@@ -132,8 +133,10 @@
                  <div class="panel mt-6 p-5 max-w-7xl mx-auto">
                      <h2 class="text-lg font-semibold mb-4">Búsqueda y selección de producto</h2>
                      <p class="text-gray-600 mb-6">
-                         Ingresa el <strong>codigo de repuesto</strong>, <strong>nombre</strong>, <strong>modelo</strong> o <strong>marca</strong> del producto o repuesto que deseas buscar.
-                         El sistema mostrará todos los productos que coincidan con los criterios ingresados, para que puedas seleccionarlos fácilmente.
+                         Ingresa el <strong>codigo de repuesto</strong>, <strong>nombre</strong>,
+                         <strong>modelo</strong> o <strong>marca</strong> del producto o repuesto que deseas buscar.
+                         El sistema mostrará todos los productos que coincidan con los criterios ingresados, para que
+                         puedas seleccionarlos fácilmente.
                      </p>
 
 
@@ -141,7 +144,8 @@
                      <div class="flex items-end gap-4 mb-8">
                          <!-- Input con ancho forzado -->
                          <div class="w-full">
-                             <label class="block text-sm text-gray-500 mb-1">Codigo de repuesto, nombre, modelo o marca</label>
+                             <label class="block text-sm text-gray-500 mb-1">Codigo de repuesto, nombre, modelo o
+                                 marca</label>
                              <div class="relative">
                                  <i
                                      class="fa-solid fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
@@ -201,7 +205,8 @@
                                          <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
                                              x-text="producto.codigo_barras"></td>
                                          <td class="px-4 py-4 whitespace-nowrap text-gray-800 dark:text-gray-100"
-    x-text="producto.codigo_repuesto ? producto.codigo_repuesto : producto.nombre"></td>
+                                             x-text="producto.codigo_repuesto ? producto.codigo_repuesto : producto.nombre">
+                                         </td>
                                          <td class="px-4 py-4 whitespace-nowrap">
                                              <input type="number"
                                                  class="w-20 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-center bg-white dark:bg-gray-900 text-gray-800 dark:text-white"
@@ -237,79 +242,121 @@
                      <div class="space-y-4">
 
                          <!-- Tipo de entrada -->
+                         <!-- Tipo de entrada -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de entrada <span class="text-red-500">*</span></label>
-                             <select class="clean-input w-full" x-model="tipoEntrada" required>
-                                 <option value="">Seleccione un tipo</option>
-                                 <option value="consignacion">Consignación</option>
-                                 <option value="prestamo">Préstamo</option>
-                                 <option value="muestra">Muestra</option>
-                                 <option value="traslado">Traslado interno</option>
-                                 <option value="marca_asociada">Ingreso por marca asociada</option>
-                                 <option value="otro">Otro</option>
-                             </select>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">
+                                 Tipo de entrada <span class="text-red-500">*</span>
+                             </label>
+                             <div class="relative">
+                                 <select class="clean-input w-full pl-10 pr-8 appearance-none cursor-pointer bg-white"
+                                     x-model="tipoEntrada" required>
+                                     <option value="">Seleccione un tipo</option>
+                                     <option value="consignacion">Consignación</option>
+                                     <option value="prestamo">Préstamo</option>
+                                     <option value="muestra">Muestra</option>
+                                     <option value="traslado">Traslado interno</option>
+                                     <option value="marca_asociada">Ingreso por marca asociada</option>
+                                     <option value="otro">Otro</option>
+                                 </select>
+                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                     <i class="fas fa-list-alt text-gray-400"></i>
+                                 </div>
+                             </div>
                          </div>
 
                          <!-- Fecha de ingreso -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de ingreso <span class="text-red-500">*</span></label>
-                             <input type="date" class="clean-input w-full" x-model="fechaIngreso" required>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">
+                                 Fecha de ingreso <span class="text-red-500">*</span>
+                             </label>
+                             <div class="relative">
+                                 <input type="text" x-ref="fechaIngresoInput" x-model="fechaIngreso"
+                                     class="clean-input w-full pl-10 pr-4 cursor-pointer hover:border-blue-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                                     placeholder="Seleccione una fecha" required>
+                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                     <i class="fas fa-calendar-alt text-gray-400"></i>
+                                 </div>
+                             </div>
+                             <p class="text-xs text-gray-500 mt-1">Haga clic para seleccionar la fecha</p>
                          </div>
 
                          <!-- Cliente General -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Cliente General</label>
-                             <select class="clean-input w-full" x-model="clienteGeneral">
-                                 <option value="">Seleccione un cliente</option>
-                                 @foreach($clientesGenerales as $cliente)
-                                 <option value="{{ $cliente->idClienteGeneral }}">{{ $cliente->descripcion }}</option>
-                                 @endforeach
-                             </select>
-                         </div>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">
+                                 Cliente General<span class="text-red-500">*</span>
+                             </label>
+                             <div class="relative">
+                                 <select
+                                     class="clean-input w-full pl-10 pr-8 appearance-none cursor-pointer bg-white hover:border-blue-400 transition-colors"
+                                     x-model="clienteGeneral">
+                                     <option value="">Seleccione un cliente</option>
+                                     @foreach ($clientesGenerales as $cliente)
+                                         <option value="{{ $cliente->idClienteGeneral }}">{{ $cliente->descripcion }}
+                                         </option>
+                                     @endforeach
+                                 </select>
+                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                     <i class="fas fa-handshake text-gray-400"></i>
+                                 </div>
 
+                             </div>
+                         </div>
                          <!-- Observaciones -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-                             <textarea class="clean-input w-full" rows="3" x-model="observaciones" placeholder="Ej. Repuestos en consignación, sin factura."></textarea>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">
+                                 
+                                 Observaciones
+                             </label>
+                             <div class="relative">
+                                 <textarea class="clean-input w-full pl-10 pr-4 resize-none" x-model="observaciones" rows="3"
+                                     placeholder="Ingrese observaciones adicionales..."></textarea>
+                                 <div class="absolute top-3 left-3 flex items-start pointer-events-none">
+                                     <i class="fas fa-comment-dots text-gray-400 mt-0.5"></i>
+                                 </div>
+                             </div>
                          </div>
 
                          <!-- Adjuntar archivo (guía de remisión, acta, etc.) -->
                          <div x-data="{
-            file: null,
-            fileName: '',
-            fileSize: 0,
-            over: false,
-            onFileChange(e) {
-                const f = e.target.files[0];
-                if (!f) return this.clear();
-                const max = 5 * 1024 * 1024;
-                if (f.size > max) {
-                    if (window.toastr) toastr.error('El archivo supera 5MB');
-                    this.clear();
-                    return;
-                }
-                this.file = f;
-                this.fileName = f.name;
-                this.fileSize = f.size;
-            },
-            clear() {
-                this.file = null;
-                this.fileName = '';
-                this.fileSize = 0;
-                $refs.fileInput.value = '';
-            }
-        }">
-                             <label class="block text-sm font-medium text-gray-700 mb-2">Adjuntar archivo (opcional)</label>
-                             <label @dragover.prevent="over=true" @dragleave="over=false" @drop.prevent="
+                             file: null,
+                             fileName: '',
+                             fileSize: 0,
+                             over: false,
+                             onFileChange(e) {
+                                 const f = e.target.files[0];
+                                 if (!f) return this.clear();
+                                 const max = 5 * 1024 * 1024;
+                                 if (f.size > max) {
+                                     if (window.toastr) toastr.error('El archivo supera 5MB');
+                                     this.clear();
+                                     return;
+                                 }
+                                 this.file = f;
+                                 this.fileName = f.name;
+                                 this.fileSize = f.size;
+                             },
+                             clear() {
+                                 this.file = null;
+                                 this.fileName = '';
+                                 this.fileSize = 0;
+                                 $refs.fileInput.value = '';
+                             }
+                         }">
+                             <label class="block text-sm font-medium text-gray-700 mb-2">Adjuntar archivo
+                                 (opcional)</label>
+                             <label @dragover.prevent="over=true" @dragleave="over=false"
+                                 @drop.prevent="
                 over=false;
                 $refs.fileInput.files = $event.dataTransfer.files;
                 onFileChange({ target: $refs.fileInput })
-            " class="w-full cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition hover:border-blue-400"
+            "
+                                 class="w-full cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition hover:border-blue-400"
                                  :class="over ? 'border-blue-500 bg-blue-50/60' : ''">
                                  <div class="flex flex-col items-center gap-2 text-gray-600">
                                      <i class="fas fa-cloud-upload-alt text-2xl"></i>
                                      <div class="text-sm">
-                                         <span class="font-medium text-blue-600">Haz clic</span> o arrastra tu archivo aquí
+                                         <span class="font-medium text-blue-600">Haz clic</span> o arrastra tu archivo
+                                         aquí
                                      </div>
                                      <div class="text-xs text-gray-500">(pdf/doc/docx/jpg/jpeg/png) · máx 5MB</div>
                                  </div>
@@ -317,27 +364,30 @@
                                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                              </label>
                              <template x-if="fileName">
-                                 <div class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3">
+                                 <div
+                                     class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3">
                                      <div class="flex items-center gap-3">
                                          <i class="fas fa-file-alt text-gray-500"></i>
                                          <div>
                                              <p class="text-sm font-medium text-gray-800" x-text="fileName"></p>
-                                             <p class="text-xs text-gray-500" x-text="(fileSize/1024).toFixed(1) + ' KB'"></p>
+                                             <p class="text-xs text-gray-500"
+                                                 x-text="(fileSize/1024).toFixed(1) + ' KB'"></p>
                                          </div>
                                      </div>
-                                     <button type="button" @click="clear()" class="text-sm text-red-600 hover:underline">Quitar</button>
+                                     <button type="button" @click="clear()"
+                                         class="text-sm text-red-600 hover:underline">Quitar</button>
                                  </div>
                              </template>
                          </div>
 
                          <!-- Botón Guardar Entrada -->
                          <div class="pt-4">
-                             <button class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                                 :disabled="guardandoEntrada"
-                                 @click="guardarEntrada">
+                             <button
+                                 class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                                 :disabled="guardandoEntrada" @click="guardarEntrada">
                                  <template x-if="guardandoEntrada">
-                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                         viewBox="0 0 24 24">
+                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                         fill="none" viewBox="0 0 24 24">
                                          <circle class="opacity-25" cx="12" cy="12" r="10"
                                              stroke="currentColor" stroke-width="4"></circle>
                                          <path class="opacity-75" fill="currentColor"
@@ -358,18 +408,21 @@
                  </div>
              </div>
              <!-- MODAL PARA SELECCIÓN DE PRODUCTOS -->
-             <div x-show="modalAbierto" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition>
+             <div x-show="modalAbierto" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition
+                 @click="cerrarModal">
                  <div class="flex items-start justify-center min-h-screen px-4 py-8">
                      <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto" @click.stop>
                          <!-- Header del modal -->
                          <div class="flex items-center justify-between p-6 border-b border-gray-200">
                              <div>
                                  <h3 class="text-lg font-semibold text-gray-900">Seleccionar Producto</h3>
-                                 <p class="text-sm text-gray-500 mt-1">Busca y selecciona el producto que deseas agregar</p>
+                                 <p class="text-sm text-gray-500 mt-1">Busca y selecciona el producto que deseas
+                                     agregar</p>
                              </div>
                              <button @click="cerrarModal" class="text-gray-400 hover:text-gray-600 transition-colors">
                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                         d="M6 18L18 6M6 6l12 12"></path>
                                  </svg>
                              </button>
                          </div>
@@ -379,9 +432,13 @@
                              <!-- Loading state -->
                              <div x-show="modalCargando" class="text-center py-8">
                                  <div class="inline-flex items-center gap-3">
-                                     <svg class="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
-                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                     <svg class="animate-spin h-6 w-6 text-blue-600" fill="none"
+                                         viewBox="0 0 24 24">
+                                         <circle class="opacity-25" cx="12" cy="12" r="10"
+                                             stroke="currentColor" stroke-width="4"></circle>
+                                         <path class="opacity-75" fill="currentColor"
+                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                         </path>
                                      </svg>
                                      <span class="text-gray-600">Buscando productos...</span>
                                  </div>
@@ -399,7 +456,8 @@
                                  <template x-if="productosEncontrados.length > 0">
                                      <div class="space-y-3">
                                          <p class="text-sm text-gray-600 mb-4">
-                                             Se encontraron <span class="font-medium" x-text="productosEncontrados.length"></span> producto(s)
+                                             Se encontraron <span class="font-medium"
+                                                 x-text="productosEncontrados.length"></span> producto(s)
                                          </p>
 
                                          <!-- Lista de productos -->
@@ -411,50 +469,61 @@
                                                      <div class="flex items-start justify-between">
                                                          <div class="flex-1">
                                                              <div class="flex items-center gap-2 mb-2">
-                                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                 <span
+                                                                     class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                                                      <i class="fas fa-barcode mr-1"></i>
-                                                                     <span x-text="producto.codigo_barras || 'Sin código'"></span>
+                                                                     <span
+                                                                         x-text="producto.codigo_barras || 'Sin código'"></span>
                                                                  </span>
                                                                  <template x-if="producto.sku">
-                                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                                         SKU: <span x-text="producto.sku" class="ml-1"></span>
+                                                                     <span
+                                                                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                         SKU: <span x-text="producto.sku"
+                                                                             class="ml-1"></span>
                                                                      </span>
                                                                  </template>
                                                              </div>
 
-                                                            <h4 class="font-medium text-gray-900 mb-1" 
-                                                                x-text="producto.codigo_repuesto ? producto.codigo_repuesto : producto.nombre">
-                                                            </h4>
-                                                             <div class="flex items-center gap-4 text-sm text-gray-600">
+                                                             <h4 class="font-medium text-gray-900 mb-1"
+                                                                 x-text="producto.codigo_repuesto ? producto.codigo_repuesto : producto.nombre">
+                                                             </h4>
+                                                             <div
+                                                                 class="flex items-center gap-4 text-sm text-gray-600">
                                                                  <span>
                                                                      <i class="fas fa-tag mr-1"></i>
-                                                                     Marca: <span class="font-medium" x-text="producto.marca"></span>
+                                                                     Marca: <span class="font-medium"
+                                                                         x-text="producto.marca"></span>
                                                                  </span>
                                                                  <span>
                                                                      <i class="fas fa-cogs mr-1"></i>
-                                                                     Modelo: <span class="font-medium" x-text="producto.modelo"></span>
+                                                                     Modelo: <span class="font-medium"
+                                                                         x-text="producto.modelo"></span>
                                                                  </span>
                                                              </div>
 
                                                              <div class="flex items-center gap-4 mt-2 text-sm">
                                                                  <span class="text-gray-600">
                                                                      <i class="fas fa-boxes mr-1"></i>
-                                                                     Stock: <span class="font-medium" x-text="producto.stock_total"></span>
+                                                                     Stock: <span class="font-medium"
+                                                                         x-text="producto.stock_total"></span>
                                                                  </span>
                                                                  <template x-if="producto.precio_compra">
                                                                      <span class="text-green-600">
                                                                          <i class="fas fa-dollar-sign mr-1"></i>
-                                                                         Compra: <span class="font-medium">S/ </span><span x-text="parseFloat(producto.precio_compra).toFixed(2)"></span>
+                                                                         Compra: <span class="font-medium">S/
+                                                                         </span><span
+                                                                             x-text="parseFloat(producto.precio_compra).toFixed(2)"></span>
                                                                      </span>
                                                                  </template>
                                                              </div>
 
                                                              <!-- Input de cantidad para productos seleccionados -->
                                                              <div x-show="estaSeleccionado(producto)" class="mt-3">
-                                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
-                                                                 <input type="number"
-                                                                     min="1"
-                                                                     :value="productosSeleccionados.find(p => p.id === producto.id)?.cantidadModal || 1"
+                                                                 <label
+                                                                     class="block text-sm font-medium text-gray-700 mb-1">Cantidad:</label>
+                                                                 <input type="number" min="1"
+                                                                     :value="productosSeleccionados.find(p => p.id === producto
+                                                                         .id)?.cantidadModal || 1"
                                                                      @click.stop
                                                                      @change="actualizarCantidadModal(producto, $event)"
                                                                      class="w-20 border border-gray-300 rounded px-2 py-1 text-center">
@@ -464,9 +533,14 @@
                                                          <!-- Checkbox para selección múltiple -->
                                                          <div class="ml-4">
                                                              <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
-                                                                 :class="estaSeleccionado(producto) ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
-                                                                 <svg x-show="estaSeleccionado(producto)" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                                                 :class="estaSeleccionado(producto) ?
+                                                                     'border-blue-500 bg-blue-500' : 'border-gray-300'">
+                                                                 <svg x-show="estaSeleccionado(producto)"
+                                                                     class="w-3 h-3 text-white" fill="none"
+                                                                     stroke="currentColor" viewBox="0 0 24 24">
+                                                                     <path stroke-linecap="round"
+                                                                         stroke-linejoin="round" stroke-width="3"
+                                                                         d="M5 13l4 4L19 7"></path>
                                                                  </svg>
                                                              </div>
                                                          </div>
@@ -480,11 +554,13 @@
                          </div>
 
                          <!-- Footer del modal con botones de acción -->
-                         <div class="border-t border-gray-200 px-6 py-4" x-show="!modalCargando && productosEncontrados.length > 0">
+                         <div class="border-t border-gray-200 px-6 py-4"
+                             x-show="!modalCargando && productosEncontrados.length > 0">
                              <div class="flex items-center justify-between">
                                  <div class="flex items-center gap-4">
                                      <span class="text-sm text-gray-600">
-                                         Seleccionados: <span class="font-medium text-blue-600" x-text="productosSeleccionados.length"></span>
+                                         Seleccionados: <span class="font-medium text-blue-600"
+                                             x-text="productosSeleccionados.length"></span>
                                      </span>
                                      <template x-if="productosSeleccionados.length > 0">
                                          <button @click="limpiarSelecciones"
@@ -503,7 +579,8 @@
                                          :disabled="productosSeleccionados.length === 0"
                                          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center gap-2">
                                          <i class="fas fa-plus"></i>
-                                         <span x-text="`Agregar ${productosSeleccionados.length} Producto${productosSeleccionados.length !== 1 ? 's' : ''}`"></span>
+                                         <span
+                                             x-text="`Agregar ${productosSeleccionados.length} Producto${productosSeleccionados.length !== 1 ? 's' : ''}`"></span>
                                      </button>
                                  </div>
                              </div>

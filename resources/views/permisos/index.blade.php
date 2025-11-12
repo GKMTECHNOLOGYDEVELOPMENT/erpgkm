@@ -370,53 +370,55 @@
                     </div>
 
                     <!-- Contenedor de Cards con Scroll -->
-                    <div class="p-8">
-                        <!-- Grid de 4 columnas con scroll vertical -->
+                    <div class="p-4 sm:p-6 md:p-8">
+                        <!-- Grid de columnas responsive con scroll vertical -->
                         <div x-show="permisos.length > 0"
-                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+                            class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-5 md:gap-6 max-h-[70vh] overflow-y-auto pr-2 sm:pr-3 md:pr-4 custom-scrollbar">
 
                             <template x-for="permiso in permisos" :key="permiso.idPermiso">
-                                <!-- Card de Permiso -->
+                                <!-- Card de Permiso - Corregido problema de texto -->
                                 <div
-                                    class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-blue-200 group relative">
+                                    class="bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 hover:shadow-lg sm:hover:shadow-xl transition-all duration-300 hover:border-blue-200 group relative flex flex-col h-full min-w-0">
 
                                     <!-- Indicador de Estado -->
-                                    <div class="absolute top-4 right-4">
+                                    <div class="absolute top-3 sm:top-4 right-3 sm:right-4">
                                         <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                                     </div>
 
-                                    <!-- Header de la Card -->
-                                    <div class="flex items-start space-x-3 mb-4">
-                                        <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
+                                    <!-- Header de la Card - Corregido problema de overflow -->
+                                    <div class="flex items-start space-x-2 sm:space-x-3 mb-3 sm:mb-4 min-w-0 w-full">
+                                        <div class="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                                                 </path>
                                             </svg>
                                         </div>
-                                        <div class="min-w-0 flex-1">
-                                            <h3 class="font-bold text-gray-900 text-lg truncate group-hover:text-blue-600 transition-colors"
-                                                x-text="permiso.nombre" :title="permiso.nombre"></h3>
+                                        <div class="min-w-0 flex-1 overflow-hidden">
+                                            <h3 class="font-bold text-gray-900 text-base sm:text-lg break-words group-hover:text-blue-600 transition-colors"
+                                                x-text="permiso.nombre"></h3>
                                         </div>
                                     </div>
 
                                     <!-- Módulo -->
-                                    <div class="mb-4">
+                                    <div class="mb-3 sm:mb-4">
                                         <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200"
+                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200 break-words max-w-full"
                                             x-text="permiso.modulo"></span>
                                     </div>
 
-                                    <!-- Descripción -->
-                                    <div class="mb-6">
-                                        <p class="text-sm text-gray-600 leading-relaxed line-clamp-3"
+                                    <!-- Descripción - Corregido problema de texto largo -->
+                                    <div class="mb-4 sm:mb-6 flex-grow min-w-0">
+                                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed break-words hyphens-auto"
                                             x-text="permiso.descripcion || 'Sin descripción disponible'"
-                                            :class="{ 'text-gray-400 italic': !permiso.descripcion }"></p>
+                                            :class="{ 'text-gray-400 italic': !permiso.descripcion }"
+                                            style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                        </p>
                                     </div>
 
                                     <!-- Información Adicional -->
-                                    <div class="flex items-center justify-between text-xs text-gray-500 mb-4">
+                                    <div class="flex items-center justify-between text-xs text-gray-500 mb-3 sm:mb-4">
                                         <span class="text-green-600 font-semibold flex items-center space-x-1">
                                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd"
@@ -428,11 +430,12 @@
                                     </div>
 
                                     <!-- Acciones -->
-                                    <div class="flex space-x-2 pt-4 border-t border-gray-100">
+                                    <div
+                                        class="flex flex-col xs:flex-row space-y-2 xs:space-y-0 xs:space-x-2 pt-3 sm:pt-4 border-t border-gray-100 mt-auto">
                                         <button @click="editPermiso(permiso)"
-                                            class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-800 border border-blue-200 transition-all duration-200 group/btn"
+                                            class="inline-flex items-center justify-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-800 border border-blue-200 transition-all duration-200 group/btn"
                                             title="Editar permiso">
-                                            <svg class="w-4 h-4 mr-1 transition-transform group-hover/btn:scale-110"
+                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 transition-transform group-hover/btn:scale-110"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
@@ -442,9 +445,9 @@
                                         </button>
 
                                         <button @click="deletePermiso(permiso.idPermiso)"
-                                            class="flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-800 border border-red-200 transition-all duration-200 group/btn"
+                                            class="inline-flex items-center justify-center px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 hover:text-red-800 border border-red-200 transition-all duration-200 group/btn"
                                             title="Eliminar permiso">
-                                            <svg class="w-4 h-4 mr-1 transition-transform group-hover/btn:scale-110"
+                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 transition-transform group-hover/btn:scale-110"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -458,19 +461,22 @@
                         </div>
 
                         <!-- Estado Vacío -->
-                        <div x-show="permisos.length === 0" class="text-center py-16">
-                            <div class="bg-gray-50 rounded-2xl p-12 max-w-md mx-auto border border-gray-200">
+                        <div x-show="permisos.length === 0" class="text-center py-8 sm:py-12 md:py-16">
+                            <div
+                                class="bg-gray-50 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-12 max-w-md mx-auto border border-gray-200">
                                 <div
-                                    class="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="bg-blue-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5 md:mb-6">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                                         </path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-900 mb-3">No hay permisos creados</h3>
-                                <p class="text-gray-600 mb-6">Comience creando el primer permiso del sistema</p>
+                                <h3 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">No
+                                    hay permisos creados</h3>
+                                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-5 md:mb-6">Comience creando el
+                                    primer permiso del sistema</p>
                             </div>
                         </div>
                     </div>
@@ -685,21 +691,21 @@
                     </div>
 
                     <!-- Contenedor de Lista Mejorada -->
-                    <div class="p-8">
-                        <!-- Lista Vertical Mejorada -->
+                    <div class="p-4 sm:p-6 md:p-8">
+                        <!-- Lista Vertical Mejorada - Responsive -->
                         <div x-show="combinaciones.length > 0"
-                            class="space-y-4 max-h-[600px] overflow-y-auto pr-4 custom-scrollbar">
+                            class="space-y-4 max-h-[70vh] overflow-y-auto pr-2 sm:pr-3 md:pr-4 custom-scrollbar">
 
                             <template x-for="combinacion in combinaciones" :key="combinacion.idCombinacion">
-                                <!-- Item de Lista Mejorado -->
+                                <!-- Item de Lista Mejorado - Responsive -->
                                 <div
-                                    class="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 group">
-                                    <div class="flex items-center justify-between">
+                                    class="bg-gradient-to-r from-white to-gray-50 border border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 hover:border-blue-200 group">
+                                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                         <!-- Información Principal -->
-                                        <div class="flex items-start space-x-4 flex-1 min-w-0">
+                                        <div class="flex items-start space-x-3 sm:space-x-4 flex-1 min-w-0">
                                             <!-- Icono -->
-                                            <div class="bg-blue-100 p-3 rounded-xl flex-shrink-0">
-                                                <svg class="w-5 h-5 text-blue-600" fill="none"
+                                            <div class="bg-blue-100 p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0">
+                                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none"
                                                     stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
@@ -711,17 +717,17 @@
                                             <!-- Contenido Mejorado -->
                                             <div class="flex-1 min-w-0">
                                                 <!-- Header con Badge Integrado -->
-                                                <div class="flex items-start justify-between mb-4">
+                                                <div
+                                                    class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4 gap-2">
                                                     <div class="flex-1 min-w-0">
-                                                        <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors truncate pr-4"
-                                                            x-text="combinacion.nombre_completo"
-                                                            :title="combinacion.nombre_completo"></h3>
+                                                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors break-words"
+                                                            x-text="combinacion.nombre_completo"></h3>
 
                                                         <!-- Badge de Permisos Integrado en el Header -->
-                                                        <div class="flex items-center space-x-3">
+                                                        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                                                             <span
-                                                                class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border border-blue-200 shadow-sm"
-                                                                x-text="`${combinacion.permisos_count} permisos asignados`"></span>
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border border-blue-200 shadow-sm"
+                                                                x-text="`${combinacion.permisos_count} permisos`"></span>
 
                                                             <!-- Estado de Actividad -->
                                                             <span
@@ -734,15 +740,16 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Grid de Información Mejorado -->
+                                                <!-- Grid de Información Mejorado - Responsive -->
                                                 <div
-                                                    class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg sm:rounded-xl border border-gray-200">
                                                     <!-- Rol -->
                                                     <div
-                                                        class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                        <div class="bg-blue-100 p-2 rounded-lg flex-shrink-0">
-                                                            <svg class="w-4 h-4 text-blue-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                        class="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                        <div class="bg-blue-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
+                                                                fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -752,17 +759,19 @@
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                                                                 Rol</div>
-                                                            <div class="text-sm font-semibold text-gray-900 truncate"
+                                                            <div class="text-sm font-semibold text-gray-900 break-words"
                                                                 x-text="combinacion.rol"></div>
                                                         </div>
                                                     </div>
 
                                                     <!-- Tipo Usuario -->
                                                     <div
-                                                        class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                        <div class="bg-green-100 p-2 rounded-lg flex-shrink-0">
-                                                            <svg class="w-4 h-4 text-green-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                        class="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                        <div
+                                                            class="bg-green-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-green-600"
+                                                                fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -772,17 +781,19 @@
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                                                                 Tipo Usuario</div>
-                                                            <div class="text-sm font-semibold text-gray-900 truncate"
+                                                            <div class="text-sm font-semibold text-gray-900 break-words"
                                                                 x-text="combinacion.tipo_usuario"></div>
                                                         </div>
                                                     </div>
 
                                                     <!-- Tipo Área -->
                                                     <div
-                                                        class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                                                        <div class="bg-purple-100 p-2 rounded-lg flex-shrink-0">
-                                                            <svg class="w-4 h-4 text-purple-600" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                        class="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                                                        <div
+                                                            class="bg-purple-100 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                                                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-purple-600"
+                                                                fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
@@ -792,7 +803,7 @@
                                                             <div
                                                                 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                                                                 Tipo Área</div>
-                                                            <div class="text-sm font-semibold text-gray-900 truncate"
+                                                            <div class="text-sm font-semibold text-gray-900 break-words"
                                                                 x-text="combinacion.tipo_area"></div>
                                                         </div>
                                                     </div>
@@ -800,8 +811,9 @@
 
                                                 <!-- Información Adicional Compacta -->
                                                 <div
-                                                    class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-                                                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                                    class="flex items-center justify-between mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
+                                                    <div
+                                                        class="flex items-center space-x-3 sm:space-x-4 text-xs text-gray-500">
                                                         <div class="flex items-center space-x-1">
                                                             <svg class="w-3 h-3 text-gray-400" fill="none"
                                                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -817,25 +829,27 @@
                                             </div>
                                         </div>
 
-                                        <!-- Acciones -->
-                                        <div class="flex items-center space-x-3 ml-6 flex-shrink-0">
+                                        <!-- Acciones - Responsive -->
+                                        <div
+                                            class="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-2 lg:gap-3 ml-0 lg:ml-6 flex-shrink-0">
                                             <button @click="selectCombinacion(combinacion)"
-                                                class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 hover:text-blue-800 border border-blue-200 transition-all duration-200 group/btn shadow-sm"
+                                                class="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-blue-700 bg-blue-50 rounded-lg sm:rounded-xl hover:bg-blue-100 hover:text-blue-800 border border-blue-200 transition-all duration-200 group/btn shadow-sm"
                                                 title="Asignar permisos">
-                                                <svg class="w-4 h-4 mr-2 transition-transform group-hover/btn:scale-110"
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 transition-transform group-hover/btn:scale-110"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
                                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
                                                     </path>
                                                 </svg>
-                                                Gestionar Permisos
+                                                <span class="hidden xs:inline">Gestionar</span>
+                                                <span class="xs:hidden">Permisos</span>
                                             </button>
 
                                             <button @click="deleteCombinacion(combinacion.idCombinacion)"
-                                                class="inline-flex items-center p-2 text-red-600 bg-red-50 rounded-xl hover:bg-red-100 hover:text-red-800 border border-red-200 transition-all duration-200 group/btn shadow-sm"
+                                                class="inline-flex items-center justify-center p-2 text-red-600 bg-red-50 rounded-lg sm:rounded-xl hover:bg-red-100 hover:text-red-800 border border-red-200 transition-all duration-200 group/btn shadow-sm"
                                                 title="Eliminar combinación">
-                                                <svg class="w-4 h-4 transition-transform group-hover/btn:scale-110"
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4 transition-transform group-hover/btn:scale-110"
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
@@ -849,22 +863,25 @@
                             </template>
                         </div>
 
-                        <!-- Estado Vacío -->
-                        <div x-show="combinaciones.length === 0" class="text-center py-16">
-                            <div class="bg-gray-50 rounded-2xl p-12 max-w-md mx-auto border border-gray-200">
+                        <!-- Estado Vacío - Responsive -->
+                        <div x-show="combinaciones.length === 0" class="text-center py-8 sm:py-12 md:py-16">
+                            <div
+                                class="bg-gray-50 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-12 max-w-md mx-auto border border-gray-200">
                                 <div
-                                    class="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="bg-blue-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5 md:mb-6">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
                                         </path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-900 mb-3">No hay combinaciones creadas</h3>
-                                <p class="text-gray-600 mb-6">Comience creando la primera combinación del sistema</p>
+                                <h3 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">No
+                                    hay combinaciones creadas</h3>
+                                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-5 md:mb-6">Comience creando la
+                                    primera combinación del sistema</p>
                                 <button onclick="document.querySelector('form').scrollIntoView({ behavior: 'smooth' })"
-                                    class="px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-lg">
+                                    class="px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors shadow-lg">
                                     Crear Primera Combinación
                                 </button>
                             </div>
@@ -907,12 +924,13 @@
                     </div>
 
                     <!-- Grid de Combinaciones Mejorado -->
-                    <div class="p-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div class="p-4 sm:p-6 md:p-8">
+                        <div
+                            class="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
                             <template x-for="combinacion in combinaciones" :key="combinacion.idCombinacion">
-                                <!-- Tarjeta de Combinación Mejorada -->
+                                <!-- Tarjeta de Combinación Mejorada - Responsive -->
                                 <button @click="selectCombinacion(combinacion)"
-                                    class="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-left hover:border-blue-300 hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+                                    class="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-left hover:border-blue-300 hover:shadow-lg sm:hover:shadow-xl transition-all duration-300 group relative overflow-hidden w-full">
 
                                     <!-- Efecto de borde superior sutil -->
                                     <div
@@ -920,22 +938,21 @@
                                     </div>
 
                                     <!-- Header de la Tarjeta -->
-                                    <div class="flex items-start justify-between mb-4">
-                                        <div class="flex-1 min-w-0">
-                                            <h3 class="font-bold text-gray-900 text-lg mb-2 group-hover:text-blue-600 transition-colors truncate"
-                                                x-text="combinacion.nombre_completo"
-                                                :title="combinacion.nombre_completo"></h3>
+                                    <div class="flex items-start justify-between mb-3 sm:mb-4">
+                                        <div class="flex-1 min-w-0 mr-2 sm:mr-3">
+                                            <h3 class="font-bold text-gray-900 text-base sm:text-lg mb-1 sm:mb-2 group-hover:text-blue-600 transition-colors break-words line-clamp-2"
+                                                x-text="combinacion.nombre_completo"></h3>
 
                                             <!-- Badge de Permisos -->
                                             <span
-                                                class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border border-blue-200 shadow-sm"
-                                                x-text="`${combinacion.permisos_count} permisos asignados`"></span>
+                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700 border border-blue-200 shadow-sm"
+                                                x-text="`${combinacion.permisos_count} permisos`"></span>
                                         </div>
 
                                         <!-- Icono de Flecha -->
                                         <div
-                                            class="transform group-hover:translate-x-1 transition-transform duration-300 ml-4 flex-shrink-0">
-                                            <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500"
+                                            class="transform group-hover:translate-x-1 transition-transform duration-300 flex-shrink-0 mt-1">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-blue-500"
                                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 5l7 7-7 7"></path>
@@ -944,65 +961,76 @@
                                     </div>
 
                                     <!-- Información de la Combinación -->
-                                    <div class="space-y-3 mb-4">
+                                    <div class="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
                                         <!-- Rol -->
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="text-gray-500 font-medium">Rol:</span>
-                                            <span class="text-gray-900 font-semibold truncate ml-2"
+                                        <div class="flex items-center justify-between text-xs sm:text-sm">
+                                            <span class="text-gray-500 font-medium flex-shrink-0 mr-2">Rol:</span>
+                                            <span class="text-gray-900 font-semibold break-words text-right min-w-0"
                                                 x-text="combinacion.rol"></span>
                                         </div>
 
                                         <!-- Tipo Usuario -->
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="text-gray-500 font-medium">Tipo Usuario:</span>
-                                            <span class="text-gray-900 font-semibold truncate ml-2"
+                                        <div class="flex items-center justify-between text-xs sm:text-sm">
+                                            <span class="text-gray-500 font-medium flex-shrink-0 mr-2">Tipo
+                                                Usuario:</span>
+                                            <span class="text-gray-900 font-semibold break-words text-right min-w-0"
                                                 x-text="combinacion.tipo_usuario"></span>
                                         </div>
 
                                         <!-- Tipo Área -->
-                                        <div class="flex items-center justify-between text-sm">
-                                            <span class="text-gray-500 font-medium">Tipo Área:</span>
-                                            <span class="text-gray-900 font-semibold truncate ml-2"
+                                        <div class="flex items-center justify-between text-xs sm:text-sm">
+                                            <span class="text-gray-500 font-medium flex-shrink-0 mr-2">Tipo
+                                                Área:</span>
+                                            <span class="text-gray-900 font-semibold break-words text-right min-w-0"
                                                 x-text="combinacion.tipo_area"></span>
                                         </div>
                                     </div>
 
                                     <!-- Estado y Acción -->
-                                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                                        <div class="flex items-center space-x-2 text-xs text-gray-500">
-                                            <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                            <span class="font-medium text-green-600">Activa</span>
+                                    <div
+                                        class="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
+                                        <div class="flex items-center space-x-1 sm:space-x-2 text-xs text-gray-500">
+                                            <div
+                                                class="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-400 rounded-full animate-pulse">
+                                            </div>
+                                            <span class="font-medium text-green-600 text-xs sm:text-sm">Activa</span>
                                         </div>
-                                        <div class="text-xs text-gray-400">
-                                            Haga clic para gestionar
+                                        <div class="text-xs text-gray-400 hidden xs:block">
+                                            Clic para gestionar
+                                        </div>
+                                        <div class="text-xs text-gray-400 xs:hidden">
+                                            Gestionar
                                         </div>
                                     </div>
 
                                     <!-- Efecto de Hover -->
                                     <div
-                                        class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl">
+                                        class="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-xl sm:rounded-2xl">
                                     </div>
                                 </button>
                             </template>
                         </div>
 
-                        <!-- Estado Vacío Mejorado -->
-                        <div x-show="combinaciones.length === 0" class="text-center py-16">
-                            <div class="bg-gray-50 rounded-2xl p-12 max-w-md mx-auto border border-gray-200">
+                        <!-- Estado Vacío Mejorado - Responsive -->
+                        <div x-show="combinaciones.length === 0" class="text-center py-8 sm:py-12 md:py-16">
+                            <div
+                                class="bg-gray-50 rounded-xl sm:rounded-2xl p-6 sm:p-8 md:p-12 max-w-md mx-auto border border-gray-200">
                                 <div
-                                    class="bg-blue-100 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="bg-blue-100 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-5 md:mb-6">
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z">
                                         </path>
                                     </svg>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-900 mb-3">No hay combinaciones disponibles
+                                <h3 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900 mb-2 sm:mb-3">No
+                                    hay combinaciones disponibles
                                 </h3>
-                                <p class="text-gray-600 mb-6">Cree una combinación primero para gestionar permisos</p>
+                                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-5 md:mb-6">Cree una combinación
+                                    primero para gestionar permisos</p>
                                 <button @click="activeTab = 'combinaciones'"
-                                    class="px-6 py-3 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-lg">
+                                    class="px-4 sm:px-6 py-2 sm:py-3 text-sm font-semibold text-white bg-blue-600 rounded-lg sm:rounded-xl hover:bg-blue-700 transition-colors shadow-lg">
                                     Crear Combinación
                                 </button>
                             </div>
