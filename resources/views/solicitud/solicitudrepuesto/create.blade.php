@@ -1,5 +1,9 @@
 <x-layout.default>
     <!-- Incluir Select2 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <style>
         .select2-container--default .select2-selection--single {
@@ -26,6 +30,18 @@
 
     <div x-data="solicitudRepuesto()" class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
         <div class="container mx-auto px-4 w-full">
+            <div class="mb-6">
+                <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
+                    <li>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="text-primary hover:underline">Solicitudes</a>
+                    </li>
+
+                    <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                        <span>Solicitud de Repuesto</span>
+                    </li>
+                </ul>
+            </div>
             <!-- Header Principal -->
             <div
                 class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
@@ -113,19 +129,15 @@
                     <!-- Selección de Ticket -->
                     <div
                         class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                             <div class="flex items-center space-x-3">
                                 <div
-                                    class="flex items-center justify-center w-10 h-10 bg-white text-purple-600 rounded-full font-bold shadow-md">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                        </path>
-                                    </svg>
+                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
+                                    <i class="fas fa-ticket-alt text-white text-lg"></i>
                                 </div>
                                 <div>
-                                    <h2 class="text-xl font-bold text-black">Selección de Ticket</h2>
-                                    <p class="text-purple-100 text-sm">Busque y seleccione el ticket asociado a esta
+                                    <h2 class="text-xl font-bold text-white">Selección de Ticket</h2>
+                                    <p class="text-white/80 text-sm">Busque y seleccione el ticket asociado a esta
                                         solicitud</p>
                                 </div>
                             </div>
@@ -172,7 +184,8 @@
                                     </div>
                                     <button @click="clearTicketSelection()"
                                         class="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg border border-red-200 transition-all duration-200">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
@@ -387,12 +400,24 @@
                                     <table class="w-full">
                                         <thead class="bg-blue-50">
                                             <tr>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Ticket</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Modelo</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Tipo de Repuesto</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Código</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Cantidad</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Acciones</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Ticket</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Modelo</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Tipo de Repuesto</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Código</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Cantidad</th>
+                                                <th
+                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                    Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-blue-100">
@@ -574,70 +599,96 @@
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <!-- Tipo de Servicio -->
                                 <div>
-                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Tipo de
-                                        Servicio</label>
-                                    <select x-model="orderInfo.tipoServicio"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
-                                        <option value="">Seleccione un tipo de servicio</option>
-                                        <template x-for="servicio in tiposServicio" :key="servicio.value">
-                                            <option :value="servicio.value" x-text="servicio.text"></option>
-                                        </template>
-                                    </select>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-tools text-blue-500 mr-2"></i>
+                                        Tipo de Servicio
+                                    </label>
+                                    <div class="relative">
+                                        <select x-model="orderInfo.tipoServicio"
+                                            class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white cursor-pointer shadow-sm hover:shadow-md">
+                                            <option value="">Seleccione un tipo de servicio</option>
+                                            <template x-for="servicio in tiposServicio" :key="servicio.value">
+                                                <option :value="servicio.value" x-text="servicio.text"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <!-- Fecha Requerida -->
                                 <div>
-                                    <label class="block text-lg font-semibold text-gray-900 mb-4">Fecha Requerida</label>
-                                    <input type="date" x-model="orderInfo.fechaRequerida"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
-                                        :min="minDate">
-                                    <div class="text-xs text-gray-500 mt-2">Fecha límite para tener todos los repuestos</div>
-                                    <div class="text-sm text-blue-600 font-medium mt-2" x-show="orderInfo.fechaRequerida">
-                                        📅 Fecha establecida: <span x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-calendar-day text-blue-500 mr-2"></i>
+                                        Fecha Requerida
+                                    </label>
+                                    <div class="relative">
+                                        <input type="text" x-ref="fechaRequeridaInput"
+                                            x-model="orderInfo.fechaRequerida"
+                                            class="w-full pr-11 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200 shadow-sm hover:shadow-md"
+                                            placeholder="Seleccione una fecha">
+                                        <div
+                                            class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-calendar-alt text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2 flex items-center">
+                                        <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+                                        Fecha límite para tener todos los repuestos
+                                    </div>
+                                    <div class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 transition-all duration-300"
+                                        x-show="orderInfo.fechaRequerida"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 transform scale-95"
+                                        x-transition:enter-end="opacity-100 transform scale-100">
+                                        <div class="flex items-center space-x-3">
+                                            <div
+                                                class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-check-circle text-blue-600 text-lg"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-blue-800">Fecha establecida</p>
+                                                <p class="text-sm text-blue-700 font-medium">
+                                                    <span
+                                                        x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Nivel de Urgencia - Versión Cards -->
                             <div class="mt-8 space-y-4">
-                                <label class="block text-lg font-semibold text-gray-900 mb-4">Nivel de
-                                    Urgencia</label>
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                    <i class="fas fa-gauge-high text-blue-500 mr-2"></i>
+                                    Nivel de Urgencia
+                                </label>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
                                         <button type="button" @click="orderInfo.urgencia = urgencia.value"
                                             class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-                                            <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full
-                            bg-white shadow-sm hover:shadow-md"
+                                            <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full shadow-sm hover:shadow-md"
                                                 :class="{
-                                                    'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-green-100': orderInfo
-                                                        .urgencia === urgencia.value && urgencia
-                                                        .value === 'baja',
-                                                    'border-yellow-500 bg-gradient-to-r from-yellow-50 to-amber-50 shadow-yellow-100': orderInfo
-                                                        .urgencia === urgencia.value && urgencia
-                                                        .value === 'media',
-                                                    'border-red-500 bg-gradient-to-r from-red-50 to-rose-50 shadow-red-100': orderInfo
-                                                        .urgencia === urgencia.value && urgencia
-                                                        .value === 'alta',
-                                                    'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
+                                                    [urgencia.borderColor + ' ' + urgencia.bgColor]: orderInfo
+                                                        .urgencia === urgencia.value,
+                                                        'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
                                                         .urgencia !== urgencia.value
                                                 }">
 
-                                                <!-- Header con emoji y título -->
+                                                <!-- Header con icono y título -->
                                                 <div class="flex items-center justify-between mb-3">
-                                                    <span class="text-2xl" x-text="urgencia.emoji"></span>
+                                                    <div class="flex items-center space-x-2">
+                                                        <i class="fas text-xl"
+                                                            :class="urgencia.icon + ' ' + urgencia.iconColor"></i>
+                                                        <h3 class="font-bold text-gray-900 text-lg"
+                                                            x-text="urgencia.text"></h3>
+                                                    </div>
                                                     <div class="w-6 h-6 flex items-center justify-center transition-all duration-300"
                                                         :class="{
-                                                            'text-green-600': orderInfo.urgencia === urgencia
-                                                                .value && urgencia.value === 'baja',
-                                                            'text-yellow-600': orderInfo.urgencia === urgencia
-                                                                .value && urgencia.value === 'media',
-                                                            'text-red-600': orderInfo.urgencia === urgencia.value &&
-                                                                urgencia.value === 'alta',
-                                                            'text-gray-400': orderInfo.urgencia !== urgencia.value
+                                                            [urgencia.iconColor]: orderInfo.urgencia === urgencia.value,
+                                                                'text-gray-400': orderInfo.urgencia !== urgencia.value
                                                         }">
-                                                        <svg class="w-5 h-5" fill="currentColor"
-                                                            viewBox="0 0 20 20">
+                                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                                             <path x-show="orderInfo.urgencia === urgencia.value"
                                                                 fill-rule="evenodd"
                                                                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -650,13 +701,9 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Contenido -->
-                                                <div class="space-y-2">
-                                                    <h3 class="font-bold text-gray-900 text-lg"
-                                                        x-text="urgencia.text"></h3>
-                                                    <p class="text-sm text-gray-600 leading-relaxed"
-                                                        x-text="urgencia.description"></p>
-                                                </div>
+                                                <!-- Descripción -->
+                                                <p class="text-sm text-gray-600 leading-relaxed"
+                                                    x-text="urgencia.description"></p>
 
                                             </div>
                                         </button>
@@ -697,8 +744,8 @@
                             </div>
                             <div class="flex justify-between items-center py-3">
                                 <span class="text-gray-700 font-medium">Estado</span>
-                                <span
-                                    class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold">Pendiente</span>
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold">En
+                                    creación</span>
                             </div>
                         </div>
                     </div>
@@ -709,7 +756,7 @@
                         <div class="space-y-4">
                             <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
                                 :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder }"
-                                class="w-full px-6 py-4 bg-yellow-500 text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
+                                class="w-full px-6 py-4 bg-warning text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -720,9 +767,9 @@
 
                             <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
                                 :class="{
-                'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
-                'hover:scale-[1.02]': canCreateOrder && !isCreatingOrder
-            }"
+                                    'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
+                                    'hover:scale-[1.02]': canCreateOrder && !isCreatingOrder
+                                }"
                                 class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
                                 <template x-if="!isCreatingOrder">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,7 +780,8 @@
                                 <template x-if="isCreatingOrder">
                                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                 </template>
-                                <span class="text-lg" x-text="isCreatingOrder ? 'Creando Orden...' : 'Crear Orden'"></span>
+                                <span class="text-lg"
+                                    x-text="isCreatingOrder ? 'Creando Orden...' : 'Crear Orden'"></span>
                             </button>
                         </div>
                     </div>
@@ -797,7 +845,51 @@
                 </div>
             </div>
         </div>
+        <!-- Modal para confirmar limpieza -->
+        <div x-show="showClearModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div x-show="showClearModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95"
+                class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 mx-auto">
 
+                <!-- Icono de advertencia -->
+                <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+
+                <!-- Contenido -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">¿Eliminar todos los artículos?</h3>
+                    <p class="text-gray-600">
+                        Esta acción eliminará <span class="font-semibold text-red-600"
+                            x-text="totalUniqueProducts"></span> artículo(s)
+                        con un total de <span class="font-semibold text-red-600" x-text="totalQuantity"></span>
+                        unidades.
+                    </p>
+                    <p class="text-sm text-gray-500 mt-2">Esta acción no se puede deshacer.</p>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3">
+                    <button @click="cancelClearAll()"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button @click="confirmClearAll()"
+                        class="flex-1 px-4 py-3 bg-danger text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas fa-trash"></i>
+                        <span>Eliminar Todo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
         <!-- Notificación Toast -->
         <div x-show="notification.show" x-transition:enter="transition ease-out duration-300 transform"
             x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
@@ -824,6 +916,8 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -834,6 +928,7 @@
                 selectedTicket: '',
                 selectedTicketInfo: null,
                 loadingTicket: false,
+                showClearModal: false, // ← AGREGAR ESTA LÍNEA
                 loadingTipos: false,
                 loadingCodigos: false,
                 products: [],
@@ -864,37 +959,46 @@
                 // Datos para los selects
                 tiposServicio: [{
                         value: 'mantenimiento',
-                        text: '🛠️ Mantenimiento Preventivo'
+                        text: 'Mantenimiento Preventivo'
                     },
                     {
                         value: 'reparacion',
-                        text: '🔧 Reparación Correctiva'
+                        text: 'Reparación Correctiva'
                     },
                     {
                         value: 'instalacion',
-                        text: '⚡ Instalación'
+                        text: 'Instalación'
                     },
                     {
                         value: 'garantia',
-                        text: '📋 Garantía'
+                        text: 'Garantía'
                     }
                 ],
                 nivelesUrgencia: [{
                         value: 'baja',
                         text: 'Baja',
-                        emoji: '🟢',
+                        icon: 'fa-circle-check',
+                        iconColor: 'text-green-500',
+                        bgColor: 'bg-green-50',
+                        borderColor: 'border-green-200',
                         description: 'Sin urgencia específica'
                     },
                     {
                         value: 'media',
                         text: 'Media',
-                        emoji: '🟡',
+                        icon: 'fa-clock',
+                        iconColor: 'text-yellow-500',
+                        bgColor: 'bg-yellow-50',
+                        borderColor: 'border-yellow-200',
                         description: 'Necesario en los próximos días'
                     },
                     {
                         value: 'alta',
                         text: 'Alta',
-                        emoji: '🔴',
+                        icon: 'fa-triangle-exclamation',
+                        iconColor: 'text-red-500',
+                        bgColor: 'bg-red-50',
+                        borderColor: 'border-red-200',
                         description: 'Urgente - necesario inmediatamente'
                     }
                 ],
@@ -906,7 +1010,8 @@
                 get totalUniqueProducts() {
                     const uniqueProducts = new Set();
                     this.products.forEach(product => {
-                        const key = `${product.ticketId}-${product.modeloId}-${product.tipoId}-${product.codigoId}`;
+                        const key =
+                            `${product.ticketId}-${product.modeloId}-${product.tipoId}-${product.codigoId}`;
                         uniqueProducts.add(key);
                     });
                     return uniqueProducts.size;
@@ -942,22 +1047,23 @@
 
                     this.$nextTick(() => {
                         this.initSelect2();
+                        this.initFlatpickr(); // Agregar esta línea
                     });
                 },
 
                 async getNextOrderNumber() {
-                try {
-                    const response = await fetch('/api/next-order-number');
-                    const data = await response.json();
-                    if (data.success) {
-                        this.orderNumber = data.nextOrderNumber;
+                    try {
+                        const response = await fetch('/api/next-order-number');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.orderNumber = data.nextOrderNumber;
+                        }
+                    } catch (error) {
+                        console.error('Error obteniendo número de orden:', error);
+                        // Si falla, usar el número por defecto
+                        this.orderNumber = {{ $nextOrderNumber ?? 1 }};
                     }
-                } catch (error) {
-                    console.error('Error obteniendo número de orden:', error);
-                    // Si falla, usar el número por defecto
-                    this.orderNumber = {{ $nextOrderNumber ?? 1 }};
-                }
-            },
+                },
 
                 initSelect2() {
                     // Ticket Select
@@ -998,7 +1104,8 @@
                         }).on('change', (e) => {
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
-                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target.value);
+                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target
+                                    .value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -1017,7 +1124,39 @@
                         });
                     }
                 },
-
+                initFlatpickr() {
+                    // Esperar a que el DOM esté listo
+                    this.$nextTick(() => {
+                        if (this.$refs.fechaRequeridaInput && typeof flatpickr !==
+                            'undefined') {
+                            try {
+                                flatpickr(this.$refs.fechaRequeridaInput, {
+                                    locale: 'es',
+                                    dateFormat: 'Y-m-d',
+                                    minDate: 'today',
+                                    disableMobile: false,
+                                    allowInput: true,
+                                    clickOpens: true,
+                                    onChange: (selectedDates, dateStr) => {
+                                        this.orderInfo.fechaRequerida = dateStr;
+                                    },
+                                    onReady: (selectedDates, dateStr, instance) => {
+                                        // Sincronizar cualquier valor existente
+                                        if (this.orderInfo.fechaRequerida) {
+                                            instance.setDate(this.orderInfo
+                                                .fechaRequerida);
+                                        }
+                                    }
+                                });
+                                console.log('Flatpickr inicializado correctamente');
+                            } catch (error) {
+                                console.error('Error al inicializar Flatpickr:', error);
+                            }
+                        } else {
+                            console.warn('Flatpickr no disponible o elemento no encontrado');
+                        }
+                    });
+                },
                 // Métodos para notificación
                 getNotificationClass() {
                     switch (this.notification.type) {
@@ -1048,11 +1187,10 @@
                 formatDateForDisplay(dateString) {
                     if (!dateString) return '';
                     const date = new Date(dateString);
-                    return date.toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    });
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}/${month}/${day}`;
                 },
 
                 async loadTicketInfo(ticketId) {
@@ -1068,17 +1206,20 @@
 
                             if (ticketData.idModelo && ticketData.modelo_nombre) {
                                 this.newProduct.modelo = ticketData.idModelo;
-                                this.updateModeloSelect(ticketData.idModelo, ticketData.modelo_nombre);
+                                this.updateModeloSelect(ticketData.idModelo, ticketData
+                                    .modelo_nombre);
                                 this.loadTiposRepuesto(ticketData.idModelo);
                             }
 
                             this.showNotification('✅ Información del ticket cargada', 'success');
                         } else {
-                            this.showNotification('❌ No se encontró información del ticket', 'error');
+                            this.showNotification('❌ No se encontró información del ticket',
+                                'error');
                         }
                     } catch (error) {
                         console.error('Error loading ticket info:', error);
-                        this.showNotification('❌ Error al cargar la información del ticket', 'error');
+                        this.showNotification('❌ Error al cargar la información del ticket',
+                            'error');
                     } finally {
                         this.loadingTicket = false;
                     }
@@ -1127,7 +1268,8 @@
                             });
 
                             $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`, 'success');
+                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`,
+                                'success');
                         } else {
                             $(this.$refs.tipoSelect).empty().append(
                                 $('<option>', {
@@ -1135,7 +1277,9 @@
                                     text: 'No hay tipos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification('⚠️ No se encontraron tipos de repuesto para este modelo', 'warning');
+                            this.showNotification(
+                                '⚠️ No se encontraron tipos de repuesto para este modelo',
+                                'warning');
                         }
                     } catch (error) {
                         console.error('Error loading tipos repuesto:', error);
@@ -1156,7 +1300,8 @@
                     this.clearCodigoSelect();
 
                     try {
-                        const response = await fetch(`/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
+                        const response = await fetch(
+                            `/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
@@ -1181,7 +1326,8 @@
                             });
 
                             $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${codigos.length} códigos cargados`, 'success');
+                            this.showNotification(`✅ ${codigos.length} códigos cargados`,
+                                'success');
                         } else {
                             $(this.$refs.codigoSelect).empty().append(
                                 $('<option>', {
@@ -1189,7 +1335,9 @@
                                     text: 'No hay códigos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification('⚠️ No se encontraron códigos para este tipo de repuesto', 'warning');
+                            this.showNotification(
+                                '⚠️ No se encontraron códigos para este tipo de repuesto',
+                                'warning');
                         }
                     } catch (error) {
                         console.error('Error loading codigos:', error);
@@ -1206,17 +1354,21 @@
                 },
 
                 clearTicketSelection() {
+                    // Primero limpia el Select2 sin disparar eventos
+                    if (this.$refs.ticketSelect) {
+                        $(this.$refs.ticketSelect).val('').trigger('change.select2');
+                    }
+
+                    // Luego limpia el estado de Alpine
                     this.selectedTicket = '';
                     this.selectedTicketInfo = null;
                     this.clearModeloSelect();
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
 
-                    if (this.$refs.ticketSelect) {
-                        $(this.$refs.ticketSelect).val('').trigger('change');
-                    }
+                    // Mostrar notificación de éxito
+                    this.showNotification('Ticket removido correctamente', 'info');
                 },
-
                 clearModeloSelect() {
                     this.newProduct.modelo = '';
                     if (this.$refs.modeloSelect) {
@@ -1273,13 +1425,17 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto', 'error');
+                        this.showNotification('Por favor complete todos los campos del producto',
+                            'error');
                         return;
                     }
 
-                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this.newProduct.modelo;
-                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this.newProduct.tipo;
-                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this.newProduct.codigo;
+                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this
+                        .newProduct.modelo;
+                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this
+                        .newProduct.tipo;
+                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this
+                        .newProduct.codigo;
                     const ticketText = this.selectedTicketInfo?.numero_ticket || 'N/A';
 
                     const existingProductIndex = this.products.findIndex(product =>
@@ -1291,7 +1447,9 @@
 
                     if (existingProductIndex !== -1) {
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(`✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`, 'success');
+                        this.showNotification(
+                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
+                            'success');
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
@@ -1333,85 +1491,96 @@
 
                 clearAll() {
                     if (this.products.length === 0) {
-                        this.showNotification('No hay productos para limpiar', 'info');
+                        this.showNotification('No hay artículos para limpiar', 'info');
                         return;
                     }
+                    this.showClearModal = true;
+                },
 
-                    if (confirm('¿Está seguro de que desea eliminar todos los productos de la orden?')) {
-                        this.products = [];
-                        this.showNotification('🗑️ Todos los productos han sido eliminados', 'info');
-                    }
+                confirmClearAll() {
+                    this.products = [];
+                    this.showClearModal = false;
+                    this.showNotification('Todos los artículos han sido eliminados', 'info');
+                },
+
+                cancelClearAll() {
+                    this.showClearModal = false;
                 },
 
                 async createOrder() {
-    if (!this.canCreateOrder) {
-        this.showNotification('❌ Complete todos los campos requeridos para crear la orden', 'error');
-        return;
-    }
+                    if (!this.canCreateOrder) {
+                        this.showNotification(
+                            '❌ Complete todos los campos requeridos para crear la orden',
+                            'error');
+                        return;
+                    }
 
-    // Mostrar preloader
-    this.isCreatingOrder = true;
-    
-    try {
-        // Preparar datos para enviar
-        const orderData = {
-            ticketId: this.selectedTicket,
-            orderInfo: this.orderInfo,
-            products: this.products,
-            orderNumber: this.orderNumber
-        };
+                    // Mostrar preloader
+                    this.isCreatingOrder = true;
 
-        console.log('Enviando datos de la orden:', orderData);
+                    try {
+                        // Preparar datos para enviar
+                        const orderData = {
+                            ticketId: this.selectedTicket,
+                            orderInfo: this.orderInfo,
+                            products: this.products,
+                            orderNumber: this.orderNumber
+                        };
 
-        // Enviar datos al servidor
-        const response = await fetch('/solicitudrepuesto/store', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(orderData)
-        });
+                        console.log('Enviando datos de la orden:', orderData);
 
-        const result = await response.json();
+                        // Enviar datos al servidor
+                        const response = await fetch('/solicitudrepuesto/store', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(orderData)
+                        });
 
-        if (result.success) {
-            this.showNotification(`🎉 ¡Orden ${result.codigo_orden} creada exitosamente!`, 'success');
-            
-            console.log('Orden guardada:', {
-                id: result.solicitud_id,
-                codigo: result.codigo_orden,
-                numeroticket: result.numeroticket,
-                productos_unicos: result.estadisticas.productos_unicos,
-                total_cantidad: result.estadisticas.total_cantidad
-            });
-            
-            // Obtener el próximo número de orden después de guardar
-            await this.getNextOrderNumber();
-            
-            // Limpiar formulario después de éxito
-            setTimeout(() => {
-                this.products = [];
-                this.clearTicketSelection();
-                this.orderInfo = {
-                    tipoServicio: '',
-                    urgencia: '',
-                    observaciones: '',
-                    fechaRequerida: ''
-                };
-                // No incrementar manualmente, ya se obtuvo el nuevo número
-            }, 3000);
-        } else {
-            throw new Error(result.message);
-        }
+                        const result = await response.json();
 
-    } catch (error) {
-        console.error('Error al crear la orden:', error);
-        this.showNotification(`❌ Error: ${error.message}`, 'error');
-    } finally {
-        this.isCreatingOrder = false;
-    }
-},
+                        if (result.success) {
+                            this.showNotification(
+                                `🎉 ¡Orden ${result.codigo_orden} creada exitosamente!`,
+                                'success');
+
+                            console.log('Orden guardada:', {
+                                id: result.solicitud_id,
+                                codigo: result.codigo_orden,
+                                numeroticket: result.numeroticket,
+                                productos_unicos: result.estadisticas.productos_unicos,
+                                total_cantidad: result.estadisticas.total_cantidad
+                            });
+
+                            // Obtener el próximo número de orden después de guardar
+                            await this.getNextOrderNumber();
+
+                            // Limpiar formulario después de éxito
+                            setTimeout(() => {
+                                this.products = [];
+                                this.clearTicketSelection();
+                                this.orderInfo = {
+                                    tipoServicio: '',
+                                    urgencia: '',
+                                    observaciones: '',
+                                    fechaRequerida: ''
+                                };
+                                // No incrementar manualmente, ya se obtuvo el nuevo número
+                            }, 3000);
+                        } else {
+                            throw new Error(result.message);
+                        }
+
+                    } catch (error) {
+                        console.error('Error al crear la orden:', error);
+                        this.showNotification(`❌ Error: ${error.message}`, 'error');
+                    } finally {
+                        this.isCreatingOrder = false;
+                    }
+                },
 
                 showNotification(message, type = 'info') {
                     this.notification.message = message;

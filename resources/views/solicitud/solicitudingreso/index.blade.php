@@ -1,6 +1,7 @@
 <x-layout.default>
     <!-- Incluir Axios CDN -->
     <!-- Font Awesome 6 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -19,6 +20,59 @@
 
         .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
+        }
+
+        /* ESTILOS PARA SELECT2 CON COLORES */
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            height: 42px !important;
+            background: white !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 40px !important;
+            padding-left: 12px !important;
+            padding-right: 30px !important;
+            color: #374151 !important;
+            font-size: 14px !important;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px !important;
+            right: 8px !important;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #e5e7eb !important;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* NUEVO: Estilos para opciones verdes (sugerencias) en el dropdown */
+        .select2-results__option .text-green-600 {
+            color: #059669 !important;
+            font-weight: 600 !important;
+        }
+
+        /* NUEVO: Estilo para la opción seleccionada cuando es sugerencia */
+        .select2-selection__rendered .text-green-600 {
+            color: #059669 !important;
+            font-weight: 600 !important;
+        }
+
+        /* Asegurar que Select2 se vea bien en el modal */
+        .select2-container {
+            z-index: 9999 !important;
         }
     </style>
     <div class="mb-6">
@@ -273,14 +327,12 @@
                                                     :class="getBotonIndividualClasses(solicitud, 'recibido')">
                                                     Recibido
                                                 </button>
-                                                <button
-                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'ubicado')"
+                                                <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'ubicado')"
                                                     :disabled="botonIndividualDeshabilitado(solicitud, 'ubicado')"
                                                     :class="getBotonIndividualClasses(solicitud, 'ubicado')">
                                                     Ubicar
                                                 </button>
-                                                <button
-                                                    @click="abrirModalActualizar(solicitud)"
+                                                <button @click="abrirModalActualizar(solicitud)"
                                                     :disabled="botonIndividualDeshabilitado(solicitud, 'actualizar')"
                                                     :class="getBotonIndividualClasses(solicitud, 'actualizar')">
                                                     Actualizar
@@ -297,26 +349,22 @@
                                     <span class="text-xs text-gray-500"
                                         x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
                                     <div class="flex space-x-2">
-                                        <button
-                                            @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                        <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
                                             :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
                                             :class="getBotonGrupalClasses(grupo, 'pendiente')">
                                             Todos Pendiente
                                         </button>
-                                        <button
-                                            @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                        <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
                                             :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
                                             :class="getBotonGrupalClasses(grupo, 'recibido')">
                                             Todos Recibido
                                         </button>
-                                        <button
-                                            @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                        <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
                                             :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
                                             :class="getBotonGrupalClasses(grupo, 'ubicado')">
                                             Todos Ubicado
                                         </button>
-                                        <button
-                                            @click="cambiarEstadoGrupo(grupo, 'actualizar')"
+                                        <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
                                             :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
                                             :class="getBotonGrupalClasses(grupo, 'actualizar')">
                                             Todos Actualizar
@@ -324,13 +372,13 @@
 
                                         <!-- NUEVO: Botón Ubicar Panel que abre Unity en pestaña nueva -->
                                         <template x-if="grupo.tiene_panel">
-                                            <button
-                                                @click="ubicarPrimerPanelEnUnity(grupo)"
+                                            <button @click="ubicarPrimerPanelEnUnity(grupo)"
                                                 :disabled="grupo.paneles_pendientes === 0"
                                                 class="px-3 py-1 text-xs rounded-lg transition-colors bg-purple-100 text-purple-800 hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
                                                 <i class="fas fa-tv mr-1"></i>
                                                 Ubicar Panel
-                                                <span class="ml-1 text-[10px] px-2 py-[2px] rounded bg-white/60 text-purple-700"
+                                                <span
+                                                    class="ml-1 text-[10px] px-2 py-[2px] rounded bg-white/60 text-purple-700"
                                                     x-text="`(${grupo.paneles_pendientes})`"></span>
                                             </button>
                                         </template>
@@ -415,7 +463,8 @@
                                     </span>
                                 </template>
                             </div>
-                            <button type="button" class="text-gray-400 hover:text-gray-600" @click="open = false">
+                            <button type="button" class="text-gray-400 hover:text-gray-600"
+                                @click="cerrarModalUbicacion()">
                                 <i class="fas fa-times text-lg"></i>
                             </button>
                         </div>
@@ -444,29 +493,33 @@
 
                             <!-- Formulario de ubicaciones -->
                             <div class="space-y-4 mb-6">
-                                <h4 class="text-md font-medium text-gray-800">
-                                    <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
-                                    Ubicaciones
-                                </h4>
+                                <div class="flex justify-between items-center">
+                                    <h4 class="text-md font-medium text-gray-800">
+                                        <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
+                                        Ubicaciones
+                                    </h4>
+
+                                    <!-- Botón para buscar sugerencias -->
+                                    <button type="button" @click="buscarSugerencias()"
+                                        class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                                        <i class="fas fa-magic"></i>
+                                        Buscar Ubicaciones Sugeridas
+                                    </button>
+                                </div>
+
                                 <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
                                     <div class="flex gap-3 items-start border border-gray-200 rounded-lg p-3">
-                                        <!-- En el modal de ubicación, modifica el select de ubicaciones -->
+                                        <!-- Select de ubicaciones con Select2 -->
                                         <div class="flex-1">
-
-                                            <!-- Agrega este botón en el modal de ubicación -->
-                                            <button type="button" @click="buscarSugerencias()"
-                                                class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm">
-                                                <i class="fas fa-magic"></i>
-                                                Buscar Ubicaciones Sugeridas
-                                            </button>
-
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación *</label>
-                                            <select x-model="ubicacion.ubicacion_id"
-                                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación
+                                                *</label>
+                                            <select x-model="ubicacion.ubicacion_id" :id="'ubicacion-select-' + index"
+                                                class="ubicacion-select w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                                 <option value="">Seleccionar ubicación</option>
                                                 <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
                                                     <option :value="ubic.idUbicacion" x-text="ubic.nombre"
-                                                        :class="ubic.nombre.includes('Espacio:') ? 'text-green-600 font-medium' : ''">
+                                                        :class="ubic.nombre.includes('Espacio:') ?
+                                                            'text-green-600 font-medium' : ''">
                                                     </option>
                                                 </template>
                                             </select>
@@ -476,8 +529,12 @@
                                                 <div class="mt-2 p-2 bg-blue-50 rounded-lg">
                                                     <p class="text-xs text-blue-700">
                                                         <i class="fas fa-lightbulb mr-1"></i>
-                                                        <strong>Sugerencia:</strong> Hay <span x-text="ubicaciones.length"></span> ubicaciones disponibles para este artículo.
-                                                        Las opciones en <span class="text-green-600 font-medium">verde</span> son sugerencias automáticas.
+                                                        <strong>Sugerencia:</strong> Hay <span
+                                                            x-text="ubicaciones.length"></span> ubicaciones disponibles
+                                                        para este artículo.
+                                                        Las opciones en <span
+                                                            class="text-green-600 font-medium">verde</span> son
+                                                        sugerencias automáticas.
                                                     </p>
                                                 </div>
                                             </template>
@@ -504,8 +561,7 @@
                                     <p class="text-sm text-blue-800">
                                         <span x-text="'Cantidad disponible: ' + cantidadDisponible"></span>
                                         <span x-show="cantidadDisponible === 0" class="text-red-600 font-medium"> -
-                                            ¡Toda la
-                                            cantidad ha sido distribuida!</span>
+                                            ¡Toda la cantidad ha sido distribuida!</span>
                                     </p>
                                 </div>
 
@@ -753,6 +809,7 @@
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
@@ -789,7 +846,8 @@
 
                 // Construye la URL hacia Unity: /unity/{idSolicitudIngreso}/solicitud
                 buildUnityUrlForSolicitud(idSolicitudIngreso) {
-                    const base = (typeof window !== 'undefined' && window.UNITY_BASE_URL) ? window.UNITY_BASE_URL : '/unity';
+                    const base = (typeof window !== 'undefined' && window.UNITY_BASE_URL) ? window.UNITY_BASE_URL :
+                    '/unity';
                     const baseClean = (base || '/unity').replace(/\/$/, ''); // sin barra final
                     return `${baseClean}/${encodeURIComponent(idSolicitudIngreso)}/solicitud`;
                 },
@@ -1096,7 +1154,81 @@
                     console.log('📝 Series form inicializado:', this.seriesForm);
                 },
 
+                // NUEVO: Método para inicializar Select2
+                // NUEVO: Método para inicializar Select2
+                inicializarSelect2(index) {
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const selectId = 'ubicacion-select-' + index;
+                            const selectElement = document.getElementById(selectId);
+
+                            if (selectElement && !$(selectElement).hasClass('select2-hidden-accessible')) {
+                                console.log('🔄 Inicializando Select2 para:', selectId);
+
+                                // Usar el modal como parent para el dropdown
+                                const modalElement = document.querySelector(
+                                    '[x-show="modalUbicacionAbierto"]');
+
+                                $(selectElement).select2({
+                                    placeholder: "Seleccionar ubicación",
+                                    allowClear: true,
+                                    width: '100%',
+                                    dropdownParent: modalElement ? $(modalElement) : $(document
+                                        .body),
+                                    // NUEVO: Template personalizado para opciones
+                                    templateResult: (state) => {
+                                        if (!state.id) {
+                                            return state.text;
+                                        }
+
+                                        // Verificar si es una sugerencia (contiene "Espacio:")
+                                        const isSugerencia = state.text.includes('Espacio:');
+
+                                        if (isSugerencia) {
+                                            const $state = $(
+                                                '<span class="text-green-600 font-medium">' +
+                                                state.text + '</span>'
+                                            );
+                                            return $state;
+                                        }
+
+                                        return state.text;
+                                    },
+                                    // NUEVO: Template para opción seleccionada
+                                    templateSelection: (state) => {
+                                        if (!state.id) {
+                                            return state.text;
+                                        }
+
+                                        // Verificar si es una sugerencia
+                                        const isSugerencia = state.text.includes('Espacio:');
+
+                                        if (isSugerencia) {
+                                            const $state = $(
+                                                '<span class="text-green-600 font-medium">' +
+                                                state.text + '</span>'
+                                            );
+                                            return $state;
+                                        }
+
+                                        return state.text;
+                                    }
+                                });
+
+                                // Sincronizar con Alpine.js cuando cambie la selección
+                                $(selectElement).on('change', (e) => {
+                                    this.ubicacionesForm[index].ubicacion_id = e.target.value;
+                                    console.log('📍 Ubicación seleccionada:', e.target.value);
+                                });
+
+                                console.log('✅ Select2 inicializado correctamente');
+                            }
+                        }, 300);
+                    });
+                },
+
                 // En tu JavaScript, modifica el método para procesar las sugerencias
+                // MODIFICADO: Método para abrir modal de ubicación
                 async abrirModalUbicacion(solicitud) {
                     console.log('=== DEBUG abrirModalUbicacion ===');
                     console.log('Solicitud seleccionada:', solicitud);
@@ -1105,12 +1237,12 @@
 
                     // Obtener sugerencias de ubicaciones
                     try {
-                        const response = await axios.get(`/solicitud-ingreso/sugerir-ubicaciones/${solicitud.articulo_id}/${solicitud.cantidad}`);
+                        const response = await axios.get(
+                            `/solicitud-ingreso/sugerir-ubicaciones/${solicitud.articulo_id}/${solicitud.cantidad}`);
 
                         if (response.data.success) {
                             console.log('Sugerencias obtenidas:', response.data.sugerencias);
 
-                            // Si hay sugerencias, cargarlas en el select de ubicaciones
                             if (response.data.sugerencias.length > 0) {
                                 this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
                                     idUbicacion: sugerencia.id,
@@ -1122,7 +1254,7 @@
                         console.error('Error al obtener sugerencias:', error);
                     }
 
-                    // Resto del código para cargar ubicaciones existentes...
+                    // Cargar ubicaciones existentes y series
                     this.cargarUbicacionesPorRelacion(solicitud);
                     this.inicializarSeries();
 
@@ -1132,6 +1264,34 @@
                     console.log('Requiere series:', this.articuloRequiereSeries);
 
                     this.modalUbicacionAbierto = true;
+
+                    // Inicializar Select2 después de que el modal esté abierto
+                    this.$nextTick(() => {
+                        console.log('🔄 Inicializando Select2 para', this.ubicacionesForm.length,
+                        'ubicaciones');
+                        this.ubicacionesForm.forEach((_, index) => {
+                            this.inicializarSelect2(index);
+                        });
+                    });
+                },
+
+                // MODIFICADO: Método para agregar ubicación
+                agregarUbicacion() {
+                    if (this.cantidadDisponible > 0) {
+                        const nuevaUbicacion = {
+                            ubicacion_id: '',
+                            cantidad: Math.min(this.cantidadDisponible, 1)
+                        };
+
+                        this.ubicacionesForm.push(nuevaUbicacion);
+                        console.log('➕ Nueva ubicación agregada. Disponible:', this.cantidadDisponible);
+
+                        // Inicializar Select2 para la nueva ubicación
+                        this.$nextTick(() => {
+                            const newIndex = this.ubicacionesForm.length - 1;
+                            this.inicializarSelect2(newIndex);
+                        });
+                    }
                 },
                 parsearUbicacionDesdeTexto(textoUbicacion) {
                     console.log('Parseando texto:', textoUbicacion);
@@ -1193,11 +1353,19 @@
                     }
                 },
 
+                // MODIFICADO: Método para cerrar modal
                 cerrarModalUbicacion() {
+                    // Destruir todas las instancias de Select2
+                    $('.ubicacion-select').each(function() {
+                        if ($(this).hasClass('select2-hidden-accessible')) {
+                            $(this).select2('destroy');
+                        }
+                    });
+
                     this.modalUbicacionAbierto = false;
                     this.solicitudSeleccionada = null;
                     this.ubicacionesForm = [];
-                    this.seriesForm = []; // Limpiar series también
+                    this.seriesForm = [];
                 },
 
                 agregarUbicacion() {
@@ -1468,7 +1636,8 @@
                     if (nuevoEstado === 'actualizar') {
                         const hayUbicados = grupo.solicitudes.some(s => s.estado === 'ubicado');
                         if (hayUbicados) {
-                            this.mostrarNotificacion('No se puede actualizar un grupo que contiene artículos ya ubicados', 'warning');
+                            this.mostrarNotificacion(
+                                'No se puede actualizar un grupo que contiene artículos ya ubicados', 'warning');
                             return;
                         }
                     }
@@ -1514,7 +1683,9 @@
                     try {
                         this.mostrarNotificacion('Buscando ubicaciones sugeridas...', 'info');
 
-                        const response = await axios.get(`/solicitud-ingreso/sugerir-ubicaciones/${this.solicitudSeleccionada.articulo_id}/${this.solicitudSeleccionada.cantidad}`);
+                        const response = await axios.get(
+                            `/solicitud-ingreso/sugerir-ubicaciones/${this.solicitudSeleccionada.articulo_id}/${this.solicitudSeleccionada.cantidad}`
+                            );
 
                         if (response.data.success && response.data.sugerencias.length > 0) {
                             this.ubicaciones = response.data.sugerencias.map(sugerencia => ({
@@ -1522,7 +1693,9 @@
                                 nombre: `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede}) - Espacio: ${sugerencia.espacio_disponible}`
                             }));
 
-                            this.mostrarNotificacion(`Se encontraron ${response.data.sugerencias.length} ubicaciones sugeridas`, 'success');
+                            this.mostrarNotificacion(
+                                `Se encontraron ${response.data.sugerencias.length} ubicaciones sugeridas`,
+                                'success');
                         } else {
                             this.mostrarNotificacion('No se encontraron ubicaciones sugeridas', 'warning');
                         }
