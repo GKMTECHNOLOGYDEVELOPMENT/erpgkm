@@ -26,7 +26,11 @@
     // remove animation after complete
     const element = document.querySelector('.dvanimation');
     element?.addEventListener('animationend', () => {
-        element.classList.remove(Alpine.store('app').animation);
+        const animationClass = Alpine.store('app').animation;
+        // VERIFICAR que la clase no esté vacía antes de remover
+        if (animationClass && animationClass.trim() !== '') {
+            element.classList.remove(animationClass);
+        }
     });
 
     // set current year in footer

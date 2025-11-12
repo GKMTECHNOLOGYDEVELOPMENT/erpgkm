@@ -9,6 +9,7 @@ use App\Http\Controllers\administracion\asociados\SubsidiarioController;
 use App\Http\Controllers\administracion\asociados\TiendaController;
 use App\Http\Controllers\administracion\cotizaciones\cotizacionController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\administracion\areas\AreasController;
 use App\Http\Controllers\dashboard\AdministracionController;
 use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
@@ -1790,4 +1791,20 @@ Route::prefix('administracion/cotizaciones')->group(function () {
     Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('cotizaciones.detalles');
 });
 
+// Rutas para Áreas
+Route::prefix('areas')->group(function () {
+    Route::get('/', [AreasController::class, 'index'])->name('areas.index');
+    Route::get('/create', [AreasController::class, 'create'])->name('areas.create');
+    Route::post('/', [AreasController::class, 'store'])->name('areas.store');
+    Route::get('/{id}', [AreasController::class, 'show'])->name('areas.show');
+    Route::get('/{id}/edit', [AreasController::class, 'edit'])->name('areas.edit');
+    Route::put('/{id}', [AreasController::class, 'update'])->name('areas.update');
+    Route::delete('/{id}', [AreasController::class, 'destroy'])->name('areas.destroy');
+    
+    // API Routes
+    Route::get('/api/areas', [AreasController::class, 'getAreas'])->name('api.areas');
+    Route::get('/api/areas-data', [AreasController::class, 'getAll'])->name('api.areas.data');
+    Route::get('/api/clientes-generales', [AreasController::class, 'getClientesGenerales'])->name('api.areas.clientes'); // ← NUEVA RUTA
+    Route::get('/{id}/clientes-modal', [AreasController::class, 'getClientesModal']);
+});
 // Route::get('/cotizacion-productos/{cotizacionId}', [SolicitudarticuloController::class, 'getCotizacionProductos']);
