@@ -432,6 +432,13 @@
     </script>
 
 
+ <script>
+    window.permisosTiendas = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CAST') ? 'true' : 'false' }},
+        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CAST') ? 'true' : 'false' }}
+    };
+</script>
+
     <script>
         window.sessionMessages = {
             success: '{{ session('success') }}',

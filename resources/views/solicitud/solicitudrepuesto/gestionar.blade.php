@@ -223,6 +223,8 @@
                             <button type="button" 
                                     class="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 btn-usado @if($estadoActual === 'usado') opacity-50 cursor-not-allowed @endif"
                                     data-repuesto-id="{{ $repuesto->idArticulos }}"
+                                    data-repuesto-codigo="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}"
+                                    data-repuesto-ticket="{{ $repuesto->numero_ticket_repuesto }}"
                                     @if($estadoActual === 'usado') disabled @endif>
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -240,6 +242,8 @@
                             <button type="button" 
                                     class="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 btn-no-usado @if($estadoActual === 'no_usado') opacity-50 cursor-not-allowed @endif"
                                     data-repuesto-id="{{ $repuesto->idArticulos }}"
+                                    data-repuesto-codigo="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}"
+                                    data-repuesto-ticket="{{ $repuesto->numero_ticket_repuesto }}"
                                     @if($estadoActual === 'no_usado') disabled @endif>
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -360,9 +364,310 @@
         @endif
     </div>
 
+    <!-- Modal para Marcar como Usado -->
+    <div id="modalUsado" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Marcar Repuesto como Usado
+                    </h3>
+                    <button type="button" id="cerrarModal" class="text-white hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <form id="formUsado" class="p-6">
+                @csrf
+                <input type="hidden" id="articulo_id" name="articulo_id">
+                
+                <!-- Información del Repuesto -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Información del Repuesto
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Código</label>
+                            <p id="modalRepuestoCodigo" class="text-gray-800 font-semibold"></p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Número de Ticket</label>
+                            <p id="modalRepuestoTicket" class="text-gray-800 font-semibold"></p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Solicitud</label>
+                            <p class="text-gray-800 font-semibold">{{ $solicitud->codigo }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha de Uso -->
+                <div class="mb-6">
+                    <label for="fecha_uso" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Fecha de Uso *
+                    </label>
+                    <input type="datetime-local" 
+                           id="fecha_uso" 
+                           name="fecha_uso" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                           value="{{ now()->format('Y-m-d\TH:i') }}"
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Selecciona la fecha y hora en que se utilizó el repuesto</p>
+                </div>
+
+                <!-- Observación -->
+                <div class="mb-6">
+                    <label for="observacion" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        Observación
+                    </label>
+                    <textarea 
+                        id="observacion" 
+                        name="observacion" 
+                        rows="4" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        placeholder="Describe dónde y cómo se utilizó el repuesto, o cualquier información relevante..."
+                        maxlength="500"></textarea>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-xs text-gray-500">Máximo 500 caracteres</p>
+                        <span id="contadorCaracteres" class="text-xs text-gray-500">0/500</span>
+                    </div>
+                </div>
+
+                <!-- Subida de Fotos -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Fotos del Repuesto Usado
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-400 transition-colors" id="dropZone">
+                        <input type="file" 
+                               id="fotos" 
+                               name="fotos[]" 
+                               multiple 
+                               accept="image/*"
+                               class="hidden">
+                        <div class="space-y-3">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="text-gray-600 font-medium">Haz clic para subir fotos</p>
+                                <p class="text-gray-500 text-sm">o arrastra y suelta las imágenes aquí</p>
+                            </div>
+                            <p class="text-xs text-gray-400">PNG, JPG, JPEG hasta 5MB cada una</p>
+                        </div>
+                    </div>
+                    <div id="previewFotos" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 hidden"></div>
+                    <p class="text-xs text-gray-500 mt-2">Máximo 5 fotos. Muestra evidencia de dónde se utilizó el repuesto.</p>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" id="cancelarModal" class="w-full sm:w-auto px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-full sm:flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all font-semibold shadow-md flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        Confirmar como Usado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Marcar como No Usado -->
+    <div id="modalNoUsado" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 rounded-t-2xl">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Devolver Repuesto al Inventario
+                    </h3>
+                    <button type="button" id="cerrarModalNoUsado" class="text-white hover:text-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <form id="formNoUsado" class="p-6">
+                @csrf
+                <input type="hidden" id="articulo_id_no_usado" name="articulo_id">
+                
+                <!-- Información del Repuesto -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-200">
+                    <h4 class="font-semibold text-gray-700 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Información del Repuesto a Devolver
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Código</label>
+                            <p id="modalRepuestoCodigoNoUsado" class="text-gray-800 font-semibold"></p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Número de Ticket</label>
+                            <p id="modalRepuestoTicketNoUsado" class="text-gray-800 font-semibold"></p>
+                        </div>
+                        <div>
+                            <label class="block text-gray-600 font-medium mb-1">Solicitud</label>
+                            <p class="text-gray-800 font-semibold">{{ $solicitud->codigo }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha de Devolución -->
+                <div class="mb-6">
+                    <label for="fecha_devolucion" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Fecha de Devolución *
+                    </label>
+                    <input type="datetime-local" 
+                           id="fecha_devolucion" 
+                           name="fecha_devolucion" 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                           value="{{ now()->format('Y-m-d\TH:i') }}"
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Selecciona la fecha y hora de la devolución al inventario</p>
+                </div>
+
+                <!-- Observación -->
+                <div class="mb-6">
+                    <label for="observacion_no_usado" class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/>
+                        </svg>
+                        Observación de la Devolución
+                    </label>
+                    <textarea 
+                        id="observacion_no_usado" 
+                        name="observacion" 
+                        rows="4" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Describe el motivo de la devolución, estado del repuesto, o cualquier información relevante..."
+                        maxlength="500"></textarea>
+                    <div class="flex justify-between items-center mt-1">
+                        <p class="text-xs text-gray-500">Máximo 500 caracteres</p>
+                        <span id="contadorCaracteresNoUsado" class="text-xs text-gray-500">0/500</span>
+                    </div>
+                </div>
+
+                <!-- Subida de Fotos -->
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Fotos de la Devolución
+                    </label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors" id="dropZoneNoUsado">
+                        <input type="file" 
+                               id="fotos_no_usado" 
+                               name="fotos[]" 
+                               multiple 
+                               accept="image/*"
+                               class="hidden">
+                        <div class="space-y-3">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <div>
+                                <p class="text-gray-600 font-medium">Haz clic para subir fotos</p>
+                                <p class="text-gray-500 text-sm">o arrastra y suelta las imágenes aquí</p>
+                            </div>
+                            <p class="text-xs text-gray-400">PNG, JPG, JPEG hasta 5MB cada una</p>
+                        </div>
+                    </div>
+                    <div id="previewFotosNoUsado" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 hidden"></div>
+                    <p class="text-xs text-gray-500 mt-2">Máximo 5 fotos. Muestra evidencia del repuesto devuelto.</p>
+                </div>
+
+                <!-- Información Importante -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <h4 class="font-semibold text-blue-800">Información Importante</h4>
+                            <ul class="text-blue-700 text-sm mt-1 space-y-1">
+                                <li>• El repuesto será devuelto al inventario automáticamente</li>
+                                <li>• El stock se incrementará en la ubicación original</li>
+                                <li>• Se eliminará el registro de salida del sistema</li>
+                                <li>• Se registrará un movimiento de entrada por devolución</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                    <button type="button" id="cancelarModalNoUsado" class="w-full sm:w-auto px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="w-full sm:flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all font-semibold shadow-md flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Confirmar Devolución
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts para la funcionalidad del front -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Variables para modal Usado
+            const modal = document.getElementById('modalUsado');
+            const form = document.getElementById('formUsado');
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fotos');
+            const previewFotos = document.getElementById('previewFotos');
+            const contadorCaracteres = document.getElementById('contadorCaracteres');
+            const observacionTextarea = document.getElementById('observacion');
+            let currentRepuestoId = null;
+            let archivosSeleccionados = [];
+
+            // Variables para modal No Usado
+            const modalNoUsado = document.getElementById('modalNoUsado');
+            const formNoUsado = document.getElementById('formNoUsado');
+            const dropZoneNoUsado = document.getElementById('dropZoneNoUsado');
+            const fileInputNoUsado = document.getElementById('fotos_no_usado');
+            const previewFotosNoUsado = document.getElementById('previewFotosNoUsado');
+            const contadorCaracteresNoUsado = document.getElementById('contadorCaracteresNoUsado');
+            const observacionTextareaNoUsado = document.getElementById('observacion_no_usado');
+            let archivosSeleccionadosNoUsado = [];
+
             // Contadores iniciales desde PHP
             let contadorUsados = {{ $contadores['usados'] }};
             let contadorNoUsados = {{ $contadores['no_usados'] }};
@@ -375,74 +680,183 @@
                 document.getElementById('contadorPendientes').textContent = contadorPendientes;
             }
 
-            // Función para cambiar estado de repuesto via AJAX
-            async function cambiarEstadoRepuesto(repuestoId, nuevoEstado) {
-                const url = nuevoEstado === 'usado' 
-                    ? `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/marcar-usado`
-                    : `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/marcar-no-usado`;
+            // ========== MODAL USADO ==========
+            // Event listeners para botones "Marcar como Usado"
+            document.querySelectorAll('.btn-usado').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.disabled) return;
+                    
+                    const repuestoId = this.getAttribute('data-repuesto-id');
+                    const repuestoCodigo = this.getAttribute('data-repuesto-codigo');
+                    const repuestoTicket = this.getAttribute('data-repuesto-ticket');
+                    
+                    abrirModalUsado(repuestoId, repuestoCodigo, repuestoTicket);
+                });
+            });
 
+            // Función para abrir el modal Usado
+            function abrirModalUsado(repuestoId, codigo, ticket) {
+                currentRepuestoId = repuestoId;
+                
+                // Llenar información del repuesto
+                document.getElementById('modalRepuestoCodigo').textContent = codigo;
+                document.getElementById('modalRepuestoTicket').textContent = ticket || 'Sin ticket';
+                document.getElementById('articulo_id').value = repuestoId;
+                
+                // Resetear formulario
+                form.reset();
+                archivosSeleccionados = [];
+                previewFotos.innerHTML = '';
+                previewFotos.classList.add('hidden');
+                contadorCaracteres.textContent = '0/500';
+                
+                // Mostrar modal
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Cerrar modal Usado
+            document.getElementById('cerrarModal').addEventListener('click', cerrarModal);
+            document.getElementById('cancelarModal').addEventListener('click', cerrarModal);
+
+            function cerrarModal() {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Contador de caracteres para observación Usado
+            observacionTextarea.addEventListener('input', function() {
+                const longitud = this.value.length;
+                contadorCaracteres.textContent = `${longitud}/500`;
+                
+                if (longitud > 500) {
+                    contadorCaracteres.classList.add('text-red-500');
+                } else {
+                    contadorCaracteres.classList.remove('text-red-500');
+                }
+            });
+
+            // Funcionalidad de subida de archivos para Usado
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-green-400', 'bg-green-50');
+            });
+            
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('border-green-400', 'bg-green-50');
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-green-400', 'bg-green-50');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    manejarArchivos(e.dataTransfer.files);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    manejarArchivos(e.target.files);
+                }
+            });
+
+            function manejarArchivos(archivos) {
+                const nuevosArchivos = Array.from(archivos);
+                
+                // Validar cantidad máxima
+                if (archivosSeleccionados.length + nuevosArchivos.length > 5) {
+                    mostrarNotificacion('Máximo 5 fotos permitidas', 'error');
+                    return;
+                }
+                
+                // Validar tipo y tamaño
+                for (const archivo of nuevosArchivos) {
+                    if (!archivo.type.startsWith('image/')) {
+                        mostrarNotificacion('Solo se permiten archivos de imagen', 'error');
+                        return;
+                    }
+                    
+                    if (archivo.size > 5 * 1024 * 1024) {
+                        mostrarNotificacion('Las imágenes deben ser menores a 5MB', 'error');
+                        return;
+                    }
+                    
+                    archivosSeleccionados.push(archivo);
+                }
+                
+                actualizarVistaPrevia();
+            }
+
+            function actualizarVistaPrevia() {
+                previewFotos.innerHTML = '';
+                
+                archivosSeleccionados.forEach((archivo, index) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative group';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
+                            <button type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors" data-index="${index}">
+                                ×
+                            </button>
+                        `;
+                        previewFotos.appendChild(div);
+                    };
+                    
+                    reader.readAsDataURL(archivo);
+                });
+                
+                if (archivosSeleccionados.length > 0) {
+                    previewFotos.classList.remove('hidden');
+                } else {
+                    previewFotos.classList.add('hidden');
+                }
+            }
+
+            // Eliminar foto de la vista previa Usado
+            previewFotos.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    archivosSeleccionados.splice(index, 1);
+                    actualizarVistaPrevia();
+                }
+            });
+
+            // Envío del formulario Usado
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!currentRepuestoId) return;
+                
+                const formData = new FormData();
+                formData.append('articulo_id', currentRepuestoId);
+                formData.append('fecha_uso', document.getElementById('fecha_uso').value);
+                formData.append('observacion', document.getElementById('observacion').value);
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                
+                // Agregar archivos
+                archivosSeleccionados.forEach(archivo => {
+                    formData.append('fotos[]', archivo);
+                });
+                
                 try {
-                    const response = await fetch(url, {
+                    const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/marcar-usado`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            articulo_id: repuestoId,
-                            observacion: '' // Puedes agregar un campo para observaciones si lo necesitas
-                        })
+                        body: formData
                     });
-
+                    
                     const data = await response.json();
-
+                    
                     if (data.success) {
-                        // Actualizar la UI localmente
-                        const repuestoElement = document.querySelector(`[data-repuesto-id="${repuestoId}"]`);
-                        const estadoElement = repuestoElement.querySelector('.estado-repuesto');
-                        const fechaElement = repuestoElement.querySelector('.fecha-actualizacion');
-                        const btnUsado = repuestoElement.querySelector('.btn-usado');
-                        const btnNoUsado = repuestoElement.querySelector('.btn-no-usado');
-                        
-                        if (nuevoEstado === 'usado') {
-                            contadorUsados++;
-                            contadorPendientes--;
-                            estadoElement.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 border border-green-200 estado-repuesto';
-                            estadoElement.textContent = '✅ Usado';
-                            
-                            // Deshabilitar botones
-                            btnUsado.disabled = true;
-                            btnUsado.classList.add('opacity-50', 'cursor-not-allowed');
-                            btnUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">✅ Ya Marcado como Usado</span>';
-                            
-                            btnNoUsado.disabled = false;
-                            btnNoUsado.classList.remove('opacity-50', 'cursor-not-allowed');
-                            btnNoUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span class="font-semibold">Marcar como No Usado</span>';
-                        } else if (nuevoEstado === 'no_usado') {
-                            contadorNoUsados++;
-                            contadorPendientes--;
-                            estadoElement.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200 estado-repuesto';
-                            estadoElement.textContent = '❌ No Usado';
-                            
-                            // Deshabilitar botones
-                            btnNoUsado.disabled = true;
-                            btnNoUsado.classList.add('opacity-50', 'cursor-not-allowed');
-                            btnNoUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span class="font-semibold">❌ Ya Marcado como No Usado</span>';
-                            
-                            btnUsado.disabled = false;
-                            btnUsado.classList.remove('opacity-50', 'cursor-not-allowed');
-                            btnUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">Marcar como Usado</span>';
-                        }
-                        
-                        // Actualizar fecha
-                        const ahora = new Date();
-                        fechaElement.textContent = `Actualizado: ${ahora.toLocaleDateString()} ${ahora.toLocaleTimeString()}`;
-                        
-                        // Actualizar contadores visuales
-                        actualizarContadores();
-                        
-                        // Mostrar notificación
                         mostrarNotificacion(data.message, 'success');
+                        cerrarModal();
+                        // Actualizar la UI
+                        actualizarEstadoRepuesto(currentRepuestoId, 'usado');
                     } else {
                         mostrarNotificacion('Error: ' + data.message, 'error');
                     }
@@ -450,11 +864,261 @@
                     console.error('Error:', error);
                     mostrarNotificacion('Error de conexión', 'error');
                 }
+            });
+
+            // ========== MODAL NO USADO ==========
+            // Event listeners para botones "Marcar como No Usado"
+            document.querySelectorAll('.btn-no-usado').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.disabled) return;
+                    
+                    const repuestoId = this.getAttribute('data-repuesto-id');
+                    const repuestoCodigo = this.getAttribute('data-repuesto-codigo');
+                    const repuestoTicket = this.getAttribute('data-repuesto-ticket');
+                    
+                    abrirModalNoUsado(repuestoId, repuestoCodigo, repuestoTicket);
+                });
+            });
+
+            // Función para abrir el modal de No Usado
+            function abrirModalNoUsado(repuestoId, codigo, ticket) {
+                currentRepuestoId = repuestoId;
+                
+                // Llenar información del repuesto
+                document.getElementById('modalRepuestoCodigoNoUsado').textContent = codigo;
+                document.getElementById('modalRepuestoTicketNoUsado').textContent = ticket || 'Sin ticket';
+                document.getElementById('articulo_id_no_usado').value = repuestoId;
+                
+                // Resetear formulario
+                formNoUsado.reset();
+                archivosSeleccionadosNoUsado = [];
+                previewFotosNoUsado.innerHTML = '';
+                previewFotosNoUsado.classList.add('hidden');
+                contadorCaracteresNoUsado.textContent = '0/500';
+                
+                // Mostrar modal
+                modalNoUsado.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // Cerrar modal No Usado
+            document.getElementById('cerrarModalNoUsado').addEventListener('click', cerrarModalNoUsado);
+            document.getElementById('cancelarModalNoUsado').addEventListener('click', cerrarModalNoUsado);
+
+            function cerrarModalNoUsado() {
+                modalNoUsado.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            // Contador de caracteres para observación No Usado
+            observacionTextareaNoUsado.addEventListener('input', function() {
+                const longitud = this.value.length;
+                contadorCaracteresNoUsado.textContent = `${longitud}/500`;
+                
+                if (longitud > 500) {
+                    contadorCaracteresNoUsado.classList.add('text-red-500');
+                } else {
+                    contadorCaracteresNoUsado.classList.remove('text-red-500');
+                }
+            });
+
+            // Funcionalidad de subida de archivos para No Usado
+            dropZoneNoUsado.addEventListener('click', () => fileInputNoUsado.click());
+
+            dropZoneNoUsado.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZoneNoUsado.classList.add('border-blue-400', 'bg-blue-50');
+            });
+
+            dropZoneNoUsado.addEventListener('dragleave', () => {
+                dropZoneNoUsado.classList.remove('border-blue-400', 'bg-blue-50');
+            });
+
+            dropZoneNoUsado.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZoneNoUsado.classList.remove('border-blue-400', 'bg-blue-50');
+                
+                if (e.dataTransfer.files.length > 0) {
+                    manejarArchivosNoUsado(e.dataTransfer.files);
+                }
+            });
+
+            fileInputNoUsado.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    manejarArchivosNoUsado(e.target.files);
+                }
+            });
+
+            function manejarArchivosNoUsado(archivos) {
+                const nuevosArchivos = Array.from(archivos);
+                
+                // Validar cantidad máxima
+                if (archivosSeleccionadosNoUsado.length + nuevosArchivos.length > 5) {
+                    mostrarNotificacion('Máximo 5 fotos permitidas', 'error');
+                    return;
+                }
+                
+                // Validar tipo y tamaño
+                for (const archivo of nuevosArchivos) {
+                    if (!archivo.type.startsWith('image/')) {
+                        mostrarNotificacion('Solo se permiten archivos de imagen', 'error');
+                        return;
+                    }
+                    
+                    if (archivo.size > 5 * 1024 * 1024) {
+                        mostrarNotificacion('Las imágenes deben ser menores a 5MB', 'error');
+                        return;
+                    }
+                    
+                    archivosSeleccionadosNoUsado.push(archivo);
+                }
+                
+                actualizarVistaPreviaNoUsado();
+            }
+
+            function actualizarVistaPreviaNoUsado() {
+                previewFotosNoUsado.innerHTML = '';
+                
+                archivosSeleccionadosNoUsado.forEach((archivo, index) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = 'relative group';
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
+                            <button type="button" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors" data-index="${index}">
+                                ×
+                            </button>
+                        `;
+                        previewFotosNoUsado.appendChild(div);
+                    };
+                    
+                    reader.readAsDataURL(archivo);
+                });
+                
+                if (archivosSeleccionadosNoUsado.length > 0) {
+                    previewFotosNoUsado.classList.remove('hidden');
+                } else {
+                    previewFotosNoUsado.classList.add('hidden');
+                }
+            }
+
+            // Eliminar foto de la vista previa No Usado
+            previewFotosNoUsado.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    archivosSeleccionadosNoUsado.splice(index, 1);
+                    actualizarVistaPreviaNoUsado();
+                }
+            });
+
+            // Envío del formulario No Usado
+            formNoUsado.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                if (!currentRepuestoId) return;
+                
+                const formData = new FormData();
+                formData.append('articulo_id', currentRepuestoId);
+                formData.append('fecha_devolucion', document.getElementById('fecha_devolucion').value);
+                formData.append('observacion', document.getElementById('observacion_no_usado').value);
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                
+                // Agregar archivos
+                archivosSeleccionadosNoUsado.forEach(archivo => {
+                    formData.append('fotos[]', archivo);
+                });
+                
+                try {
+                    const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/marcar-no-usado`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        mostrarNotificacion(data.message, 'success');
+                        cerrarModalNoUsado();
+                        // Actualizar la UI
+                        actualizarEstadoRepuestoNoUsado(currentRepuestoId, 'no_usado');
+                    } else {
+                        mostrarNotificacion('Error: ' + data.message, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarNotificacion('Error de conexión', 'error');
+                }
+            });
+
+            // ========== FUNCIONES COMUNES ==========
+            // Función para actualizar estado del repuesto en la UI para Usado
+            function actualizarEstadoRepuesto(repuestoId, nuevoEstado) {
+                const repuestoElement = document.querySelector(`[data-repuesto-id="${repuestoId}"]`);
+                const estadoElement = repuestoElement.querySelector('.estado-repuesto');
+                const fechaElement = repuestoElement.querySelector('.fecha-actualizacion');
+                const btnUsado = repuestoElement.querySelector('.btn-usado');
+                const btnNoUsado = repuestoElement.querySelector('.btn-no-usado');
+                
+                if (nuevoEstado === 'usado') {
+                    contadorUsados++;
+                    contadorPendientes--;
+                    estadoElement.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800 border border-green-200 estado-repuesto';
+                    estadoElement.textContent = '✅ Usado';
+                    
+                    // Deshabilitar botones
+                    btnUsado.disabled = true;
+                    btnUsado.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">✅ Ya Marcado como Usado</span>';
+                    
+                    btnNoUsado.disabled = false;
+                    btnNoUsado.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnNoUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span class="font-semibold">Marcar como No Usado</span>';
+                    
+                    // Actualizar fecha
+                    const ahora = new Date();
+                    fechaElement.textContent = `Actualizado: ${ahora.toLocaleDateString()} ${ahora.toLocaleTimeString()}`;
+                    
+                    // Actualizar contadores visuales
+                    actualizarContadores();
+                }
+            }
+
+            // Función para actualizar estado del repuesto en la UI para No Usado
+            function actualizarEstadoRepuestoNoUsado(repuestoId, nuevoEstado) {
+                const repuestoElement = document.querySelector(`[data-repuesto-id="${repuestoId}"]`);
+                const estadoElement = repuestoElement.querySelector('.estado-repuesto');
+                const fechaElement = repuestoElement.querySelector('.fecha-actualizacion');
+                const btnUsado = repuestoElement.querySelector('.btn-usado');
+                const btnNoUsado = repuestoElement.querySelector('.btn-no-usado');
+                
+                if (nuevoEstado === 'no_usado') {
+                    contadorNoUsados++;
+                    contadorPendientes--;
+                    estadoElement.className = 'px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800 border border-blue-200 estado-repuesto';
+                    estadoElement.textContent = '❌ No Usado';
+                    
+                    // Deshabilitar botones
+                    btnNoUsado.disabled = true;
+                    btnNoUsado.classList.add('opacity-50', 'cursor-not-allowed');
+                    btnNoUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg><span class="font-semibold">❌ Ya Marcado como No Usado</span>';
+                    
+                    btnUsado.disabled = false;
+                    btnUsado.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnUsado.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span class="font-semibold">Marcar como Usado</span>';
+                    
+                    // Actualizar fecha
+                    const ahora = new Date();
+                    fechaElement.textContent = `Actualizado: ${ahora.toLocaleDateString()} ${ahora.toLocaleTimeString()}`;
+                    
+                    // Actualizar contadores visuales
+                    actualizarContadores();
+                }
             }
 
             // Función para mostrar notificaciones
             function mostrarNotificacion(mensaje, tipo = 'success') {
-                // Crear elemento de notificación
                 const notificacion = document.createElement('div');
                 const bgColor = tipo === 'success' ? 'bg-green-500' : 'bg-red-500';
                 notificacion.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300 z-50`;
@@ -462,12 +1126,10 @@
                 
                 document.body.appendChild(notificacion);
                 
-                // Animación de entrada
                 setTimeout(() => {
                     notificacion.style.transform = 'translateX(0)';
                 }, 100);
                 
-                // Animación de salida
                 setTimeout(() => {
                     notificacion.style.transform = 'translateX-full';
                     setTimeout(() => {
@@ -475,29 +1137,6 @@
                     }, 300);
                 }, 3000);
             }
-
-            // Event listeners para botones
-            document.querySelectorAll('.btn-usado').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (this.disabled) return;
-                    
-                    const repuestoId = this.getAttribute('data-repuesto-id');
-                    if (confirm('¿Estás seguro de marcar este repuesto como USADO?\n\nEsta acción no se puede deshacer.')) {
-                        cambiarEstadoRepuesto(repuestoId, 'usado');
-                    }
-                });
-            });
-
-            document.querySelectorAll('.btn-no-usado').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (this.disabled) return;
-                    
-                    const repuestoId = this.getAttribute('data-repuesto-id');
-                    if (confirm('¿Estás seguro de marcar este repuesto como NO USADO?\n\nEl repuesto estará disponible para devolución.')) {
-                        cambiarEstadoRepuesto(repuestoId, 'no_usado');
-                    }
-                });
-            });
 
             // Efectos hover mejorados
             const buttons = document.querySelectorAll('button:not(:disabled)');

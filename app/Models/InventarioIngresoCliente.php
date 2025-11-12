@@ -20,6 +20,7 @@ class InventarioIngresoCliente extends Model
         'cliente_general_id',
         'numero_orden',
         'cantidad',
+        'codigo_solicitud',
     ];
 
     /**

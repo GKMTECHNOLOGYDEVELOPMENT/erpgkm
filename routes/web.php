@@ -744,8 +744,8 @@ Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])
 
 
 // Rutas para gestión de estados de repuestos
-Route::post('/solicitudrepuesto/marcar-usado/{id}', [SolicitudRepuestoController::class, 'marcarUsado'])->name('solicitudrepuesto.marcar.usado');
-Route::post('/solicitudrepuesto/marcar-no-usado/{id}', [SolicitudRepuestoController::class, 'marcarNoUsado'])->name('solicitudrepuesto.marcar.no-usado');
+Route::post('/solicitudrepuesto/{id}/marcar-usado', [SolicitudRepuestoController::class, 'marcarUsado'])->name('solicitudrepuesto.marcar.usado');
+Route::post('/solicitudrepuesto/{id}/marcar-no-usado', [SolicitudRepuestoController::class, 'marcarNoUsado'])->name('solicitudrepuesto.marcar.no-usado');
 
 // INICIO CATEGORIA ///
 Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () {

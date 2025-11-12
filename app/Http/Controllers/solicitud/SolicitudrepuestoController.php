@@ -113,7 +113,7 @@ class SolicitudrepuestoController extends Controller
         ]);
     }
 
-  public function gestionar($id)
+ public function gestionar($id)
 {
     // Obtener la solicitud con información básica
     $solicitud = DB::table('solicitudesordenes as so')
@@ -143,6 +143,7 @@ class SolicitudrepuestoController extends Controller
     }
 
     // Obtener los repuestos de la solicitud que ya han sido procesados/aprobados
+    // CONSULTA SIMPLIFICADA - sin joins de ubicaciones que causan duplicados
     $repuestos = DB::table('ordenesarticulos as oa')
         ->select(
             'oa.idordenesarticulos',
@@ -151,28 +152,18 @@ class SolicitudrepuestoController extends Controller
             'oa.estado as estado_repuesto',
             'oa.fechaUsado',
             'oa.fechaSinUsar',
-            'oa.idticket as idticket_repuesto', // Ticket específico del repuesto
+            'oa.idticket as idticket_repuesto',
             'a.idArticulos',
             'a.nombre',
             'a.codigo_barras',
             'a.codigo_repuesto',
             'sc.nombre as tipo_repuesto',
-            // Información de la ubicación de donde se tomó el repuesto
-            'rua.rack_ubicacion_id',
-            'ru.codigo as ubicacion_codigo',
-            'r.nombre as rack_nombre',
             // Número de ticket específico del repuesto
             't_repuesto.numero_ticket as numero_ticket_repuesto'
         )
         ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-        ->leftJoin('rack_ubicacion_articulos as rua', function($join) {
-            $join->on('a.idArticulos', '=', 'rua.articulo_id')
-                 ->where('rua.cantidad', '>', 0);
-        })
-        ->leftJoin('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-        ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-        ->leftJoin('tickets as t_repuesto', 'oa.idticket', '=', 't_repuesto.idTickets') // Join con tickets para cada repuesto
+        ->leftJoin('tickets as t_repuesto', 'oa.idticket', '=', 't_repuesto.idTickets')
         ->where('oa.idsolicitudesordenes', $id)
         ->where('oa.estado', 1) // Solo repuestos ya procesados
         ->get();
@@ -226,22 +217,68 @@ public function marcarUsado(Request $request, $solicitudId)
     try {
         $request->validate([
             'articulo_id' => 'required|integer',
-            'observacion' => 'nullable|string|max:500'
+            'fecha_uso' => 'required|date',
+            'observacion' => 'nullable|string|max:500',
+            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' // 5MB máximo por foto
         ]);
 
         DB::transaction(function () use ($request, $solicitudId) {
+            // Obtener información de la solicitud
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('codigo')
+                ->where('idsolicitudesordenes', $solicitudId)
+                ->first();
+
+            if (!$solicitud) {
+                throw new \Exception('Solicitud no encontrada');
+            }
+
+            // Obtener información del repuesto
+            $repuestoInfo = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'oa.idticket',
+                    'a.idArticulos',
+                    'a.nombre',
+                    't.numero_ticket',
+                    't.idClienteGeneral'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                ->where('oa.idsolicitudesordenes', $solicitudId)
+                ->where('oa.idarticulos', $request->articulo_id)
+                ->first();
+
+            if (!$repuestoInfo) {
+                throw new \Exception('Repuesto no encontrado en la solicitud');
+            }
+
+            // Procesar fotos si existen
+            $rutaFotos = [];
+            if ($request->hasFile('fotos')) {
+                foreach ($request->file('fotos') as $foto) {
+                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $ruta = $foto->storeAs('evidencias_repuestos', $nombreArchivo, 'public');
+                    $rutaFotos[] = $ruta;
+                }
+            }
+
+            // NO ACTUALIZAR KARDEX - ya se actualizó cuando se entregó el repuesto
+
             // Actualizar en la tabla ordenesarticulos
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $solicitudId)
                 ->where('idarticulos', $request->articulo_id)
                 ->update([
-                    'fechaUsado' => now(),
-                    'fechaSinUsar' => null, // Asegurar que no tenga fecha de no usado
-                    'observacion' => $request->observacion
+                    'fechaUsado' => $request->fecha_uso,
+                    'fechaSinUsar' => null,
+                    'observacion' => $request->observacion,
+                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
                 ]);
 
-            // Aquí puedes agregar lógica adicional si necesitas
-            // como actualizar stock, etc.
+            // Registrar en logs
+            Log::info("Repuesto marcado como usado - Solicitud: {$solicitudId}, Repuesto: {$repuestoInfo->nombre}, Fecha: {$request->fecha_uso}, Fotos: " . count($rutaFotos));
         });
 
         return response()->json([
@@ -250,6 +287,7 @@ public function marcarUsado(Request $request, $solicitudId)
         ]);
 
     } catch (\Exception $e) {
+        Log::error('Error al marcar repuesto como usado: ' . $e->getMessage());
         return response()->json([
             'success' => false,
             'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
@@ -257,55 +295,244 @@ public function marcarUsado(Request $request, $solicitudId)
     }
 }
 
+
+
 /**
- * Marcar un repuesto como no usado (devolución)
+ * Marcar un repuesto como no usado (devolución al inventario)
  */
 public function marcarNoUsado(Request $request, $solicitudId)
 {
     try {
         $request->validate([
             'articulo_id' => 'required|integer',
-            'observacion' => 'nullable|string|max:500'
+            'fecha_devolucion' => 'required|date',
+            'observacion' => 'nullable|string|max:500',
+            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' // 5MB máximo por foto
         ]);
 
         DB::transaction(function () use ($request, $solicitudId) {
-            // Actualizar en la tabla ordenesarticulos
+            // Obtener información de la solicitud
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('codigo')
+                ->where('idsolicitudesordenes', $solicitudId)
+                ->first();
+
+            if (!$solicitud) {
+                throw new \Exception('Solicitud no encontrada');
+            }
+
+            // Obtener información del repuesto y entrega
+            $repuestoInfo = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'oa.idticket',
+                    'a.idArticulos',
+                    'a.nombre',
+                    're.ubicacion_utilizada',
+                    're.usuario_destino_id',
+                    're.tipo_entrega',
+                    't.numero_ticket',
+                    't.idClienteGeneral'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->leftJoin('repuestos_entregas as re', function($join) use ($solicitudId) {
+                    $join->on('re.solicitud_id', '=', 'oa.idsolicitudesordenes')
+                         ->on('re.articulo_id', '=', 'oa.idarticulos');
+                })
+                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                ->where('oa.idsolicitudesordenes', $solicitudId)
+                ->where('oa.idarticulos', $request->articulo_id)
+                ->first();
+
+            if (!$repuestoInfo) {
+                throw new \Exception('Repuesto no encontrado en la solicitud');
+            }
+
+            // Procesar fotos si existen
+            $rutaFotos = [];
+            if ($request->hasFile('fotos')) {
+                foreach ($request->file('fotos') as $foto) {
+                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $ruta = $foto->storeAs('evidencias_devoluciones', $nombreArchivo, 'public');
+                    $rutaFotos[] = $ruta;
+                }
+            }
+
+            // Buscar la ubicación original donde estaba el repuesto
+            $ubicacionOriginal = DB::table('rack_ubicaciones')
+                ->select('idRackUbicacion', 'codigo', 'rack_id')
+                ->where('codigo', $repuestoInfo->ubicacion_utilizada)
+                ->first();
+
+            if (!$ubicacionOriginal) {
+                throw new \Exception('No se pudo encontrar la ubicación original del repuesto');
+            }
+
+            // Obtener información del rack
+            $rackInfo = DB::table('racks')
+                ->select('nombre')
+                ->where('idRack', $ubicacionOriginal->rack_id)
+                ->first();
+
+            // Obtener cliente_general_id del ticket
+            $clienteGeneralId = $repuestoInfo->idClienteGeneral ?? 1;
+
+            // 1. INCREMENTAR stock en rack_ubicacion_articulos (ubicación original)
+            $rackUbicacionArticulo = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionOriginal->idRackUbicacion)
+                ->where('articulo_id', $request->articulo_id)
+                ->first();
+
+            if ($rackUbicacionArticulo) {
+                // Si ya existe registro, incrementar
+                DB::table('rack_ubicacion_articulos')
+                    ->where('idRackUbicacionArticulo', $rackUbicacionArticulo->idRackUbicacionArticulo)
+                    ->increment('cantidad', $repuestoInfo->cantidad);
+            } else {
+                // Si no existe, crear nuevo registro
+                DB::table('rack_ubicacion_articulos')->insert([
+                    'rack_ubicacion_id' => $ubicacionOriginal->idRackUbicacion,
+                    'articulo_id' => $request->articulo_id,
+                    'cantidad' => $repuestoInfo->cantidad,
+                    'cliente_general_id' => $clienteGeneralId,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 2. INCREMENTAR stock total en tabla articulos
+            DB::table('articulos')
+                ->where('idArticulos', $request->articulo_id)
+                ->increment('stock_total', $repuestoInfo->cantidad);
+
+            // 3. Registrar movimiento en rack_movimientos (ENTRADA por devolución)
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $request->articulo_id,
+                'custodia_id' => null,
+                'ubicacion_origen_id' => null,
+                'ubicacion_destino_id' => $ubicacionOriginal->idRackUbicacion,
+                'rack_origen_id' => null,
+                'rack_destino_id' => $ubicacionOriginal->rack_id,
+                'cantidad' => $repuestoInfo->cantidad,
+                'tipo_movimiento' => 'entrada',
+                'usuario_id' => auth()->id(),
+                'observaciones' => "Devolución repuesto no usado - Solicitud: {$solicitud->codigo} - Ticket: {$repuestoInfo->numero_ticket} - Observación: {$request->observacion}",
+                'codigo_ubicacion_origen' => null,
+                'codigo_ubicacion_destino' => $ubicacionOriginal->codigo,
+                'nombre_rack_origen' => null,
+                'nombre_rack_destino' => $rackInfo->nombre ?? 'Desconocido',
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // 4. ELIMINAR registro en inventario_ingresos_clientes (donde se registró la salida)
+            // ESTO ES LO ÚNICO QUE NECESITAMOS HACER - NO CREAR NUEVO REGISTRO
+            $registrosEliminados = DB::table('inventario_ingresos_clientes')
+                ->where('codigo_solicitud', $solicitud->codigo)
+                ->where('articulo_id', $request->articulo_id)
+                ->where('tipo_ingreso', 'salida')
+                ->delete();
+
+            // 5. Actualizar KARDEX para la ENTRADA (devolución) - CORREGIR KARDEX
+            $articuloInfo = DB::table('articulos')
+                ->select('precio_compra')
+                ->where('idArticulos', $request->articulo_id)
+                ->first();
+
+            if ($articuloInfo) {
+                $this->actualizarKardexEntrada($request->articulo_id, $clienteGeneralId, $repuestoInfo->cantidad, $articuloInfo->precio_compra, "Devolución repuesto no usado - Solicitud: {$solicitud->codigo}");
+            }
+
+            // 6. Actualizar en la tabla ordenesarticulos
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $solicitudId)
                 ->where('idarticulos', $request->articulo_id)
                 ->update([
-                    'fechaSinUsar' => now(),
-                    'fechaUsado' => null, // Asegurar que no tenga fecha de usado
-                    'observacion' => $request->observacion
+                    'fechaSinUsar' => $request->fecha_devolucion,
+                    'fechaUsado' => null,
+                    'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
+                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
                 ]);
 
-            // Aquí podrías agregar lógica para devolver el stock si es necesario
-            /*
-            $repuesto = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $solicitudId)
-                ->where('idarticulos', $request->articulo_id)
-                ->first();
-
-            if ($repuesto) {
-                // Lógica para devolver al stock...
-                DB::table('rack_ubicacion_articulos')
-                    ->where('articulo_id', $request->articulo_id)
-                    ->where('rack_ubicacion_id', $repuesto->idUbicacion)
-                    ->increment('cantidad', $repuesto->cantidad);
-            }
-            */
+            // 7. Registrar en logs
+            Log::info("Repuesto devuelto al inventario - Solicitud: {$solicitudId}, Repuesto: {$repuestoInfo->nombre}, Cantidad: {$repuestoInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Cliente: {$clienteGeneralId}, Registros eliminados: {$registrosEliminados}");
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Repuesto marcado como no usado correctamente'
+            'message' => 'Repuesto marcado como no usado y devuelto al inventario correctamente'
         ]);
 
     } catch (\Exception $e) {
+        Log::error('Error al marcar repuesto como no usado: ' . $e->getMessage());
         return response()->json([
             'success' => false,
             'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
         ], 500);
+    }
+}
+private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantidad, $precioUnitario, $observaciones)
+{
+    try {
+        $fechaActual = now();
+        $mesActual = $fechaActual->format('Y-m');
+        
+        // Buscar si existe registro de kardex para este mes
+        $kardexActual = DB::table('kardex')
+            ->where('idArticulo', $articuloId)
+            ->where('cliente_general_id', $clienteGeneralId)
+            ->whereYear('fecha', $fechaActual->year)
+            ->whereMonth('fecha', $fechaActual->month)
+            ->first();
+
+        if ($kardexActual) {
+            // ACTUALIZAR registro existente del mes
+            $nuevoInventarioActual = $kardexActual->inventario_actual + $cantidad;
+            $nuevoCostoInventario = $nuevoInventarioActual * $precioUnitario;
+            
+            DB::table('kardex')
+                ->where('id', $kardexActual->id)
+                ->update([
+                    'unidades_entrada' => $kardexActual->unidades_entrada + $cantidad,
+                    'costo_unitario_entrada' => $precioUnitario,
+                    'inventario_actual' => $nuevoInventarioActual,
+                    'costo_inventario' => $nuevoCostoInventario,
+                    'updated_at' => now()
+                ]);
+                
+        } else {
+            // CREAR nuevo registro mensual
+            // Obtener último registro para calcular inventario inicial
+            $ultimoKardex = DB::table('kardex')
+                ->where('idArticulo', $articuloId)
+                ->where('cliente_general_id', $clienteGeneralId)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : 0;
+            $inventarioActual = $inventarioInicial + $cantidad;
+            $costoInventario = $inventarioActual * $precioUnitario;
+
+            DB::table('kardex')->insert([
+                'fecha' => $fechaActual->format('Y-m-d'),
+                'idArticulo' => $articuloId,
+                'cliente_general_id' => $clienteGeneralId,
+                'unidades_entrada' => $cantidad,
+                'costo_unitario_entrada' => $precioUnitario,
+                'unidades_salida' => 0,
+                'costo_unitario_salida' => 0,
+                'inventario_inicial' => $inventarioInicial,
+                'inventario_actual' => $inventarioActual,
+                'costo_inventario' => $costoInventario,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar kardex entrada: ' . $e->getMessage());
+        throw $e;
     }
 }
 
@@ -863,10 +1090,12 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
 
 
-     
-public function opciones($id)
+
+
+
+    public function opciones($id)
 {
-    // Obtener la solicitud con sus repuestos
+    // Obtener la solicitud con sus repuestos Y USUARIOS
     $solicitud = DB::table('solicitudesordenes as so')
         ->select(
             'so.idsolicitudesordenes',
@@ -880,10 +1109,10 @@ public function opciones($id)
             'so.cantidad',
             'so.totalcantidadproductos',
             'so.idticket',
-            't.numero_ticket',
-            'u.name as nombre_solicitante'
+            'so.idUsuario',
+            'so.idTecnico',
+            't.numero_ticket'
         )
-        ->leftJoin('users as u', 'so.idusuario', '=', 'u.id')
         ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
         ->where('so.idsolicitudesordenes', $id)
         ->where('so.tipoorden', 'solicitud_repuesto')
@@ -892,6 +1121,31 @@ public function opciones($id)
     if (!$solicitud) {
         abort(404, 'Solicitud no encontrada');
     }
+
+    // Obtener información del solicitante desde la tabla usuarios
+    $solicitante = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('idUsuario', $solicitud->idUsuario)
+        ->where('estado', 1) // Solo usuarios activos
+        ->first();
+
+    // Obtener información del técnico (si existe)
+    $tecnico = null;
+    if ($solicitud->idTecnico) {
+        $tecnico = DB::table('usuarios')
+            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+            ->where('idUsuario', $solicitud->idTecnico)
+            ->where('estado', 1)
+            ->first();
+    }
+
+    // Obtener lista de usuarios para la opción "otro"
+    $usuarios = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('estado', 1) // Solo usuarios activos
+        ->orderBy('Nombre')
+        ->orderBy('apellidoPaterno')
+        ->get();
 
     // Obtener los repuestos de la solicitud
     $repuestos = DB::table('ordenesarticulos as oa')
@@ -929,6 +1183,9 @@ public function opciones($id)
             ->orderBy('rua.cantidad', 'desc')
             ->get();
 
+
+            
+
         // Calcular stock total disponible
         $stockDisponible = $ubicaciones->sum('stock_ubicacion');
 
@@ -943,12 +1200,35 @@ public function opciones($id)
             ->where('idordenesarticulos', $repuesto->idordenesarticulos)
             ->where('estado', 1)
             ->exists();
+
+
+            if ($repuesto->ya_procesado) {
+            $entregaInfo = DB::table('repuestos_entregas as re')
+                ->select(
+                    're.tipo_entrega',
+                    're.usuario_destino_id',
+                    'u.Nombre',
+                    'u.apellidoPaterno',
+                    'u.apellidoMaterno'
+                )
+                ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
+                ->where('re.solicitud_id', $id)
+                ->where('re.articulo_id', $repuesto->idArticulos)
+                ->first();
+
+            $repuesto->entrega_info = $entregaInfo;
+        }
+
+
+            
     }
 
     // Verificar si toda la solicitud puede ser atendida
     $puede_aceptar = $repuestos->every(function ($repuesto) {
         return $repuesto->suficiente_stock;
     });
+
+    
 
     // Contar repuestos procesados y disponibles
     $repuestos_procesados = $repuestos->where('ya_procesado', true)->count();
@@ -961,9 +1241,17 @@ public function opciones($id)
         'puede_aceptar',
         'repuestos_procesados',
         'repuestos_disponibles',
-        'total_repuestos'
+        'total_repuestos',
+        'solicitante',
+        'tecnico',
+        'usuarios'
     ));
 }
+
+
+
+
+
 
 
 public function aceptar(Request $request, $id)
@@ -973,7 +1261,7 @@ public function aceptar(Request $request, $id)
 
         // Obtener la solicitud con todos los campos necesarios
         $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
             ->where('idsolicitudesordenes', $id)
             ->where('tipoorden', 'solicitud_repuesto')
             ->first();
@@ -1008,7 +1296,7 @@ public function aceptar(Request $request, $id)
             ->select(
                 'oa.idordenesarticulos',
                 'oa.cantidad',
-                'oa.idticket', // Obtener el idticket
+                'oa.idticket',
                 'a.idArticulos',
                 'a.nombre',
                 'a.stock_total',
@@ -1133,31 +1421,47 @@ public function aceptar(Request $request, $id)
                 'updated_at' => now()
             ]);
 
-            // ✅ 4. Registrar en inventario_ingresos_clientes CON NUMERO_ORDEN
+            // ✅ 4. Registrar en inventario_ingresos_clientes CON CODIGO_SOLICITUD
             DB::table('inventario_ingresos_clientes')->insert([
                 'compra_id' => null,
                 'articulo_id' => $repuesto->idArticulos,
                 'tipo_ingreso' => 'salida',
                 'ingreso_id' => $solicitud->idsolicitudesordenes,
                 'cliente_general_id' => $stockUbicacion->cliente_general_id,
-                'numero_orden' => $numeroTicket, // NÚMERO DE TICKET COMO NUMERO_ORDEN
+                'numero_orden' => $numeroTicket,
+                'codigo_solicitud' => $solicitud->codigo,
                 'cantidad' => -$cantidadSolicitada,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // ✅ 5. Actualizar kardex
+            // ✅ 5. Registrar en repuestos_entregas para tracking grupal
+            // En procesamiento grupal, por defecto se entrega al solicitante
+            DB::table('repuestos_entregas')->insert([
+                'solicitud_id' => $solicitud->idsolicitudesordenes,
+                'articulo_id' => $repuesto->idArticulos,
+                'usuario_destino_id' => $solicitud->idUsuario, // Por defecto al solicitante
+                'tipo_entrega' => 'solicitante',
+                'cantidad' => $cantidadSolicitada,
+                'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+                'usuario_entrego_id' => auth()->id(),
+                'observaciones' => "Repuesto entregado grupalmente - Ticket: {$numeroTicket}",
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // ✅ 6. Actualizar kardex
             $this->actualizarKardexSalida($repuesto->idArticulos, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $repuesto->precio_compra);
 
-            // ✅ 6. Marcar como procesado
+            // ✅ 7. Marcar como procesado
             DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->update([
                     'estado' => 1,
-                    'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente - Ticket: {$numeroTicket}"
+                    'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente - Ticket: {$numeroTicket} - Entregado al solicitante"
                 ]);
 
-            Log::info("✅ Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}, Ticket: {$numeroTicket}");
+            Log::info("✅ Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}, Ticket: {$numeroTicket}, Código Solicitud: {$solicitud->codigo}");
         }
 
         // Actualizar estado de la solicitud
@@ -1197,7 +1501,7 @@ public function aceptarIndividual(Request $request, $id)
 
         // Obtener la solicitud con todos los campos necesarios
         $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
             ->where('idsolicitudesordenes', $id)
             ->where('tipoorden', 'solicitud_repuesto')
             ->first();
@@ -1211,20 +1515,67 @@ public function aceptarIndividual(Request $request, $id)
 
         $articuloId = $request->input('articulo_id');
         $ubicacionId = $request->input('ubicacion_id');
+        $tipoDestinatario = $request->input('tipo_destinatario');
+        $usuarioDestinoId = $request->input('usuario_destino_id');
 
-        if (!$articuloId || !$ubicacionId) {
+        if (!$articuloId || !$ubicacionId || !$tipoDestinatario) {
             return response()->json([
                 'success' => false,
                 'message' => 'Datos incompletos para procesar el repuesto'
             ], 400);
         }
 
+        // Determinar el usuario destino final
+        $usuarioFinalId = null;
+        $tipoEntrega = '';
+        $nombreDestinatario = '';
+
+        switch ($tipoDestinatario) {
+            case 'solicitante':
+                $usuarioFinalId = $solicitud->idUsuario;
+                $tipoEntrega = 'solicitante';
+                break;
+                
+            case 'tecnico':
+                $usuarioFinalId = $solicitud->idTecnico;
+                $tipoEntrega = 'tecnico';
+                break;
+                
+            case 'otro':
+                $usuarioFinalId = $usuarioDestinoId;
+                $tipoEntrega = 'otro_usuario';
+                break;
+                
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de destinatario no válido'
+                ], 400);
+        }
+
+        if (!$usuarioFinalId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo determinar el usuario destino'
+            ], 400);
+        }
+
+        // Obtener nombre del destinatario
+        $destinatarioInfo = DB::table('usuarios')
+            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->where('idUsuario', $usuarioFinalId)
+            ->first();
+
+        $nombreDestinatario = $destinatarioInfo ? 
+            "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}" : 
+            'Usuario no encontrado';
+
         // Obtener información del repuesto CON EL IDTICKET
         $repuesto = DB::table('ordenesarticulos as oa')
             ->select(
                 'oa.idordenesarticulos',
                 'oa.cantidad',
-                'oa.idticket', // Obtener el idticket
+                'oa.idticket',
                 'a.idArticulos',
                 'a.nombre',
                 'a.stock_total'
@@ -1320,53 +1671,68 @@ public function aceptarIndividual(Request $request, $id)
             ->where('rack_ubicacion_id', $ubicacionId)
             ->decrement('cantidad', $cantidadSolicitada);
 
-        // 2. Registrar el movimiento en rack_movimientos (SALIDA)
+        // 2. Registrar el movimiento en rack_movimientos (SALIDA) con información del destinatario
         DB::table('rack_movimientos')->insert([
             'articulo_id' => $articuloId,
-            'custodia_id' => null, // No aplica para salida
+            'custodia_id' => null,
             'ubicacion_origen_id' => $ubicacionId,
-            'ubicacion_destino_id' => null, // Es una salida, no hay destino
+            'ubicacion_destino_id' => null,
             'rack_origen_id' => $stockUbicacion->rack_id,
-            'rack_destino_id' => null, // Es una salida
+            'rack_destino_id' => null,
             'cantidad' => $cantidadSolicitada,
             'tipo_movimiento' => 'salida',
             'usuario_id' => auth()->id(),
-            'observaciones' => "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket}",
+            'observaciones' => "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
             'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-            'codigo_ubicacion_destino' => null, // Es una salida
+            'codigo_ubicacion_destino' => null,
             'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-            'nombre_rack_destino' => null, // Es una salida
+            'nombre_rack_destino' => null,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        // 3. Registrar en inventario_ingresos_clientes como SALIDA CON NUMERO_ORDEN
+        // 3. Registrar en inventario_ingresos_clientes SOLO con código_solicitud
         DB::table('inventario_ingresos_clientes')->insert([
-            'compra_id' => null, // No es compra
+            'compra_id' => null,
             'articulo_id' => $articuloId,
             'tipo_ingreso' => 'salida',
-            'ingreso_id' => $solicitud->idsolicitudesordenes, // ID de la solicitud como referencia
-            'cliente_general_id' => $stockUbicacion->cliente_general_id, // Cliente general de la ubicación
-            'numero_orden' => $numeroTicket, // NÚMERO DE TICKET COMO NUMERO_ORDEN
-            'cantidad' => -$cantidadSolicitada, // Negativo porque es salida
+            'ingreso_id' => $solicitud->idsolicitudesordenes,
+            'cliente_general_id' => $stockUbicacion->cliente_general_id,
+            'numero_orden' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'cantidad' => -$cantidadSolicitada,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        // 4. Actualizar stock total del artículo
+        // 4. Registrar en la tabla de entregas (nueva tabla)
+        DB::table('repuestos_entregas')->insert([
+            'solicitud_id' => $solicitud->idsolicitudesordenes,
+            'articulo_id' => $articuloId,
+            'usuario_destino_id' => $usuarioFinalId,
+            'tipo_entrega' => $tipoEntrega,
+            'cantidad' => $cantidadSolicitada,
+            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+            'usuario_entrego_id' => auth()->id(),
+            'observaciones' => "Repuesto entregado individualmente - Ticket: {$numeroTicket}",
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // 5. Actualizar stock total del artículo
         DB::table('articulos')
             ->where('idArticulos', $articuloId)
             ->decrement('stock_total', $cantidadSolicitada);
 
-        // 5. Actualizar KARDEX para la SALIDA
+        // 6. Actualizar KARDEX para la SALIDA
         $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
 
-        // 6. Marcar el repuesto como procesado
+        // 7. Marcar el repuesto como procesado con información del destinatario
         DB::table('ordenesarticulos')
             ->where('idordenesarticulos', $repuesto->idordenesarticulos)
             ->update([
                 'estado' => 1,
-                'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket}"
+                'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})"
             ]);
 
         // Verificar si todos los repuestos han sido procesados
@@ -1390,13 +1756,16 @@ public function aceptarIndividual(Request $request, $id)
 
         DB::commit();
 
-        Log::info("Repuesto procesado individualmente - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}");
+        Log::info("Repuesto procesado individualmente - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Código Solicitud: {$solicitud->codigo}, Destinatario: {$nombreDestinatario} ({$tipoEntrega})");
 
         return response()->json([
             'success' => true,
-            'message' => 'Repuesto procesado correctamente',
+            'message' => "Repuesto procesado correctamente. Entregado a: {$nombreDestinatario}",
             'todos_procesados' => $todosProcesados,
-            'numero_ticket' => $numeroTicket
+            'numero_ticket' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'destinatario' => $nombreDestinatario,
+            'tipo_entrega' => $tipoEntrega
         ]);
 
     } catch (\Exception $e) {
