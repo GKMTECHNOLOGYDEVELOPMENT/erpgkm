@@ -632,6 +632,15 @@ class SolicitudarticuloController extends Controller
         ));
     }
 
+
+
+     public function gestionar($id)
+    {
+       
+
+        return view('solicitud.solicitudarticulo.gestionar');
+    }
+
     public function aceptarIndividual(Request $request, $id)
     {
         try {

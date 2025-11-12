@@ -40,6 +40,9 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+                                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
+
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         @click="window.location.href = '{{ route('cast.exportExcel') }}'">
@@ -54,6 +57,10 @@
                         <span>Excel</span>
                     </button>
 
+                                            @endif
+
+
+                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -68,6 +75,9 @@
                         <span>PDF</span>
                     </button>
 
+                                            @endif
+
+                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
@@ -87,6 +97,11 @@
                         </svg>
                         <span>Agregar</span>
                     </button>
+
+                                            @endif
+
+
+
                 </div>
             </div>
 

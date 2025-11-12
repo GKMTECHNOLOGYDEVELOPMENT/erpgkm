@@ -27,8 +27,16 @@ document.addEventListener('alpine:init', () => {
                     { data: 'subcategoria', className: 'text-center' },
                     { data: 'modelo', className: 'text-center' },
                     { data: 'stock_total', className: 'text-center' },
-                    { data: 'stock_total', className: 'text-center' },
-                    { data: 'stock_total', className: 'text-center' },
+                    { 
+                        data: 'entradas', 
+                        className: 'text-center',
+                        render: (data) => data || 0
+                    },
+                    { 
+                        data: 'salidas', 
+                        className: 'text-center',
+                        render: (data) => data || 0
+                    },
                      {
                         data: 'cliente_general_select',
                         className: 'text-center',
