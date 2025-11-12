@@ -1,4 +1,4 @@
-<x-layout.default>
+<x-layout.default title="Solicitud Ingreso - ERP Solutions Force">
     <!-- Incluir Axios CDN -->
     <!-- Font Awesome 6 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
