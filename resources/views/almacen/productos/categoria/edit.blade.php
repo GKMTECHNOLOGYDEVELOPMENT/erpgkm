@@ -43,7 +43,9 @@
             <!-- Botones -->
             <div class="flex justify-end space-x-4">
                 <a href="{{ route('categorias.index') }}" class="btn btn-outline-danger">Cancelar</a>
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CATEGORIA'))
                 <button type="submit" class="btn btn-primary">Actualizar</button>
+                @endif
             </div>
         </form>
     </div>

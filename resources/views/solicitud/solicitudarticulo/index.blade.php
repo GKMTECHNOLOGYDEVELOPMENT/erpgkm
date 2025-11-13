@@ -3,6 +3,8 @@
 
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800">Solicitudes</h1>
+
+            @if(\App\Helpers\PermisoHelper::tienePermiso('NUEVA SOLICITUD ARTICULO'))
             <button id="openModalBtn"
                 class="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -11,6 +13,8 @@
                 </svg>
                 Nueva Solicitud
             </button>
+            @endif
+
         </div>
 
         <!-- Modal para seleccionar tipo de solicitud -->
@@ -25,6 +29,8 @@
                 <!-- Opciones del Modal -->
                 <div class="p-6">
                     <div class="grid grid-cols-1 gap-4">
+
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR SOLICITUD ARTICULO'))
                         <!-- Opción para solicitud de artículo -->
                         <a href="{{ route('solicitudarticulo.create') }}" 
                            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
@@ -39,7 +45,9 @@
                                 <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un artículo general</p>
                             </div>
                         </a>
-                        
+                        @endif
+
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR SOLICITUD REPUESTO'))
                         <!-- Opción para solicitud de repuesto -->
                         <a href="{{ route('solicitudrepuesto.create') }}" 
                            class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-all duration-200">
@@ -55,6 +63,7 @@
                                 <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un repuesto específico</p>
                             </div>
                         </a>
+                        @endif
                     </div>
                 </div>
                 
@@ -387,6 +396,8 @@
                         <!-- Botones para Artículos (AZUL) -->
                         @if ($solicitud->tipoorden == 'solicitud_articulo')
                             <!-- Botón Ver -->
+                            
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD ARTICULO DETALLE'))
                             <a href="{{ route('solicitudarticulo.show', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -398,7 +409,9 @@
                                 </svg>
                                 Ver
                             </a>
+                            @endif
 
+                             @if(\App\Helpers\PermisoHelper::tienePermiso('OPCIONES SOLICITUD ARTICULO'))
                             <!-- Botón Opciones -->
                             <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
@@ -408,7 +421,8 @@
                                 </svg>
                                 Opciones
                             </a>
-
+                            @endif
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR SOLICITUD ARTICULO'))
                             <!-- NUEVO BOTÓN GESTIONAR -->
         <a href="{{ route('solicitudarticulo.gestionar', $solicitud->idsolicitudesordenes) }}"
             class="flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">
@@ -419,8 +433,9 @@
             </svg>
             Gestionar
         </a>
+        @endif
 
-
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD ARTICULO'))
                             <!-- Botón Editar - solo para pendientes -->
                             @if ($solicitud->estado == 'pendiente')
                                 <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
@@ -434,8 +449,12 @@
                                 </a>
                             @endif
 
+                            @endif
+
                         <!-- Botones para Repuestos (VERDE) -->
                         @else
+
+                         @if(\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
                             <!-- Botón Ver -->
                             <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
@@ -448,7 +467,8 @@
                                 </svg>
                                 Ver
                             </a>
-
+                            @endif
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
                             <!-- Botón Opciones -->
                             <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
                                 class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
@@ -458,8 +478,9 @@
                                 </svg>
                                 Opciones
                             </a>
+                            @endif
 
-
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR OPCIONES REPUESTO'))
                              <!-- NUEVO BOTÓN GESTIONAR -->
         <a href="{{ route('solicitudrepuesto.gestionar', $solicitud->idsolicitudesordenes) }}"
             class="flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition">
@@ -470,6 +491,7 @@
             </svg>
             Gestionar
         </a>
+                            @endif
 
                             <!-- Botón Editar - solo para pendientes -->
                             @if ($solicitud->estado == 'pendiente')

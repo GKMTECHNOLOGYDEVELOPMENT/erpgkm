@@ -310,12 +310,14 @@
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </a>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CUSTODIA'))
                     <button type="submit" id="submitBtn"
                             class="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm">
                         <i id="submitIcon" class="fas fa-save mr-2"></i>
                         <span id="submitText">Guardar Custodia</span>
                         <div id="submitSpinner" class="hidden ml-2 spinner"></div>
                     </button>
+                    @endif
                 </div>
             </form>
         </div>

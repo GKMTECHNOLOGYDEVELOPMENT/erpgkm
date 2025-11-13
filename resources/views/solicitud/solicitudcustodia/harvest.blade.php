@@ -350,6 +350,7 @@
 
                     <!-- Botón de retiro -->
                     <div class="pt-2">
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('RETIRAR REPUESTO HAVERST'))
                         <button type="submit"
                             class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3 group">
                             <div
@@ -362,6 +363,7 @@
                             </div>
                             <span class="text-lg">Retirar Repuesto</span>
                         </button>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -499,7 +501,8 @@
 
                                     <!-- Botón de anular -->
                                     <div class="flex justify-end pt-4">
-                                        <button type="button" onclick="anularRetiro({{ $retiro->id }})"
+                                   @if(\App\Helpers\PermisoHelper::tienePermiso('ANULAR RETIRO HAVERTS'))
+                                    <button type="button" onclick="anularRetiro({{ $retiro->id }})"
                                             class="btn bg-danger text-white font-medium py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 group">
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="h-4 w-4 group-hover:scale-110 transition-transform"
@@ -509,6 +512,7 @@
                                             </svg>
                                             Anular Retiro
                                         </button>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach

@@ -76,11 +76,13 @@
 
                 <!-- Botones de gestión -->
                 <div class="flex gap-3">
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR RACK'))
                     <button @click="abrirModalCrearRack()"
                         class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition">
                         <i class="fas fa-plus"></i>
                         Crear Rack
                     </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -185,23 +187,29 @@
 
             <!-- Botones acciones -->
             <div class="flex flex-wrap gap-3">
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ETIQUETAS RACK'))
                 <button @click="toggleLabels()" :class="labels ? 'btn btn-primary' : 'btn btn-secondary'"
                     class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
                     <i class="fas fa-tag"></i>
                     Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
                 </button>
+                @endif
 
+                @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES'))
                 <button @click="abrirModalSeleccionRack()"
                     class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                     <i class="fas fa-edit"></i>
                     Editar Dimensiones
                 </button>
-
+                @endif
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
                 <button @click="cargarDatos()"
                     class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
                     <i class="fas fa-sync-alt"></i>
                     Actualizar
                 </button>
+                @endif
+
             </div>
         </div>
 

@@ -36,6 +36,8 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+                @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL ARTICULO'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('articulos.exportExcel') }}'">
@@ -49,6 +51,9 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+                    @endif
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF ARTICULO'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -62,6 +67,10 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
+
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR ARTICULO'))
 
                     <!-- Botón Agregar -->
                     <a href="{{ route('producto.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
@@ -80,6 +89,9 @@
                         </svg>
                         <span>Agregar</span>
                     </a>
+
+                    @endif
+
 
                 </div>
             </div>
@@ -152,6 +164,19 @@
             });
         });
     </script>
+
+
+
+
+    <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ARTICULO') ? 'true' : 'false' }},
+        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR ARTICULO') ? 'true' : 'false' }},
+        puedeVerdetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES ARTICULO') ? 'true' : 'false' }},
+        puedeVerseries: {{ \App\Helpers\PermisoHelper::tienePermiso('VER SERIES ARTICULO') ? 'true' : 'false' }},
+        puedeSeleccionarCliente: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR CLIENTE ARTICULO') ? 'true' : 'false' }},
+    };
+</script>
 
 
 

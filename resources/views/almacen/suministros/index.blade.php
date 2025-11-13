@@ -36,6 +36,7 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL SUMINISTROS'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('articulos.exportExcel') }}'">
@@ -49,7 +50,9 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+                    @endif
 
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF SUMINISTROS'))
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('articulos.export.pdf') }}'">
@@ -62,7 +65,9 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
 
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR SUMINISTROS'))
                     <!-- Botón Agregar -->
                     <a href="{{ route('suministros.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
@@ -80,6 +85,7 @@
                         </svg>
                         <span>Agregar</span>
                     </a>
+                    @endif
 
                 </div>
             </div>
@@ -255,5 +261,15 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+     <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR SUMINISTROS') ? 'true' : 'false' }},
+        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR SUMINISTROS') ? 'true' : 'false' }},
+        puedeVerdetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES SUMINISTROS') ? 'true' : 'false' }},
+        puedeVerseries: {{ \App\Helpers\PermisoHelper::tienePermiso('VER SERIES SUMINISTROS') ? 'true' : 'false' }},
+        puedeSeleccionarCliente: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR CLIENTE SUMINISTROS') ? 'true' : 'false' }},
+    };
+</script>
 
 </x-layout.default>
