@@ -147,11 +147,14 @@
                                     </div>
 
 
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR USUARIO'))
                                     <!-- Botones -->
                                     <div class="sm:col-span-2 mt-3">
                                         <button type="submit" class="btn btn-primary mr-2">Guardar</button>
                                         <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
                                     </div>
+                                    @endif
+
                                 </div>
                             </div>
                         </form>

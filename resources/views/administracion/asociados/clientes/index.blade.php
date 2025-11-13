@@ -71,8 +71,7 @@
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
 
-
-
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CLIENTE'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('clientes.exportExcel') }}'">
@@ -84,10 +83,13 @@
                             <path d="M16 10L8 14M8 10L16 14" stroke="currentColor" stroke-width="1.5"
                                 stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <span>Excel</span>
+                        <span>Excel Cliente</span>
                     </button>
+                    @endif
+
 
                     
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF CLIENTE'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -102,6 +104,11 @@
                         <span>PDF</span>
                     </button>
 
+                                         @endif
+
+
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR CLIENTE'))
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
@@ -116,6 +123,9 @@
                         </svg>
                         <span>Agregar</span>
                     </button>
+
+                                         @endif
+
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
@@ -282,7 +292,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CLIENTE'))   
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -291,6 +303,8 @@
         </div>
     </div>
 
+
+   
     <script>
         window.sessionMessages = {
             success: '{{ session('success') }}',
@@ -305,12 +319,19 @@
         };
     </script>
 
+   
+
     <!-- Scripts necesarios -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    
+      <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CLIENTE') ? 'true' : 'false' }},
+        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CLIENTE') ? 'true' : 'false' }}
+    };
+</script>
    <script>
     $(document).ready(function () {
         // Inicializar Select2 para Cliente General

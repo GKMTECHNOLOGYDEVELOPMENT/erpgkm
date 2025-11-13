@@ -107,6 +107,8 @@
                     class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm">
                     Buscar
                 </button>
+
+                
             </div>
             <table id="myTable1" class="w-full min-w-[1000px] table whitespace-nowrap">
 
@@ -180,7 +182,12 @@
                         <div class="flex justify-end items-center mb-4">
                             <button type="button" class="btn btn-outline-danger"
                                 @click="open = false">Cancelar</button>
+
+
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CLIENTE GENERAL'))
                             <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            @endif
+
                         </div>
                     </form>
                 </div>

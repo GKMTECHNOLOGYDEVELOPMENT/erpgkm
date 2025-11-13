@@ -59,6 +59,9 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL USUARIOS'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         @click="exportTable('excel')">
@@ -72,6 +75,9 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+                    @endif
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF USUARIOS'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -85,9 +91,11 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
 
+                    <!-- @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CLIENTE')) -->
                     <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
+                    <!-- <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -97,7 +105,10 @@
                         </svg>
                         <span>Imprimir</span>
                     </button>
+                    @endif -->
 
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR USUARIO'))
                     <!-- Botón Agregar -->
                     <a href="{{ route('usuario.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"
@@ -111,6 +122,7 @@
                         </svg>
                         <span>Agregar</span>
                     </a>
+                    @endif
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
@@ -183,6 +195,17 @@
             });
         });
     </script>
+
+
+   <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR USUARIO') ? 'true' : 'false' }},
+        puedeActualizarEstado: {{ \App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO USUARIO') ? 'true' : 'false' }}
+    };
+</script>
+
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
