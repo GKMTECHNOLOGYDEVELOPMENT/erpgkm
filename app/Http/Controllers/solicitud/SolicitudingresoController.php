@@ -105,6 +105,9 @@ class SolicitudingresoController extends Controller
             $panelesPendientes = $solicitudesMap->filter(function ($s) {
                 return $s['es_panel'] === true && $s['estado'] !== 'ubicado';
             })->count();
+            $todoUbicado = $solicitudesMap->every(function ($s) {
+                return $s['estado'] === 'ubicado';
+            });
 
             return [
                 'origen'             => $primeraSolicitud->origen,
@@ -123,6 +126,8 @@ class SolicitudingresoController extends Controller
                 // ? Campos extra para el front
                 'tiene_panel'        => $tienePanel,
                 'paneles_pendientes' => $panelesPendientes,
+                'todo_ubicado'       => $todoUbicado,
+
             ];
         })->values();
 
@@ -436,7 +441,7 @@ class SolicitudingresoController extends Controller
 
 
 
-    
+
     public function sugerirUbicacionesMejorado($articuloId, $cantidad)
     {
         try {
@@ -524,7 +529,7 @@ class SolicitudingresoController extends Controller
         }
     }
 
-    
+
     private function formatearRespuesta($sugerencias, $tipo, $mensaje)
     {
         $sugerenciasLimpias = $sugerencias->map(function ($item) {
