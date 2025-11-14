@@ -41,6 +41,8 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+                @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL MARCA'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('marcas.exportExcel') }}'">
@@ -55,7 +57,9 @@
                         <span>Excel</span>
                     </button>
 
+                    @endif
 
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF MARCA'))
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('marcas.marcas.pdf') }}'">
@@ -68,6 +72,9 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MARCA'))
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
@@ -81,6 +88,7 @@
 
                         <span>Agregar</span>
                     </button>
+                    @endif
                 </div>
             </div>
 
@@ -170,8 +178,10 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
-                                <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
-                            </div>
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MARCA'))    
+                                    <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                    @endif
+                                </div>
                         </form>
 
                     </div>
@@ -182,7 +192,12 @@
 
 
 
-
+<script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR MARCA') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR MARCA') ? 'true' : 'false' }}
+        };
+    </script>
 
 
     <script>

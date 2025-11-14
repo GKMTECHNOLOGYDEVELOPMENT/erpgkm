@@ -14,6 +14,7 @@
             min-width: 1000px;
             /* puedes ajustar si quieres más ancho */
         }
+
         .dataTables_length select {
             appearance: none;
             -webkit-appearance: none;
@@ -41,7 +42,7 @@
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
 
-                                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
 
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
@@ -57,10 +58,10 @@
                         <span>Excel</span>
                     </button>
 
-                                            @endif
+                    @endif
 
 
-                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -75,9 +76,9 @@
                         <span>PDF</span>
                     </button>
 
-                                            @endif
+                    @endif
 
-                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CAST'))
 
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
@@ -98,7 +99,7 @@
                         <span>Agregar</span>
                     </button>
 
-                                            @endif
+                    @endif
 
 
 
@@ -198,9 +199,9 @@
                                     <select id="departamento" name="departamento" class="form-input w-full" required>
                                         <option value="" disabled selected>Seleccionar Departamento</option>
                                         @foreach ($departamentos as $departamento)
-                                            <option value="{{ $departamento['id_ubigeo'] }}">
-                                                {{ $departamento['nombre_ubigeo'] }}
-                                            </option>
+                                        <option value="{{ $departamento['id_ubigeo'] }}">
+                                            {{ $departamento['nombre_ubigeo'] }}
+                                        </option>
                                         @endforeach
                                     </select>
 
@@ -234,7 +235,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CAST'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -251,7 +254,7 @@
             function toggleSaveButton() {
                 console.log("Estado del formulario:", formValid ? "Válido" : "Inválido");
                 $('#castForm button[type="submit"]').prop('disabled', !
-                formValid); // Habilitar o deshabilitar según formValid
+                    formValid); // Habilitar o deshabilitar según formValid
             }
 
             // Función para verificar campos vacíos
@@ -288,21 +291,23 @@
                     $('#ruc-error').text('El RUC debe tener al menos 8 dígitos y solo números').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('validar.ruccast') }}', {
-                        ruc: ruc,
-                        _token: '{{ csrf_token() }}'
-                    }, function(response) {
-                        if (response.exists) {
-                            $('#ruc').addClass('border-red-500');
-                            $('#ruc-error').text('El RUC ya está registrado').show();
-                            formValid = false;
-                        } else {
-                            $('#ruc').removeClass('border-red-500');
-                            $('#ruc-error').hide();
-                        }
-                        toggleSaveButton
-                    (); // Actualizar el estado del botón después de la validación
-                    });
+                    $.post('{{ route('
+                        validar.ruccast ') }}', {
+                            ruc: ruc,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        function(response) {
+                            if (response.exists) {
+                                $('#ruc').addClass('border-red-500');
+                                $('#ruc-error').text('El RUC ya está registrado').show();
+                                formValid = false;
+                            } else {
+                                $('#ruc').removeClass('border-red-500');
+                                $('#ruc-error').hide();
+                            }
+                            toggleSaveButton
+                                (); // Actualizar el estado del botón después de la validación
+                        });
                 }
                 toggleSaveButton(); // Asegurarse de que el estado se actualiza
             });
@@ -311,20 +316,22 @@
             $('#nombre').on('input', function() {
                 let nombre = $(this).val();
                 formValid = true; // Resetear la bandera antes de realizar la validación
-                $.post('{{ route('validar.nombrecast') }}', {
-                    nombre: nombre,
-                    _token: '{{ csrf_token() }}'
-                }, function(response) {
-                    if (response.exists) {
-                        $('#nombre').addClass('border-red-500');
-                        $('#nombre-error').text('El nombre ya está registrado').show();
-                        formValid = false;
-                    } else {
-                        $('#nombre').removeClass('border-red-500');
-                        $('#nombre-error').hide();
-                    }
-                    toggleSaveButton(); // Actualizar el estado del botón después de la validación
-                });
+                $.post('{{ route('
+                    validar.nombrecast ') }}', {
+                        nombre: nombre,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    function(response) {
+                        if (response.exists) {
+                            $('#nombre').addClass('border-red-500');
+                            $('#nombre-error').text('El nombre ya está registrado').show();
+                            formValid = false;
+                        } else {
+                            $('#nombre').removeClass('border-red-500');
+                            $('#nombre-error').hide();
+                        }
+                        toggleSaveButton(); // Actualizar el estado del botón después de la validación
+                    });
             });
 
             // Validación en tiempo real del email
@@ -337,22 +344,24 @@
                     $('#email-error').text('Por favor ingrese un correo válido').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('validar.emailcast') }}', {
-                        email: email,
-                        _token: '{{ csrf_token() }}'
-                    }, function(response) {
-                        if (response.exists) {
-                            $('#email').addClass('border-red-500');
-                            $('#email-error').text('El correo electrónico ya está registrado')
-                            .show();
-                            formValid = false;
-                        } else {
-                            $('#email').removeClass('border-red-500');
-                            $('#email-error').hide();
-                        }
-                        toggleSaveButton
-                    (); // Actualizar el estado del botón después de la validación
-                    });
+                    $.post('{{ route('
+                        validar.emailcast ') }}', {
+                            email: email,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        function(response) {
+                            if (response.exists) {
+                                $('#email').addClass('border-red-500');
+                                $('#email-error').text('El correo electrónico ya está registrado')
+                                    .show();
+                                formValid = false;
+                            } else {
+                                $('#email').removeClass('border-red-500');
+                                $('#email-error').hide();
+                            }
+                            toggleSaveButton
+                                (); // Actualizar el estado del botón después de la validación
+                        });
                 }
                 toggleSaveButton(); // Asegurarse de que el estado se actualiza
             });
@@ -366,21 +375,23 @@
                     $('#telefono-error').text('El teléfono debe tener al menos 9 dígitos').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('validar.telefonocast') }}', {
-                        telefono: telefono,
-                        _token: '{{ csrf_token() }}'
-                    }, function(response) {
-                        if (response.exists) {
-                            $('#telefono').addClass('border-red-500');
-                            $('#telefono-error').text('El teléfono ya está registrado').show();
-                            formValid = false;
-                        } else {
-                            $('#telefono').removeClass('border-red-500');
-                            $('#telefono-error').hide();
-                        }
-                        toggleSaveButton
-                    (); // Actualizar el estado del botón después de la validación
-                    });
+                    $.post('{{ route('
+                        validar.telefonocast ') }}', {
+                            telefono: telefono,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        function(response) {
+                            if (response.exists) {
+                                $('#telefono').addClass('border-red-500');
+                                $('#telefono-error').text('El teléfono ya está registrado').show();
+                                formValid = false;
+                            } else {
+                                $('#telefono').removeClass('border-red-500');
+                                $('#telefono-error').hide();
+                            }
+                            toggleSaveButton
+                                (); // Actualizar el estado del botón después de la validación
+                        });
                 }
                 toggleSaveButton(); // Asegurarse de que el estado se actualiza
             });
@@ -392,25 +403,29 @@
 
                 // Verificar que las validaciones asíncronas se han completado
                 $.when(
-                    $.post('{{ route('validar.ruccast') }}', {
-                        ruc: $('#ruc').val(),
-                        _token: '{{ csrf_token() }}'
-                    }),
-                    $.post('{{ route('validar.nombrecast') }}', {
-                        nombre: $('#nombre').val(),
-                        _token: '{{ csrf_token() }}'
-                    }),
-                    $.post('{{ route('validar.emailcast') }}', {
-                        email: $('#email').val(),
-                        _token: '{{ csrf_token() }}'
-                    }),
-                    $.post('{{ route('validar.telefonocast') }}', {
-                        telefono: $('#telefono').val(),
-                        _token: '{{ csrf_token() }}'
-                    })
+                    $.post('{{ route('
+                        validar.ruccast ') }}', {
+                            ruc: $('#ruc').val(),
+                            _token: '{{ csrf_token() }}'
+                        }),
+                    $.post('{{ route('
+                        validar.nombrecast ') }}', {
+                            nombre: $('#nombre').val(),
+                            _token: '{{ csrf_token() }}'
+                        }),
+                    $.post('{{ route('
+                        validar.emailcast ') }}', {
+                            email: $('#email').val(),
+                            _token: '{{ csrf_token() }}'
+                        }),
+                    $.post('{{ route('
+                        validar.telefonocast ') }}', {
+                            telefono: $('#telefono').val(),
+                            _token: '{{ csrf_token() }}'
+                        })
                 ).done(function(rucResp, nombreResp, emailResp, telefonoResp) {
                     formValid =
-                    true; // Reseteamos la bandera a verdadero al inicio de la validación
+                        true; // Reseteamos la bandera a verdadero al inicio de la validación
 
                     // Verificamos si alguna de las respuestas indica un error
                     if (rucResp.exists || nombreResp.exists || emailResp.exists || telefonoResp
@@ -418,7 +433,7 @@
                         formValid = false; // Si hay algún error, deshabilitamos el botón
                     }
                     toggleSaveButton
-                (); // Actualizamos el estado del botón según el valor de formValid
+                        (); // Actualizamos el estado del botón según el valor de formValid
 
                     // Si no hay errores, enviamos el formulario
                     if (formValid) {
@@ -433,16 +448,36 @@
 
 
     <script>
+        window.permisosTiendas = {
+            puedeEditar: {
+                {
+                    \
+                    App\ Helpers\ PermisoHelper::tienePermiso('EDITAR CAST') ? 'true' : 'false'
+                }
+            },
+            puedeEliminar: {
+                {
+                    \
+                    App\ Helpers\ PermisoHelper::tienePermiso('ELIMINAR CAST') ? 'true' : 'false'
+                }
+            }
+        };
+    </script>
+
+    <script>
         window.sessionMessages = {
-            success: '{{ session('success') }}',
-            error: '{{ session('error') }}',
+            success: '{{ session('
+            success ') }}',
+            error: '{{ session('
+            error ') }}',
         };
     </script>
 
     <script>
         window.Laravel = {
             csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-            routeCastStore: '{{ route('cast.store') }}' // Define la ruta del endpoint
+            routeCastStore: '{{ route('
+            cast.store ') }}' // Define la ruta del endpoint
         };
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

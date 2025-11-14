@@ -41,6 +41,7 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CATEGORIA'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('categorias.exportExcel') }}'">
@@ -54,7 +55,10 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+                    @endif
 
+                    
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF CATEGORIA'))
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('categorias.categorias.pdf') }}'">
@@ -67,7 +71,9 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
 
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR CATEGORIA'))
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
@@ -86,6 +92,7 @@
                         </svg>
                         <span>Agregar</span>
                     </button>
+                    @endif
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
@@ -152,7 +159,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CATEGORIA'))    
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
 
@@ -161,6 +170,14 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CATEGORIA') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CATEGORIA') ? 'true' : 'false' }}
+        };
+    </script>
 
 
     <script>
@@ -217,6 +234,14 @@
             });
         });
     </script>
+
+<script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CATEGORIA') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CATEGORIA') ? 'true' : 'false' }}
+        };
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>

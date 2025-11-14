@@ -79,12 +79,13 @@
                         @endforeach
                     </select>
                 </div>
-
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR INFORMACION IMPORTANTE'))
                 <!-- Botones -->
                 <div class="sm:col-span-2 mt-3">
                     <button type="submit" class="btn btn-primary mr-2">Actualizar
                         Información</button>
                 </div>
+                @endif
             </div>
         </form>
 

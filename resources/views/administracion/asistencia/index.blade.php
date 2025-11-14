@@ -164,10 +164,15 @@
                             <p id="observacionEstadoFinal" class="mt-2 text-sm font-bold hidden text-center"></p>
                             <!-- Botones -->
                             <div id="observacionAcciones" class="flex justify-start gap-4 pt-4 border-t mt-4">
-                                <button type="button" class="btn btn-outline-danger"
+                               
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('DENEGAR OBSERVACION ASISTENCIA'))
+                            <button type="button" class="btn btn-outline-danger"
                                     onclick="denegarObservacion()">Denegado</button>
+                            @endif
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('APROBAR OBSERVACION ASISTENCIA'))
                                 <button type="button" class="btn btn-primary"
                                     onclick="aprobarObservacion()">Aprobado</button>
+                                        @endif
                             </div>
                         </div>
 

@@ -308,6 +308,7 @@
                                         <input type="hidden" name="rack_ubicacion_id" id="hidden_rack_ubicacion_id" value="{{ old('rack_ubicacion_id', $custodia->rack_ubicacion_id ?? '') }}">
                                     @endif
                                 </div>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('CARGAR SUGERENCIAS CUSTODIA'))
                                 <!-- Botón con ID específico -->
                                 <button type="button" id="btn-cargar-sugerencias" 
                                     class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
@@ -316,6 +317,8 @@
                                     </svg>
                                     Cargar sugerencias
                                 </button>
+
+                                @endif
                             </div>
 
                             <!-- Campo para observaciones específicas de almacén -->
@@ -463,6 +466,7 @@
                             <!-- Botón para subir fotos -->
                             @if ($custodia->estado !== 'Aprobado')
                                 <div class="mt-4 text-right">
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTOS CUSTODIA'))
                                     <button type="button" id="btn-subir-fotos" onclick="subirFotos()"
                                         class="btn btn-primary">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
@@ -472,6 +476,7 @@
                                         </svg>
                                         Subir Fotos
                                     </button>
+                                    @endif
                                 </div>
                             @endif
                         </div>
@@ -502,6 +507,7 @@
                             Atras
                         </a>
                         @if (!$isDisabled)
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CAMBIOS CUSTODIA'))
                             <button type="button" id="btn-guardar" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor">
@@ -510,6 +516,7 @@
                                 </svg>
                                 Actualizar cambios
                             </button>
+                            @endif
                         @else
                             <button type="button" class="btn btn-secondary cursor-not-allowed opacity-70" disabled>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"

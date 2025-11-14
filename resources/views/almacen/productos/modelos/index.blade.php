@@ -41,6 +41,8 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL MODELO'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('modelos.exportExcel') }}'">
@@ -54,7 +56,8 @@
                         </svg>
                         <span>Excel</span>
                     </button>
-
+                    @endif
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF MODELO'))
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
                         onclick="window.location.href='{{ route('modelos.export.pdf') }}'">
@@ -67,6 +70,8 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MODELO'))
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
@@ -86,6 +91,7 @@
 
                         <span>Agregar</span>
                     </button>
+                    @endif
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
@@ -211,7 +217,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MODELO'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
 
@@ -231,6 +239,14 @@
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+      <script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR MODELO') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR MODELO') ? 'true' : 'false' }}
+        };
+    </script>
+
     <script>
         // Inicializar Select2
         $(document).ready(function() {

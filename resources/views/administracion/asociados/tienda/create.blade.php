@@ -172,7 +172,9 @@
                 <!-- Botones -->
                 <div class="md:col-span-2 flex justify-end mt-4">
                     <a href="{{ route('administracion.tienda') }}" class="btn btn-outline-danger">Cancelar</a>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR TIENDA'))
                     <button type="submit" id="guardarBtn" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                    @endif
                 </div>
             </form>
         </div>

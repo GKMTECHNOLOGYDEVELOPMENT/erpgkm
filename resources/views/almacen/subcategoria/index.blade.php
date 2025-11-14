@@ -17,8 +17,9 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 md:left-5">
                 <div class="flex flex-wrap items-center gap-2 mb-5">
-                 
+                @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR SUB CATEGORIA'))
                     <a href="{{ route('subcategoria.create') }}" class="btn btn-primary btn-sm">Agregar</a>
+                @endif
                 </div>
             </div>
             <table id="myTable1" class="w-full table whitespace-nowrap">
@@ -40,4 +41,13 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="{{ asset('assets/js/almacen/subcategoria/subcategoria.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
+
+
+
+    <script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR SUB CATEGORIA') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR SUB CATEGORIA') ? 'true' : 'false' }}
+        };
+    </script>
 </x-layout.default>

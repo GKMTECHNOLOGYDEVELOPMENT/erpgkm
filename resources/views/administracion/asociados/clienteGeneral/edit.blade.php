@@ -114,7 +114,11 @@
             <!-- Botones -->
             <div class="flex justify-end space-x-4">
                 <a href="{{ route('administracion.cliente-general') }}" class="btn btn-outline-danger">Cancelar</a>
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CLIENTE GENERAL'))
                 <button type="submit" class="btn btn-primary">Actualizar</button>
+                @endif
+
+
             </div>
         </form>
     </div>

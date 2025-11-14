@@ -79,7 +79,7 @@
                 </div>
             </form>
 
-
+            @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR NUEVA CUSTODIA'))
             <!-- Botón "Crear Nueva Custodia" -->
             <div class="mt-4 flex justify-end">
                 <a href="{{ route('solicitudcustodia.create') }}" class="btn btn-primary">
@@ -90,6 +90,7 @@
                     Crear Nueva Custodia
                 </a>
             </div>
+            @endif
         </div>
 
         <!-- Tarjetas de estadísticas -->
@@ -349,6 +350,7 @@
 
                             <!-- Footer con botón de opciones -->
                             <div class="px-5 py-3  border-t border-gray-200 gap-2 flex justify-end">
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('OPCIONES CUSTODIA'))
                                 <a href="{{ route('solicitudcustodia.opciones', ['id' => $custodia->id]) }}"
                                     class="btn btn-warning flex items-center px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-md transition-colors duration-200">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -358,8 +360,9 @@
                                     </svg>
                                     OPCIONES
                                 </a>
+                                @endif
 
-
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('HARVEST CUSTODIA'))
                                 <!-- Botón Harvest mejorado -->
                                 <a href="{{ route('solicitudcustodia.harvest', ['id' => $custodia->id]) }}"
                                     class="btn btn-success flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
@@ -370,6 +373,7 @@
                                     </svg>
                                     HARVEST
                                 </a>
+                                @endif
 
                             </div>
                         </div>

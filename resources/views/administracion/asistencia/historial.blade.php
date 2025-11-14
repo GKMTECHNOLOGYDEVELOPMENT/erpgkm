@@ -42,6 +42,8 @@
                             <tr class="hover:bg-gray-50 dark:hover:bg-[#2d3748]">
                                 <td class="hidden">{{ $i + 1 }}</td>
                                 <td class="px-1 py-1 border">
+                                                                @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR OBSERVACION ASISTENCIA'))
+
                                     <button type="button" class="text-yellow-600 hover:text-yellow-700" title="Editar"
                                         @click="abrirModalEditar({{ $obs->idObservaciones }}, `{{ $obs->respuesta }}`, {{ $obs->estado ?? 0 }})">
                                         <div
@@ -53,6 +55,8 @@
                                             </svg>
                                         </div>
                                     </button>
+                                                                @endif
+
                                 </td>
                                 <td class="px-1 py-1 border w-[180px]">{{ $obs->fechaHora }}</td>
                                 <td class="px-1 py-1 border w-[300px]">{{ $obs->ubicacion }}</td>
@@ -156,9 +160,11 @@
                     <button @click="modalEditar.open = false" class="btn btn-outline-danger">
                         Cancelar
                     </button>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR OBSERVACION ASISTENCIA''))
                     <button @click="guardarCambios" class="btn btn-primary ltr:ml-4 rtl:mr-4">
                         Guardar
                     </button>
+                    @endif
                 </div>
             </div>
         </div>

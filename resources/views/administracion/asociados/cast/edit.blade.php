@@ -119,7 +119,10 @@
                 <!-- Botones -->
                 <div class="flex justify-end items-center mt-4">
                     <a href="{{ route('administracion.cast') }}" class="btn btn-outline-danger">Cancelar</a>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CAST'))
+
                     <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Actualizar</button>
+                    @endif
                 </div>
             </form>
         </div>
