@@ -124,6 +124,9 @@ class AreasController extends Controller
     /**
      * Update the specified resource in storage.
      */
+    /**
+     * Update the specified resource in storage.
+     */
     public function update(Request $request, $id)
     {
         try {
@@ -157,10 +160,40 @@ class AreasController extends Controller
                 Log::info("Área actualizada: {$area->nombre} con " . count($request->clientes_generales ?? []) . " clientes");
             });
 
+            // Si es una petición AJAX, responder con JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Área actualizada exitosamente.'
+                ]);
+            }
+
             return redirect()->route('areas.index')
                 ->with('success', 'Área actualizada exitosamente.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Si es una petición AJAX, responder con errores de validación en JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
         } catch (\Exception $e) {
             Log::error('Error actualizando área: ' . $e->getMessage());
+
+            // Si es una petición AJAX, responder con error JSON
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al actualizar el área: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Error al actualizar el área: ' . $e->getMessage())
                 ->withInput();
@@ -225,27 +258,27 @@ class AreasController extends Controller
         }
     }
     // En tu AreasController.php
-public function getClientesModal($id)
-{
-    try {
-        $clientesAsignados = DB::table('clientegeneral_area as cga')
-            ->join('clientegeneral as cg', 'cga.idClienteGeneral', '=', 'cg.idClienteGeneral')
-            ->where('cga.idTipoArea', $id)
-            ->select('cg.idClienteGeneral', 'cg.descripcion')
-            ->get();
+    public function getClientesModal($id)
+    {
+        try {
+            $clientesAsignados = DB::table('clientegeneral_area as cga')
+                ->join('clientegeneral as cg', 'cga.idClienteGeneral', '=', 'cg.idClienteGeneral')
+                ->where('cga.idTipoArea', $id)
+                ->select('cg.idClienteGeneral', 'cg.descripcion')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'clientes' => $clientesAsignados
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error obteniendo clientes para modal: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al cargar los clientes'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'clientes' => $clientesAsignados
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error obteniendo clientes para modal: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al cargar los clientes'
+            ], 500);
+        }
     }
-}
     /**
      * Obtener datos para DataTable
      */

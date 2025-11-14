@@ -186,22 +186,28 @@ class ClienteGeneralController extends Controller
     }
     public function clientegeneralFiltros($tipo)
     {
-        $clientes = ClienteGeneral::select('idClienteGeneral', 'descripcion')
-            ->where('estado', 1);
-    
+        // Definir el nombre del área según el tipo
+        $nombreArea = '';
         if ($tipo == 1) {
-            $clientes->whereIn('descripcion', ['TCL', 'TPV']);
+            $nombreArea = 'SMART';
         } elseif ($tipo == 2) {
-            $clientes->where('descripcion', 'NGR');
+            $nombreArea = 'HELPDESK';
         } else {
-            return response()->json([]); // Si no es 1 o 2, devuelve vacío
+            return response()->json([]);
         }
-    
-        return response()->json($clientes->get())
+
+        $clientes = ClienteGeneral::select('clientegeneral.idClienteGeneral', 'clientegeneral.descripcion')
+            ->join('clientegeneral_area', 'clientegeneral.idClienteGeneral', '=', 'clientegeneral_area.idClienteGeneral')
+            ->join('tipoarea', 'clientegeneral_area.idTipoArea', '=', 'tipoarea.idTipoArea')
+            ->where('clientegeneral.estado', 1)
+            ->where('tipoarea.nombre', $nombreArea)
+            ->orderBy('clientegeneral.descripcion')
+            ->get();
+
+        return response()->json($clientes)
             ->header('Content-Type', 'application/json; charset=utf-8');
     }
-    
-    
+
 
     public function marcasAsociadas($idClienteGeneral)
     {
@@ -285,39 +291,38 @@ class ClienteGeneralController extends Controller
     {
         try {
             $cliente = ClienteGeneral::find($id);
-    
+
             if (!$cliente) {
                 return response()->json(['error' => 'Cliente no encontrado'], 404);
             }
-    
+
             $fotoEliminada = false;
             $carpetaEliminada = false;
-    
+
             if ($cliente->foto) {
                 $fotoPath = str_replace('storage/', '', $cliente->foto);
                 $fotoPathCompleta = storage_path('app/public/' . $fotoPath);
-    
+
                 if (file_exists($fotoPathCompleta)) {
                     unlink($fotoPathCompleta);
                     $fotoEliminada = true;
                 }
-    
+
                 $directorio = dirname($fotoPathCompleta);
                 if (is_dir($directorio) && count(scandir($directorio)) == 2) {
                     rmdir($directorio);
                     $carpetaEliminada = true;
                 }
             }
-    
+
             $cliente->delete();
-    
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cliente y su imagen eliminados con éxito',
                 'fotoEliminada' => $fotoEliminada,
                 'carpetaEliminada' => $carpetaEliminada,
             ], 200);
-    
         } catch (\Illuminate\Database\QueryException $e) {
             if ($e->getCode() == '23000') {
                 return response()->json([
@@ -325,7 +330,7 @@ class ClienteGeneralController extends Controller
                     'message' => 'No puedes eliminar, el cliente general está asociado a una o más marcas.',
                 ], 409);
             }
-    
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al eliminar el cliente general.',
@@ -333,7 +338,7 @@ class ClienteGeneralController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function exportAllPDF()
     {
@@ -359,21 +364,21 @@ class ClienteGeneralController extends Controller
     public function getAll(Request $request)
     {
         $query = Clientegeneral::query();
-    
+
         $total = Clientegeneral::count();
-    
+
         // Filtro global de búsqueda
         if ($search = $request->input('search.value')) {
             $query->where('descripcion', 'like', "%$search%");
         }
-    
+
         $filtered = $query->count();
-    
+
         $clientes = $query
             ->skip($request->start)
             ->take($request->length)
             ->get();
-    
+
         $data = $clientes->map(function ($cliente) {
             return [
                 'idClienteGeneral' => $cliente->idClienteGeneral,
@@ -382,7 +387,7 @@ class ClienteGeneralController extends Controller
                 'foto' => $cliente->foto ? base64_encode($cliente->foto) : null,
             ];
         });
-    
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $total,
@@ -390,7 +395,7 @@ class ClienteGeneralController extends Controller
             'data' => $data,
         ]);
     }
-    
+
     // futuras validaciones
     public function checkNombre(Request $request)
     {

@@ -38,4 +38,10 @@ class Contactosform extends Model
     {
         return $this->belongsTo(NivelDecision::class, 'nivel_decision_id');
     }
+
+        // NUEVA RELACIÓN: Muchos a muchos con Cliente
+    public function clientes()
+    {
+        return $this->belongsToMany(Cliente::class, 'contacto_cliente', 'contacto_id', 'cliente_id', 'id', 'idCliente');
+    }
 }
