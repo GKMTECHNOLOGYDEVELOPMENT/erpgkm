@@ -9,9 +9,247 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    
 
-    
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        @keyframes pulse-valid {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+        }
+
+        @keyframes pulse-invalid {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .animate-pulse-valid {
+            animation: pulse-valid 2s infinite;
+        }
+
+        .animate-pulse-invalid {
+            animation: pulse-invalid 2s infinite;
+        }
+
+
+
+        .floating-stats {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Flechas */
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #000 !important;
+            /* Negro */
+        }
+
+        /* Bullets */
+        .swiper-pagination-bullet {
+            background: #000 !important;
+            /* Negro */
+        }
+
+        /* Bullet activo */
+        .swiper-pagination-bullet-active {
+            background: #000 !important;
+        }
+
+        @keyframes pulse-valid {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+            }
+        }
+
+        @keyframes pulse-invalid {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .animate-pulse-valid {
+            animation: pulse-valid 2s infinite;
+        }
+
+        .animate-pulse-invalid {
+            animation: pulse-invalid 2s infinite;
+        }
+
+        .floating-stats {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #000 !important;
+        }
+
+        .swiper-pagination-bullet {
+            background: #000 !important;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: #000 !important;
+        }
+
+        /* Estilos para Select2 en modales */
+        .select2-container--bootstrap4 .select2-selection--single {
+            height: 48px !important;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            background-color: white !important;
+        }
+
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            padding-left: 0 !important;
+            color: #374151 !important;
+            font-size: 0.875rem !important;
+        }
+
+        .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+            height: 46px !important;
+        }
+
+        .select2-container--bootstrap4 .select2-dropdown {
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .select2-container--bootstrap4 .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        /* Para modo oscuro */
+        .dark .select2-container--bootstrap4 .select2-selection--single {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+            color: #f9fafb !important;
+        }
+
+        .dark .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered {
+            color: #f9fafb !important;
+        }
+
+        .dark .select2-container--bootstrap4 .select2-dropdown {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+        }
+
+        .dark .select2-container--bootstrap4 .select2-results__option {
+            color: #f9fafb !important;
+        }
+
+        .dark .select2-container--bootstrap4 .select2-results__option:hover {
+            background-color: #374151 !important;
+        }
+    </style>
 
     <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
         <!-- Header Mejorado -->
@@ -152,7 +390,7 @@
 
                                                     <!-- Cantidad total -->
                                                     <div class="text-xs font-bold text-white bg-white/30 px-2 py-1 rounded"
-                                                        x-text="ubi.cantidad_total">
+                                                        x-text="ubi.cantidad_total + '/' + ubi.capacidad">
                                                     </div>
                                                 </div>
                                             </template>
@@ -212,11 +450,11 @@
                                                     x-text="modal.ubi.cantidad_total"></div>
                                                 <div class="text-xs text-gray-600">Unidades</div>
                                             </div>
-                                            <!-- <div class="text-center">
+                                            <div class="text-center">
                                                 <div class="text-2xl font-bold text-purple-600"
                                                     x-text="modal.ubi.capacidad"></div>
                                                 <div class="text-xs text-gray-600">Capacidad</div>
-                                            </div> -->
+                                            </div>
                                         </div>
 
                                         <!-- ✅ NUEVO: Botón para agregar más productos -->
@@ -247,7 +485,8 @@
                                     <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                         <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
                                         <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                                            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>
+                                            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>/<span
+                                                x-text="modal.ubi.capacidad"></span>
                                         </span>
                                     </div>
 

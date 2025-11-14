@@ -143,7 +143,14 @@
                                                         </template>
                                                     </div>
                                                     <!-- Base del rack (tabla de madera) debajo del grupo -->
-                                                    <div class="rack-grupo-base"></div>
+                                                    <div class="rack-grupo-base">
+                                                        <template
+                                                            x-if="ubicacion.tipo_rack === 'panel' && ubicacion.valor_tabla_madera !== null">
+                                                            <div class="valor-tabla-madera">
+                                                                <span x-text="ubicacion.valor_tabla_madera"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                             </template>
                                         </div>
