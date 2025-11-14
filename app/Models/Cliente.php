@@ -106,4 +106,10 @@ class Cliente extends Model
 	 {
 		 return $this->belongsToMany(ClienteGeneral::class, 'cliente_clientegeneral', 'idCliente', 'idClienteGeneral');
 	 }
+
+	 	// NUEVA RELACIÓN: Muchos a muchos con Contactosform
+	public function contactos()
+	{
+		return $this->belongsToMany(Contactosform::class, 'contacto_cliente', 'cliente_id', 'contacto_id', 'idCliente', 'id');
+	}
 }
