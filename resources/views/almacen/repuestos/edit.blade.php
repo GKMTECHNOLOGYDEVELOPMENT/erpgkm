@@ -425,11 +425,12 @@
                 </a>
 
 
-
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR REPUESTO'))
                 <!-- Guardar -->
                 <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
                     <i class="fas fa-save mr-2"></i> Actualizar Repuesto
                 </button>
+                @endif
             </div>
 
 

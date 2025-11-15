@@ -189,6 +189,7 @@
                 <div class="relative input-with-icon">
                     <div class="flex justify-between items-center">
                         <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelos</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR MODELO EN REPUESTO'))
                         <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                             @click="$dispatch('toggle-modal')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
@@ -198,6 +199,7 @@
                             </svg>
 
                         </button>
+                        @endif
                     </div>
                     <div class="relative mt-1">
                         <i class="fas fa-cubes input-icon"></i> <!-- Ícono a la izquierda -->
@@ -226,6 +228,7 @@
                     <div class="flex justify-between items-center">
                         <label for="idsubcategoria" class="block text-sm font-medium text-gray-700">Sub
                             Categoría</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR SUB CATEGORIA EN REPUESTO'))
                         <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                             @click="$dispatch('toggle-subcategoria-modal')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
@@ -234,6 +237,7 @@
                                     stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </button>
+                        @endif
                     </div>
                     <div class="relative mt-1">
                         <i class="fas fa-folder input-icon"></i>
@@ -336,6 +340,7 @@
                 <div class="relative input-with-icon">
                     <div class="flex justify-between items-center">
                         <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR UNIDAD DE MEDIDA EN REPUESTO'))
                         <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                             @click="$dispatch('toggle-unidad-modal')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
@@ -344,6 +349,7 @@
                                     stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                         </button>
+                        @endif
                     </div>
                     <div class="relative mt-1">
                         <i class="fas fa-balance-scale input-icon"></i>
@@ -437,11 +443,13 @@
                     <button type="button" id="btnLimpiar" class="btn btn-outline-warning flex items-center">
                         <i class="fas fa-eraser mr-2"></i> Limpiar
                     </button>
-
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR REPUESTO'))
                     <!-- Guardar -->
                     <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
-                        <i class="fas fa-save mr-2"></i> Guardar Producto
+                        <i class="fas fa-save mr-2"></i> Guardar Repuesto
                     </button>
+                    @endif
+
                 </div>
         </form>
     </div>
@@ -527,7 +535,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="open = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MODELO EN REPUESTO'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -582,7 +592,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="subcategoriaOpen = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SUB CATEGORIA EN REPUESTO'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -630,7 +642,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="unidadOpen = false; $dispatch('modal-unidad-closed')">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR UNIDAD DE MEDIDA EN REPUESTO'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>

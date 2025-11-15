@@ -118,8 +118,6 @@
                         <th>Categoria</th>
                         <th>Modelo</th>
                         <th>Stock Total</th>
-                        <!-- <th>Entradas</th>
-                        <th>Salidas</th> -->
                         <th>Cliente General</th>
                         <th>Estados</th>
                         <th>Acción</th>

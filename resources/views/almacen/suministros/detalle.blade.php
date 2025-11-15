@@ -71,6 +71,7 @@
                                 @endif
                             </div>
 
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('IMPRIMIR CODIGO SUMINISTROS'))
                             <button type="button"
                                 @click="openModal('{{ $articulo->codigo_barras }}', '{{ $articulo->foto_codigobarras ? base64_encode($articulo->foto_codigobarras) : '' }}')"
                                 class="btn btn-primary w-full text-base py-3 gap-2">
@@ -80,6 +81,7 @@
                                 </svg>
                                 IMPRIMIR CÓDIGO
                             </button>
+                            @endif
                         </div>
                     </div>
 
@@ -107,7 +109,7 @@
                                     </div>
                                 @endif
                             </div>
-
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('IMPRIMIR SKU SUMINISTROS'))
                             <button type="button" @click="openModal('{{ $articulo->sku }}')"
                                 class="btn btn-secondary w-full text-base py-3 gap-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,6 +118,7 @@
                                 </svg>
                                 IMPRIMIR SKU
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>

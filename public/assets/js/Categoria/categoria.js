@@ -40,7 +40,7 @@ document.addEventListener('alpine:init', () => {
     let botones = '<div class="flex justify-center items-center gap-2">';
 
     // Botón Editar
-    if (window.permisos.puedeEditar === 'true') {
+    if (window.permisos.puedeEditar) {
         botones += `
             <a href="/categoria/${row.idCategoria}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                 <svg width="24" height="24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -48,10 +48,11 @@ document.addEventListener('alpine:init', () => {
                     <path d="M14.36 4.08s.12 1.97 1.85 3.74c1.73 1.77 3.74 1.79 3.74 1.79M4.2 21.68l-1.88-1.88" opacity="0.5" stroke-width="1.5"/>
                 </svg>
             </a>`;
+
     }
 
     // Botón Eliminar
-    if (window.permisos.puedeEliminar === 'true') {
+    if (window.permisos.puedeEliminar) {
         botones += `
             <button type="button" class="ltr:mr-2 rtl:ml-2" @click="$dispatch('borrar', { id: ${row.idCategoria} })" x-tooltip="Eliminar">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
@@ -64,14 +65,15 @@ document.addEventListener('alpine:init', () => {
             </button>`;
     }
 
-    // Sin permisos (si no tiene permisos para editar ni eliminar)
-    if (window.permisos.puedeEditar !== 'true' && window.permisos.puedeEliminar !== 'true') {
+    // Sin permisos
+    if (!window.permisos.puedeEditar && !window.permisos.puedeEliminar) {
         botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
     }
 
     botones += '</div>';
     return botones;
 }
+
     
                     }
                 ],

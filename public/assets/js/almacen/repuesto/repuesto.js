@@ -58,15 +58,16 @@ document.addEventListener('alpine:init', () => {
                         orderable: false,
                         searchable: false,
                         className: 'text-center',
-                        render: (_, __, row) => {
-    let botones = `<div class="flex justify-center items-center gap-2">`;
+                       render: (_, __, row) => {
+    let botones = `<div class="flex justify-center items-center gap-3">`;
 
-    // Verificamos si el usuario tiene **algún permiso**.
-    const tienePermiso = window.permisos.puedeEditar === 'true' || window.permisos.puedeVerdetalles === 'true' || window.permisos.puedeVerseries === 'true' || window.permisos.puedeEliminar === 'true';
+    const p = window.permisos;
+
+    const tienePermiso = p.puedeEditar || p.puedeVerdetalles || p.puedeVerseries || p.puedeEliminar;
 
     if (tienePermiso) {
-        // **Editar** - Solo si tiene permiso
-        if (window.permisos.puedeEditar === 'true') {
+
+        if (p.puedeEditar) {
             botones += `
                 <a href="/repuestos/${row.idArticulos}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -77,8 +78,7 @@ document.addEventListener('alpine:init', () => {
             `;
         }
 
-        // **Ver Detalles** - Solo si tiene permiso
-        if (window.permisos.puedeVerdetalles === 'true') {
+        if (p.puedeVerdetalles) {
             botones += `
                 <a href="/repuestos/${row.idArticulos}/detalles" class="ltr:mr-2 rtl:ml-2" x-tooltip="Información detallada">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -90,8 +90,7 @@ document.addEventListener('alpine:init', () => {
             `;
         }
 
-        // **Ver Series** - Solo si tiene permiso
-        if (window.permisos.puedeVerseries === 'true') {
+        if (p.puedeVerseries) {
             botones += `
                 <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
@@ -104,8 +103,7 @@ document.addEventListener('alpine:init', () => {
             `;
         }
 
-        // **Eliminar** - Solo si tiene permiso
-        if (window.permisos.puedeEliminar === 'true') {
+        if (p.puedeEliminar) {
             botones += `
                 <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
@@ -118,36 +116,48 @@ document.addEventListener('alpine:init', () => {
                 </button>
             `;
         }
+
     } else {
-        // Si no tiene permisos, mostramos el mensaje "Sin permisos"
-        botones = `<span class="text-gray-400 text-sm">Sin permisos</span>`;
+        botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
     }
 
-    botones += '</div>';
+    botones += `</div>`;
     return botones;
 },
+
 
                     },
                 ],
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                                      drawCallback: function () {
+                                     drawCallback: function () {
     // Eliminar eventos anteriores para evitar duplicados
     $('#myTable1').off('change', '.select-cliente-general');
-    
+
     // Asignar nuevo evento a los selects
     $('#myTable1').on('change', '.select-cliente-general', function () {
         const clienteId = $(this).val();
         const articuloId = $(this).data('articulo-id'); // Obtenemos el ID del artículo
-        
-        if (clienteId) {
-            // Usamos la ruta correcta que me compartiste
-            const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
-            window.open(url, '_blank');
-            
-            // Resetear el select después de la selección
-            $(this).val('').trigger('change');
+
+        console.log("Permisos disponibles:", window.permisos);
+        console.log("Puede seleccionar cliente:", window.permisos.puedeSeleccionarCliente);
+        console.log("Cliente ID:", clienteId);
+        console.log("Articulo ID:", articuloId);
+
+        // Verificar si el usuario tiene permiso
+        if (window.permisos.puedeSeleccionarCliente) {
+            if (clienteId) {
+                const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
+                console.log("Abriendo URL:", url);
+                window.open(url, '_blank');
+
+                // Resetear el select después de la selección
+                $(this).val('').trigger('change');
+            }
+        } else {
+            console.log("No tiene permiso para seleccionar cliente.");
+            Swal.fire('Sin permiso', 'No tienes permiso para seleccionar un cliente.', 'warning');
         }
     });
 
@@ -160,6 +170,7 @@ document.addEventListener('alpine:init', () => {
         });
     }, 10);
 },
+
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',

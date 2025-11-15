@@ -101,11 +101,13 @@
                             <!-- Botón alineado abajo -->
                             <!-- Botón alineado abajo -->
                             <div class="mt-auto w-full">
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('IMPRIMIR CODIGO REPUESTO'))
                                 <button
                                     @click="openModal('{{ $articulo->codigo_repuesto }}', '{{ base64_encode($articulo->{'br-codigo-repuesto'}) }}')"
                                     class="btn btn-primary w-full text-base py-3">
                                     IMPRIMIR CÓDIGO
                                 </button>
+                                @endif
                             </div>
 
                         </div>
@@ -143,11 +145,13 @@
 
                             <!-- Botón alineado abajo -->
                             <div class="mt-auto w-full">
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('IMPRIMIR SKU REPUESTO'))
                                 <button
                                     @click="openModal('{{ $articulo->sku }}', '{{ base64_encode($articulo->fotosku) }}')"
                                     class="btn btn-secondary w-full text-base py-3">
                                     IMPRIMIR SKU
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
