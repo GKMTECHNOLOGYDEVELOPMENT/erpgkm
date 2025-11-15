@@ -447,9 +447,11 @@
             </button> -->
 
                 <!-- Guardar -->
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR PRODUCTO'))
                 <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
                     <i class="fas fa-save mr-2"></i> Actualizar Producto
                 </button>
+                @endif
             </div>
         </form>
     </div>

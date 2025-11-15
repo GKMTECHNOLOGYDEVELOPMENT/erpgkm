@@ -283,6 +283,7 @@
 
                                     <td class="px-2 sm:px-4 py-3 sm:py-4 text-center">
                                         <div class="flex justify-center">
+                                            @if(\App\Helpers\PermisoHelper::tienePermiso('VER MOVIMIENTOS KARDEX'))
                                             <a href="{{ route('kardex.detalle-movimientos', $movimiento->id) }}"
                                                 class="btn btn-sm btn-primary flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-2">
                                                 <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none"
@@ -296,6 +297,7 @@
                                                 <span class="hidden sm:inline">Ver Movimientos</span>
                                                 <span class="sm:hidden">Ver</span>
                                             </a>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

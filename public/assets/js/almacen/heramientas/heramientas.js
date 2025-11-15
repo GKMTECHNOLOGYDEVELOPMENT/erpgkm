@@ -54,96 +54,115 @@ document.addEventListener('alpine:init', () => {
                         searchable: false,
                         className: 'text-center',
                        render: (_, __, row) => {
-                        let botones = `<div class="flex justify-center items-center gap-2">`;
+    let botones = `<div class="flex justify-center items-center gap-2">`;
 
-                        // Verificamos si el usuario tiene al menos un permiso
-                        const tienePermiso = window.permisos.puedeEditar === 'true' || window.permisos.puedeEliminar === 'true' || window.permisos.puedeVerdetalles === 'true' || window.permisos.puedeVerseries === 'true';
+    const p = window.permisos;
 
-                        if (tienePermiso) {
-                            // **Editar** - Solo si tiene permiso
-                            if (window.permisos.puedeEditar === 'true') {
-                                botones += `
-                                    <a href="/heramientas/${row.idArticulos}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
-                                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
-                                        </svg>
-                                    </a>
-                                `;
-                            }
+    // Verificar si tiene algún permiso (sin true)
+    const tienePermiso =
+        p.puedeEditar ||
+        p.puedeEliminar ||
+        p.puedeVerdetalles ||
+        p.puedeVerseries;
 
-                            // **Ver Series** - Solo si tiene permiso
-                            if (window.permisos.puedeVerseries === 'true') {
-                                botones += `
-                                    <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <path d="M3 10H21M7 15H11M17 15H17.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                            <path d="M12 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V12" stroke="currentColor" stroke-width="2"/>
-                                            <path d="M16 5.24194C16 5.24194 16.5 3 19 3C21.5 3 22 5.24194 22 5.24194" stroke="currentColor" stroke-width="2"/>
-                                            <path d="M21.5 8V12" stroke="currentColor" stroke-width="2"/>
-                                        </svg>
-                                    </a>
-                                `;
-                            }
+    if (tienePermiso) {
 
-                            // **Ver Detalles** - Solo si tiene permiso
-                            if (window.permisos.puedeVerdetalles === 'true') {
-                                botones += `
-                                    <a href="/heramientas/${row.idArticulos}/detalles" class="ltr:mr-2 rtl:ml-2" x-tooltip="Información detallada">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </a>
-                                `;
-                            }
+        // === EDITAR ===
+        if (p.puedeEditar) {
+            botones += `
+                <a href="/heramientas/${row.idArticulos}/edit" class="ltr:mr-2 rtl:ml-2" x-tooltip="Editar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                        <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999L5.83881 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5" />
+                        <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                </a>
+            `;
+        }
 
-                            // **Eliminar** - Solo si tiene permiso
-                            if (window.permisos.puedeEliminar === 'true') {
-                                botones += `
-                                    <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                                            <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                            <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                        </svg>
-                                    </button>
-                                `;
-                            }
-                        } else {
-                            // Si no tiene permisos, mostrar el mensaje de "Sin permisos"
-                            botones = `<span class="text-gray-400 text-sm">Sin permisos</span>`;
-                        }
+        // === SERIES ===
+        if (p.puedeVerseries) {
+            botones += `
+                <a href="/producto/${row.idArticulos}/series" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver series">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                        <path d="M3 10H21M7 15H11M17 15H17.01" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 3H4C3.44772 3 3 3.44772 3 4V20C3 20.5523 3.44772 21 4 21H20C20.5523 21 21 20.5523 21 20V12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M16 5.24194C16 5.24194 16.5 3 19 3C21.5 3 22 5.24194 22 5.24194" stroke="currentColor" stroke-width="2"/>
+                        <path d="M21.5 8V12" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </a>
+            `;
+        }
 
-                        botones += `</div>`;
+        // === DETALLES ===
+        if (p.puedeVerdetalles) {
+            botones += `
+                <a href="/heramientas/${row.idArticulos}/detalles" class="ltr:mr-2 rtl:ml-2" x-tooltip="Información detallada">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                        <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 16V12" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 8H12.01" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </a>
+            `;
+        }
 
-                        return botones;
-                    },
+        // === ELIMINAR ===
+        if (p.puedeEliminar) {
+            botones += `
+                <button type="button" class="ltr:mr-2 rtl:ml-2" @click="deleteArticulo(${row.idArticulos})" x-tooltip="Eliminar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                        <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M18.8334 8.5L18.3735 15.3991C18.1965 18.054 18.108 19.3815 17.243 20.1907C16.378 21 15.0476 21 12.3868 21H11.6134C8.9526 21 7.6222 21 6.75719 20.1907C5.89218 19.3815 5.80368 18.054 5.62669 15.3991L5.16675 8.5" stroke="currentColor" stroke-width="1.5"/>
+                        <path opacity="0.5" d="M9.5 11L10 16" stroke="currentColor" stroke-width="1.5"/>
+                        <path opacity="0.5" d="M14.5 11L14 16" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </button>
+            `;
+        }
+
+    } else {
+
+        botones = `<span class="text-gray-400 text-sm">Sin permisos</span>`;
+    }
+
+    botones += `</div>`;
+    return botones;
+},
+
 
                     },
                 ],
                 responsive: true,
                 autoWidth: false,
                 pageLength: 10,
-                       drawCallback: function () {
+                        drawCallback: function () {
     // Eliminar eventos anteriores para evitar duplicados
     $('#myTable1').off('change', '.select-cliente-general');
-    
+
     // Asignar nuevo evento a los selects
     $('#myTable1').on('change', '.select-cliente-general', function () {
         const clienteId = $(this).val();
         const articuloId = $(this).data('articulo-id'); // Obtenemos el ID del artículo
-        
-        if (clienteId) {
-            // Usamos la ruta correcta que me compartiste
-            const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
-            window.open(url, '_blank');
-            
-            // Resetear el select después de la selección
-            $(this).val('').trigger('change');
+
+        console.log("Permisos disponibles:", window.permisos);
+        console.log("Puede seleccionar cliente:", window.permisos.puedeSeleccionarCliente);
+        console.log("Cliente ID:", clienteId);
+        console.log("Articulo ID:", articuloId);
+
+        // Verificar si el usuario tiene permiso
+        if (window.permisos.puedeSeleccionarCliente) {
+            if (clienteId) {
+                const url = `/kardex/producto/${articuloId}/cliente/${clienteId}`;
+                console.log("Abriendo URL:", url);
+                window.open(url, '_blank');
+
+                // Resetear el select después de la selección
+                $(this).val('').trigger('change');
+            }
+        } else {
+            console.log("No tiene permiso para seleccionar cliente.");
+            Swal.fire('Sin permiso', 'No tienes permiso para seleccionar un cliente.', 'warning');
         }
     });
 

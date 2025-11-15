@@ -369,11 +369,12 @@
                 <a href="{{ route('heramientas.index') }}" class="btn btn-outline-danger flex items-center">
                     <i class="fas fa-times mr-2"></i> Cancelar
                 </a>
-
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR HERRAMIENTAS'))
                 <!-- Guardar -->
                 <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
                     <i class="fas fa-save mr-2"></i> Actualizar Heramienta
                 </button>
+                @endif
             </div>
         </form>
     </div>

@@ -1,6 +1,7 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data('usuariosTable', () => ({
         datatable: null,
+        permisos: window.permisosAsistencias,
 
         init() {
             flatpickr('#startDate', {
@@ -41,43 +42,58 @@ document.addEventListener('alpine:init', () => {
                         title: 'DETALLE',
                         data: null, // Usamos toda la fila
                         className: 'text-center align-middle',
-                        render: function (data, type, row) {
-                            const tieneDelDia = !!row.observacion;
-                            const tieneHistorial = row.tiene_historial; // este campo lo debes enviar desde backend (bool)
+                        render: (data, type, row) => {
+    const tieneDelDia = !!row.observacion;
+    const tieneHistorial = row.tiene_historial;
 
-                            if (!tieneDelDia && !tieneHistorial) return '-';
+    let html = '<div class="flex justify-center gap-1">';
 
-                            let html = '<div class="flex justify-center gap-1">';
+    // 🔵 VER OBSERVACIÓN DEL DÍA
+    if (tieneDelDia && this.permisos.puedeVerObservacion) {
+        html += `
+            <button class="btn btn-sm btn-info ver-observacion" 
+                title="Ver observación del día"
+                data-observacion="${encodeURIComponent(JSON.stringify({
+                    ...row.observacion,
+                    idUsuario: row.idUsuario,
+                }))}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" 
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 
+                        4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+            </button>`;
+    }
 
-                            if (tieneDelDia) {
-                                html += `<button class="btn btn-sm btn-info ver-observacion" title="Ver observación del día"
-                                            data-observacion="${encodeURIComponent(
-                                                JSON.stringify({
-                                                    ...row.observacion,
-                                                    idUsuario: row.idUsuario,
-                                                }),
-                                            )}">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-    </svg>
-                                        </button>`;
-                            }
+    // 🔵 VER HISTORIAL COMPLETO
+    if (tieneHistorial && this.permisos.puedeVerHistorial) {
+        html += `
+            <a href="/asistencias/historial/${row.idUsuario}"
+                target="_blank" 
+                class="btn btn-sm btn-primary" 
+                title="Ver todas las observaciones">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" 
+                    viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v12a2 2 0 01-2 2z" />
+                </svg>
+            </a>`;
+    }
 
-                            if (tieneHistorial) {
-                                html += `<a href="/asistencias/historial/${row.idUsuario}" target="_blank" class="btn btn-sm btn-primary" title="Ver todas las observaciones">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v12a2 2 0 01-2 2z" />
-    </svg>
-                                </a>`;
-                            }
+    // ❌ SI NO TIENE PERMISOS → Mostrar "-"
+    if ((!this.permisos.puedeVerObservacion && tieneDelDia) &&
+        (!this.permisos.puedeVerHistorial && tieneHistorial)) 
+    {
+        html += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
+    }
 
-                            html += '</div>';
-                            return html;
-                        },
+    html += '</div>';
+    return html;
+}
+,
                     },
                     {
                         data: 'empleado',

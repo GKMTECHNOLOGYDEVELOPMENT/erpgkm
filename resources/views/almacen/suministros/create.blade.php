@@ -219,11 +219,14 @@
         <div class="relative input-with-icon">
             <div class="flex justify-between items-center">
                 <label for="idUnidad" class="block text-sm font-medium text-gray-700">Unidad de Medida</label>
+               @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR UNIDAD DE MEDIDA EN SUMINISTROS'))
                 <button type="button" class="btn btn-primary btn-sm flex items-center gap-2" @click="$dispatch('toggle-unidad-modal')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
                                     <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                 </button>
+                @endif
+
             </div>
             <div class="relative mt-1">
                 <i class="fas fa-balance-scale input-icon"></i>
@@ -240,12 +243,13 @@
 
                   <div class="flex justify-between items-center">
                     <label for="idModelo" class="block text-sm font-medium text-gray-700">Modelo</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR MODELO EN SUMINISTROS'))
                         <button type="button" class="btn btn-primary btn-sm flex items-center gap-2" @click="$dispatch('toggle-modal')">
                           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none">
                             <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
-
                         </button>
+                        @endif
                     </div>
 
                                         <div class="relative mt-1">
@@ -376,11 +380,12 @@
                 <button type="button" id="btnLimpiar" class="btn btn-outline-warning flex items-center">
                     <i class="fas fa-eraser mr-2"></i> Limpiar
                 </button>
-
+                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SUMINISTROS'))
                 <!-- Guardar -->
                 <button type="button" id="btnGuardar" class="btn btn-primary flex items-center">
                     <i class="fas fa-save mr-2"></i> Guardar Suministro
                 </button>
+                @endif
             </div>
         </form>
     </div>
@@ -454,7 +459,9 @@
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
                             <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MODELO EN SUMINISTROS'))
                             <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -475,6 +482,7 @@
                 <!-- Header del Modal -->
                 <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                     <h5 class="font-bold text-lg">Agregar Unidad de Medida</h5>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR UNIDAD DE MEDIDA EN SUMINISTROS'))
                     <button type="button" class="text-white-dark hover:text-dark" @click="unidadOpen = false; $dispatch('modal-unidad-closed')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -483,6 +491,7 @@
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
                     </button>
+                    @endif
                 </div>
 
                 <!-- Formulario -->
@@ -502,7 +511,9 @@
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
                             <button type="button" class="btn btn-outline-danger" @click="unidadOpen = false; $dispatch('modal-unidad-closed')">Cancelar</button>
+                             @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR UNIDAD DE MEDIDA EN SUMINISTROS'))
                             <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                            @endif
                         </div>
                     </form>
                 </div>

@@ -196,6 +196,14 @@
         </div>
     </div>
 
+    <script>
+    window.permisosAsistencias = {
+        puedeVerObservacion: {{ \App\Helpers\PermisoHelper::tienePermiso('VER OBSERVACIONES ASISTENCIAS') ? 'true' : 'false' }},
+        puedeVerHistorial: {{ \App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE OBSERVACIONES') ? 'true' : 'false' }},
+    };
+</script>
+
+
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/viewerjs/dist/viewer.min.js"></script>
