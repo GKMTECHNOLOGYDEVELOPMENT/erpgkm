@@ -99,35 +99,51 @@
             <!-- Filtrar por Cliente General -->
             <div x-data="{
                 clienteGenerales: [],
+                isLoading: true,
                 init() {
-                    fetch('/api/clientegeneralfiltros/2')
+                    // Cambia el número según el área que necesites (1 para SMART, 2 para HELPDESK)
+                    fetch('/api/clientegeneralfiltros/2') // 👈 Cambia este número según la vista
                         .then(response => response.json())
                         .then(data => {
                             this.clienteGenerales = data;
+                            this.isLoading = false;
             
                             // Espera a que Alpine renderice los <option>
                             this.$nextTick(() => {
                                 setTimeout(() => {
                                     const selectEl = document.getElementById('clienteGeneralFilter');
                                     if (selectEl) {
-                                        NiceSelect.destroy(selectEl);
-                                        NiceSelect.bind(selectEl);
+                                        // Destruir y recrear NiceSelect
+                                        if (typeof NiceSelect !== 'undefined') {
+                                            NiceSelect.destroy(selectEl);
+                                            NiceSelect.bind(selectEl);
+                                        }
                                     }
-                                }, 10); // Delay ligero para asegurar DOM completo
+                                }, 50);
                             });
-            
+                        })
+                        .catch(error => {
+                            console.error('Error cargando clientes:', error);
+                            this.isLoading = false;
                         });
                 }
-                }">
+            }">
                 <label for="clienteGeneralFilter" class="block text-sm font-medium text-gray-700">
                     Filtrar por Cliente General
                 </label>
                 <select id="clienteGeneralFilter" x-model="$root.clienteGeneralFilter"
                     class="form-select w-full text-white-dark"
                     @change="
-                        $root.isLoading = true;
-                        $dispatch('cliente-general-cambio', $event.target.value)">
+                $root.isLoading = true;
+                $root.debouncedFetch();
+            ">
                     <option value="">Todos los clientes generales</option>
+                    <template x-if="isLoading">
+                        <option disabled>Cargando clientes...</option>
+                    </template>
+                    <template x-if="!isLoading && clienteGenerales.length === 0">
+                        <option disabled>No hay clientes disponibles</option>
+                    </template>
                     <template x-for="cliente in clienteGenerales" :key="cliente.idClienteGeneral">
                         <option :value="cliente.idClienteGeneral" x-text="cliente.descripcion"></option>
                     </template>
@@ -219,12 +235,17 @@
                     </div>
 
                     <!-- Botón Buscar -->
-                    <button id="btnSearch" class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm flex items-center justify-center">
+                    <button id="btnSearch"
+                        class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm flex items-center justify-center">
                         <span id="searchText">Buscar</span>
                         <span id="searchSpinner" class="hidden ml-2">
-                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
                             </svg>
                         </span>
                     </button>

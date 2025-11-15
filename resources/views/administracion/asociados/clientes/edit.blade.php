@@ -1,10 +1,7 @@
 <x-layout.default>
     <!-- Cargar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <!-- Cargar jQuery y el plugin -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         .remove-client {
@@ -14,31 +11,36 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 16px;
-        }  /* Estilos para Select2 */
+        }
+
+        /* Estilos para Select2 */
         .select2-container--default .select2-selection--single,
         .select2-container--default .select2-selection--multiple {
             min-height: 42px;
             border: 1px solid #e0e6ed;
             border-radius: 4px;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__rendered,
         .select2-container--default .select2-selection--multiple .select2-selection__rendered {
             line-height: 42px;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 40px;
         }
+
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #3b82f6;
             border-color: #3b82f6;
             color: white;
             padding: 0 10px;
         }
+
         .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
             color: white;
             margin-right: 5px;
         }
-
     </style>
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -87,6 +89,35 @@
                     </select>
                 </div>
 
+
+                <!-- Contactos Asociados -->
+                <div class="md:col-span-2">
+                    <label for="contactos" class="block text-sm font-medium mb-2">Contactos Asociados</label>
+
+                    <!-- Lista de contactos seleccionados -->
+                    <div id="contactos-seleccionados" class="mb-3 flex flex-wrap gap-2">
+                        @foreach ($cliente->contactos as $contacto)
+                            <div class="contacto-badge" data-id="{{ $contacto->id }}">
+                                {{ $contacto->nombre_completo }}
+                                <button type="button" class="remove-contacto ml-2 text-white"
+                                    data-id="{{ $contacto->id }}">×</button>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Select2 para contactos -->
+                    <select id="contactos" name="contactos[]" multiple class="form-select w-full"
+                        style="display: none;">
+                        @foreach ($todosLosContactos as $contacto)
+                            <option value="{{ $contacto->id }}"
+                                {{ $cliente->contactos->contains('id', $contacto->id) ? 'selected' : '' }}>
+                                {{ $contacto->nombre_completo }} - {{ $contacto->correo_electronico }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <input type="hidden" name="contactos_sync" id="contactos_sync"
+                        value="{{ $cliente->contactos->pluck('id')->implode(',') }}">
+                </div>
                 <!-- Nombre -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -116,25 +147,27 @@
                         placeholder="Ingrese el documento" value="{{ old('documento', $cliente->documento) }}">
                 </div>
 
-                
+
 
                 @php
-    $mostrarEsTienda = $cliente->idTipoDocumento == 1; // Por ejemplo, si el tipo de documento es "RUC" (asumiendo que '1' corresponde a RUC)
-@endphp
+                    $mostrarEsTienda = $cliente->idTipoDocumento == 1; // Por ejemplo, si el tipo de documento es "RUC" (asumiendo que '1' corresponde a RUC)
+                @endphp
 
-<div id="esTiendaContainer" class="{{ $mostrarEsTienda ? '' : 'hidden' }} mt-4">
-    <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
-    <div class="flex items-center">
-        <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
-        <input type="hidden" name="esTienda" value="0">
+                <div id="esTiendaContainer" class="{{ $mostrarEsTienda ? '' : 'hidden' }} mt-4">
+                    <label for="esTienda" class="block text-sm font-medium">¿Es tienda?</label>
+                    <div class="flex items-center">
+                        <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
+                        <input type="hidden" name="esTienda" value="0">
 
-        <div class="w-12 h-6 relative">
-            <input type="checkbox" id="esTienda" name="esTienda" class="custom_sitch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
-                value="1" @checked($cliente->esTienda == 1) />
-            <span for="esTienda" class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-        </div>
-    </div>
-</div>
+                        <div class="w-12 h-6 relative">
+                            <input type="checkbox" id="esTienda" name="esTienda"
+                                class="custom_sitch absolute w-full h-full opacity-0 z-10 cursor-pointer peer"
+                                value="1" @checked($cliente->esTienda == 1) />
+                            <span for="esTienda"
+                                class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
+                        </div>
+                    </div>
+                </div>
 
 
 
@@ -227,39 +260,93 @@
         </div>
     </div>
 
+    <!-- Cargar jQuery y el plugin -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-  <script>
-    $(document).ready(function () {
-        // ✅ Inicializar Select2
-        $('#idClienteGeneral').select2({
-            placeholder: "Seleccionar Cliente General",
-            allowClear: true,
-            width: '100%'
-        });
+    <script>
+        $(document).ready(function() {
+            // ✅ Inicializar Select2
+            $('#contactos').select2({
+                placeholder: "Seleccionar contactos",
+                allowClear: true,
+                width: '100%',
+                closeOnSelect: false
+            });
 
-        $('#idTipoDocumento').select2({
-            placeholder: "Seleccionar Tipo Documento",
-            allowClear: true,
-            width: '100%'
-        });
+            // ✅ Inicializar otros Select2
+            $('#idClienteGeneral').select2({
+                placeholder: "Seleccionar Cliente General",
+                allowClear: true,
+                width: '100%'
+            });
 
-        // ✅ Mostrar u ocultar el switch "¿Es tienda?" cuando se selecciona "RUC"
-        function toggleEsTienda() {
-            const selectedText = $('#idTipoDocumento option:selected').text().trim();
-            if (selectedText === 'RUC') {
-                $('#esTiendaContainer').removeClass('hidden');
-            } else {
-                $('#esTiendaContainer').addClass('hidden');
+            $('#idTipoDocumento').select2({
+                placeholder: "Seleccionar Tipo Documento",
+                allowClear: true,
+                width: '100%'
+            });
+
+            // ✅ Manejar cambios en el select de contactos
+            $('#contactos').on('change', function() {
+                actualizarContactosSeleccionados();
+            });
+
+            // ✅ Función para actualizar la lista visual de contactos seleccionados
+            function actualizarContactosSeleccionados() {
+                const selectedIds = $('#contactos').val() || [];
+                const $container = $('#contactos-seleccionados');
+                $container.empty();
+
+                // Obtener los textos de las opciones seleccionadas
+                $('#contactos option:selected').each(function() {
+                    const contactId = $(this).val();
+                    const contactName = $(this).text();
+
+                    $container.append(`
+                        <div class="contacto-badge" data-id="${contactId}">
+                            ${contactName}
+                            <button type="button" class="remove-contacto ml-2 text-white" 
+                                    data-id="${contactId}">×</button>
+                        </div>
+                    `);
+                });
+
+                // Actualizar el campo hidden para el sync
+                $('#contactos_sync').val(selectedIds.join(','));
             }
-        }
 
-        // Detectar cambios usando eventos de Select2
-        $('#idTipoDocumento').on('select2:select select2:clear', toggleEsTienda);
+            // ✅ Remover contacto individualmente
+            $('#contactos-seleccionados').on('click', '.remove-contacto', function() {
+                const contactId = $(this).data('id');
+                const $select = $('#contactos');
 
-        // Ejecutar al cargar (por si ya está seleccionado "RUC")
-        toggleEsTienda();
-    });
-</script>
+                // Deseleccionar en el Select2
+                const currentValues = $select.val() || [];
+                const newValues = currentValues.filter(id => id != contactId);
+                $select.val(newValues).trigger('change');
+            });
+
+            // ✅ Actualizar contactos al cargar la página
+            actualizarContactosSeleccionados();
+
+            // ✅ Mostrar u ocultar el switch "¿Es tienda?" cuando se selecciona "RUC"
+            function toggleEsTienda() {
+                const selectedText = $('#idTipoDocumento option:selected').text().trim();
+                if (selectedText === 'RUC') {
+                    $('#esTiendaContainer').removeClass('hidden');
+                } else {
+                    $('#esTiendaContainer').addClass('hidden');
+                }
+            }
+
+            // Detectar cambios usando eventos de Select2
+            $('#idTipoDocumento').on('select2:select select2:clear', toggleEsTienda);
+
+            // Ejecutar al cargar (por si ya está seleccionado "RUC")
+            toggleEsTienda();
+        });
+    </script>
 
 
 

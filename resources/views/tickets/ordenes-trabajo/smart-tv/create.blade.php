@@ -697,8 +697,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    <script async
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_hLomFsC4EpF6JHKC3XRF5wE8HAtIKls&callback=initMap">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
@@ -1332,6 +1332,6 @@
 
     <script src="{{ asset('assets/js/ubigeo.js') }}"></script>
     <script src="{{ asset('assets/js/tickets/smart/configuraciones.js') }}"></script>
-   {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}
+    {{-- <script src="{{ asset('assets/js/tienda/tiendavalidaciones.js') }}"></script> --}}
 
 </x-layout.default>

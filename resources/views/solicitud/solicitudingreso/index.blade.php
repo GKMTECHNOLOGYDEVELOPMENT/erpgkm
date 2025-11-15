@@ -337,6 +337,8 @@
                                                     :class="getBotonIndividualClasses(solicitud, 'actualizar')">
                                                     Actualizar
                                                 </button>
+
+
                                             </div>
                                         </div>
                                     </template>
@@ -369,20 +371,16 @@
                                             :class="getBotonGrupalClasses(grupo, 'actualizar')">
                                             Todos Actualizar
                                         </button>
-
-                                        <!-- NUEVO: Botón Ubicar Panel que abre Unity en pestaña nueva -->
-                                        <template x-if="grupo.tiene_panel">
-                                            <button @click="ubicarPrimerPanelEnUnity(grupo)"
-                                                :disabled="grupo.paneles_pendientes === 0"
-                                                class="px-3 py-1 text-xs rounded-lg transition-colors bg-purple-100 text-purple-800 hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                                <i class="fas fa-tv mr-1"></i>
-                                                Ubicar Panel
-                                                <span
-                                                    class="ml-1 text-[10px] px-2 py-[2px] rounded bg-white/60 text-purple-700"
-                                                    x-text="`(${grupo.paneles_pendientes})`"></span>
-                                            </button>
-                                        </template>
-
+                                        <!-- 🔴 NUEVO: Botón Unity a nivel grupo -->
+                                        <button
+                                            @click="ubicarPrimeraSolicitudEnUnity(grupo)"
+                                            :disabled="esBotonUnityGrupoDeshabilitado(grupo)"
+                                            class="px-3 py-1 text-xs rounded-lg transition-colors
+                       bg-purple-100 text-purple-800 hover:bg-purple-200
+                       disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                            <i class="fas fa-tv mr-1"></i>
+                                            Unity Grupo
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -846,32 +844,124 @@
 
                 // Construye la URL hacia Unity: /unity/{idSolicitudIngreso}/solicitud
                 buildUnityUrlForSolicitud(idSolicitudIngreso) {
-                    const base = (typeof window !== 'undefined' && window.UNITY_BASE_URL) ? window.UNITY_BASE_URL :
-                    '/unity';
+                    const base = (typeof window !== 'undefined' && window.UNITY_BASE_URL) ?
+                        window.UNITY_BASE_URL :
+                        '/unity';
                     const baseClean = (base || '/unity').replace(/\/$/, ''); // sin barra final
                     return `${baseClean}/${encodeURIComponent(idSolicitudIngreso)}/solicitud`;
                 },
 
-                // Abre Unity en una pestaña nueva con el primer panel NO ubicado del grupo
-                ubicarPrimerPanelEnUnity(grupo) {
-                    if (!grupo || !Array.isArray(grupo.solicitudes)) return;
+                // 🔹 Unity por solicitud (botón dentro de cada card)
+                ubicarSolicitudEnUnity(solicitud) {
+                    if (!solicitud) return;
 
-                    // Busca el primer artículo del grupo que sea panel y no esté 'ubicado'
-                    const panelPendiente = grupo.solicitudes.find(s => s.es_panel === true && s.estado !== 'ubicado');
+                    const estadoNormalizado = String(solicitud.estado || '').trim().toLowerCase();
 
-                    if (!panelPendiente) {
-                        this.mostrarNotificacion('Todos los paneles de este grupo ya están ubicados', 'info');
+                    console.log(
+                        '▶️ [Unity] Click solicitud | id:',
+                        solicitud.idSolicitudIngreso,
+                        '| estado raw:', solicitud.estado,
+                        '| normalizado:', estadoNormalizado
+                    );
+
+                    // Solo permitir cuando está en estado "recibido"
+                    if (estadoNormalizado !== 'recibido') {
+                        this.mostrarNotificacion('Solo puedes ubicar artículos en estado "recibido"', 'warning');
                         return;
                     }
 
-                    const url = this.buildUnityUrlForSolicitud(panelPendiente.idSolicitudIngreso);
-                    // Abre en nueva pestaña con seguridad
+                    const url = this.buildUnityUrlForSolicitud(solicitud.idSolicitudIngreso);
                     const w = window.open(url, '_blank', 'noopener');
+
                     if (!w) {
-                        // Si el navegador bloqueó popups:
                         this.mostrarNotificacion('Permite ventanas emergentes para abrir Unity.', 'warning');
                     }
                 },
+
+                // 🔹 Deshabilita botón Unity por solicitud
+                esBotonUnityDeshabilitado(solicitud) {
+                    if (!solicitud) return true;
+
+                    const estadoNormalizado = String(solicitud.estado || '').trim().toLowerCase();
+
+                    // ❗ Reglas:
+                    // - deshabilitado si YA está ubicado
+                    // - deshabilitado si NO está en 'recibido'
+                    const disabled =
+                        (estadoNormalizado === 'ubicado') || // ya ubicado
+                        (estadoNormalizado !== 'recibido'); // cualquier otro distinto a 'recibido'
+
+                    console.log(
+                        '🔎 [Unity btn solicitud] id:',
+                        solicitud.idSolicitudIngreso,
+                        '| estado raw:', solicitud.estado,
+                        '| normalizado:', estadoNormalizado,
+                        '| disabled:', disabled
+                    );
+
+                    return disabled;
+                },
+
+                // 🔹 Unity por grupo: abre la primera solicitud "recibido" que encuentre
+                ubicarPrimeraSolicitudEnUnity(grupo) {
+                    if (!grupo || !Array.isArray(grupo.solicitudes)) return;
+
+                    // Buscar la primera solicitud en estado 'recibido'
+                    const primeraRecibida = grupo.solicitudes.find(s => {
+                        const estado = String(s.estado || '').trim().toLowerCase();
+                        return estado === 'recibido';
+                    });
+
+                    console.log(
+                        '▶️ [Unity Grupo] origen_id:', grupo.origen_id,
+                        '| estado_general:', grupo.estado_general,
+                        '| primeraRecibida:', primeraRecibida ? primeraRecibida.idSolicitudIngreso : null
+                    );
+
+                    if (!primeraRecibida) {
+                        this.mostrarNotificacion(
+                            'No hay artículos en estado "recibido" para abrir en Unity en este grupo.',
+                            'info'
+                        );
+                        return;
+                    }
+
+                    const url = this.buildUnityUrlForSolicitud(primeraRecibida.idSolicitudIngreso);
+                    const w = window.open(url, '_blank', 'noopener');
+
+                    if (!w) {
+                        this.mostrarNotificacion('Permite ventanas emergentes para abrir Unity.', 'warning');
+                    }
+                },
+
+                // 🔹 Deshabilita el botón Unity Grupo cuando TODO está ubicado o no hay recibidos
+                esBotonUnityGrupoDeshabilitado(grupo) {
+                    if (!grupo || !Array.isArray(grupo.solicitudes)) return true;
+
+                    // 1) Si el estado_general es 'ubicado' => todo ubicado según tu calcularEstadoGeneral
+                    if (String(grupo.estado_general || '').trim().toLowerCase() === 'ubicado') {
+                        console.log('🔒 [Unity Grupo] deshabilitado: estado_general = ubicado');
+                        return true;
+                    }
+
+                    // 2) Si no hay NINGUNA solicitud en 'recibido', también deshabilitar
+                    const tieneRecibido = grupo.solicitudes.some(s => {
+                        const estado = String(s.estado || '').trim().toLowerCase();
+                        return estado === 'recibido';
+                    });
+
+                    const disabled = !tieneRecibido;
+
+                    console.log(
+                        '🔎 [Unity Grupo btn] origen_id:', grupo.origen_id,
+                        '| estado_general:', grupo.estado_general,
+                        '| tieneRecibido:', tieneRecibido,
+                        '| disabled:', disabled
+                    );
+
+                    return disabled;
+                },
+
 
                 // Método para abrir el modal de actualización con validación
                 abrirModalActualizar(solicitud) {
@@ -1268,7 +1358,7 @@
                     // Inicializar Select2 después de que el modal esté abierto
                     this.$nextTick(() => {
                         console.log('🔄 Inicializando Select2 para', this.ubicacionesForm.length,
-                        'ubicaciones');
+                            'ubicaciones');
                         this.ubicacionesForm.forEach((_, index) => {
                             this.inicializarSelect2(index);
                         });
@@ -1685,7 +1775,7 @@
 
                         const response = await axios.get(
                             `/solicitud-ingreso/sugerir-ubicaciones/${this.solicitudSeleccionada.articulo_id}/${this.solicitudSeleccionada.cantidad}`
-                            );
+                        );
 
                         if (response.data.success && response.data.sugerencias.length > 0) {
                             this.ubicaciones = response.data.sugerencias.map(sugerencia => ({

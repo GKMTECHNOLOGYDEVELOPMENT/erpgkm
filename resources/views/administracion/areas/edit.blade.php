@@ -186,13 +186,10 @@
                         closeOnSelect: false
                     });
 
-                    // ESTA ES LA PARTE CLAVE: Preseleccionar los clientes ya asignados
+                    // Preseleccionar los clientes ya asignados
                     if (this.formData.clientes_generales && this.formData.clientes_generales.length > 0) {
-                        // Convertir a array de strings si son números
                         const selectedIds = this.formData.clientes_generales.map(id => id.toString());
                         this.select2Instance.val(selectedIds).trigger('change');
-                        
-                        // Actualizar la lista de clientes seleccionados
                         this.updateSelectedClientes(selectedIds);
                     }
 
@@ -204,7 +201,6 @@
                 },
 
                 updateSelectedClientes(selectedIds) {
-                    // Obtener los datos completos de los clientes seleccionados
                     const selectedClientesData = selectedIds.map(id => {
                         const cliente = this.allClientes.find(c => c.idClienteGeneral.toString() === id.toString());
                         return {
@@ -218,7 +214,6 @@
                 },
 
                 removeCliente(clienteId) {
-                    // Remover del select2
                     const currentValues = this.select2Instance.val() || [];
                     const newValues = currentValues.filter(id => id.toString() !== clienteId.toString());
                     this.select2Instance.val(newValues).trigger('change');
@@ -238,19 +233,25 @@
                             this.formData.clientes_generales.forEach(id => {
                                 formData.append('clientes_generales[]', id);
                             });
-                        } else {
-                            // Enviar array vacío si no hay clientes seleccionados
-                            formData.append('clientes_generales[]', '');
                         }
 
                         const response = await fetch('{{ route('areas.update', $area->idTipoArea) }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: formData
                         });
+
+                        // Verificar si la respuesta es JSON
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            const text = await response.text();
+                            console.error('Respuesta no JSON:', text.substring(0, 200));
+                            throw new Error('El servidor devolvió una respuesta no JSON. Verifica la consola para más detalles.');
+                        }
 
                         const data = await response.json();
 
@@ -264,16 +265,13 @@
                         // Éxito
                         this.showSuccess('Área actualizada exitosamente');
                         
-                        // Redirigir después de 1.5 segundos
                         setTimeout(() => {
                             window.location.href = '{{ route('areas.index') }}';
                         }, 1500);
 
                     } catch (error) {
-                        console.error('Error:', error);
-                        if (!this.errors.nombre) {
-                            this.showError(error.message || 'Error al actualizar el área');
-                        }
+                        console.error('Error completo:', error);
+                        this.showError(error.message || 'Error al actualizar el área');
                     } finally {
                         this.loading = false;
                     }
@@ -298,7 +296,8 @@
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: message
+                            text: message,
+                            confirmButtonText: 'Entendido'
                         });
                     } else {
                         alert('Error: ' + message);
@@ -311,20 +310,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             let formChanged = false;
             const form = document.querySelector('form');
-            const initialFormData = new FormData(form);
             
             if (form) {
-                // Marcar como cambiado cuando hay modificaciones
                 form.addEventListener('input', () => {
                     formChanged = true;
                 });
 
-                // Marcar como no cambiado cuando se envía
                 form.addEventListener('submit', () => {
                     formChanged = false;
                 });
 
-                // Mostrar advertencia al salir sin guardar
                 window.addEventListener('beforeunload', (e) => {
                     if (formChanged) {
                         e.preventDefault();
@@ -332,7 +327,6 @@
                     }
                 });
 
-                // Manejar enlaces
                 document.addEventListener('click', (e) => {
                     if (formChanged && e.target.closest('a') && !e.target.closest('button')) {
                         if (!confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?')) {
