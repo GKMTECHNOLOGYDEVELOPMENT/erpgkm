@@ -1066,6 +1066,10 @@ class UbicacionesVistaController extends Controller
             return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
         }
 
+        // ✅ LOG INICIAL
+        Log::info("====== INICIANDO DETALLE RACK PANEL ======");
+        Log::info("Rack: {$rack}, Sede: {$sede}");
+
         // ✅ CORREGIDO: Consulta que incluye el ID único de cada registro
         $rackData = DB::table('racks as r')
             ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
@@ -1153,6 +1157,7 @@ class UbicacionesVistaController extends Controller
             ->orderBy('ru.nivel', 'desc')
             ->orderBy('ru.posicion')
             ->get();
+
 
         // Si no existe el rack, redirigir
         if ($rackData->isEmpty()) {
@@ -1280,6 +1285,7 @@ class UbicacionesVistaController extends Controller
             'niveles' => []
         ];
 
+
         // Agrupar por niveles y ubicaciones
         $niveles = $rackData->groupBy('nivel');
 
@@ -1291,6 +1297,22 @@ class UbicacionesVistaController extends Controller
 
             foreach ($ubicacionesAgrupadas as $ubicacionId => $articulos) {
                 $primerArticulo = $articulos->first();
+
+                // ✅ LOG PARA DETECTAR UBICACION2
+                $articulosConUbicacion2 = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $primerArticulo->idRackUbicacion)
+                    ->where('ubicacion2', '1')
+                    ->get();
+
+                Log::info("Ubicación: {$primerArticulo->codigo} - ID: {$primerArticulo->idRackUbicacion}");
+                Log::info("¿Tiene ubicacion2=1?: " . ($articulosConUbicacion2->isNotEmpty() ? 'SÍ' : 'NO'));
+
+                if ($articulosConUbicacion2->isNotEmpty()) {
+                    Log::info("Artículos con ubicacion2=1 en esta ubicación:");
+                    foreach ($articulosConUbicacion2 as $artUbicacion2) {
+                        Log::info("  - ID Artículo: {$artUbicacion2->articulo_id}, Cantidad: {$artUbicacion2->cantidad}");
+                    }
+                }
 
                 // ✅ CORREGIDO: Procesar CADA ARTÍCULO INDIVIDUALMENTE sin agrupar
                 $productosAgrupados = collect();
@@ -1348,8 +1370,39 @@ class UbicacionesVistaController extends Controller
                     }
                 }
 
-                // ✅ CALCULAR CANTIDAD TOTAL
+                // ✅ MANTENER EL CÁLCULO ORIGINAL para la interfaz visual
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
+
+                // ✅ CORREGIDO: VERIFICAR SI TIENE UBICACION2 = 1
+                $tieneUbicacion2 = $articulosConUbicacion2->isNotEmpty();
+
+                // ✅ DETECTAR SI ES UNA UBICACIÓN DOBLE (hermanas)
+                $esUbicacionDoble = false;
+                $ubicacionHermanaId = null;
+
+                if ($tieneUbicacion2) {
+                    // Si esta ubicación tiene ubicacion2=1, buscar su hermana (ubicación anterior)
+                    $ubicacionHermanaId = $this->buscarUbicacionHermana($primerArticulo->idRackUbicacion, $primerArticulo->codigo, $nivelNum, $ubicacionesNivel);
+
+                    if ($ubicacionHermanaId) {
+                        $esUbicacionDoble = true;
+                        Log::info("  - Es ubicación DOBLE con hermana ID: {$ubicacionHermanaId}");
+                    }
+                } else {
+                    // Si NO tiene ubicacion2=1, verificar si alguna hermana SÍ la tiene
+                    $hermanaConUbicacion2 = $this->verificarSiHermanaTieneUbicacion2($primerArticulo->idRackUbicacion, $primerArticulo->codigo, $nivelNum, $ubicacionesNivel);
+
+                    if ($hermanaConUbicacion2) {
+                        $esUbicacionDoble = true;
+                        $tieneUbicacion2 = true; // ← Esta ubicación también se considera con ubicacion2
+                        $cantidadParaTabla = $cantidadTotal; // ← Y también muestra en tabla
+                        Log::info("  - Es ubicación DOBLE (hermana tiene ubicacion2)");
+                    }
+                }
+
+
+                // ✅ CORREGIDO: CANTIDAD PARA TABLA - Solo si tiene ubicacion2 = 1
+                $cantidadParaTabla = $tieneUbicacion2 ? $cantidadTotal : 0;
 
                 // Determinar estado basado en porcentaje de ocupación
                 $porcentajeOcupacion = 0;
@@ -1388,15 +1441,32 @@ class UbicacionesVistaController extends Controller
                 // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
                 $categoriaDisplay = $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null;
 
+                // ✅ LOG FINAL DE LA UBICACIÓN
+                Log::info("Resumen Ubicación {$primerArticulo->codigo}:");
+                Log::info("  - Cantidad Total: {$cantidadTotal}");
+                Log::info("  - Tiene ubicacion2: " . ($tieneUbicacion2 ? 'SÍ' : 'NO'));
+                Log::info("  - Cantidad para tabla: {$cantidadParaTabla}");
+                Log::info("  - Estado: {$estado}");
+                Log::info("----------------------------------------");
                 $ubicacionesEstructuradas[] = [
                     'id' => $primerArticulo->idRackUbicacion,
                     'codigo' => $primerArticulo->codigo_unico ?? $primerArticulo->codigo,
                     'productos' => $productosAgrupados->toArray(),
 
-                    // ✅ CORREGIDO: Usar las variables corregidas
+                    // ✅ PARA LA INTERFAZ VISUAL (rack)
                     'producto' => $productoDisplay,
                     'cantidad' => $cantidadTotal,
                     'cantidad_total' => $cantidadTotal,
+
+                    // ✅ CORREGIDO: PARA TABLAS (solo cuando tiene ubicacion2)
+                    'cantidad_tabla' => $cantidadParaTabla,
+
+                    // ✅ CORREGIDO: INDICADOR REAL DE UBICACION2
+                    'tiene_ubicacion2' => $tieneUbicacion2,
+
+                    // ✅ NUEVO: INDICADOR DE UBICACIÓN DOBLE
+                    'es_ubicacion_doble' => $esUbicacionDoble,
+
                     'stock_total' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['stock_total'] : null,
                     'tipo_articulo' => $tipoArticuloDisplay,
                     'categoria' => $categoriaDisplay,
@@ -1426,6 +1496,9 @@ class UbicacionesVistaController extends Controller
             ->pluck('nombre')
             ->toArray();
 
+        // ✅ LOG FINAL
+        Log::info("====== FIN DETALLE RACK PANEL ======");
+
         return view('almacen.ubicaciones.detalle-rack-panel', [
             'rack' => $rackEstructurado,
             'todosRacks' => $todosRacks,
@@ -1433,6 +1506,62 @@ class UbicacionesVistaController extends Controller
             'sedeActual' => $sede,
             'rackNombre' => $rack
         ]);
+    }
+
+    /**
+     * Buscar la ubicación hermana (anterior) para ubicaciones dobles
+     */
+    private function buscarUbicacionHermana($ubicacionId, $codigoActual, $nivel, $ubicacionesNivel)
+    {
+        // Extraer el número de la ubicación (ej: "H3-04" → 4)
+        preg_match('/-(\d+)$/', $codigoActual, $matches);
+        if (empty($matches)) return null;
+
+        $numeroActual = (int)$matches[1];
+        $numeroHermana = $numeroActual - 1;
+        $codigoHermana = preg_replace('/-\d+$/', '-' . str_pad($numeroHermana, 2, '0', STR_PAD_LEFT), $codigoActual);
+
+        // Buscar la ubicación hermana en el mismo nivel
+        foreach ($ubicacionesNivel as $ubicacion) {
+            if ($ubicacion->codigo === $codigoHermana) {
+                Log::info("  - Encontrada hermana: {$codigoHermana} - ID: {$ubicacion->idRackUbicacion}");
+                return $ubicacion->idRackUbicacion;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Verificar si la ubicación hermana tiene ubicacion2 = 1
+     */
+    private function verificarSiHermanaTieneUbicacion2($ubicacionId, $codigoActual, $nivel, $ubicacionesNivel)
+    {
+        // Extraer el número de la ubicación (ej: "H3-03" → 3)
+        preg_match('/-(\d+)$/', $codigoActual, $matches);
+        if (empty($matches)) return false;
+
+        $numeroActual = (int)$matches[1];
+        $numeroHermana = $numeroActual + 1;
+        $codigoHermana = preg_replace('/-\d+$/', '-' . str_pad($numeroHermana, 2, '0', STR_PAD_LEFT), $codigoActual);
+
+        // Buscar la ubicación hermana en el mismo nivel
+        foreach ($ubicacionesNivel as $ubicacion) {
+            if ($ubicacion->codigo === $codigoHermana) {
+                // Verificar si la hermana tiene ubicacion2 = 1
+                $tieneUbicacion2 = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $ubicacion->idRackUbicacion)
+                    ->where('ubicacion2', '1')
+                    ->exists();
+
+                if ($tieneUbicacion2) {
+                    Log::info("  - Hermana {$codigoHermana} SÍ tiene ubicacion2=1");
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function iniciarReubicacion(Request $request)
@@ -2346,6 +2475,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     // ✅ NUEVO: Método para reubicar custodias
     private function reubicarCustodia($request, $ubicacionOrigen, $ubicacionDestino)
     {

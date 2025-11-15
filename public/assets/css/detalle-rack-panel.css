@@ -150,12 +150,12 @@
     margin-bottom: 10px;
 }
 
-/* TABLA DE MADERA (MANTENIENDO EL ESTILO ANTERIOR) */
+/* TABLA DE MADERA MEJORADA CON TEXTO CENTRADO Y BONITO */
 .rack-grupo-base {
     background: linear-gradient(135deg, #8b4513, #a0522d, #cd853f);
     border: 2px solid #654321;
     border-radius: 12px;
-    height: 28px;
+    height: 32px;
     box-shadow:
         0 8px 25px rgba(139, 69, 19, 0.4),
         inset 0 2px 4px rgba(255, 255, 255, 0.2),
@@ -165,21 +165,90 @@
     margin-top: 8px;
     overflow: hidden;
     transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Efecto de brillo en el centro */
-.rack-grupo-base::after {
+/* Contenedor para centrar la cantidad */
+.cantidad-tabla-madera-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+/* Texto de la cantidad - SUPER BONITO */
+.cantidad-tabla-madera {
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 14px;
+    text-shadow:
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        -1px -1px 1px rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.5px;
+    padding: 6px 20px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.3) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    min-width: 80px;
+    text-align: center;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Efecto hover en la tabla */
+.rack-grupo-base:hover .cantidad-tabla-madera {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 0.4) 100%);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Efecto de vetas de madera mejorado */
+.rack-grupo-base::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(139, 69, 19, 0.8) 20%, rgba(160, 82, 45, 0.9) 50%, rgba(139, 69, 19, 0.8) 80%, transparent 100%),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0, 0, 0, 0.1) 3px, rgba(0, 0, 0, 0.1) 6px);
+    pointer-events: none;
+    mix-blend-mode: overlay;
     border-radius: 12px;
-    animation: wood-shine 4s ease-in-out infinite;
 }
 
+/* Efecto de brillo animado */
+@keyframes wood-shine {
+    0%,
+    100% {
+        background-position: -200% 0;
+    }
+    50% {
+        background-position: 200% 0;
+    }
+}
+
+.rack-grupo-base::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: wood-shine 6s ease-in-out infinite;
+    border-radius: 12px;
+}
 .ubicaciones-fila {
     display: flex;
     flex-wrap: wrap;

@@ -90,7 +90,7 @@ function rackDetalle() {
 
         inicializarSwipers() {
             // Inicializar Swiper para cada nivel
-            this.rack.niveles.forEach(nivel => {
+            this.rack.niveles.forEach((nivel) => {
                 const swiperId = `#swiperRackNivel${nivel.numero}`;
                 if (document.querySelector(swiperId)) {
                     new Swiper(swiperId, {
@@ -122,7 +122,10 @@ function rackDetalle() {
                 }
             });
         },
-
+        getCantidadTablaGrupo(grupo) {
+            const ubicacionConTabla = grupo.find((ubicacion) => ubicacion.tiene_ubicacion2 && ubicacion.estado !== 'vacio');
+            return ubicacionConTabla ? `${ubicacionConTabla.cantidad_tabla}/${ubicacionConTabla.capacidad}` : '';
+        },
         manejarClickUbicacion(ubi) {
             if (!ubi) return;
 
