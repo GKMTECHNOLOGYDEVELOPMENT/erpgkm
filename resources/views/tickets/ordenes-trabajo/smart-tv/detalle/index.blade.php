@@ -68,6 +68,7 @@
             Orden de Trabajo N° {{ $orden->idTickets }}
         </span>
 
+        @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE CAMBIOS ORDEN DE TRABAJO SMART'))
         <!-- Botón flotante responsive -->
         <button id="botonFlotante"
             class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
@@ -76,6 +77,10 @@
             <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
             <span class="sm:inline"></span>
         </button>
+        @endif
+
+
+
     </div>
 
 
@@ -479,10 +484,14 @@
                 <input id="erma" name="erma" type="text" class="form-input w-full"
                     value="{{ $orden->erma }}">
                 <div x-data="custodiaModal()" class="mt-5">
-                    <!-- Switch Custodia -->
+                    
+                   
+                <!-- Switch Custodia -->
                     <div class="flex gap-12">
                         <div class="flex-1 mb-6">
-                            <div class="flex items-center gap-2 mb-2">
+                            
+                        
+                        <div class="flex items-center gap-2 mb-2">
                                 <label for="EsCustonia" class="block text-sm font-medium">Custodia</label>
 
                                 <!-- Icono de ayuda con tooltip mejorado -->
@@ -513,6 +522,7 @@
                             </div>
 
 
+
                             <!-- Switch mejorado -->
                             <div class="relative">
                                 <label class="w-12 h-6 relative mt-3 block">
@@ -525,6 +535,10 @@
                                     </span>
                                 </label>
                             </div>
+                    
+
+
+
                         </div>
                     </div>
 
@@ -616,12 +630,13 @@
             <div class="md:col-span-2 flex justify-end space-x-4">
                 <!-- Botón de Volver con outline-danger -->
                 <a href="{{ route('ordenes.smart') }}" class="btn btn-outline-danger w-full md:w-auto">Volver</a>
-
+                @if(App\Helpers\PermisoHelper::tienePermiso('MODIFICAR ORDENES DE TRABAJO ORDEN DE TRABAJO SMART'))
                 <!-- Botón de Modificar -->
                 <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto"
                     @if ($idEstadflujo == 33) disabled @endif>
                     Modificar
                 </button>
+                @endif
             </div>
         </div>
     </form>
@@ -816,13 +831,11 @@
 
 <!-- Nueva Card: Historial de Estados -->
 <div id="estadosCard" class="mt-4 p-4">
+    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE ESTADOS ORDEN DE TRABAJO SMART'))    <!-- Contenedor de Estados -->
     <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
         style="background-color: {{ $colorEstado }};">Historial de Estados</span>
     <!-- Tabla con scroll horizontal -->
-
-
-
-    <!-- Contenedor de Estados -->
+    
     <div class="mt-3 overflow-x-auto">
         <div id="draggableContainer" class="flex space-x-2 w-max">
             @foreach ($estadosFlujo as $estado)
@@ -834,9 +847,9 @@
             @endforeach
         </div>
     </div>
+    @endif
 
-
-
+    @if(\App\Helpers\PermisoHelper::tienePermiso('VER ULTIMA MODIFICACION ORDEN DE TRABAJO SMART'))    <!-- Contenedor de Última Modificación -->
     <!-- Div para mostrar la última modificación (Responsive) -->
     <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
         <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
@@ -847,10 +860,11 @@
                rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
         </span>
     </div>
-
-
-
+    @endif
 </div>
+
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {

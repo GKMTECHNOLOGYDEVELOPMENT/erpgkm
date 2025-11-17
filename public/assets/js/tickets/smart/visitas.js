@@ -12,12 +12,6 @@ function formatDate(dateString) {
   };
   return date.toLocaleString('es-PE', options).replace(',', '');
 }
-
-
-
-
-
-
 fetch(`/api/obtenerVisitas/${ticketId}`)
   .then(response => response.json())
   .then(data => {
@@ -45,6 +39,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         const cardContainer = document.createElement('div');
         cardContainer.className = 'rounded-lg shadow-xl p-6 w-full sm:max-w-4xl mx-auto mt-6';
 
+         if (window.permisosVisitas.puedeOcultarMostrar) {
         // 📌 Botón para ocultar/mostrar la card
         const toggleCardButton = document.createElement('button');
         toggleCardButton.className = 'px-4 py-2 mb-2 bg-gray-300 text-gray-800 rounded-lg shadow hover:bg-gray-400 transition font-semibold w-full flex justify-between items-center';
@@ -60,7 +55,7 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
           }
         });
         visitasList.appendChild(toggleCardButton);
-
+}
         // Header de la Card (Nombre de la Visita + Botón Seleccionar)
         const cardHeader = document.createElement('div');
         cardHeader.className = 'flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 border-b pb-2 space-y-2 sm:space-y-0';
@@ -72,41 +67,57 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         ${nombre_visita} <br class="hidden sm:block"> ${tipoResponsable}: ${nombreTecnico}
     </span>
 `;
+          // Botón Seleccionar Visita (SOLO SI TIENE PERMISO)
+        if (window.permisosVisitas.puedeSeleccionarVisita) {
+          const selectButton = document.createElement('button');
+          selectButton.className = 'btn btn-warning w-full sm:w-auto seleccionarVisitaButton';
+          selectButton.setAttribute('data-id-ticket', visita.idTickets);
+          selectButton.setAttribute('data-id-visita', visita.idVisita);
+          selectButton.setAttribute('data-nombre-visita', nombre_visita);
+          selectButton.textContent = 'Seleccionar Visita';
 
-        const selectButton = document.createElement('button');
-        selectButton.className = 'btn btn-warning w-full sm:w-auto seleccionarVisitaButton';
-        selectButton.setAttribute('data-id-ticket', visita.idTickets);
-        selectButton.setAttribute('data-id-visita', visita.idVisita);
-        selectButton.setAttribute('data-nombre-visita', nombre_visita);
-        selectButton.textContent = 'Seleccionar Visita';
+          const idVisita = visita.idVisita;
 
-        const idVisita = visita.idVisita;
+          // Realizar la consulta al backend para verificar si la visita ha sido seleccionada
+          fetch(`/api/visita-seleccionada/${idVisita}`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.seleccionada) {
+                selectButton.classList.remove('btn-warning');
+                selectButton.classList.add('btn-danger');
+                selectButton.textContent = 'Visita Seleccionada';
+              }
+            })
+            .catch(error => {
+              console.error('Error al verificar si la visita está seleccionada:', error);
+            });
 
-        // Realizar la consulta al backend para verificar si la visita ha sido seleccionada
-        fetch(`/api/visita-seleccionada/${idVisita}`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.seleccionada) {
-              selectButton.classList.remove('btn-warning');
-              selectButton.classList.add('btn-danger');
-              selectButton.textContent = 'Visita Seleccionada';
-            }
-          })
-          .catch(error => {
-            console.error('Error al verificar si la visita está seleccionada:', error);
-          });
+          cardHeader.appendChild(selectButton);
+        }
 
-        // Agregar título y botón al header
+        // Agregar título al header
         cardHeader.appendChild(visitaTitle);
-        cardHeader.appendChild(selectButton);
         cardContainer.appendChild(cardHeader);
 
-        // Contenedor de fila (Fecha de Programación + Técnico en Desplazamiento)
+       // Contenedor de fila (Fecha de Programación + Técnico en Desplazamiento)
         const rowContainer = document.createElement('div');
         rowContainer.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 w-full';
 
         const visitaCard = document.createElement('div');
         visitaCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#e3e7fc]';
+        
+        // Botón Ver Imagen (SOLO SI TIENE PERMISO)
+        const viewImageButtonHtml = window.permisosVisitas.puedeVerImagenVisita && visita.tipoServicio !== 7 ? 
+          `<div class="flex justify-center mt-2">
+            <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                    id="viewImageButton-${visita.idVisitas}" 
+                    data-image-type="visita"
+                    data-id="${visita.idVisitas}"
+                    title="Ver imagen">
+              <i class="fa-solid fa-image text-sm sm:text-base"></i>
+            </button>
+          </div>` : '';
+
         visitaCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 text-center gap-2">
@@ -121,24 +132,11 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
                 <span class="badge bg-primary text-white text-xs px-3 py-1 rounded-lg shadow-md w-full">${fechaInicio} - ${fechaFinal}</span>
               </div>
             </div>
-
-            <!-- Botón para ver imagen -->
-            <div class="flex justify-center mt-2">
-              <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                  id="viewImageButton-${visita.idVisitas}" 
-                  data-image-type="visita"
-                  data-id="${visita.idVisitas}"
-                  title="Ver imagen"
-                  style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
-                <i class="fa-solid fa-image text-sm sm:text-base"></i>
-              </button>
-            </div>                   
+            ${viewImageButtonHtml}                   
           </div>
         `;
 
-
-
-
+        
 // Función para formatear fechas
 function formatDatos(dateString) {
   const date = new Date(dateString);
@@ -357,6 +355,8 @@ loadTecnicosAsociados();
   // Mostrar el modal
   document.getElementById('modalDetallesVisita').classList.remove('hidden');
 });
+
+
 
 // Evento para cerrar el modal
 document.getElementById('closeModalButton').addEventListener('click', function() {
@@ -912,15 +912,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     console.error('Error:', error);
                     toastr.error('Hubo un error al verificar la fecha de llegada.');
                   });
-
-
-
-
-
               });
-
-
-
               // Función para actualizar la tabla en el frontend
               function actualizarFechaTabla(idVisitas, nuevaFecha) {
                 // Buscar la fila en la tabla correspondiente a la visita
@@ -933,12 +925,6 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                   }
                 }
               }
-
-
-
-
-
-
               // Verificar si ya existe una foto para la visita
               fetch(`/api/verificarFoto/${visita.idVisitas}`)
                 .then(response => response.json())
@@ -1045,34 +1031,6 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
           .catch(error => {
             console.error('Error al verificar el registro de anexo:', error);
           });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         // Agregar el evento de clic al botón de like
         const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
         likeButton.addEventListener('click', function () {
@@ -1273,9 +1231,6 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
     </div>
     `;
-
-
-
                                     // Insertar la card de "Final de Servicio" debajo de la card de "Inicio de Servicio"
                                     inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
 
@@ -1361,18 +1316,6 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                         });
                                     });
                                   });
-
-
-
-
-
-
-
-
-
-
-
-
                                   fetch(`/api/verificarFoto/${visita.idVisitas}`)
                                     .then(response => response.json())
                                     .then(data => {
@@ -1472,9 +1415,3 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
     console.error('Error al obtener las visitas:', error);
     alert('Ocurrió un error al obtener las visitas.');
   });
-
-
-
-
-
-

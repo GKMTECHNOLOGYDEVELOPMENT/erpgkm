@@ -720,400 +720,6 @@ class UbicacionesVistaController extends Controller
 
                 // ✅ Lógica de repuestos
                 DB::raw('CASE 
-            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-            THEN a.codigo_repuesto 
-            ELSE a.nombre 
-        END as producto'),
-
-                'a.nombre as nombre_original',
-                'a.codigo_repuesto',
-                'a.stock_total',
-                'ta.nombre as tipo_articulo',
-                'ta.idTipoArticulo',
-
-                // ✅ CATEGORÍA CORRECTA (usando COALESCE para evitar NULLs)
-                DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria'),
-
-                'rua.cantidad',
-                'rua.custodia_id',
-                'rua.cliente_general_id',
-                'cg.descripcion as cliente_general_nombre',
-
-                // Campos de custodia
-                'cust.codigocustodias',
-                'cust.serie',
-                'cust.idMarca',
-                'cust.idModelo',
-                'cust.numero_ticket',
-                'c_cust.nombre as categoria_custodia',
-                'mar_cust.nombre as marca_nombre',
-                'm_cust.nombre as modelo_nombre',
-
-                // Campos de cliente general para CUSTODIAS
-                'cg_cust.idClienteGeneral as cliente_general_id_custodia',
-                'cg_cust.descripcion as cliente_general_nombre_custodia'
-            )
-            ->where('r.nombre', $rack)
-            ->where('r.sede', $sede)
-            ->where('r.estado', 'activo')
-            ->orderBy('ru.nivel', 'desc')
-            ->orderBy('ru.posicion')
-            ->get();
-
-        // Si no existe el rack, redirigir
-        if ($rackData->isEmpty()) {
-            return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
-        }
-
-        $rackId = $rackData->first()->idRack;
-        $ubicacionesIds = $rackData->pluck('idRackUbicacion')->unique();
-
-        // Obtener historial de movimientos - MODIFICADO PARA LIMPIAR OBSERVACIONES Y NORMALIZAR TIPOS
-        $historialPorUbicacion = [];
-        if ($ubicacionesIds->isNotEmpty()) {
-            $movimientos = DB::table('rack_movimientos')
-                ->where(function ($query) use ($ubicacionesIds) {
-                    $query->whereIn('ubicacion_origen_id', $ubicacionesIds)
-                        ->orWhereIn('ubicacion_destino_id', $ubicacionesIds);
-                })
-                ->orWhere('rack_origen_id', $rackId)
-                ->orWhere('rack_destino_id', $rackId)
-                ->select(
-                    'idMovimiento',
-                    'articulo_id',
-                    'ubicacion_origen_id',
-                    'ubicacion_destino_id',
-                    'rack_origen_id',
-                    'rack_destino_id',
-                    'cantidad',
-                    'tipo_movimiento',
-                    'observaciones',
-                    'created_at',
-                    'codigo_ubicacion_origen',
-                    'codigo_ubicacion_destino',
-                    'nombre_rack_origen',
-                    'nombre_rack_destino'
-                )
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            // Procesar movimientos para cada ubicación - MODIFICADO CON NORMALIZACIÓN DE TIPOS
-            foreach ($movimientos as $mov) {
-                // ✅ NORMALIZAR TIPOS DE MOVIMIENTO
-                $tipoNormalizado = match (strtolower($mov->tipo_movimiento)) {
-                    'entrada', 'ingreso' => 'ingreso',
-                    'salida' => 'salida',
-                    'reubicacion', 'reubicación' => 'reubicacion',
-                    'reubicacion_custodia', 'reubicación custodia', 'reubicación_custodia' => 'reubicacion_custodia',
-                    'ajuste' => 'ajuste',
-                    default => strtolower($mov->tipo_movimiento)
-                };
-
-                // ✅ LIMPIAR OBSERVACIONES: Eliminar referencias a Producto/Artículo con ID
-                $observacionesLimpias = $mov->observaciones;
-                if ($mov->observaciones) {
-                    // Eliminar "Producto: [número]" o "Artículo: [número]"
-                    $observacionesLimpias = preg_replace('/Producto:\s*\d+\s*-?\s*/', '', $mov->observaciones);
-                    $observacionesLimpias = preg_replace('/Artículo:\s*\d+\s*-?\s*/', '', $mov->observaciones);
-
-                    // Limpiar espacios extras y guiones sobrantes
-                    $observacionesLimpias = preg_replace('/\s*-\s*$/', '', $observacionesLimpias); // Quitar guión final
-                    $observacionesLimpias = preg_replace('/^\s*-\s*/', '', $observacionesLimpias); // Quitar guión inicial
-                    $observacionesLimpias = trim($observacionesLimpias);
-
-                    // Si solo queda "Reubicación múltiple", dejarlo limpio
-                    if ($observacionesLimpias === 'Reubicación múltiple') {
-                        $observacionesLimpias = 'Reubicación múltiple';
-                    }
-                }
-
-                if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
-                    $historialPorUbicacion[$mov->ubicacion_origen_id][] = [
-                        'fecha' => $mov->created_at,
-                        'producto' => 'Artículo Movido',
-                        'cantidad' => $mov->cantidad,
-                        'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
-                        'desde' => $mov->codigo_ubicacion_origen,
-                        'hacia' => $mov->codigo_ubicacion_destino,
-                        'rack_origen' => $mov->nombre_rack_origen,
-                        'rack_destino' => $mov->nombre_rack_destino,
-                        'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
-                    ];
-                }
-
-                if ($mov->ubicacion_destino_id && in_array($mov->ubicacion_destino_id, $ubicacionesIds->toArray())) {
-                    $historialPorUbicacion[$mov->ubicacion_destino_id][] = [
-                        'fecha' => $mov->created_at,
-                        'producto' => 'Artículo Movido',
-                        'cantidad' => $mov->cantidad,
-                        'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
-                        'desde' => $mov->codigo_ubicacion_origen,
-                        'hacia' => $mov->codigo_ubicacion_destino,
-                        'rack_origen' => $mov->nombre_rack_origen,
-                        'rack_destino' => $mov->nombre_rack_destino,
-                        'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
-                    ];
-                }
-
-                if ((!$mov->ubicacion_origen_id && !$mov->ubicacion_destino_id) &&
-                    ($mov->rack_origen_id == $rackId || $mov->rack_destino_id == $rackId)
-                ) {
-                    foreach ($ubicacionesIds as $ubicacionId) {
-                        $historialPorUbicacion[$ubicacionId][] = [
-                            'fecha' => $mov->created_at,
-                            'producto' => 'Movimiento de Rack',
-                            'cantidad' => $mov->cantidad,
-                            'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
-                            'desde' => $mov->nombre_rack_origen,
-                            'hacia' => $mov->nombre_rack_destino,
-                            'rack_origen' => $mov->nombre_rack_origen,
-                            'rack_destino' => $mov->nombre_rack_destino,
-                            'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
-                        ];
-                    }
-                }
-            }
-        }
-
-        // Estructurar datos para la vista
-        $rackEstructurado = [
-            'nombre' => $rackData->first()->rack_nombre,
-            'sede' => $rackData->first()->sede,
-            'niveles' => []
-        ];
-
-        // Agrupar por niveles y ubicaciones
-        $niveles = $rackData->groupBy('nivel');
-
-        foreach ($niveles as $nivelNum => $ubicacionesNivel) {
-            $ubicacionesEstructuradas = [];
-
-            // Agrupar por ubicación
-            $ubicacionesAgrupadas = $ubicacionesNivel->groupBy('idRackUbicacion');
-
-            foreach ($ubicacionesAgrupadas as $ubicacionId => $articulos) {
-                $primerArticulo = $articulos->first();
-
-                // ✅ CORREGIDO: Procesar CADA ARTÍCULO INDIVIDUALMENTE sin agrupar
-                $productosAgrupados = collect();
-
-                // ✅ FILTRAR SOLO ARTÍCULOS VÁLIDOS (que tengan idArticulos o custodia_id)
-                $articulosValidos = $articulos->filter(function ($art) {
-                    return $art->idArticulos !== null || $art->custodia_id !== null;
-                });
-
-                if ($articulosValidos->isNotEmpty()) {
-                    foreach ($articulosValidos as $art) {
-                        // ✅ SI ES CUSTODIA
-                        if ($art->custodia_id) {
-                            $productosAgrupados->push([
-                                'id' => $art->idArticulos,
-                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
-                                'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
-                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
-                                'stock_total' => $art->stock_total,
-                                'tipo_articulo' => 'CUSTODIA',
-                                'categoria' => $art->categoria_custodia ?: 'Custodia',
-                                'custodia_id' => $art->custodia_id,
-                                'codigocustodias' => $art->codigocustodias,
-                                'serie' => $art->serie,
-                                'idMarca' => $art->idMarca,
-                                'idModelo' => $art->idModelo,
-                                'marca_nombre' => $art->marca_nombre,
-                                'modelo_nombre' => $art->modelo_nombre,
-                                'numero_ticket' => $art->numero_ticket,
-                                'cliente_general_id' => $art->cliente_general_id_custodia,
-                                'cliente_general_nombre' => $art->cliente_general_nombre_custodia ?: 'Sin cliente'
-                            ]);
-                        } else {
-                            // ✅ SI ES PRODUCTO NORMAL
-                            $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
-
-                            $productosAgrupados->push([
-                                'id' => $art->idArticulos,
-                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
-                                'nombre' => $art->producto,
-                                'nombre_original' => $art->nombre_original,
-                                'codigo_repuesto' => $art->codigo_repuesto,
-                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
-                                'stock_total' => $art->stock_total,
-                                'tipo_articulo' => $art->tipo_articulo,
-                                'idTipoArticulo' => $art->idTipoArticulo,
-                                'categoria' => $art->categoria,
-                                'custodia_id' => null,
-                                'es_repuesto' => $art->idTipoArticulo == 2,
-                                'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
-                                'cliente_general_id' => $art->cliente_general_id,
-                                'cliente_general_nombre' => $art->cliente_general_nombre ?: 'Sin cliente'
-                            ]);
-                        }
-                    }
-                }
-
-                // ✅ CALCULAR CANTIDAD TOTAL
-                $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
-
-                // Determinar estado basado en porcentaje de ocupación
-                $porcentajeOcupacion = 0;
-                if ($primerArticulo->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
-                }
-
-                // Calcular estado
-                $estado = $primerArticulo->estado_ocupacion;
-                if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
-                } elseif ($cantidadTotal == 0) {
-                    $estado = 'vacio';
-                }
-
-                // Acumular categorías y tipos
-                $categoriasUnicas = $productosAgrupados->pluck('categoria')->filter()->unique();
-                $tiposUnicos = $productosAgrupados->pluck('tipo_articulo')->filter()->unique();
-                $clientesUnicos = $productosAgrupados->pluck('cliente_general_nombre')
-                    ->filter(fn($cliente) => $cliente && $cliente !== 'Sin cliente')
-                    ->unique();
-
-                // ✅ CORREGIDO: Mostrar información de múltiples productos
-                $productoDisplay = $productosAgrupados->isNotEmpty() ?
-                    ($productosAgrupados->count() === 1 ?
-                        $productosAgrupados->first()['nombre'] :
-                        $productosAgrupados->first()['nombre'] . ' +' . ($productosAgrupados->count() - 1) . ' más'
-                    ) : null;
-
-                // ✅ CORREGIDO: Usar tipos acumulados en lugar del primero
-                $tipoArticuloDisplay = $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : null;
-
-                // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
-                $categoriaDisplay = $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null;
-
-                $ubicacionesEstructuradas[] = [
-                    'id' => $primerArticulo->idRackUbicacion,
-                    'codigo' => $primerArticulo->codigo_unico ?? $primerArticulo->codigo,
-                    'productos' => $productosAgrupados->toArray(),
-
-                    // ✅ CORREGIDO: Usar las variables corregidas
-                    'producto' => $productoDisplay,
-                    'cantidad' => $cantidadTotal,
-                    'cantidad_total' => $cantidadTotal,
-                    'stock_total' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['stock_total'] : null,
-                    'tipo_articulo' => $tipoArticuloDisplay,
-                    'categoria' => $categoriaDisplay,
-
-                    'capacidad' => $primerArticulo->capacidad_maxima,
-                    'estado' => $estado,
-                    'nivel' => $primerArticulo->nivel,
-                    'fecha' => $primerArticulo->updated_at,
-                    'categorias_acumuladas' => $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : 'Sin categoría',
-                    'tipos_acumulados' => $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : 'Sin tipo',
-                    'clientes_acumulados' => $clientesUnicos->isNotEmpty() ? $clientesUnicos->join(', ') : 'Sin cliente',
-                    'historial' => $historialPorUbicacion[$primerArticulo->idRackUbicacion] ?? []
-                ];
-            }
-
-            $rackEstructurado['niveles'][] = [
-                'numero' => $nivelNum,
-                'ubicaciones' => $ubicacionesEstructuradas
-            ];
-        }
-
-        // Obtener lista de todos los racks para navegación
-        $todosRacks = DB::table('racks')
-            ->where('sede', $sede)
-            ->where('estado', 'activo')
-            ->orderBy('nombre')
-            ->pluck('nombre')
-            ->toArray();
-
-        return view('almacen.ubicaciones.detalle-rack', [
-            'rack' => $rackEstructurado,
-            'todosRacks' => $todosRacks,
-            'rackActual' => $rack,
-            'sedeActual' => $sede
-        ]);
-    }
-
-
-    public function detalleRackPanel($rack)
-    {
-        // Obtener la sede desde el query parameter
-        $sede = request('sede');
-
-        if (!$sede) {
-            $rackInfo = DB::table('racks')
-                ->where('nombre', $rack)
-                ->where('estado', 'activo')
-                ->first();
-
-            if (!$rackInfo) {
-                return redirect()->route('almacen.vista')->with('error', 'Rack no encontrado');
-            }
-
-            $sede = $rackInfo->sede;
-        }
-
-        // Obtener información completa del rack incluyendo tipo
-        $rackInfo = DB::table('racks')
-            ->where('nombre', $rack)
-            ->where('sede', $sede)
-            ->where('estado', 'activo')
-            ->first();
-
-        if (!$rackInfo) {
-            return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
-        }
-
-        // ✅ CORREGIDO: Consulta que incluye el ID único de cada registro
-        $rackData = DB::table('racks as r')
-            ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
-            ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
-            ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
-            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-
-            // ✅ UNIFICADO: Un solo JOIN para modelo que funcione para ambos casos
-            ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-            ->leftJoin('modelo as m', function ($join) {
-                $join->on('am.modelo_id', '=', 'm.idModelo')
-                    ->orOn('a.idModelo', '=', 'm.idModelo');
-            })
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
-
-            // ✅ JOIN para custodias
-            ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
-            ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
-            ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
-            ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
-
-            // ✅ JOIN para tickets de custodias
-            ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
-            ->leftJoin('clientegeneral as cg_cust', 't_cust.idClienteGeneral', '=', 'cg_cust.idClienteGeneral')
-
-            // ✅ JOIN para cliente general de PRODUCTOS NORMALES
-            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
-
-            ->select(
-                'r.idRack',
-                'r.nombre as rack_nombre',
-                'r.sede',
-                'r.tipo_rack',
-                'ru.idRackUbicacion',
-                'ru.codigo',
-                'ru.codigo_unico',
-                'ru.nivel',
-                'ru.posicion',
-                'ru.capacidad_maxima',
-                'ru.estado_ocupacion',
-                'ru.updated_at',
-
-                // ✅ NUEVO: INCLUIR EL ID ÚNICO DE CADA REGISTRO
-                'rua.idRackUbicacionArticulo',
-                'a.idArticulos',
-
-                // ✅ Lógica de repuestos
-                DB::raw('CASE 
                 WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
                 THEN a.codigo_repuesto 
                 ELSE a.nombre 
@@ -1273,10 +879,6 @@ class UbicacionesVistaController extends Controller
         $rackEstructurado = [
             'nombre' => $rackData->first()->rack_nombre,
             'sede' => $rackData->first()->sede,
-            // ✅ AGREGAR ESTOS CAMPOS:
-            'tipo_rack' => $rackInfo->tipo_rack,
-            'filas' => $rackInfo->filas,
-            'columnas' => $rackInfo->columnas,
             'niveles' => []
         ];
 
@@ -1351,22 +953,8 @@ class UbicacionesVistaController extends Controller
                 // ✅ CALCULAR CANTIDAD TOTAL
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
 
-                // Determinar estado basado en porcentaje de ocupación
-                $porcentajeOcupacion = 0;
-                if ($primerArticulo->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
-                }
-
-                // Calcular estado
-                $estado = $primerArticulo->estado_ocupacion;
-                if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
-                } elseif ($cantidadTotal == 0) {
-                    $estado = 'vacio';
-                }
+                // ✅ NUEVO: CALCULAR ESTADO BASADO EN RANGOS FIJOS DE CAPACIDAD
+                $estado = $this->calcularEstadoPorCapacidad($cantidadTotal);
 
                 // Acumular categorías y tipos
                 $categoriasUnicas = $productosAgrupados->pluck('categoria')->filter()->unique();
@@ -1426,6 +1014,495 @@ class UbicacionesVistaController extends Controller
             ->pluck('nombre')
             ->toArray();
 
+        return view('almacen.ubicaciones.detalle-rack', [
+            'rack' => $rackEstructurado,
+            'todosRacks' => $todosRacks,
+            'rackActual' => $rack,
+            'sedeActual' => $sede
+        ]);
+    }
+
+    /**
+     * ✅ NUEVO: Calcular estado basado en rangos fijos de capacidad
+     */
+    private function calcularEstadoPorCapacidad($cantidadTotal)
+    {
+        if ($cantidadTotal == 0) {
+            return 'vacio';
+        } elseif ($cantidadTotal <= 100) {
+            return 'bajo';
+        } elseif ($cantidadTotal <= 500) {
+            return 'medio';
+        } elseif ($cantidadTotal <= 1000) {
+            return 'alto';
+        } else {
+            return 'muy_alto';
+        }
+    }
+
+
+    public function detalleRackPanel($rack)
+    {
+        // Obtener la sede desde el query parameter
+        $sede = request('sede');
+
+        if (!$sede) {
+            $rackInfo = DB::table('racks')
+                ->where('nombre', $rack)
+                ->where('estado', 'activo')
+                ->first();
+
+            if (!$rackInfo) {
+                return redirect()->route('almacen.vista')->with('error', 'Rack no encontrado');
+            }
+
+            $sede = $rackInfo->sede;
+        }
+
+        // Obtener información completa del rack incluyendo tipo
+        $rackInfo = DB::table('racks')
+            ->where('nombre', $rack)
+            ->where('sede', $sede)
+            ->where('estado', 'activo')
+            ->first();
+
+        if (!$rackInfo) {
+            return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
+        }
+
+        // ✅ LOG INICIAL
+        Log::info("====== INICIANDO DETALLE RACK PANEL ======");
+        Log::info("Rack: {$rack}, Sede: {$sede}");
+
+        // ✅ CORREGIDO: Consulta que incluye el ID único de cada registro
+        $rackData = DB::table('racks as r')
+            ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
+            ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
+            ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+
+            // ✅ UNIFICADO: Un solo JOIN para modelo que funcione para ambos casos
+            ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+            ->leftJoin('modelo as m', function ($join) {
+                $join->on('am.modelo_id', '=', 'm.idModelo')
+                    ->orOn('a.idModelo', '=', 'm.idModelo');
+            })
+            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+
+            // ✅ JOIN para custodias
+            ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
+            ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
+            ->leftJoin('categoria as c_cust', 'm_cust.idCategoria', '=', 'c_cust.idCategoria')
+            ->leftJoin('marca as mar_cust', 'cust.idMarca', '=', 'mar_cust.idMarca')
+
+            // ✅ JOIN para tickets de custodias
+            ->leftJoin('tickets as t_cust', 'cust.numero_ticket', '=', 't_cust.numero_ticket')
+            ->leftJoin('clientegeneral as cg_cust', 't_cust.idClienteGeneral', '=', 'cg_cust.idClienteGeneral')
+
+            // ✅ JOIN para cliente general de PRODUCTOS NORMALES
+            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
+
+            ->select(
+                'r.idRack',
+                'r.nombre as rack_nombre',
+                'r.sede',
+                'r.tipo_rack',
+                'ru.idRackUbicacion',
+                'ru.codigo',
+                'ru.codigo_unico',
+                'ru.nivel',
+                'ru.posicion',
+                'ru.capacidad_maxima',
+                'ru.estado_ocupacion',
+                'ru.updated_at',
+
+                // ✅ NUEVO: INCLUIR EL ID ÚNICO DE CADA REGISTRO
+                'rua.idRackUbicacionArticulo',
+                'a.idArticulos',
+
+                // ✅ Lógica de repuestos
+                DB::raw('CASE 
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as producto'),
+
+                'a.nombre as nombre_original',
+                'a.codigo_repuesto',
+                'a.stock_total',
+                'ta.nombre as tipo_articulo',
+                'ta.idTipoArticulo',
+
+                // ✅ CATEGORÍA CORRECTA (usando COALESCE para evitar NULLs)
+                DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria'),
+
+                'rua.cantidad',
+                'rua.custodia_id',
+                'rua.cliente_general_id',
+                'cg.descripcion as cliente_general_nombre',
+
+                // Campos de custodia
+                'cust.codigocustodias',
+                'cust.serie',
+                'cust.idMarca',
+                'cust.idModelo',
+                'cust.numero_ticket',
+                'c_cust.nombre as categoria_custodia',
+                'mar_cust.nombre as marca_nombre',
+                'm_cust.nombre as modelo_nombre',
+
+                // Campos de cliente general para CUSTODIAS
+                'cg_cust.idClienteGeneral as cliente_general_id_custodia',
+                'cg_cust.descripcion as cliente_general_nombre_custodia'
+            )
+            ->where('r.nombre', $rack)
+            ->where('r.sede', $sede)
+            ->where('r.estado', 'activo')
+            ->orderBy('ru.nivel', 'desc')
+            ->orderBy('ru.posicion')
+            ->get();
+
+
+        // Si no existe el rack, redirigir
+        if ($rackData->isEmpty()) {
+            return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
+        }
+
+        $rackId = $rackData->first()->idRack;
+        $ubicacionesIds = $rackData->pluck('idRackUbicacion')->unique();
+
+        // Obtener historial de movimientos - MODIFICADO PARA LIMPIAR OBSERVACIONES Y NORMALIZAR TIPOS
+        $historialPorUbicacion = [];
+        if ($ubicacionesIds->isNotEmpty()) {
+            $movimientos = DB::table('rack_movimientos')
+                ->where(function ($query) use ($ubicacionesIds) {
+                    $query->whereIn('ubicacion_origen_id', $ubicacionesIds)
+                        ->orWhereIn('ubicacion_destino_id', $ubicacionesIds);
+                })
+                ->orWhere('rack_origen_id', $rackId)
+                ->orWhere('rack_destino_id', $rackId)
+                ->select(
+                    'idMovimiento',
+                    'articulo_id',
+                    'ubicacion_origen_id',
+                    'ubicacion_destino_id',
+                    'rack_origen_id',
+                    'rack_destino_id',
+                    'cantidad',
+                    'tipo_movimiento',
+                    'observaciones',
+                    'created_at',
+                    'codigo_ubicacion_origen',
+                    'codigo_ubicacion_destino',
+                    'nombre_rack_origen',
+                    'nombre_rack_destino'
+                )
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Procesar movimientos para cada ubicación - MODIFICADO CON NORMALIZACIÓN DE TIPOS
+            foreach ($movimientos as $mov) {
+                // ✅ NORMALIZAR TIPOS DE MOVIMIENTO
+                $tipoNormalizado = match (strtolower($mov->tipo_movimiento)) {
+                    'entrada', 'ingreso' => 'ingreso',
+                    'salida' => 'salida',
+                    'reubicacion', 'reubicación' => 'reubicacion',
+                    'reubicacion_custodia', 'reubicación custodia', 'reubicación_custodia' => 'reubicacion_custodia',
+                    'ajuste' => 'ajuste',
+                    default => strtolower($mov->tipo_movimiento)
+                };
+
+                // ✅ LIMPIAR OBSERVACIONES: Eliminar referencias a Producto/Artículo con ID
+                $observacionesLimpias = $mov->observaciones;
+                if ($mov->observaciones) {
+                    // Eliminar "Producto: [número]" o "Artículo: [número]"
+                    $observacionesLimpias = preg_replace('/Producto:\s*\d+\s*-?\s*/', '', $mov->observaciones);
+                    $observacionesLimpias = preg_replace('/Artículo:\s*\d+\s*-?\s*/', '', $mov->observaciones);
+
+                    // Limpiar espacios extras y guiones sobrantes
+                    $observacionesLimpias = preg_replace('/\s*-\s*$/', '', $observacionesLimpias); // Quitar guión final
+                    $observacionesLimpias = preg_replace('/^\s*-\s*/', '', $observacionesLimpias); // Quitar guión inicial
+                    $observacionesLimpias = trim($observacionesLimpias);
+
+                    // Si solo queda "Reubicación múltiple", dejarlo limpio
+                    if ($observacionesLimpias === 'Reubicación múltiple') {
+                        $observacionesLimpias = 'Reubicación múltiple';
+                    }
+                }
+
+                if ($mov->ubicacion_origen_id && in_array($mov->ubicacion_origen_id, $ubicacionesIds->toArray())) {
+                    $historialPorUbicacion[$mov->ubicacion_origen_id][] = [
+                        'fecha' => $mov->created_at,
+                        'producto' => 'Artículo Movido',
+                        'cantidad' => $mov->cantidad,
+                        'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
+                        'desde' => $mov->codigo_ubicacion_origen,
+                        'hacia' => $mov->codigo_ubicacion_destino,
+                        'rack_origen' => $mov->nombre_rack_origen,
+                        'rack_destino' => $mov->nombre_rack_destino,
+                        'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+                    ];
+                }
+
+                if ($mov->ubicacion_destino_id && in_array($mov->ubicacion_destino_id, $ubicacionesIds->toArray())) {
+                    $historialPorUbicacion[$mov->ubicacion_destino_id][] = [
+                        'fecha' => $mov->created_at,
+                        'producto' => 'Artículo Movido',
+                        'cantidad' => $mov->cantidad,
+                        'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
+                        'desde' => $mov->codigo_ubicacion_origen,
+                        'hacia' => $mov->codigo_ubicacion_destino,
+                        'rack_origen' => $mov->nombre_rack_origen,
+                        'rack_destino' => $mov->nombre_rack_destino,
+                        'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+                    ];
+                }
+
+                if ((!$mov->ubicacion_origen_id && !$mov->ubicacion_destino_id) &&
+                    ($mov->rack_origen_id == $rackId || $mov->rack_destino_id == $rackId)
+                ) {
+                    foreach ($ubicacionesIds as $ubicacionId) {
+                        $historialPorUbicacion[$ubicacionId][] = [
+                            'fecha' => $mov->created_at,
+                            'producto' => 'Movimiento de Rack',
+                            'cantidad' => $mov->cantidad,
+                            'tipo' => $tipoNormalizado, // ✅ Usar tipo normalizado
+                            'desde' => $mov->nombre_rack_origen,
+                            'hacia' => $mov->nombre_rack_destino,
+                            'rack_origen' => $mov->nombre_rack_origen,
+                            'rack_destino' => $mov->nombre_rack_destino,
+                            'observaciones' => $observacionesLimpias // ✅ Observaciones limpias
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Estructurar datos para la vista
+        $rackEstructurado = [
+            'nombre' => $rackData->first()->rack_nombre,
+            'sede' => $rackData->first()->sede,
+            // ✅ AGREGAR ESTOS CAMPOS:
+            'tipo_rack' => $rackInfo->tipo_rack,
+            'filas' => $rackInfo->filas,
+            'columnas' => $rackInfo->columnas,
+            'niveles' => []
+        ];
+
+
+        // Agrupar por niveles y ubicaciones
+        $niveles = $rackData->groupBy('nivel');
+
+        foreach ($niveles as $nivelNum => $ubicacionesNivel) {
+            $ubicacionesEstructuradas = [];
+
+            // Agrupar por ubicación
+            $ubicacionesAgrupadas = $ubicacionesNivel->groupBy('idRackUbicacion');
+
+            foreach ($ubicacionesAgrupadas as $ubicacionId => $articulos) {
+                $primerArticulo = $articulos->first();
+
+                // ✅ LOG PARA DETECTAR UBICACION2
+                $articulosConUbicacion2 = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $primerArticulo->idRackUbicacion)
+                    ->where('ubicacion2', '1')
+                    ->get();
+
+                Log::info("Ubicación: {$primerArticulo->codigo} - ID: {$primerArticulo->idRackUbicacion}");
+                Log::info("¿Tiene ubicacion2=1?: " . ($articulosConUbicacion2->isNotEmpty() ? 'SÍ' : 'NO'));
+
+                if ($articulosConUbicacion2->isNotEmpty()) {
+                    Log::info("Artículos con ubicacion2=1 en esta ubicación:");
+                    foreach ($articulosConUbicacion2 as $artUbicacion2) {
+                        Log::info("  - ID Artículo: {$artUbicacion2->articulo_id}, Cantidad: {$artUbicacion2->cantidad}");
+                    }
+                }
+
+                // ✅ CORREGIDO: Procesar CADA ARTÍCULO INDIVIDUALMENTE sin agrupar
+                $productosAgrupados = collect();
+
+                // ✅ FILTRAR SOLO ARTÍCULOS VÁLIDOS (que tengan idArticulos o custodia_id)
+                $articulosValidos = $articulos->filter(function ($art) {
+                    return $art->idArticulos !== null || $art->custodia_id !== null;
+                });
+
+                if ($articulosValidos->isNotEmpty()) {
+                    foreach ($articulosValidos as $art) {
+                        // ✅ SI ES CUSTODIA
+                        if ($art->custodia_id) {
+                            $productosAgrupados->push([
+                                'id' => $art->idArticulos,
+                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
+                                'nombre' => $art->serie ?: $art->codigocustodias ?: 'Custodia ' . $art->custodia_id,
+                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
+                                'stock_total' => $art->stock_total,
+                                'tipo_articulo' => 'CUSTODIA',
+                                'categoria' => $art->categoria_custodia ?: 'Custodia',
+                                'custodia_id' => $art->custodia_id,
+                                'codigocustodias' => $art->codigocustodias,
+                                'serie' => $art->serie,
+                                'idMarca' => $art->idMarca,
+                                'idModelo' => $art->idModelo,
+                                'marca_nombre' => $art->marca_nombre,
+                                'modelo_nombre' => $art->modelo_nombre,
+                                'numero_ticket' => $art->numero_ticket,
+                                'cliente_general_id' => $art->cliente_general_id_custodia,
+                                'cliente_general_nombre' => $art->cliente_general_nombre_custodia ?: 'Sin cliente'
+                            ]);
+                        } else {
+                            // ✅ SI ES PRODUCTO NORMAL
+                            $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
+
+                            $productosAgrupados->push([
+                                'id' => $art->idArticulos,
+                                'idRackUbicacionArticulo' => $art->idRackUbicacionArticulo, // ✅ ID ÚNICO
+                                'nombre' => $art->producto,
+                                'nombre_original' => $art->nombre_original,
+                                'codigo_repuesto' => $art->codigo_repuesto,
+                                'cantidad' => $art->cantidad, // ✅ CANTIDAD INDIVIDUAL
+                                'stock_total' => $art->stock_total,
+                                'tipo_articulo' => $art->tipo_articulo,
+                                'idTipoArticulo' => $art->idTipoArticulo,
+                                'categoria' => $art->categoria,
+                                'custodia_id' => null,
+                                'es_repuesto' => $art->idTipoArticulo == 2,
+                                'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
+                                'cliente_general_id' => $art->cliente_general_id,
+                                'cliente_general_nombre' => $art->cliente_general_nombre ?: 'Sin cliente'
+                            ]);
+                        }
+                    }
+                }
+
+                // ✅ MANTENER EL CÁLCULO ORIGINAL para la interfaz visual
+                $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
+
+                // ✅ CORREGIDO: VERIFICAR SI TIENE UBICACION2 = 1
+                $tieneUbicacion2 = $articulosConUbicacion2->isNotEmpty();
+
+                // ✅ DETECTAR SI ES UNA UBICACIÓN DOBLE (hermanas)
+                $esUbicacionDoble = false;
+                $ubicacionHermanaId = null;
+
+                if ($tieneUbicacion2) {
+                    // Si esta ubicación tiene ubicacion2=1, buscar su hermana (ubicación anterior)
+                    $ubicacionHermanaId = $this->buscarUbicacionHermana($primerArticulo->idRackUbicacion, $primerArticulo->codigo, $nivelNum, $ubicacionesNivel);
+
+                    if ($ubicacionHermanaId) {
+                        $esUbicacionDoble = true;
+                        Log::info("  - Es ubicación DOBLE con hermana ID: {$ubicacionHermanaId}");
+                    }
+                } else {
+                    // Si NO tiene ubicacion2=1, verificar si alguna hermana SÍ la tiene
+                    $hermanaConUbicacion2 = $this->verificarSiHermanaTieneUbicacion2($primerArticulo->idRackUbicacion, $primerArticulo->codigo, $nivelNum, $ubicacionesNivel);
+
+                    if ($hermanaConUbicacion2) {
+                        $esUbicacionDoble = true;
+                        $tieneUbicacion2 = true; // ← Esta ubicación también se considera con ubicacion2
+                        $cantidadParaTabla = $cantidadTotal; // ← Y también muestra en tabla
+                        Log::info("  - Es ubicación DOBLE (hermana tiene ubicacion2)");
+                    }
+                }
+
+
+                // ✅ CORREGIDO: CANTIDAD PARA TABLA - Solo si tiene ubicacion2 = 1
+                $cantidadParaTabla = $tieneUbicacion2 ? $cantidadTotal : 0;
+
+                // Determinar estado basado en porcentaje de ocupación
+                $porcentajeOcupacion = 0;
+                if ($primerArticulo->capacidad_maxima > 0) {
+                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
+                }
+
+                // Calcular estado
+                $estado = $primerArticulo->estado_ocupacion;
+                if ($estado == 'vacio' && $cantidadTotal > 0) {
+                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
+                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
+                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
+                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
+                } elseif ($cantidadTotal == 0) {
+                    $estado = 'vacio';
+                }
+
+                // Acumular categorías y tipos
+                $categoriasUnicas = $productosAgrupados->pluck('categoria')->filter()->unique();
+                $tiposUnicos = $productosAgrupados->pluck('tipo_articulo')->filter()->unique();
+                $clientesUnicos = $productosAgrupados->pluck('cliente_general_nombre')
+                    ->filter(fn($cliente) => $cliente && $cliente !== 'Sin cliente')
+                    ->unique();
+
+                // ✅ CORREGIDO: Mostrar información de múltiples productos
+                $productoDisplay = $productosAgrupados->isNotEmpty() ?
+                    ($productosAgrupados->count() === 1 ?
+                        $productosAgrupados->first()['nombre'] :
+                        $productosAgrupados->first()['nombre'] . ' +' . ($productosAgrupados->count() - 1) . ' más'
+                    ) : null;
+
+                // ✅ CORREGIDO: Usar tipos acumulados en lugar del primero
+                $tipoArticuloDisplay = $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : null;
+
+                // ✅ CORREGIDO: Usar categorías acumuladas en lugar de la primera
+                $categoriaDisplay = $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : null;
+
+                // ✅ LOG FINAL DE LA UBICACIÓN
+                Log::info("Resumen Ubicación {$primerArticulo->codigo}:");
+                Log::info("  - Cantidad Total: {$cantidadTotal}");
+                Log::info("  - Tiene ubicacion2: " . ($tieneUbicacion2 ? 'SÍ' : 'NO'));
+                Log::info("  - Cantidad para tabla: {$cantidadParaTabla}");
+                Log::info("  - Estado: {$estado}");
+                Log::info("----------------------------------------");
+                $ubicacionesEstructuradas[] = [
+                    'id' => $primerArticulo->idRackUbicacion,
+                    'codigo' => $primerArticulo->codigo_unico ?? $primerArticulo->codigo,
+                    'productos' => $productosAgrupados->toArray(),
+
+                    // ✅ PARA LA INTERFAZ VISUAL (rack)
+                    'producto' => $productoDisplay,
+                    'cantidad' => $cantidadTotal,
+                    'cantidad_total' => $cantidadTotal,
+
+                    // ✅ CORREGIDO: PARA TABLAS (solo cuando tiene ubicacion2)
+                    'cantidad_tabla' => $cantidadParaTabla,
+
+                    // ✅ CORREGIDO: INDICADOR REAL DE UBICACION2
+                    'tiene_ubicacion2' => $tieneUbicacion2,
+
+                    // ✅ NUEVO: INDICADOR DE UBICACIÓN DOBLE
+                    'es_ubicacion_doble' => $esUbicacionDoble,
+
+                    'stock_total' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['stock_total'] : null,
+                    'tipo_articulo' => $tipoArticuloDisplay,
+                    'categoria' => $categoriaDisplay,
+
+                    'capacidad' => $primerArticulo->capacidad_maxima,
+                    'estado' => $estado,
+                    'nivel' => $primerArticulo->nivel,
+                    'fecha' => $primerArticulo->updated_at,
+                    'categorias_acumuladas' => $categoriasUnicas->isNotEmpty() ? $categoriasUnicas->join(', ') : 'Sin categoría',
+                    'tipos_acumulados' => $tiposUnicos->isNotEmpty() ? $tiposUnicos->join(', ') : 'Sin tipo',
+                    'clientes_acumulados' => $clientesUnicos->isNotEmpty() ? $clientesUnicos->join(', ') : 'Sin cliente',
+                    'historial' => $historialPorUbicacion[$primerArticulo->idRackUbicacion] ?? []
+                ];
+            }
+
+            $rackEstructurado['niveles'][] = [
+                'numero' => $nivelNum,
+                'ubicaciones' => $ubicacionesEstructuradas
+            ];
+        }
+
+        // Obtener lista de todos los racks para navegación
+        $todosRacks = DB::table('racks')
+            ->where('sede', $sede)
+            ->where('estado', 'activo')
+            ->orderBy('nombre')
+            ->pluck('nombre')
+            ->toArray();
+
+        // ✅ LOG FINAL
+        Log::info("====== FIN DETALLE RACK PANEL ======");
+
         return view('almacen.ubicaciones.detalle-rack-panel', [
             'rack' => $rackEstructurado,
             'todosRacks' => $todosRacks,
@@ -1433,6 +1510,62 @@ class UbicacionesVistaController extends Controller
             'sedeActual' => $sede,
             'rackNombre' => $rack
         ]);
+    }
+
+    /**
+     * Buscar la ubicación hermana (anterior) para ubicaciones dobles
+     */
+    private function buscarUbicacionHermana($ubicacionId, $codigoActual, $nivel, $ubicacionesNivel)
+    {
+        // Extraer el número de la ubicación (ej: "H3-04" → 4)
+        preg_match('/-(\d+)$/', $codigoActual, $matches);
+        if (empty($matches)) return null;
+
+        $numeroActual = (int)$matches[1];
+        $numeroHermana = $numeroActual - 1;
+        $codigoHermana = preg_replace('/-\d+$/', '-' . str_pad($numeroHermana, 2, '0', STR_PAD_LEFT), $codigoActual);
+
+        // Buscar la ubicación hermana en el mismo nivel
+        foreach ($ubicacionesNivel as $ubicacion) {
+            if ($ubicacion->codigo === $codigoHermana) {
+                Log::info("  - Encontrada hermana: {$codigoHermana} - ID: {$ubicacion->idRackUbicacion}");
+                return $ubicacion->idRackUbicacion;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Verificar si la ubicación hermana tiene ubicacion2 = 1
+     */
+    private function verificarSiHermanaTieneUbicacion2($ubicacionId, $codigoActual, $nivel, $ubicacionesNivel)
+    {
+        // Extraer el número de la ubicación (ej: "H3-03" → 3)
+        preg_match('/-(\d+)$/', $codigoActual, $matches);
+        if (empty($matches)) return false;
+
+        $numeroActual = (int)$matches[1];
+        $numeroHermana = $numeroActual + 1;
+        $codigoHermana = preg_replace('/-\d+$/', '-' . str_pad($numeroHermana, 2, '0', STR_PAD_LEFT), $codigoActual);
+
+        // Buscar la ubicación hermana en el mismo nivel
+        foreach ($ubicacionesNivel as $ubicacion) {
+            if ($ubicacion->codigo === $codigoHermana) {
+                // Verificar si la hermana tiene ubicacion2 = 1
+                $tieneUbicacion2 = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $ubicacion->idRackUbicacion)
+                    ->where('ubicacion2', '1')
+                    ->exists();
+
+                if ($tieneUbicacion2) {
+                    Log::info("  - Hermana {$codigoHermana} SÍ tiene ubicacion2=1");
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function iniciarReubicacion(Request $request)
@@ -2346,6 +2479,7 @@ class UbicacionesVistaController extends Controller
             ], 500);
         }
     }
+
     // ✅ NUEVO: Método para reubicar custodias
     private function reubicarCustodia($request, $ubicacionOrigen, $ubicacionDestino)
     {
@@ -2687,10 +2821,10 @@ class UbicacionesVistaController extends Controller
                 ->select(
                     'a.idArticulos as id',
                     DB::raw('CASE 
-                    WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                    THEN a.codigo_repuesto 
-                    ELSE a.nombre 
-                END as nombre'),
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as nombre'),
                     'a.nombre as nombre_original',
                     'a.codigo_repuesto',
                     'a.stock_total',
@@ -2698,9 +2832,9 @@ class UbicacionesVistaController extends Controller
                     'ta.idTipoArticulo',
                     // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
                     DB::raw('CASE 
-                    WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-                    ELSE c_normal.nombre 
-                END as categoria'),
+                WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+                ELSE c_normal.nombre 
+            END as categoria'),
                     'rua.cantidad',
                     'rua.cliente_general_id',
                     'cg.descripcion as cliente_general_nombre',
@@ -2757,21 +2891,8 @@ class UbicacionesVistaController extends Controller
             $todosLosProductos = array_merge($productos, $custodias);
             $cantidadTotal = array_sum(array_column($todosLosProductos, 'cantidad'));
 
-            // Calcular estado
-            $porcentajeOcupacion = 0;
-            if ($ubicacionBase->capacidad > 0) {
-                $porcentajeOcupacion = ($cantidadTotal / $ubicacionBase->capacidad) * 100;
-            }
-
-            $estado = $ubicacionBase->estado_ocupacion;
-            if ($estado == 'vacio' && $cantidadTotal > 0) {
-                if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
-            } elseif ($cantidadTotal == 0) {
-                $estado = 'vacio';
-            }
+            // ✅ NUEVO: CALCULAR ESTADO BASADO EN RANGOS FIJOS DE CAPACIDAD
+            $estado = $this->calcularEstadoPorCapacidad($cantidadTotal);
 
             // Acumular categorías y tipos - USAR ARRAYS
             $categoriasUnicas = array_unique(array_filter(array_column($todosLosProductos, 'categoria')));
@@ -2839,6 +2960,7 @@ class UbicacionesVistaController extends Controller
         }
     }
 
+
     public function cancelarReubicacion(Request $request)
     {
         return response()->json([
@@ -2852,14 +2974,11 @@ class UbicacionesVistaController extends Controller
      */
     private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
     {
-        if ($capacidadMaxima <= 0) return 'vacio';
-
-        $porcentaje = ($cantidad / $capacidadMaxima) * 100;
-
-        if ($porcentaje == 0) return 'vacio';
-        if ($porcentaje <= 24) return 'bajo';
-        if ($porcentaje <= 49) return 'medio';
-        if ($porcentaje <= 74) return 'alto';
+        // ✅ NUEVO: Usar rangos fijos en lugar de porcentajes
+        if ($cantidad == 0) return 'vacio';
+        if ($cantidad <= 100) return 'bajo';
+        if ($cantidad <= 500) return 'medio';
+        if ($cantidad <= 1000) return 'alto';
         return 'muy_alto';
     }
 
@@ -3306,8 +3425,8 @@ class UbicacionesVistaController extends Controller
                 'tipo_rack' => 'required|in:panel,spark', // NUEVO: Validación del tipo
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000',
                 'estado' => 'required|in:activo,inactivo'
+                // ✅ ELIMINADO: capacidad_maxima
             ]);
 
             if ($validator->fails()) {
@@ -3331,10 +3450,10 @@ class UbicacionesVistaController extends Controller
             ]);
 
             $rack = DB::table('racks')->where('idRack', $rackId)->first();
-            $capacidadMaxima = $request->input('capacidad_maxima', 100);
 
+            // ✅ ELIMINADO: $capacidadMaxima ya no se necesita
             // Generar ubicaciones automáticamente
-            $this->generarUbicacionesAutomaticas($rack, $capacidadMaxima);
+            $this->generarUbicacionesAutomaticas($rack);
 
             DB::commit();
 
@@ -3371,7 +3490,7 @@ class UbicacionesVistaController extends Controller
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
                 'tipo_rack' => 'required|in:panel,spark',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000'
+                // ✅ ELIMINADO: capacidad_maxima
             ]);
 
             if ($validator->fails()) {
@@ -3467,21 +3586,14 @@ class UbicacionesVistaController extends Controller
 
             Log::debug('Ubicaciones existentes:', ['count' => $ubicacionesExistentes->count()]);
 
-            // Actualizar capacidad máxima de ubicaciones existentes
-            $actualizadas = DB::table('rack_ubicaciones')
-                ->where('rack_id', $rackId)
-                ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
-                ->update([
-                    'capacidad_maxima' => $request->capacidad_maxima,
-                    'updated_at' => now()
-                ]);
-
-            Log::debug('Capacidades actualizadas:', ['count' => $actualizadas]);
+            // ✅ ELIMINADO: Actualización de capacidad máxima
+            // Ya no se actualiza la capacidad máxima
 
             $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
 
-            // ✅ CORREGIDO: Usar el array devuelto correctamente
-            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+            // ✅ CORREGIDO: Quitar el tercer parámetro de capacidad
+            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes);
+
             // ✅ DEBUG: Verificar qué devuelve
             Log::debug('RESULTADO SINCRONIZACION:', [
                 'resultado' => $resultadoSincronizacion,
@@ -3584,7 +3696,7 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-    private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 10000)
+    private function sincronizarUbicaciones($rack, $ubicacionesExistentes)
     {
         try {
             Log::debug('=== INICIO sincronizarUbicaciones DEBUG ===', [
@@ -3655,7 +3767,7 @@ class UbicacionesVistaController extends Controller
                             'nivel' => $nivel,
                             'posicion' => $posicion,
                             'estado_ocupacion' => 'vacio',
-                            'capacidad_maxima' => $capacidadMaxima,
+                            'capacidad_maxima' => 0, // ✅ CAMBIADO: De $capacidadMaxima a 0
                             'created_at' => $now,
                             'updated_at' => $now
                         ];
@@ -3691,7 +3803,7 @@ class UbicacionesVistaController extends Controller
     /**
      * Genera ubicaciones automáticamente para un rack
      */
-    private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 10000)
+    private function generarUbicacionesAutomaticas($rack)
     {
         $ubicaciones = [];
         $now = now();
@@ -3702,7 +3814,7 @@ class UbicacionesVistaController extends Controller
                 $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
                 $codigoUnico = $rack->nombre . '-' . $codigo;
 
-                // ✅ CORREGIDO: Quitar articulo_id y cantidad_actual
+                // ✅ CORREGIDO: Quitar capacidad_maxima
                 $ubicaciones[] = [
                     'rack_id' => $rack->idRack,
                     'codigo' => $codigo,
@@ -3710,7 +3822,7 @@ class UbicacionesVistaController extends Controller
                     'nivel' => $nivel,
                     'posicion' => $posicion,
                     'estado_ocupacion' => 'vacio',
-                    'capacidad_maxima' => $capacidadMaxima,
+                    'capacidad_maxima' => 0, // ✅ O puedes poner null o eliminar el campo
                     'created_at' => $now,
                     'updated_at' => $now
                 ];
@@ -3727,8 +3839,8 @@ class UbicacionesVistaController extends Controller
             'rack_nombre' => $rack->nombre,
             'total_ubicaciones' => count($ubicaciones),
             'filas' => $rack->filas,
-            'columnas' => $rack->columnas,
-            'capacidad_maxima' => $capacidadMaxima
+            'columnas' => $rack->columnas
+            // ✅ ELIMINADO: capacidad_maxima
         ]);
     }
 

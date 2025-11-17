@@ -159,7 +159,7 @@
                              </div>
                          </div>
 
-
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO COMPRA'))
                          <!-- Botón fijo -->
                          <button
                              class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
@@ -167,6 +167,7 @@
                              <i class="fas fa-check-circle"></i>
                              BUSCAR PRODUCTO
                          </button>
+                            @endif
                      </div>
 
 
@@ -591,6 +592,7 @@
 
                          <!-- Botón Guardar con Loading -->
                          <div class="pt-4">
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR COMPRA'))
                              <button
                                  class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
                                  :disabled="!puedeGuardar || guardandoCompra"
@@ -623,6 +625,7 @@
                                  <!-- Texto del botón -->
                                  <span x-text="guardandoCompra ? 'GUARDANDO...' : 'GUARDAR COMPRA'"></span>
                              </button>
+                             @endif
                          </div>
 
                          <p class="text-xs text-gray-500 text-center">

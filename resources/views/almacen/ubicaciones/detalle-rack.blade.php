@@ -388,9 +388,16 @@
                                                         x-text="ubi.categorias_acumuladas || 'Sin categoría'">
                                                     </div>
 
-                                                    <!-- Cantidad total -->
-                                                    <div class="text-xs font-bold text-white bg-white/30 px-2 py-1 rounded"
-                                                        x-text="ubi.cantidad_total + '/' + ubi.capacidad">
+                                                    <!-- Solo cantidad total con color dinámico -->
+                                                    <div class="text-xs font-bold px-2 py-1 rounded transition-colors duration-300"
+                                                        :class="{
+                                                            'bg-gray-500 text-white': ubi.estado === 'vacio',
+                                                            'bg-green-500 text-white': ubi.estado === 'bajo',
+                                                            'bg-yellow-500 text-black': ubi.estado === 'medio',
+                                                            'bg-orange-500 text-white': ubi.estado === 'alto',
+                                                            'bg-red-500 text-white': ubi.estado === 'muy_alto'
+                                                        }"
+                                                        x-text="ubi.cantidad_total + ' unidades'">
                                                     </div>
                                                 </div>
                                             </template>
@@ -450,19 +457,15 @@
                                                     x-text="modal.ubi.cantidad_total"></div>
                                                 <div class="text-xs text-gray-600">Unidades</div>
                                             </div>
-                                            <div class="text-center">
-                                                <div class="text-2xl font-bold text-purple-600"
-                                                    x-text="modal.ubi.capacidad"></div>
-                                                <div class="text-xs text-gray-600">Capacidad</div>
-                                            </div>
                                         </div>
-
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MAS ARTICULO RACK'))            
                                         <!-- ✅ NUEVO: Botón para agregar más productos -->
                                         <button @click="abrirModalAgregarProducto(modal.ubi)"
                                             class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                             <i class="fas fa-plus text-xs"></i>
                                             Agregar Más
                                         </button>
+                                        @endif
                                     </div>
 
                                     <!-- Categorías y tipos -->
@@ -484,9 +487,17 @@
                                 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
                                     <div class="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                                         <h3 class="font-semibold text-gray-800">Productos en esta ubicación</h3>
-                                        <span class="text-xs text-gray-500 bg-gray-200 px-2 py-1 rounded">
-                                            Capacidad: <span x-text="modal.ubi.cantidad_total"></span>/<span
-                                                x-text="modal.ubi.capacidad"></span>
+                                        <span
+                                            class="text-xs px-2 py-1 rounded font-semibold transition-colors duration-300"
+                                            :class="{
+                                                'bg-gray-200 text-gray-700': modal.ubi.estado === 'vacio',
+                                                'bg-green-100 text-green-700': modal.ubi.estado === 'bajo',
+                                                'bg-yellow-100 text-yellow-700': modal.ubi.estado === 'medio',
+                                                'bg-orange-100 text-orange-700': modal.ubi.estado === 'alto',
+                                                'bg-red-100 text-red-700': modal.ubi.estado === 'muy_alto'
+                                            }">
+                                            Total: <span x-text="modal.ubi.cantidad_total"></span> unidades
+                                            (<span x-text="modal.ubi.estado" class="capitalize"></span>)
                                         </span>
                                     </div>
 
@@ -657,12 +668,11 @@
 
                                                                 <input type="number" x-model="producto.cantidad"
                                                                     @change="actualizarCantidadProducto(idx)"
-                                                                    min="1" :max="modal.ubi.capacidad"
+                                                                    min="1"
                                                                     class="w-14 text-center p-1 border border-gray-300 rounded text-sm font-semibold focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                                                     title="Cantidad">
 
                                                                 <button @click="incrementarCantidadExistente(idx)"
-                                                                    :disabled="getCantidadTotalModal() >= modal.ubi.capacidad"
                                                                     class="w-7 h-7 bg-white hover:bg-gray-200 rounded flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                                     title="Incrementar">
                                                                     <i class="fas fa-plus text-gray-600 text-xs"></i>
@@ -682,19 +692,19 @@
 
                                                             <div class="flex gap-2">
                                                                 <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
+                                                                 @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER ARTICULO RACK'))
                                                                 <button
                                                                     @click="iniciarReubicacionProducto(modal.ubi, producto)"
                                                                     :class="producto.custodia_id ?
                                                                         'bg-secondary hover:bg-purple-600' :
                                                                         'bg-primary hover:bg-blue-600'"
                                                                     class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
-                                                                    :title="producto.custodia_id ?
-                                                                        'Mover' :
-                                                                        'Mover'">
+                                                                    :title="producto.custodia_id ? 'Mover' : 'Mover'">
                                                                     <i class="fas fa-arrows-alt text-xs"></i>
                                                                     <span
                                                                         x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
                                                                 </button>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     </div>
@@ -706,10 +716,12 @@
                                                             x-text="producto.cantidadOriginal"></span> → <span
                                                             x-text="producto.cantidad"></span> unidades</span>
                                                     <div class="flex gap-2">
+                                                        @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CAMBIOS PRODUCTO RACK'))
                                                         <button @click="guardarCambiosProducto(idx)"
                                                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Guardar
                                                         </button>
+                                                        @endif
                                                         <button @click="cancelarCambiosProducto(idx)"
                                                             class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Cancelar
@@ -728,7 +740,6 @@
                                         </template>
                                     </div>
                                 </div>
-
                                 <!-- Información adicional -->
                                 <div class="grid grid-cols-2 gap-4">
                                     <div class="bg-gray-50 p-3 rounded-xl">
@@ -758,23 +769,27 @@
 
                                 <!-- Botones de acción MEJORADOS -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('REUBICAR ARTICULO TODO RACK'))
                                     <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                         class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-boxes text-xs"></i>
                                         Reubicar Todo
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER UN ARTICULO A OTRO RACK'))                                                        
                                     <button @click="abrirModalReubicacionRack(modal.ubi)"
                                         class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                                         <i class="fas fa-exchange-alt"></i>
                                         Mover a Otro Rack
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK'))                                                    
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105 col-span-2">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
+                                    @endif
                                 </div>
                             </div>
                         </template>
@@ -795,17 +810,22 @@
 
                                 <!-- Botones para ubicación vacía -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK '))
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR ARTICULO EN RACK'))                                                             
                                     <button @click="abrirModalAgregarProducto(modal.ubi)"
                                         class="bg-green-500 hover:bg-green-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-plus text-xs"></i>
                                         Agregar Producto
                                     </button>
+                                    @endif
+
+
                                 </div>
                             </div>
                         </template>
@@ -908,6 +928,7 @@
                                         <!-- Botón Seleccionar Todos -->
                                         <div class="flex items-center gap-2"
                                             x-show="modalReubicacionRack.articulos.length > 0">
+                                            @if(\App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR TODOS ARTICULOS RACK'))
                                             <button type="button" @click="seleccionarTodosArticulos()"
                                                 class="btn btn-outline-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"
                                                 :class="todosSeleccionados ? 'bg-blue-500 text-white' : ''">
@@ -916,6 +937,7 @@
                                                 <span
                                                     x-text="todosSeleccionados ? 'Todos seleccionados' : 'Seleccionar todos'"></span>
                                             </button>
+                                            @endif
 
                                             <!-- Contador rápido -->
                                             <span class="text-xs text-gray-500 dark:text-gray-400 font-medium"
@@ -1187,6 +1209,7 @@
                                         <i class="fas fa-times ltr:mr-2 rtl:ml-2"></i>
                                         Cancelar
                                     </button>
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('CONFIRMAR REUBICACION ARTICULO RACK'))
                                     <button type="button" @click="confirmarReubicacionRack()"
                                         :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
                                             .length === 0"
@@ -1196,6 +1219,7 @@
                                         <i class="fas fa-check ltr:mr-2 rtl:ml-2"></i>
                                         Confirmar Reubicación
                                     </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -1516,12 +1540,13 @@
                                                                 class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 <i class="fas fa-plus text-gray-600 text-xs"></i>
                                                             </button>
-
+                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('REMOVER PRODUCTO SELECCIONADO RACK'))                                
                                                             <!-- Remover -->
                                                             <button @click="removerProductoSeleccionado(index)"
                                                                 class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors ml-2">
                                                                 <i class="fas fa-times text-xs"></i>
                                                             </button>
+                                                            @endif
                                                         </div>
 
                                                         <!-- Stock disponible -->
@@ -1572,8 +1597,9 @@
                             <button @click="cerrarModalAgregarProducto()"
                                 class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
                                 <i class="fas fa-times"></i>
-                                Cancelar
+                                Cancelar 
                             </button>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR PRODUCTOS RACK'))
                             <button @click="confirmarAgregarProducto()"
                                 :disabled="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
                                     modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados()"
@@ -1589,6 +1615,7 @@
                                         x-text="modalAgregarProducto.productosSeleccionados.length"></span>
                                 </template>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1614,10 +1641,12 @@
                                         class="font-semibold text-white"></span></div>
                             </div>
                         </div>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER REPORTES RACK'))
                         <button type="button" class="text-white hover:text-blue-200 transition-colors"
                             @click="modalHistorial.open = false">
                             <i class="fas fa-times text-xl"></i>
                         </button>
+                        @endif
                     </div>
 
                     <!-- Body -->
@@ -1926,11 +1955,13 @@
                                     </p>
                                 </div>
                             </div>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('CANCELAR REUBICACION RACK'))
                             <button type="button"
                                 class="text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
                                 @click="modalReubicacion.open = false; cancelarReubicacion()">
                                 <i class="fas fa-times text-lg"></i>
                             </button>
+                            @endif
                         </div>
                     </div>
 
@@ -2291,8 +2322,8 @@
                             if (ubicacion.productos.length > 0) {
                                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                                     .cantidad || 0), 0);
-                                ubicacion.estado = this.calcularEstado(ubicacion.cantidad_total, ubicacion
-                                    .capacidad);
+                                ubicacion.estado = this.calcularEstado(ubicacion
+                                .cantidad_total); // ✅ QUITADO: , ubicacion.capacidad
 
                                 // ✅ ACUMULAR CATEGORÍAS Y TIPOS
                                 const categoriasUnicas = [...new Set(ubicacion.productos
@@ -2905,24 +2936,19 @@
                     if (!this.modal.ubi || !this.modal.ubi.productos) return;
 
                     const producto = this.modal.ubi.productos[index];
-                    const totalActual = this.getCantidadTotalModal();
 
-                    if (totalActual < this.modal.ubi.capacidad) {
-                        producto.cantidad = parseInt(producto.cantidad) + 1;
+                    // ✅ ELIMINADO: Validación de capacidad máxima
+                    producto.cantidad = parseInt(producto.cantidad) + 1;
 
-                        // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
-                        this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
-                        this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi
-                            .capacidad);
+                    // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
+                    this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
+                    this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total);
 
-                        console.log('➕ Cantidad incrementada:', {
-                            producto: producto.nombre,
-                            cantidad: producto.cantidad,
-                            total_ubicacion: this.modal.ubi.cantidad_total
-                        });
-                    } else {
-                        this.warning('No se puede exceder la capacidad máxima de la ubicación');
-                    }
+                    console.log('➕ Cantidad incrementada:', {
+                        producto: producto.nombre,
+                        cantidad: producto.cantidad,
+                        total_ubicacion: this.modal.ubi.cantidad_total
+                    });
                 },
 
                 decrementarCantidadExistente(index) {
@@ -2934,8 +2960,7 @@
 
                         // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
                         this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
-                        this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi
-                            .capacidad);
+                        this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total);
 
                         console.log('➖ Cantidad decrementada:', {
                             producto: producto.nombre,
@@ -2955,16 +2980,12 @@
                         return;
                     }
 
-                    const total = this.getCantidadTotalModal();
-                    if (total > this.modal.ubi.capacidad) {
-                        const exceso = total - this.modal.ubi.capacidad;
-                        producto.cantidad = Math.max(1, cantidad - exceso);
-                        this.warning('Se ajustó la cantidad para no exceder la capacidad máxima');
-                    }
+                    // ✅ ELIMINADO: Validación de capacidad máxima
+                    // Ya no hay límite de capacidad, solo actualizar
 
                     // ✅ ACTUALIZAR CANTIDAD TOTAL EN TIEMPO REAL
                     this.modal.ubi.cantidad_total = this.getCantidadTotalModal();
-                    this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total, this.modal.ubi.capacidad);
+                    this.modal.ubi.estado = this.calcularEstado(this.modal.ubi.cantidad_total);
                 },
 
                 async guardarCambiosProducto(index) {
@@ -3159,7 +3180,8 @@
                         const productosExistentes = ubi.productos ?
                             ubi.productos.reduce((total, prod) => total + (prod.cantidad || 0), 0) : 0;
 
-                        this.modalAgregarProducto.capacidadMaxima = ubi.capacidad - productosExistentes;
+                        // ✅ ELIMINADO: Cálculo de capacidad máxima disponible
+                        // this.modalAgregarProducto.capacidadMaxima = ubi.capacidad - productosExistentes;
 
                         this.modalAgregarProducto.productosSeleccionados = [];
                         this.modalAgregarProducto.productosFiltrados = [];
@@ -3234,6 +3256,7 @@
                         this.modalAgregarProducto.virtualScroll.loading = false;
                     }
                 },
+
 
                 cerrarModalAgregarProducto() {
                     this.modalAgregarProducto.open = false;
@@ -3549,9 +3572,8 @@
                                     cantidad: productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
                                     cantidad_total: productosActuales.reduce((sum, p) => sum + p
                                         .cantidad, 0),
-                                    estado: this.calcularEstado(
-                                        productosActuales.reduce((sum, p) => sum + p.cantidad, 0),
-                                        ubi.capacidad
+                                    estado: this.calcularEstado( // ✅ QUITADO: , ubi.capacidad
+                                        productosActuales.reduce((sum, p) => sum + p.cantidad, 0)
                                     ),
                                     fecha: new Date().toISOString()
                                 };
@@ -3583,7 +3605,8 @@
                                 this.rack.niveles[nivelIndex].ubicaciones[ubiIndex] = {
                                     ...ubi,
                                     cantidad_total: cantidadTotal,
-                                    estado: this.calcularEstado(cantidadTotal, ubi.capacidad),
+                                    estado: this.calcularEstado(
+                                    cantidadTotal), // ✅ QUITADO: , ubi.capacidad
                                     fecha: new Date().toISOString()
                                 };
 
@@ -4056,15 +4079,11 @@
                     }
                 },
 
-                calcularEstado(cantidad, capacidad) {
-                    if (capacidad <= 0) return 'vacio';
-
-                    const porcentaje = (cantidad / capacidad) * 100;
-
-                    if (porcentaje == 0) return 'vacio';
-                    if (porcentaje <= 24) return 'bajo';
-                    if (porcentaje <= 49) return 'medio';
-                    if (porcentaje <= 74) return 'alto';
+                calcularEstado(cantidadTotal) {
+                    if (cantidadTotal === 0) return 'vacio';
+                    if (cantidadTotal <= 100) return 'bajo';
+                    if (cantidadTotal <= 500) return 'medio';
+                    if (cantidadTotal <= 1000) return 'alto';
                     return 'muy_alto';
                 },
 

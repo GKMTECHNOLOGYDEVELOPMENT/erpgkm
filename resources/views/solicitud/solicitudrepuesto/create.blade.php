@@ -764,7 +764,7 @@
                                 </svg>
                                 <span>Limpiar Todo</span>
                             </button>
-
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD REPUESTO'))
                             <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
                                 :class="{
                                     'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
@@ -781,8 +781,9 @@
                                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                 </template>
                                 <span class="text-lg"
-                                    x-text="isCreatingOrder ? 'Creando Orden...' : 'Crear Orden'"></span>
+                                    x-text="isCreatingOrder ? 'Guardando Solicitud...' : 'Guardar Solicitud Repuesto'"></span>
                             </button>
+                            @endif
                         </div>
                     </div>
 

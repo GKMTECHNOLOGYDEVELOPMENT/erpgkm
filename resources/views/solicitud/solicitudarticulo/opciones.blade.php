@@ -288,7 +288,8 @@
                                                             Completado
                                                         </span>
                                                     @elseif($articulo->suficiente_stock)
-                                                        <button type="button"
+                                                    @if(\App\Helpers\PermisoHelper::tienePermiso('PROCESAR ARTICULO INDIVIDUAL'))
+                                                    <button type="button"
                                                             @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }})"
                                                             :disabled="!selecciones[{{ $articulo->idArticulos }}] ||
                                                                 procesandoIndividual[{{ $articulo->idArticulos }}]"
@@ -310,6 +311,7 @@
                                                                 <span>Procesando...</span>
                                                             </span>
                                                         </button>
+                                                        @endif
                                                     @else
                                                         <button disabled
                                                             class="px-6 py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300">
@@ -418,6 +420,7 @@
                                 </ul>
 
                                 <div class="space-y-4">
+                                    @if(App\Helpers\PermisoHelper::tienePermiso('PROCESAR ARTICULO GRUPAL'))                                    
                                     <button @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
                                         :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
                                         :class="{
@@ -434,7 +437,7 @@
                                         <span
                                             x-text="isLoadingGrupal ? 'Procesando...' : 'Procesar Todo el Lote'"></span>
                                     </button>
-
+                                    @endif
                                     <div
                                         class="text-center text-sm font-semibold @if ($puede_aceptar) text-success @else text-danger @endif">
                                         @if ($puede_aceptar)

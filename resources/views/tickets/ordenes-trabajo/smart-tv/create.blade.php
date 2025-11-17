@@ -53,6 +53,7 @@
                 <div class="col-span-1">
                     <div class="flex items-center space-x-2">
                         <label for="idCliente" class="block text-sm font-medium">Usuario Final</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR USUARIO FINAL ORDEN DE TRABAJO SMART'))    
                         <button type="button" class="btn btn-primary p-1 mb-2"
                             @click="openClienteModal = true;     cargarClientesGenerales('idClienteGeneraloption'); ">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
@@ -60,6 +61,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
+                        @endif
+                    
                     </div>
                     <!-- Se usa nice-select2 (clase select2) -->
                     <select id="idCliente" name="idCliente" style="width: 100%"></select>
@@ -74,12 +77,14 @@
 
                     <div class="flex items-center space-x-2">
                         <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR CLIENTE GENERAL ORDEN DE TRABAJO SMART'))
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openClienteGeneralModal = true">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 22 22"
                                 stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
+                        @endif
                     </div>
 
 
@@ -103,6 +108,7 @@
                 <div>
                     <div class="flex items-center space-x-2 ">
                         <label for="idTienda" class="block text-sm font-medium">Tienda</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR TIENDA ORDEN DE TRABAJO SMART'))
                         <a href="{{ route('tienda.create') }}" class="btn btn-primary p-1" role="button"
                             target="_blank">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
@@ -110,6 +116,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </a>
+                        @endif
+
                     </div>
 
                     <!-- Select para tiendas (solo si el cliente es tienda) -->
@@ -149,12 +157,14 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <label for="idMarca" class="block text-sm font-medium">Marca</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MARCA ORDEN DE TRABAJO SMART'))
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openMarcaModal = true">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
+                        @endif
                     </div>
                     <!-- Select para las marcas -->
                     <!-- Preload (spinner o mensaje) sobre el select -->
@@ -177,12 +187,14 @@
                 <div>
                     <div class="flex items-center space-x-2">
                         <label for="idModelo" class="block text-sm font-medium">Modelo</label>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MODELO ORDEN DE TRABAJO SMART'))
                         <button type="button" class="btn btn-primary p-1 mb-2" @click="openModeloModal = true">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
                         </button>
+                        @endif
                     </div>
                     <!-- Select para los modelos con preload -->
                     <div class="relative">
@@ -292,7 +304,9 @@
                 <!-- Botones -->
                 <div class="col-span-1 md:col-span-2 flex justify-end mt-4 gap-2">
                     <a href="{{ route('ordenes.index') }}" class="btn btn-outline-danger">Cancelar</a>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR ORDEN DE TRABAJO SMART'))
                     <button type="submit" id="btnGuardar" class="btn btn-primary ml-4">Guardar</button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -446,8 +460,10 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="openClienteModal = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR USUARIO FINAL ORDEN DE TRABAJO SMART'))
                                 <button type="submit" id="btnGuardarCliente"
                                     class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -521,7 +537,9 @@
                             <div class="flex justify-end items-center mb-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="openClienteGeneralModal = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CLIENTE GENERAL ORDEN DE TRABAJO SMART'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -569,7 +587,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="openMarcaModal = false">Cancelar</button>
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MARCA ORDEN DE TRABAJO SMART'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -679,7 +699,9 @@
                             <div class="flex justify-end items-center mt-4">
                                 <button type="button" class="btn btn-outline-danger"
                                     @click="openModeloModal = false">Cancelar</button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR MODELO ORDEN DE TRABAJO SMART'))
                                 <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4">Guardar</button>
+                                @endif
                             </div>
                         </form>
                     </div>

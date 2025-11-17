@@ -375,6 +375,7 @@
                         Completado
                     </span>
                 @elseif($repuesto->suficiente_stock)
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO INDIVIDUAL'))
                     <button type="button"
                         @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
                         :disabled="!selecciones[{{ $repuesto->idArticulos }}] || procesandoIndividual[{{ $repuesto->idArticulos }}]"
@@ -392,6 +393,8 @@
                             <span>Procesando...</span>
                         </span>
                     </button>
+                    @endif
+
                 @else
                     <button disabled
                         class="px-6 py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300">
@@ -499,6 +502,7 @@
                                 </ul>
 
                                 <div class="space-y-4">
+                                    @if(App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO GRUPAL'))
                                     <button @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
                                         :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
                                         :class="{
@@ -515,6 +519,7 @@
                                         <span
                                             x-text="isLoadingGrupal ? 'Procesando...' : 'Procesar Todo el Lote'"></span>
                                     </button>
+                                    @endif
 
                                     <div
                                         class="text-center text-sm font-semibold @if ($puede_aceptar) text-success @else text-danger @endif">

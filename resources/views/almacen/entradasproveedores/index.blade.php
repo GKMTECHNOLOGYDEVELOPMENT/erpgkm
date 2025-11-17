@@ -155,7 +155,7 @@
                              </div>
                          </div>
 
-
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO ENTRADA PROVEEDOR'))
                          <!-- Botón fijo -->
                          <button
                              class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
@@ -163,6 +163,7 @@
                              <i class="fas fa-check-circle"></i>
                              BUSCAR PRODUCTO
                          </button>
+                         @endif
                      </div>
 
 
@@ -382,6 +383,7 @@
 
                          <!-- Botón Guardar Entrada -->
                          <div class="pt-4">
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR ENTRADA PROVEEDOR'))
                              <button
                                  class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                                  :disabled="guardandoEntrada" @click="guardarEntrada">
@@ -403,6 +405,7 @@
                                  </template>
                                  <span x-text="guardandoEntrada ? 'GUARDANDO...' : 'GUARDAR ENTRADA'"></span>
                              </button>
+                             @endif
                          </div>
                      </div>
                  </div>

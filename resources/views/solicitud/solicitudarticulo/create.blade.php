@@ -637,7 +637,7 @@
                                 </svg>
                                 <span>Limpiar Todo</span>
                             </button>
-
+                             @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD ARTICULO'))
                             <button @click="createSolicitud()" :disabled="!canCreateSolicitud || isCreatingOrder"
                                 :class="{
                                     'opacity-50 cursor-not-allowed': !canCreateSolicitud || isCreatingOrder,
@@ -654,8 +654,9 @@
                                     <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                                 </template>
                                 <span class="text-lg"
-                                    x-text="isCreatingOrder ? 'Creando Solicitud...' : 'Crear Solicitud'"></span>
+                                    x-text="isCreatingOrder ? 'Guardando Solicitud...' : 'Guardar Solicitud Articulo'"></span>
                             </button>
+                            @endif
                         </div>
                     </div>
 
