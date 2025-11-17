@@ -365,7 +365,7 @@
                                 </svg>
                                 <span>Limpiar Todo</span>
                             </button>
-
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR SOLICITUD ARTICULO'))
                             <button @click="updateSolicitud()" :disabled="!canCreateSolicitud || isUpdatingSolicitud" :class="{
                                 'opacity-50 cursor-not-allowed': !canCreateSolicitud || isUpdatingSolicitud,
                                 'hover:scale-[1.02]': canCreateSolicitud && !isUpdatingSolicitud
@@ -380,6 +380,7 @@
                                 </template>
                                 <span class="text-lg" x-text="isUpdatingSolicitud ? 'Actualizando Solicitud...' : 'Actualizar Solicitud'"></span>
                             </button>
+                            @endif
 
                             <a href="{{ route('solicitudarticulo.index') }}" class="w-full px-6 py-4 bg-gray-500 text-white rounded-lg font-bold hover:bg-gray-600 transition-all duration-200 flex items-center justify-center space-x-3">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

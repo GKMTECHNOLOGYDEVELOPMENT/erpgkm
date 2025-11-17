@@ -123,6 +123,7 @@
 
         <!-- Botón Nueva Compra - CON ESPACIOS -->
         <div class="flex justify-end mt-6">
+            @if(\App\Helpers\PermisoHelper::tienePermiso('NUEVA COMPRA'))
             <a href="{{ route('compras.create') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 
                btn btn-primary space-x-2">
@@ -132,6 +133,7 @@
                 </svg>
                 <span>Nueva Compra</span>
             </a>
+            @endif
         </div>
 
         <!-- Tabla de Compras - Agregar columna Estado -->
@@ -222,6 +224,7 @@
                                 <!-- Acciones -->
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex space-x-2 justify-center">
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO COMPRA'))
                                         <!-- Botón Cambiar Estado -->
                                         <button @click="openEstadoModal(compra)" class="btn btn-secondary">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
@@ -235,7 +238,8 @@
                                             </svg>
                                             Estado
                                         </button>
-
+                                        @endif
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER DETALLES COMPRA'))
                                         <!-- Botón Detalles de Compra -->
                                         <button @click="detallesCompra(compra.idCompra)" class="btn btn-warning">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
@@ -246,6 +250,7 @@
                                             </svg>
                                             Detalles
                                         </button>
+                                        @endif
 
                                         <!-- Botón Imprimir Factura -->
                                         {{-- <button @click="imprimirFactura(compra.idCompra)" class="btn btn-warning">

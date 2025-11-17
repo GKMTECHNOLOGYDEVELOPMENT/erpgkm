@@ -303,11 +303,13 @@
                                                 <template x-if="solicitud.series && solicitud.series.length > 0">
                                                     <div>
                                                         <span class="text-gray-500">Series:</span>
+                                                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER SERIES SOLICITUD INGRESO'))
                                                         <button
                                                             @click="seriesModal = true; seriesSeleccionadas = solicitud.series"
                                                             class="ml-2 text-blue-600 text-xs underline hover:text-blue-800">
                                                             Ver series (<span x-text="solicitud.series.length"></span>)
                                                         </button>
+                                                        @endif
                                                     </div>
                                                 </template>
 
@@ -315,6 +317,8 @@
 
                                             <!-- Botones -->
                                             <div class="flex space-x-1 mt-2">
+                                                
+                                                 @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
                                                 <button
                                                     @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
                                                     :disabled="botonIndividualDeshabilitado(solicitud, 'pendiente')"
@@ -337,6 +341,8 @@
                                                     :class="getBotonIndividualClasses(solicitud, 'actualizar')">
                                                     Actualizar
                                                 </button>
+                                                @endif
+
 
 
                                             </div>
@@ -351,6 +357,7 @@
                                     <span class="text-xs text-gray-500"
                                         x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
                                     <div class="flex space-x-2">
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
                                         <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
                                             :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
                                             :class="getBotonGrupalClasses(grupo, 'pendiente')">
@@ -381,6 +388,7 @@
                                             <i class="fas fa-tv mr-1"></i>
                                             Unity Grupo
                                         </button>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -496,13 +504,14 @@
                                         <i class="fas fa-map-marker-alt mr-2 text-purple-500"></i>
                                         Ubicaciones
                                     </h4>
-
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR UBICACIONES SUGERIDAS SOLICITUD INGRESO'))
                                     <!-- Botón para buscar sugerencias -->
                                     <button type="button" @click="buscarSugerencias()"
                                         class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded-lg border border-green-200">
                                         <i class="fas fa-magic"></i>
                                         Buscar Ubicaciones Sugeridas
                                     </button>
+                                    @endif
                                 </div>
 
                                 <template x-for="(ubicacion, index) in ubicacionesForm" :key="index">
@@ -562,13 +571,14 @@
                                             ¡Toda la cantidad ha sido distribuida!</span>
                                     </p>
                                 </div>
-
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR UBICACIONES SOLICITUD INGRESO'))
                                 <!-- Botón para agregar más ubicaciones -->
                                 <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
                                     class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
                                     <i class="fas fa-plus"></i>
                                     Agregar otra ubicación
                                 </button>
+                                @endif
                             </div>
 
                             <!-- Sección de Series (solo si maneja_serie = 1) -->
@@ -668,7 +678,7 @@
                                     @click="cerrarModalUbicacion()">
                                     Cancelar
                                 </button>
-
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR UBICACIONES SOLICITUD INGRESO'))
                                 <button type="button" class="btn btn-primary" :disabled="!puedeGuardar"
                                     @click="guardarUbicaciones">
                                     <i class="fas fa-save mr-2"></i>
@@ -676,6 +686,7 @@
                                     <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
                                     <span x-show="!articuloRequiereSeries">Ubicaciones</span>
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -787,11 +798,13 @@
                         <button type="button" class="btn btn-outline-danger" @click="cerrarModalActualizar()">
                             Cancelar
                         </button>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR SOLICITUD INGRESO'))
                         <button type="button" class="btn btn-warning" :disabled="!puedeActualizar"
                             @click="guardarActualizacion">
                             <i class="fas fa-sync-alt mr-2"></i>
                             Actualizar Solicitud
                         </button>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -149,6 +149,7 @@
 
             <!-- Botones -->
             <div class="flex items-end gap-2">
+                @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR NUEVA ORDEN DE TRABAJO SMART'))
                 <!-- Agregar -->
                 <a href="{{ route('ordenes.createsmart') }}" class="btn btn-primary btn-sm px-3 py-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 block mx-auto" fill="none"
@@ -157,7 +158,8 @@
                         <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round" />
                     </svg>
                 </a>
-
+                @endif
+                @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR ORDEN DE TRABAJO SMART EXCEL'))
                 <!-- Exportar -->
                 <a class="btn btn-success btn-sm px-3 py-2"
                     x-bind:href="`{{ route('ordenes.export.excel') }}?clienteGeneral=${clienteGeneralFilter}&startDate=${startDate}&endDate=${endDate}`">
@@ -168,9 +170,9 @@
                         <path d="M9 13l6 6M15 13l-6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </a>
-
+                @endif
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR TABLA ORDEN DE TRABAJO SMART'))
                 <!-- Refrescar -->
-                <!-- Limpiar Filtros -->
                 <button class="btn btn-secondary btn-sm px-3 py-2"
                     @click="
                         startDate = '';
@@ -187,6 +189,7 @@
                         <path d='M20.49 15a9 9 0 01-14.36 3.36L1 14' stroke-linecap='round' />
                     </svg>
                 </button>
+                @endif
 
             </div>
         </div>
@@ -223,15 +226,15 @@
                     </div>
 
                    <!-- Botón Buscar -->
-<button id="btnSearch" class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm flex items-center justify-center">
-    <span id="searchText">Buscar</span>
-    <span id="searchSpinner" class="hidden ml-2">
-        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-    </span>
-</button>
+                    <button id="btnSearch" class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm flex items-center justify-center">
+                        <span id="searchText">Buscar</span>
+                        <span id="searchSpinner" class="hidden ml-2">
+                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                    </button>
                 </div>
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
@@ -338,6 +341,13 @@
     });
 });
     </script>
+
+    <script>
+    window.permisosSmart = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO SMART ') ? 'true' : 'false' }}
+    };
+</script>
 
 
     <!-- Scripts adicionales -->

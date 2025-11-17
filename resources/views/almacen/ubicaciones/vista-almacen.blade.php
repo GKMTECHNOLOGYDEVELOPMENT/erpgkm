@@ -195,7 +195,7 @@
                 </button>
                 @endif
 
-                @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES'))
+                @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
                 <button @click="abrirModalSeleccionRack()"
                     class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                     <i class="fas fa-edit"></i>
@@ -631,6 +631,7 @@
                                     class="btn btn-outline-danger">
                                     Cancelar
                                 </button>
+                                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR DIMENSIONES RACK'))
                                 <button type="submit"
                                     :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
                                     :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
@@ -642,6 +643,7 @@
                                         x-text="modalEditarDimensiones.loading ? 'Actualizando...' : 
                                         (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
                                 </button>
+                                @endif
                             </div>
                         </form>
                     </div>

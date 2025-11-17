@@ -27,7 +27,7 @@
     }
 </style>
 <div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
-    @if($idEstadflujo != 33)
+    @if($idEstadflujo != 33 && \App\Helpers\PermisoHelper::tienePermiso('CREAR UNA COORDINACION ORDEN DE TRABAJO SMART'))
     <button id="crearCordinacionBtn"
         class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
         Coordinación
@@ -653,9 +653,11 @@
                         <!-- Botones -->
                         <div class="flex justify-end items-center mt-4">
                             <button type="button" class="btn btn-outline-danger" @click="open = false">Cancelar</button>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR COORDINACION ORDEN DE TRABAJO SMART'))
                             <button type="button" id="guardarBtn" class="btn btn-primary ltr:ml-4 rtl:mr-4">
                                 Guardar
                             </button>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -990,4 +992,33 @@
         }
     };
 </script>
+
+<script>
+    window.permisosVisitas = {
+        // Botones principales
+        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA') ? 'true' : 'false' }},
+        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA') ? 'true' : 'false' }},
+        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA') ? 'true' : 'false' }},
+        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA') ? 'true' : 'false' }},
+        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO') ? 'true' : 'false' }},
+        
+        // Botones de inicio de servicio
+        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO') ? 'true' : 'false' }},
+        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO') ? 'true' : 'false' }},
+        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO') ? 'true' : 'false' }},
+        
+        // Botones de final de servicio
+        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO') ? 'true' : 'false' }},
+        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO') ? 'true' : 'false' }},
+        
+        // Botones del modal de detalles
+        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO') ? 'true' : 'false' }},
+        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO') ? 'true' : 'false' }},
+        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA') ? 'true' : 'false' }},
+        
+        // Botones del modal de condiciones
+        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES') ? 'true' : 'false' }}
+    };
+</script>
+
 <script src="{{ asset('assets/js/tickets/smart/visitas.js') }}"></script>

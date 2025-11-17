@@ -456,13 +456,14 @@
                                                 <div class="text-xs text-gray-600">Capacidad</div>
                                             </div>
                                         </div>
-
+                                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MAS ARTICULO RACK'))            
                                         <!-- ✅ NUEVO: Botón para agregar más productos -->
                                         <button @click="abrirModalAgregarProducto(modal.ubi)"
                                             class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                             <i class="fas fa-plus text-xs"></i>
                                             Agregar Más
                                         </button>
+                                        @endif
                                     </div>
 
                                     <!-- Categorías y tipos -->
@@ -682,6 +683,7 @@
 
                                                             <div class="flex gap-2">
                                                                 <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
+                                                                 @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER ARTICULO RACK'))
                                                                 <button
                                                                     @click="iniciarReubicacionProducto(modal.ubi, producto)"
                                                                     :class="producto.custodia_id ?
@@ -695,6 +697,7 @@
                                                                     <span
                                                                         x-text="producto.custodia_id ? 'Mover' : 'Mover'"></span>
                                                                 </button>
+                                                                @endif
                                                             </div>
                                                         </div>
                                                     </div>
@@ -706,10 +709,12 @@
                                                             x-text="producto.cantidadOriginal"></span> → <span
                                                             x-text="producto.cantidad"></span> unidades</span>
                                                     <div class="flex gap-2">
+                                                        @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CAMBIOS PRODUCTO RACK'))
                                                         <button @click="guardarCambiosProducto(idx)"
                                                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Guardar
                                                         </button>
+                                                        @endif
                                                         <button @click="cancelarCambiosProducto(idx)"
                                                             class="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Cancelar
@@ -758,23 +763,27 @@
 
                                 <!-- Botones de acción MEJORADOS -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('REUBICAR ARTICULO TODO RACK'))
                                     <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                         class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-boxes text-xs"></i>
                                         Reubicar Todo
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER UN ARTICULO A OTRO RACK'))                                                        
                                     <button @click="abrirModalReubicacionRack(modal.ubi)"
                                         class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                                         <i class="fas fa-exchange-alt"></i>
                                         Mover a Otro Rack
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK'))                                                    
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105 col-span-2">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
+                                    @endif
                                 </div>
                             </div>
                         </template>
@@ -795,17 +804,22 @@
 
                                 <!-- Botones para ubicación vacía -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK '))
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
-
+                                    @endif
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR ARTICULO EN RACK'))                                                             
                                     <button @click="abrirModalAgregarProducto(modal.ubi)"
                                         class="bg-green-500 hover:bg-green-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-plus text-xs"></i>
                                         Agregar Producto
                                     </button>
+                                    @endif
+
+
                                 </div>
                             </div>
                         </template>
@@ -908,6 +922,7 @@
                                         <!-- Botón Seleccionar Todos -->
                                         <div class="flex items-center gap-2"
                                             x-show="modalReubicacionRack.articulos.length > 0">
+                                            @if(\App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR TODOS ARTICULOS RACK'))
                                             <button type="button" @click="seleccionarTodosArticulos()"
                                                 class="btn btn-outline-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"
                                                 :class="todosSeleccionados ? 'bg-blue-500 text-white' : ''">
@@ -916,6 +931,7 @@
                                                 <span
                                                     x-text="todosSeleccionados ? 'Todos seleccionados' : 'Seleccionar todos'"></span>
                                             </button>
+                                            @endif
 
                                             <!-- Contador rápido -->
                                             <span class="text-xs text-gray-500 dark:text-gray-400 font-medium"
@@ -1187,6 +1203,7 @@
                                         <i class="fas fa-times ltr:mr-2 rtl:ml-2"></i>
                                         Cancelar
                                     </button>
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('CONFIRMAR REUBICACION ARTICULO RACK'))
                                     <button type="button" @click="confirmarReubicacionRack()"
                                         :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
                                             .length === 0"
@@ -1196,6 +1213,7 @@
                                         <i class="fas fa-check ltr:mr-2 rtl:ml-2"></i>
                                         Confirmar Reubicación
                                     </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -1516,12 +1534,13 @@
                                                                 class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 <i class="fas fa-plus text-gray-600 text-xs"></i>
                                                             </button>
-
+                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('REMOVER PRODUCTO SELECCIONADO RACK'))                                
                                                             <!-- Remover -->
                                                             <button @click="removerProductoSeleccionado(index)"
                                                                 class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors ml-2">
                                                                 <i class="fas fa-times text-xs"></i>
                                                             </button>
+                                                            @endif
                                                         </div>
 
                                                         <!-- Stock disponible -->
@@ -1572,8 +1591,9 @@
                             <button @click="cerrarModalAgregarProducto()"
                                 class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
                                 <i class="fas fa-times"></i>
-                                Cancelar
+                                Cancelar 
                             </button>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR PRODUCTOS RACK'))
                             <button @click="confirmarAgregarProducto()"
                                 :disabled="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
                                     modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados()"
@@ -1589,6 +1609,7 @@
                                         x-text="modalAgregarProducto.productosSeleccionados.length"></span>
                                 </template>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -1614,10 +1635,12 @@
                                         class="font-semibold text-white"></span></div>
                             </div>
                         </div>
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER REPORTES RACK'))
                         <button type="button" class="text-white hover:text-blue-200 transition-colors"
                             @click="modalHistorial.open = false">
                             <i class="fas fa-times text-xl"></i>
                         </button>
+                        @endif
                     </div>
 
                     <!-- Body -->
@@ -1926,11 +1949,13 @@
                                     </p>
                                 </div>
                             </div>
+                            @if(\App\Helpers\PermisoHelper::tienePermiso('CANCELAR REUBICACION RACK'))
                             <button type="button"
                                 class="text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
                                 @click="modalReubicacion.open = false; cancelarReubicacion()">
                                 <i class="fas fa-times text-lg"></i>
                             </button>
+                            @endif
                         </div>
                     </div>
 

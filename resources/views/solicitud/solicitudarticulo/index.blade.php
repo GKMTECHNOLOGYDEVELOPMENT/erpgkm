@@ -493,8 +493,10 @@
         </a>
                             @endif
 
+                            
                             <!-- Botón Editar - solo para pendientes -->
                             @if ($solicitud->estado == 'pendiente')
+                             @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
                                 <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
                                     class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -504,6 +506,7 @@
                                     </svg>
                                     Editar
                                 </a>
+                                @endif
                             @endif
                         @endif
                     </div>
