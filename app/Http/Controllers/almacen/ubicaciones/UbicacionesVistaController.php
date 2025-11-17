@@ -720,10 +720,10 @@ class UbicacionesVistaController extends Controller
 
                 // ✅ Lógica de repuestos
                 DB::raw('CASE 
-            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-            THEN a.codigo_repuesto 
-            ELSE a.nombre 
-        END as producto'),
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as producto'),
 
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
@@ -953,22 +953,8 @@ class UbicacionesVistaController extends Controller
                 // ✅ CALCULAR CANTIDAD TOTAL
                 $cantidadTotal = $productosAgrupados->isNotEmpty() ? $productosAgrupados->sum('cantidad') : 0;
 
-                // Determinar estado basado en porcentaje de ocupación
-                $porcentajeOcupacion = 0;
-                if ($primerArticulo->capacidad_maxima > 0) {
-                    $porcentajeOcupacion = ($cantidadTotal / $primerArticulo->capacidad_maxima) * 100;
-                }
-
-                // Calcular estado
-                $estado = $primerArticulo->estado_ocupacion;
-                if ($estado == 'vacio' && $cantidadTotal > 0) {
-                    if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                    elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                    elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                    elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
-                } elseif ($cantidadTotal == 0) {
-                    $estado = 'vacio';
-                }
+                // ✅ NUEVO: CALCULAR ESTADO BASADO EN RANGOS FIJOS DE CAPACIDAD
+                $estado = $this->calcularEstadoPorCapacidad($cantidadTotal);
 
                 // Acumular categorías y tipos
                 $categoriasUnicas = $productosAgrupados->pluck('categoria')->filter()->unique();
@@ -1034,6 +1020,24 @@ class UbicacionesVistaController extends Controller
             'rackActual' => $rack,
             'sedeActual' => $sede
         ]);
+    }
+
+    /**
+     * ✅ NUEVO: Calcular estado basado en rangos fijos de capacidad
+     */
+    private function calcularEstadoPorCapacidad($cantidadTotal)
+    {
+        if ($cantidadTotal == 0) {
+            return 'vacio';
+        } elseif ($cantidadTotal <= 100) {
+            return 'bajo';
+        } elseif ($cantidadTotal <= 500) {
+            return 'medio';
+        } elseif ($cantidadTotal <= 1000) {
+            return 'alto';
+        } else {
+            return 'muy_alto';
+        }
     }
 
 
@@ -2817,10 +2821,10 @@ class UbicacionesVistaController extends Controller
                 ->select(
                     'a.idArticulos as id',
                     DB::raw('CASE 
-                    WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                    THEN a.codigo_repuesto 
-                    ELSE a.nombre 
-                END as nombre'),
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
+                THEN a.codigo_repuesto 
+                ELSE a.nombre 
+            END as nombre'),
                     'a.nombre as nombre_original',
                     'a.codigo_repuesto',
                     'a.stock_total',
@@ -2828,9 +2832,9 @@ class UbicacionesVistaController extends Controller
                     'ta.idTipoArticulo',
                     // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
                     DB::raw('CASE 
-                    WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-                    ELSE c_normal.nombre 
-                END as categoria'),
+                WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
+                ELSE c_normal.nombre 
+            END as categoria'),
                     'rua.cantidad',
                     'rua.cliente_general_id',
                     'cg.descripcion as cliente_general_nombre',
@@ -2887,21 +2891,8 @@ class UbicacionesVistaController extends Controller
             $todosLosProductos = array_merge($productos, $custodias);
             $cantidadTotal = array_sum(array_column($todosLosProductos, 'cantidad'));
 
-            // Calcular estado
-            $porcentajeOcupacion = 0;
-            if ($ubicacionBase->capacidad > 0) {
-                $porcentajeOcupacion = ($cantidadTotal / $ubicacionBase->capacidad) * 100;
-            }
-
-            $estado = $ubicacionBase->estado_ocupacion;
-            if ($estado == 'vacio' && $cantidadTotal > 0) {
-                if ($porcentajeOcupacion > 0 && $porcentajeOcupacion <= 24) $estado = 'bajo';
-                elseif ($porcentajeOcupacion <= 49) $estado = 'medio';
-                elseif ($porcentajeOcupacion <= 74) $estado = 'alto';
-                elseif ($porcentajeOcupacion > 74) $estado = 'muy_alto';
-            } elseif ($cantidadTotal == 0) {
-                $estado = 'vacio';
-            }
+            // ✅ NUEVO: CALCULAR ESTADO BASADO EN RANGOS FIJOS DE CAPACIDAD
+            $estado = $this->calcularEstadoPorCapacidad($cantidadTotal);
 
             // Acumular categorías y tipos - USAR ARRAYS
             $categoriasUnicas = array_unique(array_filter(array_column($todosLosProductos, 'categoria')));
@@ -2969,6 +2960,7 @@ class UbicacionesVistaController extends Controller
         }
     }
 
+
     public function cancelarReubicacion(Request $request)
     {
         return response()->json([
@@ -2982,14 +2974,11 @@ class UbicacionesVistaController extends Controller
      */
     private function calcularEstadoOcupacion($cantidad, $capacidadMaxima)
     {
-        if ($capacidadMaxima <= 0) return 'vacio';
-
-        $porcentaje = ($cantidad / $capacidadMaxima) * 100;
-
-        if ($porcentaje == 0) return 'vacio';
-        if ($porcentaje <= 24) return 'bajo';
-        if ($porcentaje <= 49) return 'medio';
-        if ($porcentaje <= 74) return 'alto';
+        // ✅ NUEVO: Usar rangos fijos en lugar de porcentajes
+        if ($cantidad == 0) return 'vacio';
+        if ($cantidad <= 100) return 'bajo';
+        if ($cantidad <= 500) return 'medio';
+        if ($cantidad <= 1000) return 'alto';
         return 'muy_alto';
     }
 
@@ -3436,8 +3425,8 @@ class UbicacionesVistaController extends Controller
                 'tipo_rack' => 'required|in:panel,spark', // NUEVO: Validación del tipo
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000',
                 'estado' => 'required|in:activo,inactivo'
+                // ✅ ELIMINADO: capacidad_maxima
             ]);
 
             if ($validator->fails()) {
@@ -3461,10 +3450,10 @@ class UbicacionesVistaController extends Controller
             ]);
 
             $rack = DB::table('racks')->where('idRack', $rackId)->first();
-            $capacidadMaxima = $request->input('capacidad_maxima', 100);
 
+            // ✅ ELIMINADO: $capacidadMaxima ya no se necesita
             // Generar ubicaciones automáticamente
-            $this->generarUbicacionesAutomaticas($rack, $capacidadMaxima);
+            $this->generarUbicacionesAutomaticas($rack);
 
             DB::commit();
 
@@ -3501,7 +3490,7 @@ class UbicacionesVistaController extends Controller
                 'filas' => 'required|integer|min:1|max:12',
                 'columnas' => 'required|integer|min:1|max:24',
                 'tipo_rack' => 'required|in:panel,spark',
-                'capacidad_maxima' => 'required|integer|min:1|max:10000'
+                // ✅ ELIMINADO: capacidad_maxima
             ]);
 
             if ($validator->fails()) {
@@ -3597,21 +3586,14 @@ class UbicacionesVistaController extends Controller
 
             Log::debug('Ubicaciones existentes:', ['count' => $ubicacionesExistentes->count()]);
 
-            // Actualizar capacidad máxima de ubicaciones existentes
-            $actualizadas = DB::table('rack_ubicaciones')
-                ->where('rack_id', $rackId)
-                ->where('capacidad_maxima', '!=', $request->capacidad_maxima)
-                ->update([
-                    'capacidad_maxima' => $request->capacidad_maxima,
-                    'updated_at' => now()
-                ]);
-
-            Log::debug('Capacidades actualizadas:', ['count' => $actualizadas]);
+            // ✅ ELIMINADO: Actualización de capacidad máxima
+            // Ya no se actualiza la capacidad máxima
 
             $rackActualizado = DB::table('racks')->where('idRack', $rackId)->first();
 
-            // ✅ CORREGIDO: Usar el array devuelto correctamente
-            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes, $request->capacidad_maxima);
+            // ✅ CORREGIDO: Quitar el tercer parámetro de capacidad
+            $resultadoSincronizacion = $this->sincronizarUbicaciones($rackActualizado, $ubicacionesExistentes);
+
             // ✅ DEBUG: Verificar qué devuelve
             Log::debug('RESULTADO SINCRONIZACION:', [
                 'resultado' => $resultadoSincronizacion,
@@ -3714,7 +3696,7 @@ class UbicacionesVistaController extends Controller
         }
     }
 
-    private function sincronizarUbicaciones($rack, $ubicacionesExistentes, $capacidadMaxima = 10000)
+    private function sincronizarUbicaciones($rack, $ubicacionesExistentes)
     {
         try {
             Log::debug('=== INICIO sincronizarUbicaciones DEBUG ===', [
@@ -3785,7 +3767,7 @@ class UbicacionesVistaController extends Controller
                             'nivel' => $nivel,
                             'posicion' => $posicion,
                             'estado_ocupacion' => 'vacio',
-                            'capacidad_maxima' => $capacidadMaxima,
+                            'capacidad_maxima' => 0, // ✅ CAMBIADO: De $capacidadMaxima a 0
                             'created_at' => $now,
                             'updated_at' => $now
                         ];
@@ -3821,7 +3803,7 @@ class UbicacionesVistaController extends Controller
     /**
      * Genera ubicaciones automáticamente para un rack
      */
-    private function generarUbicacionesAutomaticas($rack, $capacidadMaxima = 10000)
+    private function generarUbicacionesAutomaticas($rack)
     {
         $ubicaciones = [];
         $now = now();
@@ -3832,7 +3814,7 @@ class UbicacionesVistaController extends Controller
                 $codigo = $this->generarCodigoUbicacion($rack->nombre, $nivel, $posicion);
                 $codigoUnico = $rack->nombre . '-' . $codigo;
 
-                // ✅ CORREGIDO: Quitar articulo_id y cantidad_actual
+                // ✅ CORREGIDO: Quitar capacidad_maxima
                 $ubicaciones[] = [
                     'rack_id' => $rack->idRack,
                     'codigo' => $codigo,
@@ -3840,7 +3822,7 @@ class UbicacionesVistaController extends Controller
                     'nivel' => $nivel,
                     'posicion' => $posicion,
                     'estado_ocupacion' => 'vacio',
-                    'capacidad_maxima' => $capacidadMaxima,
+                    'capacidad_maxima' => 0, // ✅ O puedes poner null o eliminar el campo
                     'created_at' => $now,
                     'updated_at' => $now
                 ];
@@ -3857,8 +3839,8 @@ class UbicacionesVistaController extends Controller
             'rack_nombre' => $rack->nombre,
             'total_ubicaciones' => count($ubicaciones),
             'filas' => $rack->filas,
-            'columnas' => $rack->columnas,
-            'capacidad_maxima' => $capacidadMaxima
+            'columnas' => $rack->columnas
+            // ✅ ELIMINADO: capacidad_maxima
         ]);
     }
 
