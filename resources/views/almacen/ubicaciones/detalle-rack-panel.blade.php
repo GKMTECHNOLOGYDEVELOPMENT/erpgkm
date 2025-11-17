@@ -110,7 +110,6 @@
                                                 :key="grupoIndex">
                                                 <div class="rack-grupo-container">
                                                     <div class="rack-grupo-ubicaciones">
-                                                        <!-- Iterar sobre ubicaciones en el grupo -->
                                                         <template x-for="ubicacion in grupo" :key="ubicacion.id">
                                                             <div @click="manejarClickUbicacion(ubicacion)"
                                                                 class="ubicacion-box"
@@ -125,7 +124,9 @@
                                                                 <div class="ubicacion-info">
                                                                     <template x-if="ubicacion.estado !== 'vacio'">
                                                                         <div>
+                                                                            <!-- ✅ SOLO mostrar cantidad en caja normal cuando NO tiene ubicacion2 = 1 -->
                                                                             <div class="ubicacion-cantidad"
+                                                                                x-show="!ubicacion.tiene_ubicacion2"
                                                                                 x-text="`${ubicacion.cantidad_total}/${ubicacion.capacidad}`">
                                                                             </div>
                                                                             <div class="ubicacion-categoria"
@@ -142,14 +143,15 @@
                                                             </div>
                                                         </template>
                                                     </div>
+
                                                     <!-- Base del rack (tabla de madera) debajo del grupo -->
                                                     <div class="rack-grupo-base">
-                                                        <template
-                                                            x-if="ubicacion.tipo_rack === 'panel' && ubicacion.valor_tabla_madera !== null">
-                                                            <div class="valor-tabla-madera">
-                                                                <span x-text="ubicacion.valor_tabla_madera"></span>
+                                                        <div class="cantidad-tabla-madera-container"
+                                                            x-show="grupo.some(ubicacion => ubicacion.tiene_ubicacion2 && ubicacion.estado !== 'vacio')">
+                                                            <div class="cantidad-tabla-madera"
+                                                                x-text="getCantidadTablaGrupo(grupo)">
                                                             </div>
-                                                        </template>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </template>

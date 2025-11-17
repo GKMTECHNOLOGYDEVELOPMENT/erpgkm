@@ -75,15 +75,15 @@
                 </div>
 
                 <!-- Botones de gestión -->
-                <div class="flex gap-3">
-                    @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR RACK'))
+                {{-- <div class="flex gap-3">
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR RACK'))
                     <button @click="abrirModalCrearRack()"
                         class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition">
                         <i class="fas fa-plus"></i>
                         Crear Rack
                     </button>
                     @endif
-                </div>
+                </div> --}}
             </div>
         </div>
 
@@ -187,12 +187,12 @@
 
             <!-- Botones acciones -->
             <div class="flex flex-wrap gap-3">
-                @if(\App\Helpers\PermisoHelper::tienePermiso('ETIQUETAS RACK'))
-                <button @click="toggleLabels()" :class="labels ? 'btn btn-primary' : 'btn btn-secondary'"
-                    class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
-                    <i class="fas fa-tag"></i>
-                    Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
-                </button>
+                @if (\App\Helpers\PermisoHelper::tienePermiso('ETIQUETAS RACK'))
+                    <button @click="toggleLabels()" :class="labels ? 'btn btn-primary' : 'btn btn-secondary'"
+                        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
+                        <i class="fas fa-tag"></i>
+                        Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
+                    </button>
                 @endif
 
                 @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
@@ -202,12 +202,12 @@
                     Editar Dimensiones
                 </button>
                 @endif
-                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
-                <button @click="cargarDatos()"
-                    class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
-                    <i class="fas fa-sync-alt"></i>
-                    Actualizar
-                </button>
+                @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
+                    <button @click="cargarDatos()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
                 @endif
 
             </div>
@@ -224,19 +224,19 @@
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-green-500 border"></div>
-                                <span class="text-xs text-gray-600">Baja (0-24%)</span>
+                                <span class="text-xs text-gray-600">Baja (0-100unid.)</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-amber-400 border"></div>
-                                <span class="text-xs text-gray-600">Media (25-49%)</span>
+                                <span class="text-xs text-gray-600">Media (100-500)</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded border" style="background-color:#f97316"></div>
-                                <span class="text-xs text-gray-600">Alta (50-74%)</span>
+                                <span class="text-xs text-gray-600">Alta (500-1000)</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-4 h-4 rounded bg-red-500 border"></div>
-                                <span class="text-xs text-gray-600">Muy alta (75-100%)</span>
+                                <span class="text-xs text-gray-600">Muy alta (1000+)</span>
                             </div>
                         </div>
                     </div>
@@ -1120,7 +1120,7 @@
                 },
 
                 periodoLabel() {
-                    return `Últimos ${this.filtro.periodo} días`;
+                    return 'Estado actual del almacén';
                 },
 
                 toggleLabels() {
@@ -1144,11 +1144,21 @@
                     return colors[piso] || '#f3f4f6';
                 },
 
-                getIconByValue(val) {
-                    if (val < 25) return "🟢";
-                    if (val < 50) return "🟡";
-                    if (val < 75) return "🟠";
+                // ✅ NUEVAS FUNCIONES PARA ESTADOS
+                getIconByCantidad(cantidad) {
+                    if (cantidad === 0) return "⚪";
+                    if (cantidad <= 100) return "🟢";
+                    if (cantidad <= 500) return "🟡";
+                    if (cantidad <= 1000) return "🟠";
                     return "🔴";
+                },
+
+                getEstadoText(cantidad) {
+                    if (cantidad === 0) return 'Vacío';
+                    if (cantidad <= 100) return 'Bajo';
+                    if (cantidad <= 500) return 'Medio';
+                    if (cantidad <= 1000) return 'Alto';
+                    return 'Muy Alto';
                 },
 
                 renderChart() {
@@ -1223,17 +1233,15 @@
                         };
                     }
 
-                    const valorCampo = this.mode === 'heat' ? 'value' : 'ocupacion';
-
-                    // AGREGAR TODOS LOS CAMPOS INCLUYENDO CUSTODIAS
+                    // ✅ CAMBIADO: Usar cantidad en lugar de value/ocupacion
                     const data = this.data.map(d => [
                         d.x || 0,
                         d.y || 0,
-                        d[valorCampo] || 0,
+                        d.cantidad || 0, // ← Ahora usamos cantidad absoluta
                         d.ubicacion || 'N/A',
                         d.piso || 1,
                         d.rack || 'N/A',
-                        d.cantidad || 0,
+                        d.cantidad || 0, // ← Mantenemos cantidad aquí también
                         d.categoria || 'Sin categoría',
                         d.sede || 'N/A',
                         d.tipo_articulo || 'Sin tipo',
@@ -1287,10 +1295,13 @@
                             },
                             formatter: (p) => {
                                 try {
-                                    // SOLO LOS CAMPOS QUE NECESITAMOS
-                                    const [x, y, val, ubicacion, piso, rack, cantidad,
+                                    const [x, y, cantidad, ubicacion, piso, rack, cantidadTotal,
                                         categoria, sede, tipoArticulo, nivel
                                     ] = p.data;
+
+                                    // ✅ CAMBIADO: Obtener estado basado en cantidad
+                                    const estado = this.getEstadoText(cantidadTotal);
+                                    const icono = this.getIconByCantidad(cantidadTotal);
 
                                     return `
             <div style="padding:12px; min-width: 320px;">
@@ -1301,10 +1312,10 @@
                 
                 <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
                 <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
-                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidad}</div>
+                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidadTotal} unidades</div>
+                <div style="margin-bottom:6px;">📈 <strong>Estado:</strong> ${icono} ${estado}</div>
                 <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
                 <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
-                <div style="margin-bottom:6px;">📈 <strong>${this.mode === 'heat' ? 'Actividad' : 'Ocupación'}:</strong> ${val}%</div>
                 
                 <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
                 <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
@@ -1370,8 +1381,9 @@
                                 formatter: (p) => {
                                     try {
                                         const ubicacion = p.data[3] || 'N/A';
-                                        const valor = p.data[2] || 0;
-                                        return `${this.getIconByValue(valor)} ${valor}%\n${ubicacion}`;
+                                        const cantidad = p.data[6] || 0;
+                                        const icono = this.getIconByCantidad(cantidad);
+                                        return `${icono}\n${ubicacion}`;
                                     } catch (error) {
                                         return 'N/A';
                                     }
@@ -1381,6 +1393,7 @@
                                 fontWeight: "bold"
                             },
                             itemStyle: {
+                                // ✅ MANTENIDO: Seguimos usando getFillColorByFloor para los colores de fondo
                                 color: p => this.getFillColorByFloor(p.data[4] || 1),
                                 borderColor: '#fff',
                                 borderWidth: 2,
