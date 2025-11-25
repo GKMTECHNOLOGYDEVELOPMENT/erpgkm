@@ -55,7 +55,7 @@
         style="background-color: {{ $colorEstado }};">
         Orden de Trabajo N° {{ $orden->idTickets }}
     </span>
-
+    @if(\App\Helpers\PermisoHelper::tienePermiso('BOTON FLOTANTE SOPORTE ORDEN DE TRABAJO HELPDESK'))
     <!-- Botón Flotante -->
     <button id="botonFlotante"
         class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
@@ -63,105 +63,175 @@
         @click="openModal = true">
         <i class="fa-solid fa-clock-rotate-left text-sm sm:text-base md:text-lg"></i>
     </button>
+    @endif
 
     <!-- Fondo oscuro -->
     <div x-show="openModal" class="fixed inset-0 bg-[black]/60 z-40 transition-opacity duration-300"
         @click="openModal = false"></div>
 
-    <!-- Modal deslizable desde la derecha -->
-    <div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
-        x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
-        x-transition:leave="transition ease-in-out duration-300 transform"
-        x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-        class="fixed top-0 right-0 w-80 sm:w-[600px] md:w-[700px] lg:w-[800px] h-full bg-white dark:bg-gray-900 shadow-lg z-50 p-6 flex flex-col rounded-l-lg">
+     <!-- Modal deslizable desde la derecha -->
+<div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
+    x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+    x-transition:leave="transition ease-in-out duration-300 transform"
+    x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+    class="panel fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+         dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
 
-        <!-- Encabezado del modal -->
-        <div class="flex justify-between items-center border-b pb-3 border-gray-300 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+    <!-- Panel lateral -->
+    <div
+        class="relative h-full w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+             dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
+
+        <!-- Header fijo -->
+        <div
+            class="flex justify-between items-center border-b px-4 sm:px-6 py-3 border-gray-300 dark:border-gray-700">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
             <button @click="openModal = false"
                 class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </button>
         </div>
 
-        <!-- Tabs dentro del modal -->
-        <div class="mt-4">
-            <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
+        <!-- Contenido scrolleable -->
+        <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+            @php
+                $tieneEstados = \App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE ESTADOS SOPORTE ORDEN DE TRABAJO HELPDESK');
+                $tieneHistorial = \App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE CAMBIOS ORDEN DE TRABAJO HELPDESK');
+            @endphp
 
-                <!-- Botones de Tabs -->
-                <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
-                    <button @click="activeTab = 'estados'"
-                        :class="activeTab === 'estados' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Estados
-                    </button>
-                    <button @click="activeTab = 'historial'"
-                        :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
-                            'text-gray-500 hover:text-gray-700'"
-                        class="pb-2 font-semibold text-sm uppercase">
-                        Historial de Cambios
-                    </button>
+            @if(!$tieneEstados && !$tieneHistorial)
+                <!-- Caso 1: Ningún permiso -->
+                <div class="flex flex-col items-center justify-center h-full text-center py-8">
+                    <i class="fa-solid fa-lock text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Sin permisos
+                    </h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        No tienes permisos para ver el historial de estados
+                    </p>
                 </div>
+            @elseif($tieneEstados && $tieneHistorial)
+                <!-- Caso 2: Tiene ambos permisos - Mostrar tabs -->
+                <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
+                    <!-- Tabs -->
+                    <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
+                        <button @click="activeTab = 'estados'"
+                            :class="activeTab === 'estados' ? 'border-b-2 border-red-600 text-red-600' :
+                                'text-gray-500 hover:text-gray-700'"
+                            class="pb-2 font-semibold text-xs sm:text-sm uppercase">
+                            Estados
+                        </button>
+                        <button @click="() => { activeTab = 'historial'; cargarHistorialModificaciones(ticketId); }"
+                            :class="activeTab === 'historial' ? 'border-b-2 border-red-600 text-red-600' :
+                                'text-gray-500 hover:text-gray-700'"
+                            class="pb-2 font-semibold text-xs sm:text-sm uppercase">
+                            Historial de Cambios
+                        </button>
+                    </div>
 
-                <!-- TAB: Estados -->
-                <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
-                    <table class="min-w-[600px] border-collapse w-full">
-                        <thead>
-                            <tr class="bg-gray-200 dark:bg-gray-800">
-                                <th class="px-4 py-2 text-center">Estado</th>
-                                <th class="px-4 py-2 text-center">Usuario</th>
-                                <th class="px-4 py-2 text-center">Fecha</th>
-                                <th class="px-4 py-2 text-center">Más</th>
-                            </tr>
-                        </thead>
-                        <tbody id="estadosTableBody">
-                            <!-- Aquí se llenarán los estados de flujo -->
-                        </tbody>
-                    </table>
+                    <!-- Contenido de los tabs -->
+                    <div class="flex-1">
+                        <!-- TAB: Estados -->
+                        <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
+                            <table class="min-w-[500px] w-full border-collapse text-xs sm:text-sm">
+                                <thead>
+                                    <tr class="bg-gray-200 dark:bg-gray-800">
+                                        <th class="px-2 sm:px-4 py-2 text-center">Estado</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Usuario</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Fecha</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Más</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="estadosTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- TAB: Historial -->
+                        <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
+                            <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
+                                <table
+                                    class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
+                                    <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historialModificaciones"
+                                        class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr id="preload" style="display:none;">
+                                            <td colspan="5" class="px-6 py-4 text-center">Cargando datos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Paginación -->
+                            <div class="flex justify-center mt-4">
+                                <ul id="pagination"
+                                    class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <!-- TAB: Historial -->
-                <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
-                    <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600 text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider text-left">
-                                <tr>
-                                    <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
-                                    <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
-                                    <th class="px-2 sm:px-6 py-3 text-center">Después</th>
-                                    <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
-                                    <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
+            @elseif($tieneEstados && !$tieneHistorial)
+                <!-- Caso 3: Solo tiene permiso de Estados -->
+                <div class="flex flex-col h-full">
+                    <div class="overflow-x-auto mt-4">
+                        <table class="min-w-[500px] w-full border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-gray-200 dark:bg-gray-800">
+                                    <th class="px-2 sm:px-4 py-2 text-center">Estado</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Usuario</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Fecha</th>
+                                    <th class="px-2 sm:px-4 py-2 text-center">Más</th>
                                 </tr>
                             </thead>
-                            <tbody id="historialModificaciones"
-                                class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                <!-- Preload visible mientras se cargan los datos -->
-                                <tr id="preload" style="display: none;">
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-700 dark:text-gray-300">
-                                        <span class="inline-flex items-center space-x-2">
-                                            <span
-                                                class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-info dark:border-blue-500"></span>
-                                            <span>Cargando datos...</span>
-                                        </span>
-                                    </td>
-                                </tr>
-                                <!-- Datos dinámicos -->
-                            </tbody>
+                            <tbody id="estadosTableBody"></tbody>
                         </table>
                     </div>
+                </div>
+            @elseif(!$tieneEstados && $tieneHistorial)
+                <!-- Caso 4: Solo tiene permiso de Historial -->
+                <div class="flex flex-col h-full">
+                    <div class="overflow-y-auto mt-4 flex-1">
+                        <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
+                            <table
+                                class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
+                                <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
+                                    <tr>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                        <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historialModificaciones"
+                                    class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr id="preload" style="display:none;">
+                                        <td colspan="5" class="px-6 py-4 text-center">Cargando datos...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <!-- Paginación para historial -->
-                    <div class="flex justify-center mt-4">
-                        <ul id="paginationHistorial"
-                            class="inline-flex items-center space-x-1 rtl:space-x-reverse bg-white dark:bg-gray-900 p-2 rounded-lg shadow">
-                            <!-- Generado dinámicamente -->
-                        </ul>
+                        <!-- Paginación -->
+                        <div class="flex justify-center mt-4">
+                            <ul id="pagination"
+                                class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
+</div>
 </div>
 
 <!-- 🛠️ Formulario de Detalles -->
@@ -282,15 +352,14 @@
                     Falla Reportada</label>
                 <textarea id="fallaReportada" name="Falla Reportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
-
-            @if ($idRol != 6)
+                @if(App\Helpers\PermisoHelper::tienePermiso('MODIFICAR SOPORTE ORDEN DE TRABAJO HELPDESK'))
                 <!-- Botón de Guardar -->
                 <div class="md:col-span-2 flex justify-end space-x-4">
                     <a href="{{ route('ordenes.helpdesk') }}"
                         class="btn btn-outline-danger w-full md:w-auto">Volver</a>
                     <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
                 </div>
-            @endif
+                @endif
 
         </div>
     </form>
@@ -299,6 +368,7 @@
 @if ($idRol != 6)
     <!-- Nueva Card: Historial de Estados -->
     <div id="estadosCard" class="mt-4 p-4">
+        @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE ESTADOS SOPORTE ORDEN DE TRABAJO HELPDESK')) 
         <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge bg-success"
             style="background-color: {{ $colorEstado }};">Historial de Estados</span>
 
@@ -314,7 +384,9 @@
                 @endforeach
             </div>
         </div>
+        @endif
 
+        @if(\App\Helpers\PermisoHelper::tienePermiso('VER ULTIMA MODIFICACION SOPORTE ORDEN DE TRABAJO HELPDESK'))
         <!-- Última modificación -->
         <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:gap-2">
             <span class="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
@@ -325,6 +397,7 @@
                    rounded-md text-gray-800 dark:text-white text-xs sm:text-sm w-full sm:w-auto text-center sm:text-left">
             </span>
         </div>
+        @endif
     </div>
 @endif
 

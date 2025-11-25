@@ -88,7 +88,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\entradasproveedores\EntradasproveedoresController;
 use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\solicitud\SolicitudalmacenController;
 use App\Http\Controllers\solicitud\SolicitudarticuloController;
+use App\Http\Controllers\solicitud\SolicitudcompraController;
 use App\Http\Controllers\solicitud\SolicitudingresoController;
 use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\UbigeoController;
@@ -104,6 +106,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\unity\UnityController;
+use App\Http\Controllers\usuario\VentasController;
+use App\Http\Controllers\ventas\VentasController as VentasVentasController;
 
 Auth::routes();
 
@@ -489,21 +493,16 @@ Route::prefix('despacho')->name('despacho.')->group(function () {
 });
 /// INICIO VENTAS ///
 Route::prefix('ventas')->name('ventas.')->group(function () {
-    Route::get('/', [KardexController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [RepuestosController::class, 'create'])->name('create'); // Formulario de creación
-    Route::post('/store', [RepuestosController::class, 'store'])->name('store'); // Guardar un nuevo artículo
-    Route::get('/{id}/imagen', [RepuestosController::class, 'imagen'])->name('imagen'); // Editar un artículo
-    Route::post('/{id}/fotoupdate', [RepuestosController::class, 'updateFoto']);
-    Route::get('/{id}/edit', [RepuestosController::class, 'edit'])->name('edit'); // Editar un artículo
-    Route::get('/{id}/detalles', [RepuestosController::class, 'detalle'])->name('detalles'); // Editar un artículo
-    Route::put('/update/{id}', [RepuestosController::class, 'update'])->name('update'); // Actualizar un artículo
-    Route::delete('/{id}', [RepuestosController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
-    Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
-    Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
-    Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
-    Route::get('/exportar-excel', function () {
-        return Excel::download(new ArticuloExport, 'ventas.xlsx');
-    })->name('exportExcel');
+    Route::get('/', [VentasVentasController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [VentasVentasController::class, 'create'])->name('create'); // Formulario de creación
+    Route::post('/store', [VentasVentasController::class, 'store'])->name('store'); // Guardar un nuevo artículo
+    Route::get('/{id}/edit', [VentasVentasController::class, 'edit'])->name('edit'); // Editar un artículo
+    Route::get('/{id}/detalles', [VentasVentasController::class, 'detalle'])->name('detalles'); // Editar un artículo
+    Route::put('/update/{id}', [VentasVentasController::class, 'update'])->name('update'); // Actualizar un artículo
+    Route::delete('/{id}', [VentasVentasController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
+    Route::get('/export-pdf', [VentasVentasController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
+    Route::get('/get-all', [VentasVentasController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
+    
 });
 
 /// INICIO VENTAS ///
@@ -735,10 +734,7 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::put('/{id}', [SolicitudrepuestoController::class, 'update'])->name('update');
     Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
     Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opciones'])->name('opciones');
-
-Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
-
-
+    Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
     Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 });
@@ -808,6 +804,52 @@ Route::prefix('cotizacionesL')->name('cotizacionesL.')->group(function () {
     })->name('exportExcel');
 });
 
+
+
+Route::prefix('solicitudcompra')->name('solicitudcompra.')->group(function () {
+    Route::get('/', [SolicitudcompraController::class, 'index'])->name('index');
+    Route::get('/create', [SolicitudcompraController::class, 'create'])->name('create');
+        Route::get('/gestionadministracion', [SolicitudcompraController::class, 'gestionadministracion'])->name('gestionadministracion');
+
+    Route::post('/store', [SolicitudcompraController::class, 'store'])->name('store');
+    Route::get('/{id}', [SolicitudcompraController::class, 'show'])->name('show');
+    Route::get('/{id}/edit', [SolicitudcompraController::class, 'edit'])->name('edit');
+    Route::get('/{id}/evaluacion', [SolicitudcompraController::class, 'evaluacion'])->name('evaluacion');
+    Route::put('/{id}', [SolicitudcompraController::class, 'update'])->name('update');
+    Route::delete('/{id}', [SolicitudcompraController::class, 'destroy'])->name('destroy');
+    Route::get('/solicitud-almacen/{id}/detalles', [SolicitudcompraController::class, 'getSolicitudAlmacenDetalles'])->name('solicitud-almacen.detalles');
+
+
+    Route::post('/{idSolicitud}/articulo/{idDetalle}/aprobar', [SolicitudcompraController::class, 'aprobarArticulo'])->name('articulo.aprobar');
+    Route::post('/{idSolicitud}/articulo/{idDetalle}/rechazar', [SolicitudcompraController::class, 'rechazarArticulo'])->name('articulo.rechazar');
+     Route::post('/{id}/cambiar-estado', [SolicitudcompraController::class, 'cambiarEstado'])->name('cambiar.estado');
+    Route::post('/{id}/cancelar', [SolicitudcompraController::class, 'cancelarSolicitud'])->name('cancelar');
+});
+
+// En routes/web.php - REEMPLAZA el grupo de rutas completo:
+
+Route::prefix('solicitudalmacen')->name('solicitudalmacen.')->group(function () {
+    Route::get('/', [SolicitudalmacenController::class, 'index'])->name('index');
+    Route::get('/create', [SolicitudalmacenController::class, 'create'])->name('create');
+    Route::post('/', [SolicitudalmacenController::class, 'store'])->name('store');
+    Route::get('/select-data', [SolicitudalmacenController::class, 'getSelectData'])->name('select-data');
+    Route::get('/buscar-articulo/{codigo}', [SolicitudalmacenController::class, 'buscarArticulo'])->name('buscar-articulo');
+    
+    // Rutas para detalles
+    Route::get('/{id}/detalles', [SolicitudalmacenController::class, 'show'])->name('show');
+    Route::get('/{id}/detalles-data', [SolicitudalmacenController::class, 'getDetailData'])->name('detalles-data');
+    
+    // Rutas para edición
+    Route::get('/{id}/edit', [SolicitudalmacenController::class, 'edit'])->name('edit');
+    Route::get('/{id}/edit-data', [SolicitudalmacenController::class, 'getEditData'])->name('edit-data');
+    Route::put('/{id}', [SolicitudalmacenController::class, 'update'])->name('update');
+    
+    // Rutas para gestión de estados - CORREGIDAS
+    Route::post('/detalle/{id}/cambiar-estado', [SolicitudalmacenController::class, 'changeDetailStatus'])->name('detalle.cambiar-estado');
+    Route::post('/{id}/cambiar-estado-final', [SolicitudalmacenController::class, 'changeFinalStatus'])->name('cambiar-estado-final');
+    
+
+});
 
 
 // Ruta para obtener los clientes generales asociados a un cliente
@@ -1777,19 +1819,19 @@ Route::prefix('cotizaciones-tickets')->group(function () {
 
 
 // Rutas principales de cotizaciones
-Route::prefix('administracion/cotizaciones')->group(function () {
-    Route::get('/', [cotizacionController::class, 'index'])->name('cotizaciones.index');
-    Route::get('/create', [cotizacionController::class, 'create'])->name('cotizaciones.create');
-    Route::post('/', [cotizacionController::class, 'store'])->name('cotizaciones.store');
-    Route::get('/{id}', [cotizacionController::class, 'show'])->name('cotizaciones.show');
-    Route::get('/{id}/edit', [cotizacionController::class, 'edit'])->name('cotizaciones.edit');
-    Route::put('/{id}', [cotizacionController::class, 'update'])->name('cotizaciones.update');
-    Route::delete('/{id}', [cotizacionController::class, 'destroy'])->name('cotizaciones.delete');
-    Route::get('/{id}/pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.pdf');
-    Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
-    // En tu grupo de rutas web de cotizaciones, agrega:
-    Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('cotizaciones.detalles');
-});
+// Route::prefix('administracion/cotizaciones')->group(function () {
+//     Route::get('/', [cotizacionController::class, 'index'])->name('cotizaciones.index');
+//     Route::get('/create', [cotizacionController::class, 'create'])->name('cotizaciones.create');
+//     Route::post('/', [cotizacionController::class, 'store'])->name('cotizaciones.store');
+//     Route::get('/{id}', [cotizacionController::class, 'show'])->name('cotizaciones.show');
+//     Route::get('/{id}/edit', [cotizacionController::class, 'edit'])->name('cotizaciones.edit');
+//     Route::put('/{id}', [cotizacionController::class, 'update'])->name('cotizaciones.update');
+//     Route::delete('/{id}', [cotizacionController::class, 'destroy'])->name('cotizaciones.delete');
+//     Route::get('/{id}/pdf', [cotizacionController::class, 'generarPDF'])->name('cotizaciones.pdf');
+//     Route::post('/{id}/enviar-email', [cotizacionController::class, 'enviarEmail'])->name('cotizaciones.enviar-email');
+//     // En tu grupo de rutas web de cotizaciones, agrega:
+//     Route::get('/{id}/detalles', [cotizacionController::class, 'detalle'])->name('cotizaciones.detalles');
+// });
 
 // Rutas para Áreas
 Route::prefix('areas')->group(function () {
@@ -1807,4 +1849,23 @@ Route::prefix('areas')->group(function () {
     Route::get('/api/clientes-generales', [AreasController::class, 'getClientesGenerales'])->name('api.areas.clientes'); // ← NUEVA RUTA
     Route::get('/{id}/clientes-modal', [AreasController::class, 'getClientesModal']);
 });
+
+
+
+//ENTRADAS DE PROVEEDORES
+Route::prefix('contacto')->name('contacto.')->group(function () {
+    Route::get('/', [ContactoController::class, 'index'])->name('index'); // Mostrar la vista principal
+    Route::get('/create', [ContactoController::class, 'create'])->name('create'); // Guardar una nueva categoría
+    Route::post('/store', [ContactoController::class, 'store'])->name('store'); // Guardar una nueva categoría
+    Route::get('/{id}/edit', [ContactoController::class, 'edit'])->name('edit'); // Editar una categoría
+    Route::put('/update/{id}', [ContactoController::class, 'update'])->name('update'); // Actualizar una categoría
+    Route::delete('/{id}', [ContactoController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
+    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
+    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
+    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
+    Route::get('/exportar-excel', function () {
+        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
+    })->name('exportExcel');
+});
+
 // Route::get('/cotizacion-productos/{cotizacionId}', [SolicitudarticuloController::class, 'getCotizacionProductos']);

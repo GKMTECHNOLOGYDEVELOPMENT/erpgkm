@@ -46,6 +46,7 @@ use App\Models\Subcategoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -518,6 +519,7 @@ Route::get('/clientesdespacho', [DespachoController::class, 'getClientes']);
 Route::get('/usuariosdespacho', [DespachoController::class, 'getUsuarios']);
 Route::get('/articulosdespacho', [DespachoController::class, 'getArticulos']);
 Route::get('/departamentosdespacho', [DespachoController::class, 'getDepartamentos']);
+Route::get('/articulo-series/{articuloId}', [DespachoController::class, 'getSeriesDisponibles']);
 
 Route::get('/clientescotizaciones', [cotizacionController::class, 'search']);
 Route::get('/configuracion', [cotizacionController::class, 'getConfiguracion']);
@@ -598,3 +600,93 @@ Route::get('/tickets/{ticketId}/suministros/{visitaId?}', [cotizacionController:
     }
 });
 
+
+// En routes/api.php
+Route::get('/solicitud/{codigo}', function($codigo) {
+    try {
+        // Buscar solicitud
+        $solicitud = DB::table('solicitudesordenes')
+            ->where('codigo', $codigo)
+            ->first();
+        
+        if (!$solicitud) {
+            return response()->json(['error' => 'Solicitud no encontrada'], 404);
+        }
+        
+        // Buscar artículos de la solicitud con manejo de caracteres
+        $articulos = DB::table('ordenesarticulos as oa')
+            ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+            ->where('oa.idSolicitudesOrdenes', $solicitud->idSolicitudesOrdenes)
+            ->where('a.estado', 1)
+            ->select(
+                'a.idArticulos',
+                'a.codigo_barras',
+                'a.codigo_repuesto',
+                DB::raw('CONVERT(a.nombre USING utf8) as nombre'),
+                'a.stock_total',
+                'a.precio_venta',
+                'a.precio_compra',
+                'oa.cantidad as cantidad_solicitada'
+            )
+            ->get();
+
+        // Limpiar y convertir caracteres
+        $solicitudLimpia = [
+            'id' => $solicitud->idSolicitudesOrdenes,
+            'codigo' => $solicitud->codigo,
+            'tipoorden' => mb_convert_encoding($solicitud->tipoorden ?? '', 'UTF-8', 'UTF-8'),
+            'estado' => mb_convert_encoding($solicitud->estado ?? '', 'UTF-8', 'UTF-8'),
+            'observaciones' => mb_convert_encoding($solicitud->observaciones ?? '', 'UTF-8', 'UTF-8'),
+            'fechaCreacion' => $solicitud->fechaCreacion,
+            'fechaEntrega' => $solicitud->fechaEntrega
+        ];
+
+        $articulosLimpios = $articulos->map(function($articulo) {
+            return [
+                'idArticulos' => $articulo->idArticulos,
+                'codigo_barras' => $articulo->codigo_barras,
+                'codigo_repuesto' => $articulo->codigo_repuesto,
+                'nombre' => mb_convert_encoding($articulo->nombre ?? '', 'UTF-8', 'UTF-8'),
+                'stock_total' => $articulo->stock_total,
+                'precio_venta' => floatval($articulo->precio_venta),
+                'precio_compra' => floatval($articulo->precio_compra),
+                'cantidad_solicitada' => intval($articulo->cantidad_solicitada)
+            ];
+        });
+
+        return response()->json([
+            'solicitud' => $solicitudLimpia,
+            'articulos' => $articulosLimpios
+        ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+
+    } catch (\Exception $e) {
+        Log::error('Error en API solicitud: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Error interno del servidor',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
+
+// Obtener cliente por ID
+Route::get('/clientes/cotizaciones/{id}', [cotizacionController::class, 'getClienteById']);
+
+
+Route::patch('/actualizar-suministro/{id}', function($id) {
+    try {
+        DB::table('suministros')
+            ->where('idSuministros', $id)
+            ->update([
+                'cantidad' => request('cantidad'),
+                'updated_at' => now()
+            ]);
+        
+        return response()->json(['message' => 'Cantidad actualizada correctamente.']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al actualizar la cantidad'], 500);
+    }
+})->name('actualizar.suministro');
+
+
+//API PARA TRAER EL DATOS DEL USUARIO LOGEADO AL SISTEMA 

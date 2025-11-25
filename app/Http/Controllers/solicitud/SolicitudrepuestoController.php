@@ -899,18 +899,42 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
         return view('solicitud.solicitudrepuesto.show', compact('solicitud', 'articulos'));
     }
 
-    public function edit($id)
-    {
-        $solicitud = DB::table('solicitudesordenes as so')
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_repuesto')
+   public function edit($id)
+{
+    try {
+        // Obtener la solicitud principal
+        $solicitud = DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
             ->first();
 
         if (!$solicitud) {
             abort(404, 'Solicitud no encontrada');
         }
 
-        // Obtener tickets para el select
+        // Obtener los artículos de la solicitud - CORREGIDO
+        $articulos = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.idordenesarticulos',
+                'oa.cantidad',
+                'oa.idsolicitudesordenes',
+                'oa.idticket',
+                'oa.idarticulos',
+                'a.codigo_repuesto',
+                'a.nombre as articulo_nombre',
+                't.numero_ticket',
+                'm.nombre as modelo_nombre',
+                'm.idModelo',
+                'sc.id as subcategoria_id',
+                'sc.nombre as tipo_repuesto' // Cambiado de sc.tipo_repuesto a sc.nombre
+            )
+            ->leftJoin('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+            ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
+            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->get();
+
+        // Obtener tickets disponibles (misma lógica que create)
         $userId = auth()->id();
         $tickets = DB::table('tickets as t')
             ->select(
@@ -943,28 +967,36 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
             ->orderBy('t.fecha_creacion', 'desc')
             ->get();
 
-        $articulosSolicitud = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.*',
-                'a.nombre as nombre_articulo',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.precio_compra',
-                'sc.nombre as tipo_articulo'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->get();
+        return view('solicitud.solicitudrepuesto.edit', compact(
+            'solicitud', 
+            'articulos', 
+            'tickets'
+        ));
 
-        return view('solicitud.solicitudrepuesto.edit', compact('solicitud', 'tickets', 'articulosSolicitud'));
+    } catch (\Exception $e) {
+        Log::error('Error al cargar edición de solicitud', [
+            'solicitud_id' => $id,
+            'error' => $e->getMessage()
+        ]);
+        
+        return redirect()->back()->with('error', 'Error al cargar la solicitud para editar');
     }
+}
 
     public function update(Request $request, $id)
     {
+        $startTime = microtime(true);
+        Log::info('Iniciando actualización de orden', [
+            'user_id' => auth()->id(),
+            'solicitud_id' => $id,
+            'ip' => $request->ip()
+        ]);
+
         try {
             DB::beginTransaction();
+            Log::info('Transacción de base de datos iniciada para actualización');
 
+            // Validar los datos requeridos
             $validated = $request->validate([
                 'ticketId' => 'required|exists:tickets,idTickets',
                 'orderInfo.tipoServicio' => 'required|string',
@@ -972,38 +1004,39 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
                 'orderInfo.fechaRequerida' => 'required|date',
                 'orderInfo.observaciones' => 'nullable|string',
                 'products' => 'required|array|min:1',
-                'products.*.articuloId' => 'required|exists:articulos,idArticulos',
-                'products.*.cantidad' => 'required|integer|min:1|max:1000'
+                'products.*.ticketId' => 'required|exists:tickets,idTickets',
+                'products.*.modeloId' => 'required|exists:modelo,idModelo',
+                'products.*.tipoId' => 'required|exists:subcategorias,id',
+                'products.*.codigoId' => 'required',
+                'products.*.cantidad' => 'required|integer|min:1|max:100'
             ]);
 
-            // Verificar que la solicitud existe y es del tipo correcto
-            $solicitud = DB::table('solicitudesordenes')
+            Log::info('Validación exitosa para actualización', ['solicitud_id' => $id]);
+
+            // Verificar que la solicitud existe
+            $solicitudExistente = DB::table('solicitudesordenes')
                 ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_repuesto')
                 ->first();
 
-            if (!$solicitud) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
+            if (!$solicitudExistente) {
+                throw new \Exception('Solicitud no encontrada');
             }
-
-            // Obtener información del ticket
-            $ticket = DB::table('tickets')
-                ->where('idTickets', $validated['ticketId'])
-                ->first();
 
             // Calcular nuevas estadísticas
             $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = count($validated['products']);
+            $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
+                return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
+            })->count();
 
-            // Actualizar la solicitud
+            Log::info('Nuevas estadísticas calculadas', [
+                'total_cantidad' => $totalCantidad,
+                'productos_unicos' => $totalProductosUnicos
+            ]);
+
+            // 1. Actualizar la solicitud principal
             DB::table('solicitudesordenes')
                 ->where('idsolicitudesordenes', $id)
                 ->update([
-                    'idticket' => $validated['ticketId'],
-                    'numeroticket' => $ticket->numero_ticket,
                     'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
                     'niveldeurgencia' => $validated['orderInfo']['urgencia'],
                     'tiposervicio' => $validated['orderInfo']['tipoServicio'],
@@ -1011,35 +1044,85 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
                     'cantidad' => $totalProductosUnicos,
                     'canproduuni' => $totalProductosUnicos,
                     'totalcantidadproductos' => $totalCantidad,
-                    'urgencia' => $validated['orderInfo']['urgencia']
+                    'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+                    'urgencia' => $validated['orderInfo']['urgencia'],
+                    'updated_at' => now()
                 ]);
 
-            // Eliminar artículos existentes y agregar nuevos
-            DB::table('ordenesarticulos')->where('idsolicitudesordenes', $id)->delete();
+            // 2. Eliminar artículos existentes
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->delete();
 
-            foreach ($validated['products'] as $product) {
-                DB::table('ordenesarticulos')->insert([
-                    'cantidad' => $product['cantidad'],
-                    'estado' => 0,
-                    'observacion' => null,
-                    'fotorepuesto' => null,
-                    'fechausado' => null,
-                    'fechasinusar' => null,
-                    'idsolicitudesordenes' => $id,
-                    'idticket' => $validated['ticketId'],
-                    'idarticulos' => $product['articuloId'],
-                    'idubicacion' => null
-                ]);
+            Log::info('Artículos existentes eliminados', ['solicitud_id' => $id]);
+
+            // 3. Insertar los nuevos artículos
+            $productosProcesados = 0;
+            $productosConError = 0;
+
+            foreach ($validated['products'] as $index => $product) {
+                $articulo = DB::table('articulos')
+                    ->where('codigo_repuesto', $product['codigoId'])
+                    ->first();
+
+                if ($articulo) {
+                    DB::table('ordenesarticulos')->insert([
+                        'cantidad' => $product['cantidad'],
+                        'estado' => 0,
+                        'observacion' => null,
+                        'fotorepuesto' => null,
+                        'fechausado' => null,
+                        'fechasinusar' => null,
+                        'idsolicitudesordenes' => $id,
+                        'idticket' => $product['ticketId'],
+                        'idarticulos' => $articulo->idArticulos,
+                        'idubicacion' => null,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                    $productosProcesados++;
+                } else {
+                    $productosConError++;
+                    Log::warning("Artículo no encontrado durante actualización", [
+                        'codigo' => $product['codigoId']
+                    ]);
+                }
             }
 
+            Log::info('Nuevos artículos insertados', [
+                'procesados' => $productosProcesados,
+                'con_error' => $productosConError
+            ]);
+
             DB::commit();
+            Log::info('Actualización completada exitosamente', ['solicitud_id' => $id]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Solicitud de repuesto actualizada exitosamente'
+                'message' => 'Solicitud actualizada exitosamente',
+                'solicitud_id' => $id,
+                'codigo_orden' => $solicitudExistente->codigo
             ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::error('Error de validación al actualizar', [
+                'errors' => $e->errors(),
+                'solicitud_id' => $id
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación: ' . implode(', ', array_merge(...array_values($e->errors()))),
+                'errors' => $e->errors()
+            ], 422);
+
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error al actualizar solicitud', [
+                'solicitud_id' => $id,
+                'error' => $e->getMessage()
+            ]);
 
             return response()->json([
                 'success' => false,

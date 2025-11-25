@@ -4,12 +4,17 @@
 
     <div class="panel mt-6">
         <div class="mb-4 flex flex-wrap justify-between items-center gap-3">
+           
+            @if(\App\Helpers\PermisoHelper::tienePermiso('NUEVO SEGUIMIENTO CLIENTE'))
             <!-- Botón agregar -->
             <a href="{{ route('Seguimiento.create') }}"
                 class="btn btn-sm bg-success text-white hover:bg-green-600 px-4 py-2 rounded shadow-sm flex items-center gap-2">
                 <i class="fas fa-plus"></i>
                 <span>Nuevo Seguimiento</span>
             </a>
+            @endif
+
+
 
             <!-- Grupo búsqueda -->
             <div class="flex items-center gap-3">
@@ -42,7 +47,6 @@
     </thead>
 </table>
     </div>
-
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

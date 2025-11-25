@@ -68,7 +68,7 @@
             Orden de Trabajo N° {{ $orden->idTickets }}
         </span>
 
-        @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE CAMBIOS ORDEN DE TRABAJO SMART'))
+        @if(\App\Helpers\PermisoHelper::tienePermiso('BOTON FLOTANTE ORDEN DE TRABAJO SMART'))
         <!-- Botón flotante responsive -->
         <button id="botonFlotante"
             class="bg-dark text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg shadow-md transition-all duration-200
@@ -89,34 +89,50 @@
         @click="openModal = false">
     </div>
 
-    <!-- Modal deslizable desde la derecha -->
-    <div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
-        x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
-        x-transition:leave="transition ease-in-out duration-300 transform"
-        x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-        class="panel fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+  <!-- Modal deslizable desde la derecha -->
+<div x-show="openModal" x-transition:enter="transition ease-in-out duration-300 transform"
+    x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+    x-transition:leave="transition ease-in-out duration-300 transform"
+    x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
+    class="panel fixed inset-y-0 right-0 z-50 w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
+         dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
+
+    <!-- Panel lateral -->
+    <div
+        class="relative h-full w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
              dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
 
-
-        <!-- Panel lateral -->
+        <!-- Header fijo -->
         <div
-            class="relative h-full w-full sm:w-[600px] md:w-[700px] lg:w-[800px] 
-                 dark:bg-gray-900 shadow-lg flex flex-col rounded-l-lg">
+            class="flex justify-between items-center border-b px-4 sm:px-6 py-3 border-gray-300 dark:border-gray-700">
+            <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
+            <button @click="openModal = false"
+                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
 
-            <!-- Header fijo -->
-            <div
-                class="flex justify-between items-center border-b px-4 sm:px-6 py-3 border-gray-300 dark:border-gray-700">
-                <h2 class="text-base sm:text-lg font-semibold text-gray-800 dark:text-white">Historial de Cambios</h2>
-                <button @click="openModal = false"
-                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
-            </div>
+        <!-- Contenido scrolleable -->
+        <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+            @php
+                $tieneEstados = \App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE ESTADOS ORDEN DE TRABAJO SMART');
+                $tieneHistorial = \App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL DE CAMBIOS ORDEN DE TRABAJO SMART');
+            @endphp
 
-            <!-- Contenido scrolleable -->
-            <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
+            @if(!$tieneEstados && !$tieneHistorial)
+                <!-- Caso 1: Ningún permiso -->
+                <div class="flex flex-col items-center justify-center h-full text-center py-8">
+                    <i class="fa-solid fa-lock text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Sin permisos
+                    </h3>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        No tienes permisos para ver el historial de estados
+                    </p>
+                </div>
+            @elseif($tieneEstados && $tieneHistorial)
+                <!-- Caso 2: Tiene ambos permisos - Mostrar tabs -->
                 <div x-data="{ activeTab: 'estados' }" class="flex flex-col h-full">
-
                     <!-- Tabs -->
                     <div class="flex space-x-4 border-b border-gray-300 dark:border-gray-700">
                         <button @click="activeTab = 'estados'"
@@ -133,8 +149,59 @@
                         </button>
                     </div>
 
-                    <!-- TAB: Estados -->
-                    <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
+                    <!-- Contenido de los tabs -->
+                    <div class="flex-1">
+                        <!-- TAB: Estados -->
+                        <div x-show="activeTab === 'estados'" class="overflow-x-auto mt-4">
+                            <table class="min-w-[500px] w-full border-collapse text-xs sm:text-sm">
+                                <thead>
+                                    <tr class="bg-gray-200 dark:bg-gray-800">
+                                        <th class="px-2 sm:px-4 py-2 text-center">Estado</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Usuario</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Fecha</th>
+                                        <th class="px-2 sm:px-4 py-2 text-center">Más</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="estadosTableBody"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- TAB: Historial -->
+                        <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
+                            <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
+                                <table
+                                    class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
+                                    <thead class="bg-gray-50 dark:bg-gray-800 text-xs uppercase tracking-wider">
+                                        <tr>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Campo Modificado</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Antes</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Después</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Fecha de Cambio</th>
+                                            <th class="px-2 sm:px-6 py-3 text-center">Modificado Por</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historialModificaciones"
+                                        class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr id="preload" style="display:none;">
+                                            <td colspan="5" class="px-6 py-4 text-center">Cargando datos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Paginación -->
+                            <div class="flex justify-center mt-4">
+                                <ul id="pagination"
+                                    class="inline-flex items-center space-x-1 rtl:space-x-reverse m-auto mb-4">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @elseif($tieneEstados && !$tieneHistorial)
+                <!-- Caso 3: Solo tiene permiso de Estados -->
+                <div class="flex flex-col h-full">
+                    <div class="overflow-x-auto mt-4">
                         <table class="min-w-[500px] w-full border-collapse text-xs sm:text-sm">
                             <thead>
                                 <tr class="bg-gray-200 dark:bg-gray-800">
@@ -147,9 +214,11 @@
                             <tbody id="estadosTableBody"></tbody>
                         </table>
                     </div>
-
-                    <!-- TAB: Historial -->
-                    <div x-show="activeTab === 'historial'" class="overflow-y-auto mt-4 flex-1">
+                </div>
+            @elseif(!$tieneEstados && $tieneHistorial)
+                <!-- Caso 4: Solo tiene permiso de Historial -->
+                <div class="flex flex-col h-full">
+                    <div class="overflow-y-auto mt-4 flex-1">
                         <div class="overflow-x-auto rounded-lg shadow border border-gray-300 dark:border-gray-700">
                             <table
                                 class="min-w-[600px] w-full divide-y divide-gray-200 dark:divide-gray-600 text-xs sm:text-sm">
@@ -179,11 +248,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
-
-
+</div>
 </div>
 
 

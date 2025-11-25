@@ -31,7 +31,9 @@
     </div>
 
     <div class="col-span-1 md:col-span-2 flex justify-end mt-2">
+        @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES ESTADO ORDEN DE TRABAJO SMART'))
         <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
+        @endif
     </div>
 </div>
 
@@ -41,10 +43,14 @@
         style="background-color: {{ $colorEstado }};">Fotos</span>
 
     <div class="flex items-center gap-2 mt-4">
+        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR IMAGEN ORDEN DE TRABAJO SMART'))
         <button id="abrirModalAgregarImagen" class="btn btn-primary" @click="$dispatch('toggle-modal-agregar-imagen')">
             Agregar Imagen
         </button>
+        @endif
+        @if(\App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TODAS LAS IMAGENES ORDEN DE TRABAJO SMART'))
         <button id="eliminarTodas" class="btn btn-danger hidden">Eliminar Todas</button>
+        @endif
     </div>
 
 
@@ -88,6 +94,7 @@
                 <!-- Header del Modal -->
                 <div class="flex items-center justify-between bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-3">
                     <h5 class="font-bold text-lg">Agregar Imágenes</h5>
+                   
                     <button id="cerrarModal" class="text-gray-600 hover:text-black">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
@@ -121,11 +128,13 @@
                     <button type="button" class="btn btn-outline-danger" @click="open = false">
                         Cancelar
                     </button>
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR IMAGEN ORDEN DE TRABAJO SMART'))
                     <button type="submit" class="btn btn-primary flex items-center gap-2" id="guardarImagen">
                         <span class="label">Guardar</span>
                         <span
                             class="spinner hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                     </button>
+                    @endif
                 </div>
             </div>
         </div>

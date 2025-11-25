@@ -495,4 +495,24 @@ class DespachoController extends Controller
             ], 500);
         }
     }
+
+
+    public function getSeriesDisponibles($articuloId)
+{
+    try {
+        $series = DB::table('articulo_series')
+            ->where('articulo_id', $articuloId)
+            ->where('estado', 'activo')
+            ->whereNotIn('idArticuloSerie', function($query) {
+                $query->select('articulo_serie_id')
+                      ->from('despacho_detalles_series');
+            })
+            ->select('idArticuloSerie', 'numero_serie', 'estado')
+            ->get();
+
+        return response()->json($series);
+    } catch (\Exception $e) {
+        return response()->json([], 500);
+    }
+}
 }

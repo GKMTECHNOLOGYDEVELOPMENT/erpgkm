@@ -1,36 +1,22 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class Tiposolicitud
- * 
- * @property int $idTipoSolicitud
- * @property string|null $nombre
- * 
- * @property Collection|Solicitud[] $solicituds
- *
- * @package App\Models
- */
-class Tiposolicitud extends Model
+class TipoSolicitud extends Model
 {
-	protected $table = 'tiposolicitud';
-	protected $primaryKey = 'idTipoSolicitud';
-	public $timestamps = false;
+    use HasFactory;
 
-	protected $fillable = [
-		'nombre'
-	];
+    protected $table = 'tipo_solicitud';
+    protected $primaryKey = 'idTipoSolicitud';
+    
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'estado'
+    ];
 
-	public function solicituds()
-	{
-		return $this->hasMany(Solicitud::class, 'idTipoSolicitud');
-	}
+    public $timestamps = true;
 }

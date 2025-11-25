@@ -990,11 +990,14 @@
 
                     if (existingProductIndex !== -1) {
                         // Si existe, verificar que no exceda la cantidad de la cotización
-                        const nuevaCantidad = this.products[existingProductIndex].cantidad +
-                            cotizacionProduct.cantidad;
-                        if (nuevaCantidad > cotizacionProduct.cantidad) {
+                        const nuevaCantidad = this.products[existingProductIndex].cantidad + 1;
+                        
+                        // Obtener la cantidad máxima permitida desde la cotización
+                        const cantidadMaxima = cotizacionProduct.cantidad;
+                        
+                        if (nuevaCantidad > cantidadMaxima) {
                             this.showNotification(
-                                `❌ No puede exceder la cantidad de la cotización: ${cotizacionProduct.cantidad} unidades`,
+                                `❌ No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`,
                                 'error'
                             );
                             return;
@@ -1002,79 +1005,92 @@
 
                         this.products[existingProductIndex].cantidad = nuevaCantidad;
                         this.showNotification(
-                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
+                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`,
                             'success'
                         );
                     } else {
-                        // Si no existe, agregar nuevo producto con la cantidad exacta de la cotización
+                        // Si no existe, agregar nuevo producto con cantidad inicial de 1
                         const product = {
                             uniqueId: Date.now() + Math.random(),
                             articuloId: cotizacionProduct.articulo_id,
                             nombre: articuloCompleto.nombre,
-                            codigo: articuloCompleto.codigo_barras || articuloCompleto
-                                .codigo_repuesto,
+                            codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
                             tipo: articuloCompleto.tipo_articulo,
-                            cantidad: cotizacionProduct
-                                .cantidad, // Usar la cantidad exacta de la cotización
+                            cantidad: 1, // Siempre empezar con 1
                             descripcion: cotizacionProduct.descripcion ||
                                 (this.selectedCotizacionInfo ?
                                     `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
                                     'Desde cotización'),
-                            cantidadCotizacion: cotizacionProduct
-                                .cantidad // Guardar la cantidad original
+                            cantidadCotizacion: cotizacionProduct.cantidad, // Guardar la cantidad máxima
+                            esDeCotizacion: true // Marcar que viene de cotización
                         };
 
                         this.products.push(product);
-                        this.showNotification('✅ Artículo agregado desde cotización', 'success');
+                        this.showNotification(
+                            `✅ Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`, 
+                            'success'
+                        );
                     }
                 },
 
                 addAllCotizacionProducts() {
-                    if (this.cotizacionProducts.length === 0) {
-                        this.showNotification('No hay artículos para agregar', 'info');
-                        return;
-                    }
+    if (this.cotizacionProducts.length === 0) {
+        this.showNotification('No hay artículos para agregar', 'info');
+        return;
+    }
 
-                    let addedCount = 0;
+    let addedCount = 0;
+    let skippedCount = 0;
 
-                    this.cotizacionProducts.forEach(cotizacionProduct => {
-                        const articuloCompleto = this.articulos.find(
-                            a => a.idArticulos == cotizacionProduct.articulo_id
-                        );
+    this.cotizacionProducts.forEach(cotizacionProduct => {
+        const articuloCompleto = this.articulos.find(
+            a => a.idArticulos == cotizacionProduct.articulo_id
+        );
 
-                        if (articuloCompleto) {
-                            const existingProductIndex = this.products.findIndex(
-                                product => product.articuloId == cotizacionProduct
-                                .articulo_id
-                            );
+        if (articuloCompleto) {
+            const existingProductIndex = this.products.findIndex(
+                product => product.articuloId == cotizacionProduct.articulo_id
+            );
 
-                            if (existingProductIndex !== -1) {
-                                this.products[existingProductIndex].cantidad +=
-                                    cotizacionProduct.cantidad;
-                            } else {
-                                const product = {
-                                    uniqueId: Date.now() + Math.random(),
-                                    articuloId: cotizacionProduct.articulo_id,
-                                    nombre: articuloCompleto.nombre,
-                                    codigo: articuloCompleto.codigo_barras ||
-                                        articuloCompleto.codigo_repuesto,
-                                    tipo: articuloCompleto.tipo_articulo,
-                                    cantidad: cotizacionProduct.cantidad,
-                                    descripcion: cotizacionProduct.descripcion ||
-                                        (this.selectedCotizacionInfo ?
-                                            `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
-                                            'Desde cotización')
-                                };
+            if (existingProductIndex !== -1) {
+                // Si ya existe, verificar límite
+                const product = this.products[existingProductIndex];
+                if (product.cantidad < cotizacionProduct.cantidad) {
+                    product.cantidad += 1;
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+            } else {
+                // Agregar nuevo producto con cantidad 1
+                const product = {
+                    uniqueId: Date.now() + Math.random(),
+                    articuloId: cotizacionProduct.articulo_id,
+                    nombre: articuloCompleto.nombre,
+                    codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
+                    tipo: articuloCompleto.tipo_articulo,
+                    cantidad: 1,
+                    descripcion: cotizacionProduct.descripcion ||
+                        (this.selectedCotizacionInfo ?
+                            `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
+                            'Desde cotización'),
+                    cantidadCotizacion: cotizacionProduct.cantidad,
+                    esDeCotizacion: true
+                };
 
-                                this.products.push(product);
-                            }
-                            addedCount++;
-                        }
-                    });
+                this.products.push(product);
+                addedCount++;
+            }
+        }
+    });
 
-                    this.showNotification(`✅ ${addedCount} artículos agregados desde la cotización`,
-                        'success');
-                },
+    let message = `✅ ${addedCount} artículos agregados desde la cotización`;
+    if (skippedCount > 0) {
+        message += ` (${skippedCount} ya estaban en cantidad máxima)`;
+    }
+    
+    this.showNotification(message, 'success');
+},
 
                 formatDate(dateString) {
                     if (!dateString) return '';
@@ -1201,16 +1217,35 @@
                     const newQuantity = product.cantidad + change;
 
                     // Si es de cotización, validar que no exceda la cantidad original
-                    if (product.cantidadCotizacion && newQuantity > product.cantidadCotizacion) {
-                        this.showNotification(
-                            `❌ No puede exceder la cantidad de la cotización: ${product.cantidadCotizacion} unidades`,
-                            'error'
-                        );
-                        return;
+                    if (product.esDeCotizacion && product.cantidadCotizacion) {
+                        if (newQuantity > product.cantidadCotizacion) {
+                            this.showNotification(
+                                `❌ No puede exceder la cantidad de la cotización: ${product.cantidadCotizacion} unidades`,
+                                'error'
+                            );
+                            return;
+                        }
+                        
+                        if (newQuantity < 1) {
+                            this.showNotification('❌ La cantidad mínima es 1 unidad', 'error');
+                            return;
+                        }
+                    } else {
+                        // Para artículos manuales, validaciones normales
+                        if (newQuantity < 1 || newQuantity > 1000) {
+                            return;
+                        }
                     }
 
-                    if (newQuantity >= 1 && newQuantity <= 1000) {
-                        this.products[index].cantidad = newQuantity;
+                    this.products[index].cantidad = newQuantity;
+                    
+                    // Mostrar feedback si es de cotización
+                    if (product.esDeCotizacion && product.cantidadCotizacion) {
+                        this.showNotification(
+                            `📦 Cantidad: ${newQuantity}/${product.cantidadCotizacion} unidades`,
+                            'info',
+                            2000 // Mostrar por menos tiempo
+                        );
                     }
                 },
 

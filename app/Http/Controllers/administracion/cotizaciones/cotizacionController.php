@@ -893,4 +893,43 @@ class cotizacionController extends Controller
             ], 500);
         }
     }
+
+
+    /**
+ * Obtener cliente por ID
+ */
+public function getClienteById($id)
+{
+    try {
+        $cliente = Cliente::find($id);
+
+        if (!$cliente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cliente no encontrado'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'cliente' => [
+                'idCliente' => $cliente->idCliente,
+                'nombre' => $cliente->nombre,
+                'documento' => $cliente->documento,
+                'telefono' => $cliente->telefono,
+                'email' => $cliente->email,
+                'direccion' => $cliente->direccion,
+                'departamento' => $cliente->departamento,
+                'provincia' => $cliente->provincia,
+                'distrito' => $cliente->distrito
+            ]
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al obtener cliente: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar información del cliente'
+        ], 500);
+    }
+}
 }

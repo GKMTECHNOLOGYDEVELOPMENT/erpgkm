@@ -45,7 +45,7 @@
 <input type="hidden" id="idvisita" value="{{ $idVisitaSeleccionada }}">
 
 
-
+@if(\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO VISITA ORDEN DE TRABAJO SMART TV'))
 <!-- Verificar si la visita está activa (estadovisita no es 1) -->
 @if ($estadovisita != 1)
 <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -93,6 +93,8 @@
     </button>
     @endif
 </div>
+@endif
+
 @endif
 
 

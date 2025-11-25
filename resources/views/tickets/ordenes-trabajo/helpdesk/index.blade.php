@@ -154,6 +154,7 @@
 
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-end gap-2">
+                @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR NUEVA ORDEN DE TRABAJO HELPDESK'))
                 <!-- Botón Agregar -->
                 <a href="{{ route('ordenes.createhelpdesk') }}" class="btn btn-primary btn-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
@@ -162,7 +163,8 @@
                         <line x1="6" y1="12" x2="18" y2="12" stroke-linecap="round" />
                     </svg>
                 </a>
-
+                @endif
+                @if(\App\Helpers\PermisoHelper::tienePermiso('EXPORTAR ORDENES DE TRABAJO HELPDESK EXCEL'))
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
                     <a class="btn btn-success btn-sm"
@@ -181,7 +183,9 @@
                         </svg>
                     </a>
                 </div>
-
+                @endif
+                
+                @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR TABLA ORDEN DE TRABAJO HELDESK'))
                 <!-- Botón Refrescar -->
                 <button class="btn btn-secondary btn-sm"
                     @click="
@@ -202,6 +206,8 @@
                         <path d="M20.49 15a9 9 0 01-14.36 3.36L1 14" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                 </button>
+                @endif
+
             </div>
         </div>
 
@@ -328,6 +334,16 @@
     </script>
 
 
+
+
+<!-- Agrega esto antes de cargar tu script list.js -->
+<script>
+    window.permisosHelpdesk = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
+        puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
+        puedeVerEnvio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER ENVIO ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }}
+    };
+</script>
 
 
     <!-- Scripts adicionales -->

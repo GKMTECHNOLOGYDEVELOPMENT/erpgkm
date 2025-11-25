@@ -173,6 +173,10 @@ class Articulo extends Model
 	{
 		return $this->belongsTo(Proveedore::class, 'idProveedor');
 	}
+	 public function monedaCompra()
+    {
+        return $this->belongsTo(Moneda::class, 'idMonedaCompra', 'idMoneda');
+    }
 
 
 

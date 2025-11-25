@@ -1,5 +1,3 @@
-
-
 function formatDate(dateString) {
   const date = new Date(dateString);
   const options = { 
@@ -151,7 +149,8 @@ function formatDatos(dateString) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-// Botón de Detalles
+// Botón de Detalles (SOLO SI TIENE PERMISO)
+if (window.permisosVisitas.puedeVerDetalles) {
 const detailsButton = document.createElement('button');
 detailsButton.className = 'btn btn-info w-full sm:w-auto mt-2 sm:mt-0';
 detailsButton.innerHTML = `
@@ -270,7 +269,8 @@ function loadTecnicosAsociados() {
         listItem.classList.add('px-2', 'py-1', 'border', 'rounded-lg', 'text-gray-700', 'cursor-pointer');
         listItem.textContent = `${tecnico.Nombre} ${tecnico.apellidoPaterno}`;
 
-        // Crear botón de eliminar
+        // Crear botón de eliminar (SOLO SI TIENE PERMISO)
+        if (window.permisosVisitas.puedeEliminarTecnicoApoyo) {
         const removeButton = document.createElement('button');
         removeButton.textContent = 'Eliminar';
         removeButton.classList.add('ml-2', 'text-red-500', 'hover:text-red-700', 'text-xs');
@@ -301,13 +301,16 @@ function loadTecnicosAsociados() {
         });
 
         listItem.appendChild(removeButton);
+        }
+
         listaTecnicos.appendChild(listItem);
       });
     })
     .catch(error => console.error('Error al obtener técnicos de apoyo:', error));
 }
 
-// Evento para agregar un nuevo técnico de apoyo
+// Evento para agregar un nuevo técnico de apoyo (SOLO SI TIENE PERMISO)
+if (window.permisosVisitas.puedeAgregarTecnicoApoyo) {
 document.getElementById('addTecnicoApoyoButton').addEventListener('click', function() {
   const tecnicoId = document.getElementById('detalleTecnicoApoyo').value;
   
@@ -341,6 +344,7 @@ document.getElementById('addTecnicoApoyoButton').addEventListener('click', funct
     alert('Ocurrió un problema al agregar el técnico de apoyo.');
   });
 });
+}
 
 // Cargar técnicos disponibles y los ya asociados
 loadTecnicosDeApoyo();
@@ -367,6 +371,8 @@ document.getElementById('closeModalButtonFooter').addEventListener('click', func
   document.getElementById('modalDetallesVisita').classList.add('hidden');
 });
 
+// Evento para actualizar visita (SOLO SI TIENE PERMISO)
+if (window.permisosVisitas.puedeActualizarVisita) {
 document.getElementById('actualizarButton').addEventListener('click', function() {
   const actualizarButton = document.getElementById('actualizarButton');
   const idVisita = actualizarButton.getAttribute('data-id'); // Obtener el ID de la visita del atributo 'data-id'
@@ -433,10 +439,11 @@ document.getElementById('actualizarButton').addEventListener('click', function()
     alert('Ocurrió un problema al realizar la actualización.');
   });
 });
-
+}
 
 // Agregar el botón Detalles debajo de la información de la visita
 visitaCard.appendChild(detailsButton);
+}
 
 
 
@@ -446,6 +453,17 @@ visitaCard.appendChild(detailsButton);
 
         const tecnicoCard = document.createElement('div');
         tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
+        
+        // Botón Iniciar Desplazamiento (SOLO SI TIENE PERMISO)
+        const iniciarDesplazamientoHtml = window.permisosVisitas.puedeIniciarDesplazamiento && visita.tipoServicio !== 7 ? 
+          `<div class="flex justify-center mt-2">
+            <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                      id="likeButton-${visita.idVisitas}" style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
+                <i class="fa-solid fa-route text-sm sm:text-base"></i>
+                <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
+              </button>
+            </div>` : '';
+
         tecnicoCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-3 text-center gap-2">
@@ -475,14 +493,7 @@ visitaCard.appendChild(detailsButton);
                   </span>`}
               </div>
             </div>
-        
-            <div class="flex justify-center mt-2">
-              <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                      id="likeButton-${visita.idVisitas}" style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">
-                <i class="fa-solid fa-route text-sm sm:text-base"></i>
-                <span class="text-xs sm:text-sm">Iniciar Desplazamiento</span>
-              </button>
-            </div>                   
+            ${iniciarDesplazamientoHtml}                   
           </div>
         `;
 
@@ -492,6 +503,8 @@ visitaCard.appendChild(detailsButton);
         cardContainer.appendChild(rowContainer);
         visitasList.appendChild(cardContainer);
 
+        // Evento para botones Seleccionar Visita (SOLO SI TIENE PERMISO)
+        if (window.permisosVisitas.puedeSeleccionarVisita) {
         document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
           button.addEventListener('click', function () {
             const idTicket = this.getAttribute('data-id-ticket');
@@ -524,6 +537,7 @@ visitaCard.appendChild(detailsButton);
               });
           });
         });
+        }
 
 
 
@@ -539,6 +553,40 @@ visitaCard.appendChild(detailsButton);
               // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
               const inicioServicioCard = document.createElement('div');
               inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
+              
+              // Botones de acción para Inicio de Servicio (SOLO SI TIENE PERMISOS)
+              const subirFotoHtml = window.permisosVisitas.puedeSubirFoto ? 
+                `<button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
+                            id="uploadPhotoButton-${visita.idVisitas}">
+                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Subir Foto</span>
+                    </button>` : '';
+
+              const siguienteHtml = window.permisosVisitas.puedeSiguiente ? 
+                `<button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                            id="siguiente-${visita.idVisitas}">
+                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Siguiente</span>
+                    </button>` : '';
+
+              const verImagenInicioHtml = window.permisosVisitas.puedeVerImagenInicioServicio ? 
+                `<button 
+                    class="flex items-center justify-center gap-2 
+                           px-2 py-1 sm:px-3 sm:py-1.5
+                           text-xs sm:text-sm md:text-base
+                           font-semibold rounded-full shadow-md 
+                           transition-all duration-200
+                           bg-success hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                           text-white"
+                    id="viewImageButton-${visita.idVisitas}" 
+                    data-image-type="inicioServicio"
+                    data-id="${visita.idVisitas}"
+                    title="Ver imagen">
+                    <i class="fa-solid fa-image text-base md:text-lg"></i> 
+                </button>` : '';
+
               inicioServicioCard.innerHTML = `
                 <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
                   <!-- Encabezados y Contenido Responsivo -->
@@ -565,36 +613,9 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
         
                   <!-- Botones de acción -->
                   <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
-                    <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
-                            id="uploadPhotoButton-${visita.idVisitas}">
-                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
-                      <span class="text-xs sm:text-sm">Subir Foto</span>
-                    </button>
-                  
-                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                            id="siguiente-${visita.idVisitas}">
-                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
-                      <span class="text-xs sm:text-sm">Siguiente</span>
-                    </button>
-                    
-                    <!-- Botón para ver imagen -->
-                    <button 
-                    class="flex items-center justify-center gap-2 
-                           px-2 py-1 sm:px-3 sm:py-1.5
-                           text-xs sm:text-sm md:text-base
-                           font-semibold rounded-full shadow-md 
-                           transition-all duration-200
-                           bg-success hover:bg-blue-700 focus:ring focus:ring-blue-300 
-                           text-white"
-                    id="viewImageButton-${visita.idVisitas}" 
-                    data-image-type="inicioServicio"
-                    data-id="${visita.idVisitas}"
-                    title="Ver imagen">
-                    <i class="fa-solid fa-image text-base md:text-lg"></i> 
-                </button>
-                
+                    ${subirFotoHtml}
+                    ${siguienteHtml}
+                    ${verImagenInicioHtml}
                   </div>
                 
                   <!-- Input oculto para subir foto -->
@@ -623,6 +644,45 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     // Mostrar la tarjeta de "Final de Servicio" automáticamente
                     const finalServicioCard = document.createElement('div');
                     finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
+                    
+                    // Botón Continuar (SOLO SI TIENE PERMISO)
+                    const continuarHtml = window.permisosVisitas.puedeContinuar && visita.servicio !== 1 ? 
+                      `<button class="flex items-center justify-center gap-2 
+                                px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2.5
+                                text-xs sm:text-sm md:text-base
+                                font-semibold rounded-full shadow-md 
+                                transition-all duration-200
+                                badge bg-danger focus:ring focus:ring-blue-300 
+                                text-white"
+                            id="continueButton-${visita.idVisitas}"
+                            data-visita-id="${visita.idVisitas}"
+                            @click="
+                                console.log('Button clicked');
+                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                                console.log('Visita ID:', visitaId);
+                                $dispatch('set-visita-id', visitaId);  
+                                openCondiciones = true;
+                            ">
+                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+                            <span class="text-xs sm:text-sm">Continuar Aquí</span>
+                        </button>` : '';
+
+                    // Botón Ver Imagen Final (SOLO SI TIENE PERMISO)
+                    const verImagenFinalHtml = window.permisosVisitas.puedeVerImagenFinalServicio && visita.servicio === 1 ? 
+                      `<button class="flex items-center justify-center gap-2
+                                    px-2 py-1 sm:px-3 sm:py-1.5
+                                    text-xs sm:text-sm md:text-base
+                                    font-semibold rounded-full shadow-md 
+                                    transition-all duration-200
+                                    bg-danger hover:bg-red-700 focus:ring focus:ring-red-300 
+                                    text-white"
+                                id="viewImageButton-${visita.idVisitas}" 
+                                data-image-type="finalServicio"
+                                data-id="${visita.idVisitas}"
+                                title="Ver imagen">
+                                <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+                            </button>` : '';
+
                     finalServicioCard.innerHTML = `
                       <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
                         <!-- Encabezados y Contenido Responsivo -->
@@ -684,44 +744,12 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                             </label>
                     
                             <!-- Botón Ver Imagen -->
-                            <button class="flex items-center justify-center gap-2
-                                    px-2 py-1 sm:px-3 sm:py-1.5
-                                    text-xs sm:text-sm md:text-base
-                                    font-semibold rounded-full shadow-md 
-                                    transition-all duration-200
-                                    bg-danger hover:bg-red-700 focus:ring focus:ring-red-300 
-                                    text-white"
-                                id="viewImageButton-${visita.idVisitas}" 
-                                data-image-type="finalServicio"
-                                data-id="${visita.idVisitas}"
-                                title="Ver imagen">
-                                <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
-                            </button>
+                            ${verImagenFinalHtml}
                         </div>
                         `
                             :
                             // Si el servicio no está finalizado, mostrar el botón "Continuar"
-                            `
-                        <button class="flex items-center justify-center gap-2 
-                                px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2.5
-                                text-xs sm:text-sm md:text-base
-                                font-semibold rounded-full shadow-md 
-                                transition-all duration-200
-                                badge bg-danger focus:ring focus:ring-blue-300 
-                                text-white"
-                            id="continueButton-${visita.idVisitas}"
-                            data-visita-id="${visita.idVisitas}"
-                            @click="
-                                console.log('Button clicked');
-                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
-                                console.log('Visita ID:', visitaId);
-                                $dispatch('set-visita-id', visitaId);  
-                                openCondiciones = true;
-                            ">
-                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
-                            <span class="text-xs sm:text-sm">Continuar Aquí</span>
-                        </button>
-                        `
+                            continuarHtml
                           }`}`
                       }
                         
@@ -744,6 +772,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
 
                     // Agregar el evento de clic al botón "Continuar"
+                    if (window.permisosVisitas.puedeContinuar && visita.servicio !== 1) {
                     const continueButton = document.getElementById(`continueButton-${visita.idVisitas}`);
                     if (continueButton) {
                       continueButton.addEventListener('click', () => {
@@ -751,6 +780,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                         const event = new CustomEvent('toggle-modal-condiciones');
                         window.dispatchEvent(event);
                       });
+                    }
                     }
                   }
                 })
@@ -765,12 +795,46 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
 
 
-              // Agregar el evento de clic al botón "Siguiente"
+              // Agregar el evento de clic al botón "Siguiente" (SOLO SI TIENE PERMISO)
+              if (window.permisosVisitas.puedeSiguiente) {
               const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
               siguienteButton.addEventListener('click', () => {
                 // Crear la card de "Final de Servicio"
                 const finalServicioCard = document.createElement('div');
                 finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
+                
+                // Botón Continuar (SOLO SI TIENE PERMISO)
+                const continuarFinalHtml = window.permisosVisitas.puedeContinuar ? 
+                  `<button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
+                            id="continueButton-${visita.idVisitas}"
+                            data-visita-id="${visita.idVisitas}"
+                            @click="
+                                console.log('Button clicked');
+                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+                                console.log('Visita ID:', visitaId);
+                                $dispatch('set-visita-id', visitaId);  
+                                openCondiciones = true;
+                            ">
+                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+                            <span class="text-xs sm:text-sm">Continuar Aqui si estoy </span>
+                        </button>` : '';
+
+                // Botón Ver Imagen Final (SOLO SI TIENE PERMISO)
+                const verImagenFinalHtml = window.permisosVisitas.puedeVerImagenFinalServicio ? 
+                  `<button class="flex items-center justify-center gap-2 
+                          px-2 py-1 sm:px-3 sm:py-1.5
+                          text-xs sm:text-sm md:text-base
+                          font-semibold rounded-full shadow-md 
+                          transition-all duration-200
+                          bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
+                          text-white"
+                          id="viewImageButton-${visita.idVisitas}" 
+                          data-image-type="finalServicio"
+                          data-id="${visita.idVisitas}"
+                          title="Ver imagen">
+                          <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
+                      </button>` : '';
+
                 finalServicioCard.innerHTML = `
                   <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
                     <!-- Encabezados y Contenido Responsivo -->
@@ -796,39 +860,10 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                 <!-- Botones de acción -->
                         <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4 w-full">
                         <!-- Botón Continuar -->
-                        <button class="sm:w-auto badge bg-danger text-white px-3 py-2 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full shadow-md transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 !bg-blue-600 !text-white text-sm sm:text-base md:text-lg"
-                            id="continueButton-${visita.idVisitas}"
-                            data-visita-id="${visita.idVisitas}"
-                            @click="
-                                console.log('Button clicked');
-                                visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
-                                console.log('Visita ID:', visitaId);
-                                $dispatch('set-visita-id', visitaId);  
-                                openCondiciones = true;
-                            ">
-                            <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
-                            <span class="text-xs sm:text-sm">Continuar Aqui si estoy </span>
-                        </button>
-                    
-
-
-
-
-                          
+                        ${continuarFinalHtml}
+                      
                           <!-- Botón para ver imagen -->
-                          <button class="flex items-center justify-center gap-2 
-                          px-2 py-1 sm:px-3 sm:py-1.5
-                          text-xs sm:text-sm md:text-base
-                          font-semibold rounded-full shadow-md 
-                          transition-all duration-200
-                          bg-danger hover:bg-blue-700 focus:ring focus:ring-blue-300 
-                          text-white"
-                          id="viewImageButton-${visita.idVisitas}" 
-                          data-image-type="finalServicio"
-                          data-id="${visita.idVisitas}"
-                          title="Ver imagen">
-                          <i class="fa-solid fa-image text-lg sm:text-xl"></i> 
-                      </button>
+                          ${verImagenFinalHtml}
 
                         
                       </div>
@@ -844,6 +879,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
 
                 // Agregar el evento de clic al botón "Finalizar"
+                if (window.permisosVisitas.puedeContinuar) {
                 const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
 
                 // Asegúrate de que solo se agregue un solo evento
@@ -853,6 +889,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     const event = new CustomEvent('toggle-modal-condiciones');
                     window.dispatchEvent(event);
                   });
+                }
                 }
 
 
@@ -913,6 +950,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                     toastr.error('Hubo un error al verificar la fecha de llegada.');
                   });
               });
+              }
               // Función para actualizar la tabla en el frontend
               function actualizarFechaTabla(idVisitas, nuevaFecha) {
                 // Buscar la fila en la tabla correspondiente a la visita
@@ -932,21 +970,24 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                   if (data.success) {
                     const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                     const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
-                    uploadPhotoButton.style.display = 'none';
-                    siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
+                    if (uploadPhotoButton) uploadPhotoButton.style.display = 'none';
+                    if (siguienteButton) siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                     // Agregar el evento de clic al botón "Continuar"
+                    if (window.permisosVisitas.puedeContinuar) {
                     continueButton.addEventListener('click', () => {
                       // Mostrar el modal
                       const event = new CustomEvent('toggle-modal-condiciones');
                       window.dispatchEvent(event);
                     });
+                    }
                   }
                 })
                 .catch(error => {
                   console.error('Error al verificar la foto de la visita:', error);
                 });
 
-              // Agregar el evento de clic al botón de "Subir Foto"
+              // Agregar el evento de clic al botón de "Subir Foto" (SOLO SI TIENE PERMISO)
+              if (window.permisosVisitas.puedeSubirFoto) {
               const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
               const fileInput = document.getElementById(`fileInput-${visita.idVisitas}`);
 
@@ -991,14 +1032,16 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                   toastr.success("Foto subida con éxito.");
                                   const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                                   const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
-                                  uploadPhotoButton.style.display = 'none';
-                                  siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
+                                  if (uploadPhotoButton) uploadPhotoButton.style.display = 'none';
+                                  if (siguienteButton) siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                                   // Agregar el evento de clic al botón "Continuar" después de subir la foto
+                                  if (window.permisosVisitas.puedeContinuar) {
                                   continueButton.addEventListener('click', () => {
                                     // Mostrar el modal
                                     const event = new CustomEvent('toggle-modal-condiciones');
                                     window.dispatchEvent(event);
                                   });
+                                  }
                                 } else {
                                   // toastr.error("Hubo un error al subir la foto.");
                                 }
@@ -1025,13 +1068,15 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                   toastr.error("Por favor selecciona una foto.");
                 }
               });
+              }
 
             }
           })
           .catch(error => {
             console.error('Error al verificar el registro de anexo:', error);
           });
-        // Agregar el evento de clic al botón de like
+        // Agregar el evento de clic al botón de like (SOLO SI TIENE PERMISO)
+        if (window.permisosVisitas.puedeIniciarDesplazamiento) {
         const likeButton = document.getElementById(`likeButton-${visita.idVisitas}`);
         likeButton.addEventListener('click', function () {
           // Verificar si ya hay un registro en anexos_visitas para esa visita
@@ -1110,6 +1155,31 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                   // Si existe el registro, mostrar la tarjeta de "Inicio de Servicio"
                                   const inicioServicioCard = document.createElement('div');
                                   inicioServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#d9f2e6]';
+                                  
+                                  // Botones con permisos
+                                  const subirFotoHtml = window.permisosVisitas.puedeSubirFoto ? 
+                                    `<button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
+                            id="uploadPhotoButton-${visita.idVisitas}">
+                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Subir Foto</span>
+                    </button>` : '';
+
+                                  const siguienteHtml = window.permisosVisitas.puedeSiguiente ? 
+                                    `<button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
+                            id="siguiente-${visita.idVisitas}">
+                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
+                      <span class="text-xs sm:text-sm">Siguiente</span>
+                    </button>` : '';
+
+                                  const verImagenHtml = window.permisosVisitas.puedeVerImagenInicioServicio ? 
+                                    `<button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
+                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+                            id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
+                      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
+                    </button>` : '';
+
                                   inicioServicioCard.innerHTML = `
                 <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
                   <!-- Encabezados y Contenido Responsivo -->
@@ -1136,26 +1206,9 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
         
                   <!-- Botones de acción -->
                   <div class="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 mt-4">
-                    <button class="bg-success hover:bg-green-700 text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-success !text-white text-xs sm:text-sm"
-                            id="uploadPhotoButton-${visita.idVisitas}">
-                      <i class="fa-solid fa-camera text-sm sm:text-base"></i> 
-                      <span class="text-xs sm:text-sm">Subir Foto</span>
-                    </button>
-                  
-                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-red-600 !text-white text-xs sm:text-sm"
-                            id="siguiente-${visita.idVisitas}">
-                      <i class="fa-solid fa-arrow-right text-sm sm:text-base"></i> 
-                      <span class="text-xs sm:text-sm">Siguiente</span>
-                    </button>
-                    
-                    <!-- Botón para ver imagen -->
-                    <button class="bg-success text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md
-                                   transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                            id="viewImageButton-${visita.idVisitas}" title="Ver imagen">
-                      <i class="fa-solid fa-image text-sm sm:text-base"></i> 
-                    </button>
+                    ${subirFotoHtml}
+                    ${siguienteHtml}
+                    ${verImagenHtml}
                   </div>
                 
                   <!-- Input oculto para subir foto -->
@@ -1172,12 +1225,36 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
 
 
 
-                                  // Agregar el evento de clic al botón "Siguiente"
+                                  // Agregar el evento de clic al botón "Siguiente" (SOLO SI TIENE PERMISO)
+                                  if (window.permisosVisitas.puedeSiguiente) {
                                   const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`);
                                   siguienteButton.addEventListener('click', () => {
                                     // Crear la card de "Final de Servicio"
                                     const finalServicioCard = document.createElement('div');
                                     finalServicioCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#fbe5e6]';
+                                    
+                                    // Botón Continuar (SOLO SI TIENE PERMISO)
+                                    const continuarHtml = window.permisosVisitas.puedeContinuar ? 
+                                      `<button class="flex items-center justify-center gap-2
+            px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2.5
+            text-xs sm:text-sm md:text-base
+            font-semibold rounded-full shadow-md 
+            transition-all duration-200
+            badge bg-danger focus:ring focus:ring-blue-300 
+            text-white"
+        id="continueButton-${visita.idVisitas}"
+        data-visita-id="${visita.idVisitas}"
+        @click="
+            console.log('Button clicked');
+            visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
+            console.log('Visita ID:', visitaId);
+            $dispatch('set-visita-id', visitaId);  
+            openCondiciones = true;
+        ">
+        <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
+        <span class="text-xs sm:text-sm">Continuar</span>
+    </button>` : '';
+
                                     finalServicioCard.innerHTML = `
     <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
         <!-- Encabezados y Contenido Responsivo -->
@@ -1208,25 +1285,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
     </label>
 
     <!-- Botón Continuar -->
-    <button class="flex items-center justify-center gap-2
-            px-2 py-1 sm:px-3 sm:py-2 md:px-4 md:py-2.5
-            text-xs sm:text-sm md:text-base
-            font-semibold rounded-full shadow-md 
-            transition-all duration-200
-            badge bg-danger focus:ring focus:ring-blue-300 
-            text-white"
-        id="continueButton-${visita.idVisitas}"
-        data-visita-id="${visita.idVisitas}"
-        @click="
-            console.log('Button clicked');
-            visitaId = $event.currentTarget.getAttribute('data-visita-id'); 
-            console.log('Visita ID:', visitaId);
-            $dispatch('set-visita-id', visitaId);  
-            openCondiciones = true;
-        ">
-        <i class="fa-solid fa-check-circle text-base sm:text-lg"></i>
-        <span class="text-xs sm:text-sm">Continuar</span>
-    </button>
+    ${continuarHtml}
 </div>
 
     </div>
@@ -1235,6 +1294,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                     inicioServicioCard.insertAdjacentElement('afterend', finalServicioCard);
 
                                     // Agregar el evento de clic al botón "Finalizar"
+                                    if (window.permisosVisitas.puedeContinuar) {
                                     const finalizarServicioButton = document.getElementById(`continueButton-${visita.idVisitas}`);
                                     finalizarServicioButton.addEventListener('click', () => {
                                       // Mostrar el modal
@@ -1244,6 +1304,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                       // Aquí ya no hay llamada al fetch, solo se oculta la card de "Final de Servicio"
                                       finalServicioCard.style.display = 'block'; // Ocultar la card de "Final de Servicio"
                                     });
+                                    }
 
                                     // Aquí agregamos la actualización de la fecha de llegada cuando se hace clic en "Siguiente"
                                     const fechaLlegada = new Date().toISOString().slice(0, 19).replace("T", " "); // Obtener la fecha y hora actual
@@ -1278,6 +1339,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                       });
 
                                   });
+                                  }
 
 
                                   document.querySelectorAll('.seleccionarVisitaButton').forEach(button => {
@@ -1322,21 +1384,24 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                       if (data.success) {
                                         const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                                         const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
-                                        uploadPhotoButton.style.display = 'none';
-                                        siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
+                                        if (uploadPhotoButton) uploadPhotoButton.style.display = 'none';
+                                        if (siguienteButton) siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                                         // Agregar el evento de clic al botón "Continuar"
+                                        if (window.permisosVisitas.puedeContinuar) {
                                         continueButton.addEventListener('click', () => {
                                           // Mostrar el modal
                                           const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
                                           modal.toggle();
                                         });
+                                        }
                                       }
                                     })
                                     .catch(error => {
                                       console.error('Error al verificar la foto de la visita:', error);
                                     });
 
-                                  // Agregar el evento de clic al botón de "Subir Foto"
+                                  // Agregar el evento de clic al botón de "Subir Foto" (SOLO SI TIENE PERMISO)
+                                  if (window.permisosVisitas.puedeSubirFoto) {
                                   const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                                   const fileInput = document.getElementById(`fileInput-${visita.idVisitas}`);
 
@@ -1363,14 +1428,16 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                             toastr.success("Foto subida con éxito.");
                                             const uploadPhotoButton = document.getElementById(`uploadPhotoButton-${visita.idVisitas}`);
                                             const siguienteButton = document.getElementById(`siguiente-${visita.idVisitas}`); // Cambiar a "Siguiente"
-                                            uploadPhotoButton.style.display = 'none';
-                                            siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
+                                            if (uploadPhotoButton) uploadPhotoButton.style.display = 'none';
+                                            if (siguienteButton) siguienteButton.style.display = 'block'; // Habilitar el botón "Siguiente"
                                             // Agregar el evento de clic al botón "Continuar" después de subir la foto
+                                            if (window.permisosVisitas.puedeContinuar) {
                                             continueButton.addEventListener('click', () => {
                                               // Mostrar el modal
                                               const modal = Alpine.$data(document.querySelector('[x-data="modal"]'));
                                               modal.toggle();
                                             });
+                                            }
                                           } else {
                                             // toastr.error("Hubo un error al subir la foto.");
                                           }
@@ -1383,6 +1450,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
                                       toastr.error("Por favor selecciona una foto.");
                                     }
                                   });
+                                  }
                                 }
                               })
                               .catch(error => {
@@ -1404,6 +1472,7 @@ ${visita.anexos_visitas.length > 0 && visita.anexos_visitas.find(anexo => anexo.
               }
             });
         });
+        }
       });
 
       document.getElementById('visitasContainer').style.display = 'block';

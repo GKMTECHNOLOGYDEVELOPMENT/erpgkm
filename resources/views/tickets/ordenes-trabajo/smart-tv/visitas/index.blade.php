@@ -996,28 +996,28 @@
 <script>
     window.permisosVisitas = {
         // Botones principales
-        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA') ? 'true' : 'false' }},
-        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA') ? 'true' : 'false' }},
-        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA') ? 'true' : 'false' }},
-        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA') ? 'true' : 'false' }},
-        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO') ? 'true' : 'false' }},
+        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
         
         // Botones de inicio de servicio
-        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO') ? 'true' : 'false' }},
-        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO') ? 'true' : 'false' }},
-        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO') ? 'true' : 'false' }},
+        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
         
         // Botones de final de servicio
-        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO') ? 'true' : 'false' }},
-        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO') ? 'true' : 'false' }},
+        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
         
         // Botones del modal de detalles
-        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO') ? 'true' : 'false' }},
-        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO') ? 'true' : 'false' }},
-        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA') ? 'true' : 'false' }},
+        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
+        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
         
         // Botones del modal de condiciones
-        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES') ? 'true' : 'false' }}
+        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES ORDEN DE TRABAJO SMART') ? 'true' : 'false' }}
     };
 </script>
 

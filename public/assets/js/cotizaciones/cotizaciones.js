@@ -779,114 +779,156 @@ document.addEventListener('alpine:init', () => {
         },
 
         async cargarDatosTicket(ticketId) {
-            console.log('🔄 Cargando datos del ticket:', ticketId);
+    console.log('🔄 Cargando datos del ticket:', ticketId);
 
-            if (!ticketId) {
-                this.limpiarDatosTicket();
-                return;
+    if (!ticketId) {
+        this.limpiarDatosTicket();
+        return;
+    }
+
+    try {
+        const ticketResponse = await fetch(`/api/tickets/${ticketId}/detalle`);
+        const ticketData = await ticketResponse.json();
+
+        console.log('📋 Datos completos del ticket:', ticketData);
+
+        if (ticketData.success && ticketData.ticket) {
+            const ticketCompleto = ticketData.ticket;
+
+            // 🔥 NUEVO: Cargar el cliente del ticket automáticamente
+            if (ticketCompleto.idCliente) {
+                await this.cargarClienteDesdeTicket(ticketCompleto.idCliente);
             }
 
-            try {
-                const ticketResponse = await fetch(`/api/tickets/${ticketId}/detalle`);
-                const ticketData = await ticketResponse.json();
+            const mostrarSerie = ticketCompleto.idTipotickets == 2 && ticketCompleto.tipoServicio == 6;
+            console.log('🎯 Condiciones para serie:', {
+                idTipotickets: ticketCompleto.idTipotickets,
+                tipoServicio: ticketCompleto.tipoServicio,
+                mostrarSerie: mostrarSerie
+            });
 
-                console.log('📋 Datos completos del ticket:', ticketData);
+            const visitasResponse = await fetch(`/api/tickets/${ticketId}/visitas`);
+            const visitasData = await visitasResponse.json();
 
-                if (ticketData.success && ticketData.ticket) {
-                    const ticketCompleto = ticketData.ticket;
+            console.log('📋 Visitas del ticket:', visitasData);
 
-                    const mostrarSerie = ticketCompleto.idTipotickets == 2 && ticketCompleto.tipoServicio == 6;
-                    console.log('🎯 Condiciones para serie:', {
-                        idTipotickets: ticketCompleto.idTipotickets,
-                        tipoServicio: ticketCompleto.tipoServicio,
-                        mostrarSerie: mostrarSerie
-                    });
+            let visitas = [];
+            let tecnicoNombre = 'No asignado';
+            let fechaLlegada = 'No definida';
+            let serieEquipo = '';
 
-                    const visitasResponse = await fetch(`/api/tickets/${ticketId}/visitas`);
-                    const visitasData = await visitasResponse.json();
+            if (visitasData.success && visitasData.visitas && visitasData.visitas.length > 0) {
+                visitas = visitasData.visitas;
 
-                    console.log('📋 Visitas del ticket:', visitasData);
-
-                    let visitas = [];
-                    let tecnicoNombre = 'No asignado';
-                    let fechaLlegada = 'No definida';
-                    let serieEquipo = '';
-
-                    if (visitasData.success && visitasData.visitas && visitasData.visitas.length > 0) {
-                        visitas = visitasData.visitas;
-
-                        if (visitas.length === 1) {
-                            const visita = visitas[0];
-                            tecnicoNombre = visita.tecnico?.Nombre || 'Técnico no asignado';
-                            fechaLlegada = visita.fecha_llegada ? new Date(visita.fecha_llegada).toLocaleDateString() : 'Sin fecha';
-
-                            if (mostrarSerie) {
-                                const equipoResponse = await fetch(`/api/tickets/${ticketId}/equipo/${visita.idVisitas}`);
-                                const equipoData = await equipoResponse.json();
-
-                                if (equipoData.success && equipoData.equipo) {
-                                    serieEquipo = equipoData.equipo.nserie || '';
-                                }
-                            }
-                        }
-                    }
-
-                    this.params.ticket = {
-                        id: ticketId,
-                        numero_ticket: ticketCompleto.numero_ticket,
-                        tienda_nombre: ticketCompleto.tienda?.nombre || 'Tienda no asignada',
-                        tecnico_nombre: tecnicoNombre,
-                        fecha_llegada: fechaLlegada,
-                        descripcion: ticketCompleto.fallaReportada || 'Sin descripción',
-                        visitas: visitas,
-                        serie_equipo: serieEquipo,
-                        mostrar_serie: mostrarSerie
-                    };
-
-                    if (serieEquipo) {
-                        this.params.serie = serieEquipo;
-                        console.log('✅ Serie asignada automáticamente:', serieEquipo);
-                    }
-
-                    this.params.ot = ticketId;
-                    console.log('✅ OT asignado:', ticketId);
-
-                    if (visitas.length > 1) {
-                        this.params.visita_seleccionada = '';
-                        toastr.info('Seleccione una visita específica');
-                    }
-
-                    console.log('✅ Datos del ticket cargados:', this.params.ticket);
-
-                    // 🔥 CARGAR SUMINISTROS AUTOMÁTICAMENTE AL SELECCIONAR TICKET
-                    setTimeout(() => {
-                        this.cargarSuministrosAutomaticamente();
-                    }, 500);
-
-                    if (this.items.length > 0) {
-                        this.items[0].descripcion = `Servicios para ticket: ${ticketCompleto.fallaReportada?.substring(0, 100) || 'Sin descripción'}`;
-                    }
+                if (visitas.length === 1) {
+                    const visita = visitas[0];
+                    tecnicoNombre = visita.tecnico?.Nombre || 'Técnico no asignado';
+                    fechaLlegada = visita.fecha_llegada ? new Date(visita.fecha_llegada).toLocaleDateString() : 'Sin fecha';
 
                     if (mostrarSerie) {
-                        if (serieEquipo) {
-                            toastr.success(`Serie del equipo cargada automáticamente: ${serieEquipo}`);
-                        } else {
-                            toastr.info('Ticket cumple condiciones para serie, pero no se encontró equipo asociado');
-                        }
-                    } else {
-                        toastr.info('Este ticket no cumple las condiciones para mostrar serie automática');
-                    }
+                        const equipoResponse = await fetch(`/api/tickets/${ticketId}/equipo/${visita.idVisitas}`);
+                        const equipoData = await equipoResponse.json();
 
-                    toastr.success(`Ticket ${ticketCompleto.numero_ticket} cargado correctamente - OT: ${ticketId}`);
-                } else {
-                    console.log('❌ No se encontró el ticket completo');
-                    toastr.error('No se pudieron cargar los datos del ticket');
+                        if (equipoData.success && equipoData.equipo) {
+                            serieEquipo = equipoData.equipo.nserie || '';
+                        }
+                    }
                 }
-            } catch (error) {
-                console.error('❌ Error al cargar datos del ticket:', error);
-                toastr.error('Error al cargar datos del ticket');
             }
-        },
+
+            this.params.ticket = {
+                id: ticketId,
+                numero_ticket: ticketCompleto.numero_ticket,
+                tienda_nombre: ticketCompleto.tienda?.nombre || 'Tienda no asignada',
+                tecnico_nombre: tecnicoNombre,
+                fecha_llegada: fechaLlegada,
+                descripcion: ticketCompleto.fallaReportada || 'Sin descripción',
+                visitas: visitas,
+                serie_equipo: serieEquipo,
+                mostrar_serie: mostrarSerie
+            };
+
+            if (serieEquipo) {
+                this.params.serie = serieEquipo;
+                console.log('✅ Serie asignada automáticamente:', serieEquipo);
+            }
+
+            this.params.ot = ticketId;
+            console.log('✅ OT asignado:', ticketId);
+
+            if (visitas.length > 1) {
+                this.params.visita_seleccionada = '';
+                toastr.info('Seleccione una visita específica');
+            }
+
+            console.log('✅ Datos del ticket cargados:', this.params.ticket);
+
+            // 🔥 CARGAR SUMINISTROS AUTOMÁTICAMENTE AL SELECCIONAR TICKET
+            setTimeout(() => {
+                this.cargarSuministrosAutomaticamente();
+            }, 500);
+
+            if (this.items.length > 0) {
+                this.items[0].descripcion = `Servicios para ticket: ${ticketCompleto.fallaReportada?.substring(0, 100) || 'Sin descripción'}`;
+            }
+
+            if (mostrarSerie) {
+                if (serieEquipo) {
+                    toastr.success(`Serie del equipo cargada automáticamente: ${serieEquipo}`);
+                } else {
+                    toastr.info('Ticket cumple condiciones para serie, pero no se encontró equipo asociado');
+                }
+            } else {
+                toastr.info('Este ticket no cumple las condiciones para mostrar serie automática');
+            }
+
+            toastr.success(`Ticket ${ticketCompleto.numero_ticket} cargado correctamente - OT: ${ticketId}`);
+        } else {
+            console.log('❌ No se encontró el ticket completo');
+            toastr.error('No se pudieron cargar los datos del ticket');
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar datos del ticket:', error);
+        toastr.error('Error al cargar datos del ticket');
+    }
+},
+
+// 🔥 NUEVO MÉTODO: Cargar cliente desde el ID del ticket
+async cargarClienteDesdeTicket(clienteId) {
+    try {
+        console.log('🔄 Cargando cliente desde ticket:', clienteId);
+        
+        const response = await fetch(`/api/clientes/cotizaciones/${clienteId}`);
+        const data = await response.json();
+
+        if (data.success && data.cliente) {
+            const cliente = data.cliente;
+            
+            // Actualizar los datos del cliente en el formulario
+            this.params.cliente = {
+                id: cliente.idCliente,
+                nombre: cliente.nombre,
+                email: cliente.email,
+                telefono: cliente.telefono,
+                empresa: cliente.nombre, // Usar el nombre como empresa
+                direccion: cliente.direccion,
+                documento: cliente.documento
+            };
+
+            // 🔥 ACTUALIZAR EL SELECT2 DE CLIENTE VISUALMENTE
+            $('#clienteSelect').val(cliente.idCliente).trigger('change');
+            
+            console.log('✅ Cliente cargado desde ticket:', this.params.cliente);
+            toastr.success(`Cliente cargado automáticamente: ${cliente.nombre}`);
+        } else {
+            console.log('❌ No se pudo cargar el cliente del ticket');
+            toastr.warning('No se pudo cargar la información del cliente asociado al ticket');
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar cliente desde ticket:', error);
+        toastr.error('Error al cargar información del cliente');
+    }
+},
 
         async onVisitaSeleccionada(visitaId) {
             console.log('🎯 Visita seleccionada:', visitaId);

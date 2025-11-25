@@ -1564,14 +1564,41 @@ class OrdenesHelpdeskController extends Controller
 
         // Buscar en la tabla tickets el idTicketFlujo correspondiente al ticket
         $ticket = DB::table('tickets')->where('idTickets', $id)->first();
-
-        // Obtener los articulos según el idTipoArticulo
-        $articulos = DB::table('articulos')
+// Modificar la consulta de artículos para incluir marca y modelo
+$articulos = DB::table('articulos')
     ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
-    ->select('articulos.idArticulos', 'articulos.nombre', 'articulos.idTipoArticulo', 
-             'articulos.codigo_repuesto', 'tipoarticulos.nombre as tipo_nombre') // ← Agregado
-    ->get();
-
+    ->leftJoin('modelo', 'articulos.idModelo', '=', 'modelo.idModelo')
+    ->leftJoin('marca', 'modelo.idMarca', '=', 'marca.idMarca')
+    ->leftJoin('categoria', 'modelo.idCategoria', '=', 'categoria.idCategoria')
+    ->whereIn('articulos.idTipoArticulo', [1, 3, 4]) // Solo tipos 1, 3 y 4
+    ->select(
+        'articulos.idArticulos', 
+        'articulos.nombre', 
+        'articulos.idTipoArticulo', 
+        'articulos.codigo_repuesto', 
+        'tipoarticulos.nombre as tipo_nombre',
+        'modelo.nombre as modelo_nombre',
+        'marca.nombre as marca_nombre',
+        'categoria.nombre as categoria_nombre'
+    )
+    ->get()
+    ->map(function($articulo) {
+        // Construir el texto completo con etiquetas claras
+        $textoBase = "Nombre: " . $articulo->nombre;
+        
+        // Agregar marca si existe
+        if ($articulo->marca_nombre) {
+            $textoBase .= " | Marca: " . $articulo->marca_nombre;
+        }
+        
+        // Agregar modelo si existe
+        if ($articulo->modelo_nombre) {
+            $textoBase .= " | Modelo: " . $articulo->modelo_nombre;
+        }
+        
+        $articulo->display_text = $textoBase;
+        return $articulo;
+    });
 
 
         // Inicializamos la variable para idVisitaSeleccionada
@@ -1715,22 +1742,32 @@ class OrdenesHelpdeskController extends Controller
     // }
 
 
-    public function getSuministros($ticketId, $visitaId)
-    {
-        // Obtener los suministros asociados con el ticketId y visitaId
-        $suministros = DB::table('suministros')
-            ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
-            ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo') // Hacemos el join con tipoarticulos
-            ->where('suministros.idTickets', $ticketId)
-            ->where('suministros.idVisitas', $visitaId)
-            ->select('suministros.idSuministros', 'articulos.idArticulos', 'articulos.nombre', 'tipoarticulos.nombre as tipo_nombre', 'suministros.cantidad') // Añadir idSuministros aquí
-            ->get();
+   public function getSuministros($ticketId, $visitaId)
+{
+    // Obtener los suministros asociados con el ticketId y visitaId incluyendo marca y modelo
+    $suministros = DB::table('suministros')
+        ->join('articulos', 'suministros.idArticulos', '=', 'articulos.idArticulos')
+        ->join('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+        ->leftJoin('modelo', 'articulos.idModelo', '=', 'modelo.idModelo') // LEFT JOIN con modelo
+        ->leftJoin('marca', 'modelo.idMarca', '=', 'marca.idMarca') // LEFT JOIN con marca
+        ->where('suministros.idTickets', $ticketId)
+        ->where('suministros.idVisitas', $visitaId)
+        ->select(
+            'suministros.idSuministros', 
+            'articulos.idArticulos', 
+            'articulos.nombre', 
+            'tipoarticulos.nombre as tipo_nombre', 
+            'suministros.cantidad',
+            'marca.nombre as marca_nombre', // Incluir marca
+            'modelo.nombre as modelo_nombre' // Incluir modelo
+        )
+        ->get();
 
-        // Verificar los datos obtenidos
-        Log::info('Suministros obtenidos:', ['suministros' => $suministros]);
+    // Verificar los datos obtenidos
+    Log::info('Suministros obtenidos:', ['suministros' => $suministros]);
 
-        return response()->json($suministros);
-    }
+    return response()->json($suministros);
+}
 
     public function actualizarCantidad(Request $request, $id)
     {
