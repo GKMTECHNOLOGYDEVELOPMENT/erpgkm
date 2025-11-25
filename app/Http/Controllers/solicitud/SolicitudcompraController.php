@@ -12,6 +12,8 @@ use App\Models\SolicitudAlmacenDetalle;
 use App\Models\TipoArea;
 use App\Models\PrioridadSolicitud;
 use App\Models\CentroCosto;
+use App\Models\Proveedore;
+use Illuminate\Support\Facades\Auth;
 
 class SolicitudcompraController extends Controller
 {
@@ -29,30 +31,54 @@ class SolicitudcompraController extends Controller
         return view('solicitud.solicitudcompra.index', compact('solicitudes', 'areas', 'prioridades'));
     }
 
-   public function create()
-    {
-        // Obtener datos para los selects
-        $tipoAreas = TipoArea::all();
-        $prioridades = PrioridadSolicitud::where('estado', 1)->get();
-        $centrosCosto = CentroCosto::where('estado', 1)->get();
-        
-        // Solo solicitudes de almacén aprobadas que tengan productos aprobados
-        $solicitudesAlmacen = SolicitudAlmacen::where('estado', 'aprobada')
-            ->whereHas('detalles', function($query) {
-                $query->where('estado', 'aprobado');
-            })
-            ->with(['detalles' => function($query) {
-                $query->where('estado', 'aprobado');
-            }])
-            ->get();
+public function create()
+{
+    // Obtener datos para los selects
+    $tipoAreas = TipoArea::all();
+    $prioridades = PrioridadSolicitud::where('estado', 1)->get();
+    $centrosCosto = CentroCosto::where('estado', 1)->get();
+    
+    // Obtener proveedores activos
+    $proveedores = Proveedore::where('estado', 1)
+        ->orderBy('nombre')
+        ->get(['idProveedor', 'nombre', 'telefono', 'email']);
+    
+    // Solo solicitudes de almacén aprobadas que tengan productos aprobados
+    $solicitudesAlmacen = SolicitudAlmacen::where('estado', 'aprobada')
+        ->whereHas('detalles', function($query) {
+            $query->where('estado', 'aprobado');
+        })
+        ->with(['detalles' => function($query) {
+            $query->where('estado', 'aprobado');
+        }])
+        ->get();
 
-        return view('solicitud.solicitudcompra.create', compact(
-            'tipoAreas', 
-            'prioridades', 
-            'centrosCosto',
-            'solicitudesAlmacen'
-        ));
+    // Obtener usuario autenticado como solicitante de compra
+    $user = Auth::user();
+    $solicitanteCompra = 'Usuario Sistema';
+    
+    if ($user) {
+        // Construir nombre completo del usuario
+        $solicitanteCompra = trim(
+            ($user->name ?? '') . ' ' . 
+            ($user->apellido_paterno ?? '') . ' ' . 
+            ($user->apellido_materno ?? '')
+        );
+        
+        if (empty(trim($solicitanteCompra))) {
+            $solicitanteCompra = $user->email ?? 'Usuario Sistema';
+        }
     }
+
+    return view('solicitud.solicitudcompra.create', compact(
+        'tipoAreas', 
+        'prioridades', 
+        'centrosCosto',
+        'solicitudesAlmacen',
+        'proveedores',
+        'solicitanteCompra' // Pasar el solicitante a la vista
+    ));
+}
     public function store(Request $request)
     {
         $request->validate([
@@ -151,32 +177,112 @@ class SolicitudcompraController extends Controller
         }
     }
 
+// En SolicitudcompraController - CORRIGE el método:
+
 public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
 {
     try {
-        // Cargar los detalles de la solicitud de almacén que estén aprobados
-        $detalles = SolicitudAlmacenDetalle::where('idSolicitudAlmacen', $idSolicitudAlmacen)
-            ->where('estado', 'aprobado') // Solo productos aprobados
-            ->get();
+        // Cargar la solicitud de almacén completa con sus relaciones
+        $solicitudAlmacen = SolicitudAlmacen::with([
+            'tipoArea', // Cambiar 'area' por 'tipoArea' si esa es la relación
+            'prioridad', 
+            'centroCosto',
+            'detalles' => function($query) {
+                $query->where('estado', 'aprobado');
+            }
+        ])->findOrFail($idSolicitudAlmacen);
 
-        if ($detalles->isEmpty()) {
+        if ($solicitudAlmacen->detalles->isEmpty()) {
             return response()->json([
                 'success' => false,
                 'message' => 'No hay productos aprobados en esta solicitud de almacén',
+                'solicitud' => null,
                 'detalles' => []
             ]);
         }
 
+        // Obtener usuario autenticado para solicitante de compra
+        $user = Auth::user();
+        $solicitanteCompra = 'Usuario Sistema';
+        
+        if ($user) {
+            $solicitanteCompra = trim(
+                ($user->name ?? '') . ' ' . 
+                ($user->apellido_paterno ?? '') . ' ' . 
+                ($user->apellido_materno ?? '')
+            );
+            
+            if (empty(trim($solicitanteCompra))) {
+                $solicitanteCompra = $user->email ?? 'Usuario Sistema';
+            }
+        }
+
+        // **DEBUG: Ver qué datos tenemos**
+        \Log::info('Solicitud Almacen Data:', [
+            'idTipoArea' => $solicitudAlmacen->idTipoArea,
+            'tipoArea_relation' => $solicitudAlmacen->tipoArea ? $solicitudAlmacen->tipoArea->toArray() : 'No relation',
+            'area_relation' => $solicitudAlmacen->area ? $solicitudAlmacen->area->toArray() : 'No area relation'
+        ]);
+
+        // Preparar datos de la solicitud para autocompletar
+        $solicitudData = [
+            'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+            'codigo_solicitud' => $solicitudAlmacen->codigo_solicitud,
+            'titulo' => $solicitudAlmacen->titulo,
+            'solicitante_almacen' => $solicitudAlmacen->solicitante,
+            'solicitante_compra' => $solicitanteCompra,
+            'idTipoArea' => $solicitudAlmacen->idTipoArea,
+            'tipo_area_nombre' => $solicitudAlmacen->tipoArea->nombre ?? ($solicitudAlmacen->area->nombre ?? ''),
+            'idPrioridad' => $solicitudAlmacen->idPrioridad,
+            'prioridad_nombre' => $solicitudAlmacen->prioridad->nombre ?? '',
+            'fecha_requerida' => $solicitudAlmacen->fecha_requerida,
+            'idCentroCosto' => $solicitudAlmacen->idCentroCosto,
+            'centro_costo_nombre' => $solicitudAlmacen->centroCosto ? 
+                $solicitudAlmacen->centroCosto->codigo . ' - ' . $solicitudAlmacen->centroCosto->nombre : '',
+            'justificacion' => $solicitudAlmacen->justificacion,
+            'observaciones' => $solicitudAlmacen->observaciones
+        ];
+
+        // Preparar detalles
+        $detallesData = [];
+        foreach ($solicitudAlmacen->detalles as $detalle) {
+            $detallesData[] = [
+                'idSolicitudAlmacenDetalle' => $detalle->idSolicitudAlmacenDetalle,
+                'idArticulo' => $detalle->idArticulo,
+                'descripcion_producto' => $detalle->descripcion_producto,
+                'categoria' => $detalle->categoria,
+                'cantidad' => $detalle->cantidad,
+                'cantidad_aprobada' => $detalle->cantidad,
+                'unidad' => $detalle->unidad,
+                'precio_unitario_estimado' => $detalle->precio_unitario_estimado ?? 0,
+                'total_producto' => $detalle->total_producto ?? 0,
+                'codigo_producto' => $detalle->codigo_producto,
+                'marca' => $detalle->marca,
+                'especificaciones_tecnicas' => $detalle->especificaciones_tecnicas,
+                'proveedor_sugerido' => $detalle->proveedor_sugerido ?? '',
+                'justificacion_producto' => $detalle->justificacion_producto,
+                'observaciones_detalle' => $detalle->observaciones_detalle,
+                'fromAlmacen' => true
+            ];
+        }
+
         return response()->json([
             'success' => true,
-            'detalles' => $detalles,
-            'message' => 'Productos cargados exitosamente'
+            'solicitud' => $solicitudData,
+            'detalles' => $detallesData,
+            'message' => 'Datos cargados exitosamente'
         ]);
 
     } catch (\Exception $e) {
+        \Log::error('Error en getSolicitudAlmacenDetalles: ' . $e->getMessage());
+        \Log::error('File: ' . $e->getFile());
+        \Log::error('Line: ' . $e->getLine());
+        \Log::error('Trace: ' . $e->getTraceAsString());
+        
         return response()->json([
             'success' => false,
             'message' => 'Error al cargar los detalles: ' . $e->getMessage(),
+            'solicitud' => null,
             'detalles' => []
         ], 500);
     }

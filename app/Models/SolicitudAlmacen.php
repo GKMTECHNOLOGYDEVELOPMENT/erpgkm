@@ -78,9 +78,9 @@ class SolicitudAlmacen extends Model
     }
 
     public function area()
-    {
-        return $this->belongsTo(Tipoarea::class, 'idTipoArea');
-    }
+{
+    return $this->belongsTo(Tipoarea::class, 'idTipoArea', 'idTipoArea');
+}
     public function articulo()
 {
     return $this->belongsTo(Articulo::class, 'idArticulo', 'idArticulos');

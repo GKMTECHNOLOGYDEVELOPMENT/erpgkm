@@ -77,9 +77,17 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Solicitante *</label>
-                                <input type="text" class="form-input" placeholder="Nombre completo" 
-                                       x-model="form.solicitante" name="solicitante" required>
+                                <label class="form-label">Solicitante Almacén</label>
+                                <input type="text" class="form-input" readonly
+                                       x-model="form.solicitante_almacen" name="solicitante_almacen">
+                                <small class="form-help">Cargado automáticamente desde la solicitud de almacén</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Solicitante Compra *</label>
+                                <input type="text" class="form-input" placeholder="Nombre del solicitante para compra" 
+                                    x-model="form.solicitante_compra" name="solicitante" required
+                                    value="{{ $solicitanteCompra }}" readonly>
                             </div>
 
                             <div class="form-group">
@@ -90,6 +98,9 @@
                                         <option value="{{ $area->idTipoArea }}">{{ $area->nombre }}</option>
                                     @endforeach
                                 </select>
+                                <small class="form-help" x-show="form.departamento_auto">
+                                    <span x-text="form.departamento_auto"></span> (desde almacén)
+                                </small>
                             </div>
 
                             <div class="form-group">
@@ -102,12 +113,18 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-help" x-show="form.prioridad_auto">
+                                    <span x-text="form.prioridad_auto"></span> (desde almacén)
+                                </small>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Fecha Requerida *</label>
                                 <input type="date" class="form-input" x-model="form.fecha_requerida" 
                                        name="fecha_requerida" :min="new Date().toISOString().split('T')[0]" required>
+                                <small class="form-help" x-show="form.fecha_requerida_auto">
+                                    <span x-text="form.fecha_requerida_auto"></span> (desde almacén)
+                                </small>
                             </div>
 
                             <div class="form-group">
@@ -120,6 +137,9 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small class="form-help" x-show="form.centro_costo_auto">
+                                    <span x-text="form.centro_costo_auto"></span> (desde almacén)
+                                </small>
                             </div>
 
                             <div class="form-group">
@@ -132,6 +152,9 @@
                                 <label class="form-label">Justificación *</label>
                                 <textarea class="form-textarea" rows="3" placeholder="Explique por qué es necesaria esta compra" 
                                           x-model="form.justificacion" name="justificacion" required></textarea>
+                                <small class="form-help" x-show="form.justificacion_auto">
+                                    Justificación cargada desde almacén
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -197,18 +220,19 @@
                                         <div class="form-group">
                                             <label class="form-label">Precio Unitario *</label>
                                             <div class="input-with-icon">
-                                                <span class="input-icon">$</span>
+                                                <span class="input-icon">S/</span>
                                                 <input type="number" class="form-input" min="0" step="0.01" 
                                                        x-model="item.precio_unitario_estimado" 
                                                        :name="`items[${index}][precio_unitario_estimado]`" 
                                                        @change="updateItemTotal(index)" required>
                                             </div>
+                                            <small class="form-help">Precio estimado para compra</small>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="form-label">Total</label>
                                             <div class="total-display">
-                                                <span x-text="'$' + (item.total_producto || '0.00')"></span>
+                                                <span x-text="'S/' + (item.total_producto || '0.00')"></span>
                                                 <input type="hidden" :name="`items[${index}][total_producto]`" x-model="item.total_producto">
                                             </div>
                                         </div>
@@ -230,17 +254,38 @@
                                         </div>
 
                                         <div class="form-group full-width">
+                                            <label class="form-label">Proveedor Sugerido</label>
+                                            <select class="form-select" 
+                                                    x-model="item.idProveedor" 
+                                                    :name="`items[${index}][idProveedor]`">
+                                                <option value="">Seleccione un proveedor</option>
+                                                @foreach($proveedores as $proveedor)
+                                                    <option value="{{ $proveedor->idProveedor }}">
+                                                        {{ $proveedor->nombre }} 
+                                                        @if($proveedor->telefono)
+                                                            - Tel: {{ $proveedor->telefono }}
+                                                        @endif
+                                                        @if($proveedor->email)
+                                                            - Email: {{ $proveedor->email }}
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                                <option value="otro">Otro proveedor...</option>
+                                            </select>
+                                            <input type="text" class="form-input mt-2" 
+                                                   x-show="item.idProveedor === 'otro'"
+                                                   placeholder="Especifique el nombre del proveedor"
+                                                   x-model="item.proveedor_otro"
+                                                   :name="`items[${index}][proveedor_otro]`">
+                                            <input type="hidden" :name="`items[${index}][proveedor_sugerido]`" 
+                                                   x-model="item.idProveedor === 'otro' ? item.proveedor_otro : getProveedorNombre(item.idProveedor)">
+                                        </div>
+
+                                        <div class="form-group full-width">
                                             <label class="form-label">Especificaciones Técnicas</label>
                                             <textarea class="form-textarea" rows="2" 
                                                       x-model="item.especificaciones_tecnicas" 
                                                       :name="`items[${index}][especificaciones_tecnicas]`" readonly></textarea>
-                                        </div>
-
-                                        <div class="form-group full-width">
-                                            <label class="form-label">Proveedor Sugerido</label>
-                                            <input type="text" class="form-input" placeholder="Nombre del proveedor" 
-                                                   x-model="item.proveedor_sugerido" 
-                                                   :name="`items[${index}][proveedor_sugerido]`">
                                         </div>
 
                                         <div class="form-group full-width">
@@ -291,17 +336,17 @@
                                 </div>
                                 <div class="summary-item">
                                     <span class="summary-label">Subtotal:</span>
-                                    <span class="summary-value" x-text="'$' + subtotal.toLocaleString()"></span>
+                                    <span class="summary-value" x-text="'S/' + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     <input type="hidden" name="subtotal" x-model="subtotal">
                                 </div>
                                 <div class="summary-item">
-                                    <span class="summary-label">IVA (19%):</span>
-                                    <span class="summary-value" x-text="'$' + iva.toLocaleString()"></span>
-                                    <input type="hidden" name="iva" x-model="iva">
+                                    <span class="summary-label">IGV (18%):</span>
+                                    <span class="summary-value" x-text="'S/' + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                    <input type="hidden" name="iva" x-model="igv">
                                 </div>
                                 <div class="summary-item total">
                                     <span class="summary-label">Total General:</span>
-                                    <span class="summary-value" x-text="'$' + total.toLocaleString()"></span>
+                                    <span class="summary-value" x-text="'S/' + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     <input type="hidden" name="total" x-model="total">
                                     <input type="hidden" name="total_unidades" x-model="totalUnidades">
                                 </div>
@@ -321,6 +366,9 @@
                                 <label class="form-label">Observaciones</label>
                                 <textarea class="form-textarea" rows="3" placeholder="Observaciones adicionales, condiciones especiales, etc." 
                                           x-model="form.observaciones" name="observaciones"></textarea>
+                                <small class="form-help" x-show="form.observaciones_auto">
+                                    Observaciones cargadas desde almacén
+                                </small>
                             </div>
 
                             <div class="form-group full-width">
@@ -396,8 +444,12 @@
                                     <span x-text="getSolicitudAlmacenText(form.idSolicitudAlmacen) || 'No seleccionada'"></span>
                                 </div>
                                 <div class="preview-item">
-                                    <label>Solicitante:</label>
-                                    <span x-text="form.solicitante || 'No especificado'"></span>
+                                    <label>Solicitante Almacén:</label>
+                                    <span x-text="form.solicitante_almacen || 'No especificado'"></span>
+                                </div>
+                                <div class="preview-item">
+                                    <label>Solicitante Compra:</label>
+                                    <span x-text="form.solicitante_compra || 'No especificado'"></span>
                                 </div>
                                 <div class="preview-item">
                                     <label>Departamento:</label>
@@ -432,17 +484,18 @@
                                                     <strong x-text="item.descripcion_producto || 'Sin descripción'"></strong>
                                                     <span class="item-preview-code" x-text="item.codigo_producto || `${requestCode}-${String(index + 1).padStart(2, '0')}`"></span>
                                                 </div>
-                                                <span class="item-total" x-text="'$' + (item.total_producto || '0.00')"></span>
+                                                <span class="item-total" x-text="'S/' + (item.total_producto || '0.00')"></span>
                                             </div>
                                             <div class="preview-item-details">
                                                 <span x-text="item.cantidad_aprobada + ' ' + (item.unidad || 'unidad')"></span>
-                                                <span x-text="'$' + (item.precio_unitario_estimado || '0.00') + ' c/u'"></span>
+                                                <span x-text="'S/' + (item.precio_unitario_estimado || '0.00') + ' c/u'"></span>
                                                 <span x-show="item.categoria" x-text="item.categoria" class="item-category"></span>
                                             </div>
                                             <div class="preview-item-specs" x-show="item.especificaciones_tecnicas" 
                                                  x-text="item.especificaciones_tecnicas"></div>
-                                            <div class="preview-item-vendor" x-show="item.proveedor_sugerido">
-                                                <strong>Proveedor sugerido:</strong> <span x-text="item.proveedor_sugerido"></span>
+                                            <div class="preview-item-vendor" x-show="item.idProveedor || item.proveedor_otro">
+                                                <strong>Proveedor:</strong> 
+                                                <span x-text="item.idProveedor === 'otro' ? item.proveedor_otro : getProveedorNombre(item.idProveedor)"></span>
                                             </div>
                                         </div>
                                     </template>
@@ -454,15 +507,15 @@
                                 <div class="preview-summary">
                                     <div class="preview-summary-item">
                                         <span>Subtotal:</span>
-                                        <span x-text="'$' + subtotal.toLocaleString()"></span>
+                                        <span x-text="'S/' + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     </div>
                                     <div class="preview-summary-item">
-                                        <span>IVA (19%):</span>
-                                        <span x-text="'$' + iva.toLocaleString()"></span>
+                                        <span>IGV (18%):</span>
+                                        <span x-text="'S/' + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     </div>
                                     <div class="preview-summary-item total">
                                         <span>Total:</span>
-                                        <span x-text="'$' + total.toLocaleString()"></span>
+                                        <span x-text="'S/' + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     </div>
                                 </div>
                             </div>
@@ -483,6 +536,7 @@
                             <li>Revise las cantidades aprobadas</li>
                             <li>Agregue proveedores sugeridos cuando sea posible</li>
                             <li>Verifique que los totales sean correctos</li>
+                            <li>El IGV aplicado es del 18%</li>
                         </ul>
                     </div>
                 </div>
@@ -495,7 +549,8 @@
             return {
                 form: {
                     idSolicitudAlmacen: '',
-                    solicitante: '',
+                    solicitante_almacen: '',
+                    solicitante_compra: '',
                     idTipoArea: '',
                     idPrioridad: '',
                     fecha_requerida: '',
@@ -504,11 +559,19 @@
                     justificacion: '',
                     observaciones: '',
                     items: [],
-                    files: []
+                    files: [],
+                    // Campos para mostrar datos automáticos
+                    departamento_auto: '',
+                    prioridad_auto: '',
+                    fecha_requerida_auto: '',
+                    centro_costo_auto: '',
+                    justificacion_auto: '',
+                    observaciones_auto: ''
                 },
                 
                 loadingAlmacen: false,
                 solicitudesAlmacenData: @json($solicitudesAlmacen->keyBy('idSolicitudAlmacen')),
+                proveedoresData: @json($proveedores),
 
                 get requestCode() {
                     const now = new Date();
@@ -522,6 +585,9 @@
                 init() {
                     const today = new Date().toISOString().split('T')[0];
                     this.form.fecha_requerida = today;
+                    
+                    // Establecer solicitante por defecto desde PHP
+                    this.form.solicitante_compra = '{{ $solicitanteCompra }}';
                 },
 
                 get totalUnidades() {
@@ -536,28 +602,33 @@
                     }, 0);
                 },
 
-                get iva() {
-                    return this.subtotal * 0.19;
+                get igv() {
+                    return this.subtotal * 0.18; // IGV 18%
                 },
 
                 get total() {
-                    return this.subtotal + this.iva;
+                    return this.subtotal + this.igv;
                 },
 
                 async loadAlmacenItems() {
                     if (!this.form.idSolicitudAlmacen) {
-                        this.form.items = [];
+                        this.resetAlmacenData();
                         return;
                     }
 
                     this.loadingAlmacen = true;
-                    this.form.items = [];
+                    this.resetAlmacenData();
 
                     try {
                         const response = await fetch(`/solicitudcompra/solicitud-almacen/${this.form.idSolicitudAlmacen}/detalles`);
                         const result = await response.json();
 
                         if (result.success && result.detalles && result.detalles.length > 0) {
+                            // Cargar datos de la solicitud para autocompletar
+                            if (result.solicitud) {
+                                this.autocompleteFormData(result.solicitud);
+                            }
+
                             // Cargar los detalles de la solicitud de almacén
                             this.form.items = result.detalles.map(detalle => ({
                                 idSolicitudAlmacenDetalle: detalle.idSolicitudAlmacenDetalle,
@@ -572,20 +643,12 @@
                                 codigo_producto: detalle.codigo_producto || '',
                                 marca: detalle.marca || '',
                                 especificaciones_tecnicas: detalle.especificaciones_tecnicas || '',
-                                proveedor_sugerido: detalle.proveedor_sugerido || '',
+                                idProveedor: detalle.proveedor_sugerido || '',
+                                proveedor_otro: '',
                                 justificacion_producto: detalle.justificacion_producto || '',
                                 observaciones_detalle: detalle.observaciones_detalle || '',
                                 fromAlmacen: true
                             }));
-
-                            // Llenar automáticamente algunos campos de la solicitud principal
-                            const solicitudAlmacen = this.solicitudesAlmacenData[this.form.idSolicitudAlmacen];
-                            if (solicitudAlmacen) {
-                                this.form.solicitante = solicitudAlmacen.solicitante || this.form.solicitante;
-                                this.form.idCentroCosto = solicitudAlmacen.idCentroCosto || this.form.idCentroCosto;
-                                this.form.justificacion = solicitudAlmacen.justificacion || this.form.justificacion;
-                                this.form.observaciones = solicitudAlmacen.observaciones || this.form.observaciones;
-                            }
 
                             // Calcular totales iniciales
                             this.form.items.forEach((item, index) => {
@@ -605,11 +668,63 @@
                     }
                 },
 
+               autocompleteFormData(solicitudData) {
+    // Autocompletar datos del formulario
+    this.form.solicitante_almacen = solicitudData.solicitante_almacen || '';
+    
+    // Si no se ha llenado manualmente, autocompletar solicitante de compra
+    if (!this.form.solicitante_compra && solicitudData.solicitante_compra) {
+        this.form.solicitante_compra = solicitudData.solicitante_compra;
+    }
+    
+    // Si no se ha llenado manualmente, autocompletar departamento
+    if (!this.form.idTipoArea && solicitudData.idTipoArea) {
+        this.form.idTipoArea = solicitudData.idTipoArea;
+        this.form.departamento_auto = solicitudData.tipo_area_nombre;
+    }
+    
+    if (!this.form.idPrioridad && solicitudData.idPrioridad) {
+        this.form.idPrioridad = solicitudData.idPrioridad;
+        this.form.prioridad_auto = solicitudData.prioridad_nombre;
+    }
+    
+    if (!this.form.idCentroCosto && solicitudData.idCentroCosto) {
+        this.form.idCentroCosto = solicitudData.idCentroCosto;
+        this.form.centro_costo_auto = solicitudData.centro_costo_nombre;
+    }
+    
+    if (!this.form.justificacion && solicitudData.justificacion) {
+        this.form.justificacion = solicitudData.justificacion;
+        this.form.justificacion_auto = solicitudData.justificacion;
+    }
+    
+    if (!this.form.observaciones && solicitudData.observaciones) {
+        this.form.observaciones = solicitudData.observaciones;
+        this.form.observaciones_auto = solicitudData.observaciones;
+    }
+},
+
+                resetAlmacenData() {
+                    this.form.items = [];
+                    this.form.solicitante_almacen = '';
+                    this.form.departamento_auto = '';
+                    this.form.prioridad_auto = '';
+                    this.form.centro_costo_auto = '';
+                    this.form.justificacion_auto = '';
+                    this.form.observaciones_auto = '';
+                },
+
                 updateItemTotal(index) {
                     const item = this.form.items[index];
                     const quantity = parseFloat(item.cantidad_aprobada) || 0;
                     const unitPrice = parseFloat(item.precio_unitario_estimado) || 0;
                     item.total_producto = (quantity * unitPrice).toFixed(2);
+                },
+
+                getProveedorNombre(proveedorId) {
+                    if (!proveedorId || proveedorId === 'otro') return '';
+                    const proveedor = this.proveedoresData.find(p => p.idProveedor == proveedorId);
+                    return proveedor ? proveedor.nombre : '';
                 },
 
                 getSolicitudAlmacenText(idSolicitudAlmacen) {
@@ -682,7 +797,8 @@
                     if (confirm('¿Está seguro de que desea limpiar todos los campos?')) {
                         this.form = {
                             idSolicitudAlmacen: '',
-                            solicitante: '',
+                            solicitante_almacen: '',
+                            solicitante_compra: '',
                             idTipoArea: '',
                             idPrioridad: '',
                             fecha_requerida: new Date().toISOString().split('T')[0],
@@ -691,14 +807,20 @@
                             justificacion: '',
                             observaciones: '',
                             items: [],
-                            files: []
+                            files: [],
+                            departamento_auto: '',
+                            prioridad_auto: '',
+                            fecha_requerida_auto: '',
+                            centro_costo_auto: '',
+                            justificacion_auto: '',
+                            observaciones_auto: ''
                         };
                     }
                 },
 
                 submitForm() {
                     // Validación básica
-                    if (!this.form.idSolicitudAlmacen || !this.form.solicitante || !this.form.idTipoArea || 
+                    if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea || 
                         !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
                         alert('Por favor complete todos los campos obligatorios (*)');
                         return;
