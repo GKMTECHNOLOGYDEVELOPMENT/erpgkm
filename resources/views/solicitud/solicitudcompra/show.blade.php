@@ -2,6 +2,60 @@
 
 <link rel="stylesheet" href="{{ asset('assets/css/solicitudcompra.css') }}">
 
+@php
+    // Funciones auxiliares para manejar monedas
+    function getResumenMoneda($solicitud) {
+        if ($solicitud->detalles->isEmpty()) return 'S/';
+        
+        $currencyCount = [];
+        foreach ($solicitud->detalles as $detalle) {
+            if ($detalle->moneda) {
+                $currencyId = $detalle->moneda->idMonedas;
+                $currencyCount[$currencyId] = ($currencyCount[$currencyId] ?? 0) + 1;
+            }
+        }
+        
+        if (empty($currencyCount)) return 'S/';
+        
+        $mostCommonCurrency = array_keys($currencyCount)[0];
+        foreach ($solicitud->detalles as $detalle) {
+            if ($detalle->moneda && $detalle->moneda->idMonedas == $mostCommonCurrency) {
+                return $detalle->moneda->simbolo ?? 'S/';
+            }
+        }
+        
+        return 'S/';
+    }
+
+    function hasMultipleCurrencies($solicitud) {
+        $currencies = [];
+        foreach ($solicitud->detalles as $detalle) {
+            if ($detalle->moneda) {
+                $currencyId = $detalle->moneda->idMonedas;
+                if (!in_array($currencyId, $currencies)) {
+                    $currencies[] = $currencyId;
+                }
+            }
+        }
+        return count($currencies) > 1;
+    }
+
+    function getMonedasUtilizadas($solicitud) {
+        $currencies = [];
+        foreach ($solicitud->detalles as $detalle) {
+            if ($detalle->moneda && !in_array($detalle->moneda->nombre, $currencies)) {
+                $currencies[] = $detalle->moneda->nombre;
+            }
+        }
+        return implode(', ', $currencies);
+    }
+
+    // Calcular valores una sola vez
+    $monedaResumen = getResumenMoneda($solicitud);
+    $multipleMonedas = hasMultipleCurrencies($solicitud);
+    $monedasUtilizadas = getMonedasUtilizadas($solicitud);
+@endphp
+
 <div class="container">
     <!-- Header -->
     <div class="header">
@@ -55,8 +109,12 @@
                             <p class="detail-value">{{ $solicitud->codigo_solicitud }}</p>
                         </div>
                         <div class="detail-group">
-                            <label class="detail-label">Solicitante</label>
-                            <p class="detail-value">{{ $solicitud->solicitante }}</p>
+                            <label class="detail-label">Solicitante Compra</label>
+                            <p class="detail-value">{{ $solicitud->solicitante_compra }}</p>
+                        </div>
+                        <div class="detail-group">
+                            <label class="detail-label">Solicitante Almacén</label>
+                            <p class="detail-value">{{ $solicitud->solicitante_almacen }}</p>
                         </div>
                         <div class="detail-group">
                             <label class="detail-label">Área</label>
@@ -82,6 +140,14 @@
                             <label class="detail-label">Proyecto Asociado</label>
                             <p class="detail-value">{{ $solicitud->proyecto_asociado ?? 'No especificado' }}</p>
                         </div>
+                        @if($solicitud->solicitudAlmacen)
+                        <div class="detail-group col-span-2">
+                            <label class="detail-label">Solicitud de Almacén Relacionada</label>
+                            <p class="detail-value">
+                                {{ $solicitud->solicitudAlmacen->codigo_solicitud }} - {{ $solicitud->solicitudAlmacen->titulo }}
+                            </p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -97,20 +163,26 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Subtotal:</span>
-                            <span class="font-semibold">${{ number_format($solicitud->subtotal, 2) }}</span>
+                            <span class="font-semibold">{{ $monedaResumen }}{{ number_format($solicitud->subtotal, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">IGV (18%):</span>
-                            <span class="font-semibold">${{ number_format($solicitud->iva, 2) }}</span>
+                            <span class="font-semibold">{{ $monedaResumen }}{{ number_format($solicitud->iva, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center border-t pt-2">
                             <span class="text-gray-800 font-bold">Total:</span>
-                            <span class="text-lg font-bold text-primary">${{ number_format($solicitud->total, 2) }}</span>
+                            <span class="text-lg font-bold text-primary">{{ $monedaResumen }}{{ number_format($solicitud->total, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Unidades:</span>
                             <span class="font-semibold">{{ $solicitud->total_unidades }}</span>
                         </div>
+                        @if($multipleMonedas)
+                        <div class="flex justify-between items-center border-t pt-2">
+                            <span class="text-gray-600 text-sm">Monedas Utilizadas:</span>
+                            <span class="text-sm font-semibold">{{ $monedasUtilizadas }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -189,6 +261,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unitario</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Moneda</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                         </tr>
@@ -217,10 +290,15 @@
                                 {{ $detalle->unidad ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ${{ number_format($detalle->precio_unitario_estimado, 2) }}
+                                {{ $detalle->moneda->simbolo ?? 'S/' }}{{ number_format($detalle->precio_unitario_estimado, 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ $detalle->moneda->nombre ?? 'PEN' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ${{ number_format($detalle->total_producto, 2) }}
+                                {{ $detalle->moneda->simbolo ?? 'S/' }}{{ number_format($detalle->total_producto, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -231,9 +309,9 @@
                                 </span>
                             </td>
                         </tr>
-                        @if($detalle->justificacion_producto || $detalle->especificaciones_tecnicas)
+                        @if($detalle->justificacion_producto || $detalle->especificaciones_tecnicas || $detalle->proveedor_sugerido)
                         <tr>
-                            <td colspan="7" class="px-6 py-3 bg-gray-50 text-sm text-gray-600">
+                            <td colspan="8" class="px-6 py-3 bg-gray-50 text-sm text-gray-600">
                                 @if($detalle->justificacion_producto)
                                 <div><strong>Justificación:</strong> {{ $detalle->justificacion_producto }}</div>
                                 @endif
@@ -243,6 +321,9 @@
                                 @if($detalle->proveedor_sugerido)
                                 <div class="mt-1"><strong>Proveedor Sugerido:</strong> {{ $detalle->proveedor_sugerido }}</div>
                                 @endif
+                                @if($detalle->observaciones_detalle)
+                                <div class="mt-1"><strong>Observaciones:</strong> {{ $detalle->observaciones_detalle }}</div>
+                                @endif
                             </td>
                         </tr>
                         @endif
@@ -250,12 +331,12 @@
                     </tbody>
                     <tfoot class="bg-gray-50">
                         <tr>
-                            <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-900">Totales:</td>
-                            <td class="px-6 py-3 text-sm font-medium text-gray-900">
-                                ${{ number_format($solicitud->detalles->sum('precio_unitario_estimado'), 2) }}
+                            <td colspan="5" class="px-6 py-3 text-right text-sm font-medium text-gray-900">Totales:</td>
+                            <td class="px-6 py-3 text-sm text-gray-500">
+                                <!-- Monedas utilizadas -->
                             </td>
                             <td class="px-6 py-3 text-sm font-medium text-gray-900">
-                                ${{ number_format($solicitud->detalles->sum('total_producto'), 2) }}
+                                {{ $monedaResumen }}{{ number_format($solicitud->detalles->sum('total_producto'), 2) }}
                             </td>
                             <td></td>
                         </tr>
@@ -329,6 +410,10 @@
 
 .action-buttons {
     @apply flex space-x-3;
+}
+
+.currency-badge {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800;
 }
 </style>
 

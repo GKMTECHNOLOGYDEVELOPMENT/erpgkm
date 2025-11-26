@@ -279,20 +279,26 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Subtotal:</span>
-                            <span class="font-semibold">${{ number_format($solicitud->subtotal, 2) }}</span>
+                            <span class="font-semibold">{{ $solicitud->moneda_simbolo ?? 'S/' }}{{ number_format($solicitud->subtotal, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">IVA (19%):</span>
-                            <span class="font-semibold">${{ number_format($solicitud->iva, 2) }}</span>
+                            <span class="font-semibold">{{ $solicitud->moneda_simbolo ?? 'S/' }}{{ number_format($solicitud->iva, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center border-t pt-2">
                             <span class="text-gray-800 font-bold">Total:</span>
-                            <span class="text-lg font-bold text-primary">${{ number_format($solicitud->total, 2) }}</span>
+                            <span class="text-lg font-bold text-primary">{{ $solicitud->moneda_simbolo ?? 'S/' }}{{ number_format($solicitud->total, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Unidades:</span>
                             <span class="font-semibold">{{ $solicitud->total_unidades }}</span>
                         </div>
+                        @if($solicitud->multiple_monedas)
+                        <div class="flex justify-between items-center bg-blue-50 p-2 rounded">
+                            <span class="text-gray-600 text-sm">Monedas utilizadas:</span>
+                            <span class="font-semibold text-blue-600 text-sm">{{ $solicitud->monedas_utilizadas }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -372,6 +378,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unidad</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Unitario</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Moneda</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
@@ -403,10 +410,15 @@
                                 {{ $detalle->unidad ?? 'N/A' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                ${{ number_format($detalle->precio_unitario_estimado, 2) }}
+                                {{ $detalle->moneda->simbolo ?? 'S/' }}{{ number_format($detalle->precio_unitario_estimado, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                ${{ number_format($detalle->total_producto, 2) }}
+                                {{ $detalle->moneda->simbolo ?? 'S/' }}{{ number_format($detalle->total_producto, 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ $detalle->moneda->nombre ?? 'PEN' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
@@ -438,7 +450,7 @@
                         </tr>
                         @if($detalle->justificacion_producto || $detalle->especificaciones_tecnicas)
                         <tr>
-                            <td colspan="8" class="px-6 py-3 bg-gray-50 text-sm text-gray-600">
+                            <td colspan="9" class="px-6 py-3 bg-gray-50 text-sm text-gray-600">
                                 @if($detalle->justificacion_producto)
                                 <div><strong>Justificación:</strong> {{ $detalle->justificacion_producto }}</div>
                                 @endif
@@ -458,14 +470,11 @@
                     </tbody>
                     <tfoot class="bg-gray-50">
                         <tr>
-                            <td colspan="4" class="px-6 py-3 text-right text-sm font-medium text-gray-900">Totales:</td>
+                            <td colspan="5" class="px-6 py-3 text-right text-sm font-medium text-gray-900">Totales:</td>
                             <td class="px-6 py-3 text-sm font-medium text-gray-900">
-                                ${{ number_format($solicitud->detalles->sum('precio_unitario_estimado'), 2) }}
+                                {{ $solicitud->moneda_simbolo ?? 'S/' }}{{ number_format($solicitud->detalles->sum('total_producto'), 2) }}
                             </td>
-                            <td class="px-6 py-3 text-sm font-medium text-gray-900">
-                                ${{ number_format($solicitud->detalles->sum('total_producto'), 2) }}
-                            </td>
-                            <td colspan="2"></td>
+                            <td colspan="3"></td>
                         </tr>
                     </tfoot>
                 </table>

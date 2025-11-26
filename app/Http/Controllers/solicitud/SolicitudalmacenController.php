@@ -275,10 +275,19 @@ public function getDetailData($id)
             'tipoSolicitud',
             'prioridad',
             'centroCosto',
+            'area',
             'detalles',
             'archivos',
             'historial.usuario'
         ])->findOrFail($id);
+
+        // DEBUG: Verificar relaciones
+        \Log::info('Solicitud cargada:', [
+            'id' => $solicitud->idSolicitudAlmacen,
+            'tipoSolicitud' => $solicitud->tipoSolicitud,
+            'tipoSolicitud_id' => $solicitud->idTipoSolicitud,
+            'tipoSolicitud_nombre' => $solicitud->tipoSolicitud ? $solicitud->tipoSolicitud->nombre : 'NO CARGADO'
+        ]);
 
         return response()->json([
             'success' => true,
@@ -286,6 +295,7 @@ public function getDetailData($id)
         ]);
 
     } catch (\Exception $e) {
+        \Log::error('Error en getDetailData: ' . $e->getMessage());
         return response()->json([
             'success' => false,
             'message' => 'Error al cargar los detalles: ' . $e->getMessage()

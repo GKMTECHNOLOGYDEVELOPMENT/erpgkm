@@ -41,7 +41,6 @@
 
         <!-- Grid de Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="solicitudes-container">
-            <!-- Las cards se cargarán aquí dinámicamente -->
             @if(isset($solicitudes) && count($solicitudes) > 0)
                 @foreach($solicitudes as $solicitud)
                     <div class="bg-white rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300">
@@ -74,11 +73,11 @@
                                 <div class="flex items-center mb-2">
                                     <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
                                         <span class="text-white text-sm font-semibold">
-                                            {{ substr($solicitud->solicitante, 0, 1) }}
+                                            {{ substr($solicitud->solicitante_compra ?? $solicitud->solicitante, 0, 1) }}
                                         </span>
                                     </div>
                                     <div class="ml-3">
-                                        <p class="text-sm font-medium text-gray-900">{{ $solicitud->solicitante }}</p>
+                                        <p class="text-sm font-medium text-gray-900">{{ $solicitud->solicitante_compra ?? $solicitud->solicitante }}</p>
                                         <p class="text-xs text-gray-500">
                                             {{ \Carbon\Carbon::parse($solicitud->created_at)->format('d/m/Y H:i') }}
                                         </p>
@@ -100,8 +99,18 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600">Monto Total:</span>
-                                    <span class="text-sm font-bold text-green-600">${{ number_format($solicitud->total, 2) }}</span>
+                                    <span class="text-sm font-bold text-green-600">
+                                        {{ $solicitud->resumen_moneda }}{{ number_format($solicitud->total, 2) }}
+                                    </span>
                                 </div>
+                                @if($solicitud->multiple_currencies)
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">Monedas:</span>
+                                    <span class="text-sm font-medium text-blue-600">
+                                        {{ $solicitud->monedas_utilizadas }}
+                                    </span>
+                                </div>
+                                @endif
                             </div>
 
                             <!-- Resumen de productos -->
@@ -111,8 +120,15 @@
                                     @if(isset($solicitud->detalles) && count($solicitud->detalles) > 0)
                                         @foreach($solicitud->detalles->take(3) as $detalle)
                                             <div class="flex justify-between text-xs mb-1 last:mb-0">
-                                                <span class="text-gray-700 truncate flex-1 mr-2">{{ $detalle->descripcion_producto }}</span>
-                                                <span class="text-gray-900 font-medium whitespace-nowrap">{{ $detalle->cantidad }} {{ $detalle->unidad }}</span>
+                                                <span class="text-gray-700 truncate flex-1 mr-2">
+                                                    {{ $detalle->descripcion_producto }}
+                                                </span>
+                                                <div class="flex items-center space-x-1 whitespace-nowrap">
+                                                    <span class="text-gray-900 font-medium">
+                                                        {{ $detalle->cantidad }} {{ $detalle->unidad }}
+                                                    </span>
+                                                  
+                                                </div>
                                             </div>
                                         @endforeach
                                         @if(count($solicitud->detalles) > 3)
@@ -146,18 +162,6 @@
                                             class="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors duration-200">
                                         Ver Detalles
                                     </button>
-                                    
-                                    <!-- Botones de acción según estado -->
-                                    @if($solicitud->estado == 'pendiente')
-                                        <button onclick="aprobarSolicitud({{ $solicitud->idSolicitudCompra }})" 
-                                                class="px-3 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors duration-200">
-                                            Aprobar
-                                        </button>
-                                        <button onclick="rechazarSolicitud({{ $solicitud->idSolicitudCompra }})" 
-                                                class="px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors duration-200">
-                                            Rechazar
-                                        </button>
-                                    @endif
                                 </div>
                                 
                                 <!-- Indicador de prioridad -->
@@ -229,6 +233,8 @@
 
         function aplicarFiltros() {
             console.log('Aplicando filtros...');
+            // Aquí puedes agregar la lógica para filtrar las solicitudes
+            // Puede ser mediante AJAX o recargando la página con parámetros
         }
 
         // Verificar que las funciones estén disponibles globalmente
@@ -244,6 +250,22 @@
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
+        }
+        
+        /* Estilos para mejorar la apariencia de los scrollbars en áreas con overflow */
+        .bg-gray-50::-webkit-scrollbar {
+            width: 4px;
+        }
+        .bg-gray-50::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .bg-gray-50::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        .bg-gray-50::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
     </style>
 </x-layout.default>

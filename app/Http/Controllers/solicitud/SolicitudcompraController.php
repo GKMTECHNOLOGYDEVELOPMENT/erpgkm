@@ -114,7 +114,7 @@ public function create()
         'monedas'
     ));
 }
-   public function store(Request $request)
+  public function store(Request $request)
 {
     $request->validate([
         'solicitante_compra' => 'required|string|max:255',
@@ -125,12 +125,18 @@ public function create()
         'justificacion' => 'required|string',
         'items' => 'required|array|min:1',
         'items.*.descripcion_producto' => 'required|string',
-        'items.*.idMonedas' => 'required|exists:monedas,idMonedas',
+        'items.*.idMonedas' => 'required|exists:monedas,idMonedas', // ← Este campo
         'items.*.cantidad' => 'required|integer|min:1',
         'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
         'idSolicitudAlmacen' => 'required|exists:solicitud_almacen,idSolicitudAlmacen',
     ]);
 
+    // Agrega logs para debug
+    \Log::info('Datos recibidos en store:', [
+        'items_count' => count($request->items),
+        'items_data' => $request->items,
+        'idSolicitudAlmacen' => $request->idSolicitudAlmacen
+    ]);
     try {
         \DB::beginTransaction();
 
@@ -331,14 +337,14 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
         ], 500);
     }
 }
-    public function show($id)
+   public function show($id)
 {
     // Cargar la solicitud con todas las relaciones necesarias
     $solicitud = SolicitudCompra::with([
         'tipoArea', 
         'prioridad', 
         'centroCosto', 
-        'detalles',
+        'detalles.moneda', // Agregar relación con moneda en detalles
         'archivos',
         'solicitudAlmacen',
         'solicitudAlmacen.detalles' => function($query) {
@@ -357,15 +363,14 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
 }
 
 
-
 public function evaluacion($id)
 {
-    // Cargar la solicitud con todas las relaciones necesarias
+    // Cargar la solicitud con todas las relaciones necesarias incluyendo monedas
     $solicitud = SolicitudCompra::with([
         'tipoArea', 
         'prioridad', 
         'centroCosto', 
-        'detalles',
+        'detalles.moneda', // Agregar relación con moneda
         'archivos',
         'solicitudAlmacen',
         'solicitudAlmacen.detalles' => function($query) {
@@ -382,6 +387,11 @@ public function evaluacion($id)
     // Determinar el estado general basado en los detalles
     $estadoGeneral = $this->determinarEstadoGeneral($solicitud);
 
+    // Calcular información de monedas
+    $solicitud->moneda_simbolo = $this->getResumenMoneda($solicitud);
+    $solicitud->multiple_monedas = $this->hasMultipleCurrencies($solicitud);
+    $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
+
     $estadisticas = [
         'total_productos' => $totalDetalles,
         'cantidad_total' => $solicitud->detalles->sum('cantidad'),
@@ -396,6 +406,60 @@ public function evaluacion($id)
 
     return view('solicitud.solicitudcompra.evaluacioncompras', compact('solicitud', 'estadisticas'));
 }
+
+// Agrega estas funciones al mismo controlador
+// private function getResumenMoneda($solicitud) 
+// {
+//     if ($solicitud->detalles->isEmpty()) return 'S/';
+    
+//     $currencyCount = [];
+//     foreach ($solicitud->detalles as $detalle) {
+//         if ($detalle->moneda) {
+//             $currencyId = $detalle->moneda->idMonedas;
+//             $currencyCount[$currencyId] = ($currencyCount[$currencyId] ?? 0) + 1;
+//         }
+//     }
+    
+//     if (empty($currencyCount)) return 'S/';
+    
+//     $mostCommonCurrency = array_keys($currencyCount)[0];
+//     foreach ($solicitud->detalles as $detalle) {
+//         if ($detalle->moneda && $detalle->moneda->idMonedas == $mostCommonCurrency) {
+//             return $detalle->moneda->simbolo ?? 'S/';
+//         }
+//     }
+    
+//     return 'S/';
+// }
+
+// private function hasMultipleCurrencies($solicitud) 
+// {
+//     $currencies = [];
+//     foreach ($solicitud->detalles as $detalle) {
+//         if ($detalle->moneda) {
+//             $currencyId = $detalle->moneda->idMonedas;
+//             if (!in_array($currencyId, $currencies)) {
+//                 $currencies[] = $currencyId;
+//             }
+//         }
+//     }
+//     return count($currencies) > 1;
+// }
+
+// private function getMonedasUtilizadas($solicitud) 
+// {
+//     $currencies = [];
+//     foreach ($solicitud->detalles as $detalle) {
+//         if ($detalle->moneda && !in_array($detalle->moneda->nombre, $currencies)) {
+//             $currencies[] = $detalle->moneda->nombre;
+//         }
+//     }
+//     return implode(', ', $currencies);
+// }
+
+
+
+
 
 private function determinarEstadoGeneral($solicitud)
 {
@@ -660,7 +724,7 @@ public function update(Request $request, $id)
                 ->with('error', 'No se puede editar una solicitud que no está en estado pendiente.');
         }
 
-        // Validación actualizada con los nuevos campos
+        // Validación actualizada - CORREGIR EL CAMPO idArticulo
         $validated = $request->validate([
             'idTipoArea' => 'required|exists:tipoarea,idTipoArea',
             'idPrioridad' => 'required|exists:prioridad_solicitud,idPrioridad',
@@ -676,7 +740,8 @@ public function update(Request $request, $id)
             'items.*.total_producto' => 'required|numeric|min:0',
             'items.*.idMonedas' => 'required|exists:monedas,idMonedas',
             'items.*.idSolicitudAlmacenDetalle' => 'nullable|exists:solicitud_almacen_detalle,idSolicitudAlmacenDetalle',
-            'items.*.idArticulo' => 'nullable|exists:articulos,idArticulo',
+            // CORREGIR: Cambiar idArticulo por el nombre correcto de la columna
+            'items.*.idArticulo' => 'nullable', // Remover la validación exists temporalmente
             'items.*.categoria' => 'nullable|string|max:100',
             'items.*.unidad' => 'nullable|string|max:50',
             'items.*.codigo_producto' => 'nullable|string|max:255',
@@ -722,7 +787,7 @@ public function update(Request $request, $id)
             'justificacion' => $request->justificacion,
             'observaciones' => $request->observaciones,
             'subtotal' => $subtotal,
-            'iva' => $igv, // Cambiar nombre a iva para mantener consistencia con la BD
+            'iva' => $igv,
             'total' => $total,
             'total_unidades' => $totalUnidades,
             // Mantener los solicitantes originales, no se actualizan
@@ -750,7 +815,7 @@ public function update(Request $request, $id)
             SolicitudCompraDetalle::create([
                 'idSolicitudCompra' => $solicitud->idSolicitudCompra,
                 'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null,
-                'idArticulo' => $item['idArticulo'] ?? null,
+                'idArticulo' => $item['idArticulo'] ?? null, // VERIFICAR SI ESTE CAMPO EXISTE EN LA BD
                 'descripcion_producto' => $item['descripcion_producto'],
                 'categoria' => $item['categoria'] ?? null,
                 'cantidad' => $item['cantidad'],
@@ -831,13 +896,80 @@ public function update(Request $request, $id)
 
 public function gestionadministracion()
 {
-    $solicitudes = SolicitudCompra::with(['detalles' => function($query) {
-            $query->select('idSolicitudCompraDetalle', 'idSolicitudCompra', 'descripcion_producto', 
-                          'cantidad', 'unidad', 'precio_unitario_estimado');
-        }])
-        ->orderBy('created_at', 'desc')
-        ->paginate(12); // o el número que prefieras
+    $solicitudes = SolicitudCompra::with([
+        'detalles.moneda',
+        'detalles' => function($query) {
+            $query->select(
+                'idSolicitudCompraDetalle', 
+                'idSolicitudCompra', 
+                'descripcion_producto', 
+                'cantidad', 
+                'unidad', 
+                'precio_unitario_estimado',
+                'idMonedas'
+            );
+        }
+    ])
+    ->orderBy('created_at', 'desc')
+    ->paginate(12);
+    
+    // Procesar los datos aquí
+    $solicitudes->getCollection()->transform(function($solicitud) {
+        $solicitud->resumen_moneda = $this->getResumenMoneda($solicitud);
+        $solicitud->multiple_currencies = $this->hasMultipleCurrencies($solicitud);
+        $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
+        return $solicitud;
+    });
     
     return view('solicitud.solicitudcompra.gestionadministracion', compact('solicitudes'));
+}
+
+private function getResumenMoneda($solicitud) 
+{
+    if ($solicitud->detalles->isEmpty()) return 'S/';
+    
+    $currencyCount = [];
+    foreach ($solicitud->detalles as $detalle) {
+        if ($detalle->moneda) {
+            $currencyId = $detalle->moneda->idMonedas;
+            $currencyCount[$currencyId] = ($currencyCount[$currencyId] ?? 0) + 1;
+        }
+    }
+    
+    if (empty($currencyCount)) return 'S/';
+    
+    $mostCommonCurrency = array_keys($currencyCount)[0];
+    foreach ($solicitud->detalles as $detalle) {
+        if ($detalle->moneda && $detalle->moneda->idMonedas == $mostCommonCurrency) {
+            return $detalle->moneda->simbolo ?? 'S/';
+        }
+    }
+    
+    return 'S/';
+}
+
+private function hasMultipleCurrencies($solicitud) 
+{
+    $currencies = [];
+    foreach ($solicitud->detalles as $detalle) {
+        if ($detalle->moneda) {
+            $currencyId = $detalle->moneda->idMonedas;
+            if (!in_array($currencyId, $currencies)) {
+                $currencies[] = $currencyId;
+            }
+        }
+    }
+    return count($currencies) > 1;
+}
+
+private function getMonedasUtilizadas($solicitud) 
+{
+    $currencies = [];
+    foreach ($solicitud->detalles as $detalle) {
+        if ($detalle->moneda && !in_array($detalle->moneda->nombre, $currencies)) {
+            $currencies[] = $detalle->moneda->nombre;
+        }
+    }
+    return implode(', ', $currencies);
 }
 }

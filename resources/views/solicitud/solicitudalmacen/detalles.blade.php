@@ -78,7 +78,7 @@
                             </div>
                             <div class="detail-row">
                                 <div class="detail-label">Tipo de Solicitud:</div>
-                                <div class="detail-value" x-text="solicitud.tipoSolicitud?.nombre"></div>
+                                <div class="detail-value" x-text="solicitud.tipoSolicitud?.nombre || solicitud.tipoSolicitud?.App?.Models?.TipoSolicitud?.nombre || 'No especificado'"></div>
                             </div>
                             <div class="detail-row">
                                 <div class="detail-label">Solicitante:</div>

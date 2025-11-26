@@ -789,24 +789,37 @@
 
             // NUEVO MÉTODO: Cambiar moneda al hacer clic
             cycleCurrency(index) {
-                const item = this.form.items[index];
-                const currentCurrencyId = item.idMonedas || 1;
-                
-                // Encontrar el índice actual de la moneda
-                const currentIndex = this.monedasList.findIndex(moneda => moneda.idMonedas == currentCurrencyId);
-                
-                // Obtener la siguiente moneda (cíclico)
-                const nextIndex = (currentIndex + 1) % this.monedasList.length;
-                const nextCurrency = this.monedasList[nextIndex];
-                
-                // Actualizar la moneda del item
-                item.idMonedas = nextCurrency.idMonedas;
-                
-                // Forzar actualización del total
-                this.updateItemTotal(index);
-                
-                console.log(`Moneda cambiada a: ${nextCurrency.nombre} (${nextCurrency.simbolo})`);
-            },
+    const item = this.form.items[index];
+    const currentCurrencyId = item.idMonedas || 1;
+    
+    // Encontrar el índice actual de la moneda
+    const currentIndex = this.monedasList.findIndex(moneda => moneda.idMonedas == currentCurrencyId);
+    
+    // Obtener la siguiente moneda (cíclico)
+    const nextIndex = (currentIndex + 1) % this.monedasList.length;
+    const nextCurrency = this.monedasList[nextIndex];
+    
+    // Actualizar la moneda del item
+    item.idMonedas = nextCurrency.idMonedas;
+    
+    // Forzar actualización del total
+    this.updateItemTotal(index);
+    
+    console.log(`Moneda cambiada a: ${nextCurrency.nombre} (${nextCurrency.simbolo})`);
+    
+    // Debug: mostrar información actual
+    this.showDebugInfo();
+},
+showDebugInfo() {
+    const debugDiv = document.getElementById('debug-info');
+    if (debugDiv) {
+        debugDiv.innerHTML = `
+            <strong>Debug Info:</strong><br>
+            Items: ${this.form.items.length}<br>
+            Monedas: ${this.form.items.map(item => `Item ${item.idMonedas}`).join(', ')}
+        `;
+    }
+},
 
             getProveedorNombre(proveedorId) {
                 if (!proveedorId || proveedorId === 'otro') return '';
@@ -945,28 +958,39 @@
                 }
             },
 
-            submitForm() {
-                if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea || 
-                    !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
-                    alert('Por favor complete todos los campos obligatorios (*)');
-                    return;
-                }
+            // Modifica el método submitForm para mejor debug
+submitForm() {
+    // Debug antes de enviar
+    console.log('Datos a enviar:', JSON.stringify(this.form.items, null, 2));
+    
+    if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea || 
+        !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
+        alert('Por favor complete todos los campos obligatorios (*)');
+        return;
+    }
 
-                if (this.form.items.length === 0) {
-                    alert('Debe seleccionar una solicitud de almacén con productos aprobados');
-                    return;
-                }
+    if (this.form.items.length === 0) {
+        alert('Debe seleccionar una solicitud de almacén con productos aprobados');
+        return;
+    }
 
-                for (let i = 0; i < this.form.items.length; i++) {
-                    const item = this.form.items[i];
-                    if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item.idMonedas) {
-                        alert(`Por favor complete todos los campos obligatorios del artículo ${i + 1}`);
-                        return;
-                    }
-                }
+    // Validar que todos los items tengan moneda
+    for (let i = 0; i < this.form.items.length; i++) {
+        const item = this.form.items[i];
+        if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item.idMonedas) {
+            alert(`Por favor complete todos los campos obligatorios del artículo ${i + 1}\n\nFaltante: ${!item.descripcion_producto ? 'Descripción' : !item.cantidad_aprobada ? 'Cantidad' : !item.precio_unitario_estimado ? 'Precio' : 'Moneda'}`);
+            return;
+        }
+    }
 
-                document.getElementById('purchaseRequestForm').submit();
-            }
+    // Mostrar datos finales en consola
+    console.log('Enviando formulario con datos:', {
+        items: this.form.items,
+        formData: this.form
+    });
+
+    document.getElementById('purchaseRequestForm').submit();
+}
         }
     }
     </script>
