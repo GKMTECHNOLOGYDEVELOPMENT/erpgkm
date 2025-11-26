@@ -14,6 +14,9 @@ class SolicitudAlmacen extends Model
     
     protected $fillable = [
         'codigo_solicitud',
+         'idSolicitudAlmacen',
+        'solicitante_compra',
+        'solicitante_almacen',
         'titulo',
         'idTipoSolicitud',
         'solicitante',
@@ -85,4 +88,9 @@ class SolicitudAlmacen extends Model
 {
     return $this->belongsTo(Articulo::class, 'idArticulo', 'idArticulos');
 }
+
+  public function solicitudesCompra()
+    {
+        return $this->hasMany(SolicitudCompra::class, 'idSolicitudAlmacen', 'idSolicitudAlmacen');
+    }
 }

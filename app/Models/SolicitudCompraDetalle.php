@@ -29,7 +29,8 @@ class SolicitudCompraDetalle extends Model
         'justificacion_producto',
         'estado',
         'cantidad_aprobada',
-        'observaciones_detalle'
+        'observaciones_detalle',
+        'idMonedas' // Agregar este campo
     ];
 
     protected $casts = [
@@ -53,5 +54,12 @@ class SolicitudCompraDetalle extends Model
     {
         $this->total_producto = $this->cantidad * $this->precio_unitario_estimado;
         return $this;
+    }
+
+    
+    // Relación con moneda
+    public function moneda()
+    {
+        return $this->belongsTo(Moneda::class, 'idMonedas');
     }
 }

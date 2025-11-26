@@ -46,4 +46,9 @@ class Moneda extends Model
 	{
 		return $this->hasMany(Facturacion::class, 'idMonedas');
 	}
+
+	 public function detallesCompra()
+    {
+        return $this->hasMany(SolicitudCompraDetalle::class, 'idMonedas');
+    }
 }

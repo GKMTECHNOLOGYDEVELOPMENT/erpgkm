@@ -12,25 +12,28 @@ use App\Models\SolicitudAlmacenDetalle;
 use App\Models\TipoArea;
 use App\Models\PrioridadSolicitud;
 use App\Models\CentroCosto;
+use App\Models\Moneda;
 use App\Models\Proveedore;
 use Illuminate\Support\Facades\Auth;
 
 class SolicitudcompraController extends Controller
 {
-     public function index()
-    {
-        // Obtener todas las solicitudes de compra con relaciones
-        $solicitudes = SolicitudCompra::with(['tipoArea', 'prioridad'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+   public function index()
+{
+    // Obtener todas las solicitudes de compra con relaciones
+    $solicitudes = SolicitudCompra::with([
+        'tipoArea', 
+        'prioridad',
+        'solicitudAlmacen', // Relación con solicitud de almacén
+        'detalles.moneda'   // Relación con detalles y moneda
+    ])->orderBy('created_at', 'desc')->get();
 
-        // Obtener áreas y prioridades para los filtros
-        $areas = TipoArea::all();
-        $prioridades = PrioridadSolicitud::where('estado', 1)->get();
+    // Obtener áreas y prioridades para los filtros
+    $areas = TipoArea::all();
+    $prioridades = PrioridadSolicitud::where('estado', 1)->get();
 
-        return view('solicitud.solicitudcompra.index', compact('solicitudes', 'areas', 'prioridades'));
-    }
-
+    return view('solicitud.solicitudcompra.index', compact('solicitudes', 'areas', 'prioridades'));
+}
 public function create()
 {
     // Obtener datos para los selects
@@ -43,30 +46,61 @@ public function create()
         ->orderBy('nombre')
         ->get(['idProveedor', 'nombre', 'telefono', 'email']);
     
-    // Solo solicitudes de almacén aprobadas que tengan productos aprobados
+    // **OPCIÓN 2: Filtrar manualmente las solicitudes que ya están en compras**
+    
+    // Primero obtenemos los IDs de solicitudes de almacén que YA están en compras
+    $solicitudesAlmacenEnCompras = SolicitudCompra::pluck('idSolicitudAlmacen')->toArray();
+    
+    // Luego obtenemos solo las solicitudes de almacén que NO están en esa lista
     $solicitudesAlmacen = SolicitudAlmacen::where('estado', 'aprobada')
         ->whereHas('detalles', function($query) {
             $query->where('estado', 'aprobado');
         })
+        ->whereNotIn('idSolicitudAlmacen', $solicitudesAlmacenEnCompras) // ✅ Excluir las que ya tienen compra
         ->with(['detalles' => function($query) {
             $query->where('estado', 'aprobado');
         }])
         ->get();
 
-    // Obtener usuario autenticado como solicitante de compra
+    // **DEBUG: Verificar cuántas solicitudes se obtienen**
+    \Log::info('Solicitudes de almacén disponibles para compra:', [
+        'total' => $solicitudesAlmacen->count(),
+        'excluidas' => count($solicitudesAlmacenEnCompras),
+        'ids_disponibles' => $solicitudesAlmacen->pluck('idSolicitudAlmacen')->toArray(),
+        'ids_excluidas' => $solicitudesAlmacenEnCompras
+    ]);
+
+
+        $monedas = Moneda::all(); // O si tienes un estado: ->where('estado', 1)->get()
+
+    // Obtener usuario autenticado
     $user = Auth::user();
     $solicitanteCompra = 'Usuario Sistema';
     
     if ($user) {
-        // Construir nombre completo del usuario
-        $solicitanteCompra = trim(
-            ($user->name ?? '') . ' ' . 
-            ($user->apellido_paterno ?? '') . ' ' . 
-            ($user->apellido_materno ?? '')
-        );
-        
-        if (empty(trim($solicitanteCompra))) {
-            $solicitanteCompra = $user->email ?? 'Usuario Sistema';
+        if (isset($user->Nombre)) {
+            $solicitanteCompra = trim(
+                ($user->Nombre ?? '') . ' ' . 
+                ($user->apellidoPaterno ?? '') . ' ' . 
+                ($user->apellidoMaterno ?? '')
+            );
+            
+            if (empty(trim($solicitanteCompra))) {
+                $solicitanteCompra = $user->correo ?? $user->usuario ?? 'Usuario Sistema';
+            }
+        } else {
+            $usuario = \App\Models\Usuario::where('idUsuario', $user->id ?? $user->idUsuario)->first();
+            if ($usuario) {
+                $solicitanteCompra = trim(
+                    ($usuario->Nombre ?? '') . ' ' . 
+                    ($usuario->apellidoPaterno ?? '') . ' ' . 
+                    ($usuario->apellidoMaterno ?? '')
+                );
+                
+                if (empty(trim($solicitanteCompra))) {
+                    $solicitanteCompra = $usuario->correo ?? $usuario->usuario ?? 'Usuario Sistema';
+                }
+            }
         }
     }
 
@@ -76,115 +110,146 @@ public function create()
         'centrosCosto',
         'solicitudesAlmacen',
         'proveedores',
-        'solicitanteCompra' // Pasar el solicitante a la vista
+        'solicitanteCompra',
+        'monedas'
     ));
 }
-    public function store(Request $request)
-    {
-        $request->validate([
-            'solicitante' => 'required|string|max:255',
-            'idTipoArea' => 'required|exists:tipoarea,idTipoArea',
-            'idPrioridad' => 'required|exists:prioridad_solicitud,idPrioridad',
-            'fecha_requerida' => 'required|date',
-            'justificacion' => 'required|string',
-            'items' => 'required|array|min:1',
-            'items.*.descripcion_producto' => 'required|string',
-            'items.*.cantidad' => 'required|integer|min:1',
-            'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
+   public function store(Request $request)
+{
+    $request->validate([
+        'solicitante_compra' => 'required|string|max:255',
+        'solicitante_almacen' => 'required|string|max:255',
+        'idTipoArea' => 'required|exists:tipoarea,idTipoArea',
+        'idPrioridad' => 'required|exists:prioridad_solicitud,idPrioridad',
+        'fecha_requerida' => 'required|date',
+        'justificacion' => 'required|string',
+        'items' => 'required|array|min:1',
+        'items.*.descripcion_producto' => 'required|string',
+        'items.*.idMonedas' => 'required|exists:monedas,idMonedas',
+        'items.*.cantidad' => 'required|integer|min:1',
+        'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
+        'idSolicitudAlmacen' => 'required|exists:solicitud_almacen,idSolicitudAlmacen',
+    ]);
+
+    try {
+        \DB::beginTransaction();
+
+        // Generar código de solicitud
+        $codigoSolicitud = 'SC-' . date('Ymd') . '-' . str_pad(SolicitudCompra::count() + 1, 4, '0', STR_PAD_LEFT);
+
+        // Calcular totales
+        $subtotal = 0;
+        $totalUnidades = 0;
+
+        foreach ($request->items as $item) {
+            $subtotal += $item['cantidad'] * $item['precio_unitario_estimado'];
+            $totalUnidades += $item['cantidad'];
+        }
+
+        $iva = $subtotal * 0.18; // 18% IGV
+        $total = $subtotal + $iva;
+
+        // **CREAR SOLICITUD DE COMPRA CON AMBOS SOLICITANTES Y RELACIÓN CON ALMACÉN**
+        $solicitudCompra = SolicitudCompra::create([
+            'codigo_solicitud' => $codigoSolicitud,
+            'idSolicitudAlmacen' => $request->idSolicitudAlmacen, // ✅ RELACIÓN CON SOLICITUD ALMACÉN
+            'solicitante_compra' => $request->solicitante_compra, // Usuario actual
+            'solicitante_almacen' => $request->solicitante_almacen, // De la solicitud almacén
+            'idTipoArea' => $request->idTipoArea,
+            'idPrioridad' => $request->idPrioridad,
+            'fecha_requerida' => $request->fecha_requerida,
+            'idCentroCosto' => $request->idCentroCosto,
+            'proyecto_asociado' => $request->proyecto_asociado,
+            'justificacion' => $request->justificacion,
+            'observaciones' => $request->observaciones,
+            'subtotal' => $subtotal,
+            'iva' => $iva,
+            'total' => $total,
+            'total_unidades' => $totalUnidades,
+            'estado' => 'pendiente'
         ]);
 
-        try {
-            \DB::beginTransaction();
-
-            // Generar código de solicitud
-            $codigoSolicitud = 'SC-' . date('Ymd') . '-' . str_pad(SolicitudCompra::count() + 1, 4, '0', STR_PAD_LEFT);
-
-            // Calcular totales
-            $subtotal = 0;
-            $totalUnidades = 0;
-
-            foreach ($request->items as $item) {
-                $subtotal += $item['cantidad'] * $item['precio_unitario_estimado'];
-                $totalUnidades += $item['cantidad'];
-            }
-
-            $iva = $subtotal * 0.19; // 19% IVA
-            $total = $subtotal + $iva;
-
-            // Crear solicitud de compra
-            $solicitudCompra = SolicitudCompra::create([
-                'codigo_solicitud' => $codigoSolicitud,
-                'idSolicitudAlmacen' => $request->idSolicitudAlmacen,
-                'solicitante' => $request->solicitante,
-                'idTipoArea' => $request->idTipoArea,
-                'idPrioridad' => $request->idPrioridad,
-                'fecha_requerida' => $request->fecha_requerida,
-                'idCentroCosto' => $request->idCentroCosto,
-                'proyecto_asociado' => $request->proyecto_asociado,
-                'justificacion' => $request->justificacion,
-                'observaciones' => $request->observaciones,
-                'subtotal' => $subtotal,
-                'iva' => $iva,
-                'total' => $total,
-                'total_unidades' => $totalUnidades,
+        // Crear detalles manteniendo la relación con almacén
+        foreach ($request->items as $item) {
+            SolicitudCompraDetalle::create([
+                'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
+                'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null, // ✅ Relación con detalle de almacén
+                'idArticulo' => $item['idArticulo'] ?? null,
+                'descripcion_producto' => $item['descripcion_producto'],
+                'categoria' => $item['categoria'] ?? '',
+                'cantidad' => $item['cantidad'],
+                'unidad' => $item['unidad'] ?? 'unidad',
+                'idMonedas' => $item['idMonedas'],
+                'precio_unitario_estimado' => $item['precio_unitario_estimado'],
+                'total_producto' => $item['cantidad'] * $item['precio_unitario_estimado'],
+                'codigo_producto' => $item['codigo_producto'] ?? '',
+                'marca' => $item['marca'] ?? '',
+                'especificaciones_tecnicas' => $item['especificaciones_tecnicas'] ?? '',
+                'proveedor_sugerido' => $item['proveedor_sugerido'] ?? $this->getProveedorSugerido($item),
+                'justificacion_producto' => $item['justificacion_producto'] ?? '',
+                'observaciones_detalle' => $item['observaciones_detalle'] ?? '',
                 'estado' => 'pendiente'
             ]);
+        }
 
-            // Crear detalles
-            foreach ($request->items as $item) {
-                SolicitudCompraDetalle::create([
+        // Guardar archivos si existen
+        if ($request->hasFile('archivos')) {
+            foreach ($request->file('archivos') as $archivo) {
+                $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+                $ruta = $archivo->storeAs('solicitudes_compra/' . $solicitudCompra->idSolicitudCompra, $nombreArchivo, 'public');
+
+                SolicitudCompraArchivo::create([
                     'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
-                    'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null,
-                    'descripcion_producto' => $item['descripcion_producto'],
-                    'categoria' => $item['categoria'],
-                    'cantidad' => $item['cantidad'],
-                    'unidad' => $item['unidad'],
-                    'precio_unitario_estimado' => $item['precio_unitario_estimado'],
-                    'total_producto' => $item['cantidad'] * $item['precio_unitario_estimado'],
-                    'codigo_producto' => $item['codigo_producto'],
-                    'marca' => $item['marca'],
-                    'especificaciones_tecnicas' => $item['especificaciones_tecnicas'],
-                    'proveedor_sugerido' => $item['proveedor_sugerido'],
-                    'justificacion_producto' => $item['justificacion_producto'],
-                    'estado' => 'pendiente'
+                    'nombre_archivo' => $archivo->getClientOriginalName(),
+                    'ruta_archivo' => $ruta,
+                    'tipo_archivo' => $archivo->getClientMimeType(),
+                    'tamaño' => $archivo->getSize(),
                 ]);
             }
-
-            // Guardar archivos si existen
-            if ($request->hasFile('archivos')) {
-                foreach ($request->file('archivos') as $archivo) {
-                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $ruta = $archivo->storeAs('solicitudes_compra/' . $solicitudCompra->idSolicitudCompra, $nombreArchivo, 'public');
-
-                    SolicitudCompraArchivo::create([
-                        'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
-                        'nombre_archivo' => $archivo->getClientOriginalName(),
-                        'ruta_archivo' => $ruta,
-                        'tipo_archivo' => $archivo->getClientMimeType(),
-                        'tamaño' => $archivo->getSize(),
-                    ]);
-                }
-            }
-
-            \DB::commit();
-
-            return redirect()->route('solicitudcompra.index')
-                ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente.');
-
-        } catch (\Exception $e) {
-            \DB::rollBack();
-            return back()->with('error', 'Error al crear la solicitud: ' . $e->getMessage());
         }
-    }
 
-// En SolicitudcompraController - CORRIGE el método:
+        \DB::commit();
+
+        return redirect()->route('solicitudcompra.index')
+            ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente.')
+            ->with('solicitud_id', $solicitudCompra->idSolicitudCompra);
+
+    } catch (\Exception $e) {
+        \DB::rollBack();
+        \Log::error('Error al crear solicitud de compra: ' . $e->getMessage());
+        \Log::error('Trace: ' . $e->getTraceAsString());
+        
+        return back()
+            ->with('error', 'Error al crear la solicitud: ' . $e->getMessage())
+            ->withInput();
+    }
+}
+
+// Método auxiliar para obtener proveedor sugerido
+private function getProveedorSugerido($item)
+{
+    if (isset($item['proveedor_sugerido']) && !empty($item['proveedor_sugerido'])) {
+        return $item['proveedor_sugerido'];
+    }
+    
+    if (isset($item['idProveedor']) && $item['idProveedor'] === 'otro' && isset($item['proveedor_otro'])) {
+        return $item['proveedor_otro'];
+    }
+    
+    if (isset($item['idProveedor']) && $item['idProveedor'] !== 'otro' && !empty($item['idProveedor'])) {
+        $proveedor = Proveedore::find($item['idProveedor']);
+        return $proveedor ? $proveedor->nombre : '';
+    }
+    
+    return '';
+}
 
 public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
 {
     try {
-        // Cargar la solicitud de almacén completa con sus relaciones
+        // Cargar la solicitud de almacén completa con sus relaciones CORREGIDAS
         $solicitudAlmacen = SolicitudAlmacen::with([
-            'tipoArea', // Cambiar 'area' por 'tipoArea' si esa es la relación
+            'area', // CORREGIDO: era 'tipoArea'
             'prioridad', 
             'centroCosto',
             'detalles' => function($query) {
@@ -201,28 +266,11 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
             ]);
         }
 
-        // Obtener usuario autenticado para solicitante de compra
-        $user = Auth::user();
-        $solicitanteCompra = 'Usuario Sistema';
-        
-        if ($user) {
-            $solicitanteCompra = trim(
-                ($user->name ?? '') . ' ' . 
-                ($user->apellido_paterno ?? '') . ' ' . 
-                ($user->apellido_materno ?? '')
-            );
-            
-            if (empty(trim($solicitanteCompra))) {
-                $solicitanteCompra = $user->email ?? 'Usuario Sistema';
-            }
+        // **CORRECCIÓN: Formatear correctamente la fecha**
+        $fechaRequerida = $solicitudAlmacen->fecha_requerida;
+        if ($fechaRequerida instanceof \Carbon\Carbon) {
+            $fechaRequerida = $fechaRequerida->format('Y-m-d');
         }
-
-        // **DEBUG: Ver qué datos tenemos**
-        \Log::info('Solicitud Almacen Data:', [
-            'idTipoArea' => $solicitudAlmacen->idTipoArea,
-            'tipoArea_relation' => $solicitudAlmacen->tipoArea ? $solicitudAlmacen->tipoArea->toArray() : 'No relation',
-            'area_relation' => $solicitudAlmacen->area ? $solicitudAlmacen->area->toArray() : 'No area relation'
-        ]);
 
         // Preparar datos de la solicitud para autocompletar
         $solicitudData = [
@@ -230,12 +278,11 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
             'codigo_solicitud' => $solicitudAlmacen->codigo_solicitud,
             'titulo' => $solicitudAlmacen->titulo,
             'solicitante_almacen' => $solicitudAlmacen->solicitante,
-            'solicitante_compra' => $solicitanteCompra,
             'idTipoArea' => $solicitudAlmacen->idTipoArea,
-            'tipo_area_nombre' => $solicitudAlmacen->tipoArea->nombre ?? ($solicitudAlmacen->area->nombre ?? ''),
+            'tipo_area_nombre' => $solicitudAlmacen->area->nombre ?? '',
             'idPrioridad' => $solicitudAlmacen->idPrioridad,
             'prioridad_nombre' => $solicitudAlmacen->prioridad->nombre ?? '',
-            'fecha_requerida' => $solicitudAlmacen->fecha_requerida,
+            'fecha_requerida' => $fechaRequerida, // **USAR LA FECHA FORMATEADA**
             'idCentroCosto' => $solicitudAlmacen->idCentroCosto,
             'centro_costo_nombre' => $solicitudAlmacen->centroCosto ? 
                 $solicitudAlmacen->centroCosto->codigo . ' - ' . $solicitudAlmacen->centroCosto->nombre : '',
@@ -243,7 +290,7 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
             'observaciones' => $solicitudAlmacen->observaciones
         ];
 
-        // Preparar detalles
+        // ... el resto del código igual
         $detallesData = [];
         foreach ($solicitudAlmacen->detalles as $detalle) {
             $detallesData[] = [
@@ -251,6 +298,7 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
                 'idArticulo' => $detalle->idArticulo,
                 'descripcion_producto' => $detalle->descripcion_producto,
                 'categoria' => $detalle->categoria,
+                'idMonedas' => $detalle->idMonedas ?? null,
                 'cantidad' => $detalle->cantidad,
                 'cantidad_aprobada' => $detalle->cantidad,
                 'unidad' => $detalle->unidad,
@@ -275,10 +323,6 @@ public function getSolicitudAlmacenDetalles($idSolicitudAlmacen)
 
     } catch (\Exception $e) {
         \Log::error('Error en getSolicitudAlmacenDetalles: ' . $e->getMessage());
-        \Log::error('File: ' . $e->getFile());
-        \Log::error('Line: ' . $e->getLine());
-        \Log::error('Trace: ' . $e->getTraceAsString());
-        
         return response()->json([
             'success' => false,
             'message' => 'Error al cargar los detalles: ' . $e->getMessage(),
@@ -562,15 +606,13 @@ private function actualizarEstadoSolicitud($idSolicitud)
 
 
 
-
-
-   public function edit($id)
+public function edit($id)
 {
     $solicitud = SolicitudCompra::with([
         'tipoArea', 
         'prioridad', 
         'centroCosto', 
-        'detalles',
+        'detalles.moneda', // Agregar relación con moneda
         'archivos',
         'solicitudAlmacen',
         'solicitudAlmacen.detalles' => function($query) {
@@ -588,25 +630,20 @@ private function actualizarEstadoSolicitud($idSolicitud)
     $tipoAreas = TipoArea::all();
     $prioridades = PrioridadSolicitud::where('estado', 1)->get();
     $centrosCosto = CentroCosto::where('estado', 1)->get();
-    
-    // Solo solicitudes de almacén aprobadas que tengan productos aprobados
-    $solicitudesAlmacen = SolicitudAlmacen::where('estado', 'aprobada')
-        ->whereHas('detalles', function($query) {
-            $query->where('estado', 'aprobado');
-        })
-        ->with(['detalles' => function($query) {
-            $query->where('estado', 'aprobado');
-        }])
-        ->get();
+    $monedas = Moneda::all(); // Agregar monedas
+    $proveedores = Proveedore::where('estado', 1)->get(); // Agregar proveedores
 
     return view('solicitud.solicitudcompra.edit', compact(
         'solicitud',
         'tipoAreas', 
         'prioridades', 
         'centrosCosto',
-        'solicitudesAlmacen'
+        'monedas', // Agregar monedas
+        'proveedores' // Agregar proveedores
     ));
-}public function update(Request $request, $id)
+}
+
+public function update(Request $request, $id)
 {
     \Log::info('=== UPDATE METHOD STARTED ===');
     \Log::info('Request ID:', ['id' => $id]);
@@ -623,9 +660,8 @@ private function actualizarEstadoSolicitud($idSolicitud)
                 ->with('error', 'No se puede editar una solicitud que no está en estado pendiente.');
         }
 
-        // Validación
+        // Validación actualizada con los nuevos campos
         $validated = $request->validate([
-            'solicitante' => 'required|string|max:255',
             'idTipoArea' => 'required|exists:tipoarea,idTipoArea',
             'idPrioridad' => 'required|exists:prioridad_solicitud,idPrioridad',
             'fecha_requerida' => 'required|date',
@@ -638,6 +674,17 @@ private function actualizarEstadoSolicitud($idSolicitud)
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
             'items.*.total_producto' => 'required|numeric|min:0',
+            'items.*.idMonedas' => 'required|exists:monedas,idMonedas',
+            'items.*.idSolicitudAlmacenDetalle' => 'nullable|exists:solicitud_almacen_detalle,idSolicitudAlmacenDetalle',
+            'items.*.idArticulo' => 'nullable|exists:articulos,idArticulo',
+            'items.*.categoria' => 'nullable|string|max:100',
+            'items.*.unidad' => 'nullable|string|max:50',
+            'items.*.codigo_producto' => 'nullable|string|max:255',
+            'items.*.marca' => 'nullable|string|max:100',
+            'items.*.especificaciones_tecnicas' => 'nullable|string',
+            'items.*.proveedor_sugerido' => 'nullable|string|max:255',
+            'items.*.justificacion_producto' => 'nullable|string',
+            'items.*.observaciones_detalle' => 'nullable|string',
             'archivos' => 'nullable|array',
             'archivos.*' => 'file|max:10240', // 10MB máximo
         ]);
@@ -646,7 +693,7 @@ private function actualizarEstadoSolicitud($idSolicitud)
 
         \DB::beginTransaction();
 
-        // Calcular totales
+        // Calcular totales con IGV del 18% (como en el create)
         $subtotal = 0;
         $totalUnidades = 0;
 
@@ -655,19 +702,18 @@ private function actualizarEstadoSolicitud($idSolicitud)
             $totalUnidades += $item['cantidad'];
         }
 
-        $iva = $subtotal * 0.19; // 19% IVA
-        $total = $subtotal + $iva;
+        $igv = $subtotal * 0.18; // 18% IGV (como en el create)
+        $total = $subtotal + $igv;
 
         \Log::info('Totals calculated:', [
             'subtotal' => $subtotal,
-            'iva' => $iva,
+            'igv' => $igv,
             'total' => $total,
             'total_unidades' => $totalUnidades
         ]);
 
-        // Actualizar solicitud de compra
+        // Actualizar solicitud de compra - mantener solicitantes originales
         $solicitud->update([
-            'solicitante' => $request->solicitante,
             'idTipoArea' => $request->idTipoArea,
             'idPrioridad' => $request->idPrioridad,
             'fecha_requerida' => $request->fecha_requerida,
@@ -676,9 +722,10 @@ private function actualizarEstadoSolicitud($idSolicitud)
             'justificacion' => $request->justificacion,
             'observaciones' => $request->observaciones,
             'subtotal' => $subtotal,
-            'iva' => $iva,
+            'iva' => $igv, // Cambiar nombre a iva para mantener consistencia con la BD
             'total' => $total,
             'total_unidades' => $totalUnidades,
+            // Mantener los solicitantes originales, no se actualizan
         ]);
 
         \Log::info('Solicitud updated successfully');
@@ -689,6 +736,17 @@ private function actualizarEstadoSolicitud($idSolicitud)
 
         // Crear nuevos detalles
         foreach ($request->items as $item) {
+            // Determinar el proveedor sugerido
+            $proveedorSugerido = $item['proveedor_sugerido'] ?? null;
+            if (!$proveedorSugerido && isset($item['idProveedor'])) {
+                if ($item['idProveedor'] === 'otro') {
+                    $proveedorSugerido = $item['proveedor_otro'] ?? null;
+                } else {
+                    $proveedor = Proveedore::find($item['idProveedor']);
+                    $proveedorSugerido = $proveedor ? $proveedor->nombre : null;
+                }
+            }
+
             SolicitudCompraDetalle::create([
                 'idSolicitudCompra' => $solicitud->idSolicitudCompra,
                 'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null,
@@ -696,13 +754,14 @@ private function actualizarEstadoSolicitud($idSolicitud)
                 'descripcion_producto' => $item['descripcion_producto'],
                 'categoria' => $item['categoria'] ?? null,
                 'cantidad' => $item['cantidad'],
-                'unidad' => $item['unidad'] ?? null,
+                'unidad' => $item['unidad'] ?? 'unidad',
                 'precio_unitario_estimado' => $item['precio_unitario_estimado'],
                 'total_producto' => $item['total_producto'],
+                'idMonedas' => $item['idMonedas'],
                 'codigo_producto' => $item['codigo_producto'] ?? null,
                 'marca' => $item['marca'] ?? null,
                 'especificaciones_tecnicas' => $item['especificaciones_tecnicas'] ?? null,
-                'proveedor_sugerido' => $item['proveedor_sugerido'] ?? null,
+                'proveedor_sugerido' => $proveedorSugerido,
                 'justificacion_producto' => $item['justificacion_producto'] ?? null,
                 'observaciones_detalle' => $item['observaciones_detalle'] ?? null,
                 'estado' => 'pendiente'

@@ -15,6 +15,8 @@ class SolicitudCompra extends Model
     protected $fillable = [
         'codigo_solicitud',
         'idSolicitudAlmacen',
+        'solicitante_compra',
+        'solicitante_almacen',
         'solicitante',
         'idTipoArea',
         'idPrioridad',

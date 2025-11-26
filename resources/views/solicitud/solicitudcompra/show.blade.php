@@ -100,7 +100,7 @@
                             <span class="font-semibold">${{ number_format($solicitud->subtotal, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-600">IVA (19%):</span>
+                            <span class="text-gray-600">IGV (18%):</span>
                             <span class="font-semibold">${{ number_format($solicitud->iva, 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center border-t pt-2">

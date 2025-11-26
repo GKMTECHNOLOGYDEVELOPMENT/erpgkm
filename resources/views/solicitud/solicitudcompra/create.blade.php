@@ -37,6 +37,12 @@
         <form id="purchaseRequestForm" action="{{ route('solicitudcompra.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             
+            <!-- Campos hidden importantes -->
+            <input type="hidden" name="codigo_solicitud" x-model="requestCode">
+            <input type="hidden" name="idSolicitudAlmacen" x-model="form.idSolicitudAlmacen">
+            <input type="hidden" name="solicitante_compra" x-model="form.solicitante_compra">
+            <input type="hidden" name="solicitante_almacen" x-model="form.solicitante_almacen">
+            
             <div class="create-content">
                 <!-- Form Section -->
                 <div class="form-section">
@@ -51,7 +57,6 @@
                                 <div class="request-code">
                                     <span class="code-label">Código de Solicitud:</span>
                                     <span class="code-value" x-text="requestCode"></span>
-                                    <input type="hidden" name="codigo_solicitud" x-model="requestCode">
                                     <button type="button" class="btn-copy" @click="copyCode()" title="Copiar código">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
@@ -65,29 +70,42 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label class="form-label">Solicitud de Almacén *</label>
-                                <select class="form-select" x-model="form.idSolicitudAlmacen" @change="loadAlmacenItems()" required>
+                                <select class="form-select" x-model="form.idSolicitudAlmacen" @change="loadAlmacenItems()" name="idSolicitudAlmacen" required>
                                     <option value="">Seleccione una solicitud de almacén</option>
-                                    @foreach($solicitudesAlmacen as $solicitud)
-                                        <option value="{{ $solicitud->idSolicitudAlmacen }}">
-                                            {{ $solicitud->codigo_solicitud }} - {{ $solicitud->titulo }}
-                                        </option>
-                                    @endforeach
+                                    @if($solicitudesAlmacen->count() > 0)
+                                        @foreach($solicitudesAlmacen as $solicitud)
+                                            <option value="{{ $solicitud->idSolicitudAlmacen }}">
+                                                {{ $solicitud->codigo_solicitud }} - {{ $solicitud->titulo }}
+                                                ({{ $solicitud->detalles->count() }} productos)
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="" disabled>No hay solicitudes de almacén disponibles</option>
+                                    @endif
                                 </select>
-                                <input type="hidden" name="idSolicitudAlmacen" x-model="form.idSolicitudAlmacen">
+                                @if($solicitudesAlmacen->count() === 0)
+                                    <small class="form-help text-warning">
+                                        No hay solicitudes de almacén aprobadas disponibles para crear compras.
+                                    </small>
+                                @else
+                                    <small class="form-help">
+                                        Se muestran solo solicitudes de almacén que no tienen compra asociada.
+                                    </small>
+                                @endif
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Solicitante Almacén</label>
                                 <input type="text" class="form-input" readonly
-                                       x-model="form.solicitante_almacen" name="solicitante_almacen">
+                                       x-model="form.solicitante_almacen">
                                 <small class="form-help">Cargado automáticamente desde la solicitud de almacén</small>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label">Solicitante Compra *</label>
-                                <input type="text" class="form-input" placeholder="Nombre del solicitante para compra" 
-                                    x-model="form.solicitante_compra" name="solicitante" required
-                                    value="{{ $solicitanteCompra }}" readonly>
+                                <input type="text" class="form-input" readonly
+                                    x-model="form.solicitante_compra">
+                                <small class="form-help">Usuario autenticado del sistema</small>
                             </div>
 
                             <div class="form-group">
@@ -217,22 +235,38 @@
                                                    :name="`items[${index}][unidad]`" readonly>
                                         </div>
 
+                                        <!-- PRECIO UNITARIO CON SELECTOR DE MONEDA POR CLIC -->
                                         <div class="form-group">
                                             <label class="form-label">Precio Unitario *</label>
-                                            <div class="input-with-icon">
-                                                <span class="input-icon">S/</span>
-                                                <input type="number" class="form-input" min="0" step="0.01" 
-                                                       x-model="item.precio_unitario_estimado" 
-                                                       :name="`items[${index}][precio_unitario_estimado]`" 
-                                                       @change="updateItemTotal(index)" required>
+                                            <div class="price-currency-container">
+                                                <div class="currency-selector-clickable">
+                                                    <button type="button" class="currency-btn" 
+                                                            @click="cycleCurrency(index)"
+                                                            :title="getMonedaNombre(item.idMonedas)">
+                                                        <span class="currency-symbol" x-text="getMonedaSimbolo(item.idMonedas)"></span>
+                                                        <svg class="currency-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                                            <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                                                        </svg>
+                                                    </button>
+                                                    <input type="hidden" :name="`items[${index}][idMonedas]`" x-model="item.idMonedas">
+                                                </div>
+                                                <div class="price-input-container">
+                                                    <input type="number" class="form-input price-input" min="0" step="0.01" 
+                                                           x-model="item.precio_unitario_estimado" 
+                                                           :name="`items[${index}][precio_unitario_estimado]`" 
+                                                           @change="updateItemTotal(index)" required>
+                                                </div>
                                             </div>
-                                            <small class="form-help">Precio estimado para compra</small>
+                                            <small class="form-help">
+                                                <span x-text="getMonedaNombre(item.idMonedas)"></span> - Precio estimado para compra
+                                            </small>
                                         </div>
 
+                                        <!-- TOTAL DEL PRODUCTO -->
                                         <div class="form-group">
                                             <label class="form-label">Total</label>
                                             <div class="total-display">
-                                                <span x-text="'S/' + (item.total_producto || '0.00')"></span>
+                                                <span class="total-amount" x-text="getMonedaSimbolo(item.idMonedas) + (item.total_producto || '0.00')"></span>
                                                 <input type="hidden" :name="`items[${index}][total_producto]`" x-model="item.total_producto">
                                             </div>
                                         </div>
@@ -336,19 +370,23 @@
                                 </div>
                                 <div class="summary-item">
                                     <span class="summary-label">Subtotal:</span>
-                                    <span class="summary-value" x-text="'S/' + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                    <span class="summary-value" x-text="getResumenMoneda() + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     <input type="hidden" name="subtotal" x-model="subtotal">
                                 </div>
                                 <div class="summary-item">
                                     <span class="summary-label">IGV (18%):</span>
-                                    <span class="summary-value" x-text="'S/' + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                    <span class="summary-value" x-text="getResumenMoneda() + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     <input type="hidden" name="iva" x-model="igv">
                                 </div>
                                 <div class="summary-item total">
                                     <span class="summary-label">Total General:</span>
-                                    <span class="summary-value" x-text="'S/' + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                    <span class="summary-value" x-text="getResumenMoneda() + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     <input type="hidden" name="total" x-model="total">
                                     <input type="hidden" name="total_unidades" x-model="totalUnidades">
+                                </div>
+                                <div class="summary-item" x-show="hasMultipleCurrencies">
+                                    <span class="summary-label">Monedas Utilizadas:</span>
+                                    <span class="summary-value" x-text="getMonedasUtilizadas()"></span>
                                 </div>
                             </div>
                         </div>
@@ -484,12 +522,13 @@
                                                     <strong x-text="item.descripcion_producto || 'Sin descripción'"></strong>
                                                     <span class="item-preview-code" x-text="item.codigo_producto || `${requestCode}-${String(index + 1).padStart(2, '0')}`"></span>
                                                 </div>
-                                                <span class="item-total" x-text="'S/' + (item.total_producto || '0.00')"></span>
+                                                <span class="item-total" x-text="getMonedaSimbolo(item.idMonedas) + (item.total_producto || '0.00')"></span>
                                             </div>
                                             <div class="preview-item-details">
                                                 <span x-text="item.cantidad_aprobada + ' ' + (item.unidad || 'unidad')"></span>
-                                                <span x-text="'S/' + (item.precio_unitario_estimado || '0.00') + ' c/u'"></span>
+                                                <span x-text="getMonedaSimbolo(item.idMonedas) + (item.precio_unitario_estimado || '0.00') + ' c/u'"></span>
                                                 <span x-show="item.categoria" x-text="item.categoria" class="item-category"></span>
+                                                <span class="currency-badge" x-text="getMonedaNombre(item.idMonedas)"></span>
                                             </div>
                                             <div class="preview-item-specs" x-show="item.especificaciones_tecnicas" 
                                                  x-text="item.especificaciones_tecnicas"></div>
@@ -507,15 +546,19 @@
                                 <div class="preview-summary">
                                     <div class="preview-summary-item">
                                         <span>Subtotal:</span>
-                                        <span x-text="'S/' + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                        <span x-text="getResumenMoneda() + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     </div>
                                     <div class="preview-summary-item">
                                         <span>IGV (18%):</span>
-                                        <span x-text="'S/' + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                        <span x-text="getResumenMoneda() + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
                                     </div>
                                     <div class="preview-summary-item total">
                                         <span>Total:</span>
-                                        <span x-text="'S/' + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                        <span x-text="getResumenMoneda() + total.toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                    </div>
+                                    <div class="preview-summary-item" x-show="hasMultipleCurrencies">
+                                        <span>Monedas Utilizadas:</span>
+                                        <span x-text="getMonedasUtilizadas()"></span>
                                     </div>
                                 </div>
                             </div>
@@ -537,6 +580,7 @@
                             <li>Agregue proveedores sugeridos cuando sea posible</li>
                             <li>Verifique que los totales sean correctos</li>
                             <li>El IGV aplicado es del 18%</li>
+                            <li>Haga clic en el símbolo de moneda para cambiar entre diferentes tipos</li>
                         </ul>
                     </div>
                 </div>
@@ -545,305 +589,468 @@
     </div>
 
     <script>
-        function createPurchaseRequest() {
-            return {
-                form: {
-                    idSolicitudAlmacen: '',
-                    solicitante_almacen: '',
-                    solicitante_compra: '',
-                    idTipoArea: '',
-                    idPrioridad: '',
-                    fecha_requerida: '',
-                    idCentroCosto: '',
-                    proyecto_asociado: '',
-                    justificacion: '',
-                    observaciones: '',
-                    items: [],
-                    files: [],
-                    // Campos para mostrar datos automáticos
-                    departamento_auto: '',
-                    prioridad_auto: '',
-                    fecha_requerida_auto: '',
-                    centro_costo_auto: '',
-                    justificacion_auto: '',
-                    observaciones_auto: ''
-                },
+    function createPurchaseRequest() {
+        return {
+            form: {
+                idSolicitudAlmacen: '',
+                solicitante_almacen: '',
+                solicitante_compra: '{{ $solicitanteCompra }}',
+                idTipoArea: '',
+                idPrioridad: '',
+                fecha_requerida: '',
+                idCentroCosto: '',
+                proyecto_asociado: '',
+                justificacion: '',
+                observaciones: '',
+                items: [],
+                files: [],
+                // Campos para mostrar datos automáticos
+                departamento_auto: '',
+                prioridad_auto: '',
+                fecha_requerida_auto: '',
+                centro_costo_auto: '',
+                justificacion_auto: '',
+                observaciones_auto: ''
+            },
+            
+            loadingAlmacen: false,
+            solicitudesAlmacenData: @json($solicitudesAlmacen->keyBy('idSolicitudAlmacen')),
+            proveedoresData: @json($proveedores),
+            monedasData: @json($monedas->keyBy('idMonedas')),
+            monedasList: @json($monedas),
+
+            get requestCode() {
+                const now = new Date();
+                const year = now.getFullYear().toString().slice(-2);
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
+                return `SC-${year}${month}${day}-${random}`;
+            },
+
+            init() {
+                const today = new Date().toISOString().split('T')[0];
+                this.form.fecha_requerida = today;
+            },
+
+            get totalUnidades() {
+                return this.form.items.reduce((sum, item) => {
+                    return sum + (parseInt(item.cantidad_aprobada) || 0);
+                }, 0);
+            },
+
+            get subtotal() {
+                return this.form.items.reduce((sum, item) => {
+                    return sum + (parseFloat(item.total_producto) || 0);
+                }, 0);
+            },
+
+            get igv() {
+                return this.subtotal * 0.18;
+            },
+
+            get total() {
+                return this.subtotal + this.igv;
+            },
+
+            get hasMultipleCurrencies() {
+                const currencies = new Set();
+                this.form.items.forEach(item => {
+                    if (item.idMonedas) {
+                        currencies.add(item.idMonedas);
+                    }
+                });
+                return currencies.size > 1;
+            },
+
+            async loadAlmacenItems() {
+                console.log('Cargando items para solicitud almacén:', this.form.idSolicitudAlmacen);
                 
-                loadingAlmacen: false,
-                solicitudesAlmacenData: @json($solicitudesAlmacen->keyBy('idSolicitudAlmacen')),
-                proveedoresData: @json($proveedores),
-
-                get requestCode() {
-                    const now = new Date();
-                    const year = now.getFullYear().toString().slice(-2);
-                    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-                    const day = now.getDate().toString().padStart(2, '0');
-                    const random = Math.floor(Math.random() * 999).toString().padStart(3, '0');
-                    return `SC-${year}${month}${day}-${random}`;
-                },
-
-                init() {
-                    const today = new Date().toISOString().split('T')[0];
-                    this.form.fecha_requerida = today;
-                    
-                    // Establecer solicitante por defecto desde PHP
-                    this.form.solicitante_compra = '{{ $solicitanteCompra }}';
-                },
-
-                get totalUnidades() {
-                    return this.form.items.reduce((sum, item) => {
-                        return sum + (parseInt(item.cantidad_aprobada) || 0);
-                    }, 0);
-                },
-
-                get subtotal() {
-                    return this.form.items.reduce((sum, item) => {
-                        return sum + (parseFloat(item.total_producto) || 0);
-                    }, 0);
-                },
-
-                get igv() {
-                    return this.subtotal * 0.18; // IGV 18%
-                },
-
-                get total() {
-                    return this.subtotal + this.igv;
-                },
-
-                async loadAlmacenItems() {
-                    if (!this.form.idSolicitudAlmacen) {
-                        this.resetAlmacenData();
-                        return;
-                    }
-
-                    this.loadingAlmacen = true;
+                if (!this.form.idSolicitudAlmacen) {
                     this.resetAlmacenData();
-
-                    try {
-                        const response = await fetch(`/solicitudcompra/solicitud-almacen/${this.form.idSolicitudAlmacen}/detalles`);
-                        const result = await response.json();
-
-                        if (result.success && result.detalles && result.detalles.length > 0) {
-                            // Cargar datos de la solicitud para autocompletar
-                            if (result.solicitud) {
-                                this.autocompleteFormData(result.solicitud);
-                            }
-
-                            // Cargar los detalles de la solicitud de almacén
-                            this.form.items = result.detalles.map(detalle => ({
-                                idSolicitudAlmacenDetalle: detalle.idSolicitudAlmacenDetalle,
-                                idArticulo: detalle.idArticulo,
-                                descripcion_producto: detalle.descripcion_producto || '',
-                                categoria: detalle.categoria || '',
-                                cantidad: detalle.cantidad || 0,
-                                cantidad_aprobada: detalle.cantidad_aprobada || detalle.cantidad || 1,
-                                unidad: detalle.unidad || 'unidad',
-                                precio_unitario_estimado: detalle.precio_unitario_estimado || 0,
-                                total_producto: detalle.total_producto || 0,
-                                codigo_producto: detalle.codigo_producto || '',
-                                marca: detalle.marca || '',
-                                especificaciones_tecnicas: detalle.especificaciones_tecnicas || '',
-                                idProveedor: detalle.proveedor_sugerido || '',
-                                proveedor_otro: '',
-                                justificacion_producto: detalle.justificacion_producto || '',
-                                observaciones_detalle: detalle.observaciones_detalle || '',
-                                fromAlmacen: true
-                            }));
-
-                            // Calcular totales iniciales
-                            this.form.items.forEach((item, index) => {
-                                this.updateItemTotal(index);
-                            });
-
-                        } else {
-                            alert('No se encontraron productos aprobados en esta solicitud de almacén');
-                            this.form.items = [];
-                        }
-                    } catch (error) {
-                        console.error('Error loading almacen items:', error);
-                        alert('Error al cargar los productos de la solicitud de almacén');
-                        this.form.items = [];
-                    } finally {
-                        this.loadingAlmacen = false;
-                    }
-                },
-
-               autocompleteFormData(solicitudData) {
-    // Autocompletar datos del formulario
-    this.form.solicitante_almacen = solicitudData.solicitante_almacen || '';
-    
-    // Si no se ha llenado manualmente, autocompletar solicitante de compra
-    if (!this.form.solicitante_compra && solicitudData.solicitante_compra) {
-        this.form.solicitante_compra = solicitudData.solicitante_compra;
-    }
-    
-    // Si no se ha llenado manualmente, autocompletar departamento
-    if (!this.form.idTipoArea && solicitudData.idTipoArea) {
-        this.form.idTipoArea = solicitudData.idTipoArea;
-        this.form.departamento_auto = solicitudData.tipo_area_nombre;
-    }
-    
-    if (!this.form.idPrioridad && solicitudData.idPrioridad) {
-        this.form.idPrioridad = solicitudData.idPrioridad;
-        this.form.prioridad_auto = solicitudData.prioridad_nombre;
-    }
-    
-    if (!this.form.idCentroCosto && solicitudData.idCentroCosto) {
-        this.form.idCentroCosto = solicitudData.idCentroCosto;
-        this.form.centro_costo_auto = solicitudData.centro_costo_nombre;
-    }
-    
-    if (!this.form.justificacion && solicitudData.justificacion) {
-        this.form.justificacion = solicitudData.justificacion;
-        this.form.justificacion_auto = solicitudData.justificacion;
-    }
-    
-    if (!this.form.observaciones && solicitudData.observaciones) {
-        this.form.observaciones = solicitudData.observaciones;
-        this.form.observaciones_auto = solicitudData.observaciones;
-    }
-},
-
-                resetAlmacenData() {
-                    this.form.items = [];
-                    this.form.solicitante_almacen = '';
-                    this.form.departamento_auto = '';
-                    this.form.prioridad_auto = '';
-                    this.form.centro_costo_auto = '';
-                    this.form.justificacion_auto = '';
-                    this.form.observaciones_auto = '';
-                },
-
-                updateItemTotal(index) {
-                    const item = this.form.items[index];
-                    const quantity = parseFloat(item.cantidad_aprobada) || 0;
-                    const unitPrice = parseFloat(item.precio_unitario_estimado) || 0;
-                    item.total_producto = (quantity * unitPrice).toFixed(2);
-                },
-
-                getProveedorNombre(proveedorId) {
-                    if (!proveedorId || proveedorId === 'otro') return '';
-                    const proveedor = this.proveedoresData.find(p => p.idProveedor == proveedorId);
-                    return proveedor ? proveedor.nombre : '';
-                },
-
-                getSolicitudAlmacenText(idSolicitudAlmacen) {
-                    const solicitud = this.solicitudesAlmacenData[idSolicitudAlmacen];
-                    return solicitud ? `${solicitud.codigo_solicitud} - ${solicitud.titulo}` : '';
-                },
-
-                getDepartmentText(idTipoArea) {
-                    const departments = {
-                        @foreach($tipoAreas as $area)
-                            '{{ $area->idTipoArea }}': '{{ $area->nombre }}',
-                        @endforeach
-                    };
-                    return departments[idTipoArea] || idTipoArea;
-                },
-
-                getCostCenterText(idCentroCosto) {
-                    const costCenters = {
-                        @foreach($centrosCosto as $centro)
-                            '{{ $centro->idCentroCosto }}': '{{ $centro->codigo }} - {{ $centro->nombre }}',
-                        @endforeach
-                    };
-                    return costCenters[idCentroCosto] || idCentroCosto;
-                },
-
-                getPriorityText(idPrioridad) {
-                    const priorities = {
-                        @foreach($prioridades as $prioridad)
-                            '{{ $prioridad->idPrioridad }}': '{{ $prioridad->nombre }}',
-                        @endforeach
-                    };
-                    return priorities[idPrioridad] || idPrioridad;
-                },
-
-                formatPreviewDate(dateString) {
-                    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                    return new Date(dateString).toLocaleDateString('es-ES', options);
-                },
-
-                copyCode() {
-                    navigator.clipboard.writeText(this.requestCode).then(() => {
-                        const btn = event.target.closest('.btn-copy');
-                        const originalHTML = btn.innerHTML;
-                        btn.innerHTML = `
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-                            </svg>
-                        `;
-                        btn.style.color = '#10b981';
-                        
-                        setTimeout(() => {
-                            btn.innerHTML = originalHTML;
-                            btn.style.color = '';
-                        }, 2000);
-                    });
-                },
-
-                handleFileSelect(event) {
-                    const files = Array.from(event.target.files);
-                    files.forEach(file => {
-                        this.form.files.push(file);
-                    });
-                },
-
-                removeFile(index) {
-                    this.form.files.splice(index, 1);
-                },
-
-                resetForm() {
-                    if (confirm('¿Está seguro de que desea limpiar todos los campos?')) {
-                        this.form = {
-                            idSolicitudAlmacen: '',
-                            solicitante_almacen: '',
-                            solicitante_compra: '',
-                            idTipoArea: '',
-                            idPrioridad: '',
-                            fecha_requerida: new Date().toISOString().split('T')[0],
-                            idCentroCosto: '',
-                            proyecto_asociado: '',
-                            justificacion: '',
-                            observaciones: '',
-                            items: [],
-                            files: [],
-                            departamento_auto: '',
-                            prioridad_auto: '',
-                            fecha_requerida_auto: '',
-                            centro_costo_auto: '',
-                            justificacion_auto: '',
-                            observaciones_auto: ''
-                        };
-                    }
-                },
-
-                submitForm() {
-                    // Validación básica
-                    if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea || 
-                        !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
-                        alert('Por favor complete todos los campos obligatorios (*)');
-                        return;
-                    }
-
-                    if (this.form.items.length === 0) {
-                        alert('Debe seleccionar una solicitud de almacén con productos aprobados');
-                        return;
-                    }
-
-                    // Validar items
-                    for (let i = 0; i < this.form.items.length; i++) {
-                        const item = this.form.items[i];
-                        if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado) {
-                            alert(`Por favor complete todos los campos obligatorios del artículo ${i + 1}`);
-                            return;
-                        }
-                    }
-
-                    // Enviar formulario
-                    document.getElementById('purchaseRequestForm').submit();
+                    return;
                 }
+
+                this.loadingAlmacen = true;
+                this.resetAlmacenData();
+
+                try {
+                    const response = await fetch(`/solicitudcompra/solicitud-almacen/${this.form.idSolicitudAlmacen}/detalles`);
+                    const result = await response.json();
+
+                    console.log('Respuesta del servidor:', result);
+
+                    if (result.success && result.detalles && result.detalles.length > 0) {
+                        if (result.solicitud) {
+                            this.autocompleteFormData(result.solicitud);
+                        }
+
+                        this.form.items = result.detalles.map(detalle => ({
+                            idSolicitudAlmacenDetalle: detalle.idSolicitudAlmacenDetalle,
+                            idArticulo: detalle.idArticulo,
+                            descripcion_producto: detalle.descripcion_producto || '',
+                            categoria: detalle.categoria || '',
+                            cantidad: detalle.cantidad || 0,
+                            cantidad_aprobada: detalle.cantidad_aprobada || detalle.cantidad || 1,
+                            unidad: detalle.unidad || 'unidad',
+                            precio_unitario_estimado: detalle.precio_unitario_estimado || 0,
+                            total_producto: detalle.total_producto || 0,
+                            codigo_producto: detalle.codigo_producto || '',
+                            marca: detalle.marca || '',
+                            especificaciones_tecnicas: detalle.especificaciones_tecnicas || '',
+                            idProveedor: detalle.proveedor_sugerido || '',
+                            proveedor_otro: '',
+                            justificacion_producto: detalle.justificacion_producto || '',
+                            observaciones_detalle: detalle.observaciones_detalle || '',
+                            idMonedas: detalle.idMonedas || 1, // Moneda por defecto: Sol Peruano
+                            fromAlmacen: true
+                        }));
+
+                        this.form.items.forEach((item, index) => {
+                            this.updateItemTotal(index);
+                        });
+
+                        console.log('Items cargados exitosamente:', this.form.items.length);
+
+                    } else {
+                        alert('No se encontraron productos aprobados en esta solicitud de almacén');
+                        this.form.items = [];
+                    }
+                } catch (error) {
+                    console.error('Error loading almacen items:', error);
+                    alert('Error al cargar los productos de la solicitud de almacén');
+                    this.form.items = [];
+                } finally {
+                    this.loadingAlmacen = false;
+                }
+            },
+
+            autocompleteFormData(solicitudData) {
+                console.log('Autocompletando formulario con datos:', solicitudData);
+                
+                this.form.departamento_auto = '';
+                this.form.prioridad_auto = '';
+                this.form.centro_costo_auto = '';
+                this.form.justificacion_auto = '';
+                this.form.observaciones_auto = '';
+
+                this.form.solicitante_almacen = solicitudData.solicitante_almacen || '';
+                
+                if (solicitudData.idTipoArea) {
+                    this.form.idTipoArea = solicitudData.idTipoArea;
+                    this.form.departamento_auto = solicitudData.tipo_area_nombre;
+                }
+                
+                if (solicitudData.idPrioridad) {
+                    this.form.idPrioridad = solicitudData.idPrioridad;
+                    this.form.prioridad_auto = solicitudData.prioridad_nombre;
+                }
+                
+                if (solicitudData.fecha_requerida) {
+                    this.form.fecha_requerida = solicitudData.fecha_requerida;
+                    this.form.fecha_requerida_auto = solicitudData.fecha_requerida;
+                }
+                
+                if (solicitudData.idCentroCosto && !this.form.idCentroCosto) {
+                    this.form.idCentroCosto = solicitudData.idCentroCosto;
+                    this.form.centro_costo_auto = solicitudData.centro_costo_nombre;
+                }
+                
+                if (solicitudData.justificacion && !this.form.justificacion) {
+                    this.form.justificacion = solicitudData.justificacion;
+                    this.form.justificacion_auto = solicitudData.justificacion;
+                }
+                
+                if (solicitudData.observaciones && !this.form.observaciones) {
+                    this.form.observaciones = solicitudData.observaciones;
+                    this.form.observaciones_auto = solicitudData.observaciones;
+                }
+            },
+
+            resetAlmacenData() {
+                console.log('Reseteando datos de almacén...');
+                
+                this.form.items = [];
+                this.form.solicitante_almacen = '';
+                this.form.departamento_auto = '';
+                this.form.prioridad_auto = '';
+                this.form.fecha_requerida_auto = '';
+                this.form.centro_costo_auto = '';
+                this.form.justificacion_auto = '';
+                this.form.observaciones_auto = '';
+            },
+
+            updateItemTotal(index) {
+                const item = this.form.items[index];
+                const quantity = parseFloat(item.cantidad_aprobada) || 0;
+                const unitPrice = parseFloat(item.precio_unitario_estimado) || 0;
+                item.total_producto = (quantity * unitPrice).toFixed(2);
+            },
+
+            // NUEVO MÉTODO: Cambiar moneda al hacer clic
+            cycleCurrency(index) {
+                const item = this.form.items[index];
+                const currentCurrencyId = item.idMonedas || 1;
+                
+                // Encontrar el índice actual de la moneda
+                const currentIndex = this.monedasList.findIndex(moneda => moneda.idMonedas == currentCurrencyId);
+                
+                // Obtener la siguiente moneda (cíclico)
+                const nextIndex = (currentIndex + 1) % this.monedasList.length;
+                const nextCurrency = this.monedasList[nextIndex];
+                
+                // Actualizar la moneda del item
+                item.idMonedas = nextCurrency.idMonedas;
+                
+                // Forzar actualización del total
+                this.updateItemTotal(index);
+                
+                console.log(`Moneda cambiada a: ${nextCurrency.nombre} (${nextCurrency.simbolo})`);
+            },
+
+            getProveedorNombre(proveedorId) {
+                if (!proveedorId || proveedorId === 'otro') return '';
+                const proveedor = this.proveedoresData.find(p => p.idProveedor == proveedorId);
+                return proveedor ? proveedor.nombre : '';
+            },
+
+            getMonedaSimbolo(idMonedas) {
+                if (!idMonedas) return 'S/';
+                const moneda = this.monedasData[idMonedas];
+                return moneda ? moneda.simbolo : 'S/';
+            },
+
+            getMonedaNombre(idMonedas) {
+                if (!idMonedas) return 'Sol Peruano';
+                const moneda = this.monedasData[idMonedas];
+                return moneda ? moneda.nombre : 'Sol Peruano';
+            },
+
+            getResumenMoneda() {
+                // Para el resumen general, usar la moneda más común o Sol Peruano por defecto
+                if (this.form.items.length === 0) return 'S/';
+                
+                const currencyCount = {};
+                this.form.items.forEach(item => {
+                    if (item.idMonedas) {
+                        currencyCount[item.idMonedas] = (currencyCount[item.idMonedas] || 0) + 1;
+                    }
+                });
+                
+                const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+                    currencyCount[a] > currencyCount[b] ? a : b, 1
+                );
+                
+                return this.getMonedaSimbolo(mostCommonCurrency);
+            },
+
+            getMonedasUtilizadas() {
+                const currencies = new Set();
+                this.form.items.forEach(item => {
+                    if (item.idMonedas) {
+                        currencies.add(this.getMonedaNombre(item.idMonedas));
+                    }
+                });
+                return Array.from(currencies).join(', ');
+            },
+
+            getSolicitudAlmacenText(idSolicitudAlmacen) {
+                const solicitud = this.solicitudesAlmacenData[idSolicitudAlmacen];
+                return solicitud ? `${solicitud.codigo_solicitud} - ${solicitud.titulo}` : '';
+            },
+
+            getDepartmentText(idTipoArea) {
+                const departments = {
+                    @foreach($tipoAreas as $area)
+                        '{{ $area->idTipoArea }}': '{{ $area->nombre }}',
+                    @endforeach
+                };
+                return departments[idTipoArea] || idTipoArea;
+            },
+
+            getCostCenterText(idCentroCosto) {
+                const costCenters = {
+                    @foreach($centrosCosto as $centro)
+                        '{{ $centro->idCentroCosto }}': '{{ $centro->codigo }} - {{ $centro->nombre }}',
+                    @endforeach
+                };
+                return costCenters[idCentroCosto] || idCentroCosto;
+            },
+
+            getPriorityText(idPrioridad) {
+                const priorities = {
+                    @foreach($prioridades as $prioridad)
+                        '{{ $prioridad->idPrioridad }}': '{{ $prioridad->nombre }}',
+                    @endforeach
+                };
+                return priorities[idPrioridad] || idPrioridad;
+            },
+
+            formatPreviewDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('es-ES', options);
+            },
+
+            copyCode() {
+                navigator.clipboard.writeText(this.requestCode).then(() => {
+                    const btn = event.target.closest('.btn-copy');
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                        </svg>
+                    `;
+                    btn.style.color = '#10b981';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.style.color = '';
+                    }, 2000);
+                });
+            },
+
+            handleFileSelect(event) {
+                const files = Array.from(event.target.files);
+                files.forEach(file => {
+                    this.form.files.push(file);
+                });
+            },
+
+            removeFile(index) {
+                this.form.files.splice(index, 1);
+            },
+
+            resetForm() {
+                if (confirm('¿Está seguro de que desea limpiar todos los campos?')) {
+                    this.form = {
+                        idSolicitudAlmacen: '',
+                        solicitante_almacen: '',
+                        solicitante_compra: '{{ $solicitanteCompra }}',
+                        idTipoArea: '',
+                        idPrioridad: '',
+                        fecha_requerida: new Date().toISOString().split('T')[0],
+                        idCentroCosto: '',
+                        proyecto_asociado: '',
+                        justificacion: '',
+                        observaciones: '',
+                        items: [],
+                        files: [],
+                        departamento_auto: '',
+                        prioridad_auto: '',
+                        fecha_requerida_auto: '',
+                        centro_costo_auto: '',
+                        justificacion_auto: '',
+                        observaciones_auto: ''
+                    };
+                }
+            },
+
+            submitForm() {
+                if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea || 
+                    !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
+                    alert('Por favor complete todos los campos obligatorios (*)');
+                    return;
+                }
+
+                if (this.form.items.length === 0) {
+                    alert('Debe seleccionar una solicitud de almacén con productos aprobados');
+                    return;
+                }
+
+                for (let i = 0; i < this.form.items.length; i++) {
+                    const item = this.form.items[i];
+                    if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item.idMonedas) {
+                        alert(`Por favor complete todos los campos obligatorios del artículo ${i + 1}`);
+                        return;
+                    }
+                }
+
+                document.getElementById('purchaseRequestForm').submit();
             }
         }
+    }
     </script>
+
+    <style>
+    .price-currency-container {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        align-items: start;
+    }
+
+    .currency-selector-clickable {
+        display: flex;
+    }
+
+    .currency-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 12px;
+        background: #f8fafc;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        color: #374151;
+        min-width: 70px;
+        justify-content: center;
+    }
+
+    .currency-btn:hover {
+        background: #e5e7eb;
+        border-color: #9ca3af;
+    }
+
+    .currency-btn:active {
+        background: #d1d5db;
+        transform: scale(0.98);
+    }
+
+    .currency-symbol {
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .currency-arrow {
+        opacity: 0.6;
+        transition: transform 0.2s ease;
+    }
+
+    .currency-btn:hover .currency-arrow {
+        opacity: 0.8;
+        transform: translateY(1px);
+    }
+
+    .price-input-container {
+        flex: 1;
+    }
+
+    .price-input {
+        width: 100%;
+    }
+
+    .total-display .total-amount {
+        font-weight: 600;
+        color: #059669;
+        font-size: 1rem;
+    }
+
+    .currency-badge {
+        background: #f3f4f6;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: #6b7280;
+        border: 1px solid #e5e7eb;
+        font-weight: 500;
+    }
+
+    .form-help span {
+        color: #6b7280;
+        font-style: italic;
+    }
+    </style>
 </x-layout.default>

@@ -25,7 +25,6 @@
                     </svg>
                     Nueva Solicitud
                 </a>
-
             </div>
 
             <!-- Stats -->
@@ -94,6 +93,9 @@
                             <option value="en_proceso">En Proceso</option>
                             <option value="completada">Completada</option>
                             <option value="cancelada">Cancelada</option>
+                            <option value="presupuesto_aprobado">Presupuesto Aprobado</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="finalizado">Finalizado</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -120,7 +122,7 @@
                                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                             </svg>
                         </span>
-                        <input type="text" class="search-input" placeholder="Buscar solicitudes..." x-model="filters.search">
+                        <input type="text" class="search-input" placeholder="Buscar por código, proyecto, solicitante..." x-model="filters.search">
                     </div>
                 </div>
             </div>
@@ -130,21 +132,39 @@
                 <template x-for="request in filteredRequests" :key="request.idSolicitudCompra">
                     <div class="card" :class="'priority-' + (request.prioridad?.nivel || 'medium')">
                         <div class="card-header">
-                            <div class="card-id" x-text="request.codigo_solicitud"></div>
+                            <div class="card-codes">
+                                <div class="card-id" x-text="request.codigo_solicitud"></div>
+                                <div class="card-almacen-code" x-show="request.solicitud_almacen?.codigo_solicitud" 
+                                     x-text="'Almacén: ' + request.solicitud_almacen?.codigo_solicitud"></div>
+                            </div>
                             <div class="card-status" :class="'status-' + request.estado" x-text="getStatusText(request.estado)"></div>
                         </div>
                         <div class="card-body">
                             <h3 class="card-title" x-text="request.proyecto_asociado || 'Solicitud de Compra'"></h3>
                             <div class="card-details">
+                                <!-- Solicitante Compra -->
                                 <div class="detail-item">
                                     <span class="detail-label">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
                                         </svg>
-                                        Solicitante:
+                                        Solicitante Compra:
                                     </span>
-                                    <span class="detail-value" x-text="request.solicitante"></span>
+                                    <span class="detail-value" x-text="request.solicitante_compra || 'N/A'"></span>
                                 </div>
+                                
+                                <!-- Solicitante Almacén -->
+                                <div class="detail-item">
+                                    <span class="detail-label">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                        </svg>
+                                        Solicitante Almacén:
+                                    </span>
+                                    <span class="detail-value" x-text="request.solicitante_almacen || 'N/A'"></span>
+                                </div>
+
+                                <!-- Área -->
                                 <div class="detail-item">
                                     <span class="detail-label">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
@@ -155,6 +175,8 @@
                                     </span>
                                     <span class="detail-value" x-text="request.tipo_area?.nombre || 'N/A'"></span>
                                 </div>
+                                
+                                <!-- Prioridad -->
                                 <div class="detail-item">
                                     <span class="detail-label">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
@@ -164,6 +186,8 @@
                                     </span>
                                     <span class="detail-value" x-text="request.prioridad?.nombre || 'N/A'"></span>
                                 </div>
+                                
+                                <!-- Total -->
                                 <div class="detail-item">
                                     <span class="detail-label">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
@@ -171,9 +195,22 @@
                                         </svg>
                                         Total:
                                     </span>
-                                    <span class="detail-value" x-text="'$' + (request.total ? Number(request.total).toLocaleString() : '0')"></span>
+                                    <span class="detail-value" x-text="getCurrencySymbol(request) + (request.total ? Number(request.total).toLocaleString('es-PE', {minimumFractionDigits: 2}) : '0.00')"></span>
+                                </div>
+                                
+                                <!-- Moneda Principal -->
+                                <div class="detail-item" x-show="getMainCurrency(request)">
+                                    <span class="detail-label">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M8 10.933l-5.247-5.25a.5.5 0 0 1 .708-.708L8 9.526l4.539-4.55a.5.5 0 1 1 .708.708L8 10.933z"/>
+                                        </svg>
+                                        Moneda:
+                                    </span>
+                                    <span class="detail-value" x-text="getMainCurrency(request)"></span>
                                 </div>
                             </div>
+                            
+                            <!-- Justificación -->
                             <div class="card-justification" x-show="request.justificacion">
                                 <strong>Justificación:</strong>
                                 <span x-text="request.justificacion?.substring(0, 100) + (request.justificacion?.length > 100 ? '...' : '')"></span>
@@ -194,7 +231,7 @@
                                         <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
                                     </svg>
                                 </button>
-                                <button class="btn-icon" title="Editar" @click="editRequest(request.idSolicitudCompra)">
+                                <button class="btn-icon" title="Editar" @click="editRequest(request.idSolicitudCompra)" x-show="request.estado === 'pendiente'">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                                         <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
                                     </svg>
@@ -243,7 +280,9 @@
                         ...solicitud,
                         // Asegurar que las relaciones estén disponibles
                         tipo_area: solicitud.tipo_area || null,
-                        prioridad: solicitud.prioridad || null
+                        prioridad: solicitud.prioridad || null,
+                        solicitud_almacen: solicitud.solicitud_almacen || null,
+                        detalles: solicitud.detalles || []
                     }));
                 },
                 
@@ -269,8 +308,10 @@
                             const searchTerm = this.filters.search.toLowerCase();
                             return (
                                 (request.proyecto_asociado || '').toLowerCase().includes(searchTerm) ||
-                                (request.solicitante || '').toLowerCase().includes(searchTerm) ||
+                                (request.solicitante_compra || '').toLowerCase().includes(searchTerm) ||
+                                (request.solicitante_almacen || '').toLowerCase().includes(searchTerm) ||
                                 (request.codigo_solicitud || '').toLowerCase().includes(searchTerm) ||
+                                (request.solicitud_almacen?.codigo_solicitud || '').toLowerCase().includes(searchTerm) ||
                                 (request.justificacion || '').toLowerCase().includes(searchTerm)
                             );
                         }
@@ -290,9 +331,54 @@
                         'rechazada': 'Rechazada',
                         'en_proceso': 'En Proceso',
                         'completada': 'Completada',
-                        'cancelada': 'Cancelada'
+                        'cancelada': 'Cancelada',
+                        'presupuesto_aprobado': 'Presupuesto Aprobado',
+                        'pagado': 'Pagado',
+                        'finalizado': 'Finalizado'
                     };
                     return statusMap[status] || status;
+                },
+                
+                getCurrencySymbol(request) {
+                    // Obtener el símbolo de moneda más común de los detalles
+                    if (!request.detalles || request.detalles.length === 0) {
+                        return 'S/';
+                    }
+                    
+                    // Contar monedas por símbolo
+                    const currencyCount = {};
+                    request.detalles.forEach(detalle => {
+                        if (detalle.moneda && detalle.moneda.simbolo) {
+                            currencyCount[detalle.moneda.simbolo] = (currencyCount[detalle.moneda.simbolo] || 0) + 1;
+                        }
+                    });
+                    
+                    // Encontrar la moneda más común
+                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+                        currencyCount[a] > currencyCount[b] ? a : b, 'S/'
+                    );
+                    
+                    return mostCommonCurrency;
+                },
+                
+                getMainCurrency(request) {
+                    // Obtener el nombre de la moneda principal
+                    if (!request.detalles || request.detalles.length === 0) {
+                        return '';
+                    }
+                    
+                    const currencyCount = {};
+                    request.detalles.forEach(detalle => {
+                        if (detalle.moneda && detalle.moneda.nombre) {
+                            currencyCount[detalle.moneda.nombre] = (currencyCount[detalle.moneda.nombre] || 0) + 1;
+                        }
+                    });
+                    
+                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+                        currencyCount[a] > currencyCount[b] ? a : b, ''
+                    );
+                    
+                    return mostCommonCurrency;
                 },
                 
                 formatDate(dateString) {
@@ -323,4 +409,54 @@
             }
         }
     </script>
+
+    <style>
+    .card-codes {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .card-almacen-code {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 0;
+    }
+    
+    .detail-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .detail-value {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        text-align: right;
+    }
+    
+    .card-justification {
+        margin-top: 8px;
+        padding: 8px;
+        background: #f8fafc;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+    
+    .card-justification strong {
+        color: #374151;
+    }
+    </style>
 </x-layout.default>
