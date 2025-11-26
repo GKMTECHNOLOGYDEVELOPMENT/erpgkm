@@ -125,7 +125,7 @@ public function create()
         'justificacion' => 'required|string',
         'items' => 'required|array|min:1',
         'items.*.descripcion_producto' => 'required|string',
-        'items.*.idMonedas' => 'required|exists:monedas,idMonedas', // ← Este campo
+        'items.*.idMonedas' => 'required|exists:monedas,idMonedas',
         'items.*.cantidad' => 'required|integer|min:1',
         'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
         'idSolicitudAlmacen' => 'required|exists:solicitud_almacen,idSolicitudAlmacen',
@@ -137,8 +137,27 @@ public function create()
         'items_data' => $request->items,
         'idSolicitudAlmacen' => $request->idSolicitudAlmacen
     ]);
+
     try {
         \DB::beginTransaction();
+
+        // **ACTUALIZAR ESTADO DE LA SOLICITUD DE ALMACÉN**
+        $solicitudAlmacen = \App\Models\SolicitudAlmacen::find($request->idSolicitudAlmacen);
+        
+        if (!$solicitudAlmacen) {
+            throw new \Exception('No se encontró la solicitud de almacén con ID: ' . $request->idSolicitudAlmacen);
+        }
+
+        // Actualizar estado de la solicitud de almacén
+        $solicitudAlmacen->update([
+            'estado' => 'Solicitud Enviada administración',
+            'updated_at' => now()
+        ]);
+
+        \Log::info('Estado de solicitud almacén actualizado:', [
+            'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+            'nuevo_estado' => 'Solicitud Enviada administración'
+        ]);
 
         // Generar código de solicitud
         $codigoSolicitud = 'SC-' . date('Ymd') . '-' . str_pad(SolicitudCompra::count() + 1, 4, '0', STR_PAD_LEFT);
@@ -216,8 +235,14 @@ public function create()
 
         \DB::commit();
 
+        \Log::info('Solicitud de compra creada exitosamente:', [
+            'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
+            'codigo_solicitud' => $codigoSolicitud,
+            'idSolicitudAlmacen' => $request->idSolicitudAlmacen
+        ]);
+
         return redirect()->route('solicitudcompra.index')
-            ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente.')
+            ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente y solicitud de almacén enviada a administración.')
             ->with('solicitud_id', $solicitudCompra->idSolicitudCompra);
 
     } catch (\Exception $e) {
@@ -379,9 +404,9 @@ public function evaluacion($id)
     ])->findOrFail($id);
 
     // Calcular estadísticas de los detalles
-    $totalDetalles = $solicitud->detalles->count();
-    $aprobados = $solicitud->detalles->where('estado', 'aprobado')->count();
-    $rechazados = $solicitud->detalles->where('estado', 'rechazado')->count();
+$totalDetalles = $solicitud->detalles->count();
+    $aprobados = $solicitud->detalles->where('estado', 'Aprobado por administración')->count();
+    $rechazados = $solicitud->detalles->where('estado', 'Rechazado por administración')->count();
     $pendientes = $solicitud->detalles->where('estado', 'pendiente')->count();
 
     // Determinar el estado general basado en los detalles
@@ -407,76 +432,22 @@ public function evaluacion($id)
     return view('solicitud.solicitudcompra.evaluacioncompras', compact('solicitud', 'estadisticas'));
 }
 
-// Agrega estas funciones al mismo controlador
-// private function getResumenMoneda($solicitud) 
-// {
-//     if ($solicitud->detalles->isEmpty()) return 'S/';
-    
-//     $currencyCount = [];
-//     foreach ($solicitud->detalles as $detalle) {
-//         if ($detalle->moneda) {
-//             $currencyId = $detalle->moneda->idMonedas;
-//             $currencyCount[$currencyId] = ($currencyCount[$currencyId] ?? 0) + 1;
-//         }
-//     }
-    
-//     if (empty($currencyCount)) return 'S/';
-    
-//     $mostCommonCurrency = array_keys($currencyCount)[0];
-//     foreach ($solicitud->detalles as $detalle) {
-//         if ($detalle->moneda && $detalle->moneda->idMonedas == $mostCommonCurrency) {
-//             return $detalle->moneda->simbolo ?? 'S/';
-//         }
-//     }
-    
-//     return 'S/';
-// }
-
-// private function hasMultipleCurrencies($solicitud) 
-// {
-//     $currencies = [];
-//     foreach ($solicitud->detalles as $detalle) {
-//         if ($detalle->moneda) {
-//             $currencyId = $detalle->moneda->idMonedas;
-//             if (!in_array($currencyId, $currencies)) {
-//                 $currencies[] = $currencyId;
-//             }
-//         }
-//     }
-//     return count($currencies) > 1;
-// }
-
-// private function getMonedasUtilizadas($solicitud) 
-// {
-//     $currencies = [];
-//     foreach ($solicitud->detalles as $detalle) {
-//         if ($detalle->moneda && !in_array($detalle->moneda->nombre, $currencies)) {
-//             $currencies[] = $detalle->moneda->nombre;
-//         }
-//     }
-//     return implode(', ', $currencies);
-// }
-
-
-
-
-
 private function determinarEstadoGeneral($solicitud)
 {
     $detalles = $solicitud->detalles;
     $total = $detalles->count();
-    $aprobados = $detalles->where('estado', 'aprobado')->count();
-    $rechazados = $detalles->where('estado', 'rechazado')->count();
+    $aprobados = $detalles->where('estado', 'Aprobado por administración')->count();
+    $rechazados = $detalles->where('estado', 'Rechazado por administración')->count();
     $pendientes = $detalles->where('estado', 'pendiente')->count();
 
     if ($pendientes > 0) {
         return 'en_proceso'; // Todavía hay artículos pendientes
     } elseif ($aprobados == $total) {
-        return 'completada'; // Todos los artículos aprobados
+        return 'completada'; // Todos los artículos aprobados por administración
     } elseif ($rechazados == $total) {
-        return 'rechazada'; // Todos los artículos rechazados
+        return 'rechazada'; // Todos los artículos rechazados por administración
     } else {
-        return 'en_proceso'; // Mezcla de aprobados y rechazados
+        return 'en_proceso'; // Mezcla de aprobados y rechazados por administración
     }
 }
 
@@ -502,12 +473,14 @@ private function obtenerEstadosSiguientes($solicitud)
             
         case 'presupuesto_aprobado':
             $estadosSiguientes = [
+                'cancelada' => 'Cancelar Solicitud',
                 'pagado' => 'Marcar como Pagado'
             ];
             break;
             
         case 'pagado':
             $estadosSiguientes = [
+                'cancelada' => 'Cancelar Solicitud',
                 'finalizado' => 'Finalizar Proceso'
             ];
             break;
@@ -515,15 +488,25 @@ private function obtenerEstadosSiguientes($solicitud)
         case 'en_proceso':
             if ($this->puedeAvanzarEstado($solicitud)) {
                 $estadosSiguientes = [
+                    'cancelada' => 'Cancelar Solicitud',
                     'completada' => 'Completar Evaluación'
                 ];
+            } else {
+                $estadosSiguientes = [
+                    'cancelada' => 'Cancelar Solicitud'
+                ];
             }
+            break;
+            
+        case 'pendiente':
+            $estadosSiguientes = [
+                'cancelada' => 'Cancelar Solicitud'
+            ];
             break;
     }
     
     return $estadosSiguientes;
 }
-
 // Método para cambiar el estado de la solicitud
 public function cambiarEstado(Request $request, $id)
 {
@@ -541,11 +524,32 @@ public function cambiarEstado(Request $request, $id)
             ], 400);
         }
         
-        // Actualizar estado
+        \DB::beginTransaction();
+        
+        // Actualizar estado de solicitud compra
         $solicitud->update([
             'estado' => $nuevoEstado,
             'fecha_aprobacion' => in_array($nuevoEstado, ['completada', 'presupuesto_aprobado', 'pagado', 'finalizado']) ? now() : $solicitud->fecha_aprobacion
         ]);
+        
+        // Si el estado es 'finalizado', actualizar también la solicitud de almacén
+        if ($nuevoEstado === 'finalizado' && $solicitud->idSolicitudAlmacen) {
+            $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+            if ($solicitudAlmacen) {
+                $solicitudAlmacen->update([
+                    'estado' => 'finalizado',
+                    'fecha_aprobacion' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                \Log::info('Estado de solicitud almacén actualizado a finalizado:', [
+                    'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+                    'idSolicitudCompra' => $solicitud->idSolicitudCompra
+                ]);
+            }
+        }
+        
+        \DB::commit();
         
         return response()->json([
             'success' => true,
@@ -554,6 +558,7 @@ public function cambiarEstado(Request $request, $id)
         ]);
         
     } catch (\Exception $e) {
+        \DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error al cambiar el estado: ' . $e->getMessage()
@@ -575,11 +580,34 @@ public function cancelarSolicitud(Request $request, $id)
             ], 400);
         }
         
+        \DB::beginTransaction();
+        
         $solicitud->update([
             'estado' => 'cancelada',
             'motivo_rechazo' => $motivo,
             'fecha_aprobacion' => now()
         ]);
+        
+        // Actualizar también la solicitud de almacén a cancelada
+        if ($solicitud->idSolicitudAlmacen) {
+            $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+            if ($solicitudAlmacen) {
+                $solicitudAlmacen->update([
+                    'estado' => 'cancelada',
+                    'motivo_rechazo' => $motivo,
+                    'fecha_aprobacion' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                \Log::info('Estado de solicitud almacén actualizado a cancelada:', [
+                    'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+                    'idSolicitudCompra' => $solicitud->idSolicitudCompra,
+                    'motivo' => $motivo
+                ]);
+            }
+        }
+        
+        \DB::commit();
         
         return response()->json([
             'success' => true,
@@ -587,6 +615,7 @@ public function cancelarSolicitud(Request $request, $id)
         ]);
         
     } catch (\Exception $e) {
+        \DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error al cancelar la solicitud: ' . $e->getMessage()
@@ -596,29 +625,46 @@ public function cancelarSolicitud(Request $request, $id)
 
 
 
-// En tu SolicitudCompraController
 public function aprobarArticulo(Request $request, $idSolicitud, $idDetalle)
 {
     try {
+        \DB::beginTransaction();
+
         $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
             ->where('idSolicitudCompraDetalle', $idDetalle)
             ->firstOrFail();
 
+        // Actualizar detalle de compra (REEMPLAZA estado)
         $detalle->update([
-            'estado' => 'aprobado',
+            'estado' => 'Aprobado por administración',
             'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalle->cantidad,
             'observaciones_detalle' => $request->observaciones
         ]);
 
+        // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
+        if ($detalle->idSolicitudAlmacenDetalle) {
+            $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
+            if ($detalleAlmacen) {
+                $detalleAlmacen->update([
+                    'estado' => 'Aprobado por administración', // NUEVO ESTADO
+                    'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalleAlmacen->cantidad,
+                    'observaciones_detalle' => $request->observaciones
+                ]);
+            }
+        }
+
         // Recalcular el estado general de la solicitud
         $this->actualizarEstadoSolicitud($idSolicitud);
 
+        \DB::commit();
+
         return response()->json([
             'success' => true,
-            'message' => 'Artículo aprobado correctamente'
+            'message' => 'Artículo aprobado por administración correctamente'
         ]);
 
     } catch (\Exception $e) {
+        \DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error al aprobar el artículo: ' . $e->getMessage()
@@ -629,32 +675,49 @@ public function aprobarArticulo(Request $request, $idSolicitud, $idDetalle)
 public function rechazarArticulo(Request $request, $idSolicitud, $idDetalle)
 {
     try {
+        \DB::beginTransaction();
+
         $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
             ->where('idSolicitudCompraDetalle', $idDetalle)
             ->firstOrFail();
 
+        // Actualizar detalle de compra (REEMPLAZA estado)
         $detalle->update([
-            'estado' => 'rechazado',
+            'estado' => 'Rechazado por administración',
             'cantidad_aprobada' => 0,
             'observaciones_detalle' => $request->observaciones
         ]);
 
+        // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
+        if ($detalle->idSolicitudAlmacenDetalle) {
+            $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
+            if ($detalleAlmacen) {
+                $detalleAlmacen->update([
+                    'estado' => 'Rechazado por administración', // NUEVO ESTADO
+                    'cantidad_aprobada' => 0,
+                    'observaciones_detalle' => $request->observaciones
+                ]);
+            }
+        }
+
         // Recalcular el estado general de la solicitud
         $this->actualizarEstadoSolicitud($idSolicitud);
 
+        \DB::commit();
+
         return response()->json([
             'success' => true,
-            'message' => 'Artículo rechazado correctamente'
+            'message' => 'Artículo rechazado por administración correctamente'
         ]);
 
     } catch (\Exception $e) {
+        \DB::rollBack();
         return response()->json([
             'success' => false,
             'message' => 'Error al rechazar el artículo: ' . $e->getMessage()
         ], 500);
     }
 }
-
 private function actualizarEstadoSolicitud($idSolicitud)
 {
     $solicitud = SolicitudCompra::with('detalles')->find($idSolicitud);

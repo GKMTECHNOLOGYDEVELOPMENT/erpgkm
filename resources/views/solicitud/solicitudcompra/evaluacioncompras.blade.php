@@ -422,30 +422,30 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    @if($detalle->estado == 'aprobado') bg-green-100 text-green-800
-                                    @elseif($detalle->estado == 'rechazado') bg-red-100 text-red-800
+                                    @if($detalle->estado == 'Aprobado por administración') bg-green-100 text-green-800
+                                    @elseif($detalle->estado == 'Rechazado por administración') bg-red-100 text-red-800
                                     @else bg-yellow-100 text-yellow-800 @endif">
                                     {{ $detalle->estado }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @if($detalle->estado == 'pendiente' && in_array($solicitud->estado, ['pendiente', 'en_proceso']))
-                                <div class="flex space-x-2">
-                                    <button onclick="aprobarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})" 
-                                            class="text-green-600 hover:text-green-900 bg-green-50 px-3 py-1 rounded border border-green-200 hover:bg-green-100 transition-colors">
-                                        Aprobar
-                                    </button>
-                                    <button onclick="rechazarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})" 
-                                            class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded border border-red-200 hover:bg-red-100 transition-colors">
-                                        Rechazar
-                                    </button>
-                                </div>
-                                @else
-                                <span class="text-gray-500 text-xs">Acción realizada</span>
-                                @if($detalle->observaciones_detalle)
-                                <br><span class="text-xs text-gray-600" title="{{ $detalle->observaciones_detalle }}">📝</span>
-                                @endif
-                                @endif
+<div class="flex space-x-2">
+    <button onclick="aprobarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})" 
+            class="text-green-600 hover:text-green-900 bg-green-50 px-3 py-1 rounded border border-green-200 hover:bg-green-100 transition-colors">
+        Aprobar por Administración
+    </button>
+    <button onclick="rechazarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})" 
+            class="text-red-600 hover:text-red-900 bg-red-50 px-3 py-1 rounded border border-red-200 hover:bg-red-100 transition-colors">
+        Rechazar por Administración
+    </button>
+</div>
+@else
+<span class="text-gray-500 text-xs">Acción realizada</span>
+@if($detalle->observaciones_detalle)
+<br><span class="text-xs text-gray-600" title="{{ $detalle->observaciones_detalle }}">📝</span>
+@endif
+@endif
                             </td>
                         </tr>
                         @if($detalle->justificacion_producto || $detalle->especificaciones_tecnicas)
