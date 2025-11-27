@@ -84,9 +84,11 @@
 
             <!-- Botón Guardar -->
             <div class="flex justify-end">
-                <button id="guardarEstado" class="btn btn-primary px-6 py-2">
-                    <span class="btn-text">Guardar</span>
-                </button>
+                @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE ESTADOS HELP DESK EJECUCION'))
+                    <button id="guardarEstado" class="btn btn-primary px-6 py-2">
+                        <span class="btn-text">Guardar</span>
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -114,9 +116,11 @@
         </div>
 
         <div class="flex justify-end mt-6">
-            <button type="submit" id="guardarHerramientas" class="btn btn-primary px-6 py-2">
-                <span class="btn-text">Guardar</span>
-            </button>
+            @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR INVENTARIO HELP DESK EJECUCION'))
+                <button type="submit" id="guardarHerramientas" class="btn btn-primary px-6 py-2">
+                    <span class="btn-text">Guardar</span>
+                </button>
+            @endif
         </div>
     </div>
 </div>
@@ -146,8 +150,8 @@
                 <!-- Marca -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Marca</label>
-                    <select id="marcaInstalar" name="marca" style="width: 100%" class="form-select w-full" data-toggle="tooltip"
-                        data-tooltip="Seleccione la marca del producto">
+                    <select id="marcaInstalar" name="marca" style="width: 100%" class="form-select w-full"
+                        data-toggle="tooltip" data-tooltip="Seleccione la marca del producto">
                         <option value="" disabled selected>Seleccionar Marca</option>
                         @foreach ($marcas as $marca)
                             <option value="{{ $marca->idMarca }}">{{ $marca->nombre }}</option>
@@ -158,8 +162,8 @@
                 <!-- Modelo -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Modelo</label>
-                    <select id="modeloInstalar" name="modelo" style="width: 100%" class="form-select w-full hidden" data-toggle="tooltip"
-                        data-tooltip="Seleccione el modelo específico">
+                    <select id="modeloInstalar" name="modelo" style="width: 100%" class="form-select w-full hidden"
+                        data-toggle="tooltip" data-tooltip="Seleccione el modelo específico">
                         <option value="" disabled selected>Seleccionar Modelo</option>
                     </select>
                 </div>
@@ -181,9 +185,11 @@
 
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
-                    <button id="guardarInstalar" class="btn btn-primary px-6 py-2">
-                        <span class="btn-text">Guardar</span>
-                    </button>
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR EQUIPOS INSTALAR HELP DESK EJECUCION'))
+                        <button id="guardarInstalar" class="btn btn-primary px-6 py-2">
+                            <span class="btn-text">Guardar</span>
+                        </button>
+                    @endif
                 </div>
             </form>
         </div>
@@ -269,9 +275,11 @@
 
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
-                    <button id="guardarRetirar" class="btn btn-primary px-6 py-2">
-                        <span class="btn-text">Guardar</span>
-                    </button>
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR EQUIPOS RETIRAR HELP DESK EJECUCION'))
+                        <button id="guardarRetirar" class="btn btn-primary px-6 py-2">
+                            <span class="btn-text">Guardar</span>
+                        </button>
+                    @endif
                 </div>
             </form>
         </div>

@@ -75,11 +75,13 @@
     <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
-        <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-            style="background-color: #BDB762; border: none; box-shadow: none;" value="7"
-            onclick="finalizarServicio()">
-            ✅ Visita finaliza correctamente
-        </button>
+        @if (\App\Helpers\PermisoHelper::tienePermiso('BOTON VISITA FINALIZA HELP DESK LABORATORIO'))
+            <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+                style="background-color: #BDB762; border: none; box-shadow: none;" value="7"
+                onclick="finalizarServicio()">
+                ✅ Visita finaliza correctamente
+            </button>
+        @endif
 
 
     </div>

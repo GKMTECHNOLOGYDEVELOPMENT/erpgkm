@@ -85,9 +85,11 @@
 
             <!-- Botón Guardar -->
             <div class="flex justify-end">
+                @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES ESTADOS HELP DESK LABORATORIO'))
                 <button id="guardarEstado" class="btn btn-primary px-6 py-2">
                     <span class="btn-text">Guardar</span>
                 </button>
+                @endif
             </div>
         </div>
     </div>
@@ -155,9 +157,11 @@
 
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR EQUIPO HELP DESK LABORATORIO'))
                     <button id="guardarInstalar" class="btn btn-primary px-6 py-2">
                         <span class="btn-text">Guardar</span>
                     </button>
+                    @endif
                 </div>
             </form>
         </div>

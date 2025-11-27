@@ -7,11 +7,11 @@
     <div class="w-full md:w-[500px] flex flex-col items-center">
         <p class="mb-2 text-lg font-bold text-center">
             @if ($tipoUsuario == 5)
-            FIRMA DEL CHOFER
+                FIRMA DEL CHOFER
             @elseif ($tipoUsuario == 1)
-            FIRMA DEL TÉCNICO
+                FIRMA DEL TÉCNICO
             @else
-            FIRMA
+                FIRMA
             @endif
         </p>
         <div class="w-full h-[500px] border-2 border-gray-300 rounded-lg relative" style="height: 300px;">
@@ -45,55 +45,62 @@
 <input type="hidden" id="idvisita" value="{{ $idVisitaSeleccionada }}">
 
 
-@if(\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO VISITA ORDEN DE TRABAJO SMART TV'))
-<!-- Verificar si la visita está activa (estadovisita no es 1) -->
-@if ($estadovisita != 1)
-<div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    @if ($idtipoServicio == 1)
-    <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
-    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-        style="background-color: #BDB762; border: none; box-shadow: none;" value="7" onclick="finalizarServicio()">
-        ✅ Visita finaliza correctamente
-    </button>
+@if (\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO VISITA ORDEN DE TRABAJO SMART TV'))
+    <!-- Verificar si la visita está activa (estadovisita no es 1) -->
+    @if ($estadovisita != 1)
+        <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            @if ($idtipoServicio == 1)
+                <!-- Mostrar estos botones solo si idtipoServicio es 1 -->
+                <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+                    style="background-color: #BDB762; border: none; box-shadow: none;" value="7"
+                    onclick="finalizarServicio()">
+                    ✅ Visita finaliza correctamente
+                </button>
 
-    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #B5FA37; border: none; box-shadow: none;" value="8" onclick="coordinarRecojo()">
-        📅 Pendiente recojo
-    </button>
+                <button type="button"
+                    class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+                    style="background-color: #B5FA37; border: none; box-shadow: none;" value="8"
+                    onclick="coordinarRecojo()">
+                    📅 Pendiente recojo
+                </button>
 
-    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #ADADAD; border: none; box-shadow: none;" value="6" onclick="fueraDeGarantia()">
-        ⚠️ Fuera de Garantía
-    </button>
+                <button type="button"
+                    class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+                    style="background-color: #ADADAD; border: none; box-shadow: none;" value="6"
+                    onclick="fueraDeGarantia()">
+                    ⚠️ Fuera de Garantía
+                </button>
 
-    <button type="button" class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
-        style="background-color: #FFFF00; border: none; box-shadow: none;" value="5" onclick="pendienteRepuestos()">
-        ⏳ Pendiente de solicitud de repuesto
-    </button>
-
-    @elseif ($idtipoServicio == 3)
-    <!-- Mostrar solo este botón si idtipoServicio es 3 -->
-    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-        style="background-color:rgb(98, 104, 189); border: none; box-shadow: none;" value="7"
-        onclick="solicitudEntrega()">
-        ✅ Solicitud de Entrega
-    </button>
-    @elseif ($idtipoServicio == 4)
-        <!-- Mostrar solo este botón si idtipoServicio es 4 -->
-    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-        style="background-color: #4CAF50; border: none; box-shadow: none;" value="7"
-        onclick="finalizarServicio()">
-        ✅ Visita finaliza correctamente
-    </button>
-    @elseif ($idtipoServicio == 7)
-    <!-- Mostrar solo este botón si idtipoServicio es 7 -->
-    <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
-        style="background-color: #FA4DF4; border: none; box-shadow: none;" value="9" onclick="coordinarEntrega()">
-        📦 COORDINAR ENTREGA
-    </button>
+                <button type="button"
+                    class="btn w-full text-black px-4 py-2 rounded-lg shadow-md transition-all duration-200"
+                    style="background-color: #FFFF00; border: none; box-shadow: none;" value="5"
+                    onclick="pendienteRepuestos()">
+                    ⏳ Pendiente de solicitud de repuesto
+                </button>
+            @elseif ($idtipoServicio == 3)
+                <!-- Mostrar solo este botón si idtipoServicio es 3 -->
+                <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+                    style="background-color:rgb(98, 104, 189); border: none; box-shadow: none;" value="7"
+                    onclick="solicitudEntrega()">
+                    ✅ Solicitud de Entrega
+                </button>
+            @elseif ($idtipoServicio == 4)
+                <!-- Mostrar solo este botón si idtipoServicio es 4 -->
+                <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+                    style="background-color: #4CAF50; border: none; box-shadow: none;" value="7"
+                    onclick="finalizarServicio()">
+                    ✅ Visita finaliza correctamente
+                </button>
+            @elseif ($idtipoServicio == 7)
+                <!-- Mostrar solo este botón si idtipoServicio es 7 -->
+                <button type="button" class="w-full text-white px-4 py-2 rounded-lg transition-all duration-200"
+                    style="background-color: #FA4DF4; border: none; box-shadow: none;" value="9"
+                    onclick="coordinarEntrega()">
+                    📦 COORDINAR ENTREGA
+                </button>
+            @endif
+        </div>
     @endif
-</div>
-@endif
 
 @endif
 
