@@ -5,6 +5,7 @@ namespace App\Http\Controllers\administracion\asociados;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GeneralRequests;
 use App\Models\Clientegeneral;
+use App\Models\ContactoFinal;
 use App\Models\Marca;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -20,48 +21,7 @@ class ClienteGeneralController extends Controller
         return view('administracion.asociados.clienteGeneral.index');
     }
 
-    // public function store(GeneralRequests $request)
-    // {
-    //     try {
-    //         // Datos básicos del cliente
-    //         $dataClientes = [
-    //             'descripcion' => $request->descripcion,
-    //             'estado' => 1,
-    //         ];
-
-    //         // Guardar el cliente en la base de datos (sin la imagen por ahora)
-    //         Log::info('Insertando cliente:', $dataClientes);
-    //         $cliente = Clientegeneral::create($dataClientes);
-
-    //         // Procesar la imagen si se ha subido
-    //         if ($request->hasFile('logo')) {
-    //             // Obtener el contenido binario de la imagen
-    //             $binaryImage = file_get_contents($request->file('logo')->getRealPath());
-
-    //             // Actualizar el cliente con la imagen en formato binario
-    //             DB::table('clientegeneral')
-    //                 ->where('idClienteGeneral', $cliente->idClienteGeneral)
-    //                 ->update(['foto' => $binaryImage]);
-
-    //             Log::info('Imagen guardada como longblob en la base de datos.');
-    //         }
-
-    //         // Responder con JSON
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Cliente agregado correctamente',
-    //             'data' => $cliente,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         // Log para capturar el error
-    //         Log::error('Error al guardar el cliente: ' . $e->getMessage());
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Ocurrió un error al guardar el cliente.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
+ 
 
 
     public function store(GeneralRequests $request)
@@ -111,25 +71,36 @@ class ClienteGeneralController extends Controller
 
 
 
-    public function edit($id)
+  public function edit($id)
     {
         $cliente = ClienteGeneral::findOrFail($id);
         $marcas = Marca::all();
+        $contactosFinales = ContactoFinal::all(); // 👈 AGREGAR
 
         // Convertir imagen a base64 si existe
         if ($cliente->foto) {
             $cliente->foto = 'data:image/jpeg;base64,' . base64_encode($cliente->foto);
         }
 
-        // Obtener IDs de marcas asociadas desde la tabla pivote
+        // Obtener IDs de marcas asociadas
         $marcasAsociadasIds = DB::table('marca_clientegeneral')
             ->where('idClienteGeneral', $cliente->idClienteGeneral)
             ->pluck('idMarca');
-
-        // Obtener objetos Marca completos con esos IDs
         $marcasAsociadas = Marca::whereIn('idMarca', $marcasAsociadasIds)->get();
 
-        return view('administracion.asociados.clienteGeneral.edit', compact('cliente', 'marcas', 'marcasAsociadas'));
+        // 👈 AGREGAR: Obtener IDs de contactos finales asociados
+        $contactosFinalesAsociadosIds = DB::table('cliente_general_contacto_final')
+            ->where('idClienteGeneral', $cliente->idClienteGeneral)
+            ->pluck('idContactoFinal');
+        $contactosFinalesAsociados = ContactoFinal::whereIn('idContactoFinal', $contactosFinalesAsociadosIds)->get();
+
+        return view('administracion.asociados.clienteGeneral.edit', compact(
+            'cliente', 
+            'marcas', 
+            'marcasAsociadas',
+            'contactosFinales', // 👈 AGREGAR
+            'contactosFinalesAsociados' // 👈 AGREGAR
+        ));
     }
 
 
@@ -232,8 +203,10 @@ class ClienteGeneralController extends Controller
             'descripcion' => 'required|string|max:255',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'estado' => 'nullable|boolean',
-            'marcas' => 'nullable|array', // <- marcas es opcional
+            'marcas' => 'nullable|array',
             'marcas.*' => 'exists:marca,idMarca',
+            'contactos_finales' => 'nullable|array', // 👈 AGREGAR validación
+            'contactos_finales.*' => 'exists:contactofinal,idContactoFinal', // 👈 AGREGAR validación
         ]);
 
         $cliente = Clientegeneral::findOrFail($id);
@@ -274,7 +247,14 @@ class ClienteGeneralController extends Controller
         if ($request->has('marcas')) {
             $cliente->marcas()->sync($request->marcas);
         } else {
-            $cliente->marcas()->detach(); // Si no hay selección, quitar todas
+            $cliente->marcas()->detach();
+        }
+
+        // ✅ AGREGAR: Sincronizar contactos finales (relación muchos a muchos)
+        if ($request->has('contactos_finales')) {
+            $cliente->contactosFinales()->sync($request->contactos_finales);
+        } else {
+            $cliente->contactosFinales()->detach();
         }
 
         Log::info("Cliente actualizado correctamente con ID: $id");
@@ -283,7 +263,62 @@ class ClienteGeneralController extends Controller
             ->with('success', 'Cliente actualizado exitosamente.');
     }
 
+    // 👈 AGREGAR: Método para obtener contactos finales asociados (para AJAX)
+    public function contactosFinalesAsociados($idClienteGeneral)
+    {
+        $contactosFinalesAsociados = ContactoFinal::whereIn('idContactoFinal', function ($query) use ($idClienteGeneral) {
+            $query->select('idContactoFinal')
+                ->from('cliente_general_contacto_final')
+                ->where('idClienteGeneral', $idClienteGeneral);
+        })->get();
 
+        return response()->json($contactosFinalesAsociados);
+    }
+
+    // 👈 AGREGAR: Método para agregar contacto final
+    public function agregarContactoFinalClienteGeneral($idClienteGeneral, $idContactoFinal)
+    {
+        $exists = DB::table('cliente_general_contacto_final')
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->where('idContactoFinal', $idContactoFinal)
+            ->exists();
+
+        if (!$exists) {
+            DB::table('cliente_general_contacto_final')->insert([
+                'idClienteGeneral' => $idClienteGeneral,
+                'idContactoFinal' => $idContactoFinal,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
+        }
+    }
+
+    // 👈 AGREGAR: Método para eliminar contacto final
+    public function eliminarContactoFinalClienteGeneral($idClienteGeneral, $idContactoFinal)
+    {
+        $relacionExistente = DB::table('cliente_general_contacto_final')
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->where('idContactoFinal', $idContactoFinal)
+            ->exists();
+
+        if (!$relacionExistente) {
+            return response()->json(['success' => false, 'message' => 'No se encontró la relación']);
+        }
+
+        $deleted = DB::table('cliente_general_contacto_final')
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->where('idContactoFinal', $idContactoFinal)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Error al eliminar la relación']);
+        }
+    }
 
 
 

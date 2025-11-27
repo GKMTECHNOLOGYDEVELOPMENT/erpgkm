@@ -1,8 +1,7 @@
 <x-layout.default>
-
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <div x-data="solicitudRepuestoOpciones()" class="min-h-screen py-8">
+    <div x-data="solicitudArticuloOpciones()" class="min-h-screen py-8">
         <div class="container mx-auto px-4 max-w-7xl">
 
             <!-- Header Mejorado -->
@@ -86,6 +85,21 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Información del Solicitante -->
+                        <div class="mt-6">
+                            @if($solicitante)
+                            <div class="flex items-center space-x-3 p-4 bg-purple-50 rounded-xl max-w-md">
+                                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-user-tie text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-500">Solicitante</p>
+                                    <p class="font-semibold text-gray-900">{{ $solicitante->Nombre }} {{ $solicitante->apellidoPaterno }}</p>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -157,13 +171,17 @@
                                             </th>
                                             <th
                                                 class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
-
                                                 Disponible
                                             </th>
                                             <th
                                                 class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-map-marker-alt mr-1 text-slate-500"></i>
                                                 Ubicación
+                                            </th>
+                                            <th
+                                                class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <i class="fas fa-user-check mr-1 text-slate-500"></i>
+                                                Entregado A
                                             </th>
                                             <th
                                                 class="px-6 py-5 text-left text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
@@ -257,6 +275,76 @@
                                                     </div>
                                                 </td>
 
+                                                <!-- NUEVA COLUMNA: Entregado A -->
+                                                <td class="px-6 py-6">
+                                                    @if ($articulo->ya_procesado)
+                                                        @php
+                                                            // Obtener información de a quién se entregó este artículo
+                                                            $entregaInfo = DB::table('articulos_entregas as ae')
+                                                                ->select(
+                                                                    'ae.tipo_entrega',
+                                                                    'ae.usuario_destino_id',
+                                                                    'u.Nombre',
+                                                                    'u.apellidoPaterno',
+                                                                    'u.apellidoMaterno'
+                                                                )
+                                                                ->leftJoin('usuarios as u', 'ae.usuario_destino_id', '=', 'u.idUsuario')
+                                                                ->where('ae.solicitud_id', $solicitud->idsolicitudesordenes)
+                                                                ->where('ae.articulo_id', $articulo->idArticulos)
+                                                                ->first();
+                                                        @endphp
+
+                                                        @if($entregaInfo && $entregaInfo->usuario_destino_id)
+                                                            <div class="text-center">
+                                                                @switch($entregaInfo->tipo_entrega)
+                                                                    @case('solicitante')
+                                                                        <div class="flex items-center justify-center space-x-2">
+                                                                            <i class="fas fa-user-tie text-blue-600"></i>
+                                                                            <div>
+                                                                                <p class="font-semibold text-slate-900 text-sm">
+                                                                                    {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
+                                                                                </p>
+                                                                                <p class="text-xs text-slate-500">Solicitante</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        @break
+                                                                    
+                                                                    @case('otro_usuario')
+                                                                        <div class="flex items-center justify-center space-x-2">
+                                                                            <i class="fas fa-users text-orange-600"></i>
+                                                                            <div>
+                                                                                <p class="font-semibold text-slate-900 text-sm">
+                                                                                    {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
+                                                                                </p>
+                                                                                <p class="text-xs text-slate-500">Otro usuario</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        @break
+                                                                    
+                                                                    @default
+                                                                        <span class="text-slate-500 text-sm">No especificado</span>
+                                                                @endswitch
+                                                            </div>
+                                                        @else
+                                                            <!-- MOSTRAR "Pendiente por asignar" cuando está procesado pero no tiene info de entrega -->
+                                                            <div class="text-center">
+                                                                <span class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-purple-100 text-purple-700">
+                                                                    <i class="fas fa-user-clock mr-1"></i>
+                                                                    Pendiente por asignar
+                                                                </span>
+                                                            </div>
+                                                        @endif
+                                                    @else
+                                                        <!-- Cuando NO está procesado -->
+                                                        <div class="text-center">
+                                                            <span class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-700">
+                                                                <i class="fas fa-clock mr-1"></i>
+                                                                Pendiente Por Asignar
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                </td>
+
                                                 <!-- Estado -->
                                                 <td class="px-6 py-6">
                                                     @if ($articulo->ya_procesado)
@@ -288,29 +376,25 @@
                                                             Completado
                                                         </span>
                                                     @elseif($articulo->suficiente_stock)
-                                                    @if(\App\Helpers\PermisoHelper::tienePermiso('PROCESAR ARTICULO INDIVIDUAL'))
-                                                    <button type="button"
-                                                            @click="procesarIndividual({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }})"
-                                                            :disabled="!selecciones[{{ $articulo->idArticulos }}] ||
-                                                                procesandoIndividual[{{ $articulo->idArticulos }}]"
-                                                            :class="{
-                                                                'opacity-50 cursor-not-allowed': !selecciones[
-                                                                        {{ $articulo->idArticulos }}] ||
-                                                                    procesandoIndividual[{{ $articulo->idArticulos }}]
-                                                            }"
-                                                            class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
-                                                            <span
-                                                                x-show="!procesandoIndividual[{{ $articulo->idArticulos }}]">
-                                                                <i class="fas fa-play-circle mr-2"></i>
-                                                                Procesar
-                                                            </span>
-                                                            <span
-                                                                x-show="procesandoIndividual[{{ $articulo->idArticulos }}]"
-                                                                class="flex items-center space-x-2">
-                                                                <i class="fas fa-spinner fa-spin mr-2"></i>
-                                                                <span>Procesando...</span>
-                                                            </span>
-                                                        </button>
+                                                        @if(\App\Helpers\PermisoHelper::tienePermiso('PROCESAR ARTICULO INDIVIDUAL'))
+                                                        <button type="button"
+                                                                @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $articulo->idArticulos }}, '{{ $articulo->nombre }}')"
+                                                                :disabled="!selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}]"
+                                                                :class="{
+                                                                    'opacity-50 cursor-not-allowed': !selecciones[{{ $articulo->idArticulos }}] || procesandoIndividual[{{ $articulo->idArticulos }}],
+                                                                    'bg-blue-600 hover:bg-blue-700': selecciones[{{ $articulo->idArticulos }}] && !procesandoIndividual[{{ $articulo->idArticulos }}]
+                                                                }"
+                                                                class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-5 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg">
+                                                                <span x-show="!procesandoIndividual[{{ $articulo->idArticulos }}]">
+                                                                    <i class="fas fa-play-circle mr-2"></i>
+                                                                    Procesar
+                                                                </span>
+                                                                <span x-show="procesandoIndividual[{{ $articulo->idArticulos }}]"
+                                                                    class="flex items-center space-x-2">
+                                                                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                                                                    <span>Procesando...</span>
+                                                                </span>
+                                                            </button>
                                                         @endif
                                                     @else
                                                         <button disabled
@@ -370,8 +454,7 @@
                                     </li>
                                     <li class="flex items-center text-sm text-slate-700">
                                         <i class="fas fa-check-circle text-blue-500 mr-3 flex-shrink-0"></i>
-                                        Use el botón <span class="font-semibold text-blue-700">"Procesar"</span> en
-                                        cada fila.
+                                        Elija a qué usuario entregar cada artículo.
                                     </li>
                                     <li class="flex items-center text-sm text-slate-700">
                                         <i class="fas fa-check-circle text-blue-500 mr-3 flex-shrink-0"></i>
@@ -452,62 +535,196 @@
                             </div>
                         </div>
 
-                        <!-- Barra de Estado Mejorada -->
-                        <div
-                            class="mt-10 p-6 bg-gradient-to-r from-blue-50 to-slate-50 rounded-2xl border border-slate-200 shadow-sm">
-                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-                                <!-- Estado -->
-                                <div class="flex items-start gap-4">
-                                    <div
-                                        class="flex-shrink-0 w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center shadow-sm">
-                                        <i class="fas fa-info-circle text-blue-600"></i>
-                                    </div>
+                       <!-- Barra de Estado Mejorada -->
+<div class="mt-10 p-6 bg-gradient-to-r from-blue-50 to-slate-50 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <!-- Estado -->
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-11 h-11 bg-blue-100 rounded-2xl flex items-center justify-center shadow-sm">
+                <i class="fas fa-info-circle text-blue-600"></i>
+            </div>
 
-                                    <div>
-                                        @if ($articulos_procesados == $total_articulos)
-                                            <p class="text-sm font-semibold text-green-600 flex items-center gap-1">
-                                                <i class="fas fa-check-circle"></i>
-                                                Procesamiento completado exitosamente
-                                            </p>
-                                        @else
-                                            <p class="text-sm font-semibold text-blue-600 flex items-center gap-1">
-                                                <i class="fas fa-chart-bar"></i>
-                                                Progreso general:
-                                                <span class="text-slate-700">{{ $articulos_procesados }}</span>
-                                                <span class="text-slate-500">de</span>
-                                                <span class="text-slate-700">{{ $total_articulos }}</span> artículos
-                                            </p>
-                                        @endif
+            <div>
+                @if ($articulos_procesados == $total_articulos)
+                    <p class="text-sm font-semibold text-green-600 flex items-center gap-1">
+                        <i class="fas fa-check-circle"></i>
+                        Procesamiento completado exitosamente
+                    </p>
+                @else
+                    <p class="text-sm font-semibold text-blue-600 flex items-center gap-1">
+                        <i class="fas fa-chart-bar"></i>
+                        Progreso general:
+                        <span class="text-slate-700">{{ $articulos_procesados }}</span>
+                        <span class="text-slate-500">de</span>
+                        <span class="text-slate-700">{{ $total_articulos }}</span> artículos
+                    </p>
+                @endif
 
-                                        <p class="text-xs text-slate-500 mt-1">
-                                            <i class="fas fa-clock mr-1"></i>
-                                            Última actualización:
-                                            <span
-                                                class="font-medium text-slate-600">{{ now()->format('d/m/Y H:i') }}</span>
-                                        </p>
-                                    </div>
-                                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                    <i class="fas fa-clock mr-1"></i>
+                    Última actualización:
+                    <span class="font-medium text-slate-600">{{ now()->format('d/m/Y H:i') }}</span>
+                </p>
+            </div>
+        </div>
 
-                                <!-- Botón -->
-                                <a href="{{ route('solicitudarticulo.index') }}"
-                                    class="inline-flex items-center px-5 py-2.5 bg-dark text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-                                    <i class="fas fa-arrow-left mr-2"></i>
-                                    Volver al Listado Principal
-                                </a>
-                            </div>
-                        </div>
+        <!-- Botones -->
+        <div class="flex flex-col sm:flex-row gap-3">
+            @if($puede_generar_pdf)
+            <a href="{{ route('solicitudarticulo.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
+               target="_blank"
+               class="inline-flex items-center px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Descargar Conformidad
+            </a>
+            @endif
+            
+            <a href="{{ route('solicitudarticulo.index') }}"
+                class="inline-flex items-center px-5 py-2.5 bg-dark text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Volver al Listado
+            </a>
+        </div>
+    </div>
+</div>
                     </div>
                 </div>
             @endif
+        </div>
+
+        <!-- Modal para seleccionar destinatario -->
+        <div x-show="mostrarModalDestinatario" 
+             x-cloak
+             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all duration-300 scale-100"
+                 x-show="mostrarModalDestinatario"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100">
+                
+                <!-- Header del Modal -->
+                <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-user-check text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Seleccionar Destinatario</h3>
+                                <p class="text-blue-100 text-sm" x-text="articuloSeleccionadoNombre"></p>
+                            </div>
+                        </div>
+                        <button @click="cerrarModalDestinatario" class="text-white hover:text-blue-200 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido del Modal -->
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Seleccione a quién se le entregará el artículo:</p>
+                    
+                    <!-- Opción 1: Solicitante -->
+                    <div class="mb-4">
+                        <label class="flex items-start space-x-3 p-4 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all duration-200"
+                               :class="{ 'border-blue-500 bg-blue-50': destinatarioSeleccionado === 'solicitante' }">
+                            <input type="radio" 
+                                   x-model="destinatarioSeleccionado" 
+                                   value="solicitante" 
+                                   class="mt-1 text-blue-600 focus:ring-blue-500">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <i class="fas fa-user-tie text-blue-600"></i>
+                                    <span class="font-semibold text-gray-900">Entregar al Solicitante</span>
+                                </div>
+                                <p class="text-sm text-gray-600">
+                                    @if($solicitante)
+                                        {{ $solicitante->Nombre }} {{ $solicitante->apellidoPaterno }}
+                                    @else
+                                        Usuario que realizó la solicitud
+                                    @endif
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Opción 2: Otro Usuario -->
+                    <div class="mb-6">
+                        <label class="flex items-start space-x-3 p-4 border-2 border-orange-200 rounded-xl hover:border-orange-400 hover:bg-orange-50 cursor-pointer transition-all duration-200"
+                               :class="{ 'border-orange-500 bg-orange-50': destinatarioSeleccionado === 'otro' }">
+                            <input type="radio" 
+                                   x-model="destinatarioSeleccionado" 
+                                   value="otro" 
+                                   class="mt-1 text-orange-600 focus:ring-orange-500">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <i class="fas fa-users text-orange-600"></i>
+                                    <span class="font-semibold text-gray-900">Otro Usuario</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Seleccionar un usuario diferente</p>
+                                
+                                <!-- Select de usuarios (solo visible cuando se selecciona "otro") -->
+                                <div x-show="destinatarioSeleccionado === 'otro'" class="mt-3">
+                                    <select x-model="usuarioSeleccionado"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                        <option value="">Seleccione un usuario</option>
+                                        @foreach($usuarios as $usuario)
+                                            <option value="{{ $usuario->idUsuario }}">
+                                                {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }} - {{ $usuario->correo }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex space-x-3">
+                        <button @click="cerrarModalDestinatario"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                            Cancelar
+                        </button>
+                        <button @click="confirmarProcesamientoIndividual"
+                                :disabled="!destinatarioValido"
+                                :class="{
+                                    'bg-blue-600 hover:bg-blue-700': destinatarioValido,
+                                    'bg-gray-400 cursor-not-allowed': !destinatarioValido
+                                }"
+                                class="flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Confirmar Entrega
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('solicitudRepuestoOpciones', () => ({
+            Alpine.data('solicitudArticuloOpciones', () => ({
                 selecciones: {},
                 procesandoIndividual: {},
                 isLoadingGrupal: false,
+                
+                // Nuevas variables para el modal de destinatario
+                mostrarModalDestinatario: false,
+                destinatarioSeleccionado: '',
+                usuarioSeleccionado: '',
+                solicitudIdSeleccionada: null,
+                articuloIdSeleccionado: null,
+                articuloSeleccionadoNombre: '',
+
+                get destinatarioValido() {
+                    if (this.destinatarioSeleccionado === 'solicitante') {
+                        return true;
+                    }
+                    if (this.destinatarioSeleccionado === 'otro') {
+                        return this.usuarioSeleccionado !== '';
+                    }
+                    return false;
+                },
 
                 get todasUbicacionesSeleccionadas() {
                     const articulos = @json($articulos);
@@ -524,35 +741,58 @@
                     return @json($puede_aceptar);
                 },
 
-                async procesarIndividual(solicitudId, articuloId) {
+                abrirModalDestinatario(solicitudId, articuloId, nombreArticulo) {
                     const ubicacionId = this.selecciones[articuloId];
-
+                    
                     if (!ubicacionId) {
-                        this.mostrarNotificacion('error',
-                            'Seleccione una ubicación para este artículo');
+                        this.mostrarNotificacion('error', 'Seleccione una ubicación para este artículo');
                         return;
                     }
+
+                    this.solicitudIdSeleccionada = solicitudId;
+                    this.articuloIdSeleccionado = articuloId;
+                    this.articuloSeleccionadoNombre = nombreArticulo;
+                    this.destinatarioSeleccionado = '';
+                    this.usuarioSeleccionado = '';
+                    this.mostrarModalDestinatario = true;
+                },
+
+                cerrarModalDestinatario() {
+                    this.mostrarModalDestinatario = false;
+                    this.destinatarioSeleccionado = '';
+                    this.usuarioSeleccionado = '';
+                },
+
+                async confirmarProcesamientoIndividual() {
+                    if (!this.destinatarioValido) {
+                        this.mostrarNotificacion('error', 'Seleccione un destinatario válido');
+                        return;
+                    }
+
+                    const ubicacionId = this.selecciones[this.articuloIdSeleccionado];
 
                     if (!confirm(
-                            `¿Está seguro de que desea procesar este artículo?\n\nEl stock será descontado de la ubicación seleccionada.`
-                        )) {
+                        `¿Está seguro de que desea procesar este artículo?\n\nArtículo: ${this.articuloSeleccionadoNombre}\nDestinatario: ${this.obtenerNombreDestinatario()}\n\nEl stock será descontado de la ubicación seleccionada.`
+                    )) {
                         return;
                     }
 
-                    this.procesandoIndividual[articuloId] = true;
+                    this.procesandoIndividual[this.articuloIdSeleccionado] = true;
+                    this.mostrarModalDestinatario = false;
 
                     try {
                         const response = await fetch(
-                            `/solicitudarticulo/${solicitudId}/aceptar-individual`, {
+                            `/solicitudarticulo/${this.solicitudIdSeleccionada}/aceptar-individual`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 },
                                 body: JSON.stringify({
-                                    articulo_id: articuloId,
-                                    ubicacion_id: ubicacionId
+                                    articulo_id: this.articuloIdSeleccionado,
+                                    ubicacion_id: ubicacionId,
+                                    tipo_destinatario: this.destinatarioSeleccionado,
+                                    usuario_destino_id: this.destinatarioSeleccionado === 'otro' ? this.usuarioSeleccionado : null
                                 })
                             });
 
@@ -576,7 +816,19 @@
                         console.error('Error:', error);
                         this.mostrarNotificacion('error', 'Error al procesar el artículo');
                     } finally {
-                        this.procesandoIndividual[articuloId] = false;
+                        this.procesandoIndividual[this.articuloIdSeleccionado] = false;
+                    }
+                },
+
+                obtenerNombreDestinatario() {
+                    switch (this.destinatarioSeleccionado) {
+                        case 'solicitante':
+                            return '{{ $solicitante ? $solicitante->Nombre . " " . $solicitante->apellidoPaterno : "Solicitante" }}';
+                        case 'otro':
+                            const select = document.querySelector('[x-model="usuarioSeleccionado"]');
+                            return select ? select.options[select.selectedIndex]?.text : 'Otro usuario';
+                        default:
+                            return 'No seleccionado';
                     }
                 },
 
@@ -663,4 +915,10 @@
             }));
         });
     </script>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 </x-layout.default>

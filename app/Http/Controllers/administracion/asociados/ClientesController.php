@@ -8,7 +8,6 @@ use App\Models\Cliente;
 use App\Models\Clientegeneral;
 use App\Models\Tipodocumento;
 use App\Models\Tienda;
-use App\Models\Contactosform;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,7 +25,6 @@ class ClientesController extends Controller
         // Llamar la vista ubicada en administracion/usuarios.blade.php
         return view('administracion.asociados.clientes.index', compact('departamentos', 'clientesGenerales', 'tiposDocumento'));
     }
-
 
     public function store(Request $request)
     {
@@ -124,78 +122,69 @@ class ClientesController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function edit($id)
+    {
+        $cliente = Cliente::findOrFail($id);
+        
+        $clientesGenerales = ClienteGeneral::all();
+        $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function ($query) use ($cliente) {
+            $query->select('idClienteGeneral')
+                ->from('cliente_clientegeneral')
+                ->where('idCliente', $cliente->idCliente);
+        })->get();
 
+        $tiposDocumento = TipoDocumento::all();
 
+        // Obtener los datos de los archivos JSON
+        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+        $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+        $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
 
+        // Buscar el departamento correspondiente a la cli$cliente
+        $departamentoSeleccionado = array_filter($departamentos, function ($departamento) use ($cliente) {
+            return $departamento['id_ubigeo'] == $cliente->departamento;
+        });
+        $departamentoSeleccionado = reset($departamentoSeleccionado);
 
-
-public function edit($id)
-{
-    $cliente = Cliente::with('contactos')->findOrFail($id); // 👈 Agregar with('contactos')
-    
-    $clientesGenerales = ClienteGeneral::all();
-    $clientesGeneralesAsociados = ClienteGeneral::whereIn('idClienteGeneral', function ($query) use ($cliente) {
-        $query->select('idClienteGeneral')
-            ->from('cliente_clientegeneral')
-            ->where('idCliente', $cliente->idCliente);
-    })->get();
-
-    $tiposDocumento = TipoDocumento::all();
-
-    // ✅ AGREGAR: Obtener todos los contactos disponibles
-    $todosLosContactos = Contactosform::all();
-
-    // Obtener los datos de los archivos JSON
-    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-    $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
-    $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
-
-    // Buscar el departamento correspondiente a la cli$cliente
-    $departamentoSeleccionado = array_filter($departamentos, function ($departamento) use ($cliente) {
-        return $departamento['id_ubigeo'] == $cliente->departamento;
-    });
-    $departamentoSeleccionado = reset($departamentoSeleccionado);
-
-    // Obtener provincias del departamento seleccionado
-    $provinciasDelDepartamento = [];
-    foreach ($provincias as $provincia) {
-        if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
-            $provinciasDelDepartamento[] = $provincia;
+        // Obtener provincias del departamento seleccionado
+        $provinciasDelDepartamento = [];
+        foreach ($provincias as $provincia) {
+            if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
+                $provinciasDelDepartamento[] = $provincia;
+            }
         }
-    }
 
-    // Buscar la provincia seleccionada en el array de provinciasDelDepartamento
-    $provinciaSeleccionada = null;
-    foreach ($provinciasDelDepartamento as $provincia) {
-        if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $cliente->provincia) {
-            $provinciaSeleccionada = $provincia;
-            break;
+        // Buscar la provincia seleccionada en el array de provinciasDelDepartamento
+        $provinciaSeleccionada = null;
+        foreach ($provinciasDelDepartamento as $provincia) {
+            if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $cliente->provincia) {
+                $provinciaSeleccionada = $provincia;
+                break;
+            }
         }
-    }
 
-    // Obtener los distritos correspondientes a la provincia seleccionada
-    $distritosDeLaProvincia = [];
-    foreach ($distritos as $distrito) {
-        if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
-            $distritosDeLaProvincia[] = $distrito;
+        // Obtener los distritos correspondientes a la provincia seleccionada
+        $distritosDeLaProvincia = [];
+        foreach ($distritos as $distrito) {
+            if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
+                $distritosDeLaProvincia[] = $distrito;
+            }
         }
+
+        $distritoSeleccionado = null;
+
+        return view('administracion.asociados.clientes.edit', compact(
+            'cliente',
+            'clientesGenerales',
+            'tiposDocumento',
+            'departamentos',
+            'provinciasDelDepartamento',
+            'provinciaSeleccionada',
+            'distritosDeLaProvincia',
+            'distritoSeleccionado',
+            'clientesGeneralesAsociados'
+        ));
     }
-
-    $distritoSeleccionado = null;
-
-    return view('administracion.asociados.clientes.edit', compact(
-        'cliente',
-        'clientesGenerales',
-        'tiposDocumento',
-        'departamentos',
-        'provinciasDelDepartamento',
-        'provinciaSeleccionada',
-        'distritosDeLaProvincia',
-        'distritoSeleccionado',
-        'clientesGeneralesAsociados',
-        'todosLosContactos' // 👈 AGREGAR esta variable
-    ));
-}
 
     public function clientesGeneralesAsociados($idCliente)
     {
@@ -219,6 +208,7 @@ public function edit($id)
 
         return response()->json($clientesGenerales);
     }
+
     public function obtenerCliente($idCliente)
     {
         $cliente = Cliente::find($idCliente);
@@ -231,36 +221,34 @@ public function edit($id)
             'idCliente' => $cliente->idCliente,
             'nombre' => $cliente->nombre,
             'documento' => $cliente->documento,
-            'direccion' => $cliente->direccion, // 👈 AÑADIDO
-            'idTipoDocumento' => $cliente->idTipoDocumento, // Asegúrate de devolver el idTipoDocumento
-            'esTienda' => $cliente->esTienda == 1 ? "SI" : "NO", // Convertimos el 1 en "SI" y 0 en "NO"
+            'direccion' => $cliente->direccion,
+            'idTipoDocumento' => $cliente->idTipoDocumento,
+            'esTienda' => $cliente->esTienda == 1 ? "SI" : "NO",
         ]);
     }
-    
 
     /**
      * Obtener las tiendas asociadas a un cliente si es tienda
      */
     public function obtenerTiendas($idCliente)
-{
-    $cliente = Cliente::find($idCliente);
+    {
+        $cliente = Cliente::find($idCliente);
 
-    if (!$cliente) {
-        return response()->json(['error' => 'Cliente no encontrado'], 404);
+        if (!$cliente) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        // Si el cliente tiene idTipoDocumento 2, traer todas las tiendas
+        if ($cliente->idTipoDocumento == 8) {
+            // Obtener todas las tiendas
+            $tiendas = Tienda::all();
+        } else {
+            // Si el cliente tiene idTipoDocumento 1, traer solo las tiendas relacionadas
+            $tiendas = Tienda::where('idCliente', $idCliente)->get();
+        }
+
+        return response()->json($tiendas);
     }
-
-    // Si el cliente tiene idTipoDocumento 2, traer todas las tiendas
-    if ($cliente->idTipoDocumento == 8) {
-        // Obtener todas las tiendas
-        $tiendas = Tienda::all();
-    } else {
-        // Si el cliente tiene idTipoDocumento 1, traer solo las tiendas relacionadas
-        $tiendas = Tienda::where('idCliente', $idCliente)->get();
-    }
-
-    return response()->json($tiendas);
-}
-
 
     // Método para agregar cliente general
     public function agregarClienteGeneral($idCliente, $idClienteGeneral)
@@ -281,11 +269,6 @@ public function edit($id)
             return response()->json(['success' => false, 'message' => 'La relación ya existe.']);
         }
     }
-
-
-
-
-
 
     public function eliminarClienteGeneral($idCliente, $idClienteGeneral)
     {
@@ -331,82 +314,68 @@ public function edit($id)
         }
     }
 
+    public function update(Request $request, $id)
+    {
+        try {
+            Log::info('Datos recibidos en la solicitud:', $request->all());
 
+            // Validación de los datos
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
+                'documento' => 'required|string|max:255',
+                'telefono' => 'nullable|string|max:15',
+                'email' => 'nullable|email|max:255',
+                'departamento' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+                'distrito' => 'required|string|max:255',
+                'direccion' => 'required|string|max:255',
+                'esTienda' => 'nullable|boolean',
+                'estado' => 'nullable|boolean',
+            ]);
 
-public function update(Request $request, $id)
-{
-    try {
-        Log::info('Datos recibidos en la solicitud:', $request->all());
+            Log::info('Datos validados correctamente:', $validatedData);
 
-        // Validación de los datos
-        $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
-            'documento' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:15',
-            'email' => 'nullable|email|max:255',
-            'departamento' => 'required|string|max:255',
-            'provincia' => 'required|string|max:255',
-            'distrito' => 'required|string|max:255',
-            'direccion' => 'required|string|max:255',
-            'esTienda' => 'nullable|boolean',
-            'estado' => 'nullable|boolean',
-            'contactos_sync' => 'nullable|string' // 👈 AGREGAR validación para contactos
-        ]);
+            // Buscar el cliente
+            $cliente = Cliente::find($id);
 
-        Log::info('Datos validados correctamente:', $validatedData);
+            if (!$cliente) {
+                Log::error("Cliente con ID {$id} no encontrado.");
+                return redirect()->route('administracion.clientes')->with('error', 'Cliente no encontrado.');
+            }
 
-        // Buscar el cliente
-        $cliente = Cliente::find($id);
+            Log::info("Cliente encontrado con ID {$id}:", $cliente->toArray());
 
-        if (!$cliente) {
-            Log::error("Cliente con ID {$id} no encontrado.");
-            return redirect()->route('administracion.clientes')->with('error', 'Cliente no encontrado.');
+            // Determinar el valor de 'esTienda' y 'estado'
+            $esTienda = $request->has('esTienda') && $request->esTienda == '1' ? '1' : '0';
+            $estado = $request->has('estado') && $request->estado == '1' ? '1' : '0';
+
+            // Actualizar los campos del cliente
+            $cliente->update([
+                'nombre' => $validatedData['nombre'],
+                'idTipoDocumento' => $validatedData['idTipoDocumento'],
+                'documento' => $validatedData['documento'],
+                'telefono' => $validatedData['telefono'],
+                'email' => $validatedData['email'],
+                'departamento' => $validatedData['departamento'],
+                'provincia' => $validatedData['provincia'],
+                'distrito' => $validatedData['distrito'],
+                'direccion' => $validatedData['direccion'],
+                'esTienda' => $esTienda,
+                'estado' => $estado,
+            ]);
+
+            Log::info("Cliente con ID {$id} actualizado exitosamente.");
+
+            return redirect()->route('administracion.clientes')->with('success', 'Cliente actualizado correctamente');
+            
+        } catch (\Exception $e) {
+            Log::error("Error al actualizar el cliente con ID {$id}: " . $e->getMessage(), [
+                'stack' => $e->getTraceAsString(),
+            ]);
+            return redirect()->route('administracion.clientes')->with('error', 'Hubo un error al actualizar el cliente.');
         }
-
-        Log::info("Cliente encontrado con ID {$id}:", $cliente->toArray());
-
-        // Determinar el valor de 'esTienda' y 'estado'
-        $esTienda = $request->has('esTienda') && $request->esTienda == '1' ? '1' : '0';
-        $estado = $request->has('estado') && $request->estado == '1' ? '1' : '0';
-
-        // Actualizar los campos del cliente
-        $cliente->update([
-            'nombre' => $validatedData['nombre'],
-            'idTipoDocumento' => $validatedData['idTipoDocumento'],
-            'documento' => $validatedData['documento'],
-            'telefono' => $validatedData['telefono'],
-            'email' => $validatedData['email'],
-            'departamento' => $validatedData['departamento'],
-            'provincia' => $validatedData['provincia'],
-            'distrito' => $validatedData['distrito'],
-            'direccion' => $validatedData['direccion'],
-            'esTienda' => $esTienda,
-            'estado' => $estado,
-        ]);
-
-        // ✅ AGREGAR: Sincronizar contactos
-        if ($request->has('contactos_sync') && !empty($request->contactos_sync)) {
-            $contactosIds = explode(',', $request->contactos_sync);
-            $cliente->contactos()->sync($contactosIds);
-            Log::info("Contactos sincronizados para cliente {$id}: " . implode(', ', $contactosIds));
-        } else {
-            $cliente->contactos()->detach();
-            Log::info("Todos los contactos desvinculados del cliente {$id}");
-        }
-
-        Log::info("Cliente con ID {$id} actualizado exitosamente.");
-
-        return redirect()->route('administracion.clientes')->with('success', 'Cliente actualizado correctamente');
-        
-    } catch (\Exception $e) {
-        Log::error("Error al actualizar el cliente con ID {$id}: " . $e->getMessage(), [
-            'stack' => $e->getTraceAsString(),
-        ]);
-        return redirect()->route('administracion.clientes')->with('error', 'Hubo un error al actualizar el cliente.');
     }
-}
-
 
     public function getAll(Request $request)
     {
@@ -451,8 +420,6 @@ public function update(Request $request, $id)
             'data' => $data,
         ]);
     }
-    
-    
 
     public function exportAllPDF()
     {
@@ -473,7 +440,6 @@ public function update(Request $request, $id)
             return redirect()->back()->with('error', 'Ocurrió un error al generar el reporte.');
         }
     }
-
 
     public function destroy($id)
     {
@@ -508,5 +474,4 @@ public function update(Request $request, $id)
             ], 500);
         }
     }
-    
 }

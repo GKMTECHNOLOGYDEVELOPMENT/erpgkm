@@ -189,70 +189,89 @@
                                 </div>
 
                                 <!-- Lista de Productos de la Cotización -->
-                                <div x-show="cotizacionProducts.length > 0" class="mt-6">
-                                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Artículos en la Cotización
-                                    </h4>
-                                    <div class="overflow-hidden rounded-xl border border-green-200">
-                                        <table class="w-full">
-                                            <thead class="bg-green-50">
-                                                <tr>
-                                                    <th
-                                                        class="px-4 py-3 text-left text-sm font-semibold text-green-600">
-                                                        Artículo</th>
-                                                    <th
-                                                        class="px-4 py-3 text-left text-sm font-semibold text-green-600">
-                                                        Código</th>
-                                                    <th
-                                                        class="px-4 py-3 text-left text-sm font-semibold text-green-600">
-                                                        Cantidad</th>
-                                                    <th
-                                                        class="px-4 py-3 text-left text-sm font-semibold text-green-600">
-                                                        Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="bg-white divide-y divide-green-100">
-                                                <template x-for="(product, index) in cotizacionProducts"
-                                                    :key="index">
-                                                    <tr class="hover:bg-green-50 transition-colors">
-                                                        <td class="px-4 py-3 text-sm font-medium text-gray-900"
-                                                            x-text="product.nombre_articulo || product.descripcion">
-                                                        </td>
-                                                        <td class="px-4 py-3 text-sm text-green-600 font-mono"
-                                                            x-text="product.codigo_repuesto"></td>
-                                                        <td class="px-4 py-3 text-sm text-gray-700"
-                                                            x-text="product.cantidad"></td>
-                                                        <td class="px-4 py-3 text-sm">
-                                                            <button @click="addProductFromCotizacion(product)"
-                                                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center space-x-2">
-                                                                <svg class="w-4 h-4" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M12 4v16m8-8H4"></path>
-                                                                </svg>
-                                                                <span>Agregar</span>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-                                            </tbody>
-                                        </table>
+<div x-show="cotizacionProducts.length > 0" class="mt-6">
+    <h4 class="text-lg font-semibold text-gray-900 mb-4">Artículos en la Cotización</h4>
+    <div class="overflow-hidden rounded-xl border border-green-200">
+        <table class="w-full">
+            <thead class="bg-green-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">
+                        Artículo</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">
+                        Código</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">
+                        Tipo</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">
+                        Cantidad</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-green-600">
+                        Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-green-100">
+                <template x-for="(product, index) in cotizacionProducts" :key="index">
+                    <tr class="hover:bg-green-50 transition-colors">
+                        <td class="px-4 py-3">
+                            <div class="space-y-1">
+                                <!-- Nombre principal -->
+                                <div class="text-sm font-medium text-gray-900" 
+                                     x-text="getArticuloNombre(product.articulo_id)"></div>
+                                
+                                <!-- Información adicional -->
+                                <div class="text-xs text-gray-500 space-y-0.5">
+                                    <!-- Tipo de artículo -->
+                                    <div class="flex items-center space-x-1" 
+                                         x-show="getArticuloTipo(product.articulo_id)">
+                                        <span class="font-medium">Tipo:</span>
+                                        <span x-text="getArticuloTipo(product.articulo_id)"></span>
                                     </div>
-
-                                    <!-- Botón para agregar todos los productos -->
-                                    <div class="mt-4 flex justify-end">
-                                        <button @click="addAllCotizacionProducts()"
-                                            class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-bold flex items-center space-x-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
-                                                </path>
-                                            </svg>
-                                            <span>Agregar Todos los Artículos</span>
-                                        </button>
+                                    
+                                    <!-- Modelo -->
+                                    <div class="flex items-center space-x-1" 
+                                         x-show="getArticuloModelo(product.articulo_id)">
+                                        <span class="font-medium">Modelo:</span>
+                                        <span x-text="getArticuloModelo(product.articulo_id)"></span>
                                     </div>
                                 </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-green-600 font-mono"
+                            x-text="getArticuloCodigo(product.articulo_id)"></td>
+                        <td class="px-4 py-3 text-sm text-gray-700"
+                            x-text="getArticuloTipo(product.articulo_id)"></td>
+                        <td class="px-4 py-3 text-sm text-gray-700"
+                            x-text="product.cantidad"></td>
+                        <td class="px-4 py-3 text-sm">
+                            <button @click="addProductFromCotizacion(product)"
+                                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span>Agregar</span>
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Botón para agregar todos los productos -->
+    <div class="mt-4 flex justify-end">
+        <button @click="addAllCotizacionProducts()"
+            class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-bold flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                </path>
+            </svg>
+            <span>Agregar Todos los Artículos</span>
+        </button>
+    </div>
+</div>
                             </div>
 
                             <!-- Tabla de Artículos -->
@@ -269,94 +288,132 @@
 
                                 <div class="overflow-hidden rounded-xl border border-blue-100">
                                     <table class="w-full">
-                                        <thead class="bg-blue-50">
+                                       <thead class="bg-blue-50">
                                             <tr>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                     Artículo</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                     Código</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Tipo</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                <th class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                     Cantidad</th>
-                                                <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                     Acciones</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="bg-white divide-y divide-blue-100">
-                                            <template x-if="products.length === 0">
-                                                <tr>
-                                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                                        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="1"
-                                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-                                                            </path>
-                                                        </svg>
-                                                        <p class="mt-4 text-lg font-medium text-gray-900">No hay
-                                                            artículos agregados</p>
-                                                        <p class="text-sm mt-2">Agregue artículos usando el formulario
-                                                            inferior o desde una cotización aprobada</p>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                            <template x-for="(product, index) in products" :key="product.uniqueId">
-                                                <tr class="product-row hover:bg-blue-50 transition-all duration-200">
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base font-semibold text-gray-900"
-                                                        x-text="product.nombre"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-blue-600 font-mono font-bold"
-                                                        x-text="product.codigo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-700"
-                                                        x-text="product.tipo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
-                                                        <div class="flex items-center space-x-3">
-                                                            <span class="font-bold" x-text="product.cantidad"></span>
-                                                            <div class="flex space-x-1">
-                                                                <button @click="updateQuantity(index, -1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                        </path>
-                                                                    </svg>
-                                                                </button>
-                                                                <button @click="updateQuantity(index, 1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                                        </path>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
-                                                        <button @click="removeProduct(index)"
-                                                            class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                                </path>
-                                                            </svg>
-                                                            <span>Eliminar</span>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </template>
-                                        </tbody>
+                                      <tbody class="bg-white divide-y divide-blue-100">
+    <template x-if="products.length === 0">
+        <tr>
+            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="1"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                    </path>
+                </svg>
+                <p class="mt-4 text-lg font-medium text-gray-900">No hay
+                    artículos agregados</p>
+                <p class="text-sm mt-2">Agregue artículos usando el formulario
+                    inferior o desde una cotización aprobada</p>
+            </td>
+        </tr>
+    </template>
+    <template x-for="(product, index) in products" :key="product.uniqueId">
+        <tr class="product-row hover:bg-blue-50 transition-all duration-200">
+            <!-- Columna Artículo con información completa -->
+            <td class="px-6 py-4">
+                <div class="space-y-1">
+                    <!-- Nombre principal -->
+                    <div class="text-base font-semibold text-gray-900" 
+                         x-text="product.nombre"></div>
+                    
+                    <!-- Información adicional -->
+                    <div class="text-xs text-gray-500 space-y-0.5">
+                        <!-- Tipo de artículo -->
+                        <div class="flex items-center space-x-1" x-show="product.tipo_articulo">
+                            <span class="font-medium">Tipo:</span>
+                            <span x-text="product.tipo_articulo"></span>
+                        </div>
+                        
+                        <!-- Modelo -->
+                        <div class="flex items-center space-x-1" x-show="product.modelo">
+                            <span class="font-medium">Modelo:</span>
+                            <span x-text="product.modelo"></span>
+                        </div>
+                        
+                        <!-- Marca -->
+                        <div class="flex items-center space-x-1" x-show="product.marca">
+                            <span class="font-medium">Marca:</span>
+                            <span x-text="product.marca"></span>
+                        </div>
+                        
+                        <!-- Subcategoría -->
+                        <div class="flex items-center space-x-1" x-show="product.subcategoria">
+                            <span class="font-medium">Categoría:</span>
+                            <span x-text="product.subcategoria"></span>
+                        </div>
+                    </div>
+                </div>
+            </td>
+            
+            <!-- Columna Código -->
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-base text-blue-600 font-mono font-bold" 
+                     x-text="product.codigo"></div>
+                <div class="text-xs text-gray-400 mt-1" 
+                     x-text="product.codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto'"></div>
+            </td>
+            
+            <!-- Columna Cantidad -->
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center space-x-3 justify-center">
+                    <span class="font-bold text-lg" x-text="product.cantidad"></span>
+                    <div class="flex space-x-1">
+                        <button @click="updateQuantity(index, -1)"
+                            class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
+                            :disabled="product.cantidad <= 1"
+                            :class="{ 'opacity-50 cursor-not-allowed': product.cantidad <= 1 }">
+                            <svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </button>
+                        <button @click="updateQuantity(index, 1)"
+                            class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
+                            :disabled="product.cantidad >= 1000"
+                            :class="{ 'opacity-50 cursor-not-allowed': product.cantidad >= 1000 }">
+                            <svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </td>
+            
+            <!-- Columna Acciones -->
+            <td class="px-6 py-4 whitespace-nowrap text-base">
+                <button @click="removeProduct(index)"
+                    class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-red-50">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                        </path>
+                    </svg>
+                    <span>Eliminar</span>
+                </button>
+            </td>
+        </tr>
+    </template>
+</tbody>
                                     </table>
                                 </div>
                             </div>
@@ -370,18 +427,21 @@
                                     <!-- Artículo -->
                                     <div class="lg:col-span-2">
                                         <label class="block text-sm font-semibold text-gray-700 mb-3">Artículo</label>
-                                        <select x-model="newProduct.articuloId" x-ref="articuloSelect"
-                                            class="w-full">
+                                        <select x-model="newProduct.articuloId" x-ref="articuloSelect" class="w-full">
                                             <option value="">Seleccione un artículo...</option>
-                                            <template x-for="articulo in articulos" :key="articulo.idArticulos">
-                                                <option :value="articulo.idArticulos"
-                                                    :data-codigo="articulo.codigo_barras || articulo.codigo_repuesto"
-                                                    :data-tipo="articulo.tipo_articulo"
-                                                    :data-stock="articulo.stock_total"
-                                                    x-text="`${articulo.nombre} (${articulo.codigo_barras || articulo.codigo_repuesto})`">
-                                                </option>
+                                            <template x-if="articulos && articulos.length > 0">
+                                                <template x-for="articulo in articulos" :key="articulo.idArticulos">
+                                                    <option :value="articulo.idArticulos"
+                                                        :data-codigo="articulo.codigo_barras || articulo.codigo_repuesto"
+                                                        :data-tipo="articulo.tipo_articulo"
+                                                        x-text="articulo.nombre_completo">
+                                                    </option>
+                                                </template>
                                             </template>
                                         </select>
+                                        <div x-show="!articulos || articulos.length === 0" class="text-red-500 text-sm mt-2">
+                                            No hay artículos disponibles
+                                        </div>
                                     </div>
 
                                     <!-- Cantidad -->
@@ -776,155 +836,165 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
     <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('solicitudArticulo', () => ({
-                // Estado de la aplicación
-                currentDate: '',
-                orderNumber: {{ $nextOrderNumber ?? 1 }},
-                products: [],
-                // En tu estado de Alpine, agrega:
-                showClearModal: false,
-                newProduct: {
-                    articuloId: '',
-                    cantidad: 1,
-                    descripcion: ''
-                },
-                orderInfo: {
-                    tipoServicio: 'solicitud_articulo',
-                    urgencia: '',
-                    observaciones: '',
-                    fechaRequerida: ''
-                },
-                notification: {
-                    show: false,
-                    message: '',
-                    type: 'info'
-                },
-                notificationTimeout: null,
-                minDate: '',
-                isCreatingOrder: false,
+      document.addEventListener('alpine:init', () => {
+        // Debug: Verificar que los artículos se están pasando correctamente
+        console.log('Artículos desde Laravel:', @json($articulos));
+        
+        Alpine.data('solicitudArticulo', () => ({
+            // Estado de la aplicación
+            currentDate: '',
+            orderNumber: {{ $nextOrderNumber ?? 1 }},
+            products: [],
+            showClearModal: false,
+            newProduct: {
+                articuloId: '',
+                cantidad: 1,
+                descripcion: ''
+            },
+            orderInfo: {
+                tipoServicio: 'solicitud_articulo',
+                urgencia: '',
+                observaciones: '',
+                fechaRequerida: ''
+            },
+            notification: {
+                show: false,
+                message: '',
+                type: 'info'
+            },
+            notificationTimeout: null,
+            minDate: '',
+            isCreatingOrder: false,
 
-                // Nuevas variables para cotizaciones
-                cotizacionesAprobadas: @json($cotizacionesAprobadas ?? []),
-                selectedCotizacion: '',
-                selectedCotizacionInfo: null,
-                cotizacionProducts: [],
+            // Nuevas variables para cotizaciones
+            cotizacionesAprobadas: @json($cotizacionesAprobadas ?? []),
+            selectedCotizacion: '',
+            selectedCotizacionInfo: null,
+            cotizacionProducts: [],
 
-                // Artículos desde Laravel
-                articulos: @json($articulos),
+            // Artículos desde Laravel - Asegurar que sea un array
+            articulos: @json($articulos ?? []),
 
-                // Niveles de urgencia
-                nivelesUrgencia: [{
-                        value: 'baja',
-                        text: 'Baja',
-                        icon: 'fa-circle-check',
-                        iconColor: 'text-green-500',
-                        bgColor: 'bg-green-50',
-                        borderColor: 'border-green-200',
-                        description: 'Sin urgencia específica'
-                    },
-                    {
-                        value: 'media',
-                        text: 'Media',
-                        icon: 'fa-clock',
-                        iconColor: 'text-yellow-500',
-                        bgColor: 'bg-yellow-50',
-                        borderColor: 'border-yellow-200',
-                        description: 'Necesario en los próximos días'
-                    },
-                    {
-                        value: 'alta',
-                        text: 'Alta',
-                        icon: 'fa-triangle-exclamation',
-                        iconColor: 'text-red-500',
-                        bgColor: 'bg-red-50',
-                        borderColor: 'border-red-200',
-                        description: 'Urgente - necesario inmediatamente'
-                    }
-                ],
+            // Niveles de urgencia
+            nivelesUrgencia: [{
+                    value: 'baja',
+                    text: 'Baja',
+                    icon: 'fa-circle-check',
+                    iconColor: 'text-green-500',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    description: 'Sin urgencia específica'
+                },
+                {
+                    value: 'media',
+                    text: 'Media',
+                    icon: 'fa-clock',
+                    iconColor: 'text-yellow-500',
+                    bgColor: 'bg-yellow-50',
+                    borderColor: 'border-yellow-200',
+                    description: 'Necesario en los próximos días'
+                },
+                {
+                    value: 'alta',
+                    text: 'Alta',
+                    icon: 'fa-triangle-exclamation',
+                    iconColor: 'text-red-500',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    description: 'Urgente - necesario inmediatamente'
+                }
+            ],
 
-                // Computed properties
-                get totalQuantity() {
-                    return this.products.reduce((sum, product) => sum + product.cantidad, 0);
-                },
-                get totalUniqueProducts() {
-                    return this.products.length;
-                },
-                get canAddProduct() {
-                    return this.newProduct.articuloId &&
-                        this.newProduct.cantidad > 0;
-                },
-                get canCreateSolicitud() {
-                    return this.products.length > 0 &&
-                        this.orderInfo.tipoServicio &&
-                        this.orderInfo.urgencia &&
-                        this.orderInfo.fechaRequerida;
-                },
+            // Computed properties
+            get totalQuantity() {
+                return this.products.reduce((sum, product) => sum + product.cantidad, 0);
+            },
+            get totalUniqueProducts() {
+                return this.products.length;
+            },
+            get canAddProduct() {
+                return this.newProduct.articuloId &&
+                    this.newProduct.cantidad > 0;
+            },
+            get canCreateSolicitud() {
+                return this.products.length > 0 &&
+                    this.orderInfo.tipoServicio &&
+                    this.orderInfo.urgencia &&
+                    this.orderInfo.fechaRequerida;
+            },
 
-                // Métodos
-                init() {
-                    this.currentDate = new Date().toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
+            // Métodos
+            init() {
+                // Debug: Verificar el estado inicial
+                console.log('Alpine init - articulos:', this.articulos);
+                console.log('Alpine init - cotizaciones:', this.cotizacionesAprobadas);
+
+                this.currentDate = new Date().toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                this.minDate = new Date().toISOString().split('T')[0];
+
+                this.$nextTick(() => {
+                    this.initSelect2();
+                    this.initFlatpickr();
+                });
+            },
+
+            initSelect2() {
+                // Debug antes de inicializar Select2
+                console.log('Inicializando Select2 - articulos disponibles:', this.articulos.length);
+                
+                // Artículo Select
+                if (this.$refs.articuloSelect && this.articulos.length > 0) {
+                    $(this.$refs.articuloSelect).select2({
+                        placeholder: 'Buscar artículo...',
+                        language: 'es',
+                        width: '100%'
+                    }).on('change', (e) => {
+                        this.newProduct.articuloId = e.target.value;
                     });
+                } else {
+                    console.warn('No se pudo inicializar Select2 - no hay artículos o elemento no encontrado');
+                }
 
-                    this.minDate = new Date().toISOString().split('T')[0];
-
-                    this.$nextTick(() => {
-                        this.initSelect2();
-                        this.initFlatpickr(); // Inicializar Flatpickr
+                // Cotización Select
+                if (this.$refs.cotizacionSelect) {
+                    $(this.$refs.cotizacionSelect).select2({
+                        placeholder: 'Buscar cotización...',
+                        language: 'es',
+                        width: '100%'
+                    }).on('change', (e) => {
+                        this.selectedCotizacion = e.target.value;
+                        this.loadCotizacionProducts();
                     });
-                },
-
-                initSelect2() {
-                    // Artículo Select
-                    if (this.$refs.articuloSelect) {
-                        $(this.$refs.articuloSelect).select2({
-                            placeholder: 'Buscar artículo...',
-                            language: 'es',
-                            width: '100%'
-                        }).on('change', (e) => {
-                            this.newProduct.articuloId = e.target.value;
-                        });
-                    }
-
-                    // Cotización Select
-                    if (this.$refs.cotizacionSelect) {
-                        $(this.$refs.cotizacionSelect).select2({
-                            placeholder: 'Buscar cotización...',
-                            language: 'es',
-                            width: '100%'
-                        }).on('change', (e) => {
-                            this.selectedCotizacion = e.target.value;
-                            this.loadCotizacionProducts();
-                        });
-                    }
-                },
+                }
+            },
 
                 initFlatpickr() {
-                    // Inicializar Flatpickr para el campo de fecha requerida
-                    if (this.$refs.fechaRequeridaInput) {
-                        flatpickr(this.$refs.fechaRequeridaInput, {
-                            locale: 'es',
-                            dateFormat: 'Y-m-d',
-                            minDate: 'today',
-                            disableMobile: false, // Cambiar a false para mejor compatibilidad móvil
-                            allowInput: true,
-                            clickOpens: true,
-                            onChange: (selectedDates, dateStr) => {
-                                this.orderInfo.fechaRequerida = dateStr;
-                            },
-                            onReady: (selectedDates, dateStr, instance) => {
-                                // Asegurarse de que el valor del modelo se sincronice
-                                if (this.orderInfo.fechaRequerida) {
-                                    instance.setDate(this.orderInfo.fechaRequerida);
-                                }
+                // Inicializar Flatpickr para el campo de fecha requerida
+                if (this.$refs.fechaRequeridaInput) {
+                    flatpickr(this.$refs.fechaRequeridaInput, {
+                        locale: 'es',
+                        dateFormat: 'Y-m-d',
+                        minDate: 'today',
+                        disableMobile: false,
+                        allowInput: true,
+                        clickOpens: true,
+                        onChange: (selectedDates, dateStr) => {
+                            this.orderInfo.fechaRequerida = dateStr;
+                        },
+                        onReady: (selectedDates, dateStr, instance) => {
+                            if (this.orderInfo.fechaRequerida) {
+                                instance.setDate(this.orderInfo.fechaRequerida);
                             }
-                        });
-                    }
-                },
+                        }
+                    });
+                }
+            },
 
 
                 async loadCotizacionProducts() {
@@ -973,65 +1043,70 @@
                 },
 
                 addProductFromCotizacion(cotizacionProduct) {
-                    // Buscar el artículo completo en la lista de artículos
-                    const articuloCompleto = this.articulos.find(
-                        a => a.idArticulos == cotizacionProduct.articulo_id
-                    );
+                // Buscar el artículo completo en la lista de artículos
+                const articuloCompleto = this.articulos.find(
+                    a => a.idArticulos == cotizacionProduct.articulo_id
+                );
 
-                    if (!articuloCompleto) {
-                        this.showNotification('❌ Artículo no encontrado en el catálogo', 'error');
+                if (!articuloCompleto) {
+                    this.showNotification('❌ Artículo no encontrado en el catálogo', 'error');
+                    return;
+                }
+
+                // Verificar si ya existe el artículo en la solicitud
+                const existingProductIndex = this.products.findIndex(
+                    product => product.articuloId == cotizacionProduct.articulo_id
+                );
+
+                if (existingProductIndex !== -1) {
+                    // Si existe, verificar que no exceda la cantidad de la cotización
+                    const nuevaCantidad = this.products[existingProductIndex].cantidad + 1;
+                    
+                    // Obtener la cantidad máxima permitida desde la cotización
+                    const cantidadMaxima = cotizacionProduct.cantidad;
+                    
+                    if (nuevaCantidad > cantidadMaxima) {
+                        this.showNotification(
+                            `❌ No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`,
+                            'error'
+                        );
                         return;
                     }
 
-                    // Verificar si ya existe el artículo en la solicitud
-                    const existingProductIndex = this.products.findIndex(
-                        product => product.articuloId == cotizacionProduct.articulo_id
+                    this.products[existingProductIndex].cantidad = nuevaCantidad;
+                    this.showNotification(
+                        `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`,
+                        'success'
                     );
+                } else {
+                    // Si no existe, agregar nuevo producto con TODA la información del artículo
+                    const product = {
+                        uniqueId: Date.now() + Math.random(),
+                        articuloId: cotizacionProduct.articulo_id,
+                        nombre: articuloCompleto.nombre,
+                        codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
+                        codigo_barras: articuloCompleto.codigo_barras,
+                        codigo_repuesto: articuloCompleto.codigo_repuesto,
+                        tipo_articulo: articuloCompleto.tipo_articulo,
+                        modelo: articuloCompleto.modelo,
+                        marca: articuloCompleto.marca,
+                        subcategoria: articuloCompleto.subcategoria,
+                        cantidad: 1, // Siempre empezar con 1
+                        descripcion: cotizacionProduct.descripcion ||
+                            (this.selectedCotizacionInfo ?
+                                `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
+                                'Desde cotización'),
+                        cantidadCotizacion: cotizacionProduct.cantidad, // Guardar la cantidad máxima
+                        esDeCotizacion: true // Marcar que viene de cotización
+                    };
 
-                    if (existingProductIndex !== -1) {
-                        // Si existe, verificar que no exceda la cantidad de la cotización
-                        const nuevaCantidad = this.products[existingProductIndex].cantidad + 1;
-                        
-                        // Obtener la cantidad máxima permitida desde la cotización
-                        const cantidadMaxima = cotizacionProduct.cantidad;
-                        
-                        if (nuevaCantidad > cantidadMaxima) {
-                            this.showNotification(
-                                `❌ No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`,
-                                'error'
-                            );
-                            return;
-                        }
-
-                        this.products[existingProductIndex].cantidad = nuevaCantidad;
-                        this.showNotification(
-                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`,
-                            'success'
-                        );
-                    } else {
-                        // Si no existe, agregar nuevo producto con cantidad inicial de 1
-                        const product = {
-                            uniqueId: Date.now() + Math.random(),
-                            articuloId: cotizacionProduct.articulo_id,
-                            nombre: articuloCompleto.nombre,
-                            codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
-                            tipo: articuloCompleto.tipo_articulo,
-                            cantidad: 1, // Siempre empezar con 1
-                            descripcion: cotizacionProduct.descripcion ||
-                                (this.selectedCotizacionInfo ?
-                                    `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
-                                    'Desde cotización'),
-                            cantidadCotizacion: cotizacionProduct.cantidad, // Guardar la cantidad máxima
-                            esDeCotizacion: true // Marcar que viene de cotización
-                        };
-
-                        this.products.push(product);
-                        this.showNotification(
-                            `✅ Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`, 
-                            'success'
-                        );
-                    }
-                },
+                    this.products.push(product);
+                    this.showNotification(
+                        `✅ Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`, 
+                        'success'
+                    );
+                }
+            },
 
                 addAllCotizacionProducts() {
     if (this.cotizacionProducts.length === 0) {
@@ -1062,13 +1137,18 @@
                     skippedCount++;
                 }
             } else {
-                // Agregar nuevo producto con cantidad 1
+                // Agregar nuevo producto con TODA la información
                 const product = {
                     uniqueId: Date.now() + Math.random(),
                     articuloId: cotizacionProduct.articulo_id,
                     nombre: articuloCompleto.nombre,
                     codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
-                    tipo: articuloCompleto.tipo_articulo,
+                    codigo_barras: articuloCompleto.codigo_barras,
+                    codigo_repuesto: articuloCompleto.codigo_repuesto,
+                    tipo_articulo: articuloCompleto.tipo_articulo,
+                    modelo: articuloCompleto.modelo,
+                    marca: articuloCompleto.marca,
+                    subcategoria: articuloCompleto.subcategoria,
                     cantidad: 1,
                     descripcion: cotizacionProduct.descripcion ||
                         (this.selectedCotizacionInfo ?
@@ -1151,60 +1231,64 @@
                 },
 
                 addProduct() {
-                    if (!this.canAddProduct) {
-                        this.showNotification('Por favor seleccione un artículo y cantidad', 'error');
-                        return;
-                    }
+    if (!this.canAddProduct) {
+        this.showNotification('Por favor seleccione un artículo y cantidad', 'error');
+        return;
+    }
 
-                    // Obtener información del artículo seleccionado
-                    const selectedOption = $(this.$refs.articuloSelect).find('option:selected');
-                    const articuloData = this.articulos.find(a => a.idArticulos == this.newProduct
-                        .articuloId);
+    // Obtener información del artículo seleccionado
+    const selectedOption = $(this.$refs.articuloSelect).find('option:selected');
+    const articuloData = this.articulos.find(a => a.idArticulos == this.newProduct.articuloId);
 
-                    if (!articuloData) {
-                        this.showNotification('Error al obtener información del artículo', 'error');
-                        return;
-                    }
+    if (!articuloData) {
+        this.showNotification('Error al obtener información del artículo', 'error');
+        return;
+    }
 
-                    // Verificar si ya existe el artículo
-                    const existingProductIndex = this.products.findIndex(product =>
-                        product.articuloId === this.newProduct.articuloId
-                    );
+    // Verificar si ya existe el artículo
+    const existingProductIndex = this.products.findIndex(product =>
+        product.articuloId === this.newProduct.articuloId
+    );
 
-                    if (existingProductIndex !== -1) {
-                        // Si existe, sumar la cantidad
-                        this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(
-                            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
-                            'success');
-                    } else {
-                        // Si no existe, agregar nuevo producto
-                        const product = {
-                            uniqueId: Date.now() + Math.random(),
-                            articuloId: this.newProduct.articuloId,
-                            nombre: articuloData.nombre,
-                            codigo: articuloData.codigo_barras || articuloData.codigo_repuesto,
-                            tipo: articuloData.tipo_articulo,
-                            cantidad: this.newProduct.cantidad,
-                            descripcion: this.newProduct.descripcion
-                        };
+    if (existingProductIndex !== -1) {
+        // Si existe, sumar la cantidad
+        this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
+        this.showNotification(
+            `✅ Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
+            'success');
+    } else {
+        // Si no existe, agregar nuevo producto con toda la información (sin stock)
+        const product = {
+            uniqueId: Date.now() + Math.random(),
+            articuloId: this.newProduct.articuloId,
+            nombre: articuloData.nombre,
+            codigo: articuloData.codigo_barras || articuloData.codigo_repuesto,
+            codigo_barras: articuloData.codigo_barras,
+            codigo_repuesto: articuloData.codigo_repuesto,
+            tipo_articulo: articuloData.tipo_articulo,
+            modelo: articuloData.modelo,
+            marca: articuloData.marca,
+            subcategoria: articuloData.subcategoria,
+            cantidad: this.newProduct.cantidad,
+            descripcion: this.newProduct.descripcion
+        };
 
-                        this.products.push(product);
-                        this.showNotification('Artículo agregado correctamente', 'success');
-                    }
+        this.products.push(product);
+        this.showNotification('Artículo agregado correctamente', 'success');
+    }
 
-                    // Reset form
-                    this.newProduct = {
-                        articuloId: '',
-                        cantidad: 1,
-                        descripcion: ''
-                    };
+    // Reset form
+    this.newProduct = {
+        articuloId: '',
+        cantidad: 1,
+        descripcion: ''
+    };
 
-                    // Reset Select2
-                    if (this.$refs.articuloSelect) {
-                        $(this.$refs.articuloSelect).val('').trigger('change');
-                    }
-                },
+    // Reset Select2
+    if (this.$refs.articuloSelect) {
+        $(this.$refs.articuloSelect).val('').trigger('change');
+    }
+},
 
                 removeProduct(index) {
                     this.products.splice(index, 1);
@@ -1261,6 +1345,35 @@
                     this.products = [];
                     this.showClearModal = false;
                     this.showNotification('Todos los artículos han sido eliminados', 'info');
+                },
+                // Métodos auxiliares para obtener información de artículos
+                getArticuloCompleto(articuloId) {
+                    return this.articulos.find(a => a.idArticulos == articuloId);
+                },
+
+                getArticuloNombre(articuloId) {
+                    const articulo = this.getArticuloCompleto(articuloId);
+                    return articulo ? articulo.nombre : 'Artículo no encontrado';
+                },
+
+                getArticuloCodigo(articuloId) {
+                    const articulo = this.getArticuloCompleto(articuloId);
+                    return articulo ? (articulo.codigo_barras || articulo.codigo_repuesto) : 'N/A';
+                },
+
+                getArticuloTipo(articuloId) {
+                    const articulo = this.getArticuloCompleto(articuloId);
+                    return articulo ? articulo.tipo_articulo : '';
+                },
+
+                getArticuloModelo(articuloId) {
+                    const articulo = this.getArticuloCompleto(articuloId);
+                    return articulo ? articulo.modelo : '';
+                },
+
+                getArticuloMarca(articuloId) {
+                    const articulo = this.getArticuloCompleto(articuloId);
+                    return articulo ? articulo.marca : '';
                 },
 
                 cancelClearAll() {

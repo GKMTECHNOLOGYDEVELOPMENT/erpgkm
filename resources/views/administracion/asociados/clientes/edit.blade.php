@@ -2,7 +2,6 @@
     <!-- Cargar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-
     <style>
         .remove-client {
             background: transparent;
@@ -42,6 +41,7 @@
             margin-right: 5px;
         }
     </style>
+    
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
@@ -52,6 +52,7 @@
             </li>
         </ul>
     </div>
+    
     <!-- Formulario de Editar Cliente -->
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CLIENTES</h2>
@@ -62,9 +63,9 @@
                 @method('PUT')
 
                 <!-- Clientes Generales asociados -->
-                <div>
+                <div class="md:col-span-2">
                     <strong>Clientes Generales Asociados:</strong>
-                    <div id="selected-items-list" class="flex flex-wrap gap-2">
+                    <div id="selected-items-list" class="flex flex-wrap gap-2 mt-2">
                         @foreach ($clientesGeneralesAsociados as $clienteGeneral)
                             <span class="badge bg-primary">
                                 {{ $clienteGeneral->descripcion }}
@@ -76,8 +77,8 @@
                 </div>
 
                 <!-- ClienteGeneral -->
-                <div>
-                    <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                <div class="md:col-span-2">
+                    <label for="idClienteGeneral" class="block text-sm font-medium mb-2">Cliente General</label>
                     <select id="idClienteGeneral" name="idClienteGeneral" class="select2 w-full" style="display: none">
                         <option value="" disabled selected>Seleccionar Cliente General</option>
                         @foreach ($clientesGenerales as $clienteGeneral)
@@ -89,35 +90,6 @@
                     </select>
                 </div>
 
-
-                <!-- Contactos Asociados -->
-                <div class="md:col-span-2">
-                    <label for="contactos" class="block text-sm font-medium mb-2">Contactos Asociados</label>
-
-                    <!-- Lista de contactos seleccionados -->
-                    <div id="contactos-seleccionados" class="mb-3 flex flex-wrap gap-2">
-                        @foreach ($cliente->contactos as $contacto)
-                            <div class="contacto-badge" data-id="{{ $contacto->id }}">
-                                {{ $contacto->nombre_completo }}
-                                <button type="button" class="remove-contacto ml-2 text-white"
-                                    data-id="{{ $contacto->id }}">×</button>
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <!-- Select2 para contactos -->
-                    <select id="contactos" name="contactos[]" multiple class="form-select w-full"
-                        style="display: none;">
-                        @foreach ($todosLosContactos as $contacto)
-                            <option value="{{ $contacto->id }}"
-                                {{ $cliente->contactos->contains('id', $contacto->id) ? 'selected' : '' }}>
-                                {{ $contacto->nombre_completo }} - {{ $contacto->correo_electronico }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <input type="hidden" name="contactos_sync" id="contactos_sync"
-                        value="{{ $cliente->contactos->pluck('id')->implode(',') }}">
-                </div>
                 <!-- Nombre -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium">Nombre</label>
@@ -139,15 +111,12 @@
                     </select>
                 </div>
 
-
                 <!-- Documento -->
                 <div>
                     <label for="documento" class="block text-sm font-medium">Documento</label>
                     <input id="documento" type="text" name="documento" class="form-input w-full"
                         placeholder="Ingrese el documento" value="{{ old('documento', $cliente->documento) }}">
                 </div>
-
-
 
                 @php
                     $mostrarEsTienda = $cliente->idTipoDocumento == 1; // Por ejemplo, si el tipo de documento es "RUC" (asumiendo que '1' corresponde a RUC)
@@ -168,8 +137,6 @@
                         </div>
                     </div>
                 </div>
-
-
 
                 <!-- Teléfono -->
                 <div>
@@ -233,7 +200,7 @@
                     <input id="direccion" type="text" name="direccion" class="form-input w-full"
                         placeholder="Ingrese la dirección" value="{{ old('direccion', $cliente->direccion) }}">
                 </div>
-                <!-- Estado -->
+                
                 <!-- Estado -->
                 <div>
                     <label for="estado" class="block text-sm font-medium">Estado</label>
@@ -247,7 +214,6 @@
                             class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark dark:peer-checked:before:bg-white before:bottom-1 before:w-4 before:h-4 before:rounded-full peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
                     </div>
                 </div>
-
 
                 <!-- Botones -->
                 <div class="md:col-span-2 flex justify-end mt-4">
@@ -267,14 +233,6 @@
     <script>
         $(document).ready(function() {
             // ✅ Inicializar Select2
-            $('#contactos').select2({
-                placeholder: "Seleccionar contactos",
-                allowClear: true,
-                width: '100%',
-                closeOnSelect: false
-            });
-
-            // ✅ Inicializar otros Select2
             $('#idClienteGeneral').select2({
                 placeholder: "Seleccionar Cliente General",
                 allowClear: true,
@@ -286,49 +244,6 @@
                 allowClear: true,
                 width: '100%'
             });
-
-            // ✅ Manejar cambios en el select de contactos
-            $('#contactos').on('change', function() {
-                actualizarContactosSeleccionados();
-            });
-
-            // ✅ Función para actualizar la lista visual de contactos seleccionados
-            function actualizarContactosSeleccionados() {
-                const selectedIds = $('#contactos').val() || [];
-                const $container = $('#contactos-seleccionados');
-                $container.empty();
-
-                // Obtener los textos de las opciones seleccionadas
-                $('#contactos option:selected').each(function() {
-                    const contactId = $(this).val();
-                    const contactName = $(this).text();
-
-                    $container.append(`
-                        <div class="contacto-badge" data-id="${contactId}">
-                            ${contactName}
-                            <button type="button" class="remove-contacto ml-2 text-white" 
-                                    data-id="${contactId}">×</button>
-                        </div>
-                    `);
-                });
-
-                // Actualizar el campo hidden para el sync
-                $('#contactos_sync').val(selectedIds.join(','));
-            }
-
-            // ✅ Remover contacto individualmente
-            $('#contactos-seleccionados').on('click', '.remove-contacto', function() {
-                const contactId = $(this).data('id');
-                const $select = $('#contactos');
-
-                // Deseleccionar en el Select2
-                const currentValues = $select.val() || [];
-                const newValues = currentValues.filter(id => id != contactId);
-                $select.val(newValues).trigger('change');
-            });
-
-            // ✅ Actualizar contactos al cargar la página
-            actualizarContactosSeleccionados();
 
             // ✅ Mostrar u ocultar el switch "¿Es tienda?" cuando se selecciona "RUC"
             function toggleEsTienda() {
@@ -347,8 +262,6 @@
             toggleEsTienda();
         });
     </script>
-
-
 
     <script>
         $(document).ready(function() {
@@ -430,117 +343,87 @@
         });
     </script>
 
-
-
-
     <script>
         $(document).ready(function() {
-            $('#idCliente').change(function() {
-                var idCliente = $(this).val();
+            // Evento cuando se selecciona un cliente general
+            $('#idClienteGeneral').change(function() {
+                var idClienteGeneral = $(this).val(); // Obtener el ID del cliente general seleccionado
+                var descripcionClienteGeneral = $("#idClienteGeneral option:selected")
+                    .text(); // Obtener el nombre del cliente general
 
-                if (idCliente) {
-                    $.get('/clientes/generales/asociados/' + idCliente, function(data) {
-                        // Limpiar los items previos
-                        $('#selected-items-list').empty();
+                // Verificar si hay una opción seleccionada
+                if (idClienteGeneral) {
+                    // Comprobar si el cliente general ya está en la lista
+                    var existingBadge = $('#selected-items-list').find('[data-id="' + idClienteGeneral +
+                        '"]');
 
-                        // Agregar los nuevos badges
-                        data.forEach(function(clienteGeneral) {
-                            $('#selected-items-list').append(
-                                '<span class="badge badge-blue">' + clienteGeneral
-                                .descripcion + '</span>');
-                        });
+                    if (existingBadge.length > 0) {
+                        alert("Este cliente general ya está asociado.");
+                        return; // Evitar agregarlo de nuevo
+                    }
+
+                    // Agregar el nuevo cliente general a la lista
+                    var newBadge = '<span class="badge bg-primary" data-id="' + idClienteGeneral + '">' +
+                        descripcionClienteGeneral +
+                        '<button class="remove-client text-white ml-2" data-id="' + idClienteGeneral +
+                        '">X</button>' +
+                        '</span>';
+
+                    $('#selected-items-list').append(newBadge);
+
+                    // Enviar al servidor para almacenar la relación
+                    $.ajax({
+                        url: '/clientes/' + '{{ $cliente->idCliente }}' +
+                            '/agregar-cliente-general/' + idClienteGeneral,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}', // Token CSRF
+                            idClienteGeneral: idClienteGeneral,
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                console.log('Cliente general agregado exitosamente');
+                            } else {
+                                console.error('Error al agregar el cliente general:', response
+                                    .message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error al agregar el cliente general:', error);
+                            alert("Hubo un error al agregar el cliente general.");
+                        }
                     });
                 }
             });
-        });
-    </script>
 
+            // Eliminar un cliente general de la lista
+            $('#selected-items-list').on('click', '.remove-client', function(event) {
+                event.preventDefault(); // Evitar que se recargue la página
 
-    <script>
-        $(document).ready(function() {
-            // Inicializar Select2
-            NiceSelect.bind(document.getElementById("idClienteGeneral"));
-            NiceSelect.bind(document.getElementById("idTipoDocumento"));
-        });
+                var idClienteGeneral = $(this).data('id');
+                var badge = $(this).parent();
 
-        // Evento cuando se selecciona un cliente general
-        $('#idClienteGeneral').change(function() {
-            var idClienteGeneral = $(this).val(); // Obtener el ID del cliente general seleccionado
-            var descripcionClienteGeneral = $("#idClienteGeneral option:selected")
-                .text(); // Obtener el nombre del cliente general
-
-            // Verificar si hay una opción seleccionada
-            if (idClienteGeneral) {
-                // Comprobar si el cliente general ya está en la lista
-                var existingBadge = $('#selected-items-list').find('[data-id="' + idClienteGeneral +
-                    '"]');
-
-                if (existingBadge.length > 0) {
-                    alert("Este cliente general ya está asociado.");
-                    return; // Evitar agregarlo de nuevo
-                }
-
-                // Agregar el nuevo cliente general a la lista
-                var newBadge = '<span class="badge bg-primary" data-id="' + idClienteGeneral + '">' +
-                    descripcionClienteGeneral +
-                    '<button class="remove-client text-white ml-2" data-id="' + idClienteGeneral +
-                    '">X</button>' +
-                    '</span>';
-
-                $('#selected-items-list').append(newBadge);
-
-                // Enviar al servidor para almacenar la relación
+                // Enviar al servidor para eliminar la relación
                 $.ajax({
                     url: '/clientes/' + '{{ $cliente->idCliente }}' +
-                        '/agregar-cliente-general/' + idClienteGeneral,
-                    type: 'POST',
+                        '/eliminar-cliente-general/' + idClienteGeneral,
+                    type: 'DELETE',
                     data: {
                         _token: '{{ csrf_token() }}', // Token CSRF
-                        idClienteGeneral: idClienteGeneral,
                     },
                     success: function(response) {
+                        // Si la eliminación es exitosa, eliminar el badge
                         if (response.success) {
-                            console.log('Cliente general agregado exitosamente');
+                            badge.remove();
                         } else {
-                            console.error('Error al agregar el cliente general:', response
-                                .message);
+                            alert("Hubo un error al eliminar el cliente general.");
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.error('Error al agregar el cliente general:', error);
-                        alert("Hubo un error al agregar el cliente general.");
-                    }
-                });
-            }
-        });
-
-        // Eliminar un cliente general de la lista
-        $('#selected-items-list').on('click', '.remove-client', function(event) {
-            event.preventDefault(); // Evitar que se recargue la página
-
-            var idClienteGeneral = $(this).data('id');
-            var badge = $(this).parent();
-
-            // Enviar al servidor para eliminar la relación
-            $.ajax({
-                url: '/clientes/' + '{{ $cliente->idCliente }}' +
-                    '/eliminar-cliente-general/' + idClienteGeneral,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}', // Token CSRF
-                },
-                success: function(response) {
-                    // Si la eliminación es exitosa, eliminar el badge
-                    if (response.success) {
-                        badge.remove();
-                    } else {
+                        console.error('Error al eliminar el cliente general', error);
                         alert("Hubo un error al eliminar el cliente general.");
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error al eliminar el cliente general', error);
-                    alert("Hubo un error al eliminar el cliente general.");
-                }
+                });
             });
         });
     </script>

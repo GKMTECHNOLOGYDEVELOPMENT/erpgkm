@@ -272,80 +272,87 @@
                 </div>
             </td>
 
-            <!-- NUEVA COLUMNA: Entregado A -->
-            <td class="px-6 py-6">
-                @if ($repuesto->ya_procesado)
-                    @php
-                        // Obtener información de a quién se entregó este repuesto
-                        $entregaInfo = DB::table('repuestos_entregas as re')
-                            ->select(
-                                're.tipo_entrega',
-                                're.usuario_destino_id',
-                                'u.Nombre',
-                                'u.apellidoPaterno',
-                                'u.apellidoMaterno'
-                            )
-                            ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
-                            ->where('re.solicitud_id', $solicitud->idsolicitudesordenes)
-                            ->where('re.articulo_id', $repuesto->idArticulos)
-                            ->first();
-                    @endphp
+          <!-- NUEVA COLUMNA: Entregado A -->
+<td class="px-6 py-6">
+    @if ($repuesto->ya_procesado)
+        @php
+            // Obtener información de a quién se entregó este repuesto
+            $entregaInfo = DB::table('repuestos_entregas as re')
+                ->select(
+                    're.tipo_entrega',
+                    're.usuario_destino_id',
+                    'u.Nombre',
+                    'u.apellidoPaterno',
+                    'u.apellidoMaterno'
+                )
+                ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
+                ->where('re.solicitud_id', $solicitud->idsolicitudesordenes)
+                ->where('re.articulo_id', $repuesto->idArticulos)
+                ->first();
+        @endphp
 
-                    @if($entregaInfo)
-                        <div class="text-center">
-                            @switch($entregaInfo->tipo_entrega)
-                                @case('solicitante')
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <i class="fas fa-user-tie text-blue-600"></i>
-                                        <div>
-                                            <p class="font-semibold text-slate-900 text-sm">
-                                                {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
-                                            </p>
-                                            <p class="text-xs text-slate-500">Solicitante</p>
-                                        </div>
-                                    </div>
-                                    @break
-                                
-                                @case('tecnico')
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <i class="fas fa-user-cog text-green-600"></i>
-                                        <div>
-                                            <p class="font-semibold text-slate-900 text-sm">
-                                                {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
-                                            </p>
-                                            <p class="text-xs text-slate-500">Técnico</p>
-                                        </div>
-                                    </div>
-                                    @break
-                                
-                                @case('otro_usuario')
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <i class="fas fa-users text-orange-600"></i>
-                                        <div>
-                                            <p class="font-semibold text-slate-900 text-sm">
-                                                {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
-                                            </p>
-                                            <p class="text-xs text-slate-500">Otro usuario</p>
-                                        </div>
-                                    </div>
-                                    @break
-                                
-                                @default
-                                    <span class="text-slate-500 text-sm">No especificado</span>
-                            @endswitch
+        @if($entregaInfo && $entregaInfo->usuario_destino_id)
+            <div class="text-center">
+                @switch($entregaInfo->tipo_entrega)
+                    @case('solicitante')
+                        <div class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-user-tie text-blue-600"></i>
+                            <div>
+                                <p class="font-semibold text-slate-900 text-sm">
+                                    {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
+                                </p>
+                                <p class="text-xs text-slate-500">Solicitante</p>
+                            </div>
                         </div>
-                    @else
-                        <span class="text-slate-400 text-sm">Información no disponible</span>
-                    @endif
-                @else
-                    <div class="text-center">
-                        <span class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-700">
-                            <i class="fas fa-clock mr-1"></i>
-                            Pendiente
-                        </span>
-                    </div>
-                @endif
-            </td>
+                        @break
+                    
+                    @case('tecnico')
+                        <div class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-user-cog text-green-600"></i>
+                            <div>
+                                <p class="font-semibold text-slate-900 text-sm">
+                                    {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
+                                </p>
+                                <p class="text-xs text-slate-500">Técnico</p>
+                            </div>
+                        </div>
+                        @break
+                    
+                    @case('otro_usuario')
+                        <div class="flex items-center justify-center space-x-2">
+                            <i class="fas fa-users text-orange-600"></i>
+                            <div>
+                                <p class="font-semibold text-slate-900 text-sm">
+                                    {{ $entregaInfo->Nombre }} {{ $entregaInfo->apellidoPaterno }}
+                                </p>
+                                <p class="text-xs text-slate-500">Otro usuario</p>
+                            </div>
+                        </div>
+                        @break
+                    
+                    @default
+                        <span class="text-slate-500 text-sm">No especificado</span>
+                @endswitch
+            </div>
+        @else
+            <!-- MOSTRAR "Pendiente por asignar" cuando está procesado pero no tiene info de entrega -->
+            <div class="text-center">
+                <span class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-purple-100 text-purple-700">
+                    <i class="fas fa-user-clock mr-1"></i>
+                    Pendiente por asignar
+                </span>
+            </div>
+        @endif
+    @else
+        <!-- Cuando NO está procesado -->
+        <div class="text-center">
+            <span class="inline-flex items-center px-3 py-2 rounded-xl text-sm font-semibold bg-amber-100 text-amber-700">
+                <i class="fas fa-clock mr-1"></i>
+                Pendiente Por Asignar
+            </span>
+        </div>
+    @endif
+</td>
 
             <!-- Estado -->
             <td class="px-6 py-6">
@@ -571,12 +578,26 @@
                                     </div>
                                 </div>
 
+                         
+        <div class="flex flex-col sm:flex-row gap-3">
+
+                            @if($puede_generar_pdf)
+                            <a href="{{ route('solicitudrepuesto.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
+                            target="_blank"
+                            class="inline-flex items-center px-5 py-2.5 bg-red-600 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                                <i class="fas fa-file-pdf mr-2"></i>
+                                Descargar Conformidad
+                            </a>
+                            @endif
                                 <!-- Botón -->
                                 <a href="{{ route('solicitudarticulo.index') }}"
                                     class="inline-flex items-center px-5 py-2.5 bg-dark text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                                     <i class="fas fa-arrow-left mr-2"></i>
                                     Volver al Listado Principal
                                 </a>
+
+
+        </div>
                             </div>
                         </div>
                     </div>

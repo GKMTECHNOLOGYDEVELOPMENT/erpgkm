@@ -125,188 +125,187 @@ class OrdenesHelpdeskController extends Controller
 
 
 
+public function storehelpdesk(Request $request)
+{
+    try {
+        Log::debug('Datos recibidos en storehelpdesk:', $request->all());
 
+        // Validación - agregar idContactoFinal como nullable
+        $validatedData = $request->validate([
+            'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
+            'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
+            'idCliente' => 'required|integer|exists:cliente,idCliente',
+            'idTienda' => 'required|integer|exists:tienda,idTienda',
+            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+            'fallaReportada' => 'required|string|max:255',
+            'esEnvio' => 'nullable|boolean',
+            'idTecnico' => 'nullable|integer|exists:usuarios,idUsuario',
+            'tipoRecojo' => 'nullable|integer|exists:tiporecojo,idtipoRecojo',
+            'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio',
+            'nombreTecnicoEnvio' => 'nullable|array',
+            'dniTecnicoEnvio' => 'nullable|array',
+            'agencia' => 'nullable|string|max:255',
+            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
 
+            // Validación solo si el tipoServicio es 6
+            'tipoProducto' => 'required_if:tipoServicio,6|integer|exists:categoria,idCategoria',
+            'marca' => 'required_if:tipoServicio,6|integer|exists:marca,idMarca',
+            'modelo' => 'required_if:tipoServicio,6|integer|exists:modelo,idModelo',
+            'serieRetirar' => 'nullable|string|max:255',
+            'observaciones' => 'nullable|string|max:1000',
+            'nrmcotizacion' => 'nullable|string|max:1000',
+        ]);
 
-    public function storehelpdesk(Request $request)
-    {
-        try {
-            Log::debug('Datos recibidos en storehelpdesk:', $request->all());
+        Log::debug('Datos validados:', $validatedData);
 
-            // Validación
-            $validatedData = $request->validate([
-                'numero_ticket' => 'required|string|max:255|unique:tickets,numero_ticket',
-                'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
-                'idCliente' => 'required|integer|exists:cliente,idCliente',
-                'idTienda' => 'required|integer|exists:tienda,idTienda',
-                'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
-                'fallaReportada' => 'required|string|max:255',
-                'esEnvio' => 'nullable|boolean',
-                'idTecnico' => 'nullable|integer|exists:usuarios,idUsuario',
-                'tipoRecojo' => 'nullable|integer|exists:tiporecojo,idtipoRecojo',
-                'tipoEnvio' => 'nullable|integer|exists:tipoenvio,idtipoenvio',
-                'nombreTecnicoEnvio' => 'nullable|array',
-                'dniTecnicoEnvio' => 'nullable|array',
-                'agencia' => 'nullable|string|max:255',
+        // Crear el ticket - incluir idContactoFinal
+        $ticket = Ticket::create([
+            'numero_ticket' => $validatedData['numero_ticket'],
+            'idClienteGeneral' => $validatedData['idClienteGeneral'],
+            'idCliente' => $validatedData['idCliente'],
+            'idContactoFinal' => $validatedData['idContactoFinal'] ?? null, // ✅ NUEVO CAMPO
+            'idTienda' => $validatedData['idTienda'],
+            'tipoServicio' => $validatedData['tipoServicio'],
+            'idUsuario' => auth()->id(),
+            'fallaReportada' => $validatedData['fallaReportada'],
+            'nrmcotizacion' => $validatedData['nrmcotizacion'],
+            'fecha_creacion' => now(),
+            'idTipotickets' => 2,
+            'envio' => $validatedData['esEnvio'] ? 1 : 0,
+        ]);
 
-                // Validación solo si el tipoServicio es 6
-                'tipoProducto' => 'required_if:tipoServicio,6|integer|exists:categoria,idCategoria',
-                'marca' => 'required_if:tipoServicio,6|integer|exists:marca,idMarca',
-                'modelo' => 'required_if:tipoServicio,6|integer|exists:modelo,idModelo',
-                'serieRetirar' => 'nullable|string|max:255',
-                'observaciones' => 'nullable|string|max:1000',
-                'nrmcotizacion' => 'nullable|string|max:1000',
+        Log::debug('Orden de trabajo creada correctamente.');
 
-            ]);
+        // ... el resto de tu código permanece igual
+        // Guardar técnicos si es envío
+        if ($validatedData['esEnvio']) {
+            foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
+                $dni = $validatedData['dniTecnicoEnvio'][$index];
 
-            Log::debug('Datos validados:', $validatedData);
-
-            // Crear el ticket
-            $ticket = Ticket::create([
-                'numero_ticket' => $validatedData['numero_ticket'],
-                'idClienteGeneral' => $validatedData['idClienteGeneral'],
-                'idCliente' => $validatedData['idCliente'],
-                'idTienda' => $validatedData['idTienda'],
-                'tipoServicio' => $validatedData['tipoServicio'],
-                'idUsuario' => auth()->id(),
-                'fallaReportada' => $validatedData['fallaReportada'],
-                'nrmcotizacion' => $validatedData['nrmcotizacion'],
-                'fecha_creacion' => now(),
-                'idTipotickets' => 2,
-                'envio' => $validatedData['esEnvio'] ? 1 : 0,
-            ]);
-
-            Log::debug('Orden de trabajo creada correctamente.');
-
-            // Guardar técnicos si es envío
-            if ($validatedData['esEnvio']) {
-                foreach ($validatedData['nombreTecnicoEnvio'] as $index => $nombre) {
-                    $dni = $validatedData['dniTecnicoEnvio'][$index];
-
-                    DB::table('ticket_receptor')->insert([
-                        'idTickets' => $ticket->idTickets,
-                        'nombre' => $nombre,
-                        'dni' => $dni,
-                    ]);
-                }
-
-                Log::info('Datos de técnicos de recojo guardados correctamente');
-            }
-
-            // Solo crear el flujo normal si tipoServicio NO es 6
-            if ($validatedData['tipoServicio'] != 6) {
-                $idEstadflujo = $validatedData['esEnvio'] ? 30 : 1;
-
-                $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
-                    'idTicket' => $ticket->idTickets,
-                    'idEstadflujo' => $idEstadflujo,
-                    'idUsuario' => auth()->id(),
-                    'fecha_creacion' => now(),
-                ]);
-
-                $ticket->idTicketFlujo = $ticketFlujoId;
-                $ticket->save();
-
-                Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
-            }
-
-            // Guardar datos de envío si es necesario
-            if ($validatedData['esEnvio']) {
-                DB::table('datos_envio')->insert([
+                DB::table('ticket_receptor')->insert([
                     'idTickets' => $ticket->idTickets,
-                    'tipoRecojo' => $validatedData['tipoRecojo'],
-                    'tipoEnvio' => $validatedData['tipoEnvio'],
-                    'idUsuario' => $validatedData['idTecnico'],
-                    'agencia' => $validatedData['agencia'],
-                    'tipo' => 1
+                    'nombre' => $nombre,
+                    'dni' => $dni,
                 ]);
-                Log::info('Datos de envío guardados correctamente');
             }
 
-            // Crear visita y flujo adicional si tipoServicio es 6 (Laboratorio)
-            if ($validatedData['tipoServicio'] == 6) {
-                // Crear la visita
-                $idVisita = DB::table('visitas')->insertGetId([
-                    'nombre' => 'LABORATORIO',
-                    'fecha_programada' => now(),
-                    'fecha_asignada' => now(),
-                    'fechas_desplazamiento' => now(),
-                    'fecha_llegada' => now(),
-                    'fecha_inicio' => now(),
-                    'fecha_final' => now(),
-                    'fecha_inicio_hora' => now(),
-                    'fecha_final_hora' => now(),
-                    'estado' => 1,
-                    'idTickets' => $ticket->idTickets,
-                    'idUsuario' => auth()->id(),
-                    'necesita_apoyo' => 0,
-                    'tipoServicio' => 6,
-                    'visto' => 0,
-                    'recojo' => 0,
-                    'estadovisita' => 0,
-                    'celularclientetienda' => null,
-                    'dniclientetienda' => null,
-                    'nombreclientetienda' => null
-                ]);
-
-                Log::info('Visita de laboratorio creada automáticamente.');
-
-                // Crear flujo adicional con estado 2
-                $ticketFlujoEstado2 = DB::table('ticketflujo')->insertGetId([
-                    'idTicket' => $ticket->idTickets,
-                    'idEstadflujo' => 10,
-                    'idUsuario' => auth()->id(),
-                    'fecha_creacion' => now(),
-                ]);
-
-                // Actualizar el ticket con el nuevo flujo (estado 2)
-                $ticket->idTicketFlujo = $ticketFlujoEstado2;
-                $ticket->save();
-
-                Log::info('Ticket actualizado con segundo idTicketFlujo (estado 2)', [
-                    'ticket' => $ticket->idTickets,
-                    'nuevo_flujo' => $ticketFlujoEstado2
-                ]);
-
-                // Ahora, guardamos los datos en la tabla equipos
-                DB::table('equipos')->insert([
-                    'nserie' => $validatedData['serieRetirar'],
-                    'modalidad' => 'Instalación',  // Aquí puedes poner la modalidad que necesites, por ejemplo 'Laboratorio'
-                    'idTickets' => $ticket->idTickets,
-                    'idModelo' => $validatedData['modelo'],
-                    'idMarca' => $validatedData['marca'],
-                    'idCategoria' => $validatedData['tipoProducto'],
-                    'idVisitas' => $idVisita,  // Usamos el idVisita generado
-                    'observaciones' => $validatedData['observaciones'],
-                ]);
-
-                Log::info('Datos del equipo guardados correctamente');
-            }
-
-            // Redirección según tipoServicio
-            if ($validatedData['tipoServicio'] == 2) {
-                return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
-            } elseif ($validatedData['tipoServicio'] == 1) {
-                return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
-            } elseif ($validatedData['tipoServicio'] == 5) {
-                return redirect()->route('ordenes.helpdesk.ejecucion.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Ejecucion).');
-            } elseif ($validatedData['tipoServicio'] == 6) {
-                return redirect()->route('ordenes.helpdesk.laboratorio.edit', ['id' => $ticket->idTickets])
-                    ->with('success', 'Orden de trabajo creada correctamente (Laboratorio).');
-            } else {
-                return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
-            }
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Errores de validación:', $e->errors());
-            return redirect()->back()->withErrors($e->errors())->withInput();
-        } catch (\Exception $e) {
-            Log::error('Error al crear la orden de trabajo: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
+            Log::info('Datos de técnicos de recojo guardados correctamente');
         }
+
+        // Solo crear el flujo normal si tipoServicio NO es 6
+        if ($validatedData['tipoServicio'] != 6) {
+            $idEstadflujo = $validatedData['esEnvio'] ? 30 : 1;
+
+            $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
+                'idTicket' => $ticket->idTickets,
+                'idEstadflujo' => $idEstadflujo,
+                'idUsuario' => auth()->id(),
+                'fecha_creacion' => now(),
+            ]);
+
+            $ticket->idTicketFlujo = $ticketFlujoId;
+            $ticket->save();
+
+            Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
+        }
+
+        // Guardar datos de envío si es necesario
+        if ($validatedData['esEnvio']) {
+            DB::table('datos_envio')->insert([
+                'idTickets' => $ticket->idTickets,
+                'tipoRecojo' => $validatedData['tipoRecojo'],
+                'tipoEnvio' => $validatedData['tipoEnvio'],
+                'idUsuario' => $validatedData['idTecnico'],
+                'agencia' => $validatedData['agencia'],
+                'tipo' => 1
+            ]);
+            Log::info('Datos de envío guardados correctamente');
+        }
+
+        // Crear visita y flujo adicional si tipoServicio es 6 (Laboratorio)
+        if ($validatedData['tipoServicio'] == 6) {
+            // Crear la visita
+            $idVisita = DB::table('visitas')->insertGetId([
+                'nombre' => 'LABORATORIO',
+                'fecha_programada' => now(),
+                'fecha_asignada' => now(),
+                'fechas_desplazamiento' => now(),
+                'fecha_llegada' => now(),
+                'fecha_inicio' => now(),
+                'fecha_final' => now(),
+                'fecha_inicio_hora' => now(),
+                'fecha_final_hora' => now(),
+                'estado' => 1,
+                'idTickets' => $ticket->idTickets,
+                'idUsuario' => auth()->id(),
+                'necesita_apoyo' => 0,
+                'tipoServicio' => 6,
+                'visto' => 0,
+                'recojo' => 0,
+                'estadovisita' => 0,
+                'celularclientetienda' => null,
+                'dniclientetienda' => null,
+                'nombreclientetienda' => null
+            ]);
+
+            Log::info('Visita de laboratorio creada automáticamente.');
+
+            // Crear flujo adicional con estado 2
+            $ticketFlujoEstado2 = DB::table('ticketflujo')->insertGetId([
+                'idTicket' => $ticket->idTickets,
+                'idEstadflujo' => 10,
+                'idUsuario' => auth()->id(),
+                'fecha_creacion' => now(),
+            ]);
+
+            // Actualizar el ticket con el nuevo flujo (estado 2)
+            $ticket->idTicketFlujo = $ticketFlujoEstado2;
+            $ticket->save();
+
+            Log::info('Ticket actualizado con segundo idTicketFlujo (estado 2)', [
+                'ticket' => $ticket->idTickets,
+                'nuevo_flujo' => $ticketFlujoEstado2
+            ]);
+
+            // Ahora, guardamos los datos en la tabla equipos
+            DB::table('equipos')->insert([
+                'nserie' => $validatedData['serieRetirar'],
+                'modalidad' => 'Instalación',
+                'idTickets' => $ticket->idTickets,
+                'idModelo' => $validatedData['modelo'],
+                'idMarca' => $validatedData['marca'],
+                'idCategoria' => $validatedData['tipoProducto'],
+                'idVisitas' => $idVisita,
+                'observaciones' => $validatedData['observaciones'],
+            ]);
+
+            Log::info('Datos del equipo guardados correctamente');
+        }
+
+        // Redirección según tipoServicio
+        if ($validatedData['tipoServicio'] == 2) {
+            return redirect()->route('ordenes.helpdesk.levantamiento.edit', ['id' => $ticket->idTickets])
+                ->with('success', 'Orden de trabajo creada correctamente (Levantamiento de Información).');
+        } elseif ($validatedData['tipoServicio'] == 1) {
+            return redirect()->route('ordenes.helpdesk.soporte.edit', ['id' => $ticket->idTickets])
+                ->with('success', 'Orden de trabajo creada correctamente (Soporte On Site).');
+        } elseif ($validatedData['tipoServicio'] == 5) {
+            return redirect()->route('ordenes.helpdesk.ejecucion.edit', ['id' => $ticket->idTickets])
+                ->with('success', 'Orden de trabajo creada correctamente (Ejecucion).');
+        } elseif ($validatedData['tipoServicio'] == 6) {
+            return redirect()->route('ordenes.helpdesk.laboratorio.edit', ['id' => $ticket->idTickets])
+                ->with('success', 'Orden de trabajo creada correctamente (Laboratorio).');
+        } else {
+            return redirect()->route('ordenes.helpdesk.index')->with('success', 'Orden de trabajo creada correctamente.');
+        }
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Errores de validación:', $e->errors());
+        return redirect()->back()->withErrors($e->errors())->withInput();
+    } catch (\Exception $e) {
+        Log::error('Error al crear la orden de trabajo: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
     }
+}
 
 
 
@@ -5502,5 +5501,121 @@ public function eliminarSuministro($id)
         return response()->json(['error' => 'Error al eliminar el artículo.'], 500);
     }
 }
+
+
+
+public function obtenerContactosPorClienteGeneral($idClienteGeneral)
+{
+    try {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $idClienteGeneral)
+            ->where('cf.estado', 1) // Solo contactos activos
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'contactos' => $contactos
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error al obtener contactos por cliente general: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar los contactos'
+        ], 500);
+    }
+}
+
+
+
+public function obtenerTodosLosContactos()
+{
+    try {
+        $contactos = DB::table('contactofinal as cf')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'contactos' => $contactos
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error al obtener todos los contactos: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar los contactos'
+        ], 500);
+    }
+}
+
+
+public function obtenerClienteGeneralConContactos($idClienteGeneral)
+{
+    try {
+        $clienteGeneral = DB::table('clientegeneral')
+            ->where('idClienteGeneral', $idClienteGeneral)
+            ->where('estado', 1)
+            ->first();
+
+        if (!$clienteGeneral) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cliente general no encontrado'
+            ], 404);
+        }
+
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'cliente_general' => $clienteGeneral,
+            'contactos' => $contactos
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error al obtener cliente general con contactos: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cargar la información'
+        ], 500);
+    }
+}
+
+
+
+
 
 }

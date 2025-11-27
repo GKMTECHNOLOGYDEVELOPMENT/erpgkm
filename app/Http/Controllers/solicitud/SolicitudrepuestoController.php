@@ -1318,6 +1318,9 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
     $repuestos_disponibles = $repuestos->where('suficiente_stock', true)->count();
     $total_repuestos = $repuestos->count();
 
+
+    $puede_generar_pdf = ($repuestos_procesados == $total_repuestos) && ($total_repuestos > 0);
+
     return view('solicitud.solicitudrepuesto.opciones', compact(
         'solicitud', 
         'repuestos', 
@@ -1327,7 +1330,9 @@ private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantid
         'total_repuestos',
         'solicitante',
         'tecnico',
-        'usuarios'
+        'usuarios',
+        'puede_generar_pdf' 
+
     ));
 }
 
@@ -1954,4 +1959,137 @@ private function actualizarKardexSalida($articuloId, $clienteGeneralId, $cantida
         throw $e;
     }
 }
+
+public function generarConformidad($id)
+{
+    try {
+        // Obtener la solicitud con información completa
+        $solicitud = DB::table('solicitudesordenes as so')
+            ->select(
+                'so.idsolicitudesordenes',
+                'so.codigo',
+                'so.tiposervicio',
+                'so.niveldeurgencia',
+                'so.fechacreacion',
+                'so.fecharequerida',
+                'so.fechaaprobacion',
+                'so.observaciones',
+                'so.cantidad',
+                'so.totalcantidadproductos',
+                'so.idusuario',
+                'so.idtecnico',
+                'so.estado', // ← NO OLVIDAR ESTE CAMPO
+                'u_solicitante.Nombre as solicitante_nombre',
+                'u_solicitante.apellidoPaterno as solicitante_apellido',
+                'u_solicitante.documento as solicitante_documento',
+                'u_aprobador.Nombre as aprobador_nombre',
+                'u_aprobador.apellidoPaterno as aprobador_apellido',
+                't.numero_ticket',
+                't.serie',
+                'm.nombre as modelo_nombre',
+                'mar.nombre as marca_nombre'
+            )
+            ->leftJoin('usuarios as u_solicitante', 'so.idusuario', '=', 'u_solicitante.idUsuario')
+            ->leftJoin('usuarios as u_aprobador', 'so.idaprobador', '=', 'u_aprobador.idUsuario')
+            ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
+            ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
+            ->leftJoin('marca as mar', 't.idMarca', '=', 'mar.idMarca')
+            ->where('so.idsolicitudesordenes', $id)
+            ->where('so.tipoorden', 'solicitud_repuesto')
+            ->first();
+
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        // Verificar que todos los repuestos estén procesados
+        $repuestosPendientes = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0)
+            ->count();
+
+        if ($repuestosPendientes > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede generar la conformidad: aún hay repuestos pendientes de entrega'
+            ], 400);
+        }
+
+        // Obtener repuestos entregados con información de entrega
+        $repuestos = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.cantidad',
+                'a.nombre as repuesto_nombre',
+                'a.codigo_barras',
+                'a.codigo_repuesto',
+                're.ubicacion_utilizada',
+                're.fecha_entrega',
+                're.tipo_entrega',
+                'u_destino.Nombre as destinatario_nombre',
+                'u_destino.apellidoPaterno as destinatario_apellido',
+                'u_entrego.Nombre as entregador_nombre',
+                'u_entrego.apellidoPaterno as entregador_apellido',
+                't.numero_ticket'
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->leftJoin('repuestos_entregas as re', function($join) use ($id) {
+                $join->on('re.articulo_id', '=', 'a.idArticulos')
+                     ->where('re.solicitud_id', $id);
+            })
+            ->leftJoin('usuarios as u_destino', 're.usuario_destino_id', '=', 'u_destino.idUsuario')
+            ->leftJoin('usuarios as u_entrego', 're.usuario_entrego_id', '=', 'u_entrego.idUsuario')
+            ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->where('oa.estado', 1)
+            ->get();
+
+        // Verificar que hay repuestos procesados
+        if ($repuestos->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay repuestos procesados para generar la conformidad'
+            ], 400);
+        }
+
+        // Datos estáticos de la empresa
+        $empresa = (object) [
+            'nombre_empresa' => 'GKM TECHNOLOGY',
+            'direccion' => 'Av. Principal 123',
+            'telefono' => '9999',
+            'ruc' => '000000',
+            'logo' => null
+        ];
+
+        // Generar PDF
+        $pdf = \PDF::loadView('solicitud.solicitudrepuesto.pdf.conformidad', [
+            'solicitud' => $solicitud,
+            'repuestos' => $repuestos,
+            'empresa' => $empresa,
+            'fecha_generacion' => now()->format('d/m/Y H:i')
+        ]);
+
+        $nombreArchivo = 'conformidad_repuestos_' . $solicitud->codigo . '_' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($nombreArchivo);
+
+    } catch (\Exception $e) {
+        Log::error('Error al generar PDF de conformidad de repuestos: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al generar el PDF: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
+
+
 }

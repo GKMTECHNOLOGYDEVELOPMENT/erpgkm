@@ -937,23 +937,27 @@
         }
 
         // 8. Cargar última modificación
-        function cargarUltimaModificacion() {
-            $.ajax({
-                url: '/ultima-modificacion/' + ticketId,
-                method: 'GET',
-                success: function(response) {
-                    if (response.success) {
-                        const mod = response.ultima_modificacion;
-                        const fecha = formatDate(mod.fecha_modificacion || mod.created_at);
-                        document.getElementById('ultimaModificacion').textContent =
-                            `${fecha} por ${mod.usuario}: Se modificó ${mod.campo} de "${mod.valor_antiguo}" a "${mod.valor_nuevo}"`;
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Error al cargar última modificación:', xhr);
-                }
-            });
+function cargarUltimaModificacion() {
+    // Verificar si el elemento existe
+    const ultimaModificacionElement = document.getElementById('ultimaModificacion');
+    if (!ultimaModificacionElement) return; // Salir si no existe
+    
+    $.ajax({
+        url: '/ultima-modificacion/' + ticketId,
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const mod = response.ultima_modificacion;
+                const fecha = formatDate(mod.fecha_modificacion || mod.created_at);
+                ultimaModificacionElement.textContent =
+                    `${fecha} por ${mod.usuario}: Se modificó ${mod.campo} de "${mod.valor_antiguo}" a "${mod.valor_nuevo}"`;
+            }
+        },
+        error: function(xhr) {
+            console.error('Error al cargar última modificación:', xhr);
         }
+    });
+}
 
         // 9. Inicialización completa
         function init() {
@@ -1032,28 +1036,32 @@
         });
 
         // Función para guardar en historial
-        function updateModificationLog(field, oldValue, newValue) {
-            const usuario = "{{ auth()->user()->Nombre }}";
-            const fecha = formatDate(new Date());
+function updateModificationLog(field, oldValue, newValue) {
+    const usuario = "{{ auth()->user()->Nombre }}";
+    const fecha = formatDate(new Date());
+    
+    // Verificar si el elemento existe antes de intentar modificarlo
+    const ultimaModificacionElement = document.getElementById('ultimaModificacion');
+    if (ultimaModificacionElement) {
+        ultimaModificacionElement.textContent =
+            `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
+    }
 
-            document.getElementById('ultimaModificacion').textContent =
-                `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
-
-            $.ajax({
-                url: '/guardar-modificacion/' + ticketId,
-                method: 'POST',
-                data: {
-                    field: field,
-                    oldValue: oldValue,
-                    newValue: newValue,
-                    usuario: usuario,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                error: function(xhr) {
-                    console.error('Error al guardar modificación:', xhr);
-                }
-            });
+    $.ajax({
+        url: '/guardar-modificacion/' + ticketId,
+        method: 'POST',
+        data: {
+            field: field,
+            oldValue: oldValue,
+            newValue: newValue,
+            usuario: usuario,
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        error: function(xhr) {
+            console.error('Error al guardar modificación:', xhr);
         }
+    });
+}
 
         // Iniciar todo cuando el DOM esté listo
         init();

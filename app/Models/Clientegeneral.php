@@ -55,4 +55,8 @@ class Clientegeneral extends Model
 	{
 		return $this->belongsToMany(Marca::class, 'marca_clientegeneral', 'idClienteGeneral', 'idMarca');
 	}
+	public function contactosFinales()
+    {
+        return $this->belongsToMany(ContactoFinal::class, 'cliente_general_contacto_final', 'idClienteGeneral', 'idContactoFinal');
+    }
 }

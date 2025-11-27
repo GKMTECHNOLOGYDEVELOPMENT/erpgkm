@@ -43,6 +43,14 @@
                     </select>
                 </div>
 
+                <!-- Agregar después del select de Cliente General -->
+                <div id="contactosContainer" class="hidden">
+                    <label for="idContactoFinal" class="block text-sm font-medium">Contacto</label>
+                    <select id="idContactoFinal" name="idContactoFinal" class="select2 w-full">
+                        <option value="" selected>Seleccionar Contacto</option>
+                    </select>
+                </div>
+
                 <!-- Cliente General -->
                 <div>
                     <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
@@ -902,4 +910,178 @@
         });
     </script>
 
+
+
+
+  <script>
+$(document).ready(function() {
+    const selectClienteGeneral = $('#idClienteGeneral');
+    
+    // Crear el select de contactos si no existe
+    if ($('#idContactoFinal').length === 0) {
+        $('<div id="contactosContainer" class="hidden">' +
+            '<label for="idContactoFinal" class="block text-sm font-medium">Contacto</label>' +
+            '<select id="idContactoFinal" name="idContactoFinal" class="select2 w-full">' +
+            '<option value="" selected>Seleccionar Contacto</option>' +
+            '</select>' +
+            '</div>').insertAfter(selectClienteGeneral.parent());
+    }
+
+    const contactosContainer = $('#contactosContainer');
+    const selectContacto = $('#idContactoFinal');
+
+    // Inicializar Select2 para contactos
+    selectContacto.select2({
+        width: '100%',
+        placeholder: 'Seleccionar Contacto'
+    });
+
+    // Función para limpiar y ocultar contactos
+    function limpiarContactos() {
+        selectContacto.empty().append('<option value="" selected>Seleccionar Contacto</option>');
+        
+        if (selectContacto.hasClass('select2-hidden-accessible')) {
+            selectContacto.select2('destroy');
+        }
+        selectContacto.select2({
+            width: '100%',
+            placeholder: 'Seleccionar Contacto'
+        });
+        
+        contactosContainer.addClass('hidden');
+    }
+
+    // Función para cargar contactos por cliente general
+    function cargarContactosPorClienteGeneral(idClienteGeneral) {
+        if (!idClienteGeneral) {
+            console.log('No hay cliente general seleccionado');
+            limpiarContactos();
+            return;
+        }
+
+        console.log(`Cargando contactos para cliente general: ${idClienteGeneral}`);
+        
+        selectContacto.prop('disabled', true);
+        
+        fetch(`/contactos/cliente-general/${idClienteGeneral}`)
+            .then(response => response.json())
+            .then(data => {
+                selectContacto.prop('disabled', false);
+                
+                if (data.success && data.contactos && data.contactos.length > 0) {
+                    console.log(`Encontrados ${data.contactos.length} contactos`);
+                    
+                    selectContacto.empty().append('<option value="" selected>Seleccionar Contacto</option>');
+                    
+                    data.contactos.forEach(contacto => {
+                        const displayText = contacto.telefono 
+                            ? `${contacto.nombre_completo} - ${contacto.correo} - ${contacto.telefono}`
+                            : `${contacto.nombre_completo} - ${contacto.correo}`;
+                        
+                        selectContacto.append(`<option value="${contacto.id}">${displayText}</option>`);
+                    });
+                    
+                    contactosContainer.removeClass('hidden');
+                    
+                    selectContacto.select2('destroy').select2({
+                        width: '100%',
+                        placeholder: 'Seleccionar Contacto'
+                    });
+                    
+                    toastr.success(`${data.contactos.length} contacto(s) cargado(s)`);
+                } else {
+                    console.log('No hay contactos para este cliente general');
+                    limpiarContactos();
+                    toastr.info('No hay contactos disponibles para este cliente general');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar contactos:', error);
+                selectContacto.prop('disabled', false);
+                limpiarContactos();
+                toastr.error('Error al cargar los contactos');
+            });
+    }
+
+    // Evento cuando cambia el cliente general
+    selectClienteGeneral.on('change', function() {
+        const idClienteGeneral = $(this).val();
+        cargarContactosPorClienteGeneral(idClienteGeneral);
+    });
+
+    // MODIFICACIÓN: Función para manejar la selección automática
+    function manejarSeleccionAutomaticaClientesGenerales(data) {
+        const select = $('#idClienteGeneral');
+        
+        if (data.length === 1) {
+            // Seleccionar automáticamente el único cliente general
+            select.val(data[0].idClienteGeneral).trigger('change'); // ✅ AGREGAR trigger('change')
+            
+            console.log('✅ Cliente general único seleccionado automáticamente:', data[0].idClienteGeneral);
+            
+            // Forzar la carga de contactos inmediatamente
+            setTimeout(() => {
+                cargarContactosPorClienteGeneral(data[0].idClienteGeneral);
+            }, 300);
+        } else {
+            // Si hay múltiples, solo limpiar contactos
+            limpiarContactos();
+        }
+    }
+
+    // MODIFICACIÓN: Actualizar el evento change del cliente principal
+    $('#idCliente').on('change', function() {
+        const clienteId = $(this).val();
+        console.log(`🔍 Cliente seleccionado: ${clienteId}`);
+
+        if (!clienteId) {
+            $('#idClienteGeneral').empty().append(
+                '<option value="" selected>Seleccionar Cliente General</option>'
+            ).trigger('change');
+            limpiarContactos();
+            return;
+        }
+
+        // Obtener y cargar clientes generales
+        fetch(`/clientes-generales/${clienteId}`)
+            .then(response => response.json())
+            .then(data => {
+                const select = $('#idClienteGeneral');
+                select.empty().append(
+                    '<option value="" selected>Seleccionar Cliente General</option>'
+                );
+
+                data.forEach(clienteGeneral => {
+                    select.append(
+                        `<option value="${clienteGeneral.idClienteGeneral}">${clienteGeneral.descripcion}</option>`
+                    );
+                });
+
+                // Reinicializar Select2
+                if (select.hasClass('select2-hidden-accessible')) {
+                    select.select2('destroy');
+                }
+                select.select2({
+                    width: '100%',
+                    placeholder: 'Seleccionar Cliente General'
+                });
+
+                // ✅ USAR LA NUEVA FUNCIÓN para manejar la selección automática
+                manejarSeleccionAutomaticaClientesGenerales(data);
+            })
+            .catch(error => {
+                console.error('Error al cargar clientes generales:', error);
+                limpiarContactos();
+            });
+    });
+
+    // Cargar contactos si ya hay un cliente general seleccionado al cargar la página
+    if (selectClienteGeneral.val()) {
+        console.log('🔄 Cliente general ya seleccionado al cargar la página');
+        setTimeout(() => {
+            cargarContactosPorClienteGeneral(selectClienteGeneral.val());
+        }, 500);
+    }
+});
+</script> 
 </x-layout.default>

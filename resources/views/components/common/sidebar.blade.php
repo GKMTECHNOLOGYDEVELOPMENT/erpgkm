@@ -404,7 +404,7 @@
                         @endif
 
                         <li>
-                            <a href="{{ route('contacto.index') }}">Contacto</a>
+                            <a href="{{ route('contactofinal.index') }}">Contacto</a>
                         </li>
 
                     </ul>

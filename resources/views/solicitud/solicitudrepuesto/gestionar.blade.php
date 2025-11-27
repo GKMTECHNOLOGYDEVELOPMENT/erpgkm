@@ -622,7 +622,6 @@
                                 <li>• El repuesto será devuelto al inventario automáticamente</li>
                                 <li>• El stock se incrementará en la ubicación original</li>
                                 <li>• Se eliminará el registro de salida del sistema</li>
-                                <li>• Se registrará un movimiento de entrada por devolución</li>
                             </ul>
                         </div>
                     </div>

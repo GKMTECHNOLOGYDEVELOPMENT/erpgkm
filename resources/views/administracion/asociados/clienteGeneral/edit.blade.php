@@ -1,25 +1,20 @@
 <x-layout.default>
-
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/nice-select2@2.1.0/dist/css/nice-select2.min.css" rel="stylesheet" />
-    <!-- Select2 JS -->
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2@2.1.0/dist/js/nice-select2.min.js"></script>
-
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('administracion.cliente-general') }}" class="text-primary hover:underline">Cliente
-                    General</a>
+                <a href="{{ route('administracion.cliente-general') }}" class="text-primary hover:underline">Cliente General</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
                 <span>Editar Cliente General</span>
             </li>
         </ul>
-
     </div>
+
     <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
         <h2 class="text-xl font-bold mb-5">EDITAR CLIENTE GENERAL</h2>
 
@@ -52,22 +47,38 @@
                 </select>
             </div>
 
-            <!-- Contenedor para mostrar los seleccionados -->
+            <!-- Contenedor para mostrar marcas seleccionadas -->
             <div class="mt-3">
-                <strong>Seleccionados:</strong>
+                <strong>Marcas Seleccionadas:</strong>
                 <div id="selected-marcas"
                     class="mt-2 flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[45px] text-xs">
                 </div>
             </div>
 
+            <!-- 🔥 NUEVO: Select múltiple para Contactos Finales -->
+            <div>
+                <label for="contactos_finales" class="block text-sm font-medium mb-1">Contactos Finales</label>
+                <select name="contactos_finales[]" id="contactos_finales" class="nice-select w-full" multiple>
+                    @foreach ($contactosFinales as $contacto)
+                        <option value="{{ $contacto->idContactoFinal }}"
+                            {{ $contactosFinalesAsociados->contains($contacto->idContactoFinal) ? 'selected' : '' }}>
+                            {{ $contacto->nombre_completo }} - {{ $contacto->numero_documento }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-
-
+            <!-- 🔥 NUEVO: Contenedor para mostrar contactos finales seleccionados -->
+            <div class="mt-3">
+                <strong>Contactos Finales Seleccionados:</strong>
+                <div id="selected-contactos-finales"
+                    class="mt-2 flex flex-wrap gap-2 border border-gray-300 rounded-md p-2 min-h-[45px] text-xs">
+                </div>
+            </div>
 
             <!-- Campo para la imagen -->
             <div x-data="{ fotoPreview: '{{ $cliente->foto ? $cliente->foto : '' }}' }">
                 <label for="foto" class="block text-sm font-medium mb-2">Foto</label>
-
                 <input type="file" id="foto" name="foto" accept="image/*"
                     class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 file:bg-primary/90 file:text-white file:hover:bg-primary w-full"
                     @change="fotoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : '{{ $cliente->foto }}'">
@@ -93,13 +104,10 @@
                 @enderror
             </div>
 
-
-
             <!-- Estado -->
             <div>
                 <label for="estado" class="block text-sm font-medium">Estado</label>
                 <div class="flex items-center">
-                    <!-- Campo hidden para enviar valor 0 si el switch no está activado -->
                     <input type="hidden" name="estado" value="0">
                     <div class="w-12 h-6 relative">
                         <input type="checkbox" id="estado" name="estado"
@@ -117,28 +125,29 @@
                 @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CLIENTE GENERAL'))
                 <button type="submit" class="btn btn-primary">Actualizar</button>
                 @endif
-
-
             </div>
         </form>
     </div>
 
-
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar NiceSelect2
+            // Inicializar NiceSelect2 para Marcas
             NiceSelect.bind(document.getElementById("marcas"), {
                 searchable: true,
             });
 
-            // Mostrar seleccionados personalizados
-            function actualizarSeleccionados() {
+            // Inicializar NiceSelect2 para Contactos Finales
+            NiceSelect.bind(document.getElementById("contactos_finales"), {
+                searchable: true,
+            });
+
+            // Mostrar seleccionados personalizados para Marcas
+            function actualizarSeleccionadosMarcas() {
                 const select = document.getElementById("marcas");
                 const seleccionados = Array.from(select.selectedOptions).map(opt => opt.text);
                 const contenedor = document.getElementById("selected-marcas");
 
-                contenedor.innerHTML = ""; // Limpiar
+                contenedor.innerHTML = "";
                 seleccionados.forEach(nombre => {
                     const chip = document.createElement("span");
                     chip.className = "bg-primary text-white px-2 py-1 rounded";
@@ -147,13 +156,30 @@
                 });
             }
 
-            // Detectar cambios
-            document.getElementById("marcas").addEventListener("change", actualizarSeleccionados);
+            // 🔥 NUEVO: Mostrar seleccionados personalizados para Contactos Finales
+            function actualizarSeleccionadosContactosFinales() {
+                const select = document.getElementById("contactos_finales");
+                const seleccionados = Array.from(select.selectedOptions).map(opt => opt.text);
+                const contenedor = document.getElementById("selected-contactos-finales");
+
+                contenedor.innerHTML = "";
+                seleccionados.forEach(nombre => {
+                    const chip = document.createElement("span");
+                    chip.className = "bg-green-500 text-white px-2 py-1 rounded";
+                    chip.textContent = nombre;
+                    contenedor.appendChild(chip);
+                });
+            }
+
+            // Detectar cambios en Marcas
+            document.getElementById("marcas").addEventListener("change", actualizarSeleccionadosMarcas);
+
+            // 🔥 NUEVO: Detectar cambios en Contactos Finales
+            document.getElementById("contactos_finales").addEventListener("change", actualizarSeleccionadosContactosFinales);
 
             // Mostrar los que ya están seleccionados al iniciar
-            actualizarSeleccionados();
+            actualizarSeleccionadosMarcas();
+            actualizarSeleccionadosContactosFinales();
         });
     </script>
-
-
 </x-layout.default>

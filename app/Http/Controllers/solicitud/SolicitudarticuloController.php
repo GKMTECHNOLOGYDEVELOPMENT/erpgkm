@@ -58,10 +58,13 @@ class SolicitudarticuloController extends Controller
         return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
     }
 
-   public function create()
+
+    
+public function create()
 {
     $usuario = auth()->user()->load('tipoArea');
 
+    // Consulta principal para artículos (tipos 1, 3, 4)
     $articulos = DB::table('articulos as a')
         ->select(
             'a.idArticulos',
@@ -70,11 +73,88 @@ class SolicitudarticuloController extends Controller
             'a.codigo_repuesto',
             'a.precio_compra',
             'a.stock_total',
-            'sc.nombre as tipo_articulo'
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo_nombre',
+            'm.nombre as nombre_modelo',
+            'mar.nombre as nombre_marca',
+            'sc.nombre as nombre_subcategoria'
         )
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
         ->where('a.estado', 1)
+        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
         ->get();
+
+    // Para los repuestos (tipo 2)
+    $repuestos = DB::table('articulos as a')
+        ->select(
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.precio_compra',
+            'a.stock_total',
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo_nombre',
+            'm.nombre as nombre_modelo',
+            'mar.nombre as nombre_marca',
+            'sc.nombre as nombre_subcategoria'
+        )
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('a.estado', 1)
+        ->where('a.idTipoArticulo', 2) // Solo repuestos
+        ->get();
+
+    // Combinar ambos resultados
+    $articulosCompletos = $articulos->merge($repuestos);
+
+    // Formatear los datos de manera más simple
+    $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+        $infoAdicional = [];
+        
+        // Información del tipo de artículo
+        if ($articulo->tipo_articulo_nombre) {
+            $infoAdicional[] = $articulo->tipo_articulo_nombre;
+        }
+        
+        // Información del modelo y marca (si existe)
+        if ($articulo->nombre_modelo) {
+            $infoAdicional[] = $articulo->nombre_modelo;
+        }
+        if ($articulo->nombre_marca) {
+            $infoAdicional[] = $articulo->nombre_marca;
+        }
+        
+        // Información de subcategoría (especialmente para repuestos)
+        if ($articulo->nombre_subcategoria) {
+            $infoAdicional[] = $articulo->nombre_subcategoria;
+        }
+        
+        $infoTexto = $infoAdicional ? ' (' . implode(' - ', $infoAdicional) . ')' : '';
+        $codigo = $articulo->codigo_barras ?: $articulo->codigo_repuesto;
+        
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'nombre' => $articulo->nombre,
+            'codigo_barras' => $articulo->codigo_barras,
+            'codigo_repuesto' => $articulo->codigo_repuesto,
+            'tipo_articulo' => $articulo->tipo_articulo_nombre,
+            'modelo' => $articulo->nombre_modelo,
+            'marca' => $articulo->nombre_marca,
+            'subcategoria' => $articulo->nombre_subcategoria,
+            'nombre_completo' => $articulo->nombre . $infoTexto . ' (' . $codigo . ')'
+        ];
+    });
 
     // Obtener solo cotizaciones aprobadas que NO tengan solicitudes
     $cotizacionesAprobadas = DB::table('cotizaciones as c')
@@ -106,11 +186,13 @@ class SolicitudarticuloController extends Controller
 
     return view("solicitud.solicitudarticulo.create", [
         'usuario' => $usuario,
-        'articulos' => $articulos,
+        'articulos' => $articulosFormateados,
         'cotizacionesAprobadas' => $cotizacionesAprobadas,
         'nextOrderNumber' => $nextOrderNumber
     ]);
 }
+
+
     public function store(Request $request)
 {
     try {
@@ -238,225 +320,457 @@ class SolicitudarticuloController extends Controller
         ], 500);
     }
 }
+public function show($id)
+{
+    $usuario = auth()->user()->load('tipoArea');
 
-    public function show($id)
-    {
-        $usuario = auth()->user()->load('tipoArea');
+    // Obtener la solicitud existente con más información
+    $solicitud = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.codigo_cotizacion',
+            'so.tiposervicio',
+            'so.niveldeurgencia as urgencia',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.estado',
+            'so.fechacreacion',
+            'so.totalcantidadproductos',
+            'so.cantidad as productos_unicos',
+            DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante"),
+            'ta.nombre as nombre_area'
+        )
+        ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+        ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
+        ->where('so.idsolicitudesordenes', $id)
+        ->where('so.tipoorden', 'solicitud_articulo')
+        ->first();
 
-        // Obtener la solicitud existente con más información
-        $solicitud = DB::table('solicitudesordenes as so')
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
+    }
+
+    // Obtener los artículos de la solicitud con información completa
+    $articulos = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad',
+            'oa.estado',
+            'oa.observacion as descripcion',
+            'oa.idarticulos',
+            'a.nombre as nombre_articulo',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.precio_compra',
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo',
+            'm.nombre as modelo',
+            'mar.nombre as marca',
+            'sc.nombre as subcategoria'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->get();
+
+    // Para los repuestos (tipo 2), obtener información adicional desde articulo_modelo
+    $repuestosIds = $articulos->where('idTipoArticulo', 2)->pluck('idarticulos');
+    
+    if ($repuestosIds->count() > 0) {
+        $repuestosCompletos = DB::table('articulo_modelo as am')
             ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.codigo_cotizacion', // Agregar este campo
-                'so.tiposervicio',
-                'so.niveldeurgencia as urgencia',
-                'so.fecharequerida',
-                'so.observaciones',
-                'so.estado',
-                'so.fechacreacion',
-                'so.totalcantidadproductos',
-                'so.cantidad as productos_unicos',
-                DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante"),
-                'ta.nombre as nombre_area'
+                'am.articulo_id',
+                'm.nombre as nombre_modelo_repuesto',
+                'mar.nombre as nombre_marca_repuesto'
             )
-            ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
-            ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_articulo')
-            ->first();
-
-        if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
-        }
-
-        // Obtener los artículos de la solicitud
-        $articulos = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'oa.estado',
-                'oa.observacion as descripcion',
-                'oa.idarticulos',
-                'a.nombre as nombre_articulo',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.precio_compra',
-                'sc.nombre as tipo_articulo'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
+            ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+            ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+            ->whereIn('am.articulo_id', $repuestosIds)
             ->get();
 
-        return view('solicitud.solicitudarticulo.show', [
-            'usuario' => $usuario,
-            'solicitud' => $solicitud,
-            'articulos' => $articulos
-        ]);
+        // Actualizar la información de los repuestos
+        foreach ($articulos as $articulo) {
+            if ($articulo->idTipoArticulo == 2) {
+                $repuestoInfo = $repuestosCompletos->firstWhere('articulo_id', $articulo->idarticulos);
+                if ($repuestoInfo) {
+                    $articulo->modelo = $repuestoInfo->nombre_modelo_repuesto;
+                    $articulo->marca = $repuestoInfo->nombre_marca_repuesto;
+                }
+            }
+        }
     }
+
+    return view('solicitud.solicitudarticulo.show', [
+        'usuario' => $usuario,
+        'solicitud' => $solicitud,
+        'articulos' => $articulos // Mantenemos como colección de objetos
+    ]);
+}
 
    
-    public function edit($id)
-    {
-        $usuario = auth()->user()->load('tipoArea');
+  public function edit($id)
+{
+    $usuario = auth()->user()->load('tipoArea');
 
-        // Obtener la solicitud existente
-        $solicitud = DB::table('solicitudesordenes as so')
+    // Obtener la solicitud existente con información de cotización
+    $solicitud = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.codigo_cotizacion', // Este campo guarda el numero_cotizacion
+            'so.tiposervicio',
+            'so.niveldeurgencia as urgencia',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.estado'
+        )
+        ->where('so.idsolicitudesordenes', $id)
+        ->where('so.tipoorden', 'solicitud_articulo')
+        ->first();
+
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
+    }
+
+    // Obtener información de la cotización si existe
+    $cotizacionActual = null;
+    $productosCotizacion = [];
+    
+    if ($solicitud->codigo_cotizacion) {
+        $cotizacionActual = DB::table('cotizaciones as c')
             ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.tiposervicio',
-                'so.niveldeurgencia as urgencia',
-                'so.fecharequerida',
-                'so.observaciones',
-                'so.estado'
+                'c.idCotizaciones',
+                'c.numero_cotizacion',
+                'c.fecha_emision',
+                'c.estado_cotizacion',
+                'cl.nombre as cliente_nombre'
             )
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_articulo')
+            ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+            ->where('c.numero_cotizacion', $solicitud->codigo_cotizacion)
+            ->first();
+
+        // Obtener productos de la cotización actual
+        if ($cotizacionActual) {
+            $productosCotizacion = DB::table('cotizacion_productos as cp')
+                ->select(
+                    'cp.id',
+                    'cp.articulo_id',
+                    'cp.cantidad',
+                    'cp.descripcion',
+                    'cp.precio_unitario',
+                    'cp.subtotal'
+                )
+                ->where('cp.cotizacion_id', $cotizacionActual->idCotizaciones)
+                ->get();
+        }
+    }
+
+    // Obtener los artículos actuales de la solicitud con información completa
+    $productosActuales = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad',
+            'oa.observacion as descripcion',
+            'oa.idarticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo_nombre',
+            'm.nombre as nombre_modelo',
+            'mar.nombre as nombre_marca',
+            'sc.nombre as nombre_subcategoria'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->where('oa.estado', 0) // Solo artículos pendientes
+        ->get();
+
+    // Para los repuestos (tipo 2), obtener información adicional
+    $repuestosIds = $productosActuales->where('idTipoArticulo', 2)->pluck('idarticulos');
+    
+    if ($repuestosIds->count() > 0) {
+        $repuestosCompletos = DB::table('articulo_modelo as am')
+            ->select(
+                'am.articulo_id',
+                'm.nombre as nombre_modelo_repuesto',
+                'mar.nombre as nombre_marca_repuesto'
+            )
+            ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+            ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+            ->whereIn('am.articulo_id', $repuestosIds)
+            ->get();
+
+        // Actualizar la información de los repuestos
+        foreach ($productosActuales as $producto) {
+            if ($producto->idTipoArticulo == 2) {
+                $repuestoInfo = $repuestosCompletos->firstWhere('articulo_id', $producto->idarticulos);
+                if ($repuestoInfo) {
+                    $producto->nombre_modelo = $repuestoInfo->nombre_modelo_repuesto;
+                    $producto->nombre_marca = $repuestoInfo->nombre_marca_repuesto;
+                }
+            }
+        }
+    }
+
+    // Obtener todos los artículos disponibles (igual que en create)
+    $articulos = DB::table('articulos as a')
+        ->select(
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.precio_compra',
+            'a.stock_total',
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo_nombre',
+            'm.nombre as nombre_modelo',
+            'mar.nombre as nombre_marca',
+            'sc.nombre as nombre_subcategoria'
+        )
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('a.estado', 1)
+        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
+        ->get();
+
+    // Para los repuestos (tipo 2)
+    $repuestos = DB::table('articulos as a')
+        ->select(
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.precio_compra',
+            'a.stock_total',
+            'a.idTipoArticulo',
+            'a.idModelo',
+            'a.idsubcategoria',
+            'ta.nombre as tipo_articulo_nombre',
+            'm.nombre as nombre_modelo',
+            'mar.nombre as nombre_marca',
+            'sc.nombre as nombre_subcategoria'
+        )
+        ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+        ->where('a.estado', 1)
+        ->where('a.idTipoArticulo', 2) // Solo repuestos
+        ->get();
+
+    // Combinar ambos resultados
+    $articulosCompletos = $articulos->merge($repuestos);
+
+    // Formatear los datos
+    $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+        $infoAdicional = [];
+        
+        if ($articulo->tipo_articulo_nombre) {
+            $infoAdicional[] = $articulo->tipo_articulo_nombre;
+        }
+        
+        if ($articulo->nombre_modelo) {
+            $infoAdicional[] = $articulo->nombre_modelo;
+        }
+        if ($articulo->nombre_marca) {
+            $infoAdicional[] = $articulo->nombre_marca;
+        }
+        
+        if ($articulo->nombre_subcategoria) {
+            $infoAdicional[] = $articulo->nombre_subcategoria;
+        }
+        
+        $infoTexto = $infoAdicional ? ' (' . implode(' - ', $infoAdicional) . ')' : '';
+        $codigo = $articulo->codigo_barras ?: $articulo->codigo_repuesto;
+        
+        return [
+            'idArticulos' => $articulo->idArticulos,
+            'nombre' => $articulo->nombre,
+            'codigo_barras' => $articulo->codigo_barras,
+            'codigo_repuesto' => $articulo->codigo_repuesto,
+            'tipo_articulo' => $articulo->tipo_articulo_nombre,
+            'modelo' => $articulo->nombre_modelo,
+            'marca' => $articulo->nombre_marca,
+            'subcategoria' => $articulo->nombre_subcategoria,
+            'nombre_completo' => $articulo->nombre . $infoTexto . ' (' . $codigo . ')'
+        ];
+    });
+
+    // Obtener cotizaciones aprobadas que NO tengan solicitudes (excluyendo la actual)
+    $cotizacionesAprobadas = DB::table('cotizaciones as c')
+        ->select(
+            'c.idCotizaciones',
+            'c.numero_cotizacion',
+            'c.fecha_emision',
+            'c.estado_cotizacion',
+            'cl.nombre as cliente_nombre'
+        )
+        ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+        ->where('c.estado_cotizacion', 'aprobada')
+        ->whereNotExists(function ($query) use ($solicitud) {
+            $query->select(DB::raw(1))
+                  ->from('solicitudesordenes as so')
+                  ->whereRaw('so.codigo_cotizacion = c.numero_cotizacion')
+                  ->where('so.tipoorden', 'solicitud_articulo')
+                  ->where('so.idsolicitudesordenes', '!=', $solicitud->idsolicitudesordenes); // Excluir la actual
+        })
+        ->orderBy('c.fecha_emision', 'desc')
+        ->get();
+
+    return view('solicitud.solicitudarticulo.edit', [
+        'usuario' => $usuario,
+        'solicitud' => $solicitud,
+        'productosActuales' => $productosActuales,
+        'articulos' => $articulosFormateados,
+        'cotizacionesAprobadas' => $cotizacionesAprobadas,
+        'cotizacionActual' => $cotizacionActual,
+        'productosCotizacion' => $productosCotizacion
+    ]);
+}
+
+   public function update(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+
+        // Validar que la solicitud existe
+        $solicitud = DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_articulo')
             ->first();
 
         if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
-        }
-
-        // Obtener los artículos actuales de la solicitud
-        $productosActuales = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'oa.observacion as descripcion',
-                'oa.idarticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'sc.nombre as tipo_articulo'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->where('oa.estado', 0) // Solo artículos pendientes
-            ->get();
-
-        // Obtener todos los artículos disponibles
-        $articulos = DB::table('articulos as a')
-            ->select(
-                'a.idArticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.precio_compra',
-                'a.stock_total',
-                'sc.nombre as tipo_articulo'
-            )
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('a.estado', 1)
-            ->get();
-
-        return view('solicitud.solicitudarticulo.edit', [
-            'usuario' => $usuario,
-            'solicitud' => $solicitud,
-            'productosActuales' => $productosActuales,
-            'articulos' => $articulos
-        ]);
-    }
-
-    public function update(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
-
-            // Validar que la solicitud existe
-            $solicitud = DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_articulo')
-                ->first();
-
-            if (!$solicitud) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
-
-            // Validar los datos
-            $validated = $request->validate([
-                'orderInfo.tipoServicio' => 'required|string',
-                'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
-                'orderInfo.fechaRequerida' => 'required|date',
-                'orderInfo.observaciones' => 'nullable|string',
-                'products' => 'required|array|min:1',
-                'products.*.articuloId' => 'required|exists:articulos,idArticulos',
-                'products.*.cantidad' => 'required|integer|min:1|max:1000',
-                'products.*.descripcion' => 'nullable|string'
-            ]);
-
-            // Calcular nuevas estadísticas de productos
-            $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = count($validated['products']);
-
-            // 1. Actualizar la solicitud principal
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
-                    'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
-                    'niveldeurgencia' => $validated['orderInfo']['urgencia'],
-                    'tiposervicio' => $validated['orderInfo']['tipoServicio'],
-                    'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                    'cantidad' => $totalProductosUnicos,
-                    'canproduuni' => $totalProductosUnicos,
-                    'totalcantidadproductos' => $totalCantidad,
-                    'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
-                    'urgencia' => $validated['orderInfo']['urgencia'],
-                    'fechaactualizacion' => now()
-                ]);
-
-            // 2. Eliminar los artículos actuales (solo los pendientes)
-            DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('estado', 0) // Solo eliminar los pendientes
-                ->delete();
-
-            // 3. Insertar los nuevos artículos
-            foreach ($validated['products'] as $product) {
-                DB::table('ordenesarticulos')->insert([
-                    'cantidad' => $product['cantidad'],
-                    'estado' => 0, // 0 = pendiente
-                    'observacion' => $product['descripcion'] ?? null,
-                    'fotorepuesto' => null,
-                    'fechausado' => null,
-                    'fechasinusar' => null,
-                    'idsolicitudesordenes' => $id,
-                    'idticket' => null, // No hay ticket en solicitud de artículos
-                    'idarticulos' => $product['articuloId'],
-                    'idubicacion' => null
-                ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Solicitud de artículos actualizada exitosamente',
-                'solicitud_id' => $id,
-                'codigo_orden' => $solicitud->codigo,
-                'estadisticas' => [
-                    'productos_unicos' => $totalProductosUnicos,
-                    'total_cantidad' => $totalCantidad
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Error al actualizar solicitud de artículos: ' . $e->getMessage());
-
             return response()->json([
                 'success' => false,
-                'message' => 'Error al actualizar la solicitud: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Solicitud no encontrada'
+            ], 404);
         }
+
+        // Validar los datos
+        $validated = $request->validate([
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.articuloId' => 'required|exists:articulos,idArticulos',
+            'products.*.cantidad' => 'required|integer|min:1|max:1000',
+            'products.*.descripcion' => 'nullable|string',
+            'selectedCotizacion' => 'nullable|exists:cotizaciones,idCotizaciones'
+        ]);
+
+        // Si se está agregando una cotización, verificar que no tenga ya una
+        if (!empty($validated['selectedCotizacion']) && !$solicitud->codigo_cotizacion) {
+            // Obtener información de la cotización
+            $cotizacion = DB::table('cotizaciones')
+                ->where('idCotizaciones', $validated['selectedCotizacion'])
+                ->first();
+
+            if ($cotizacion) {
+                $codigoCotizacion = $cotizacion->numero_cotizacion;
+                
+                // Actualizar el código de cotización en la solicitud
+                DB::table('solicitudesordenes')
+                    ->where('idsolicitudesordenes', $id)
+                    ->update([
+                        'codigo_cotizacion' => $codigoCotizacion
+                    ]);
+
+                // Actualizar estado de la cotización
+                DB::table('cotizaciones')
+                    ->where('idCotizaciones', $validated['selectedCotizacion'])
+                    ->update([
+                        'estado_cotizacion' => 'solicitado',
+                        'updated_at' => now()
+                    ]);
+            }
+        }
+
+        // Resto del código de actualización (calcular estadísticas, etc.)
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = count($validated['products']);
+
+        // 1. Actualizar la solicitud principal
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+                'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+                'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+                'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+                'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+                'cantidad' => $totalProductosUnicos,
+                'canproduuni' => $totalProductosUnicos,
+                'totalcantidadproductos' => $totalCantidad,
+                'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+                'urgencia' => $validated['orderInfo']['urgencia'],
+                'fechaactualizacion' => now()
+            ]);
+
+        // 2. Eliminar los artículos actuales (solo los pendientes)
+        DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0) // Solo eliminar los pendientes
+            ->delete();
+
+        // 3. Insertar los nuevos artículos
+        foreach ($validated['products'] as $product) {
+            DB::table('ordenesarticulos')->insert([
+                'cantidad' => $product['cantidad'],
+                'estado' => 0, // 0 = pendiente
+                'observacion' => $product['descripcion'] ?? null,
+                'fotorepuesto' => null,
+                'fechausado' => null,
+                'fechasinusar' => null,
+                'idsolicitudesordenes' => $id,
+                'idticket' => null,
+                'idarticulos' => $product['articuloId'],
+                'idubicacion' => null,
+                'codigo_cotizacion' => $solicitud->codigo_cotizacion // Mantener el código de cotización si existe
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Solicitud de artículos actualizada exitosamente',
+            'solicitud_id' => $id,
+            'codigo_orden' => $solicitud->codigo,
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        Log::error('Error al actualizar solicitud de artículos: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la solicitud: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function destroy($id)
     {
@@ -531,9 +845,9 @@ class SolicitudarticuloController extends Controller
     }
 
     public function opciones($id)
-    {
-        // Obtener la solicitud con sus artículos
-        $solicitud = DB::table('solicitudesordenes as so')
+{
+    // Obtener la solicitud con el campo idusuario incluido
+    $solicitud = DB::table('solicitudesordenes as so')
         ->select(
             'so.idsolicitudesordenes',
             'so.codigo',
@@ -546,6 +860,7 @@ class SolicitudarticuloController extends Controller
             'so.cantidad',
             'so.totalcantidadproductos',
             'so.idticket',
+            'so.idusuario', // ← ESTE ES EL CAMPO QUE FALTABA
             't.numero_ticket',
             'u.Nombre as nombre_solicitante'
         )
@@ -555,311 +870,692 @@ class SolicitudarticuloController extends Controller
         ->where('so.tipoorden', 'solicitud_articulo')
         ->first();
 
-        if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
-        }
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
+    }
 
-        // Obtener los artículos de la solicitud
-        $articulos = DB::table('ordenesarticulos as oa')
+    // Obtener información del solicitante
+    $solicitante = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('idUsuario', $solicitud->idusuario) // ← Usar idusuario de la solicitud
+        ->where('estado', 1)
+        ->first();
+
+    // Obtener lista de usuarios para la opción "otro"
+    $usuarios = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->orderBy('apellidoPaterno')
+        ->get();
+
+    // Obtener los artículos de la solicitud
+    $articulos = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad as cantidad_solicitada',
+            'oa.observacion',
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.stock_total',
+            'sc.nombre as tipo_articulo'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->get();
+
+    // Para cada artículo, obtener stock disponible y ubicaciones con detalle
+    foreach ($articulos as $articulo) {
+        // Obtener ubicaciones con stock detallado
+        $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
             ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad as cantidad_solicitada',
-                'oa.observacion',
-                'a.idArticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.stock_total',
-                'sc.nombre as tipo_articulo'
+                'rua.idRackUbicacionArticulo',
+                'rua.rack_ubicacion_id',
+                'rua.cantidad as stock_ubicacion',
+                'rua.cliente_general_id',
+                'ru.codigo as ubicacion_codigo',
+                'r.nombre as rack_nombre'
             )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $articulo->idArticulos)
+            ->where('rua.cantidad', '>', 0)
+            ->orderBy('rua.cantidad', 'desc')
             ->get();
 
-        // Para cada artículo, obtener stock disponible y ubicaciones con detalle
-        foreach ($articulos as $articulo) {
-            // Obtener ubicaciones con stock detallado
-            $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
+        // Calcular stock total disponible
+        $stockDisponible = $ubicaciones->sum('stock_ubicacion');
+
+        // Agregar información al artículo
+        $articulo->stock_disponible = $stockDisponible;
+        $articulo->ubicaciones_detalle = $ubicaciones;
+        $articulo->suficiente_stock = $stockDisponible >= $articulo->cantidad_solicitada;
+        $articulo->diferencia_stock = $stockDisponible - $articulo->cantidad_solicitada;
+
+        // Verificar si ya fue procesado individualmente
+        $articulo->ya_procesado = DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $articulo->idordenesarticulos)
+            ->where('estado', 1)
+            ->exists();
+
+        // Si ya fue procesado, obtener información de entrega
+        if ($articulo->ya_procesado) {
+            $entregaInfo = DB::table('articulos_entregas as ae')
                 ->select(
-                    'rua.idRackUbicacionArticulo',
-                    'rua.rack_ubicacion_id',
-                    'rua.cantidad as stock_ubicacion',
-                    'rua.cliente_general_id',
-                    'ru.codigo as ubicacion_codigo',
-                    'r.nombre as rack_nombre'
+                    'ae.tipo_entrega',
+                    'ae.usuario_destino_id',
+                    'u.Nombre',
+                    'u.apellidoPaterno',
+                    'u.apellidoMaterno'
                 )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $articulo->idArticulos)
-                ->where('rua.cantidad', '>', 0)
-                ->orderBy('rua.cantidad', 'desc')
-                ->get();
+                ->leftJoin('usuarios as u', 'ae.usuario_destino_id', '=', 'u.idUsuario')
+                ->where('ae.solicitud_id', $solicitud->idsolicitudesordenes)
+                ->where('ae.articulo_id', $articulo->idArticulos)
+                ->first();
 
-            // Calcular stock total disponible
-            $stockDisponible = $ubicaciones->sum('stock_ubicacion');
-
-            // Agregar información al artículo
-            $articulo->stock_disponible = $stockDisponible;
-            $articulo->ubicaciones_detalle = $ubicaciones;
-            $articulo->suficiente_stock = $stockDisponible >= $articulo->cantidad_solicitada;
-            $articulo->diferencia_stock = $stockDisponible - $articulo->cantidad_solicitada;
-
-            // Verificar si ya fue procesado individualmente
-            $articulo->ya_procesado = DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $articulo->idordenesarticulos)
-                ->where('estado', 1)
-                ->exists();
+            $articulo->entrega_info = $entregaInfo;
         }
-
-        // Verificar si toda la solicitud puede ser atendida
-        $puede_aceptar = $articulos->every(function ($articulo) {
-            return $articulo->suficiente_stock;
-        });
-
-        // Contar artículos procesados y disponibles
-        $articulos_procesados = $articulos->where('ya_procesado', true)->count();
-        $articulos_disponibles = $articulos->where('suficiente_stock', true)->count();
-        $total_articulos = $articulos->count();
-
-        return view('solicitud.solicitudarticulo.opciones', compact(
-            'solicitud',
-            'articulos',
-            'puede_aceptar',
-            'articulos_procesados',
-            'articulos_disponibles',
-            'total_articulos'
-        ));
     }
 
+    // Verificar si toda la solicitud puede ser atendida
+    $puede_aceptar = $articulos->every(function ($articulo) {
+        return $articulo->suficiente_stock;
+    });
+
+    // Contar artículos procesados y disponibles
+    $articulos_procesados = $articulos->where('ya_procesado', true)->count();
+    $articulos_disponibles = $articulos->where('suficiente_stock', true)->count();
+    $total_articulos = $articulos->count();
+
+    // Verificar si se puede generar PDF (todos los artículos procesados)
+    $puede_generar_pdf = ($articulos_procesados == $total_articulos) && ($total_articulos > 0);
+
+    return view('solicitud.solicitudarticulo.opciones', compact(
+        'solicitud',
+        'articulos',
+        'puede_aceptar',
+        'articulos_procesados',
+        'articulos_disponibles',
+        'total_articulos',
+        'solicitante',
+        'usuarios',
+        'puede_generar_pdf' // ← Nueva variable
+
+    ));
+}
 
 
-     public function gestionar($id)
-    {
-       
+public function gestionar($id)
+{
+    // Obtener la solicitud con información básica
+    $solicitud = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.estado',
+            'so.tiposervicio',
+            'so.niveldeurgencia',
+            'so.fechacreacion',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.cantidad',
+            'so.totalcantidadproductos',
+            'u.Nombre as nombre_solicitante'
+        )
+        ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+        ->where('so.idsolicitudesordenes', $id)
+        ->where('so.tipoorden', 'solicitud_articulo')
+        ->first();
 
-        return view('solicitud.solicitudarticulo.gestionar');
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
     }
 
-    public function aceptarIndividual(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
+    // Obtener los artículos de la solicitud que ya han sido procesados/aprobados
+    $articulos = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad as cantidad_solicitada',
+            'oa.observacion',
+            'oa.estado as estado_articulo',
+            'oa.fechaUsado',
+            'oa.fechaSinUsar',
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'sc.nombre as tipo_articulo'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->where('oa.estado', 1) // Solo artículos ya procesados
+        ->get();
 
-            // Obtener la solicitud con todos los campos necesarios
+    // Determinar el estado actual de cada artículo basado en las fechas
+    $estadosArticulos = [];
+    foreach ($articulos as $articulo) {
+        if ($articulo->fechaUsado) {
+            $estadosArticulos[$articulo->idArticulos] = 'usado';
+        } elseif ($articulo->fechaSinUsar) {
+            $estadosArticulos[$articulo->idArticulos] = 'no_usado';
+        } else {
+            $estadosArticulos[$articulo->idArticulos] = 'pendiente';
+        }
+    }
+
+    // Contadores para el resumen
+    $contadores = [
+        'usados' => 0,
+        'no_usados' => 0,
+        'pendientes' => 0
+    ];
+
+    // Contar los estados
+    foreach ($estadosArticulos as $estado) {
+        if ($estado === 'usado') {
+            $contadores['usados']++;
+        } elseif ($estado === 'no_usado') {
+            $contadores['no_usados']++;
+        } else {
+            $contadores['pendientes']++;
+        }
+    }
+
+    return view('solicitud.solicitudarticulo.gestionar', compact(
+        'solicitud', 
+        'articulos',
+        'estadosArticulos',
+        'contadores'
+    ));
+}
+
+// Agregar estos métodos al controlador para manejar las acciones
+
+public function marcarUsado(Request $request, $solicitudId)
+{
+    try {
+        $request->validate([
+            'articulo_id' => 'required|integer',
+            'fecha_uso' => 'required|date',
+            'observacion' => 'nullable|string|max:500',
+            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+        ]);
+
+        DB::transaction(function () use ($request, $solicitudId) {
+            // Obtener información de la solicitud
             $solicitud = DB::table('solicitudesordenes')
-                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_articulo') // Cambiado a solicitud_articulo
+                ->select('codigo')
+                ->where('idsolicitudesordenes', $solicitudId)
                 ->first();
 
             if (!$solicitud) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
-
-            $articuloId = $request->input('articulo_id');
-            $ubicacionId = $request->input('ubicacion_id');
-
-            if (!$articuloId || !$ubicacionId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Datos incompletos para procesar el artículo'
-                ], 400);
+                throw new \Exception('Solicitud no encontrada');
             }
 
             // Obtener información del artículo
-            $articulo = DB::table('ordenesarticulos as oa')
+            $articuloInfo = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'a.idArticulos',
+                    'a.nombre'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $solicitudId)
+                ->where('oa.idarticulos', $request->articulo_id)
+                ->first();
+
+            if (!$articuloInfo) {
+                throw new \Exception('Artículo no encontrado en la solicitud');
+            }
+
+            // Procesar fotos si existen
+            $rutaFotos = [];
+            if ($request->hasFile('fotos')) {
+                foreach ($request->file('fotos') as $foto) {
+                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $ruta = $foto->storeAs('evidencias_articulos', $nombreArchivo, 'public');
+                    $rutaFotos[] = $ruta;
+                }
+            }
+
+            // Actualizar en la tabla ordenesarticulos
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $solicitudId)
+                ->where('idarticulos', $request->articulo_id)
+                ->update([
+                    'fechaUsado' => $request->fecha_uso,
+                    'fechaSinUsar' => null,
+                    'observacion' => $request->observacion,
+                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
+                ]);
+
+            // Registrar en logs
+            Log::info("Artículo marcado como usado - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Fecha: {$request->fecha_uso}");
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículo marcado como usado correctamente'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al marcar artículo como usado: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al marcar el artículo: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+public function marcarNoUsado(Request $request, $solicitudId)
+{
+    try {
+        $request->validate([
+            'articulo_id' => 'required|integer',
+            'fecha_devolucion' => 'required|date',
+            'observacion' => 'nullable|string|max:500',
+            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+        ]);
+
+        DB::transaction(function () use ($request, $solicitudId) {
+            // Obtener información de la solicitud
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('codigo')
+                ->where('idsolicitudesordenes', $solicitudId)
+                ->first();
+
+            if (!$solicitud) {
+                throw new \Exception('Solicitud no encontrada');
+            }
+
+            // Obtener información del artículo y entrega
+            $articuloInfo = DB::table('ordenesarticulos as oa')
                 ->select(
                     'oa.idordenesarticulos',
                     'oa.cantidad',
                     'a.idArticulos',
                     'a.nombre',
-                    'a.stock_total'
+                    'ae.ubicacion_utilizada'
                 )
                 ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-                ->where('oa.idsolicitudesordenes', $id)
-                ->where('a.idArticulos', $articuloId)
-                ->first();
-
-            if (!$articulo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Artículo no encontrado en la solicitud'
-                ], 404);
-            }
-
-            // Verificar si ya fue procesado
-            $yaProcesado = DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $articulo->idordenesarticulos)
-                ->where('estado', 1)
-                ->exists();
-
-            if ($yaProcesado) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este artículo ya fue procesado anteriormente'
-                ], 400);
-            }
-
-            $cantidadSolicitada = $articulo->cantidad;
-
-            // Verificar stock en la ubicación seleccionada
-            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-                ->select(
-                    'rua.cantidad',
-                    'rua.idRackUbicacionArticulo',
-                    'rua.cliente_general_id',
-                    'ru.codigo as ubicacion_codigo',
-                    'ru.idRackUbicacion',
-                    'r.idRack as rack_id',
-                    'r.nombre as rack_nombre'
-                )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $articuloId)
-                ->where('rua.rack_ubicacion_id', $ubicacionId)
-                ->first();
-
-            if (!$stockUbicacion) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ubicación no encontrada para este artículo'
-                ], 404);
-            }
-
-            if ($stockUbicacion->cantidad < $cantidadSolicitada) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-                ], 400);
-            }
-
-            // Obtener información del artículo para el kardex
-            $articuloInfo = DB::table('articulos')
-                ->select('precio_compra', 'precio_venta', 'stock_total')
-                ->where('idArticulos', $articuloId)
+                ->leftJoin('articulos_entregas as ae', function($join) use ($solicitudId) {
+                    $join->on('ae.solicitud_id', '=', 'oa.idsolicitudesordenes')
+                         ->on('ae.articulo_id', '=', 'oa.idarticulos');
+                })
+                ->where('oa.idsolicitudesordenes', $solicitudId)
+                ->where('oa.idarticulos', $request->articulo_id)
                 ->first();
 
             if (!$articuloInfo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Información del artículo no encontrada'
-                ], 404);
+                throw new \Exception('Artículo no encontrado en la solicitud');
             }
 
-            // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
-            DB::table('rack_ubicacion_articulos')
-                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-                ->decrement('cantidad', $cantidadSolicitada);
+            // Procesar fotos si existen
+            $rutaFotos = [];
+            if ($request->hasFile('fotos')) {
+                foreach ($request->file('fotos') as $foto) {
+                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
+                    $ruta = $foto->storeAs('evidencias_devoluciones_articulos', $nombreArchivo, 'public');
+                    $rutaFotos[] = $ruta;
+                }
+            }
 
-            Log::info("✅ Stock descontado en rack_ubicacion_articulos - Artículo ID: {$stockUbicacion->idRackUbicacionArticulo}, Cantidad: -{$cantidadSolicitada}");
-
-            // ✅ 2. DESCONTAR stock total en tabla articulos
-            DB::table('articulos')
-                ->where('idArticulos', $articuloId)
-                ->decrement('stock_total', $cantidadSolicitada);
-
-            // Verificar stock actualizado
-            $articuloActualizado = DB::table('articulos')
-                ->select('stock_total')
-                ->where('idArticulos', $articuloId)
+            // Buscar la ubicación original donde estaba el artículo
+            $ubicacionOriginal = DB::table('rack_ubicaciones')
+                ->select('idRackUbicacion', 'codigo', 'rack_id')
+                ->where('codigo', $articuloInfo->ubicacion_utilizada)
                 ->first();
 
-            Log::info("✅ Stock total actualizado en articulos - ID: {$articuloId}, Stock anterior: {$articuloInfo->stock_total}, Stock actual: {$articuloActualizado->stock_total}");
-
-            // ✅ 3. Registrar el movimiento en rack_movimientos (SALIDA)
-            DB::table('rack_movimientos')->insert([
-                'articulo_id' => $articuloId,
-                'custodia_id' => null,
-                'ubicacion_origen_id' => $ubicacionId,
-                'ubicacion_destino_id' => null,
-                'rack_origen_id' => $stockUbicacion->rack_id,
-                'rack_destino_id' => null,
-                'cantidad' => $cantidadSolicitada,
-                'tipo_movimiento' => 'salida',
-                'usuario_id' => auth()->id(),
-                'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
-                'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-                'codigo_ubicacion_destino' => null,
-                'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-                'nombre_rack_destino' => null,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            Log::info("✅ Movimiento registrado en rack_movimientos - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}");
-
-            // ✅ 4. Registrar en inventario_ingresos_clientes como SALIDA
-            DB::table('inventario_ingresos_clientes')->insert([
-                'compra_id' => null,
-                'articulo_id' => $articuloId,
-                'tipo_ingreso' => 'salida',
-                'ingreso_id' => $solicitud->idsolicitudesordenes,
-                'cliente_general_id' => $stockUbicacion->cliente_general_id,
-                'cantidad' => -$cantidadSolicitada,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            Log::info("✅ Registro creado en inventario_ingresos_clientes - Cliente: {$stockUbicacion->cliente_general_id}, Cantidad: -{$cantidadSolicitada}");
-
-            // ✅ 5. Actualizar KARDEX para la SALIDA
-            $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
-
-            // ✅ 6. Marcar el artículo como procesado
-            DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $articulo->idordenesarticulos)
-                ->update([
-                    'estado' => 1,
-                    'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente"
-                ]);
-
-            Log::info("✅ Artículo marcado como procesado - ID: {$articulo->idordenesarticulos}");
-
-            // Verificar si todos los artículos han sido procesados
-            $articulosPendientes = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('estado', 0)
-                ->count();
-
-            $todosProcesados = $articulosPendientes == 0;
-
-            // Si todos los artículos han sido procesados, marcar la solicitud como aprobada
-            if ($todosProcesados) {
-                DB::table('solicitudesordenes')
-                    ->where('idsolicitudesordenes', $id)
-                    ->update([
-                        'estado' => 'aprobada',
-                        'fechaaprobacion' => now(),
-                        'idaprobador' => auth()->id()
-                    ]);
-
-                Log::info("✅ TODOS los artículos procesados - Solicitud marcada como APROBADA");
+            if (!$ubicacionOriginal) {
+                throw new \Exception('No se pudo encontrar la ubicación original del artículo');
             }
 
-            DB::commit();
+            // Obtener información del rack
+            $rackInfo = DB::table('racks')
+                ->select('nombre')
+                ->where('idRack', $ubicacionOriginal->rack_id)
+                ->first();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Artículo procesado correctamente',
-                'todos_procesados' => $todosProcesados
+            // 1. INCREMENTAR stock en rack_ubicacion_articulos (ubicación original)
+            $rackUbicacionArticulo = DB::table('rack_ubicacion_articulos')
+                ->where('rack_ubicacion_id', $ubicacionOriginal->idRackUbicacion)
+                ->where('articulo_id', $request->articulo_id)
+                ->first();
+
+            if ($rackUbicacionArticulo) {
+                // Si ya existe registro, incrementar
+                DB::table('rack_ubicacion_articulos')
+                    ->where('idRackUbicacionArticulo', $rackUbicacionArticulo->idRackUbicacionArticulo)
+                    ->increment('cantidad', $articuloInfo->cantidad);
+            } else {
+                // Si no existe, crear nuevo registro
+                DB::table('rack_ubicacion_articulos')->insert([
+                    'rack_ubicacion_id' => $ubicacionOriginal->idRackUbicacion,
+                    'articulo_id' => $request->articulo_id,
+                    'cantidad' => $articuloInfo->cantidad,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 2. INCREMENTAR stock total en tabla articulos
+            DB::table('articulos')
+                ->where('idArticulos', $request->articulo_id)
+                ->increment('stock_total', $articuloInfo->cantidad);
+
+            // 3. Registrar movimiento en rack_movimientos (ENTRADA por devolución)
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $request->articulo_id,
+                'custodia_id' => null,
+                'ubicacion_origen_id' => null,
+                'ubicacion_destino_id' => $ubicacionOriginal->idRackUbicacion,
+                'rack_origen_id' => null,
+                'rack_destino_id' => $ubicacionOriginal->rack_id,
+                'cantidad' => $articuloInfo->cantidad,
+                'tipo_movimiento' => 'entrada',
+                'usuario_id' => auth()->id(),
+                'observaciones' => "Devolución artículo no usado - Solicitud: {$solicitud->codigo} - Observación: {$request->observacion}",
+                'codigo_ubicacion_origen' => null,
+                'codigo_ubicacion_destino' => $ubicacionOriginal->codigo,
+                'nombre_rack_origen' => null,
+                'nombre_rack_destino' => $rackInfo->nombre ?? 'Desconocido',
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al procesar artículo individual: ' . $e->getMessage());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            Log::error('Trace: ' . $e->getTraceAsString());
 
+            // 4. ELIMINAR registro en inventario_ingresos_clientes (donde se registró la salida)
+            $registrosEliminados = DB::table('inventario_ingresos_clientes')
+                ->where('ingreso_id', $solicitudId)
+                ->where('articulo_id', $request->articulo_id)
+                ->where('tipo_ingreso', 'salida')
+                ->delete();
+
+            // 5. Actualizar en la tabla ordenesarticulos
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $solicitudId)
+                ->where('idarticulos', $request->articulo_id)
+                ->update([
+                    'fechaSinUsar' => $request->fecha_devolucion,
+                    'fechaUsado' => null,
+                    'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
+                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
+                ]);
+
+            // 6. Registrar en logs
+            Log::info("Artículo devuelto al inventario - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Cantidad: {$articuloInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Registros eliminados: {$registrosEliminados}");
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículo marcado como no usado y devuelto al inventario correctamente'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al marcar artículo como no usado: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al marcar el artículo: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+   public function aceptarIndividual(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+
+        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO idusuario)
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario') // ← AGREGADO idusuario
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_articulo')
+            ->first();
+
+        if (!$solicitud) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al procesar el artículo: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Solicitud no encontrada'
+            ], 404);
         }
+
+        $articuloId = $request->input('articulo_id');
+        $ubicacionId = $request->input('ubicacion_id');
+
+        if (!$articuloId || !$ubicacionId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos incompletos para procesar el artículo'
+            ], 400);
+        }
+
+        // Obtener información del artículo
+        $articulo = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.idordenesarticulos',
+                'oa.cantidad',
+                'a.idArticulos',
+                'a.nombre',
+                'a.stock_total'
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->where('a.idArticulos', $articuloId)
+            ->first();
+
+        if (!$articulo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Artículo no encontrado en la solicitud'
+            ], 404);
+        }
+
+        // Verificar si ya fue procesado
+        $yaProcesado = DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $articulo->idordenesarticulos)
+            ->where('estado', 1)
+            ->exists();
+
+        if ($yaProcesado) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este artículo ya fue procesado anteriormente'
+            ], 400);
+        }
+
+        $cantidadSolicitada = $articulo->cantidad;
+
+        // Verificar stock en la ubicación seleccionada
+        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+            ->select(
+                'rua.cantidad',
+                'rua.idRackUbicacionArticulo',
+                'rua.cliente_general_id',
+                'ru.codigo as ubicacion_codigo',
+                'ru.idRackUbicacion',
+                'r.idRack as rack_id',
+                'r.nombre as rack_nombre'
+            )
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $articuloId)
+            ->where('rua.rack_ubicacion_id', $ubicacionId)
+            ->first();
+
+        if (!$stockUbicacion) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ubicación no encontrada para este artículo'
+            ], 404);
+        }
+
+        if ($stockUbicacion->cantidad < $cantidadSolicitada) {
+            return response()->json([
+                'success' => false,
+                'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+            ], 400);
+        }
+
+        // Obtener información del artículo para el kardex
+        $articuloInfo = DB::table('articulos')
+            ->select('precio_compra', 'precio_venta', 'stock_total')
+            ->where('idArticulos', $articuloId)
+            ->first();
+
+        if (!$articuloInfo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Información del artículo no encontrada'
+            ], 404);
+        }
+
+        // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
+        DB::table('rack_ubicacion_articulos')
+            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+            ->decrement('cantidad', $cantidadSolicitada);
+
+        // ✅ 2. DESCONTAR stock total en tabla articulos
+        DB::table('articulos')
+            ->where('idArticulos', $articuloId)
+            ->decrement('stock_total', $cantidadSolicitada);
+
+        // ✅ 3. Registrar el movimiento en rack_movimientos (SALIDA)
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $articuloId,
+            'custodia_id' => null,
+            'ubicacion_origen_id' => $ubicacionId,
+            'ubicacion_destino_id' => null,
+            'rack_origen_id' => $stockUbicacion->rack_id,
+            'rack_destino_id' => null,
+            'cantidad' => $cantidadSolicitada,
+            'tipo_movimiento' => 'salida',
+            'usuario_id' => auth()->id(),
+            'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
+            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+            'codigo_ubicacion_destino' => null,
+            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+            'nombre_rack_destino' => null,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 4. Registrar en inventario_ingresos_clientes como SALIDA
+        DB::table('inventario_ingresos_clientes')->insert([
+            'compra_id' => null,
+            'articulo_id' => $articuloId,
+            'tipo_ingreso' => 'salida',
+            'ingreso_id' => $solicitud->idsolicitudesordenes,
+            'cliente_general_id' => $stockUbicacion->cliente_general_id,
+            'cantidad' => -$cantidadSolicitada,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 5. Actualizar KARDEX para la SALIDA
+        $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
+
+        // Determinar el usuario destino final
+        $usuarioFinalId = null;
+        $tipoEntrega = '';
+        $nombreDestinatario = '';
+
+        switch ($request->tipo_destinatario) {
+            case 'solicitante':
+                $usuarioFinalId = $solicitud->idusuario; // ← CORREGIDO: idusuario en lugar de idUsuario
+                $tipoEntrega = 'solicitante';
+                break;
+                
+            case 'otro':
+                $usuarioFinalId = $request->usuario_destino_id;
+                $tipoEntrega = 'otro_usuario';
+                break;
+                
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de destinatario no válido'
+                ], 400);
+        }
+
+        // Obtener nombre del destinatario
+        $destinatarioInfo = DB::table('usuarios')
+            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->where('idUsuario', $usuarioFinalId)
+            ->first();
+
+        $nombreDestinatario = $destinatarioInfo ? 
+            "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}" : 
+            'Usuario no encontrado';
+
+        // ✅ 6. Registrar en articulos_entregas (NUEVA TABLA)
+        DB::table('articulos_entregas')->insert([
+            'solicitud_id' => $solicitud->idsolicitudesordenes,
+            'articulo_id' => $articuloId,
+            'usuario_destino_id' => $usuarioFinalId,
+            'tipo_entrega' => $tipoEntrega,
+            'cantidad' => $cantidadSolicitada,
+            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+            'fecha_entrega' => now(),
+            'usuario_entrego_id' => auth()->id(),
+            'observaciones' => "Artículo entregado individualmente",
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 7. Marcar el artículo como procesado
+        DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $articulo->idordenesarticulos)
+            ->update([
+                'estado' => 1,
+                'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Entregado a: {$nombreDestinatario}"
+            ]);
+
+        // Verificar si todos los artículos han sido procesados
+        $articulosPendientes = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0)
+            ->count();
+
+        $todosProcesados = $articulosPendientes == 0;
+
+        // Si todos los artículos han sido procesados, marcar la solicitud como aprobada
+        if ($todosProcesados) {
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => 'aprobada',
+                    'fechaaprobacion' => now(),
+                    'idaprobador' => auth()->id()
+                ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Artículo procesado correctamente. Entregado a: {$nombreDestinatario}",
+            'todos_procesados' => $todosProcesados,
+            'destinatario' => $nombreDestinatario,
+            'tipo_entrega' => $tipoEntrega,
+            'puede_generar_pdf' => $todosProcesados // ← Agregar esta línea
+
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al procesar artículo individual: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar el artículo: ' . $e->getMessage()
+        ], 500);
     }
+}
+
+
 
     public function aceptar(Request $request, $id)
     {
@@ -1012,6 +1708,22 @@ class SolicitudarticuloController extends Controller
                     'updated_at' => now()
                 ]);
 
+                // En procesamiento grupal, por defecto se entrega al solicitante
+                DB::table('articulos_entregas')->insert([
+                'solicitud_id' => $solicitud->idsolicitudesordenes,
+                'articulo_id' => $articulo->idArticulos,
+                 'usuario_destino_id' => $solicitud->idusuario, // ← CAMBIAR A idusuario
+                'tipo_entrega' => 'solicitante',
+                'cantidad' => $cantidadSolicitada,
+                'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+                'fecha_entrega' => now(),
+                'usuario_entrego_id' => auth()->id(),
+                'observaciones' => "Artículo entregado grupalmente",
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+
                 // ✅ 4. Registrar en inventario_ingresos_clientes
                 DB::table('inventario_ingresos_clientes')->insert([
                     'compra_id' => null,
@@ -1050,22 +1762,20 @@ class SolicitudarticuloController extends Controller
             DB::commit();
 
             return response()->json([
-                'success' => true,
-                'message' => 'Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al aceptar solicitud de artículos (grupal): ' . $e->getMessage());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            Log::error('Trace: ' . $e->getTraceAsString());
+            'success' => true,
+            'message' => 'Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.',
+            
+        ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al aceptar solicitud de artículos (grupal): ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     // Método para actualizar kardex (Mismo que para repuestos)
     private function actualizarKardexSalida($articuloId, $clienteGeneralId, $cantidadSalida, $costoUnitario)
@@ -1155,6 +1865,124 @@ class SolicitudarticuloController extends Controller
         }
     }
 
+
+public function generarConformidad($id)
+{
+    try {
+        // Obtener la solicitud con información completa - AGREGAR CAMPO estado
+        $solicitud = DB::table('solicitudesordenes as so')
+            ->select(
+                'so.idsolicitudesordenes',
+                'so.codigo',
+                'so.codigo_cotizacion',
+                'so.tiposervicio',
+                'so.niveldeurgencia',
+                'so.fechacreacion',
+                'so.fecharequerida',
+                'so.fechaaprobacion',
+                'so.observaciones',
+                'so.cantidad',
+                'so.totalcantidadproductos',
+                'so.idusuario',
+                'so.estado', // ← ESTE ES EL CAMPO QUE FALTABA
+                'u_solicitante.Nombre as solicitante_nombre',
+                'u_solicitante.apellidoPaterno as solicitante_apellido',
+                'u_solicitante.documento as solicitante_documento',
+                'u_aprobador.Nombre as aprobador_nombre',
+                'u_aprobador.apellidoPaterno as aprobador_apellido'
+            )
+            ->leftJoin('usuarios as u_solicitante', 'so.idusuario', '=', 'u_solicitante.idUsuario')
+            ->leftJoin('usuarios as u_aprobador', 'so.idaprobador', '=', 'u_aprobador.idUsuario')
+            ->where('so.idsolicitudesordenes', $id)
+            ->where('so.tipoorden', 'solicitud_articulo')
+            ->first();
+
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        // Verificar que todos los artículos estén procesados
+        $articulosPendientes = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0)
+            ->count();
+
+        if ($articulosPendientes > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede generar la conformidad: aún hay artículos pendientes de entrega'
+            ], 400);
+        }
+
+        // Obtener artículos entregados con información CORREGIDA
+        $articulos = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.cantidad',
+                'a.nombre as articulo_nombre',
+                'a.codigo_barras',
+                'a.codigo_repuesto',
+                'ae.ubicacion_utilizada',
+                'ae.fecha_entrega',
+                'ae.tipo_entrega',
+                'u_destino.Nombre as destinatario_nombre',
+                'u_destino.apellidoPaterno as destinatario_apellido',
+                'u_entrego.Nombre as entregador_nombre',
+                'u_entrego.apellidoPaterno as entregador_apellido'
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->leftJoin('articulos_entregas as ae', function($join) use ($id) {
+                $join->on('ae.articulo_id', '=', 'a.idArticulos')
+                     ->where('ae.solicitud_id', $id);
+            })
+            ->leftJoin('usuarios as u_destino', 'ae.usuario_destino_id', '=', 'u_destino.idUsuario')
+            ->leftJoin('usuarios as u_entrego', 'ae.usuario_entrego_id', '=', 'u_entrego.idUsuario')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->where('oa.estado', 1)
+            ->get();
+
+        // Verificar que hay artículos procesados
+        if ($articulos->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay artículos procesados para generar la conformidad'
+            ], 400);
+        }
+
+        // Datos estáticos de la empresa
+        $empresa = (object) [
+            'nombre_empresa' => 'GKM TECHNOLOGY',
+            'direccion' => 'Av. Principal 123',
+            'telefono' => '9999',
+            'ruc' => '000000',
+            'logo' => null
+        ];
+
+        // Generar PDF
+        $pdf = \PDF::loadView('solicitud.solicitudarticulo.pdf.conformidad', [
+            'solicitud' => $solicitud,
+            'articulos' => $articulos,
+            'empresa' => $empresa,
+            'fecha_generacion' => now()->format('d/m/Y H:i')
+        ]);
+
+        $nombreArchivo = 'conformidad_entrega_' . $solicitud->codigo . '_' . now()->format('Ymd_His') . '.pdf';
+
+        return $pdf->download($nombreArchivo);
+
+    } catch (\Exception $e) {
+        Log::error('Error al generar PDF de conformidad: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al generar el PDF: ' . $e->getMessage()
+        ], 500);
+    }
+}
 
     
 }

@@ -82,118 +82,147 @@
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Columna Principal -->
                 <div class="xl:col-span-2 space-y-6">
-                    <!-- Artículos Solicitados -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-                            <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                    <!-- Artículos Solicitados - VISTA MEJORADA -->
+                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                            <div class="flex items-center space-x-3">
                                 <div
-                                    class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-sm">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
+                                    <i class="fas fa-box text-white text-lg"></i>
                                 </div>
                                 <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">ARTÍCULOS SOLICITADOS</h2>
-                                    <p class="text-gray-600 text-sm">Lista completa de artículos requeridos</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-3">
-                                <div
-                                    class="text-right bg-blue-50 rounded-xl px-4 py-3 border border-blue-200 shadow-sm">
-                                    <p class="text-xs text-blue-700 font-semibold uppercase tracking-wide">Total</p>
-                                    <p class="text-2xl font-bold text-blue-800">{{ $articulos->count() }}</p>
-                                </div>
-                                <div
-                                    class="text-right bg-green-50 rounded-xl px-4 py-3 border border-green-200 shadow-sm">
-                                    <p class="text-xs text-green-700 font-semibold uppercase tracking-wide">Cantidad</p>
-                                    <p class="text-2xl font-bold text-green-800">{{ $articulos->sum('cantidad') }}</p>
+                                    <h2 class="text-xl font-bold text-white">Artículos Solicitados</h2>
+                                    <p class="text-white/80 text-sm">Lista completa de artículos requeridos</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-                            <div class="overflow-x-auto">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-semibold text-gray-900">Detalle de Artículos</h3>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-sm text-gray-600">
+                                        {{ $articulos->count() }} artículo{{ $articulos->count() !== 1 ? 's' : '' }}
+                                    </span>
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                                        x-show="{{ $articulos->count() > 0 }}"></div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-hidden rounded-xl border border-blue-100">
                                 <table class="w-full">
-                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                    <thead class="bg-blue-50">
                                         <tr>
-                                            <th
-                                                class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                 Artículo</th>
-                                            <th
-                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                                Tipo</th>
-                                            <th
-                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
+                                                Código</th>
+                                            <th class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                 Cantidad</th>
-                                            <th
-                                                class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                            <th class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
                                                 Estado</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white divide-y divide-blue-100">
                                         @forelse($articulos as $articulo)
-                                            <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                                <td class="px-4 py-4">
-                                                    <div class="space-y-2">
-                                                        <!-- Nombre del artículo -->
-                                                        <p class="font-semibold text-gray-900 text-base leading-tight">
+                                            <tr class="product-row hover:bg-blue-50 transition-all duration-200">
+                                                <!-- Columna Artículo con información completa -->
+                                                <td class="px-6 py-4">
+                                                    <div class="space-y-1">
+                                                        <!-- Nombre principal -->
+                                                        <div class="text-base font-semibold text-gray-900">
                                                             {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}
-                                                        </p>
+                                                        </div>
+                                                        
+                                                        <!-- Información adicional -->
+                                                        <div class="text-xs text-gray-500 space-y-0.5">
+                                                            <!-- Tipo de artículo -->
+                                                            @if($articulo->tipo_articulo)
+                                                            <div class="flex items-center space-x-1">
+                                                                <span class="font-medium">Tipo:</span>
+                                                                <span>{{ $articulo->tipo_articulo }}</span>
+                                                            </div>
+                                                            @endif
+                                                            
+                                                            <!-- Modelo -->
+                                                            @if($articulo->modelo)
+                                                            <div class="flex items-center space-x-1">
+                                                                <span class="font-medium">Modelo:</span>
+                                                                <span>{{ $articulo->modelo }}</span>
+                                                            </div>
+                                                            @endif
+                                                            
+                                                            <!-- Marca -->
+                                                            @if($articulo->marca)
+                                                            <div class="flex items-center space-x-1">
+                                                                <span class="font-medium">Marca:</span>
+                                                                <span>{{ $articulo->marca }}</span>
+                                                            </div>
+                                                            @endif
+                                                            
+                                                            <!-- Subcategoría -->
+                                                            @if($articulo->subcategoria)
+                                                            <div class="flex items-center space-x-1">
+                                                                <span class="font-medium">Categoría:</span>
+                                                                <span>{{ $articulo->subcategoria }}</span>
+                                                            </div>
+                                                            @endif
+                                                        </div>
+
+                                                        <!-- Descripción adicional si existe -->
+                                                        @if($articulo->descripcion)
+                                                        <div class="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+                                                            <p class="text-xs text-gray-600">
+                                                                <span class="font-medium">Nota:</span> {{ $articulo->descripcion }}
+                                                            </p>
+                                                        </div>
+                                                        @endif
                                                     </div>
                                                 </td>
-
-                                                <!-- Tipo -->
-                                                <td class="px-4 py-4 align-top">
-                                                    <div class="flex justify-center">
-                                                        <span
-                                                            class="px-3 py-2 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold whitespace-nowrap">
-                                                            {{ $articulo->tipo_articulo ?? 'General' }}
-                                                        </span>
+                                                
+                                                <!-- Columna Código -->
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="text-base text-blue-600 font-mono font-bold">
+                                                        {{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}
+                                                    </div>
+                                                    <div class="text-xs text-gray-400 mt-1">
+                                                        {{ $articulo->codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto' }}
                                                     </div>
                                                 </td>
-
-                                                <!-- Cantidad -->
-                                                <td class="px-4 py-4 align-top">
-                                                    <div class="flex justify-center">
-                                                        <span
-                                                            class="text-lg font-bold text-gray-900 bg-gray-100 rounded-lg px-4 py-2 inline-block min-w-16 text-center border border-gray-200">
+                                                
+                                                <!-- Columna Cantidad -->
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    <div class="flex items-center justify-center">
+                                                        <span class="font-bold text-lg bg-blue-100 text-blue-800 rounded-lg px-4 py-2 border border-blue-200">
                                                             {{ $articulo->cantidad ?? 0 }}
                                                         </span>
                                                     </div>
                                                 </td>
+                                                
+                                                <!-- Columna Estado -->
+                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                    @php
+                                                        $estadoClase = [
+                                                            '0' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                            '1' => 'bg-green-100 text-green-800 border border-green-200',
+                                                            '2' => 'bg-red-100 text-red-800 border border-red-200',
+                                                        ][$articulo->estado ?? 0] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                                <!-- Estado -->
-                                                <td class="px-4 py-4 align-top">
+                                                        $estadoTexto = [
+                                                            '0' => 'Pendiente',
+                                                            '1' => 'Completado',
+                                                            '2' => 'Rechazado',
+                                                        ][$articulo->estado ?? 0] ?? 'Desconocido';
+
+                                                        $estadoIcono = [
+                                                            '0' => '⏳',
+                                                            '1' => '✅',
+                                                            '2' => '❌',
+                                                        ][$articulo->estado ?? 0] ?? '❓';
+                                                    @endphp
                                                     <div class="flex justify-center">
-                                                        @php
-                                                            $estadoClase =
-                                                                [
-                                                                    '0' =>
-                                                                        'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                                                    '1' =>
-                                                                        'bg-green-100 text-green-800 border border-green-200',
-                                                                    '2' =>
-                                                                        'bg-red-100 text-red-800 border border-red-200',
-                                                                ][$articulo->estado ?? 0] ??
-                                                                'bg-gray-100 text-gray-800 border border-gray-200';
-
-                                                            $estadoTexto =
-                                                                [
-                                                                    '0' => 'Pendiente',
-                                                                    '1' => 'Completado',
-                                                                    '2' => 'Rechazado',
-                                                                ][$articulo->estado ?? 0] ?? 'Desconocido';
-                                                        @endphp
-                                                        <span
-                                                            class="px-3 py-2 {{ $estadoClase }} rounded-full text-xs font-semibold flex items-center gap-2 whitespace-nowrap">
-                                                            <span
-                                                                class="w-2 h-2 rounded-full 
-                                                                @if (($articulo->estado ?? 0) == 1) bg-green-500
-                                                                @elseif(($articulo->estado ?? 0) == 2) bg-red-500
-                                                                @else bg-yellow-500 @endif">
-                                                            </span>
+                                                        <span class="px-3 py-2 {{ $estadoClase }} rounded-full text-sm font-semibold flex items-center gap-2">
+                                                            <span>{{ $estadoIcono }}</span>
                                                             {{ $estadoTexto }}
                                                         </span>
                                                     </div>
@@ -201,46 +230,42 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="px-4 py-12 text-center">
+                                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
                                                     <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="1"
                                                             d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                                                     </svg>
-                                                    <p class="mt-4 text-lg font-semibold text-gray-500">No hay
+                                                    <p class="mt-4 text-lg font-medium text-gray-900">No hay
                                                         artículos registrados</p>
-                                                    <p class="mt-1 text-gray-400 text-sm">Agrega artículos para
-                                                        comenzar</p>
+                                                    <p class="text-sm mt-2">No se han agregado artículos a esta solicitud</p>
                                                 </td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
 
-                        @if ($articulos->count() > 0)
+                            @if($articulos->count() > 0)
                             <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200 shadow-sm">
-                                    <p class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1">Total
-                                        Artículos</p>
+                                <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
+                                    <p class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1">Total Artículos</p>
                                     <p class="text-2xl font-bold text-blue-800">{{ $articulos->count() }}</p>
                                 </div>
-                                <div class="bg-green-50 rounded-xl p-4 text-center border border-green-200 shadow-sm">
-                                    <p class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1">Total
-                                        Cantidad</p>
+                                <div class="bg-green-50 rounded-xl p-4 text-center border border-green-200">
+                                    <p class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1">Total Cantidad</p>
                                     <p class="text-2xl font-bold text-green-800">{{ $articulos->sum('cantidad') }}</p>
                                 </div>
-                                <div
-                                    class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200 shadow-sm">
-                                    <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1">Tipos
-                                        Diferentes</p>
+                                <div class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
+                                    <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1">Tipos Diferentes</p>
                                     <p class="text-2xl font-bold text-purple-800">
-                                        {{ $articulos->unique('tipo_articulo')->count() }}</p>
+                                        {{ $articulos->unique('tipo_articulo')->count() }}
+                                    </p>
                                 </div>
                             </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Información de la Orden -->
@@ -528,4 +553,6 @@
             </div>
         </div>
     </div>
+
+
 </x-layout.default>

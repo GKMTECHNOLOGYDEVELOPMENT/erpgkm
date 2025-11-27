@@ -86,6 +86,8 @@ class Ticket extends Model
         'idTipotickets',
         'idEstadoots',
         'idTicketFlujo',
+        'idContactoFinal', 
+
         'idTecnico',
         'idUsuario',
         'idTienda',

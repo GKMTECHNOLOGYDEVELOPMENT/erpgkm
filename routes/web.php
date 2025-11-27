@@ -52,6 +52,7 @@ use App\Exports\MarcasExport;
 use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
+use App\Http\Controllers\administracion\asociados\ContactoFinalController;
 use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\administracion\cotizacionesl\cotizacionlController as CotizacioneslCotizacionlController;
 use App\Http\Controllers\administracion\cotizacionesls\cotizacionlController;
@@ -175,7 +176,11 @@ Route::get('/administracion/compras', [ComprasController::class, 'index'])->name
 //Rutas para Clientes Generales
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])
     ->name('administracion.cliente-general')
-    ->middleware(['auth', 'permiso:VER CLIENTE GENERAL']);Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+    ->middleware(['auth', 'permiso:VER CLIENTE GENERAL']);
+    
+    Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+
+    
 Route::get('/exportar-clientes-general', function () {
     return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
 })->name('clientes-general.exportExcel');
@@ -719,6 +724,15 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
 
     Route::post('/{id}/aceptar', [SolicitudarticuloController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
+
+    Route::get('/{id}/conformidad-pdf', [SolicitudarticuloController::class, 'generarConformidad'])
+    ->name('conformidad-pdf');
+
+
+Route::get('/{id}/gestionar', [SolicitudarticuloController::class, 'gestionar'])->name('gestionar');
+Route::post('/{id}/marcar-usado', [SolicitudarticuloController::class, 'marcarUsado'])->name('marcar-usado');
+Route::post('/{id}/marcar-no-usado', [SolicitudarticuloController::class, 'marcarNoUsado'])->name('marcar-no-usado');
+
 });
 
     Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])
@@ -737,6 +751,10 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
     Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
+
+Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
+    ->name('conformidad-pdf');
+
 });
 
 
@@ -1852,20 +1870,23 @@ Route::prefix('areas')->group(function () {
 
 
 
-//ENTRADAS DE PROVEEDORES
-Route::prefix('contacto')->name('contacto.')->group(function () {
-    Route::get('/', [ContactoController::class, 'index'])->name('index'); // Mostrar la vista principal
-    Route::get('/create', [ContactoController::class, 'create'])->name('create'); // Guardar una nueva categoría
-    Route::post('/store', [ContactoController::class, 'store'])->name('store'); // Guardar una nueva categoría
-    Route::get('/{id}/edit', [ContactoController::class, 'edit'])->name('edit'); // Editar una categoría
-    Route::put('/update/{id}', [ContactoController::class, 'update'])->name('update'); // Actualizar una categoría
-    Route::delete('/{id}', [ContactoController::class, 'destroy'])->name('destroy'); // Eliminar una categoría
-    Route::get('/reporte-ubicaciones', [UbicacionesController::class, 'exportAllPDF'])->name('ubicaciones.pdf'); // Exportar todas las categorías a PDF
-    Route::get('/get-all', [UbicacionesController::class, 'getAll'])->name('getAll'); // Obtener todas las categorías en formato JSON
-    Route::post('/check-nombre', [UbicacionesController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
-    Route::get('/exportar-excel', function () {
-        return Excel::download(new CategoriaExport, 'ubicaciones.xlsx');
-    })->name('exportExcel');
+// Rutas para ContactoFinal
+Route::prefix('contactofinal')->group(function () {
+    Route::get('/', [ContactoFinalController::class, 'index'])->name('contactofinal.index');
+    Route::post('/store', [ContactoFinalController::class, 'store'])->name('contactofinal.store');
+    Route::get('/{id}/edit', [ContactoFinalController::class, 'edit'])->name('contactofinal.edit');
+    Route::put('/{id}', [ContactoFinalController::class, 'update'])->name('contactofinal.update');
+    Route::delete('/{id}', [ContactoFinalController::class, 'destroy'])->name('contactofinal.destroy');
+    Route::get('/all', [ContactoFinalController::class, 'getAll'])->name('contactofinal.getAll');
 });
+
+
+
+
+// En tu archivo de rutas
+Route::get('/contactos/cliente-general/{id}', [OrdenesHelpdeskController::class, 'obtenerContactosPorClienteGeneral'])->name('contactos.por-cliente-general');
+Route::get('/contactos/todos', [OrdenesHelpdeskController::class, 'obtenerTodosLosContactos'])->name('contactos.todos');
+Route::get('/cliente-general/{id}/contactos', [OrdenesHelpdeskController::class, 'obtenerClienteGeneralConContactos'])->name('cliente-general.contactos');
+
 
 // Route::get('/cotizacion-productos/{cotizacionId}', [SolicitudarticuloController::class, 'getCotizacionProductos']);
