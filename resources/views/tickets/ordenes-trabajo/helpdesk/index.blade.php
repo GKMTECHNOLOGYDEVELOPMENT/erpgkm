@@ -69,7 +69,7 @@
         </div>
 
         <!-- Filtros -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <!-- Fecha de Inicio -->
             <div>
                 <label for="startDate" class="block text-sm font-medium text-gray-700">Fecha Inicio</label>
@@ -78,7 +78,7 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             startDate = dateStr;
-                            debouncedFetch(); // 👈 aquí
+                            debouncedFetch();
                         }
                     })" />
             </div>
@@ -91,7 +91,7 @@
                         dateFormat: 'Y-m-d',
                         onChange: function(selectedDates, dateStr) {
                             endDate = dateStr;
-                            debouncedFetch(); // 👈 aquí
+                            debouncedFetch();
                         }
                     })" />
             </div>
@@ -101,19 +101,16 @@
                 clienteGenerales: [],
                 isLoading: true,
                 init() {
-                    // Cambia el número según el área que necesites (1 para SMART, 2 para HELPDESK)
-                    fetch('/api/clientegeneralfiltros/2') // 👈 Cambia este número según la vista
+                    fetch('/api/clientegeneralfiltros/2')
                         .then(response => response.json())
                         .then(data => {
                             this.clienteGenerales = data;
                             this.isLoading = false;
             
-                            // Espera a que Alpine renderice los <option>
                             this.$nextTick(() => {
                                 setTimeout(() => {
                                     const selectEl = document.getElementById('clienteGeneralFilter');
                                     if (selectEl) {
-                                        // Destruir y recrear NiceSelect
                                         if (typeof NiceSelect !== 'undefined') {
                                             NiceSelect.destroy(selectEl);
                                             NiceSelect.bind(selectEl);
@@ -134,9 +131,10 @@
                 <select id="clienteGeneralFilter" x-model="$root.clienteGeneralFilter"
                     class="form-select w-full text-white-dark"
                     @change="
-                $root.isLoading = true;
-                $root.debouncedFetch();
-            ">
+                        $root.isLoading = true;
+                        $root.contactoFinalFilter = ''; // Limpiar contacto cuando cambia cliente
+                        $root.debouncedFetch();
+                    ">
                     <option value="">Todos los clientes generales</option>
                     <template x-if="isLoading">
                         <option disabled>Cargando clientes...</option>
@@ -150,7 +148,70 @@
                 </select>
             </div>
 
-
+            <!-- Filtrar por Contacto Final -->
+            <div x-data="{
+                contactosFinales: [],
+                isLoading: false,
+                init() {
+                    // Cargar contactos cuando cambie el cliente general
+                    this.$watch('$root.clienteGeneralFilter', (newValue) => {
+                        this.cargarContactos(newValue);
+                    });
+                },
+                cargarContactos(idClienteGeneral) {
+                    if (!idClienteGeneral) {
+                        this.contactosFinales = [];
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    fetch(`/api/contactos-finales/${idClienteGeneral}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.contactosFinales = data;
+                            this.isLoading = false;
+                            
+                            // Recrear NiceSelect
+                            this.$nextTick(() => {
+                                setTimeout(() => {
+                                    const selectEl = document.getElementById('contactoFinalFilter');
+                                    if (selectEl) {
+                                        if (typeof NiceSelect !== 'undefined') {
+                                            NiceSelect.destroy(selectEl);
+                                            NiceSelect.bind(selectEl);
+                                        }
+                                    }
+                                }, 50);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error cargando contactos:', error);
+                            this.isLoading = false;
+                        });
+                }
+            }">
+                <label for="contactoFinalFilter" class="block text-sm font-medium text-gray-700">
+                    Filtrar por Contacto Final
+                </label>
+                <select id="contactoFinalFilter" x-model="$root.contactoFinalFilter" 
+                        class="form-select w-full text-white-dark"
+                        @change="$root.isLoading = true; $root.debouncedFetch();"
+                        :disabled="!$root.clienteGeneralFilter">
+                    <option value="">Todos los contactos</option>
+                    <template x-if="isLoading">
+                        <option disabled>Cargando contactos...</option>
+                    </template>
+                    <template x-if="!isLoading && contactosFinales.length === 0 && $root.clienteGeneralFilter">
+                        <option disabled>No hay contactos para este cliente</option>
+                    </template>
+                    <template x-if="!$root.clienteGeneralFilter">
+                        <option disabled>Seleccione un cliente general primero</option>
+                    </template>
+                    <template x-for="contacto in contactosFinales" :key="contacto.id">
+                        <option :value="contacto.id" x-text="contacto.nombre_completo"></option>
+                    </template>
+                </select>
+            </div>
 
             <!-- Botones de Acción -->
             <div class="flex flex-wrap items-end gap-2">
@@ -168,8 +229,7 @@
                 <!-- Botón Exportar (Excel) -->
                 <div x-data="{ open: false }" class="relative">
                     <a class="btn btn-success btn-sm"
-                        x-bind:href="`{{ route('ordenes.export.helpdesk.excel') }}?clienteGeneral=${clienteGeneralFilter}&startDate=${startDate}&endDate=${endDate}`">
-
+                        x-bind:href="`{{ route('ordenes.export.helpdesk.excel') }}?clienteGeneral=${clienteGeneralFilter}&contactoFinal=${contactoFinalFilter}&startDate=${startDate}&endDate=${endDate}`">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" viewBox="0 0 24 24"
                             fill="currentColor">
                             <path
@@ -189,15 +249,19 @@
                 <!-- Botón Refrescar -->
                 <button class="btn btn-secondary btn-sm"
                     @click="
-                startDate = '';
-                endDate = '';
-                marcaFilter = '';
-                clienteGeneralFilter = '';
-                document.getElementById('clienteGeneralFilter').value = '';
-                NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
-                NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
-                debouncedFetch();
-            ">
+                        startDate = '';
+                        endDate = '';
+                        marcaFilter = '';
+                        clienteGeneralFilter = '';
+                        contactoFinalFilter = '';
+                        document.getElementById('clienteGeneralFilter').value = '';
+                        document.getElementById('contactoFinalFilter').value = '';
+                        NiceSelect.destroy(document.getElementById('clienteGeneralFilter'));
+                        NiceSelect.bind(document.getElementById('clienteGeneralFilter'));
+                        NiceSelect.destroy(document.getElementById('contactoFinalFilter'));
+                        NiceSelect.bind(document.getElementById('contactoFinalFilter'));
+                        debouncedFetch();
+                    ">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 block mx-auto" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <polyline points="23 4 23 10 17 10" stroke-linecap="round" stroke-linejoin="round" />
@@ -207,10 +271,8 @@
                     </svg>
                 </button>
                 @endif
-
             </div>
         </div>
-
 
         <!-- Tabla y Paginación -->
         <div class="panel mt-6">
@@ -255,7 +317,6 @@
                             </svg>
                         </span>
                     </button>
-
                 </div>
 
                 <!-- Tabla con clases Bootstraahi ep/DataTables -->
@@ -283,6 +344,7 @@
             <div id="pagination" class="flex flex-wrap justify-center gap-2 mt-4"></div>
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Botón buscar
@@ -333,18 +395,14 @@
         });
     </script>
 
-
-
-
-<!-- Agrega esto antes de cargar tu script list.js -->
-<script>
-    window.permisosHelpdesk = {
-        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
-        puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
-        puedeVerEnvio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER ENVIO ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }}
-    };
-</script>
-
+    <!-- Agrega esto antes de cargar tu script list.js -->
+    <script>
+        window.permisosHelpdesk = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
+            puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }},
+            puedeVerEnvio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER ENVIO ORDEN DE TRABAJO HELPDESK') ? 'true' : 'false' }}
+        };
+    </script>
 
     <!-- Scripts adicionales -->
     <script src="{{ asset('assets/js/tickets/helpdesk/list.js') }}"></script>

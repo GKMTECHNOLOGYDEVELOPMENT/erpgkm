@@ -32,4 +32,13 @@ class ContactoFinal extends Model
     {
         return $this->belongsTo(Tipodocumento::class, 'idTipoDocumento', 'idTipoDocumento');
     }
+    public function clientesGenerales()
+    {
+        return $this->belongsToMany(
+            ClienteGeneral::class,
+            'cliente_general_contacto_final',
+            'idContactoFinal',
+            'idClienteGeneral'
+        );
+    }
 }

@@ -247,4 +247,8 @@ class Ticket extends Model
         return $this->hasOne(Custodia::class, 'id_ticket', 'idTickets');
     }
 
+    public function contactofinal()
+    {
+        return $this->belongsTo(ContactoFinal::class, 'idContactoFinal', 'idContactoFinal');
+    }
 }

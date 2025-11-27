@@ -581,6 +581,26 @@ public function storehelpdesk(Request $request)
             ->value('estadovisita');  // Obtenemos el valor de estadovisita
         Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
+
+
+         $contactos = [];
+    if ($orden->idClienteGeneral) {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $orden->idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+    }
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -610,7 +630,9 @@ public function storehelpdesk(Request $request)
             'tiposEnvio',
             'tiposRecojo',
             'ultimaVisitaConEstado1',
-            'estadovisita'
+            'estadovisita',
+            'contactos' // ✅ NUEVO: Pasar contactos a la vista
+
 
 
         ));
@@ -890,6 +912,25 @@ public function storehelpdesk(Request $request)
             ->value('estadovisita');  // Obtenemos el valor de estadovisita
         Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
+
+         $contactos = [];
+    if ($orden->idClienteGeneral) {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $orden->idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+    }
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -919,7 +960,9 @@ public function storehelpdesk(Request $request)
             'tiposEnvio',
             'tiposRecojo',
             'ultimaVisitaConEstado1',
-            'estadovisita'
+            'estadovisita',
+            'contactos' // ✅ NUEVO: Agregar contactos
+
 
 
         ));
@@ -1200,6 +1243,25 @@ public function storehelpdesk(Request $request)
             ->value('estadovisita');  // Obtenemos el valor de estadovisita
         Log::info('Estado de la visita: ' . $estadovisita);  // Log del valor de estadovisita
 
+$contactos = [];
+    if ($orden->idClienteGeneral) {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $orden->idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+    }
+
+
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
             'orden',
             'usuarios',
@@ -1229,7 +1291,9 @@ public function storehelpdesk(Request $request)
             'tiposEnvio',
             'tiposRecojo',
             'ultimaVisitaConEstado1',
-            'estadovisita'
+            'estadovisita',
+            'contactos' 
+
 
 
         ));
@@ -1683,6 +1747,23 @@ $articulos = DB::table('articulos')
 
         $existeFlujo25 = $flujo ? true : false;  // Si existe flujo con idEstadflujo 4, establecer como verdadero
 
+$contactos = [];
+    if ($orden->idClienteGeneral) {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
+            ->where('cgcf.idClienteGeneral', $orden->idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono',
+                'td.nombre as tipo_documento',
+                'cf.numero_documento'
+            )
+            ->get();
+    }
 
 
         return view("tickets.ordenes-trabajo.helpdesk.edit", compact(
@@ -1710,7 +1791,8 @@ $articulos = DB::table('articulos')
             'existeFlujo31',
             'ultimaVisitaConEstado1',
             'existeFlujo25',
-            'estadovisita'
+            'estadovisita',
+             'contactos' 
 
         ));
     }
@@ -2058,6 +2140,8 @@ $articulos = DB::table('articulos')
             'idTecnico' => 'required|integer|exists:usuarios,idUsuario',
             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'fallaReportada' => 'required|string|max:255',
+            'idContactoFinal' => 'nullable|integer',
+            'idContactoFinal' => 'nullable|integer',
         ]);
 
         $orden = Ticket::findOrFail($id);
@@ -2073,151 +2157,158 @@ $articulos = DB::table('articulos')
     }
 
 
-    public function getAll(Request $request)
-    {
-        try {
-            Log::info("📥 Entrando al método getAll (HELPDESK)", $request->all());
+public function getAll(Request $request)
+{
+    try {
+        Log::info("📥 Entrando al método getAll (HELPDESK)", $request->all());
 
-            $tipoTicket = 2;
+        $tipoTicket = 2;
 
-            // Base query
-            $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
-            $recordsTotal = $baseQuery->count();
+        // Base query
+        $baseQuery = Ticket::query()->where('idTipotickets', $tipoTicket);
+        $recordsTotal = $baseQuery->count();
 
-            // Consulta optimizada con relaciones necesarias
-            $query = $baseQuery->select([
-                'idTickets',
-                'numero_ticket',
-                'fecha_creacion',
-                'idCliente',
-                'idClienteGeneral',
-                'idTienda',
-                'idTicketFlujo',
-                'idEstadoots',
-                'idUsuario',
-                'tipoServicio',
-                'direccion',
-            ])
-                ->with([
-                    'cliente:idCliente,nombre',
-                    'tienda:idTienda,nombre',
-                    'tecnico:idUsuario,Nombre',
-                    'usuario:idUsuario,Nombre',
-                    'tiposervicio:idTipoServicio,nombre', // ✅ Incluido
-                    'estado_ot:idEstadoots,descripcion,color',
-                    'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
-                    'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
-                    'manejoEnvio:idmanejo_envio,idTickets,tipo',
+        // Consulta optimizada con relaciones necesarias
+        $query = $baseQuery->select([
+            'idTickets',
+            'numero_ticket',
+            'fecha_creacion',
+            'idCliente',
+            'idClienteGeneral',
+            'idContactoFinal',
+            'idTienda',
+            'idTicketFlujo',
+            'idEstadoots',
+            'idUsuario',
+            'tipoServicio',
+            'direccion',
+        ])
+        ->with([
+            'cliente:idCliente,nombre',
+            'tienda:idTienda,nombre',
+            'tecnico:idUsuario,Nombre',
+            'usuario:idUsuario,Nombre',
+            'tiposervicio:idTipoServicio,nombre',
+            'estado_ot:idEstadoots,descripcion,color',
+            'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
+            'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
+            'manejoEnvio:idmanejo_envio,idTickets,tipo',
+            'contactofinal:idContactoFinal,nombre_completo', // 👈 RELACIÓN CORREGIDA
 
-                    // Última visita programada
-                    'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
-                        ->latest('fecha_programada')->limit(1),
+            // Última visita programada
+            'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
+                ->latest('fecha_programada')->limit(1),
 
-                    // Visita seleccionada con técnico
-                    'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
-                    'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
-                    'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
+            // Visita seleccionada con técnico
+            'seleccionarVisita:idselecionarvisita,idTickets,idVisitas,vistaseleccionada',
+            'seleccionarVisita.visita:idVisitas,nombre,fecha_programada,fecha_asignada,estado,idUsuario',
+            'seleccionarVisita.visita.tecnico:idUsuario,Nombre',
 
-                    // Transición de estado para visita
-                    'transicion_status_tickets' => fn($q) => $q
-                        ->when($request->filled('idVisita'), function ($q2) use ($request) {
-                            $q2->where('idVisita', $request->idVisita)
-                                ->where('idEstadoots', 3);
-                        }),
-                ]);
+            // Transición de estado para visita
+            'transicion_status_tickets' => fn($q) => $q
+                ->when($request->filled('idVisita'), function ($q2) use ($request) {
+                    $q2->where('idVisita', $request->idVisita)
+                        ->where('idEstadoots', 3);
+                }),
+        ]);
 
-            // Filtros
-            if ($request->filled('clienteGeneral')) {
-                $query->where('idClienteGeneral', $request->clienteGeneral);
-            }
-
-            if ($request->filled('startDate') && $request->filled('endDate')) {
-                $query->whereBetween('fecha_creacion', [
-                    $request->startDate . ' 00:00:00',
-                    $request->endDate . ' 23:59:59'
-                ]);
-            } elseif ($request->filled('startDate')) {
-                $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
-            } elseif ($request->filled('endDate')) {
-                $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
-            }
-
-            // Buscador global
-            if ($request->has('search') && !empty($request->input('search.value'))) {
-                $searchValue = trim($request->input('search.value'));
-                $normalized = Str::lower(Str::ascii($searchValue));
-
-                $query->where(function ($q) use ($searchValue, $normalized) {
-                    $q->orWhere('idTickets', $searchValue)
-                        ->orWhere('numero_ticket', $searchValue)
-                        ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
-                        ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
-                        ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                        ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                        // Por esto (más robusto):
-                        ->orWhereHas(
-                            'ticketflujo.estadoFlujo',
-                            fn($q) =>
-                            $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"])
-                        )
-
-                        ->orWhere(function ($q) use ($searchValue, $normalized) {
-                            if (stripos($normalized, 'soporte') !== false || strtolower($normalized) === 's') {
-                                $q->orWhere('tipoServicio', 1); // Soporte
-                            }
-
-                            if (stripos($normalized, 'laboratorio') !== false || strtolower($normalized) === 'la') {
-                                $q->orWhere('tipoServicio', 6); // Laboratorio
-                            }
-
-                            if (stripos($normalized, 'levantamiento') !== false || strtolower($normalized) === 'l') {
-                                $q->orWhere('tipoServicio', 2); // Levantamiento
-                            }
-
-                            if (stripos($normalized, 'ejecucion') !== false || strtolower($normalized) === 'e') {
-                                $q->orWhere('tipoServicio', 5); // Ejecución
-                            }
-                        });
-                });
-            }
-
-            // Orden y paginación
-            $query->orderBy('idTickets', 'desc');
-            $recordsFiltered = (clone $query)->count();
-
-            $ordenes = $query->skip($request->input('start', 0))
-                ->take($request->input('length', 10))
-                ->get()
-                ->map(function ($item) {
-                    $arr = json_decode(json_encode($item), true);
-                    array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
-                    return $arr;
-                });
-
-            return response()->json([
-                "draw" => intval($request->input('draw')),
-                "recordsTotal" => $recordsTotal,
-                "recordsFiltered" => $recordsFiltered,
-                "data" => $ordenes
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('❌ Error en getAll() Helpdesk', [
-                'message' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
-            ]);
-
-            return response()->json([
-                "draw" => intval($request->input('draw')),
-                "recordsTotal" => 0,
-                "recordsFiltered" => 0,
-                "data" => [],
-                "error" => "Error del servidor: " . $e->getMessage()
-            ], 500);
+        // Filtros
+        if ($request->filled('clienteGeneral')) {
+            $query->where('idClienteGeneral', $request->clienteGeneral);
         }
+
+        // 👈 NUEVO FILTRO POR CONTACTO FINAL
+        if ($request->filled('contactoFinal') && $request->contactoFinal != '') {
+            $query->where('idContactoFinal', $request->contactoFinal);
+        }
+
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            $query->whereBetween('fecha_creacion', [
+                $request->startDate . ' 00:00:00',
+                $request->endDate . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('startDate')) {
+            $query->where('fecha_creacion', '>=', $request->startDate . ' 00:00:00');
+        } elseif ($request->filled('endDate')) {
+            $query->where('fecha_creacion', '<=', $request->endDate . ' 23:59:59');
+        }
+
+        // Buscador global
+        if ($request->has('search') && !empty($request->input('search.value'))) {
+            $searchValue = trim($request->input('search.value'));
+            $normalized = Str::lower(Str::ascii($searchValue));
+
+            $query->where(function ($q) use ($searchValue, $normalized) {
+                $q->orWhere('idTickets', $searchValue)
+                    ->orWhere('numero_ticket', $searchValue)
+                    ->orWhere('numero_ticket', 'LIKE', "%{$searchValue}%")
+                    ->orWhere('direccion', 'LIKE', "%{$searchValue}%")
+                    ->orWhereHas('cliente', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('contactofinal', fn($q) => $q->where('nombre_completo', 'LIKE', "%{$searchValue}%")) // 👈 BÚSQUEDA EN CONTACTO
+                    ->orWhereHas(
+                        'ticketflujo.estadoFlujo',
+                        fn($q) =>
+                        $q->whereRaw("LOWER(CONVERT(descripcion USING utf8)) LIKE ?", ["%{$normalized}%"])
+                    )
+
+                    ->orWhere(function ($q) use ($searchValue, $normalized) {
+                        if (stripos($normalized, 'soporte') !== false || strtolower($normalized) === 's') {
+                            $q->orWhere('tipoServicio', 1); // Soporte
+                        }
+
+                        if (stripos($normalized, 'laboratorio') !== false || strtolower($normalized) === 'la') {
+                            $q->orWhere('tipoServicio', 6); // Laboratorio
+                        }
+
+                        if (stripos($normalized, 'levantamiento') !== false || strtolower($normalized) === 'l') {
+                            $q->orWhere('tipoServicio', 2); // Levantamiento
+                        }
+
+                        if (stripos($normalized, 'ejecucion') !== false || strtolower($normalized) === 'e') {
+                            $q->orWhere('tipoServicio', 5); // Ejecución
+                        }
+                    });
+            });
+        }
+
+        // Orden y paginación
+        $query->orderBy('idTickets', 'desc');
+        $recordsFiltered = (clone $query)->count();
+
+        $ordenes = $query->skip($request->input('start', 0))
+            ->take($request->input('length', 10))
+            ->get()
+            ->map(function ($item) {
+                $arr = json_decode(json_encode($item), true);
+                array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
+                return $arr;
+            });
+
+        return response()->json([
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => $recordsTotal,
+            "recordsFiltered" => $recordsFiltered,
+            "data" => $ordenes
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('❌ Error en getAll() Helpdesk', [
+            'message' => $e->getMessage(),
+            'line' => $e->getLine(),
+            'file' => $e->getFile(),
+        ]);
+
+        return response()->json([
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => 0,
+            "recordsFiltered" => 0,
+            "data" => [],
+            "error" => "Error del servidor: " . $e->getMessage()
+        ], 500);
     }
+}
 
 
 
@@ -2500,6 +2591,7 @@ $articulos = DB::table('articulos')
             'idTienda' => 'required|exists:tienda,idTienda',
             'fallaReportada' => 'nullable|string',
             'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
+            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
 
         ]);
 
@@ -2515,6 +2607,7 @@ $articulos = DB::table('articulos')
         $orden->idTienda = $request->idTienda;
         $orden->fallaReportada = $request->fallaReportada;
         $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
+        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
 
 
         // Guardar los cambios
@@ -2544,6 +2637,8 @@ $articulos = DB::table('articulos')
             'fallaReportada' => 'nullable|string',
             'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
             'nrmcotizacion' => 'nullable|string',
+            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
+
 
         ]);
 
@@ -2560,6 +2655,8 @@ $articulos = DB::table('articulos')
         $orden->fallaReportada = $request->fallaReportada;
         $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
         $orden->nrmcotizacion = $request->nrmcotizacion;
+        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
+
 
         // Guardar los cambios
         $orden->save();
@@ -4940,7 +5037,9 @@ $articulos = DB::table('articulos')
         return Excel::download(
             new HelpdeskTicketExport(
                 $request->startDate,
-                $request->endDate
+                $request->endDate,
+                $request->contactoFinal // 👈 NUEVO PARÁMETRO
+
             ),
             'ordenes_helpdesk.xlsx'
         );
@@ -5511,7 +5610,7 @@ public function obtenerContactosPorClienteGeneral($idClienteGeneral)
             ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
             ->join('tipodocumento as td', 'cf.idTipoDocumento', '=', 'td.idTipoDocumento')
             ->where('cgcf.idClienteGeneral', $idClienteGeneral)
-            ->where('cf.estado', 1) // Solo contactos activos
+            ->where('cf.estado', 1)
             ->select(
                 'cf.idContactoFinal as id',
                 'cf.nombre_completo',

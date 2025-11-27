@@ -215,6 +215,22 @@
                     @endif
                 </select>
             </div>
+            <!-- ✅ NUEVO: Contacto Final -->
+            <div id="contactoContainer" class="{{ $orden->idContactoFinal ? '' : 'hidden' }}">
+                <label class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-address-book text-gray-500"></i>
+                    Contacto
+                </label>
+                <select id="idContactoFinal" name="idContactoFinal" class="form-input w-full select2">
+                    <option value="">Seleccionar Contacto</option>
+                    @foreach($contactos as $contacto)
+                        <option value="{{ $contacto->id }}" 
+                            {{ $orden->idContactoFinal == $contacto->id ? 'selected' : '' }}>
+                            {{ $contacto->nombre_completo }} - {{ $contacto->correo }} - {{ $contacto->telefono }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <!-- Tienda -->
             <div>
                 <label class="text-sm font-medium flex items-center gap-2">
@@ -284,13 +300,11 @@
 
             @if ($idRol != 6)
                 <!-- Botón de Guardar -->
-                @if (\App\Helpers\PermisoHelper::tienePermiso('BOTONES MODIFICAR Y VOLVER HELP DESK LABORATORIO'))
                     <div class="md:col-span-2 flex justify-end space-x-4">
                         <a href="{{ route('ordenes.helpdesk') }}"
                             class="btn btn-outline-danger w-full md:w-auto">Volver</a>
                         <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
                     </div>
-                @endif
             @endif
 
         </div>
@@ -659,101 +673,195 @@
                 });
         }
 
-        // 5. Funciones para selects dependientes
-        function setupSelectDependientes() {
-            // Cliente -> Cliente General
-            $('#idCliente').on('change', function() {
-                const clienteId = $(this).val();
-                const $clienteGeneral = $('#idClienteGeneral');
-                const $tienda = $('#idTienda');
+       // 5. Funciones para selects dependientes - CORREGIDO
+function setupSelectDependientes() {
+    // Cliente -> Cliente General
+    $('#idCliente').on('change', function() {
+        const clienteId = $(this).val();
+        const $clienteGeneral = $('#idClienteGeneral');
+        const $tienda = $('#idTienda');
+        const $contactoContainer = $('#contactoContainer');
 
-                if (!clienteId) {
-                    $clienteGeneral.val('').trigger('change').prop('disabled', true);
-                    $tienda.val('').trigger('change').prop('disabled', true);
-                    return;
-                }
-
-                // Cargar clientes generales
-                $clienteGeneral.prop('disabled', true).empty();
-                $.get(`/clientes-generales/${clienteId}`)
-                    .then(data => {
-                        $clienteGeneral.empty().append(
-                            '<option value="">Seleccionar Cliente General</option>');
-                        if (data.length > 0) {
-                            data.forEach(cg => {
-                                $clienteGeneral.append(new Option(cg.descripcion, cg
-                                    .idClienteGeneral));
-                            });
-                        }
-                        $clienteGeneral.val(
-                                '{{ $orden->clienteGeneral ? $orden->clienteGeneral->idClienteGeneral : '' }}'
-                            )
-                            .trigger('change')
-                            .prop('disabled', false);
-                    })
-                    .catch(error => {
-                        console.error('Error cargando clientes generales:', error);
-                        $clienteGeneral.empty().append('<option value="">Error al cargar</option>');
-                    });
-
-                // Cargar tiendas
-                $tienda.prop('disabled', true).empty();
-                $.get(`/api/cliente/${clienteId}`)
-                    .then(clienteData => {
-                        if (clienteData.idTipoDocumento == 8) {
-                            $('#direccion').val(clienteData.direccion || '');
-                        }
-
-                        const endpoint = (clienteData.idTipoDocumento == 8 || clienteData
-                                .esTienda == 0) ?
-                            '/api/tiendas' :
-                            `/api/cliente/${clienteId}/tiendas`;
-
-                        return $.get(endpoint);
-                    })
-                    .then(tiendasData => {
-                        $tienda.empty().append(
-                            '<option value="" disabled>Seleccionar Tienda</option>');
-                        if (tiendasData?.length > 0) {
-                            tiendasData.forEach(tienda => {
-                                $tienda.append(new Option(tienda.nombre, tienda.idTienda));
-                            });
-                        }
-                        $tienda.val('{{ $orden->idTienda }}')
-                            .trigger('change')
-                            .prop('disabled', false);
-                    })
-                    .catch(error => {
-                        console.error('Error cargando tiendas:', error);
-                        $tienda.empty().append('<option value="">Error al cargar</option>');
-                    });
-            });
-
-            // Tienda -> Dirección
-            $('#idTienda').on('change', function() {
-                const tiendaId = $(this).val();
-                const clienteId = $('#idCliente').val();
-
-                if (!tiendaId) {
-                    $('#direccion').val('');
-                    return;
-                }
-
-                $.get(`/api/cliente/${clienteId}`)
-                    .then(clienteData => {
-                        if (clienteData.idTipoDocumento != 8) {
-                            return $.get(`/api/tienda/${tiendaId}`);
-                        }
-                        return null;
-                    })
-                    .then(tiendaData => {
-                        if (tiendaData) {
-                            $('#direccion').val(tiendaData.direccion || '');
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
+        if (!clienteId) {
+            $clienteGeneral.val('').trigger('change').prop('disabled', true);
+            $tienda.val('').trigger('change').prop('disabled', true);
+            $contactoContainer.addClass('hidden');
+            $('#idContactoFinal').val('').trigger('change');
+            return;
         }
+
+        // Cargar clientes generales
+        $clienteGeneral.prop('disabled', true).empty();
+        $.get(`/clientes-generales/${clienteId}`)
+            .then(data => {
+                $clienteGeneral.empty().append(
+                    '<option value="">Seleccionar Cliente General</option>');
+                if (data.length > 0) {
+                    data.forEach(cg => {
+                        $clienteGeneral.append(new Option(cg.descripcion, cg.idClienteGeneral));
+                    });
+                }
+                
+                // ✅ MANTENER el valor existente si hay uno
+                const currentClienteGeneral = '{{ $orden->idClienteGeneral }}';
+                if (currentClienteGeneral) {
+                    $clienteGeneral.val(currentClienteGeneral).trigger('change');
+                }
+                
+                $clienteGeneral.prop('disabled', false);
+            })
+            .catch(error => {
+                console.error('Error cargando clientes generales:', error);
+                $clienteGeneral.empty().append('<option value="">Error al cargar</option>');
+            });
+
+        // Cargar tiendas
+        $tienda.prop('disabled', true).empty();
+        $.get(`/api/cliente/${clienteId}`)
+            .then(clienteData => {
+                if (clienteData.idTipoDocumento == 8) {
+                    $('#direccion').val(clienteData.direccion || '');
+                }
+
+                const endpoint = (clienteData.idTipoDocumento == 8 || clienteData.esTienda == 0) ?
+                    '/api/tiendas' :
+                    `/api/cliente/${clienteId}/tiendas`;
+
+                return $.get(endpoint);
+            })
+            .then(tiendasData => {
+                $tienda.empty().append(
+                    '<option value="" disabled>Seleccionar Tienda</option>');
+                if (tiendasData?.length > 0) {
+                    tiendasData.forEach(tienda => {
+                        $tienda.append(new Option(tienda.nombre, tienda.idTienda));
+                    });
+                }
+                
+                // ✅ MANTENER el valor existente si hay uno
+                const currentTienda = '{{ $orden->idTienda }}';
+                if (currentTienda) {
+                    $tienda.val(currentTienda).trigger('change');
+                }
+                
+                $tienda.prop('disabled', false);
+            })
+            .catch(error => {
+                console.error('Error cargando tiendas:', error);
+                $tienda.empty().append('<option value="">Error al cargar</option>');
+            });
+    });
+
+    // Cliente General -> Contactos (CORREGIDO)
+    $('#idClienteGeneral').on('change', function() {
+        const idClienteGeneral = $(this).val();
+        if (idClienteGeneral) {
+            cargarContactosPorClienteGeneral(idClienteGeneral);
+        } else {
+            // Si no hay cliente general seleccionado, ocultar y limpiar contactos
+            $('#contactoContainer').addClass('hidden');
+            $('#idContactoFinal').val('').trigger('change');
+        }
+    });
+
+    // Tienda -> Dirección
+    $('#idTienda').on('change', function() {
+        const tiendaId = $(this).val();
+        const clienteId = $('#idCliente').val();
+
+        if (!tiendaId) {
+            $('#direccion').val('');
+            return;
+        }
+
+        $.get(`/api/cliente/${clienteId}`)
+            .then(clienteData => {
+                if (clienteData.idTipoDocumento != 8) {
+                    return $.get(`/api/tienda/${tiendaId}`);
+                }
+                return null;
+            })
+            .then(tiendaData => {
+                if (tiendaData) {
+                    $('#direccion').val(tiendaData.direccion || '');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+}
+
+// Función para cargar contactos por cliente general - CORREGIDA
+function cargarContactosPorClienteGeneral(idClienteGeneral) {
+    const $contactoContainer = $('#contactoContainer');
+    const $contactoSelect = $('#idContactoFinal');
+    
+    console.log('Cargando contactos para cliente general:', idClienteGeneral);
+    
+    if (!idClienteGeneral) {
+        $contactoContainer.addClass('hidden');
+        $contactoSelect.empty().append('<option value="">Seleccionar Contacto</option>');
+        return;
+    }
+
+    // Mostrar loading
+    $contactoSelect.prop('disabled', true);
+    
+    fetch(`/contactos/cliente-general/${idClienteGeneral}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error en la respuesta del servidor');
+            }
+            return response.json();
+        })
+        .then(data => {
+            $contactoSelect.prop('disabled', false);
+            
+            console.log('Contactos recibidos:', data);
+            
+            if (data.success && data.contactos && data.contactos.length > 0) {
+                $contactoSelect.empty().append('<option value="">Seleccionar Contacto</option>');
+                
+                data.contactos.forEach(contacto => {
+                    const displayText = contacto.telefono 
+                        ? `${contacto.nombre_completo} - ${contacto.correo} - ${contacto.telefono}`
+                        : `${contacto.nombre_completo} - ${contacto.correo}`;
+                    
+                    $contactoSelect.append(new Option(displayText, contacto.id));
+                });
+                
+                $contactoContainer.removeClass('hidden');
+                
+                // ✅ MANTENER el valor existente si hay uno
+                const currentContacto = '{{ $orden->idContactoFinal }}';
+                if (currentContacto) {
+                    $contactoSelect.val(currentContacto).trigger('change');
+                }
+                
+                // Reinicializar Select2 si es necesario
+                if ($contactoSelect.hasClass('select2-hidden-accessible')) {
+                    $contactoSelect.select2('destroy');
+                }
+                $contactoSelect.select2({
+                    width: '100%',
+                    placeholder: 'Seleccionar Contacto'
+                });
+                
+                console.log('Contactos cargados correctamente');
+                
+            } else {
+                $contactoContainer.addClass('hidden');
+                $contactoSelect.empty().append('<option value="">No hay contactos disponibles</option>');
+                console.log('No hay contactos disponibles');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar contactos:', error);
+            $contactoSelect.prop('disabled', false);
+            $contactoContainer.addClass('hidden');
+            $contactoSelect.empty().append('<option value="">Error al cargar contactos</option>');
+            toastr.error('Error al cargar los contactos');
+        });
+}
 
         function setupEstadoButtons() {
             document.querySelectorAll(".estado-button").forEach(estadoElement => {
@@ -813,60 +921,71 @@
         }
 
         // 7. Configurar formulario de guardado
-        function setupFormGuardado() {
-            $('#guardarFallaReportada').on('click', function(e) {
-                e.preventDefault();
+       function setupFormGuardado() {
+    $('#guardarFallaReportada').on('click', function(e) {
+        e.preventDefault();
 
-                const formData = {
-                    idCliente: $('#idCliente').val(),
-                    idClienteGeneral: $('#idClienteGeneral').val(),
-                    idTienda: $('#idTienda').val(),
-                    numero_ticket: $('#numero_ticket').val(),
-                    fallaReportada: $('#fallaReportada').val(),
-                    ejecutor: $('#ejecutor').val()
+        const formData = {
+            idCliente: $('#idCliente').val(),
+            idClienteGeneral: $('#idClienteGeneral').val(),
+            idTienda: $('#idTienda').val(),
+            numero_ticket: $('#numero_ticket').val(),
+            fallaReportada: $('#fallaReportada').val(),
+            ejecutor: $('#ejecutor').val(),
+            idContactoFinal: $('#idContactoFinal').val() // ✅ Este campo es opcional
+        };
+
+        // Validación CORREGIDA - excluir idContactoFinal de la validación requerida
+        let isValid = true;
+        const requiredFields = ['idCliente', 'idClienteGeneral', 'idTienda', 'numero_ticket', 'fallaReportada'];
+        
+        for (const field of requiredFields) {
+            if (!formData[field] || formData[field] === '') {
+                const fieldNames = {
+                    'idCliente': 'Cliente',
+                    'idClienteGeneral': 'Cliente General', 
+                    'idTienda': 'Tienda',
+                    'numero_ticket': 'Ticket',
+                    'fallaReportada': 'Falla Reportada'
                 };
-
-                // Validación
-                let isValid = true;
-                for (const key in formData) {
-                    if (formData[key] === '' || formData[key] === null) {
-                        toastr.error(`El campo ${key} es requerido`);
-                        isValid = false;
-                        $(`[name="${key}"]`).addClass('border-red-500').focus();
-                        break;
-                    }
-                }
-
-                if (!isValid) return;
-
-                // Mostrar loading
-                const btn = $(this);
-                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
-
-                $.ajax({
-                    url: '/actualizar-orden-soporte/' + ticketId,
-                    method: 'PUT',
-                    data: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        toastr.success(response.message || 'Orden actualizada con éxito');
-                        // Actualizar última modificación
-                        cargarUltimaModificacion();
-                    },
-                    error: function(xhr) {
-                        const errorMsg = xhr.responseJSON?.message ||
-                            'Error al actualizar la orden';
-                        toastr.error(errorMsg);
-                        console.error('Error:', xhr.responseJSON);
-                    },
-                    complete: function() {
-                        btn.prop('disabled', false).html('Modificar');
-                    }
-                });
-            });
+                
+                toastr.error(`El campo ${fieldNames[field]} es requerido`);
+                isValid = false;
+                $(`[name="${field}"]`).addClass('border-red-500').focus();
+                break;
+            }
         }
+
+        if (!isValid) return;
+
+        // Mostrar loading
+        const btn = $(this);
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+        $.ajax({
+            url: '/actualizar-orden-soporte/' + ticketId,
+            method: 'PUT',
+            data: formData,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                toastr.success(response.message || 'Orden actualizada con éxito');
+                // Actualizar última modificación
+                cargarUltimaModificacion();
+            },
+            error: function(xhr) {
+                const errorMsg = xhr.responseJSON?.message ||
+                    'Error al actualizar la orden';
+                toastr.error(errorMsg);
+                console.error('Error:', xhr.responseJSON);
+            },
+            complete: function() {
+                btn.prop('disabled', false).html('Modificar');
+            }
+        });
+    });
+}
 
         // 8. Cargar última modificación
         function cargarUltimaModificacion() {
@@ -947,28 +1066,33 @@
         }
 
 
-        function updateModificationLog(field, oldValue, newValue) {
-            const usuario = "{{ auth()->user()->Nombre }}";
-            const fecha = formatDate(new Date());
+       // Función para guardar en historial
+function updateModificationLog(field, oldValue, newValue) {
+    const usuario = "{{ auth()->user()->Nombre }}";
+    const fecha = formatDate(new Date());
+    
+    // Verificar si el elemento existe antes de intentar modificarlo
+    const ultimaModificacionElement = document.getElementById('ultimaModificacion');
+    if (ultimaModificacionElement) {
+        ultimaModificacionElement.textContent =
+            `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
+    }
 
-            document.getElementById('ultimaModificacion').textContent =
-                `${fecha} por ${usuario}: Se modificó ${field} de "${oldValue}" a "${newValue}"`;
-
-            $.ajax({
-                url: '/guardar-modificacion/' + ticketId,
-                method: 'POST',
-                data: {
-                    field: field,
-                    oldValue: oldValue,
-                    newValue: newValue, // 🔥 aquí guardas el texto legible, no el ID
-                    usuario: usuario,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                error: function(xhr) {
-                    console.error('Error al guardar modificación:', xhr);
-                }
-            });
+    $.ajax({
+        url: '/guardar-modificacion/' + ticketId,
+        method: 'POST',
+        data: {
+            field: field,
+            oldValue: oldValue,
+            newValue: newValue,
+            usuario: usuario,
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        error: function(xhr) {
+            console.error('Error al guardar modificación:', xhr);
         }
+    });
+}
 
 
 

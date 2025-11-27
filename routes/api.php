@@ -690,3 +690,25 @@ Route::patch('/actualizar-suministro/{id}', function($id) {
 
 
 //API PARA TRAER EL DATOS DEL USUARIO LOGEADO AL SISTEMA 
+// Obtener contactos finales por cliente general
+Route::get('/contactos-finales/{idClienteGeneral}', function ($idClienteGeneral) {
+    try {
+        $contactos = DB::table('contactofinal as cf')
+            ->join('cliente_general_contacto_final as cgcf', 'cf.idContactoFinal', '=', 'cgcf.idContactoFinal')
+            ->where('cgcf.idClienteGeneral', $idClienteGeneral)
+            ->where('cf.estado', 1)
+            ->select(
+                'cf.idContactoFinal as id',
+                'cf.nombre_completo',
+                'cf.correo',
+                'cf.telefono'
+            )
+            ->orderBy('cf.nombre_completo')
+            ->get();
+            
+        return response()->json($contactos);
+    } catch (\Exception $e) {
+        Log::error('Error al obtener contactos: ' . $e->getMessage());
+        return response()->json([], 500);
+    }
+});

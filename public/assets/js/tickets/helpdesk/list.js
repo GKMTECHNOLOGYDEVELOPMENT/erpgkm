@@ -5,9 +5,10 @@ document.addEventListener('alpine:init', () => {
         marcas: [],
         marcaFilter: '',
         clienteGeneralFilter: '',
+        contactoFinalFilter: '', // 👈 NUEVA VARIABLE
         startDate: '',
         endDate: '',
-        debouncedFetch: null, // 👈 nuevo
+        debouncedFetch: null,
 
         init() {
             this.$nextTick(() => {
@@ -23,9 +24,11 @@ document.addEventListener('alpine:init', () => {
                 this.$watch('marcaFilter', () => this.debouncedFetch());
                 this.$watch('startDate', () => this.debouncedFetch());
                 this.$watch('endDate', () => this.debouncedFetch());
+                this.$watch('contactoFinalFilter', () => this.debouncedFetch()); // 👈 NUEVO WATCHER
 
                 document.addEventListener('cliente-general-cambio', (e) => {
                     this.clienteGeneralFilter = e.detail;
+                    this.contactoFinalFilter = ''; // 👈 Limpiar contacto cuando cambia cliente
                     this.isLoading = true;
                     this.debouncedFetch();
                 });
@@ -109,6 +112,7 @@ document.addEventListener('alpine:init', () => {
                     data: (d) => {
                         d.tipoTicket = 2;
                         d.clienteGeneral = this.clienteGeneralFilter;
+                        d.contactoFinal = this.contactoFinalFilter; // 👈 NUEVO PARÁMETRO
                         d.startDate = this.startDate;
                         d.endDate = this.endDate;
                     },
@@ -121,7 +125,7 @@ document.addEventListener('alpine:init', () => {
                     },
                     dataSrc: (json) => {
                         console.log('📦 Data completa:', json.data);
-                        console.log('📦 manejoEnvio:', json.data[0]?.manejoEnvio); // 🔥 Debería llegar aquí
+                        console.log('📦 manejoEnvio:', json.data[0]?.manejoEnvio);
 
                         this.ordenesData = json.data;
                         return json.data;
@@ -129,7 +133,7 @@ document.addEventListener('alpine:init', () => {
                 },
                 columns: [
                     { title: 'ACCIONES', data: null, orderable: false, render: this.getEditButton },
-                    { title: 'OT', data: 'idTickets' }, // 👈 NUEVA COLUMNA
+                    { title: 'OT', data: 'idTickets' },
                     { title: 'N. TICKET', data: 'numero_ticket', defaultContent: 'N/A' },
                     { title: 'F. TICKET', data: 'fecha_creacion', defaultContent: 'N/A', render: formatDate },
                     {
@@ -164,40 +168,38 @@ document.addEventListener('alpine:init', () => {
                             }
                         },
                     },
-
                     {
                         title: 'TIPO SERVICIO',
                         data: 'tipoServicio',
                         render: function (data) {
                             if (data == 1) {
                                 return `<span x-tooltip="Soporte" class="inline-block">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
-                            <text x="6" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">S</text>
-                        </svg>
-                    </span>`;
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
+                                        <text x="6" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">S</text>
+                                    </svg>
+                                </span>`;
                             } else if (data == 2) {
                                 return `<span x-tooltip="Levantamiento de Información" class="inline-block">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
-                            <text x="6" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">L</text>
-                        </svg>
-                    </span>`;
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
+                                        <text x="6" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">L</text>
+                                    </svg>
+                                </span>`;
                             } else if (data == 5) {
                                 return `<span x-tooltip="Ejecución" class="inline-block">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
-                            <text x="4" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">E</text>
-                        </svg>
-                    </span>`;
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" viewBox="0 0 24 24">
+                                        <text x="4" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">E</text>
+                                    </svg>
+                                </span>`;
                             } else if (data == 6) {
                                 return `<span x-tooltip="Laboratorio" class="inline-block">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-5 mx-auto" viewBox="0 0 32 24">
-                            <text x="3" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">LA</text>
-                        </svg>
-                    </span>`;
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-5 mx-auto" viewBox="0 0 32 24">
+                                        <text x="3" y="16" font-size="14" font-family="Arial, sans-serif" font-weight="bold">LA</text>
+                                    </svg>
+                                </span>`;
                             }
                             return '';
                         },
                     },
-
                     { title: 'MÁS', data: null, orderable: false, render: this.getMoreButton },
                 ],
 
@@ -205,7 +207,7 @@ document.addEventListener('alpine:init', () => {
                 searching: true,
                 paging: true,
                 pageLength: 10,
-                order: [[0, 'desc']], // ✅ ORDENA POR ID
+                order: [[0, 'desc']],
                 language: {
                     search: 'Buscar...',
                     zeroRecords: 'No se encontraron registros',
@@ -273,14 +275,14 @@ document.addEventListener('alpine:init', () => {
                             floatingControls.appendChild(paginate);
                             panel.appendChild(floatingControls);
                         }
-                    }, 300); // Espera para asegurar render completo
+                    }, 300);
                 },
 
                 rowCallback: (row, data) => {
                     const estadoColor = data.ticketflujo?.estadoflujo?.color || '';
 
                     if (estadoColor) {
-                        $(row).addClass('estado-bg').attr('data-bg', estadoColor); // Guarda el color en un atributo
+                        $(row).addClass('estado-bg').attr('data-bg', estadoColor);
                     }
                 },
 
@@ -288,7 +290,6 @@ document.addEventListener('alpine:init', () => {
                     $('#myTable1 tbody tr.estado-bg').each(function () {
                         const bgColor = $(this).attr('data-bg');
 
-                        // 🔥 Aplica los estilos en línea con !important
                         $(this).attr('style', `background-color: ${bgColor} !important;`);
                         $(this)
                             .find('td')
@@ -313,79 +314,78 @@ document.addEventListener('alpine:init', () => {
         },
 
         getEditButton(data) {
-    console.log('📦 Data completa:', data);
-    console.log('🚚 Manejo de envío:', data.manejo_envio);
+            console.log('📦 Data completa:', data);
+            console.log('🚚 Manejo de envío:', data.manejo_envio);
 
-    // Normaliza a array
-    const envios = Array.isArray(data.manejo_envio) ? data.manejo_envio : data.manejo_envio ? [data.manejo_envio] : [];
-    const tieneEnvio = envios.some((envio) => envio.tipo === 1 || envio.tipo === 2);
+            // Normaliza a array
+            const envios = Array.isArray(data.manejo_envio) ? data.manejo_envio : data.manejo_envio ? [data.manejo_envio] : [];
+            const tieneEnvio = envios.some((envio) => envio.tipo === 1 || envio.tipo === 2);
 
-    let botones = '<div class="flex justify-center items-center space-x-2">';
+            let botones = '<div class="flex justify-center items-center space-x-2">';
 
-    // Botón Editar - verificar permiso
-    if (window.permisosHelpdesk.puedeEditar) {
-        botones += `
-            <a href="/ordenes/helpdesk/${
-                data.tipoServicio == 1 ? 'soporte' : 
-                data.tipoServicio == 2 ? 'levantamiento' : 
-                data.tipoServicio == 5 ? 'ejecucion' : 'laboratorio'
-            }/${data.idTickets}/edit" class="ltr:mr-1 rtl:ml-1" x-tooltip="Editar">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" />
-                    <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
-                </svg>
-            </a>`;
-    }
+            // Botón Editar - verificar permiso
+            if (window.permisosHelpdesk.puedeEditar) {
+                botones += `
+                    <a href="/ordenes/helpdesk/${
+                        data.tipoServicio == 1 ? 'soporte' : 
+                        data.tipoServicio == 2 ? 'levantamiento' : 
+                        data.tipoServicio == 5 ? 'ejecucion' : 'laboratorio'
+                    }/${data.idTickets}/edit" class="ltr:mr-1 rtl:ml-1" x-tooltip="Editar">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" />
+                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" />
+                        </svg>
+                    </a>`;
+            }
 
-    // Botón Ver PDF - verificar permiso
-    if (window.permisosHelpdesk.puedeVerPDF) {
-        // Ruta PDF según tipo de servicio
-        let pdfUrl = '';
-        switch (data.tipoServicio) {
-            case 1:
-                pdfUrl = `/ordenes/helpdesk/pdf/soporte/${data.idTickets}`;
-                break;
-            case 2:
-                pdfUrl = `/ordenes/helpdesk/pdf/levantamiento/${data.idTickets}`;
-                break;
-            case 5:
-                pdfUrl = `/ordenes/helpdesk/pdf/ejecucion/${data.idTickets}`;
-                break;
-            case 6:
-                pdfUrl = `/ordenes/helpdesk/pdf/laboratorio/${data.idTickets}`;
-                break;
-            default:
-                pdfUrl = '';
-        }
+            // Botón Ver PDF - verificar permiso
+            if (window.permisosHelpdesk.puedeVerPDF) {
+                let pdfUrl = '';
+                switch (data.tipoServicio) {
+                    case 1:
+                        pdfUrl = `/ordenes/helpdesk/pdf/soporte/${data.idTickets}`;
+                        break;
+                    case 2:
+                        pdfUrl = `/ordenes/helpdesk/pdf/levantamiento/${data.idTickets}`;
+                        break;
+                    case 5:
+                        pdfUrl = `/ordenes/helpdesk/pdf/ejecucion/${data.idTickets}`;
+                        break;
+                    case 6:
+                        pdfUrl = `/ordenes/helpdesk/pdf/laboratorio/${data.idTickets}`;
+                        break;
+                    default:
+                        pdfUrl = '';
+                }
 
-        if (pdfUrl) {
-            botones += `
-                <a href="${pdfUrl}" target="_blank" x-tooltip="Ver PDF">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block mx-auto text-red-600 hover:text-red-800" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8.828a2 2 0 00-.586-1.414l-4.828-4.828A2 2 0 0013.172 2H6zm7 1.414L18.586 9H14a1 1 0 01-1-1V3.414zM8.75 11a.75.75 0 01.75.75v.5a.75.75 0 01-.75.75H8v1h.75a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75v-4A.75.75 0 018 11h.75zM11 11.75a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm0 2.25a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm3.25-2.25h.5a.75.75 0 01.75.75v2a.75.75 0 01-1.5 0v-.25h-.25a.75.75 0 010-1.5h.25v-.25z" />
-                    </svg>
-                </a>`;
-        }
-    }
+                if (pdfUrl) {
+                    botones += `
+                        <a href="${pdfUrl}" target="_blank" x-tooltip="Ver PDF">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block mx-auto text-red-600 hover:text-red-800" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6 2a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8.828a2 2 0 00-.586-1.414l-4.828-4.828A2 2 0 0013.172 2H6zm7 1.414L18.586 9H14a1 1 0 01-1-1V3.414zM8.75 11a.75.75 0 01.75.75v.5a.75.75 0 01-.75.75H8v1h.75a.75.75 0 010 1.5H8a.75.75 0 01-.75-.75v-4A.75.75 0 018 11h.75zM11 11.75a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm0 2.25a.75.75 0 011.5 0v.25a.75.75 0 01-1.5 0v-.25zm3.25-2.25h.5a.75.75 0 01.75.75v2a.75.75 0 01-1.5 0v-.25h-.25a.75.75 0 010-1.5h.25v-.25z" />
+                            </svg>
+                        </a>`;
+                }
+            }
 
-    // Botón Ver Envío - verificar permiso y si tiene envío
-    if (window.permisosHelpdesk.puedeVerEnvio && tieneEnvio) {
-        botones += `
-            <a href="/apps/invoice/preview/${data.idTickets}" class="ltr:ml-2 rtl:mr-2" x-tooltip="Ver Envío">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5V5.25A2.25 2.25 0 015.25 3h9.5A2.25 2.25 0 0117 5.25V16.5M17 9h1.878a2.25 2.25 0 011.765.84l1.435 1.794a2.25 2.25 0 01.472 1.406V16.5M3 16.5h18M5.25 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13.5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                </svg>
-            </a>`;
-    }
+            // Botón Ver Envío - verificar permiso y si tiene envío
+            if (window.permisosHelpdesk.puedeVerEnvio && tieneEnvio) {
+                botones += `
+                    <a href="/apps/invoice/preview/${data.idTickets}" class="ltr:ml-2 rtl:mr-2" x-tooltip="Ver Envío">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-green-600 hover:text-green-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16.5V5.25A2.25 2.25 0 015.25 3h9.5A2.25 2.25 0 0117 5.25V16.5M17 9h1.878a2.25 2.25 0 011.765.84l1.435 1.794a2.25 2.25 0 01.472 1.406V16.5M3 16.5h18M5.25 21a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm13.5 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+                        </svg>
+                    </a>`;
+            }
 
-    // Si no tiene ningún permiso, mostrar mensaje
-    if (!window.permisosHelpdesk.puedeEditar && !window.permisosHelpdesk.puedeVerPDF && !window.permisosHelpdesk.puedeVerEnvio) {
-        botones += `<span class="text-gray-400 text-xs">Sin permisos</span>`;
-    }
+            // Si no tiene ningún permiso, mostrar mensaje
+            if (!window.permisosHelpdesk.puedeEditar && !window.permisosHelpdesk.puedeVerPDF && !window.permisosHelpdesk.puedeVerEnvio) {
+                botones += `<span class="text-gray-400 text-xs">Sin permisos</span>`;
+            }
 
-    botones += '</div>';
-    return botones;
-},
+            botones += '</div>';
+            return botones;
+        },
 
         getMoreButton(data) {
             return `
@@ -409,7 +409,7 @@ document.addEventListener('alpine:init', () => {
                 let record = this.ordenesData.find((r) => r.idTickets == id);
                 if (record) {
                     const transiciones = record.transicion_status_tickets || [];
-                    const tipoServicio = record.tiposervicio?.nombre?.toLowerCase() || ''; // asegúrate que esté bien mapeado
+                    const tipoServicio = record.tiposervicio?.nombre?.toLowerCase() || '';
 
                     // Última visita del ticket
                     const ultimaVisitaId = Math.max(...transiciones.map((t) => t.idVisitas));
@@ -451,6 +451,7 @@ document.addEventListener('alpine:init', () => {
             year: 'numeric',
         });
     }
+    
     $(document).ready(function () {
         setTimeout(() => {
             $('.dataTables_length select').css('background-image', 'none');
