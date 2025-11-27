@@ -1,10 +1,7 @@
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<!-- Flatpickr CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
 <style>
     /* Estilos para la paginación */
@@ -332,7 +329,8 @@
         </div>
     </div>
 @endif
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -340,7 +338,6 @@
     const ticketId = '{{ $orden->idTickets }}';
     const estadosFlujo = @json($estadosFlujo);
 
-    // Función para cargar el historial con paginación
     // Función para cargar el historial con paginación
     function cargarHistorialModificaciones(page = 1) {
         const tbody = $('#historialModificaciones');
