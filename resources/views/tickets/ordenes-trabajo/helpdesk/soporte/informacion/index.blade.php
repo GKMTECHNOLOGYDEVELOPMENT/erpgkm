@@ -84,7 +84,7 @@
 
             <!-- Botón Guardar -->
             <div class="flex justify-end">
-                @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES ESTADO ORDEN DE TRABAJO HELP DESK LEVANTAMIENTO'))
+                @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES ESTADO ORDEN DE TRABAJO HELP DESK SOPORTE'))
                     <button id="guardarEstado" class="btn btn-primary px-6 py-2">
                         <span class="btn-text">Guardar</span>
                     </button>
@@ -98,7 +98,7 @@
         <span class="text-sm sm:text-lg font-semibold mb-2 sm:mb-4 badge"
             style="background-color: {{ $colorEstado }};">Inventario</span>
         <div class="flex justify-end mt-2">
-            @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR INVENTARIO HELP DESK LEVANTAMIENTO'))
+            @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR INVENTARIO HELP DESK SOPORTE'))
                 <button type="button" id="addHerramienta" class="btn btn-primary" data-toggle="tooltip"
                     data-tooltip="Agregar nueva herramienta">+</button>
             @endif
@@ -118,7 +118,7 @@
         </div>
 
         <div class="flex justify-end mt-6">
-            @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR INVENTARIO HELP DESK LEVANTAMIENTO'))
+            @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR INVENTARIO HELP DESK SOPORTE'))
                 <button type="submit" id="guardarHerramientas" class="btn btn-primary px-6 py-2">
                     <span class="btn-text">Guardar</span>
                 </button>
@@ -187,7 +187,7 @@
 
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
-                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO INSTALAR HELP DESK LEVANTAMIENTO'))
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO INSTALAR HELP DESK SOPORTE'))
                         <button id="guardarInstalar" class="btn btn-primary px-6 py-2">
                             <span class="btn-text">Guardar</span>
                         </button>
@@ -277,7 +277,7 @@
 
                 <!-- Botón Guardar -->
                 <div class="flex justify-end">
-                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK LEVANTAMIENTO'))
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK SOPORTE'))
                         <button id="guardarRetirar" class="btn btn-primary px-6 py-2">
                             <span class="btn-text">Guardar</span>
                         </button>
