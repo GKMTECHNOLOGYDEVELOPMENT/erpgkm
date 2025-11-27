@@ -28,7 +28,9 @@
     </div>
 
     <div class="col-span-1 md:col-span-2 flex justify-end mt-2">
-        <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
+        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE ESTADOS HELP DESK LEVANTAMIENTO'))
+            <button id="guardarEstado" class="btn btn-primary px-6 py-2">Guardar</button>
+        @endif
     </div>
 
 
@@ -47,9 +49,12 @@
         style="background-color: {{ $colorEstado }};">Fotos</span>
 
     <!-- Botón para abrir el modal -->
-    <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4" @click="$dispatch('toggle-modal-agregar-imagen')">
-        Agregar Imagen
-    </button>
+    @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR IMAGENES HELP DESK LEVANTAMIENTO'))
+        <button id="abrirModalAgregarImagen" class="btn btn-primary mt-4"
+            @click="$dispatch('toggle-modal-agregar-imagen')">
+            Agregar Imagen
+        </button>
+    @endif
 
     <!-- Swiper Container -->
     <div class="swiper w-full max-w-4x2 h-80 rounded-lg overflow-hidden mt-4" id="slider5">

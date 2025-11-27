@@ -6,9 +6,12 @@
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
     <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
-    <button id="crearCordinacionBtn" class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
-        Coordinación
-    </button>
+    @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR COORDINACIÓN HELP DESK LABORATORIO'))
+        <button id="crearCordinacionBtn"
+            class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
+            Coordinación
+        </button>
+    @endif
 </div>
 <script>
     // Pasamos el valor de 'ultimaVisitaConEstado1' desde Laravel a JavaScript
@@ -20,8 +23,7 @@
     if (!ultimaVisitaConEstado1) {
         // Si es falso (es 0 o null), ocultamos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'none';
-    }
-    else {
+    } else {
         // Si la última visita tiene estado 1 o si no hay visitas, mostramos el botón
         document.getElementById('botonCoordinacionContainer').style.display = 'flex';
     }
@@ -32,7 +34,8 @@
 
 
 <!-- Modal de Detalles con nuevo estilo y cierre al hacer clic fuera -->
-<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
+<div id="modalDetallesVisita"
+    class="modal hidden fixed inset-0 z-[999] flex items-start justify-center bg-[black]/60 overflow-y-auto"
     onclick="if(event.target === this) this.classList.add('hidden')">
     <div class="modal-content panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-xl bg-white shadow-lg">
 
@@ -48,11 +51,13 @@
         <div class="p-5 max-h-[70vh] overflow-y-auto space-y-4">
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Inicio:</h3>
-                <input type="text" id="detalleFechaInicioHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                <input type="text" id="detalleFechaInicioHora"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
             </div>
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Fecha Fin:</h3>
-                <input type="text" id="detalleFechaFinalHora" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                <input type="text" id="detalleFechaFinalHora"
+                    class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
             </div>
             <div>
                 <h3 class="font-semibold text-sm text-gray-600 mb-1">Técnico:</h3>
@@ -70,8 +75,10 @@
 
                 <!-- Agregar técnico de apoyo -->
                 <div class="mt-4">
-                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de Apoyo:</label>
-                    <select id="detalleTecnicoApoyo" class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
+                    <label for="detalleTecnicoApoyo" class="font-semibold text-sm text-gray-600 mb-1">Agregar Técnico de
+                        Apoyo:</label>
+                    <select id="detalleTecnicoApoyo"
+                        class="form-input w-full px-2 py-1 border rounded-lg text-gray-700">
                         <!-- Opciones con JS -->
                     </select>
                     <button id="addTecnicoApoyoButton" class="btn btn-success mt-2 w-full">Agregar</button>
@@ -96,69 +103,10 @@
 </div>
 
 
-
-
-<!-- Modal de Detalles de Visita -->
-<div x-data="{ openDetallesVisita: false }" class="mb-5"
-    @toggle-modal-detalles-visita.window="openDetallesVisita = !openDetallesVisita">
-    <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openDetallesVisita && '!block'">
-        <div class="flex items-start justify-center min-h-screen px-4" @click.self="openDetallesVisita = false">
-            <div x-show="openDetallesVisita" x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8">
-                <!-- Header -->
-                <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                    <h5 class="font-bold text-lg">Detalles de la Visita</h5>
-                    <button type="button" class="text-white-dark hover:text-dark" @click="openDetallesVisita = false">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                            stroke-linejoin="round" class="w-6 h-6">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                    </button>
-                </div>
-
-
-                <div class="modal-scroll p-5 space-y-4">
-                    <!-- Contenido del modal -->
-                    <div>
-                        <h4 class="text-lg font-semibold">Información de la Visita</h4>
-                        <p><strong>Nombre:</strong> <span id="detalleNombre"></span></p>
-                        <p><strong>Ticket: </strong><span id="detalleTicket"></span></p>
-                        <p><strong>Fecha de Programación:</strong> <span id="detalleFechaProgramada"></span></p>
-                        <p><strong>Fecha de Asignación:</strong> <span id="detalleFechaAsignada"></span></p>
-                        <p><strong>Fecha de Desplazamiento:</strong> <span id="detalleFechaDesplazamiento"></span></p>
-                        <p><strong>Fecha de Llegada:</strong> <span id="detalleFechaLlegada"></span></p>
-                        <p><strong>Fecha de Inicio:</strong> <span id="detalleFechaInicio"></span></p>
-                        <p><strong>Fecha de Finalización:</strong> <span id="detalleFechaFinal"></span></p>
-                        <p><strong>Usuario:</strong> <span id="detalleUsuario"></span></p>
-                        <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
-                        <p><strong>Cliente: </strong><span id="detalleTicketCliente"></span></p>
-                        <p><strong>Servicio: </strong><span id="detalleTicketServicio"></span></p>
-                        <p><strong>Falla: </strong><span id="detalleTicketFalla"></span></p>
-                        <p><strong>Direccion: </strong><span id="detalleTicketDireccion"></span></p>
-                        <p><strong>Fecha de Compra: </strong><span id="detalleTicketFechaCompra"></span></p>
-                        <p><strong>Lat: </strong><span id="detalleTicketLat"></span></p>
-                        <p><strong>Long: </strong><span id="detalleTicketLng"></span></p>
-
-                    </div>
-                    <!-- Botones -->
-                    <div class="flex justify-end items-center mt-4">
-                        <button type="button" class="btn btn-outline-danger" @click="openDetallesVisita = false">
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 <div x-data="{
     openCondiciones: false,
     visitaId: null, // Agrega esta propiedad
-    latitud: null,  // Variable para almacenar la latitud
+    latitud: null, // Variable para almacenar la latitud
     longitud: null, // Variable para almacenar la longitud
     ubicacion: null, // Variable para almacenar la dirección
 
@@ -272,10 +220,8 @@
                 toastr.error('Hubo un error al guardar las condiciones.');
             });
     }
-}" class="mb-5"
-    @set-visita-id.window="visitaId = $event.detail"
-    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones"
-    x-init="obtenerUbicacion()">
+}" class="mb-5" @set-visita-id.window="visitaId = $event.detail"
+    @toggle-modal-condiciones.window="openCondiciones = !openCondiciones" x-init="obtenerUbicacion()">
     <div class="fixed inset-0 bg-black/60 z-[999] hidden overflow-y-auto" :class="openCondiciones && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="openCondiciones = false">
             <div x-show="openCondiciones" x-transition:enter="transition ease-out duration-300 transform"
@@ -428,7 +374,8 @@
 
 
 <!-- Modal de Detalles -->
-<div id="modalDetallesVisita" class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80">
+<div id="modalDetallesVisita"
+    class="modal hidden fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-80">
     <div class="modal-content bg-white rounded-lg shadow-lg w-full sm:w-3/4 md:w-1/3 p-4 overflow-auto">
         <!-- Cabecera del Modal -->
         <div class="modal-header flex justify-between items-center mb-4 border-b pb-2">
@@ -443,11 +390,13 @@
             <div class="grid grid-cols-1 gap-4">
                 <div>
                     <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Inicio:</h3>
-                    <input type="datetime-local" id="detalleFechaInicioHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+                    <input type="datetime-local" id="detalleFechaInicioHora"
+                        class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
                 </div>
                 <div>
                     <h3 class="font-semibold text-sm text-gray-700 mb-1">Fecha Fin:</h3>
-                    <input type="datetime-local" id="detalleFechaFinalHora" class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
+                    <input type="datetime-local" id="detalleFechaFinalHora"
+                        class="form-input w-full px-3 py-2 border rounded-lg text-gray-600">
                 </div>
                 <div>
                     <h3 class="font-semibold text-sm text-gray-700 mb-1">Técnico:</h3>
@@ -461,8 +410,10 @@
 
         <!-- Pie del Modal -->
         <div class="modal-footer flex justify-end mt-4 border-t pt-4">
-            <button id="closeModalButtonFooter" class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Cerrar</button>
-            <button id="actualizarButton" class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
+            <button id="closeModalButtonFooter"
+                class="btn btn-primary bg-blue-600 text-white hover:bg-blue-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Cerrar</button>
+            <button id="actualizarButton"
+                class="btn btn-success bg-green-600 text-white hover:bg-green-700 py-2 px-4 rounded-lg focus:outline-none transition-all duration-200">Actualizar</button>
         </div>
     </div>
 </div>
@@ -472,9 +423,9 @@
 
 <!-- MODAL PARA CREAR VISITA USANDO ALPINE.JS -->
 <div x-data="{
-    open: false, 
-    encargadoTipo: '', 
-    necesitaApoyo: false, 
+    open: false,
+    encargadoTipo: '',
+    necesitaApoyo: false,
     imagePreview: null,
 
     // Función para previsualizar la imagen antes de subirla
@@ -486,8 +437,7 @@
             reader.readAsDataURL(file);
         }
     }
-}"
-    class="mb-5" @toggle-modal.window="open = !open">
+}" class="mb-5" @toggle-modal.window="open = !open">
 
     <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
         <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
@@ -527,8 +477,8 @@
                         <div class="w-full">
                             <label class="block text-sm font-medium mb-1">Rango de atención</label>
                             <div class="flex space-x-2">
-                                <input id="horaInicioInput" type="text" name="Hora Inicio" class="form-input w-1/2"
-                                    placeholder="Elige la hora de Inicio" required>
+                                <input id="horaInicioInput" type="text" name="Hora Inicio"
+                                    class="form-input w-1/2" placeholder="Elige la hora de Inicio" required>
                                 <input id="horaFinInput" type="text" name="Hora Fin" class="form-input w-1/2"
                                     placeholder="Elige la hora de Fin" required>
                             </div>
@@ -556,14 +506,13 @@
                                 <option value="" disabled selected>Seleccionar Encargado</option>
                                 <!-- Aquí se itera sobre los usuarios -->
                                 @foreach ($encargado as $encargados)
-                                <option value="{{ $encargados->idUsuario }}"
-                                    data-tipo="{{ $encargados->idTipoUsuario }}">
-                                    {{ $encargados->Nombre }} -
-                                    @if ($encargados->idTipoUsuario == 1)
-                                    TÉCNICO
-
-                                    @endif
-                                </option>
+                                    <option value="{{ $encargados->idUsuario }}"
+                                        data-tipo="{{ $encargados->idTipoUsuario }}">
+                                        {{ $encargados->Nombre }} -
+                                        @if ($encargados->idTipoUsuario == 1)
+                                            TÉCNICO
+                                        @endif
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -585,7 +534,7 @@
                                 style="display: none;" placeholder="Seleccionar Técnicos de Apoyo">
                                 <!-- Aquí iteramos sobre los técnicos -->
                                 @foreach ($tecnicos_apoyo as $tecnico)
-                                <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
+                                    <option value="{{ $tecnico->idUsuario }}">{{ $tecnico->Nombre }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -599,7 +548,8 @@
                         <!-- Campo para cargar la imagen -->
                         <div class="space-y-4 mt-2">
                             <label class="block text-sm font-medium">Subir Imagen</label>
-                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage" name="imagenVisita"
+                            <input type="file" x-ref="imagen" id="imagenVisita" @change="previewImage"
+                                name="imagenVisita"
                                 class="form-input file:py-2 file:px-4 file:border-0 file:font-semibold p-0 
         file:bg-primary/90 ltr:file:mr-5 rtl:file-ml-5 file:text-white file:hover:bg-primary w-full">
 
@@ -781,7 +731,7 @@
             time_24hr: true,
             locale: "es"
         });
-        
+
         flatpickr("#detalleFechaInicioHora", {
             enableTime: true,
             dateFormat: "Y-m-d H:i",
@@ -849,7 +799,8 @@
 
             // Enviar 1 si el checkbox está marcado, 0 si no
             const necesitaApoyo = document.getElementById('necesitaApoyo').checked ? 1 : 0;
-            const recojo = document.getElementById('esRecojo').checked ? 1 : 0; // Obtener el valor de recojo
+            const recojo = document.getElementById('esRecojo').checked ? 1 :
+            0; // Obtener el valor de recojo
 
 
             const tecnicosApoyo = Array.from(document.getElementById('idTecnicoApoyo').selectedOptions)
@@ -857,7 +808,8 @@
             const ticketId = '{{ $ticket->idTickets }}'; // El ID del ticket
 
             // Obtener la imagen seleccionada
-            const imagenVisita = document.getElementById('imagenVisita').files[0]; // Obtener el primer archivo seleccionado
+            const imagenVisita = document.getElementById('imagenVisita').files[
+            0]; // Obtener el primer archivo seleccionado
 
             // Verificar si los campos obligatorios están vacíos
             if (!nombreVisita || !fechaVisita || !horaInicio || !horaFin || !encargado) {
@@ -905,7 +857,8 @@
             // Si 'necesita_apoyo' está marcado, agregar técnicos de apoyo al FormData
             if (necesitaApoyo && tecnicosApoyo.length > 0) {
                 tecnicosApoyo.forEach((tecnicoId) => {
-                    formData.append('tecnicos_apoyo[]', tecnicoId); // Asegúrate de enviar como array
+                    formData.append('tecnicos_apoyo[]',
+                    tecnicoId); // Asegúrate de enviar como array
                 });
             }
             formData.append('idTickets', ticketId);
@@ -914,7 +867,8 @@
 
             // Si hay una imagen, agregarla directamente al FormData
             if (imagenVisita) {
-                formData.append('imagenVisita', imagenVisita); // Agregar el archivo de imagen directamente
+                formData.append('imagenVisita',
+                imagenVisita); // Agregar el archivo de imagen directamente
             }
 
             // Realizar la solicitud AJAX
@@ -925,7 +879,8 @@
                 contentType: false, // No enviar un tipo de contenido
                 processData: false, // No procesar los datos
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Añadir el token CSRF a los encabezados
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                        .getAttribute('content') // Añadir el token CSRF a los encabezados
                 },
                 success: function(response) {
                     if (response.success) {
