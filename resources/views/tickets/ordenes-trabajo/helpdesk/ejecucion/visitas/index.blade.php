@@ -969,4 +969,38 @@
         }
     };
 </script>
-<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>
+
+
+
+<script>
+    window.permisosHelpDeskVisitas = {
+        // Botones principales
+        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        
+        // Botones de inicio de servicio
+        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        
+        // Botones de final de servicio
+        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeVerImagenDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN DESPLAZAMIENTO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        
+        // Botones del modal de detalles
+        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO HELPDESK EJECUCION') ? 'true' : 'false' }},
+        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA HELPDESK EJECUCION') ? 'true' : 'false' }},
+        
+        // Botones del modal de condiciones
+        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES HELPDESK EJECUCION') ? 'true' : 'false' }}
+    };
+</script>
+
+
+
+<script src="{{ asset('assets/js/tickets/helpdesk/helpvisitaejecucion.js') }}"></script>

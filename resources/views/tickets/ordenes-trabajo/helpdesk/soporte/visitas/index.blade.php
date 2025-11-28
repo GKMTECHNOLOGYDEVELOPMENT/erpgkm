@@ -6,7 +6,7 @@
 
 <div class="flex gap-1 sm:gap-2 justify-center mt-2" id="botonCoordinacionContainer">
     <!-- Si no existe el flujo con idEstadflujo = 4, existe una condición para el idTickets y idVisitas, o no existe ninguna visita, mostrar el botón -->
-    @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR COORDINACIÓN HELP DESK LEVANTAMIENTO'))
+    @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR COORDINACIÓN HELP DESK SOPORTE'))
     <button id="crearCordinacionBtn"
         class="px-2 py-1 sm:px-4 sm:py-2 btn btn-success text-white rounded-lg shadow-md flex items-center text-xs sm:text-base">
         Coordinación
@@ -969,4 +969,34 @@
         }
     };
 </script>
-<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>
+
+
+<script>
+    window.permisosHelpDeskVisitas = {
+        // Botones principales
+        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        
+        // Botones de inicio de servicio
+        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        
+        // Botones de final de servicio
+        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeVerImagenDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN DESPLAZAMIENTO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        
+        // Botones del modal de detalles
+        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO HELPDESK SOPORTE') ? 'true' : 'false' }},
+        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA HELPDESK SOPORTE') ? 'true' : 'false' }},
+        
+        // Botones del modal de condiciones
+        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES HELPDESK SOPORTE') ? 'true' : 'false' }}
+    };
+</script>
+<script src="{{ asset('assets/js/tickets/helpdesk/helpvisitasoporte.js') }}"></script>

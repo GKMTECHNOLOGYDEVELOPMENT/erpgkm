@@ -305,7 +305,7 @@
             </div>
 
 
-            @if ($idRol != 6)
+        @if (\App\Helpers\PermisoHelper::tienePermiso('BOTON DE MODIFICAR Y VOLVER HELP DESK EJECUCION'))
                 <!-- Botón de Guardar -->
                     <div class="md:col-span-2 flex justify-end space-x-4">
                         <a href="{{ route('ordenes.helpdesk') }}"

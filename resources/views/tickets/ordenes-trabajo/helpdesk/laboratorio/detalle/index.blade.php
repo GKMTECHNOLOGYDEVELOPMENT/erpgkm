@@ -298,7 +298,7 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
-            @if ($idRol != 6)
+        @if (\App\Helpers\PermisoHelper::tienePermiso('BOTONES MODIFICAR Y VOLVER HELP DESK LABORATORIO'))
                 <!-- Botón de Guardar -->
                     <div class="md:col-span-2 flex justify-end space-x-4">
                         <a href="{{ route('ordenes.helpdesk') }}"

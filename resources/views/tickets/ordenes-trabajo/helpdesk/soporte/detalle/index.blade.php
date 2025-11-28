@@ -375,6 +375,7 @@
                     Falla Reportada</label>
                 <textarea id="fallaReportada" name="Falla Reportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
+        @if (\App\Helpers\PermisoHelper::tienePermiso('MODIFICAR SOPORTE ORDEN DE TRABAJO HELPDESK'))
 
                 <!-- Botón de Guardar -->
                 <div class="md:col-span-2 flex justify-end space-x-4">
@@ -382,6 +383,8 @@
                         class="btn btn-outline-danger w-full md:w-auto">Volver</a>
                     <button id="guardarFallaReportada" class="btn btn-primary w-full md:w-auto">Modificar</button>
                 </div>
+
+                @endif
 
         </div>
     </form>

@@ -910,4 +910,37 @@
         }
     };
 </script>
-<script src="{{ asset('assets/js/tickets/helpdesk/laboratorio.js') }}"></script>
+
+
+<script>
+    window.permisosHelpDeskVisitas = {
+        // Botones principales
+        puedeOcultarMostrar: {{ \App\Helpers\PermisoHelper::tienePermiso('OCULTAR MOSTRAR VISITA HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeSeleccionarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR VISITA HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeVerImagenVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN VISITA HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeVerDetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES VISITA HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeIniciarDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('INICIAR DESPLAZAMIENTO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        
+        // Botones de inicio de servicio
+        puedeSubirFoto: {{ \App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTO INICIO SERVICIO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeSiguiente: {{ \App\Helpers\PermisoHelper::tienePermiso('SIGUIENTE INICIO SERVICIO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeVerImagenInicioServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN INICIO SERVICIO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        
+        // Botones de final de servicio
+        puedeContinuar: {{ \App\Helpers\PermisoHelper::tienePermiso('CONTINUAR FINAL SERVICIO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeVerImagenFinalServicio: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN FINAL SERVICIO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeVerImagenDesplazamiento: {{ \App\Helpers\PermisoHelper::tienePermiso('VER IMAGEN DESPLAZAMIENTO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        
+        // Botones del modal de detalles
+        puedeEliminarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR TECNICO APOYO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeAgregarTecnicoApoyo: {{ \App\Helpers\PermisoHelper::tienePermiso('AGREGAR TECNICO APOYO HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        puedeActualizarVisita: {{ \App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR VISITA HELPDESK LABORATORIO') ? 'true' : 'false' }},
+        
+        // Botones del modal de condiciones
+        puedeGuardarCondiciones: {{ \App\Helpers\PermisoHelper::tienePermiso('GUARDAR CONDICIONES HELPDESK LABORATORIO') ? 'true' : 'false' }}
+    };
+</script>
+
+
+
+<script src="{{ asset('assets/js/tickets/helpdesk/helpvisitalaboratorio.js') }}"></script>
