@@ -55,7 +55,9 @@ class Ordenesarticulo extends Model
 		'fechaSinUsar',
 		'idSolicitudesOrdenes',
 		'idArticulos',
-		'idUbicacion'
+		'idUbicacion',
+		'id_area_destino',
+		'id_usuario_destino'
 	];
 
 	public function solicitudesordene()

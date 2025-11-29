@@ -17,21 +17,41 @@
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <div class="flex flex-col md:flex-row md:items-center gap-3 mb-3">
-                                    <h1 class="text-3xl lg:text-4xl font-bold text-gray-900">
-                                        Orden #<span class="text-blue-600">{{ $solicitud->codigo ?? 'N/A' }}</span>
-                                    </h1>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span
-                                            class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold border border-blue-200 shadow-sm flex items-center">
-                                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                                            {{ ucfirst($solicitud->estado ?? 'pendiente') }}
-                                        </span>
-                                        <span
-                                            class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold border border-purple-200 shadow-sm">
-                                            Solicitud de Artículo
-                                        </span>
+                                <!-- En el Header Principal, después de la información del solicitante -->
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>Creada: {{ $solicitud->fechacreacion ? \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') : 'N/A' }}</span>
                                     </div>
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span>{{ $solicitud->nombre_solicitante ?? 'Solicitante no especificado' }}</span>
+                                    </div>
+                                    <!-- Nuevos campos agregados -->
+                                    @if($solicitud->nombre_area_destino)
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        <span>Área Destino: {{ $solicitud->nombre_area_destino }}</span>
+                                    </div>
+                                    @endif
+                                    @if($solicitud->usuario_destino_nombre)
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <span>Destinatario: {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}</span>
+                                    </div>
+                                    @endif
                                 </div>
                                 <div class="flex flex-wrap gap-4 text-sm text-gray-600">
                                     <div class="flex items-center">
@@ -52,6 +72,8 @@
                                         <span>{{ $solicitud->nombre_solicitante ?? 'Solicitante no especificado' }}</span>
                                     </div>
                                 </div>
+
+
                             </div>
                         </div>
                     </div>
@@ -66,14 +88,14 @@
                             Volver
                         </a>
                         @if (($solicitud->estado ?? '') != 'completada')
-                            <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
-                                class="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Editar
-                            </a>
+                        <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
+                            class="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Editar
+                        </a>
                         @endif
                     </div>
                 </div>
@@ -125,123 +147,123 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-blue-100">
                                         @forelse($articulos as $articulo)
-                                            <tr class="product-row hover:bg-blue-50 transition-all duration-200">
-                                                <!-- Columna Artículo con información completa -->
-                                                <td class="px-6 py-4">
-                                                    <div class="space-y-1">
-                                                        <!-- Nombre principal -->
-                                                        <div class="text-base font-semibold text-gray-900">
-                                                            {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}
-                                                        </div>
-                                                        
-                                                        <!-- Información adicional -->
-                                                        <div class="text-xs text-gray-500 space-y-0.5">
-                                                            <!-- Tipo de artículo -->
-                                                            @if($articulo->tipo_articulo)
-                                                            <div class="flex items-center space-x-1">
-                                                                <span class="font-medium">Tipo:</span>
-                                                                <span>{{ $articulo->tipo_articulo }}</span>
-                                                            </div>
-                                                            @endif
-                                                            
-                                                            <!-- Modelo -->
-                                                            @if($articulo->modelo)
-                                                            <div class="flex items-center space-x-1">
-                                                                <span class="font-medium">Modelo:</span>
-                                                                <span>{{ $articulo->modelo }}</span>
-                                                            </div>
-                                                            @endif
-                                                            
-                                                            <!-- Marca -->
-                                                            @if($articulo->marca)
-                                                            <div class="flex items-center space-x-1">
-                                                                <span class="font-medium">Marca:</span>
-                                                                <span>{{ $articulo->marca }}</span>
-                                                            </div>
-                                                            @endif
-                                                            
-                                                            <!-- Subcategoría -->
-                                                            @if($articulo->subcategoria)
-                                                            <div class="flex items-center space-x-1">
-                                                                <span class="font-medium">Categoría:</span>
-                                                                <span>{{ $articulo->subcategoria }}</span>
-                                                            </div>
-                                                            @endif
-                                                        </div>
+                                        <tr class="product-row hover:bg-blue-50 transition-all duration-200">
+                                            <!-- Columna Artículo con información completa -->
+                                            <td class="px-6 py-4">
+                                                <div class="space-y-1">
+                                                    <!-- Nombre principal -->
+                                                    <div class="text-base font-semibold text-gray-900">
+                                                        {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}
+                                                    </div>
 
-                                                        <!-- Descripción adicional si existe -->
-                                                        @if($articulo->descripcion)
-                                                        <div class="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-                                                            <p class="text-xs text-gray-600">
-                                                                <span class="font-medium">Nota:</span> {{ $articulo->descripcion }}
-                                                            </p>
+                                                    <!-- Información adicional -->
+                                                    <div class="text-xs text-gray-500 space-y-0.5">
+                                                        <!-- Tipo de artículo -->
+                                                        @if($articulo->tipo_articulo)
+                                                        <div class="flex items-center space-x-1">
+                                                            <span class="font-medium">Tipo:</span>
+                                                            <span>{{ $articulo->tipo_articulo }}</span>
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Modelo -->
+                                                        @if($articulo->modelo)
+                                                        <div class="flex items-center space-x-1">
+                                                            <span class="font-medium">Modelo:</span>
+                                                            <span>{{ $articulo->modelo }}</span>
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Marca -->
+                                                        @if($articulo->marca)
+                                                        <div class="flex items-center space-x-1">
+                                                            <span class="font-medium">Marca:</span>
+                                                            <span>{{ $articulo->marca }}</span>
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Subcategoría -->
+                                                        @if($articulo->subcategoria)
+                                                        <div class="flex items-center space-x-1">
+                                                            <span class="font-medium">Categoría:</span>
+                                                            <span>{{ $articulo->subcategoria }}</span>
                                                         </div>
                                                         @endif
                                                     </div>
-                                                </td>
-                                                
-                                                <!-- Columna Código -->
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="text-base text-blue-600 font-mono font-bold">
-                                                        {{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}
-                                                    </div>
-                                                    <div class="text-xs text-gray-400 mt-1">
-                                                        {{ $articulo->codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto' }}
-                                                    </div>
-                                                </td>
-                                                
-                                                <!-- Columna Cantidad -->
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    <div class="flex items-center justify-center">
-                                                        <span class="font-bold text-lg bg-blue-100 text-blue-800 rounded-lg px-4 py-2 border border-blue-200">
-                                                            {{ $articulo->cantidad ?? 0 }}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                
-                                                <!-- Columna Estado -->
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    @php
-                                                        $estadoClase = [
-                                                            '0' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                                            '1' => 'bg-green-100 text-green-800 border border-green-200',
-                                                            '2' => 'bg-red-100 text-red-800 border border-red-200',
-                                                        ][$articulo->estado ?? 0] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                                        $estadoTexto = [
-                                                            '0' => 'Pendiente',
-                                                            '1' => 'Completado',
-                                                            '2' => 'Rechazado',
-                                                        ][$articulo->estado ?? 0] ?? 'Desconocido';
-
-                                                        $estadoIcono = [
-                                                            '0' => '⏳',
-                                                            '1' => '✅',
-                                                            '2' => '❌',
-                                                        ][$articulo->estado ?? 0] ?? '❓';
-                                                    @endphp
-                                                    <div class="flex justify-center">
-                                                        <span class="px-3 py-2 {{ $estadoClase }} rounded-full text-sm font-semibold flex items-center gap-2">
-                                                            <span>{{ $estadoIcono }}</span>
-                                                            {{ $estadoTexto }}
-                                                        </span>
+                                                    <!-- Descripción adicional si existe -->
+                                                    @if($articulo->descripcion)
+                                                    <div class="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+                                                        <p class="text-xs text-gray-600">
+                                                            <span class="font-medium">Nota:</span> {{ $articulo->descripcion }}
+                                                        </p>
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                            <!-- Columna Código -->
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-base text-blue-600 font-mono font-bold">
+                                                    {{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}
+                                                </div>
+                                                <div class="text-xs text-gray-400 mt-1">
+                                                    {{ $articulo->codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto' }}
+                                                </div>
+                                            </td>
+
+                                            <!-- Columna Cantidad -->
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center justify-center">
+                                                    <span class="font-bold text-lg bg-blue-100 text-blue-800 rounded-lg px-4 py-2 border border-blue-200">
+                                                        {{ $articulo->cantidad ?? 0 }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Columna Estado -->
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                @php
+                                                $estadoClase = [
+                                                '0' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                '1' => 'bg-green-100 text-green-800 border border-green-200',
+                                                '2' => 'bg-red-100 text-red-800 border border-red-200',
+                                                ][$articulo->estado ?? 0] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
+
+                                                $estadoTexto = [
+                                                '0' => 'Pendiente',
+                                                '1' => 'Completado',
+                                                '2' => 'Rechazado',
+                                                ][$articulo->estado ?? 0] ?? 'Desconocido';
+
+                                                $estadoIcono = [
+                                                '0' => '⏳',
+                                                '1' => '✅',
+                                                '2' => '❌',
+                                                ][$articulo->estado ?? 0] ?? '❓';
+                                                @endphp
+                                                <div class="flex justify-center">
+                                                    <span class="px-3 py-2 {{ $estadoClase }} rounded-full text-sm font-semibold flex items-center gap-2">
+                                                        <span>{{ $estadoIcono }}</span>
+                                                        {{ $estadoTexto }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
                                         @empty
-                                            <tr>
-                                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                                    <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="1"
-                                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                                    </svg>
-                                                    <p class="mt-4 text-lg font-medium text-gray-900">No hay
-                                                        artículos registrados</p>
-                                                    <p class="text-sm mt-2">No se han agregado artículos a esta solicitud</p>
-                                                </td>
-                                            </tr>
+                                        <tr>
+                                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
+                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1"
+                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                                </svg>
+                                                <p class="mt-4 text-lg font-medium text-gray-900">No hay
+                                                    artículos registrados</p>
+                                                <p class="text-sm mt-2">No se han agregado artículos a esta solicitud</p>
+                                            </td>
+                                        </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
@@ -293,8 +315,67 @@
                                         class="block text-xs font-semibold text-green-700 mb-2 uppercase tracking-wide">Tipo
                                         de Servicio</label>
                                     <p class="text-lg font-bold text-green-800">
-                                        {{ $solicitud->tiposervicio ?? 'No especificado' }}</p>
+                                        {{ $solicitud->tiposervicio ?? 'No especificado' }}
+                                    </p>
                                 </div>
+
+
+                                <!-- NUEVO: Área Destino -->
+                                @if($solicitud->nombre_area_destino)
+                                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                                    <label class="block text-xs font-semibold text-green-700 mb-2 uppercase tracking-wide">Área Destino</label>
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        <p class="text-lg font-bold text-green-800">{{ $solicitud->nombre_area_destino }}</p>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                                    <label class="block text-xs font-semibold text-purple-700 mb-2 uppercase tracking-wide">Fecha de Creación</label>
+                                    <p class="text-lg font-bold text-purple-800">
+                                        @if ($solicitud->fechacreacion)
+                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
+                                        @else
+                                        No especificada
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <!-- NUEVO: Usuario Destino -->
+                                @if($solicitud->usuario_destino_nombre)
+                                <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
+                                    <label class="block text-xs font-semibold text-indigo-700 mb-2 uppercase tracking-wide">Usuario Destino</label>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <p class="text-lg font-bold text-indigo-800">
+                                                {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}
+                                            </p>
+                                        </div>
+                                        @if($solicitud->usuario_destino_correo)
+                                        <div class="flex items-center text-sm text-indigo-600 ml-7">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            {{ $solicitud->usuario_destino_correo }}
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                                @endif
+
+
+
+
                                 <div
                                     class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
                                     <label
@@ -302,9 +383,9 @@
                                         de Creación</label>
                                     <p class="text-lg font-bold text-purple-800">
                                         @if ($solicitud->fechacreacion)
-                                            {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
+                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
                                         @else
-                                            No especificada
+                                        No especificada
                                         @endif
                                     </p>
                                 </div>
@@ -317,9 +398,9 @@
                                         Requerida</label>
                                     <p class="text-lg font-bold text-orange-800">
                                         @if ($solicitud->fecharequerida)
-                                            {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
+                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
                                         @else
-                                            No definida
+                                        No definida
                                         @endif
                                     </p>
                                 </div>
@@ -328,20 +409,20 @@
                                     <label
                                         class="block text-xs font-semibold text-red-700 mb-2 uppercase tracking-wide">Urgencia</label>
                                     @php
-                                        $urgenciaClase =
-                                            [
-                                                'baja' => 'bg-green-100 text-green-800 border border-green-200',
-                                                'media' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                                'alta' => 'bg-red-100 text-red-800 border border-red-200',
-                                            ][$solicitud->urgencia ?? 'baja'] ??
-                                            'bg-gray-100 text-gray-800 border border-gray-200';
+                                    $urgenciaClase =
+                                    [
+                                    'baja' => 'bg-green-100 text-green-800 border border-green-200',
+                                    'media' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                    'alta' => 'bg-red-100 text-red-800 border border-red-200',
+                                    ][$solicitud->urgencia ?? 'baja'] ??
+                                    'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                        $urgenciaTexto =
-                                            [
-                                                'baja' => 'Baja',
-                                                'media' => 'Media',
-                                                'alta' => 'Alta',
-                                            ][$solicitud->urgencia ?? 'baja'] ?? 'No especificado';
+                                    $urgenciaTexto =
+                                    [
+                                    'baja' => 'Baja',
+                                    'media' => 'Media',
+                                    'alta' => 'Alta',
+                                    ][$solicitud->urgencia ?? 'baja'] ?? 'No especificado';
                                     @endphp
                                     <span
                                         class="px-3 py-1 {{ $urgenciaClase }} rounded-full text-sm font-semibold flex items-center w-fit">
@@ -360,7 +441,8 @@
                                         class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Productos
                                         Únicos</label>
                                     <p class="text-lg font-bold text-gray-900">
-                                        {{ $solicitud->productos_unicos ?? 0 }}</p>
+                                        {{ $solicitud->productos_unicos ?? 0 }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -369,39 +451,57 @@
 
                 <!-- Sidebar Mejorado -->
                 <div class="space-y-6">
-                    <!-- Información del Solicitante -->
+                    <!-- En el Sidebar, después de "Información del Solicitante" -->
+                    @if($solicitud->nombre_area_destino || $solicitud->usuario_destino_nombre)
                     <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
                         <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                             </svg>
-                            SOLICITANTE
+                            DESTINO FINAL
                         </h3>
-                        <div class="flex items-center space-x-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                            <div
-                                class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-sm">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-900">
-                                    {{ $solicitud->nombre_solicitante ?? 'No especificado' }}</p>
-                                <p class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+
+                        @if($solicitud->nombre_area_destino)
+                        <div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    {{ $solicitud->nombre_area ?? 'Área no especificada' }}
-                                </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-green-700 font-semibold uppercase">Área Destino</p>
+                                    <p class="text-sm font-bold text-green-800">{{ $solicitud->nombre_area_destino }}</p>
+                                </div>
                             </div>
                         </div>
+                        @endif
+
+                        @if($solicitud->usuario_destino_nombre)
+                        <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-indigo-700 font-semibold uppercase">Usuario Destino</p>
+                                    <p class="text-sm font-bold text-indigo-800">
+                                        {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}
+                                    </p>
+                                    @if($solicitud->usuario_destino_correo)
+                                    <p class="text-xs text-indigo-600 mt-1">{{ $solicitud->usuario_destino_correo }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                     </div>
+                    @endif
 
                     <!-- Resumen de la Orden -->
                     <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
@@ -427,6 +527,36 @@
                                     {{ ucfirst($solicitud->estado ?? 'pendiente') }}
                                 </span>
                             </div>
+
+                            <!-- Nuevos campos en el resumen -->
+                            @if($solicitud->nombre_area_destino)
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="text-sm text-gray-600 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    Área Destino:
+                                </span>
+                                <span class="text-sm font-semibold text-green-700">{{ $solicitud->nombre_area_destino }}</span>
+                            </div>
+                            @endif
+
+                            @if($solicitud->usuario_destino_nombre)
+                            <div class="flex justify-between items-center py-2">
+                                <span class="text-sm text-gray-600 flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                    Destinatario:
+                                </span>
+                                <span class="text-sm font-semibold text-indigo-700 text-right">
+                                    {{ $solicitud->usuario_destino_nombre }}<br>
+                                    <span class="text-xs">{{ $solicitud->usuario_destino_apellido }}</span>
+                                </span>
+                            </div>
+                            @endif
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                 <span class="text-sm text-gray-600 flex items-center">
                                     <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor"
@@ -459,12 +589,12 @@
                                     Urgencia:
                                 </span>
                                 @php
-                                    $urgenciaColor =
-                                        [
-                                            'baja' => 'text-green-600 bg-green-100',
-                                            'media' => 'text-yellow-600 bg-yellow-100',
-                                            'alta' => 'text-red-600 bg-red-100',
-                                        ][$solicitud->urgencia ?? 'baja'] ?? 'text-gray-600 bg-gray-100';
+                                $urgenciaColor =
+                                [
+                                'baja' => 'text-green-600 bg-green-100',
+                                'media' => 'text-yellow-600 bg-yellow-100',
+                                'alta' => 'text-red-600 bg-red-100',
+                                ][$solicitud->urgencia ?? 'baja'] ?? 'text-gray-600 bg-gray-100';
                                 @endphp
                                 <span class="px-2 py-1 {{ $urgenciaColor }} rounded text-xs font-semibold">
                                     {{ ucfirst($solicitud->urgencia ?? 'baja') }}
@@ -475,21 +605,21 @@
 
                     <!-- Observaciones -->
                     @if (!empty($solicitud->observaciones))
-                        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                                </svg>
-                                Observaciones
-                            </h3>
-                            <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                                <p class="text-sm text-yellow-800 leading-relaxed">
-                                    {{ $solicitud->observaciones }}
-                                </p>
-                            </div>
+                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                            Observaciones
+                        </h3>
+                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                            <p class="text-sm text-yellow-800 leading-relaxed">
+                                {{ $solicitud->observaciones }}
+                            </p>
                         </div>
+                    </div>
                     @endif
 
                     <!-- Tiempos -->
@@ -509,26 +639,26 @@
                                     Requerida</label>
                                 <p class="text-sm font-semibold text-gray-900">
                                     @if ($solicitud->fecharequerida)
-                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
+                                    {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
                                     @else
-                                        <span class="text-red-500">No definida</span>
+                                    <span class="text-red-500">No definida</span>
                                     @endif
                                 </p>
                             </div>
                             @php
-                                $fechaRequerida = $solicitud->fecharequerida
-                                    ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                                    : now();
-                                $diasRestantes = now()->diffInDays($fechaRequerida, false);
+                            $fechaRequerida = $solicitud->fecharequerida
+                            ? \Carbon\Carbon::parse($solicitud->fecharequerida)
+                            : now();
+                            $diasRestantes = now()->diffInDays($fechaRequerida, false);
 
-                                $diasColor =
-                                    $diasRestantes <= 0
-                                        ? 'text-red-600 bg-red-50 border-red-200'
-                                        : ($diasRestantes <= 2
-                                            ? 'text-orange-600 bg-orange-50 border-orange-200'
-                                            : 'text-green-600 bg-green-50 border-green-200');
-                            @endphp
-                            <div class="rounded-lg p-4 border {{ $diasColor }}">
+                            $diasColor =
+                            $diasRestantes <= 0
+                                ? 'text-red-600 bg-red-50 border-red-200'
+                                : ($diasRestantes <=2
+                                ? 'text-orange-600 bg-orange-50 border-orange-200'
+                                : 'text-green-600 bg-green-50 border-green-200' );
+                                @endphp
+                                <div class="rounded-lg p-4 border {{ $diasColor }}">
                                 <label
                                     class="block text-xs font-semibold mb-2 uppercase tracking-wide
                                     @if ($diasRestantes <= 0) text-red-700
@@ -539,19 +669,19 @@
                                 <p class="text-2xl font-bold">
                                     {{ $diasRestantes > 0 ? floor($diasRestantes) . ' días' : 'Vencida' }}
                                 </p>
-                                @if ($diasRestantes <= 2 && $diasRestantes > 0)
+                                @if ($diasRestantes <= 2 && $diasRestantes> 0)
                                     <p
                                         class="text-xs mt-1 
                                         @if ($diasRestantes <= 2) text-orange-600 @endif">
                                         ¡Quedan pocos días!
                                     </p>
-                                @endif
-                            </div>
+                                    @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 

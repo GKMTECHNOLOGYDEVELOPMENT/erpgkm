@@ -733,6 +733,9 @@ Route::get('/{id}/gestionar', [SolicitudarticuloController::class, 'gestionar'])
 Route::post('/{id}/marcar-usado', [SolicitudarticuloController::class, 'marcarUsado'])->name('marcar-usado');
 Route::post('/{id}/marcar-no-usado', [SolicitudarticuloController::class, 'marcarNoUsado'])->name('marcar-no-usado');
 
+// En web.php (rutas de solicitudarticulo)
+Route::post('/{id}/enviar-almacen', [SolicitudarticuloController::class, 'enviarAlmacen'])->name('enviar-almacen');
+Route::get('/enviar-almacen/modal-data', [SolicitudarticuloController::class, 'getModalData'])->name('modal-data');
 });
 
     Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])

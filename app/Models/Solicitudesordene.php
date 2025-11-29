@@ -52,7 +52,9 @@ class Solicitudesordene extends Model
 		'codigo',
 		'idTipoServicio',
 		'idTecnico',
-		'idUsuario'
+		'idUsuario',
+		'id_area_destino',
+		'id_usuario_destino'
 	];
 
 	public function tiposervicio()

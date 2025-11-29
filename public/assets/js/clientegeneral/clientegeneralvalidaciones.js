@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('ctnFile');
 
     // Base URL for API requests
-    const BASE_URL = 'http://192.168.0.204:8000/'; // Ajusta según tu configuración
+    const BASE_URL = 'http://127.0.0.1:8000/'; // Ajusta según tu configuración
 
     // Validaciones
     const validateNombreUnico = async (nombre) => {
