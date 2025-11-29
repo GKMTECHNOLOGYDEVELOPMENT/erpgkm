@@ -1888,6 +1888,46 @@
             @endif
 
 
+            @if(PermisoHelper::tienePermiso('VER PERMISOS'))
+
+          <h2
+        class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
+
+        <svg class="w-4 h-5 flex-none hidden" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span>PERMISOS</span>
+    </h2>
+
+    <li class="menu nav-item">
+        <a href="{{ route('permisos.index') }}" class="nav-link group">
+            <div class="flex items-center">
+
+               <svg class="group-hover:!text-primary shrink-0" width="20" height="20" 
+    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17 9H7V7C7 4.79086 8.79086 3 11 3H13C15.2091 3 17 4.79086 17 7V9Z" 
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="5" y="9" width="14" height="12" rx="2" 
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 14V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+
+
+                <span
+                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                    Permisos
+                </span>
+            </div>
+        </a>
+    </li>
+    @endif
+
+
+
+   
+
+
             {{-- <h2
                     class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
 
