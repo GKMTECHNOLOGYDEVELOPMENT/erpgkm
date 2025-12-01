@@ -1,91 +1,177 @@
 <x-layout.default>
-
-<link rel="stylesheet" href="{{ asset('assets/css/solicitudcompra.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <div x-data="purchaseRequests()" x-init="init()">
-        <div class="container">
+        <!-- Container principal -->
+
+        <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="mb-4">
+                <ul class="flex space-x-2 rtl:space-x-reverse">
+                    <li><a href="" class="text-primary hover:underline">Solicitudes</a></li>
+                    <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1"><span>Solicitud Compra</span>
+                    </li>
+                </ul>
+            </div>
             <!-- Header -->
-            <div class="header">
-                <div class="title-section">
-                    <div class="title-with-icon">
-                        <div class="icon-wrapper">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5v13a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 14.5v-13zM1.5 1a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-13a.5.5 0 0 0-.5-.5h-13z"/>
-                                <path d="M3.5 3a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-2zm3 0a.5.5 0 0 0-.5.5v5a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-5a.5.5 0 0 0-.5-.5h-5zm3 5a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-2z"/>
-                            </svg>
+            <div
+                class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-lg shadow-sm">
+                            <i class="fas fa-file-invoice-dollar text-white"></i>
                         </div>
                         <div>
-                            <h1>Solicitudes de Compra</h1>
-                            <p>Gestiona y revisa todas las solicitudes de compra</p>
+                            <h1 class="text-xl font-bold text-gray-900">Solicitudes de Compra</h1>
+                            <p class="text-gray-600 text-sm">Gestiona y revisa todas las solicitudes</p>
                         </div>
                     </div>
                 </div>
-                <a href="{{ route('solicitudcompra.create') }}" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg>
+                <a href="{{ route('solicitudcompra.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-medium text-xs text-white uppercase tracking-wide hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-150 shadow-sm hover:shadow">
+                    <i class="fas fa-plus text-sm mr-2"></i>
                     Nueva Solicitud
                 </a>
             </div>
 
-            <!-- Stats -->
-            <div class="stats">
-                <div class="stat-card" @mouseenter="hoverStat = 'total'" @mouseleave="hoverStat = ''">
-                    <div class="stat-icon total">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" x-text="requests.length"></div>
-                        <div class="stat-label">Total Solicitudes</div>
-                    </div>
-                </div>
-                <div class="stat-card" @mouseenter="hoverStat = 'pending'" @mouseleave="hoverStat = ''">
-                    <div class="stat-icon pending">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" x-text="getRequestsByStatus('pendiente').length"></div>
-                        <div class="stat-label">Pendientes</div>
-                    </div>
-                </div>
-                <div class="stat-card" @mouseenter="hoverStat = 'approved'" @mouseleave="hoverStat = ''">
-                    <div class="stat-icon approved">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-                        </svg>
-                    </div>
-                    <div class="stat-content">
-                        <div class="stat-value" x-text="getRequestsByStatus('aprobada').length"></div>
-                        <div class="stat-label">Aprobadas</div>
+            <!-- Stats - Design Moderno sin Gradients -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <!-- Total Solicitudes -->
+                <div class="relative group cursor-pointer transform transition-all duration-300 hover:scale-105">
+                    <div class="bg-blue-500 rounded-2xl p-5 text-white shadow-lg">
+                        <div
+                            class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300">
+                        </div>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-blue-100 text-sm font-medium">Total Solicitudes</p>
+                                    <p class="text-2xl font-bold mt-1" x-text="requests.length">0</p>
+                                </div>
+                                <div
+                                    class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas fa-layer-group text-white text-lg"></i>
+                                </div>
+                            </div>
+                            <!-- Indicador de estado -->
+                            <div class="mt-3 flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-white rounded-full"></div>
+                                <span class="text-blue-100 text-xs">Todas las solicitudes</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card" @mouseenter="hoverStat = 'rejected'" @mouseleave="hoverStat = ''">
-                    <div class="stat-icon rejected">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                        </svg>
+                <!-- Pendientes -->
+                <div class="relative group cursor-pointer transform transition-all duration-300 hover:scale-105">
+                    <div class="bg-amber-500 rounded-2xl p-5 text-white shadow-lg">
+                        <div
+                            class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300">
+                        </div>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-amber-100 text-sm font-medium">Pendientes</p>
+                                    <p class="text-2xl font-bold mt-1" x-text="getRequestsByStatus('pendiente').length">
+                                        0</p>
+                                </div>
+                                <div
+                                    class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas fa-clock text-white text-lg"></i>
+                                </div>
+                            </div>
+                            <!-- Indicador de estado -->
+                            <div class="mt-3 flex items-center space-x-1">
+                                <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                                <span class="text-amber-100 text-xs">En espera</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-content">
-                        <div class="stat-value" x-text="getRequestsByStatus('rechazada').length"></div>
-                        <div class="stat-label">Rechazadas</div>
+                </div>
+
+                <!-- Aprobadas -->
+                <div class="relative group cursor-pointer transform transition-all duration-300 hover:scale-105">
+                    <div class="bg-emerald-500 rounded-2xl p-5 text-white shadow-lg">
+                        <div
+                            class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300">
+                        </div>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-emerald-100 text-sm font-medium">Aprobadas</p>
+                                    <p class="text-2xl font-bold mt-1" x-text="getRequestsByStatus('aprobada').length">0
+                                    </p>
+                                </div>
+                                <div
+                                    class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas fa-check-circle text-white text-lg"></i>
+                                </div>
+                            </div>
+                            <!-- Indicador de éxito -->
+                            <div class="mt-3 flex items-center space-x-1">
+                                <i class="fas fa-star text-white text-xs"></i>
+                                <span class="text-emerald-100 text-xs">Aprobado</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rechazadas -->
+                <div class="relative group cursor-pointer transform transition-all duration-300 hover:scale-105">
+                    <div class="bg-red-500 rounded-2xl p-5 text-white shadow-lg">
+                        <div
+                            class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300">
+                        </div>
+
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-rose-100 text-sm font-medium">Rechazadas</p>
+                                    <p class="text-2xl font-bold mt-1" x-text="getRequestsByStatus('rechazada').length">
+                                        0</p>
+                                </div>
+                                <div
+                                    class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas fa-times-circle text-white text-lg"></i>
+                                </div>
+                            </div>
+                            <!-- Indicador de alerta -->
+                            <div class="mt-3 flex items-center space-x-1">
+                                <i class="fas fa-exclamation-triangle text-white text-xs"></i>
+                                <span class="text-rose-100 text-xs">Requiere atención</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="filters-card">
-                <div class="filters-header">
-                    <h3>Filtros</h3>
-                    <button class="btn-clear" @click="clearFilters()">Limpiar Filtros</button>
+            <!-- Filters - Design Mejorado -->
+            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-filter text-blue-600 text-sm"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900">Filtros y Búsqueda</h3>
+                    </div>
+                    <button
+                        class="mt-3 sm:mt-0 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                        @click="clearFilters()">
+                        <i class="fas fa-eraser text-gray-500 mr-2"></i>
+                        Limpiar Filtros
+                    </button>
                 </div>
-                <div class="filters">
-                    <div class="filter-group">
-                        <label class="filter-label">Estado</label>
-                        <select class="filter-select" x-model="filters.status">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- Estado -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-tag text-blue-500 text-xs mr-2"></i>
+                            Estado
+                        </label>
+                        <select
+                            class="block w-full pl-4 pr-10 py-2.5 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-white shadow-sm transition-all duration-200"
+                            x-model="filters.status">
                             <option value="">Todos los estados</option>
                             <option value="pendiente">Pendiente</option>
                             <option value="aprobada">Aprobada</option>
@@ -98,160 +184,306 @@
                             <option value="finalizado">Finalizado</option>
                         </select>
                     </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Prioridad</label>
-                        <select class="filter-select" x-model="filters.priority">
+
+                    <!-- Prioridad -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-flag text-warning text-xs mr-2"></i>
+                            Prioridad
+                        </label>
+                        <select
+                            class="block w-full pl-4 pr-10 py-2.5 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-white shadow-sm transition-all duration-200"
+                            x-model="filters.priority">
                             <option value="">Todas las prioridades</option>
-                            @foreach($prioridades as $prioridad)
+                            @foreach ($prioridades as $prioridad)
                                 <option value="{{ $prioridad->idPrioridad }}">{{ $prioridad->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Área</label>
-                        <select class="filter-select" x-model="filters.area">
+
+                    <!-- Área -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-building text-green-500 text-xs mr-2"></i>
+                            Área
+                        </label>
+                        <select
+                            class="block w-full pl-4 pr-10 py-2.5 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl bg-white shadow-sm transition-all duration-200"
+                            x-model="filters.area">
                             <option value="">Todas las áreas</option>
-                            @foreach($areas as $area)
+                            @foreach ($areas as $area)
                                 <option value="{{ $area->idTipoArea }}">{{ $area->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="search-box">
-                        <span class="search-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                            </svg>
-                        </span>
-                        <input type="text" class="search-input" placeholder="Buscar por código, proyecto, solicitante..." x-model="filters.search">
+
+                    <!-- Búsqueda -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700 flex items-center">
+                            <i class="fas fa-search text-purple-500 text-xs mr-2"></i>
+                            Buscar
+                        </label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="text"
+                                class="block w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-xl transition-all duration-200"
+                                placeholder="Buscar solicitudes..." x-model="filters.search">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Cards Container -->
-            <div class="cards-container">
-                <template x-for="request in filteredRequests" :key="request.idSolicitudCompra">
-                    <div class="card" :class="'priority-' + (request.prioridad?.nivel || 'medium')">
-                        <div class="card-header">
-                            <div class="card-codes">
-                                <div class="card-id" x-text="request.codigo_solicitud"></div>
-                                <div class="card-almacen-code" x-show="request.solicitud_almacen?.codigo_solicitud" 
-                                     x-text="'Almacén: ' + request.solicitud_almacen?.codigo_solicitud"></div>
+            <!-- Cards Container - Design Moderno con Colores Planos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <template x-for="request in paginatedRequests" :key="request.idSolicitudCompra">
+                    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-105 group relative"
+                        :class="{
+                            'border-l-4 border-l-warning': request.estado === 'pendiente',
+                            'border-l-4 border-l-success': request.estado === 'aprobada',
+                            'border-l-4 border-l-danger': request.estado === 'rechazada',
+                            'border-l-4 border-l-primary': request.estado === 'en_proceso',
+                            'border-l-4 border-l-secondary': request.estado === 'completada',
+                            'border-l-4 border-l-dark': request.estado === 'cancelada',
+                            'border-l-4 border-l-warning-light': request.estado === 'presupuesto_aprobado',
+                            'border-l-4 border-l-info': request.estado === 'pagado',
+                            'border-l-4 border-l-[#888ea8]': request.estado === 'finalizado'
+                        
+                        }">
+
+                        <!-- Header con color según ESTADO -->
+                        <div class="px-6 py-4 text-white relative overflow-hidden"
+                            :class="{
+                                'bg-warning': request.estado === 'pendiente',
+                                'bg-success': request.estado === 'aprobada',
+                                'bg-danger': request.estado === 'rechazada',
+                                'bg-primary': request.estado === 'en_proceso',
+                                'bg-secondary': request.estado === 'completada',
+                                'bg-dark': request.estado === 'cancelada',
+                                'bg-warning-light': request.estado === 'presupuesto_aprobado',
+                                'bg-info': request.estado === 'pagado',
+                                'bg-[#888ea8]': request.estado === 'finalizado'
+                            }">
+                            <div
+                                class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             </div>
-                            <div class="card-status" :class="'status-' + request.estado" x-text="getStatusText(request.estado)"></div>
-                        </div>
-                        <div class="card-body">
-                            <h3 class="card-title" x-text="request.proyecto_asociado || 'Solicitud de Compra'"></h3>
-                            <div class="card-details">
-                                <!-- Solicitante Compra -->
-                                <div class="detail-item">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                                        </svg>
-                                        Solicitante Compra:
-                                    </span>
-                                    <span class="detail-value" x-text="request.solicitante_compra || 'N/A'"></span>
+
+                            <div class="relative z-10 flex justify-between items-start">
+                                <div>
+                                    <div class="text-lg font-bold" x-text="request.codigo_solicitud"></div>
+                                    <div class="text-white/80 text-sm mt-1"
+                                        x-show="request.solicitud_almacen?.codigo_solicitud"
+                                        x-text="'Almacén: ' + request.solicitud_almacen?.codigo_solicitud"></div>
                                 </div>
-                                
-                                <!-- Solicitante Almacén -->
-                                <div class="detail-item">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                                        </svg>
-                                        Solicitante Almacén:
-                                    </span>
-                                    <span class="detail-value" x-text="request.solicitante_almacen || 'N/A'"></span>
+                                <div class="flex flex-col items-end space-y-2">
+                                    <!-- Badge de estado más prominente -->
+                                    <span
+                                        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-white/30 text-white shadow-md backdrop-blur-sm border border-white/20"
+                                        x-text="getStatusText(request.estado)"></span>
+                                    <div class="text-xs text-white/70" x-text="formatDate(request.created_at)"></div>
+                                </div>
+                            </div>
+
+                            <!-- Indicador de prioridad en esquina superior derecha -->
+                            <div class="absolute top-3 right-3">
+                                <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                                    :class="{
+                                        'bg-danger': request.prioridad?.nivel === 'high',
+                                        'bg-warning': request.prioridad?.nivel === 'medium',
+                                        'bg-success': request.prioridad?.nivel === 'low',
+                                        'bg-dark': !request.prioridad?.nivel
+                                    }"
+                                    :title="'Prioridad: ' + (request.prioridad?.nombre || 'No definida')">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-6">
+                            <!-- Título del proyecto -->
+                            <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-2"
+                                x-text="request.proyecto_asociado || 'No especificado'"></h3>
+
+                            <!-- Información principal en grid -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <!-- Solicitante Compra -->
+                                <div class="space-y-1">
+                                    <div
+                                        class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <i class="fas fa-user-tie text-primary mr-2 text-xs"></i>
+                                        Solicitante
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900 truncate"
+                                        x-text="request.solicitante_compra || 'N/A'"></div>
                                 </div>
 
                                 <!-- Área -->
-                                <div class="detail-item">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zM3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm2 7a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-2.5.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
-                                            <path d="M2 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2H2zm12 1a1 1 0 0 1 1 1v1H1V3a1 1 0 0 1 1-1h12zM1 7v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7H1z"/>
-                                        </svg>
-                                        Área:
-                                    </span>
-                                    <span class="detail-value" x-text="request.tipo_area?.nombre || 'N/A'"></span>
+                                <div class="space-y-1">
+                                    <div
+                                        class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <i class="fas fa-building text-secondary mr-2 text-xs"></i>
+                                        Área
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900 truncate"
+                                        x-text="request.tipo_area?.nombre || 'N/A'"></div>
                                 </div>
-                                
+
                                 <!-- Prioridad -->
-                                <div class="detail-item">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M3.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-9z"/>
-                                        </svg>
-                                        Prioridad:
-                                    </span>
-                                    <span class="detail-value" x-text="request.prioridad?.nombre || 'N/A'"></span>
+                                <div class="space-y-1">
+                                    <div
+                                        class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <i class="fas fa-flag text-warning mr-2 text-xs"></i>
+                                        Prioridad
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900"
+                                        x-text="request.prioridad?.nombre || 'N/A'"></div>
                                 </div>
-                                
+
                                 <!-- Total -->
-                                <div class="detail-item">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499L12.136.326zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484L5.562 3zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
-                                        </svg>
-                                        Total:
-                                    </span>
-                                    <span class="detail-value" x-text="getCurrencySymbol(request) + (request.total ? Number(request.total).toLocaleString('es-PE', {minimumFractionDigits: 2}) : '0.00')"></span>
-                                </div>
-                                
-                                <!-- Moneda Principal -->
-                                <div class="detail-item" x-show="getMainCurrency(request)">
-                                    <span class="detail-label">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 10.933l-5.247-5.25a.5.5 0 0 1 .708-.708L8 9.526l4.539-4.55a.5.5 0 1 1 .708.708L8 10.933z"/>
-                                        </svg>
-                                        Moneda:
-                                    </span>
-                                    <span class="detail-value" x-text="getMainCurrency(request)"></span>
+                                <div class="space-y-1">
+                                    <div
+                                        class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        <i class="fas fa-money-bill-wave text-success mr-2 text-xs"></i>
+                                        Total
+                                    </div>
+                                    <div class="text-sm font-bold text-gray-900"
+                                        x-text="getCurrencySymbol(request) + (request.total ? Number(request.total).toLocaleString('es-PE', {minimumFractionDigits: 2}) : '0.00')">
+                                    </div>
                                 </div>
                             </div>
-                            
+
+                            <!-- Información adicional -->
+                            <div class="space-y-3">
+                                <!-- Solicitante Almacén -->
+                                <div class="flex items-center justify-between py-2 border-b border-gray-100"
+                                    x-show="request.solicitante_almacen">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-warehouse text-dark mr-2 text-sm"></i>
+                                        Sol. Almacén:
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900 truncate max-w-[120px]"
+                                        x-text="request.solicitante_almacen"></div>
+                                </div>
+
+                                <!-- Moneda -->
+                                <div class="flex items-center justify-between py-2 border-b border-gray-100"
+                                    x-show="getMainCurrency(request)">
+                                    <div class="flex items-center text-sm text-gray-600">
+                                        <i class="fas fa-coins text-warning-light mr-2 text-sm"></i>
+                                        Moneda:
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900" x-text="getMainCurrency(request)">
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Justificación -->
-                            <div class="card-justification" x-show="request.justificacion">
-                                <strong>Justificación:</strong>
-                                <span x-text="request.justificacion?.substring(0, 100) + (request.justificacion?.length > 100 ? '...' : '')"></span>
+                            <div class="mt-4 p-4 bg-primary-light rounded-xl border border-primary/20"
+                                x-show="request.justificacion">
+                                <div class="flex items-start">
+                                    <i class="fas fa-comment-dots text-primary mr-3 text-sm"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-primary-dark mb-1">Justificación</p>
+                                        <p class="text-sm text-primary-dark/80 leading-relaxed"
+                                            x-text="request.justificacion?.substring(0, 120) + (request.justificacion?.length > 120 ? '...' : '')">
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <div class="card-date">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
-                                    <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/>
-                                    <path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/>
-                                </svg>
-                                <span x-text="formatDate(request.created_at)"></span>
-                            </div>
-                            <div class="card-actions">
-                                <button class="btn-icon" title="Ver detalles" @click="viewRequest(request.idSolicitudCompra)">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                        <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                                    </svg>
-                                </button>
-                                <button class="btn-icon" title="Editar" @click="editRequest(request.idSolicitudCompra)" x-show="request.estado === 'pendiente'">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                                    </svg>
-                                </button>
+
+                        <!-- Card Footer -->
+                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-calendar-alt text-gray-400 mr-2 text-sm"></i>
+                                    <span x-text="'Creado: ' + formatDate(request.created_at)"></span>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <!-- Botón Ver Detalles -->
+                                    <button
+                                        class="inline-flex items-center px-3 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-all duration-200 transform hover:scale-105"
+                                        title="Ver detalles" @click="viewRequest(request.idSolicitudCompra)">
+                                        <i class="fas fa-eye mr-1.5 text-xs"></i>
+                                        Ver
+                                    </button>
+
+                                    <!-- Botón Editar (solo para pendientes) -->
+                                    <button
+                                        class="inline-flex items-center px-3 py-2 bg-warning text-white rounded-lg text-sm font-medium hover:bg-warning-dark focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-1 transition-all duration-200 transform hover:scale-105"
+                                        title="Editar" @click="editRequest(request.idSolicitudCompra)"
+                                        x-show="request.estado === 'pendiente'">
+                                        <i class="fas fa-edit mr-1.5 text-xs"></i>
+                                        Editar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </template>
-
-                <div x-show="filteredRequests.length === 0" class="empty-state">
-                    <div class="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                            <path d="M7 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z"/>
-                        </svg>
-                    </div>
-                    <h3>No se encontraron solicitudes</h3>
-                    <p>No hay solicitudes que coincidan con los filtros aplicados</p>
-                    <button class="btn btn-secondary" @click="clearFilters()">Limpiar filtros</button>
+            </div>
+            <!-- Después del grid de cards -->
+            <div class="mt-8 flex items-center justify-between" x-show="filteredRequests.length > 0">
+                <!-- Información de paginación -->
+                <div class="text-sm text-gray-700">
+                    Mostrando
+                    <span x-text="(currentPage - 1) * itemsPerPage + 1"></span>
+                    a
+                    <span x-text="Math.min(currentPage * itemsPerPage, filteredRequests.length)"></span>
+                    de
+                    <span x-text="filteredRequests.length"></span> resultados
                 </div>
+
+                <!-- Controles de paginación -->
+                <div class="flex space-x-2">
+                    <!-- Botón Anterior -->
+                    <button
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="currentPage === 1" @click="currentPage--">
+                        <i class="fas fa-chevron-left mr-1 text-xs"></i>
+                        Anterior
+                    </button>
+
+                    <!-- Números de página -->
+                    <div class="flex space-x-1">
+                        <template x-for="page in totalPages" :key="page">
+                            <button
+                                class="w-8 h-8 flex items-center justify-center border text-sm font-medium rounded-md"
+                                :class="page === currentPage ?
+                                    'border-blue-500 bg-blue-500 text-white' :
+                                    'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'"
+                                @click="currentPage = page" x-text="page">
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Botón Siguiente -->
+                    <button
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        :disabled="currentPage === totalPages" @click="currentPage++">
+                        Siguiente
+                        <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Empty State -->
+            <div x-show="filteredRequests.length === 0" class="text-center py-12">
+                <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gray-100 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="currentColor"
+                        viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                        <path
+                            d="M7 11.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron solicitudes</h3>
+                <p class="text-gray-500 mb-4">No hay solicitudes que coincidan con los filtros aplicados</p>
+                <button
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    @click="clearFilters()">
+                    Limpiar filtros
+                </button>
             </div>
         </div>
     </div>
@@ -273,7 +505,10 @@
                 },
                 showNewRequestModal: false,
                 hoverStat: '',
-                
+                // Variables de paginación AGREGADAS
+                currentPage: 1,
+                itemsPerPage: 6,
+
                 init() {
                     // Usar los datos reales de Laravel
                     this.requests = solicitudesData.map(solicitud => ({
@@ -285,24 +520,24 @@
                         detalles: solicitud.detalles || []
                     }));
                 },
-                
+
                 get filteredRequests() {
                     return this.requests.filter(request => {
                         // Filtrar por estado
                         if (this.filters.status && request.estado !== this.filters.status) {
                             return false;
                         }
-                        
+
                         // Filtrar por prioridad
                         if (this.filters.priority && request.idPrioridad != this.filters.priority) {
                             return false;
                         }
-                        
+
                         // Filtrar por área
                         if (this.filters.area && request.idTipoArea != this.filters.area) {
                             return false;
                         }
-                        
+
                         // Filtrar por búsqueda
                         if (this.filters.search) {
                             const searchTerm = this.filters.search.toLowerCase();
@@ -311,19 +546,52 @@
                                 (request.solicitante_compra || '').toLowerCase().includes(searchTerm) ||
                                 (request.solicitante_almacen || '').toLowerCase().includes(searchTerm) ||
                                 (request.codigo_solicitud || '').toLowerCase().includes(searchTerm) ||
-                                (request.solicitud_almacen?.codigo_solicitud || '').toLowerCase().includes(searchTerm) ||
+                                (request.solicitud_almacen?.codigo_solicitud || '').toLowerCase().includes(
+                                    searchTerm) ||
                                 (request.justificacion || '').toLowerCase().includes(searchTerm)
                             );
                         }
-                        
+
                         return true;
                     });
                 },
-                
+
+                // Computed property para solicitudes paginadas AGREGADA
+                get paginatedRequests() {
+                    const start = (this.currentPage - 1) * this.itemsPerPage;
+                    const end = start + this.itemsPerPage;
+                    return this.filteredRequests.slice(start, end);
+                },
+
+                // Computed property para total de páginas AGREGADA
+                get totalPages() {
+                    return Math.ceil(this.filteredRequests.length / this.itemsPerPage);
+                },
+
+                // Método para páginas visibles AGREGADO
+                getVisiblePages() {
+                    const pages = [];
+                    const total = this.totalPages;
+                    const current = this.currentPage;
+
+                    if (total <= 5) {
+                        for (let i = 1; i <= total; i++) pages.push(i);
+                    } else {
+                        if (current <= 3) {
+                            pages.push(1, 2, 3, 4, '...', total);
+                        } else if (current >= total - 2) {
+                            pages.push(1, '...', total - 3, total - 2, total - 1, total);
+                        } else {
+                            pages.push(1, '...', current - 1, current, current + 1, '...', total);
+                        }
+                    }
+                    return pages;
+                },
+
                 getRequestsByStatus(status) {
                     return this.requests.filter(request => request.estado === status);
                 },
-                
+
                 getStatusText(status) {
                     const statusMap = {
                         'pendiente': 'Pendiente',
@@ -338,56 +606,61 @@
                     };
                     return statusMap[status] || status;
                 },
-                
+
                 getCurrencySymbol(request) {
                     // Obtener el símbolo de moneda más común de los detalles
                     if (!request.detalles || request.detalles.length === 0) {
                         return 'S/';
                     }
-                    
+
                     // Contar monedas por símbolo
                     const currencyCount = {};
                     request.detalles.forEach(detalle => {
                         if (detalle.moneda && detalle.moneda.simbolo) {
-                            currencyCount[detalle.moneda.simbolo] = (currencyCount[detalle.moneda.simbolo] || 0) + 1;
+                            currencyCount[detalle.moneda.simbolo] = (currencyCount[detalle.moneda.simbolo] || 0) +
+                                1;
                         }
                     });
-                    
+
                     // Encontrar la moneda más común
-                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) =>
                         currencyCount[a] > currencyCount[b] ? a : b, 'S/'
                     );
-                    
+
                     return mostCommonCurrency;
                 },
-                
+
                 getMainCurrency(request) {
                     // Obtener el nombre de la moneda principal
                     if (!request.detalles || request.detalles.length === 0) {
                         return '';
                     }
-                    
+
                     const currencyCount = {};
                     request.detalles.forEach(detalle => {
                         if (detalle.moneda && detalle.moneda.nombre) {
                             currencyCount[detalle.moneda.nombre] = (currencyCount[detalle.moneda.nombre] || 0) + 1;
                         }
                     });
-                    
-                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) => 
+
+                    const mostCommonCurrency = Object.keys(currencyCount).reduce((a, b) =>
                         currencyCount[a] > currencyCount[b] ? a : b, ''
                     );
-                    
+
                     return mostCommonCurrency;
                 },
-                
+
                 formatDate(dateString) {
                     if (!dateString) return 'N/A';
                     const date = new Date(dateString);
-                    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                    const options = {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    };
                     return date.toLocaleDateString('es-ES', options);
                 },
-                
+
                 clearFilters() {
                     this.filters = {
                         status: '',
@@ -395,8 +668,10 @@
                         area: '',
                         search: ''
                     };
+                    // Resetear paginación al limpiar filtros AGREGADO
+                    this.currentPage = 1;
                 },
-                
+
                 viewRequest(id) {
                     // Redirigir a la vista de detalles usando la ruta correcta
                     window.location.href = `/solicitudcompra/${id}`;
@@ -409,54 +684,4 @@
             }
         }
     </script>
-
-    <style>
-    .card-codes {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
-    
-    .card-almacen-code {
-        font-size: 0.75rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-    
-    .detail-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 4px 0;
-    }
-    
-    .detail-label {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.8rem;
-        color: #6b7280;
-        font-weight: 500;
-    }
-    
-    .detail-value {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #374151;
-        text-align: right;
-    }
-    
-    .card-justification {
-        margin-top: 8px;
-        padding: 8px;
-        background: #f8fafc;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        color: #6b7280;
-    }
-    
-    .card-justification strong {
-        color: #374151;
-    }
-    </style>
 </x-layout.default>
