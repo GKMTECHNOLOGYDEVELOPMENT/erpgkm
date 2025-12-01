@@ -3,6 +3,15 @@
 namespace App\Http\Controllers\solicitud;
 
 use App\Http\Controllers\Controller;
+use App\Models\Articulo;
+use App\Models\CentroCosto;
+use App\Models\Ordenesarticulo;
+use App\Models\PrioridadSolicitud;
+use App\Models\SolicitudAlmacen;
+use App\Models\SolicitudAlmacenDetalle;
+use App\Models\Solicitudesordene;
+use App\Models\Tipoarea;
+use App\Models\TipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +124,21 @@ public function create()
         ->where('a.idTipoArticulo', 2) // Solo repuestos
         ->get();
 
+
+        // Obtener todas las áreas
+    $areas = DB::table('tipoarea')
+        ->orderBy('nombre')
+        ->get();
+
+         // Obtener todos los usuarios activos
+    $usuarios = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->orderBy('apellidoPaterno')
+        ->get();
+
+
     // Combinar ambos resultados
     $articulosCompletos = $articulos->merge($repuestos);
 
@@ -188,7 +212,9 @@ public function create()
         'usuario' => $usuario,
         'articulos' => $articulosFormateados,
         'cotizacionesAprobadas' => $cotizacionesAprobadas,
-        'nextOrderNumber' => $nextOrderNumber
+        'nextOrderNumber' => $nextOrderNumber,
+        'areas' => $areas,           // Nuevo
+        'usuarios' => $usuarios      // Nuevo
     ]);
 }
 
@@ -204,6 +230,8 @@ public function create()
             'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
             'orderInfo.fechaRequerida' => 'required|date',
             'orderInfo.observaciones' => 'nullable|string',
+            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',      // Nuevo
+            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',    // Nuevo
             'products' => 'required|array|min:1',
             'products.*.articuloId' => 'required|exists:articulos,idArticulos',
             'products.*.cantidad' => 'required|integer|min:1|max:1000',
@@ -268,6 +296,8 @@ public function create()
             'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
             'idtecnico' => null,
             'idusuario' => Auth::id(),
+             'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
+            'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],  // Nuevo
             'urgencia' => $validated['orderInfo']['urgencia']
         ]);
 
@@ -324,7 +354,7 @@ public function show($id)
 {
     $usuario = auth()->user()->load('tipoArea');
 
-    // Obtener la solicitud existente con más información
+    // Obtener la solicitud existente con más información - INCLUYENDO NUEVOS CAMPOS
     $solicitud = DB::table('solicitudesordenes as so')
         ->select(
             'so.idsolicitudesordenes',
@@ -338,11 +368,21 @@ public function show($id)
             'so.fechacreacion',
             'so.totalcantidadproductos',
             'so.cantidad as productos_unicos',
+            'so.id_area_destino',           // Nuevo campo
+            'so.id_usuario_destino',        // Nuevo campo
             DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante"),
-            'ta.nombre as nombre_area'
+            'ta.nombre as nombre_area',
+            // Información del área destino
+            'ta_destino.nombre as nombre_area_destino',
+            // Información del usuario destino
+            'u_destino.Nombre as usuario_destino_nombre',
+            'u_destino.apellidoPaterno as usuario_destino_apellido',
+            'u_destino.correo as usuario_destino_correo'
         )
         ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
         ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
+        ->leftJoin('tipoarea as ta_destino', 'so.id_area_destino', '=', 'ta_destino.idTipoArea') // Nuevo join
+        ->leftJoin('usuarios as u_destino', 'so.id_usuario_destino', '=', 'u_destino.idUsuario') // Nuevo join
         ->where('so.idsolicitudesordenes', $id)
         ->where('so.tipoorden', 'solicitud_articulo')
         ->first();
@@ -352,7 +392,7 @@ public function show($id)
     }
 
     // Obtener los artículos de la solicitud con información completa
-    $articulos = DB::table('ordenesarticulos as oa')
+       $articulos = DB::table('ordenesarticulos as oa')
         ->select(
             'oa.idordenesarticulos',
             'oa.cantidad',
@@ -428,7 +468,9 @@ public function show($id)
             'so.niveldeurgencia as urgencia',
             'so.fecharequerida',
             'so.observaciones',
-            'so.estado'
+            'so.estado',
+            'so.id_area_destino',           // Nuevo campo
+            'so.id_usuario_destino'         // Nuevo campo
         )
         ->where('so.idsolicitudesordenes', $id)
         ->where('so.tipoorden', 'solicitud_articulo')
@@ -635,6 +677,21 @@ public function show($id)
         ->orderBy('c.fecha_emision', 'desc')
         ->get();
 
+
+
+         // Obtener todas las áreas
+    $areas = DB::table('tipoarea')
+        ->orderBy('nombre')
+        ->get();
+        
+    // Obtener todos los usuarios activos
+    $usuarios = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->orderBy('apellidoPaterno')
+        ->get();
+
     return view('solicitud.solicitudarticulo.edit', [
         'usuario' => $usuario,
         'solicitud' => $solicitud,
@@ -642,7 +699,9 @@ public function show($id)
         'articulos' => $articulosFormateados,
         'cotizacionesAprobadas' => $cotizacionesAprobadas,
         'cotizacionActual' => $cotizacionActual,
-        'productosCotizacion' => $productosCotizacion
+        'productosCotizacion' => $productosCotizacion,
+        'areas' => $areas,           // Nuevo
+        'usuarios' => $usuarios      // Nuevo
     ]);
 }
 
@@ -670,6 +729,8 @@ public function show($id)
             'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
             'orderInfo.fechaRequerida' => 'required|date',
             'orderInfo.observaciones' => 'nullable|string',
+            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',      // Nuevo
+            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',    // Nuevo
             'products' => 'required|array|min:1',
             'products.*.articuloId' => 'required|exists:articulos,idArticulos',
             'products.*.cantidad' => 'required|integer|min:1|max:1000',
@@ -717,6 +778,8 @@ public function show($id)
                 'niveldeurgencia' => $validated['orderInfo']['urgencia'],
                 'tiposervicio' => $validated['orderInfo']['tipoServicio'],
                 'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+                'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
+                'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],  // Nuevo
                 'cantidad' => $totalProductosUnicos,
                 'canproduuni' => $totalProductosUnicos,
                 'totalcantidadproductos' => $totalCantidad,
@@ -846,7 +909,7 @@ public function show($id)
 
     public function opciones($id)
 {
-    // Obtener la solicitud con el campo idusuario incluido
+     // Obtener la solicitud con el campo idusuario incluido
     $solicitud = DB::table('solicitudesordenes as so')
         ->select(
             'so.idsolicitudesordenes',
@@ -860,11 +923,21 @@ public function show($id)
             'so.cantidad',
             'so.totalcantidadproductos',
             'so.idticket',
-            'so.idusuario', // ← ESTE ES EL CAMPO QUE FALTABA
+            'so.idusuario',
+            'so.id_area_destino',           // Nuevo campo
+            'so.id_usuario_destino',        // Nuevo campo
             't.numero_ticket',
-            'u.Nombre as nombre_solicitante'
+            'u.Nombre as nombre_solicitante',
+            // Información del área destino
+            'ta_destino.nombre as nombre_area_destino',
+            // Información del usuario destino
+            'u_destino.Nombre as usuario_destino_nombre',
+            'u_destino.apellidoPaterno as usuario_destino_apellido',
+            'u_destino.correo as usuario_destino_correo'
         )
         ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+        ->leftJoin('tipoarea as ta_destino', 'so.id_area_destino', '=', 'ta_destino.idTipoArea') // Nuevo join
+        ->leftJoin('usuarios as u_destino', 'so.id_usuario_destino', '=', 'u_destino.idUsuario') // Nuevo join
         ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
         ->where('so.idsolicitudesordenes', $id)
         ->where('so.tipoorden', 'solicitud_articulo')
@@ -873,7 +946,6 @@ public function show($id)
     if (!$solicitud) {
         abort(404, 'Solicitud no encontrada');
     }
-
     // Obtener información del solicitante
     $solicitante = DB::table('usuarios')
         ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
@@ -1304,14 +1376,14 @@ public function marcarNoUsado(Request $request, $solicitudId)
     }
 }
 
-   public function aceptarIndividual(Request $request, $id)
+ public function aceptarIndividual(Request $request, $id)
 {
     try {
         DB::beginTransaction();
 
-        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO idusuario)
+        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO id_usuario_destino)
         $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario') // ← AGREGADO idusuario
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario', 'id_usuario_destino')
             ->where('idsolicitudesordenes', $id)
             ->where('tipoorden', 'solicitud_articulo')
             ->first();
@@ -1464,8 +1536,20 @@ public function marcarNoUsado(Request $request, $solicitudId)
         $nombreDestinatario = '';
 
         switch ($request->tipo_destinatario) {
+            case 'destino':
+                // Usuario Destino Original
+                if (!$solicitud->id_usuario_destino) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se ha definido un usuario destino en la solicitud'
+                    ], 400);
+                }
+                $usuarioFinalId = $solicitud->id_usuario_destino;
+                $tipoEntrega = 'destino';
+                break;
+                
             case 'solicitante':
-                $usuarioFinalId = $solicitud->idusuario; // ← CORREGIDO: idusuario en lugar de idUsuario
+                $usuarioFinalId = $solicitud->idusuario;
                 $tipoEntrega = 'solicitante';
                 break;
                 
@@ -1487,9 +1571,14 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ->where('idUsuario', $usuarioFinalId)
             ->first();
 
-        $nombreDestinatario = $destinatarioInfo ? 
-            "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}" : 
-            'Usuario no encontrado';
+        if (!$destinatarioInfo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario destinatario no encontrado'
+            ], 404);
+        }
+
+        $nombreDestinatario = "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}";
 
         // ✅ 6. Registrar en articulos_entregas (NUEVA TABLA)
         DB::table('articulos_entregas')->insert([
@@ -1541,8 +1630,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
             'todos_procesados' => $todosProcesados,
             'destinatario' => $nombreDestinatario,
             'tipo_entrega' => $tipoEntrega,
-            'puede_generar_pdf' => $todosProcesados // ← Agregar esta línea
-
+            'puede_generar_pdf' => $todosProcesados
         ]);
 
     } catch (\Exception $e) {
@@ -1557,163 +1645,213 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
 
 
-    public function aceptar(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
+ public function aceptar(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
 
-            // Obtener la solicitud con todos los campos necesarios
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_articulo') // Cambiado a solicitud_articulo
-                ->first();
+        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO id_usuario_destino)
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario', 'id_usuario_destino')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_articulo')
+            ->first();
 
-            if (!$solicitud) {
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        // Verificar si la solicitud ya está aprobada
+        if ($solicitud->estado == 'aprobada') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
+            ], 400);
+        }
+
+        // Obtener las ubicaciones seleccionadas del request
+        $ubicacionesSeleccionadas = $request->input('ubicaciones', []);
+
+        if (empty($ubicacionesSeleccionadas)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se han seleccionado ubicaciones para los artículos'
+            ], 400);
+        }
+
+        // Determinar el usuario destino para el procesamiento grupal
+        $usuarioFinalId = null;
+        $tipoEntrega = '';
+        $nombreDestinatario = '';
+
+        switch ($request->tipo_destinatario) {
+            case 'destino':
+                // Usuario Destino Original
+                if (!$solicitud->id_usuario_destino) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se ha definido un usuario destino en la solicitud'
+                    ], 400);
+                }
+                $usuarioFinalId = $solicitud->id_usuario_destino;
+                $tipoEntrega = 'destino';
+                break;
+                
+            case 'solicitante':
+                $usuarioFinalId = $solicitud->idusuario;
+                $tipoEntrega = 'solicitante';
+                break;
+                
+            case 'otro':
+                $usuarioFinalId = $request->usuario_destino_id;
+                $tipoEntrega = 'otro_usuario';
+                break;
+                
+            default:
                 return response()->json([
                     'success' => false,
-                    'message' => 'Solicitud no encontrada'
+                    'message' => 'Tipo de destinatario no válido'
+                ], 400);
+        }
+
+        // Obtener nombre del destinatario
+        $destinatarioInfo = DB::table('usuarios')
+            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->where('idUsuario', $usuarioFinalId)
+            ->first();
+
+        if (!$destinatarioInfo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario destinatario no encontrado'
+            ], 404);
+        }
+
+        $nombreDestinatario = "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}";
+
+        // Obtener artículos de la solicitud
+        $articulosSolicitud = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.idordenesarticulos',
+                'oa.cantidad',
+                'a.idArticulos',
+                'a.nombre',
+                'a.stock_total',
+                'a.precio_compra'
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->get();
+
+        // Verificar que todos los artículos tengan stock suficiente
+        foreach ($articulosSolicitud as $articulo) {
+            $stockDisponible = DB::table('rack_ubicacion_articulos')
+                ->where('articulo_id', $articulo->idArticulos)
+                ->sum('cantidad');
+
+            if ($stockDisponible < $articulo->cantidad) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stock insuficiente para el artículo: {$articulo->nombre}. Disponible: {$stockDisponible}, Solicitado: {$articulo->cantidad}"
+                ], 400);
+            }
+        }
+
+        // Procesar cada artículo
+        foreach ($articulosSolicitud as $articulo) {
+            $cantidadSolicitada = $articulo->cantidad;
+            $ubicacionId = $ubicacionesSeleccionadas[$articulo->idArticulos] ?? null;
+
+            if (!$ubicacionId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No se seleccionó ubicación para el artículo: {$articulo->nombre}"
+                ], 400);
+            }
+
+            // Verificar stock en la ubicación seleccionada
+            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                ->select(
+                    'rua.cantidad',
+                    'rua.idRackUbicacionArticulo',
+                    'rua.cliente_general_id',
+                    'ru.codigo as ubicacion_codigo',
+                    'ru.idRackUbicacion',
+                    'r.idRack as rack_id',
+                    'r.nombre as rack_nombre'
+                )
+                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->where('rua.articulo_id', $articulo->idArticulos)
+                ->where('rua.rack_ubicacion_id', $ubicacionId)
+                ->first();
+
+            if (!$stockUbicacion) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Ubicación no encontrada para el artículo: {$articulo->nombre}"
                 ], 404);
             }
 
-            // Verificar si la solicitud ya está aprobada
-            if ($solicitud->estado == 'aprobada') {
+            if ($stockUbicacion->cantidad < $cantidadSolicitada) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
+                    'message' => "Stock insuficiente en la ubicación seleccionada para: {$articulo->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
                 ], 400);
             }
 
-            // Obtener las ubicaciones seleccionadas del request
-            $ubicacionesSeleccionadas = $request->input('ubicaciones', []);
+            // Verificar si ya fue procesado
+            $yaProcesado = DB::table('ordenesarticulos')
+                ->where('idordenesarticulos', $articulo->idordenesarticulos)
+                ->where('estado', 1)
+                ->exists();
 
-            if (empty($ubicacionesSeleccionadas)) {
+            if ($yaProcesado) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se han seleccionado ubicaciones para los artículos'
+                    'message' => "El artículo {$articulo->nombre} ya fue procesado anteriormente"
                 ], 400);
             }
 
-            // Obtener artículos de la solicitud
-            $articulosSolicitud = DB::table('ordenesarticulos as oa')
-                ->select(
-                    'oa.idordenesarticulos',
-                    'oa.cantidad',
-                    'a.idArticulos',
-                    'a.nombre',
-                    'a.stock_total',
-                    'a.precio_compra'
-                )
-                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-                ->where('oa.idsolicitudesordenes', $id)
-                ->get();
+            // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
+            DB::table('rack_ubicacion_articulos')
+                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+                ->decrement('cantidad', $cantidadSolicitada);
 
-            // Verificar que todos los artículos tengan stock suficiente
-            foreach ($articulosSolicitud as $articulo) {
-                $stockDisponible = DB::table('rack_ubicacion_articulos')
-                    ->where('articulo_id', $articulo->idArticulos)
-                    ->sum('cantidad');
+            // ✅ 2. DESCONTAR stock total en tabla articulos
+            DB::table('articulos')
+                ->where('idArticulos', $articulo->idArticulos)
+                ->decrement('stock_total', $cantidadSolicitada);
 
-                if ($stockDisponible < $articulo->cantidad) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Stock insuficiente para el artículo: {$articulo->nombre}. Disponible: {$stockDisponible}, Solicitado: {$articulo->cantidad}"
-                    ], 400);
-                }
-            }
+            // ✅ 3. Registrar movimiento en rack_movimientos
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $articulo->idArticulos,
+                'custodia_id' => null,
+                'ubicacion_origen_id' => $ubicacionId,
+                'ubicacion_destino_id' => null,
+                'rack_origen_id' => $stockUbicacion->rack_id,
+                'rack_destino_id' => null,
+                'cantidad' => $cantidadSolicitada,
+                'tipo_movimiento' => 'salida',
+                'usuario_id' => auth()->id(),
+                'observaciones' => "Solicitud artículo aprobada (grupal): {$solicitud->codigo}",
+                'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+                'codigo_ubicacion_destino' => null,
+                'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+                'nombre_rack_destino' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-            // Procesar cada artículo
-            foreach ($articulosSolicitud as $articulo) {
-                $cantidadSolicitada = $articulo->cantidad;
-                $ubicacionId = $ubicacionesSeleccionadas[$articulo->idArticulos] ?? null;
-
-                if (!$ubicacionId) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "No se seleccionó ubicación para el artículo: {$articulo->nombre}"
-                    ], 400);
-                }
-
-                // Verificar stock en la ubicación seleccionada
-                $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-                    ->select(
-                        'rua.cantidad',
-                        'rua.idRackUbicacionArticulo',
-                        'rua.cliente_general_id',
-                        'ru.codigo as ubicacion_codigo',
-                        'ru.idRackUbicacion',
-                        'r.idRack as rack_id',
-                        'r.nombre as rack_nombre'
-                    )
-                    ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                    ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                    ->where('rua.articulo_id', $articulo->idArticulos)
-                    ->where('rua.rack_ubicacion_id', $ubicacionId)
-                    ->first();
-
-                if (!$stockUbicacion) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Ubicación no encontrada para el artículo: {$articulo->nombre}"
-                    ], 404);
-                }
-
-                if ($stockUbicacion->cantidad < $cantidadSolicitada) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "Stock insuficiente en la ubicación seleccionada para: {$articulo->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-                    ], 400);
-                }
-
-                // Verificar si ya fue procesado
-                $yaProcesado = DB::table('ordenesarticulos')
-                    ->where('idordenesarticulos', $articulo->idordenesarticulos)
-                    ->where('estado', 1)
-                    ->exists();
-
-                if ($yaProcesado) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => "El artículo {$articulo->nombre} ya fue procesado anteriormente"
-                    ], 400);
-                }
-
-                // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
-                DB::table('rack_ubicacion_articulos')
-                    ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-                    ->decrement('cantidad', $cantidadSolicitada);
-
-                // ✅ 2. DESCONTAR stock total en tabla articulos
-                DB::table('articulos')
-                    ->where('idArticulos', $articulo->idArticulos)
-                    ->decrement('stock_total', $cantidadSolicitada);
-
-                // ✅ 3. Registrar movimiento en rack_movimientos
-                DB::table('rack_movimientos')->insert([
-                    'articulo_id' => $articulo->idArticulos,
-                    'custodia_id' => null,
-                    'ubicacion_origen_id' => $ubicacionId,
-                    'ubicacion_destino_id' => null,
-                    'rack_origen_id' => $stockUbicacion->rack_id,
-                    'rack_destino_id' => null,
-                    'cantidad' => $cantidadSolicitada,
-                    'tipo_movimiento' => 'salida',
-                    'usuario_id' => auth()->id(),
-                    'observaciones' => "Solicitud artículo aprobada (grupal): {$solicitud->codigo}",
-                    'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-                    'codigo_ubicacion_destino' => null,
-                    'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-                    'nombre_rack_destino' => null,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
-
-                // En procesamiento grupal, por defecto se entrega al solicitante
-                DB::table('articulos_entregas')->insert([
+            // ✅ 4. Registrar en articulos_entregas con el destinatario seleccionado
+            DB::table('articulos_entregas')->insert([
                 'solicitud_id' => $solicitud->idsolicitudesordenes,
                 'articulo_id' => $articulo->idArticulos,
-                 'usuario_destino_id' => $solicitud->idusuario, // ← CAMBIAR A idusuario
-                'tipo_entrega' => 'solicitante',
+                'usuario_destino_id' => $usuarioFinalId,
+                'tipo_entrega' => $tipoEntrega,
                 'cantidad' => $cantidadSolicitada,
                 'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
                 'fecha_entrega' => now(),
@@ -1723,48 +1861,48 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 'updated_at' => now()
             ]);
 
+            // ✅ 5. Registrar en inventario_ingresos_clientes
+            DB::table('inventario_ingresos_clientes')->insert([
+                'compra_id' => null,
+                'articulo_id' => $articulo->idArticulos,
+                'tipo_ingreso' => 'salida',
+                'ingreso_id' => $solicitud->idsolicitudesordenes,
+                'cliente_general_id' => $stockUbicacion->cliente_general_id,
+                'cantidad' => -$cantidadSolicitada,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-                // ✅ 4. Registrar en inventario_ingresos_clientes
-                DB::table('inventario_ingresos_clientes')->insert([
-                    'compra_id' => null,
-                    'articulo_id' => $articulo->idArticulos,
-                    'tipo_ingreso' => 'salida',
-                    'ingreso_id' => $solicitud->idsolicitudesordenes,
-                    'cliente_general_id' => $stockUbicacion->cliente_general_id,
-                    'cantidad' => -$cantidadSolicitada,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+            // ✅ 6. Actualizar kardex
+            $this->actualizarKardexSalida($articulo->idArticulos, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articulo->precio_compra);
 
-                // ✅ 5. Actualizar kardex
-                $this->actualizarKardexSalida($articulo->idArticulos, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articulo->precio_compra);
-
-                // ✅ 6. Marcar como procesado
-                DB::table('ordenesarticulos')
-                    ->where('idordenesarticulos', $articulo->idordenesarticulos)
-                    ->update([
-                        'estado' => 1,
-                        'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente"
-                    ]);
-
-                Log::info("✅ Artículo procesado grupalmente - Artículo: {$articulo->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
-            }
-
-            // Actualizar estado de la solicitud
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
+            // ✅ 7. Marcar como procesado
+            DB::table('ordenesarticulos')
+                ->where('idordenesarticulos', $articulo->idordenesarticulos)
                 ->update([
-                    'estado' => 'aprobada',
-                    'fechaaprobacion' => now(),
-                    'idaprobador' => auth()->id()
+                    'estado' => 1,
+                    'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente - Entregado a: {$nombreDestinatario}"
                 ]);
 
-            DB::commit();
+            Log::info("✅ Artículo procesado grupalmente - Artículo: {$articulo->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
+        }
 
-            return response()->json([
+        // Actualizar estado de la solicitud
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'estado' => 'aprobada',
+                'fechaaprobacion' => now(),
+                'idaprobador' => auth()->id()
+            ]);
+
+        DB::commit();
+
+        return response()->json([
             'success' => true,
-            'message' => 'Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.',
-            
+            'message' => "Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas. Entregado a: {$nombreDestinatario}",
+            'destinatario' => $nombreDestinatario,
+            'tipo_entrega' => $tipoEntrega
         ]);
 
     } catch (\Exception $e) {
@@ -1983,6 +2121,318 @@ public function generarConformidad($id)
         ], 500);
     }
 }
+
+
+
+public function enviarASolicitudAlmacen(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'idusuario')
+            ->where('idsolicitudesordenes', $id)
+            ->first();
+
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        $articulosSinStock = $request->input('articulos', []);
+        
+        if (empty($articulosSinStock)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se han seleccionado artículos sin stock'
+            ], 400);
+        }
+
+        // Obtener información del usuario solicitante
+        $usuarioSolicitante = DB::table('usuarios')
+            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->where('idUsuario', $solicitud->idusuario)
+            ->first();
+
+        $nombreSolicitante = $usuarioSolicitante ? 
+            trim($usuarioSolicitante->Nombre . ' ' . $usuarioSolicitante->apellidoPaterno) : 
+            'Solicitante';
+
+        // Generar código para la nueva solicitud de abastecimiento
+        $codigoAbastecimiento = 'SA-' . date('ymd') . '-' . str_pad(DB::table('solicitud_almacen')->count() + 1, 3, '0', STR_PAD_LEFT);
+
+        // Crear la solicitud de abastecimiento
+        $solicitudAlmacenId = DB::table('solicitud_almacen')->insertGetId([
+            'codigo_solicitud' => $codigoAbastecimiento,
+            'titulo' => 'Solicitud de Abastecimiento - ' . $solicitud->codigo,
+            'idTipoSolicitud' => 1,
+            'solicitante' => $nombreSolicitante,
+            'idPrioridad' => 2,
+            'fecha_requerida' => now()->addDays(7)->format('Y-m-d'),
+            'idCentroCosto' => null,
+            'idTipoArea' => 1,
+            'descripcion' => 'Solicitud generada automáticamente desde: ' . $solicitud->codigo . '. Artículos sin stock disponible.',
+            'justificacion' => 'Los siguientes artículos no contaban con stock suficiente en la solicitud original y requieren abastecimiento.',
+            'observaciones' => 'Generado automáticamente del sistema',
+            'total_unidades' => array_sum(array_column($articulosSinStock, 'cantidad_solicitada')),
+            'estado' => 'pendiente',
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // Agregar los artículos a la solicitud de abastecimiento
+        foreach ($articulosSinStock as $articulo) {
+            $articuloInfo = DB::table('articulos as a')
+                ->select(
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.codigo_barras',
+                    'a.codigo_repuesto',
+                    'sc.nombre as categoria_nombre',
+                    'u.nombre as unidad_nombre',
+                    'm.nombre as modelo_nombre',
+                    'mar.nombre as marca_nombre'
+                )
+                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+                ->leftJoin('unidades as u', 'a.idUnidad', '=', 'u.idUnidad')
+                ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+                ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+                ->where('a.idArticulos', $articulo['idArticulos'])
+                ->first();
+
+            if ($articuloInfo) {
+                DB::table('solicitud_almacen_detalle')->insert([
+                    'idSolicitudAlmacen' => $solicitudAlmacenId,
+                    'idArticulo' => $articuloInfo->idArticulos,
+                    'descripcion_producto' => $articuloInfo->nombre,
+                    'cantidad' => $articulo['cantidad_solicitada'],
+                    'unidad' => $articuloInfo->unidad_nombre ?? 'unidad',
+                    'categoria' => $articuloInfo->categoria_nombre ?? '',
+                    'codigo_producto' => $articuloInfo->codigo_barras ?? $articuloInfo->codigo_repuesto,
+                    'marca' => $articuloInfo->marca_nombre ?? '',
+                    'especificaciones_tecnicas' => 'Solicitado desde: ' . $solicitud->codigo,
+                    'justificacion_producto' => 'Stock insuficiente en solicitud original',
+                    'estado' => 'pendiente',
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+        }
+
+        // Marcar los artículos como "enviados a abastecimiento" en la solicitud original
+        foreach ($articulosSinStock as $articulo) {
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('idarticulos', $articulo['idArticulos'])
+                ->update([
+                    'observacion' => DB::raw("CONCAT(COALESCE(observacion, ''), ' | Enviado a abastecimiento: $codigoAbastecimiento')"),
+                    'estado' => 2
+                ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Artículos enviados a solicitud de abastecimiento exitosamente',
+            'codigo_abastecimiento' => $codigoAbastecimiento,
+            'id_solicitud_almacen' => $solicitudAlmacenId,
+            'total_articulos' => count($articulosSinStock)
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al enviar a solicitud de abastecimiento: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al enviar a solicitud de abastecimiento: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+public function enviarAlmacen(Request $request, $solicitudId)
+{
+    try {
+        DB::beginTransaction();
+
+        // Obtener la solicitud original
+        $solicitudOriginal = Solicitudesordene::findOrFail($solicitudId);
+        
+        // Obtener artículos seleccionados y datos del formulario
+        $articulosSeleccionados = $request->articulos;
+        $datosSolicitud = $request->datos_solicitud;
+
+        // Obtener usuario autenticado
+        $usuario = Auth::user();
+        
+        // Obtener información completa del usuario desde la tabla usuarios
+        $usuarioInfo = \App\Models\Usuario::find($usuario->idUsuario ?? $usuario->id);
+        
+        // Construir nombre completo del solicitante
+        $nombreSolicitante = 'Usuario Almacén'; // Valor por defecto
+        
+        if ($usuarioInfo) {
+            $nombreSolicitante = trim(
+                ($usuarioInfo->Nombre ?? $usuarioInfo->name ?? '') . ' ' . 
+                ($usuarioInfo->apellidoPaterno ?? $usuarioInfo->apellido_paterno ?? '') . ' ' . 
+                ($usuarioInfo->apellidoMaterno ?? $usuarioInfo->apellido_materno ?? '')
+            );
+            
+            // Si está vacío, usar el email o nombre de usuario
+            if (empty(trim($nombreSolicitante))) {
+                $nombreSolicitante = $usuarioInfo->correo ?? $usuarioInfo->usuario ?? 'Usuario Almacén';
+            }
+        }
+
+        // Generar código único para la solicitud de abastecimiento
+        $codigoSolicitud = 'SA-' . date('ymd') . '-' . str_pad(SolicitudAlmacen::count() + 1, 3, '0', STR_PAD_LEFT);
+
+        // Crear la solicitud de abastecimiento CON EL NOMBRE DEL USUARIO AUTENTICADO
+        $solicitudAlmacen = SolicitudAlmacen::create([
+            'codigo_solicitud' => $codigoSolicitud,
+            'titulo' => $datosSolicitud['titulo'],
+            'idsolicitudArticulo' => $solicitudOriginal->id,
+            'idTipoSolicitud' => $datosSolicitud['idTipoSolicitud'],
+            'solicitante' => $nombreSolicitante, // CAMBIADO: Usar nombre del usuario autenticado
+            'idPrioridad' => $datosSolicitud['idPrioridad'],
+            'fecha_requerida' => $datosSolicitud['fecha_requerida'],
+            'idCentroCosto' => $datosSolicitud['idCentroCosto'],
+            'idTipoArea' => $datosSolicitud['idTipoArea'],
+            'descripcion' => $datosSolicitud['descripcion'],
+            'justificacion' => $datosSolicitud['justificacion'],
+            'observaciones' => $datosSolicitud['observaciones'],
+            'total_unidades' => $this->calcularTotalUnidades($articulosSeleccionados),
+            'estado' => 'pendiente'
+        ]);
+
+        // Procesar cada artículo seleccionado
+        foreach ($articulosSeleccionados as $articuloData) {
+            $this->crearDetalleSolicitud($solicitudAlmacen->idSolicitudAlmacen, $articuloData);
+        }
+
+        // Marcar los artículos como enviados a abastecimiento
+        $this->marcarArticulosEnviados($solicitudId, $articulosSeleccionados);
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Solicitud de abastecimiento creada exitosamente',
+            'codigo_abastecimiento' => $codigoSolicitud,
+            'id_solicitud_almacen' => $solicitudAlmacen->idSolicitudAlmacen,
+            'total_articulos' => count($articulosSeleccionados),
+            'solicitante' => $nombreSolicitante // Opcional: devolver el nombre para debug
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear solicitud de abastecimiento: ' . $e->getMessage()
+        ], 500);
+    }
+}
+    private function obtenerTipoSolicitudAbastecimiento()
+    {
+        // Buscar tipo "Abastecimiento" o usar el primero disponible
+        $tipo = TipoSolicitud::where('nombre', 'like', '%abastecimiento%')
+                            ->orWhere('nombre', 'like', '%reposición%')
+                            ->first();
+        
+        return $tipo ? $tipo->idTipoSolicitud : TipoSolicitud::first()->idTipoSolicitud;
+    }
+
+    private function obtenerPrioridadUrgente()
+    {
+        // Buscar prioridad "Urgente" o nivel 3-4
+        $prioridad = PrioridadSolicitud::where('nivel', '>=', 3)
+                                    ->where('estado', 1)
+                                    ->first();
+        
+        return $prioridad ? $prioridad->idPrioridad : PrioridadSolicitud::where('estado', 1)->first()->idPrioridad;
+    }
+
+    private function obtenerCentroCostoDefault()
+    {
+        $centroCosto = CentroCosto::where('estado', 1)->first();
+        return $centroCosto ? $centroCosto->idCentroCosto : null;
+    }
+
+    private function calcularTotalUnidades($articulos)
+    {
+        return array_sum(array_column($articulos, 'cantidad_solicitada'));
+    }
+
+    private function crearDetalleSolicitud($solicitudAlmacenId, $articuloData)
+    {
+        // Obtener información completa del artículo
+        $articulo = Articulo::with(['unidad', 'modelo.marca', 'modelo.categoria'])
+                          ->find($articuloData['idArticulos']);
+
+        if (!$articulo) {
+            return;
+        }
+
+        // Calcular cantidad faltante
+        $cantidadFaltante = $articuloData['cantidad_solicitada'] - $articuloData['stock_disponible'];
+        
+        // Asegurar que la cantidad sea al menos 1
+        $cantidadSolicitar = max(1, $cantidadFaltante);
+
+        SolicitudAlmacenDetalle::create([
+            'idSolicitudAlmacen' => $solicitudAlmacenId,
+            'idArticulo' => $articulo->idArticulos,
+            'descripcion_producto' => $articulo->nombre,
+            'cantidad' => $cantidadSolicitar,
+            'unidad' => $articulo->unidad ? $articulo->unidad->nombre : 'Unidad',
+            'categoria' => $articulo->modelo && $articulo->modelo->categoria ? $articulo->modelo->categoria->nombre : '',
+            'codigo_producto' => $articulo->codigo_barras ?: $articulo->codigo_repuesto,
+            'marca' => $articulo->modelo && $articulo->modelo->marca ? $articulo->modelo->marca->nombre : '',
+            'especificaciones_tecnicas' => $articulo->ficha_tecnica,
+            'justificacion_producto' => 'Stock insuficiente. Solicitado: ' . $articuloData['cantidad_solicitada'] . ', Disponible: ' . $articuloData['stock_disponible'],
+            'estado' => 'pendiente',
+            'observaciones_detalle' => 'Generado automáticamente por sistema'
+        ]);
+    }
+
+    private function marcarArticulosEnviados($solicitudId, $articulosSeleccionados)
+    {
+        // Aquí puedes implementar la lógica para marcar los artículos como enviados a abastecimiento
+        // en tu tabla ordenesarticulos o donde corresponda
+        
+        foreach ($articulosSeleccionados as $articuloData) {
+            // Ejemplo: Actualizar el estado en ordenesarticulos
+            Ordenesarticulo::where('idSolicitudesOrdenes', $solicitudId)
+                          ->where('idArticulos', $articuloData['idArticulos'])
+                          ->update([
+                              'estado' => 2, // O el estado que indique "enviado a abastecimiento"
+                              'observacion' => 'Enviado a solicitud de abastecimiento - ' . now()->format('d/m/Y H:i')
+                          ]);
+        }
+    }
+
+    // Método para obtener datos del modal de creación
+    public function getModalData()
+    {
+        $tiposSolicitud = TipoSolicitud::where('estado', 1)->get();
+        $prioridades = PrioridadSolicitud::where('estado', 1)->get();
+        $centrosCosto = CentroCosto::where('estado', 1)->get();
+        $areas = Tipoarea::all();
+
+        return response()->json([
+            'tiposSolicitud' => $tiposSolicitud,
+            'prioridades' => $prioridades,
+            'centrosCosto' => $centrosCosto,
+            'areas' => $areas
+        ]);
+    }
+
+
+
 
     
 }

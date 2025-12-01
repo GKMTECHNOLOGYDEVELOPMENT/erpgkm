@@ -17,6 +17,7 @@ class SolicitudAlmacen extends Model
          'idSolicitudAlmacen',
         'solicitante_compra',
         'solicitante_almacen',
+        'idsolicitudArticulo',
         'titulo',
         'idTipoSolicitud',
         'solicitante',

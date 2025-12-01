@@ -943,4 +943,4 @@
 
 
 
-<script src="{{ asset('assets/js/tickets/helpdesk/helpvisitalaboratorio.js') }}"></script>
+<script src="{{ asset('assets/js/tickets/helpdesk/help.js') }}"></script>

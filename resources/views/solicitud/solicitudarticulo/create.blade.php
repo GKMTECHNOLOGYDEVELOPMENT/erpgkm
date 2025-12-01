@@ -528,6 +528,39 @@
                         </div>
 
                         <div class="p-6">
+                            <!-- En la sección de Información Adicional, después del Tipo de Servicio -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Área Destino -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-building text-blue-500 mr-2"></i>
+                                        Área Destino
+                                    </label>
+                                    <select x-model="orderInfo.areaDestino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Seleccione un área...</option>
+                                        @foreach($areas as $area)
+                                            <option value="{{ $area->idTipoArea }}">{{ $area->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Usuario Destino -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-user text-blue-500 mr-2"></i>
+                                        Usuario Destino
+                                    </label>
+                                    <select x-model="orderInfo.usuarioDestino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Seleccione un usuario...</option>
+                                        <template x-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
+                                            <option :value="usuario.idUsuario" x-text="`${usuario.Nombre} ${usuario.apellidoPaterno}`"></option>
+                                        </template>
+                                    </select>
+                                    <div x-show="orderInfo.areaDestino && usuariosFiltrados.length === 0" class="text-yellow-600 text-sm mt-2">
+                                        No hay usuarios disponibles en esta área
+                                    </div>
+                                </div>
+                            </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <!-- Tipo de Servicio -->
                                 <div>
@@ -851,12 +884,18 @@
                 cantidad: 1,
                 descripcion: ''
             },
+             areas: @json($areas ?? []),
+            usuarios: @json($usuarios ?? []),
+            usuariosFiltrados: [],
+
             orderInfo: {
-                tipoServicio: 'solicitud_articulo',
-                urgencia: '',
-                observaciones: '',
-                fechaRequerida: ''
-            },
+        tipoServicio: 'solicitud_articulo',
+        urgencia: '',
+        observaciones: '',
+        fechaRequerida: '',
+        areaDestino: '',      // Nuevo campo
+        usuarioDestino: ''    // Nuevo campo
+    },
             notification: {
                 show: false,
                 message: '',
@@ -874,6 +913,7 @@
 
             // Artículos desde Laravel - Asegurar que sea un array
             articulos: @json($articulos ?? []),
+           
 
             // Niveles de urgencia
             nivelesUrgencia: [{
@@ -921,6 +961,8 @@
                     this.orderInfo.tipoServicio &&
                     this.orderInfo.urgencia &&
                     this.orderInfo.fechaRequerida;
+                    this.orderInfo.areaDestino &&        // Nuevo requerimiento
+                    this.orderInfo.usuarioDestino; 
             },
 
             // Métodos
@@ -935,6 +977,14 @@
                     month: 'long',
                     day: 'numeric'
                 });
+                 // Filtrar usuarios cuando cambie el área
+                this.$watch('orderInfo.areaDestino', (value) => {
+                    this.filtrarUsuariosPorArea(value);
+                    // Resetear usuario destino si cambia el área
+                    if (value !== this.orderInfo.areaDestino) {
+                        this.orderInfo.usuarioDestino = '';
+                    }
+                });
 
                 this.minDate = new Date().toISOString().split('T')[0];
 
@@ -943,6 +993,18 @@
                     this.initFlatpickr();
                 });
             },
+
+
+            filtrarUsuariosPorArea(areaId) {
+        if (!areaId) {
+            this.usuariosFiltrados = [];
+            return;
+        }
+        
+        this.usuariosFiltrados = this.usuarios.filter(usuario => 
+            usuario.idTipoArea == areaId
+        );
+    },
 
             initSelect2() {
                 // Debug antes de inicializar Select2

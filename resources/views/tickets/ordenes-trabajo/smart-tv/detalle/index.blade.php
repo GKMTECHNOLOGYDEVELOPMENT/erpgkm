@@ -467,15 +467,18 @@
                 </div>
             </div>
 
-            <!-- Dirección -->
-            <div>
-                <label class="text-sm font-medium flex items-center gap-2">
-                    <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
-                    Dirección
-                </label>
-                <input id="direccion" name="direccion" type="text" class="form-input w-full"
-                    value="{{ $orden->direccion }}">
-            </div>
+         <!-- Dirección -->
+<div>
+    <label class="text-sm font-medium flex items-center gap-2">
+        <i class="fa-solid fa-map-marker-alt text-gray-500"></i>
+        Dirección
+    </label>
+    <div class="flex items-center gap-2"> <!-- Contenedor flex -->
+        <input id="direccion" name="direccion" type="text" class="form-input flex-1"
+            value="{{ $orden->direccion }}">
+        <!-- El botón se agregará aquí automáticamente -->
+    </div>
+</div>
 
             <!-- Marca -->
             <div>
@@ -551,7 +554,7 @@
                 <textarea id="fallaReportada" name="fallaReportada" rows="2" class="form-input w-full">{{ $orden->fallaReportada }}</textarea>
             </div>
 
-            <div x-data="{ erma: '{{ $orden->erma }}' }" class="mb-5">
+             <div x-data="{ erma: '{{ $orden->erma }}' }" class="mb-5">
                 <label class="text-sm font-medium"><i class="fa-solid fa-file-signature text-gray-500"></i> N.
                     erma</label>
                 <input id="erma" name="erma" type="text" class="form-input w-full"
@@ -595,6 +598,9 @@
                             </div>
 
 
+                                       
+
+
 
                             <!-- Switch mejorado -->
                             <div class="relative">
@@ -608,6 +614,8 @@
                                     </span>
                                 </label>
                             </div>
+
+
 
 
 
@@ -697,6 +705,89 @@
 
 
 
+                         <!-- Mapa y coordenadas -->
+<div class="md:col-span-2 mt-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <!-- Link de Ubicación -->
+        <div class="md:col-span-3">
+            <label for="linkubicacion" class="text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-link text-gray-500"></i>
+                Link de Ubicación (Google Maps)
+            </label>
+            <div class="flex">
+                <input id="linkubicacion" name="linkubicacion" type="text" class="form-input w-full rounded-r-none"
+                    value="{{ $orden->linkubicacion ?? '' }}" placeholder="Pega aquí el link de Google Maps">
+                <!-- <button type="button" onclick="extractCoordinatesFromLink()" 
+                    class="btn btn-primary rounded-l-none">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                </button> -->
+            </div>
+            <small class="text-gray-500">Pega un link de Google Maps para cargar automáticamente las coordenadas</small>
+        </div>
+
+        <!-- Coordenadas -->
+        <div>
+            <label for="latitud" class="text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-latitude text-gray-500"></i>
+                Latitud
+            </label>
+            <input id="latitud" name="lat" type="text" class="form-input w-full"
+                value="{{ $orden->lat ?? '' }}" placeholder="Ej: -12.046374">
+        </div>
+
+        <div>
+            <label for="longitud" class="text-sm font-medium flex items-center gap-2">
+                <i class="fa-solid fa-longitude text-gray-500"></i>
+                Longitud
+            </label>
+            <input id="longitud" name="lng" type="text" class="form-input w-full"
+                value="{{ $orden->lng ?? '' }}" placeholder="Ej: -77.042818">
+        </div>
+
+        <!-- Botón para actualizar mapa -->
+        <!-- <div class="flex items-end">
+            <button type="button" onclick="updateMarkerFromInputs()" class="btn btn-primary w-full">
+                <i class="fa-solid fa-sync-alt mr-2"></i> Actualizar Mapa
+            </button>
+        </div> -->
+    </div>
+
+    <!-- Buscador -->
+    <div class="mb-4">
+        <label for="mapSearchBox" class="text-sm font-medium flex items-center gap-2">
+            <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+            Buscar lugar en el mapa
+        </label>
+        <input id="mapSearchBox" class="form-input w-full" type="text" 
+            placeholder="Escribe una dirección, lugar o punto de referencia...">
+    </div>
+
+    <!-- Mapa -->
+    <div>
+        <label class="text-sm font-medium flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-map text-gray-500"></i>
+            Mapa Interactivo
+        </label>
+        <div id="map" class="w-full h-96 rounded-lg border shadow-sm"></div>
+        <small class="text-gray-500 mt-1 block">
+            Haz clic en el mapa para cambiar la ubicación. Arrastra el marcador rojo para ajustar.
+        </small>
+    </div>
+</div>
+
+
+           
+
+
+            
+    
+
+
+
+
+
+
+
 
 
             <!-- Botón de Guardar -->
@@ -712,8 +803,398 @@
                 @endif
             </div>
         </div>
+
+
+
     </form>
+
+   <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQKbJK_7JMR45InjGsGuHQcsQ7toEVIf4&libraries=places&callback=initMap">
+</script>
 </div>
+
+
+<script>
+    let map, marker, geocoder, autocomplete;
+
+    function initMap() {
+        console.log("✅ Inicializando mapa...");
+        
+        const latInput = document.getElementById("latitud");
+        const lngInput = document.getElementById("longitud");
+        const linkInput = document.getElementById("linkubicacion");
+        const direccionInput = document.getElementById("direccion");
+        const mapContainer = document.getElementById("map");
+        const searchInput = document.getElementById("mapSearchBox");
+
+        if (!mapContainer) {
+            console.error("❌ No se encontró el contenedor del mapa");
+            return;
+        }
+
+        // Coordenadas iniciales (usar las del ticket o Lima por defecto)
+        let initialLat = -11.957242;
+        let initialLng = -77.0731862;
+        
+        // Si hay coordenadas guardadas, usarlas
+        if (latInput && latInput.value) {
+            const latValue = parseFloat(latInput.value);
+            const lngValue = parseFloat(lngInput.value);
+            if (!isNaN(latValue) && !isNaN(lngValue)) {
+                initialLat = latValue;
+                initialLng = lngValue;
+                console.log("📍 Usando coordenadas guardadas:", initialLat, initialLng);
+            }
+        }
+
+        // Inicializar mapa
+        map = new google.maps.Map(mapContainer, {
+            center: {
+                lat: initialLat,
+                lng: initialLng
+            },
+            zoom: 15,
+            mapTypeControl: true,
+            streetViewControl: true,
+            fullscreenControl: true
+        });
+
+        // Crear marcador
+        marker = new google.maps.Marker({
+            position: {
+                lat: initialLat,
+                lng: initialLng
+            },
+            map: map,
+            draggable: true,
+            title: "Arrastra para cambiar ubicación"
+        });
+
+        // Inicializar geocoder
+        geocoder = new google.maps.Geocoder();
+
+        // 🔄 Función para actualizar todos los campos
+        function updateInputs(lat, lng, direccion = "") {
+            if (latInput) latInput.value = lat.toFixed(6);
+            if (lngInput) lngInput.value = lng.toFixed(6);
+            if (linkInput) linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+            
+            // Actualizar dirección solo si se proporciona y el campo está vacío
+            if (direccionInput && direccion) {
+                // Solo actualizar si está vacío o si el usuario confirma
+                if (!direccionInput.value || direccionInput.value.trim() === "" || 
+                    confirm("¿Desea actualizar la dirección con la ubicación del mapa?")) {
+                    direccionInput.value = direccion;
+                }
+            }
+            
+            // Obtener dirección completa desde coordenadas
+            getAddressFromCoords(lat, lng);
+        }
+
+        // 🔁 Obtener dirección desde coordenadas
+        function getAddressFromCoords(lat, lng) {
+            if (!geocoder) return;
+            
+            geocoder.geocode({
+                location: {
+                    lat: lat,
+                    lng: lng
+                }
+            }, (results, status) => {
+                if (status === "OK" && results[0]) {
+                    const direccion = results[0].formatted_address;
+                    // Actualizar título del marcador
+                    marker.setTitle(direccion);
+                    
+                    // Si el buscador está vacío, actualizarlo
+                    if (searchInput && !searchInput.value) {
+                        searchInput.value = direccion;
+                    }
+                } else {
+                    console.warn("⚠️ Dirección no encontrada:", status);
+                }
+            });
+        }
+
+        // 🖱 Clic en el mapa para cambiar ubicación
+        map.addListener("click", function(event) {
+            const lat = event.latLng.lat();
+            const lng = event.latLng.lng();
+            marker.setPosition({
+                lat: lat,
+                lng: lng
+            });
+            updateInputs(lat, lng);
+            toastr.success("Ubicación actualizada. Arrastra el marcador para ajustar.");
+        });
+
+        // 📍 Arrastrar marcador
+        marker.addListener("dragend", () => {
+            const pos = marker.getPosition();
+            updateInputs(pos.lat(), pos.lng());
+            toastr.info("Ubicación ajustada. Coordenadas actualizadas.");
+        });
+
+        // 🔍 Autocompletado para búsqueda
+        if (searchInput) {
+            autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                types: ['geocode', 'establishment'],
+                componentRestrictions: { country: 'pe' } // Limitar a Perú
+            });
+            
+            autocomplete.bindTo("bounds", map);
+
+            autocomplete.addListener("place_changed", () => {
+                const place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    toastr.warning("No se encontró la ubicación. Intenta con otra dirección.");
+                    return;
+                }
+
+                const loc = place.geometry.location;
+                const direccionCompleta = place.formatted_address || "";
+                
+                // Mover mapa al lugar
+                map.panTo(loc);
+                map.setZoom(17);
+                marker.setPosition(loc);
+                
+                // Actualizar todos los campos
+                updateInputs(loc.lat(), loc.lng(), direccionCompleta);
+                
+                toastr.success("Ubicación encontrada en el mapa.");
+            });
+        }
+
+        // ✏️ Actualizar marcador cuando cambian las coordenadas manualmente
+        function updateMarker() {
+            const lat = parseFloat(latInput.value);
+            const lng = parseFloat(lngInput.value);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const newPos = {
+                    lat: lat,
+                    lng: lng
+                };
+                marker.setPosition(newPos);
+                map.setCenter(newPos);
+                getAddressFromCoords(lat, lng);
+                toastr.info("Marcador actualizado con las coordenadas ingresadas.");
+            }
+        }
+
+        if (latInput) latInput.addEventListener("change", updateMarker);
+        if (lngInput) lngInput.addEventListener("change", updateMarker);
+
+        // 🔗 Función para buscar dirección en el mapa
+        window.buscarDireccionEnMapa = function() {
+            const direccionTexto = direccionInput ? direccionInput.value.trim() : "";
+            
+            if (!direccionTexto) {
+                toastr.warning("Ingresa una dirección para buscar en el mapa.");
+                return;
+            }
+            
+            // Mostrar loading
+            if (direccionInput) direccionInput.classList.add('loading');
+            
+            geocoder.geocode({
+                'address': direccionTexto
+            }, function(results, status) {
+                if (direccionInput) direccionInput.classList.remove('loading');
+                
+                if (status === google.maps.GeocoderStatus.OK && results[0]) {
+                    const location = results[0].geometry.location;
+                    const direccionCompleta = results[0].formatted_address;
+                    
+                    // Actualizar buscador
+                    if (searchInput) searchInput.value = direccionCompleta;
+                    
+                    // Mover mapa
+                    map.setCenter(location);
+                    map.setZoom(17);
+                    marker.setPosition(location);
+                    
+                    // Actualizar campos
+                    updateInputs(location.lat(), location.lng(), direccionCompleta);
+                    
+                    toastr.success("Dirección encontrada en el mapa.");
+                } else {
+                    console.error("Error al geocodificar:", status);
+                    toastr.error("No se pudo encontrar la dirección. Intenta con una dirección más específica.");
+                }
+            });
+        };
+
+        // 🎯 Agregar botón para buscar dirección en el campo de dirección
+const direccionContainer = direccionInput ? direccionInput.parentElement : null;
+if (direccionContainer && !direccionContainer.querySelector('.search-direccion-btn')) {
+    const searchBtn = document.createElement('button');
+    searchBtn.type = 'button';
+    searchBtn.className = 'btn btn-primary px-3 py-2 search-direccion-btn flex-shrink-0';
+    searchBtn.innerHTML = '<i class="fa-solid fa-map-marker-alt"></i>';
+    searchBtn.title = 'Buscar en mapa';
+    searchBtn.onclick = window.buscarDireccionEnMapa;
+    
+    // Insertar el botón en el contenedor flex
+    direccionContainer.appendChild(searchBtn);
+}
+
+        // FUNCIÓN PARA EXTRAER COORDENADAS DE LINKS DE GOOGLE MAPS
+        function extractCoordinates(url) {
+            console.log("🔗 Procesando URL:", url);
+            
+            let lat, lng;
+            const patterns = [
+                /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/g,
+                /\/place\/.*?@(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /q=(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /\/search\/.*?@(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /maps\/(\-?\d+\.\d+),(\-?\d+\.\d+)/,
+                /\/@(-?\d+\.\d+),(-?\d+\.\d+)/,
+                /\/search\/(\-?\d+\.\d+),(\-?\d+\.\d+)/,
+                /data=.*?3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) {
+                    if (pattern.toString().includes('g')) {
+                        const allMatches = [...url.matchAll(pattern)];
+                        if (allMatches.length > 0) {
+                            const lastMatch = allMatches[allMatches.length - 1];
+                            lat = parseFloat(lastMatch[1]);
+                            lng = parseFloat(lastMatch[2]);
+                        }
+                    } else {
+                        lat = parseFloat(match[1]);
+                        lng = parseFloat(match[2]);
+                    }
+                    
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        console.log("✅ Coordenadas extraídas:", lat, lng);
+                        break;
+                    }
+                }
+            }
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+                marker.setPosition({ lat, lng });
+                map.setCenter({ lat, lng });
+                updateInputs(lat, lng);
+                return true;
+            } else {
+                console.warn("⚠️ No se pudieron extraer coordenadas del link");
+                toastr.warning("No se pudieron extraer coordenadas del link. Verifica que sea un link válido de Google Maps.");
+                return false;
+            }
+        }
+
+        // PROCESAR LINK CUANDO CAMBIA
+        if (linkInput) {
+            linkInput.addEventListener("change", () => {
+                const link = linkInput.value.trim();
+                if (!link) return;
+                
+                linkInput.classList.add('loading');
+                
+                if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps")) {
+                    expandShortURL(link);
+                } else {
+                    extractCoordinates(link);
+                }
+                
+                setTimeout(() => {
+                    linkInput.classList.remove('loading');
+                }, 1000);
+            });
+            
+            linkInput.addEventListener("paste", (e) => {
+                setTimeout(() => {
+                    const link = linkInput.value.trim();
+                    if (link) {
+                        linkInput.classList.add('loading');
+                        if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps")) {
+                            expandShortURL(link);
+                        } else {
+                            extractCoordinates(link);
+                        }
+                        setTimeout(() => {
+                            linkInput.classList.remove('loading');
+                        }, 1000);
+                    }
+                }, 100);
+            });
+        }
+
+        // Inicializar con coordenadas actuales
+        if (latInput && latInput.value && lngInput && lngInput.value) {
+            updateMarker();
+        } else {
+            updateInputs(initialLat, initialLng);
+        }
+        
+        console.log("✅ Mapa inicializado correctamente");
+    }
+
+    // Función para expandir URL corta
+    async function expandShortURL(shortURL) {
+        try {
+            const response = await fetch(`/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.expanded_url) {
+                    extractCoordinates(data.expanded_url);
+                    return;
+                }
+            }
+            
+            // Fallback
+            if (!extractCoordinates(shortURL)) {
+                toastr.warning("No se pudo procesar el link corto. Intenta con el link completo de Google Maps.");
+            }
+        } catch (error) {
+            console.error("❌ Error al expandir URL:", error);
+            if (!extractCoordinates(shortURL)) {
+                toastr.error("Error al procesar el link. Intenta con el link completo de Google Maps.");
+            }
+        }
+    }
+
+    // Manejar error de Google Maps
+    window.gm_authFailure = function() {
+        console.error("Error de autenticación de Google Maps");
+        const mapContainer = document.getElementById("map");
+        if (mapContainer) {
+            mapContainer.innerHTML = `
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <strong>Error:</strong> No se pudo cargar Google Maps. Verifica tu API Key.
+                    <p class="mt-2">Coordenadas actuales: 
+                        <span id="currentLat">${document.getElementById('latitud')?.value || 'N/A'}</span>, 
+                        <span id="currentLng">${document.getElementById('longitud')?.value || 'N/A'}</span>
+                    </p>
+                </div>
+            `;
+        }
+    };
+</script>
+
+<style>
+    .loading {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z' opacity='.5'/%3E%3Cpath d='M12 2a10 10 0 0 0-10 10h2a8 8 0 0 1 8-8z'%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='1s' repeatCount='indefinite'/%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 20px 20px;
+    }
+    
+    #map {
+        min-height: 400px;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+    }
+</style>
 
 
 <script>
@@ -1996,6 +2477,9 @@
                 fechaCreacion: $('input[name="fechaCreacion"]').val(), // <--- Aquí la agregas
                 fallaReportada: $('textarea[name="fallaReportada"]').val(),
                 erma: $('input[name="erma"]').val(),
+                linkubicacion: $('input[name="linkubicacion"]').val(),
+                lat: $('input[name="lat"]').val(),
+                lng: $('input[name="lng"]').val()
             };
 
             // Mostrar los datos del formulario en la consola

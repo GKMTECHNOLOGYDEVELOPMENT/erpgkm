@@ -169,13 +169,13 @@ class OrdenesTrabajoController extends Controller
     public function storesmart(Request $request)
     {
         try {
-            Log::info('Inicio de la creación de orden de trabajo', ['data' => $request->all()]);
-            // Manejar los checkboxes para que siempre estén presentes
+            Log::info('Inicio de la creaciÃ³n de orden de trabajo', ['data' => $request->all()]);
+            // Manejar los checkboxes para que siempre estÃ©n presentes
             $request->merge([
                 'evaluaciontienda' => $request->has('evaluaciontienda') ? 1 : 0,
             ]);
 
-            // Validación de los datos
+            // ValidaciÃ³n de los datos
             $validatedData = $request->validate([
                 'nroTicket' => 'required|string|max:255|unique:tickets,numero_ticket',
                 'idClienteGeneral' => 'required|integer|exists:clientegeneral,idClienteGeneral',
@@ -196,17 +196,17 @@ class OrdenesTrabajoController extends Controller
 
             Log::info('Datos validados correctamente', ['validatedData' => $validatedData]);
 
-            // Verificar si el cliente no es una tienda y se proporcionó un nombre de tienda
+            // Verificar si el cliente no es una tienda y se proporcionÃ³ un nombre de tienda
             $tiendaId = $validatedData['idTienda'];
 
-            // Si no hay idTienda, significa que se está creando una tienda
+            // Si no hay idTienda, significa que se estÃ¡ creando una tienda
             if (!$tiendaId && $request->has('nombreTienda') && $request->input('nombreTienda') !== "") {
                 // Crear la tienda con los datos proporcionados
                 $tienda = Tienda::create([
                     'nombre' => $request->input('nombreTienda'),
                 ]);
 
-                $tiendaId = $tienda->idTienda; // Guardar el ID de la tienda recién creada
+                $tiendaId = $tienda->idTienda; // Guardar el ID de la tienda reciÃ©n creada
                 Log::info('Tienda creada', ['tienda' => $tienda]);
             }
 
@@ -238,26 +238,26 @@ class OrdenesTrabajoController extends Controller
 
             Log::info('Orden de trabajo creada correctamente', ['ticket' => $ticket]);
 
-            // Verificar si el checkbox "Entrega a Lab" está marcado
+            // Verificar si el checkbox "Entrega a Lab" estÃ¡ marcado
             if ($request->has('entregaLab') && $request->input('entregaLab') === 'on') {
-                // Si "Entrega a Lab" está marcado, solo se crea la visita y su flujo relacionado
+                // Si "Entrega a Lab" estÃ¡ marcado, solo se crea la visita y su flujo relacionado
 
                 // Crear la visita
                 $visita = Visita::create([
                     'nombre' => 'Laboratorio',  // El nombre de la visita
                     'fecha_programada' => now(),  // Fecha y hora programada: ahora
-                    'fecha_asignada' => now(),    // Fecha de asignación: ahora
+                    'fecha_asignada' => now(),    // Fecha de asignaciÃ³n: ahora
                     'fechas_desplazamiento' => null, // Asumimos que este campo puede ser null
                     'fecha_llegada' => null,  // Asumimos que este campo puede ser null
                     'fecha_inicio' => null,  // El campo 'fecha_inicio' debe ser null
                     'fecha_final' => null,  // El campo 'fecha_final' debe ser null
-                    'estado' => 1,  // Estado inicial (puedes ajustarlo según sea necesario)
+                    'estado' => 1,  // Estado inicial (puedes ajustarlo segÃºn sea necesario)
                     'idTickets' => $ticket->idTickets,  // El ID del ticket relacionado
-                    'idUsuario' => $this->obtenerIdUsuario(),  // Llamar a la función para obtener el idUsuario correcto
+                    'idUsuario' => $this->obtenerIdUsuario(),  // Llamar a la funciÃ³n para obtener el idUsuario correcto
                     'fecha_inicio_hora' => null,  // Este campo puede ser null
                     'fecha_final_hora' => null,  // Este campo puede ser null
                     'necesita_apoyo' => 0,  // Necesita apoyo (por defecto se establece en 0)
-                    'tipoServicio' => 7,  // Tipo de servicio es 7, según lo solicitado
+                    'tipoServicio' => 7,  // Tipo de servicio es 7, segÃºn lo solicitado
                 ]);
 
                 Log::info('Visita creada correctamente para laboratorio', ['visita' => $visita]);
@@ -281,7 +281,7 @@ class OrdenesTrabajoController extends Controller
 
                 Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
             } else {
-                // Si "Entrega a Lab" no está marcado, se maneja el flujo "es recojo"
+                // Si "Entrega a Lab" no estÃ¡ marcado, se maneja el flujo "es recojo"
                 $estadoFlujo = $request->has('esRecojo') && $request->input('esRecojo') === 'on' ? 8 : 1;
 
                 $ticketFlujoId = DB::table('ticketflujo')->insertGetId([
@@ -303,19 +303,21 @@ class OrdenesTrabajoController extends Controller
                 Log::info('Ticket actualizado con idTicketFlujo', ['ticket' => $ticket]);
             }
 
-            // Redirigir a la vista de edición del ticket con el ID del ticket recién creado
+            // Redirigir a la vista de ediciÃ³n del ticket con el ID del ticket reciÃ©n creado
             return redirect()->route('ordenes.edit', ['id' => $ticket->idTickets])
                 ->with('success', 'Orden de trabajo creada correctamente.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // En caso de error en la validación
-            Log::error('Errores de validación', ['errors' => $e->errors()]);
+            // En caso de error en la validaciÃ³n
+            Log::error('Errores de validaciÃ³n', ['errors' => $e->errors()]);
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             // En caso de cualquier otro error
             Log::error('Error al crear la orden de trabajo', ['exception' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Ocurrió un error al crear la orden de trabajo.');
+            return redirect()->back()->with('error', 'OcurriÃ³ un error al crear la orden de trabajo.');
         }
     }
+
+
 
 
     /**
@@ -1599,6 +1601,9 @@ class OrdenesTrabajoController extends Controller
             'fechaCreacion' => 'required|date_format:Y-m-d H:i:s',
             'fallaReportada' => 'nullable|string',
             'erma' => 'nullable|string|max:255',
+            'linkubicacion' => 'nullable|string|max:500',
+            'lat' => 'nullable|string|max:50',
+            'lng' => 'nullable|string|max:50',
         ]);
 
         // Encontrar la orden y actualizarla
@@ -1619,6 +1624,9 @@ class OrdenesTrabajoController extends Controller
         $orden->fecha_creacion = $request->fechaCreacion;
         $orden->fallaReportada = $request->fallaReportada;
         $orden->erma = $request->erma;
+        $orden->linkubicacion = $request->linkubicacion;
+        $orden->lat = $request->lat;
+        $orden->lng = $request->lng;
 
 
         // Guardar los cambios

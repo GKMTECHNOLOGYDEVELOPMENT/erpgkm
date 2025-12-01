@@ -31,7 +31,9 @@
         {{ Js::from($articulos) }},
         {{ Js::from($cotizacionesAprobadas) }},
         {{ Js::from($cotizacionActual) }},
-        {{ Js::from($productosCotizacion) }}
+        {{ Js::from($productosCotizacion) }},
+        {{ Js::from($areas) }},
+        {{ Js::from($usuarios) }}
     )" 
          class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
         <div class="container mx-auto px-4 w-full">
@@ -442,6 +444,51 @@
                         </div>
 
                         <div class="p-6">
+                            <!-- Nuevos campos: Área Destino y Usuario Destino -->
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                                <!-- Área Destino -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-building text-green-500 mr-2"></i>
+                                        Área Destino
+                                    </label>
+                                    <select x-model="orderInfo.areaDestino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white">
+                                        <option value="">Seleccione un área...</option>
+                                        <template x-for="area in areas" :key="area.idTipoArea">
+                                            <option :value="area.idTipoArea" x-text="area.nombre"></option>
+                                        </template>
+                                    </select>
+                                    <div class="text-xs text-gray-500 mt-2 flex items-center">
+                                        <i class="fas fa-info-circle text-green-400 mr-1"></i>
+                                        Área donde se utilizarán los artículos
+                                    </div>
+                                </div>
+
+                                <!-- Usuario Destino -->
+                                <div>
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-user text-purple-500 mr-2"></i>
+                                        Usuario Destino
+                                    </label>
+                                    <select x-model="orderInfo.usuarioDestino" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-white">
+                                        <option value="">Seleccione un usuario...</option>
+                                        <template x-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
+                                            <option :value="usuario.idUsuario" 
+                                                    x-text="`${usuario.Nombre} ${usuario.apellidoPaterno} ${usuario.apellidoMaterno || ''}`">
+                                            </option>
+                                        </template>
+                                    </select>
+                                    <div x-show="orderInfo.areaDestino && usuariosFiltrados.length === 0" class="text-yellow-600 text-sm mt-2 flex items-center">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        No hay usuarios disponibles en esta área
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2 flex items-center">
+                                        <i class="fas fa-info-circle text-purple-400 mr-1"></i>
+                                        Usuario que recibirá los artículos
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <!-- Tipo de Servicio -->
                                 <div>
@@ -575,6 +622,21 @@
                         </div>
                     </div>
 
+                    <!-- Información de Destino -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100" x-show="orderInfo.areaDestino || orderInfo.usuarioDestino">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Información de Destino</h3>
+                        <div class="space-y-4">
+                            <div x-show="orderInfo.areaDestino" class="flex justify-between items-center py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium">Área Destino</span>
+                                <span class="text-sm font-semibold text-green-700 text-right" x-text="getAreaNombre(orderInfo.areaDestino)"></span>
+                            </div>
+                            <div x-show="orderInfo.usuarioDestino" class="flex justify-between items-center py-3">
+                                <span class="text-gray-700 font-medium">Usuario Destino</span>
+                                <span class="text-sm font-semibold text-purple-700 text-right" x-text="getUsuarioNombre(orderInfo.usuarioDestino)"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Acciones Rápidas -->
                     <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
                         <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
@@ -682,7 +744,9 @@
                 articulos,
                 cotizacionesAprobadas,
                 cotizacionActual,
-                productosCotizacion
+                productosCotizacion,
+                areas,
+                usuarios
             ) => ({
                 // Estado de la aplicación
                 currentDate: '',
@@ -697,7 +761,9 @@
                     tipoServicio: solicitud.tiposervicio || 'solicitud_articulo',
                     urgencia: solicitud.urgencia || '',
                     observaciones: solicitud.observaciones || '',
-                    fechaRequerida: solicitud.fecharequerida ? solicitud.fecharequerida.split(' ')[0] : ''
+                    fechaRequerida: solicitud.fecharequerida ? solicitud.fecharequerida.split(' ')[0] : '',
+                    areaDestino: solicitud.id_area_destino || '',
+                    usuarioDestino: solicitud.id_usuario_destino || ''
                 },
                 notification: {
                     show: false,
@@ -708,6 +774,11 @@
                 minDate: '',
                 isUpdatingSolicitud: false,
                 articulos: articulos,
+
+                // Nuevas variables para áreas y usuarios
+                areas: areas,
+                usuarios: usuarios,
+                usuariosFiltrados: [],
 
                 // Variables para cotizaciones
                 cotizacionesAprobadas: cotizacionesAprobadas,
@@ -762,7 +833,9 @@
                     return this.products.length > 0 && 
                            this.orderInfo.tipoServicio && 
                            this.orderInfo.urgencia &&
-                           this.orderInfo.fechaRequerida;
+                           this.orderInfo.fechaRequerida &&
+                           this.orderInfo.areaDestino &&
+                           this.orderInfo.usuarioDestino;
                 },
 
                 // Métodos
@@ -779,10 +852,39 @@
                     // Cargar productos actuales
                     this.loadExistingProducts();
 
+                    // Filtrar usuarios basado en el área destino actual
+                    this.filtrarUsuariosPorArea(this.orderInfo.areaDestino);
+
                     this.$nextTick(() => {
                         this.initSelect2();
                         this.initFlatpickr();
                     });
+
+                    // Watch para cambios en área destino
+                    this.$watch('orderInfo.areaDestino', (value) => {
+                        this.filtrarUsuariosPorArea(value);
+                    });
+                },
+
+                filtrarUsuariosPorArea(areaId) {
+                    if (!areaId) {
+                        this.usuariosFiltrados = [];
+                        return;
+                    }
+                    
+                    this.usuariosFiltrados = this.usuarios.filter(usuario => 
+                        usuario.idTipoArea == areaId
+                    );
+                },
+
+                getAreaNombre(areaId) {
+                    const area = this.areas.find(a => a.idTipoArea == areaId);
+                    return area ? area.nombre : 'No especificado';
+                },
+
+                getUsuarioNombre(usuarioId) {
+                    const usuario = this.usuarios.find(u => u.idUsuario == usuarioId);
+                    return usuario ? `${usuario.Nombre} ${usuario.apellidoPaterno}` : 'No especificado';
                 },
 
                 loadExistingProducts() {
