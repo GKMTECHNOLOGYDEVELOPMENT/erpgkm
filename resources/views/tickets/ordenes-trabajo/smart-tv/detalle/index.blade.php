@@ -874,23 +874,26 @@
         geocoder = new google.maps.Geocoder();
 
         // 🔄 Función para actualizar todos los campos
-        function updateInputs(lat, lng, direccion = "") {
-            if (latInput) latInput.value = lat.toFixed(6);
-            if (lngInput) lngInput.value = lng.toFixed(6);
-            if (linkInput) linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
-            
-            // Actualizar dirección solo si se proporciona y el campo está vacío
-            if (direccionInput && direccion) {
-                // Solo actualizar si está vacío o si el usuario confirma
-                if (!direccionInput.value || direccionInput.value.trim() === "" || 
-                    confirm("¿Desea actualizar la dirección con la ubicación del mapa?")) {
-                    direccionInput.value = direccion;
-                }
-            }
-            
-            // Obtener dirección completa desde coordenadas
-            getAddressFromCoords(lat, lng);
+       // 🔄 Función para actualizar todos los campos
+function updateInputs(lat, lng, direccion = "") {
+    if (latInput) latInput.value = lat.toFixed(6);
+    if (lngInput) lngInput.value = lng.toFixed(6);
+    if (linkInput) linkInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+    
+    // Actualizar dirección solo si se proporciona y el campo está vacío
+    if (direccionInput && direccion) {
+        // Solo actualizar si está vacío o mostramos un toast de confirmación
+        if (!direccionInput.value || direccionInput.value.trim() === "") {
+            direccionInput.value = direccion;
+        } else {
+            // Mostrar toast informativo en lugar de confirm
+            toastr.info("La dirección actual será conservada. Si deseas cambiarla, actualízala manualmente.");
         }
+    }
+    
+    // Obtener dirección completa desde coordenadas
+    getAddressFromCoords(lat, lng);
+}
 
         // 🔁 Obtener dirección desde coordenadas
         function getAddressFromCoords(lat, lng) {
