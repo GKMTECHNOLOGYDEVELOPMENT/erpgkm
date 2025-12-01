@@ -83,22 +83,6 @@
             <div class="md:flex md:justify-between md:items-center mb-5 gap-3">
                 <h2 class="text-lg font-bold">CONFIGURACIÓN</h2>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('unity.racks.modelo.create') }}"
-                        class="btn btn-primary btn-sm whitespace-nowrap">
-                        Crear modelo Rack
-                    </a>
-
-                    <a href="{{ route('unity.racks.asignar.index') }}"
-                        class="btn btn-outline-primary btn-sm whitespace-nowrap">
-                        Asignar Rack
-                    </a>
-
-                    <a href="{{ route('unity.cajas.create') }}"
-                        class="btn btn-success btn-sm whitespace-nowrap">
-                        Creación de Cajas
-                    </a>
-                </div>
             </div>
 
 
