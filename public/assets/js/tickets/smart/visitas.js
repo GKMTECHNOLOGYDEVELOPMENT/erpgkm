@@ -105,16 +105,16 @@ fetch(`/api/obtenerVisitas/${ticketId}`)
         visitaCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#e3e7fc]';
         
         // Botón Ver Imagen (SOLO SI TIENE PERMISO)
-        const viewImageButtonHtml = window.permisosVisitas.puedeVerImagenVisita && visita.tipoServicio !== 7 ? 
-          `<div class="flex justify-center mt-2">
-            <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
-                    id="viewImageButton-${visita.idVisitas}" 
-                    data-image-type="visita"
-                    data-id="${visita.idVisitas}"
-                    title="Ver imagen">
-              <i class="fa-solid fa-image text-sm sm:text-base"></i>
-            </button>
-          </div>` : '';
+        const viewImageButtonHtml = window.permisosVisitas.puedeVerImagenVisita ? 
+  `<div class="flex justify-center mt-2">
+    <button class="badge bg-primary text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
+            id="viewImageButton-${visita.idVisitas}" 
+            data-image-type="visita"
+            data-id="${visita.idVisitas}"
+            title="Ver imagen">
+      <i class="fa-solid fa-image text-sm sm:text-base"></i>
+    </button>
+  </div>` : '';
 
         visitaCard.innerHTML = `
           <div class="px-4 py-3 rounded-lg flex flex-col space-y-4">
@@ -455,7 +455,7 @@ visitaCard.appendChild(detailsButton);
         tecnicoCard.className = 'rounded-lg shadow-md p-4 w-full sm:max-w-md mx-auto bg-[#deeffd]';
         
         // Botón Iniciar Desplazamiento (SOLO SI TIENE PERMISO)
-        const iniciarDesplazamientoHtml = window.permisosVisitas.puedeIniciarDesplazamiento && visita.tipoServicio !== 7 ? 
+const iniciarDesplazamientoHtml = window.permisosVisitas.puedeIniciarDesplazamiento ? 
           `<div class="flex justify-center mt-2">
             <button class="badge bg-info text-white px-2 py-1 sm:px-3 sm:py-1.5 rounded-full shadow-md transition-all duration-200 flex items-center gap-1 sm:gap-2 !bg-blue-600 !text-white text-xs sm:text-sm"
                       id="likeButton-${visita.idVisitas}" style="display: ${visita.tipoServicio === 7 ? 'none' : 'block'};">

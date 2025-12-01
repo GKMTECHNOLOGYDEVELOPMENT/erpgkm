@@ -1888,7 +1888,6 @@
             @endif
 
 
-            @if(PermisoHelper::tienePermiso('VER PERMISOS'))
 
           <h2
         class="py-3 px-7 flex items-center uppercase font-extrabold bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] -mx-4 mb-1">
@@ -1921,7 +1920,6 @@
             </div>
         </a>
     </li>
-    @endif
 
 
 
