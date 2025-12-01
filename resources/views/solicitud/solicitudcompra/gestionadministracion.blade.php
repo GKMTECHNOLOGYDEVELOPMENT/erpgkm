@@ -38,17 +38,19 @@
         <div class="bg-white rounded-lg shadow-md p-4 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                    <select
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Todos los estados</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="aprobada">Aprobada</option>
-                        <option value="rechazada">Rechazada</option>
-                        <option value="en_proceso">En Proceso</option>
-                        <option value="completada">Completada</option>
-                        <option value="cancelada">Cancelada</option>
-                    </select>
+                       <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+            <select name="estado" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="">Todos los estados</option>
+                <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                <option value="aprobada" {{ request('estado') == 'aprobada' ? 'selected' : '' }}>Aprobada</option>
+                <option value="rechazada" {{ request('estado') == 'rechazada' ? 'selected' : '' }}>Rechazada</option>
+                <option value="en_proceso" {{ request('estado') == 'en_proceso' ? 'selected' : '' }}>En Proceso</option>
+                <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
+                <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                <option value="presupuesto_aprobado" {{ request('estado') == 'presupuesto_aprobado' ? 'selected' : '' }}>Presupuesto Aprobado</option>
+                <option value="pagado" {{ request('estado') == 'pagado' ? 'selected' : '' }}>Pagado</option>
+                <option value="finalizado" {{ request('estado') == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
+            </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>

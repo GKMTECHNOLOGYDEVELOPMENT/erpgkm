@@ -953,35 +953,55 @@ class SolicitudcompraController extends Controller
 
 
 
-    public function gestionadministracion()
-    {
-        $solicitudes = SolicitudCompra::with([
-            'detalles.moneda',
-            'detalles' => function ($query) {
-                $query->select(
-                    'idSolicitudCompraDetalle',
-                    'idSolicitudCompra',
-                    'descripcion_producto',
-                    'cantidad',
-                    'unidad',
-                    'precio_unitario_estimado',
-                    'idMonedas'
-                );
-            }
-        ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+public function gestionadministracion()
+{
+    $query = SolicitudCompra::with([
+        'detalles.moneda',
+        'detalles' => function ($query) {
+            $query->select(
+                'idSolicitudCompraDetalle',
+                'idSolicitudCompra',
+                'descripcion_producto',
+                'cantidad',
+                'unidad',
+                'precio_unitario_estimado',
+                'idMonedas'
+            );
+        }
+    ]);
 
-        // Procesar los datos aquí
-        $solicitudes->getCollection()->transform(function ($solicitud) {
-            $solicitud->resumen_moneda = $this->getResumenMoneda($solicitud);
-            $solicitud->multiple_currencies = $this->hasMultipleCurrencies($solicitud);
-            $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
-            return $solicitud;
-        });
-
-        return view('solicitud.solicitudcompra.gestionadministracion', compact('solicitudes'));
+    // Filtrar por estado si se proporciona
+    if (request()->has('estado') && request('estado') != '') {
+        $query->where('estado', request('estado'));
     }
+
+    // Filtrar por prioridad si se proporciona
+    if (request()->has('prioridad') && request('prioridad') != '') {
+        $query->where('idPrioridad', request('prioridad'));
+    }
+
+    // Filtrar por fecha desde
+    if (request()->has('fecha_desde') && request('fecha_desde') != '') {
+        $query->whereDate('created_at', '>=', request('fecha_desde'));
+    }
+
+    // Filtrar por fecha hasta
+    if (request()->has('fecha_hasta') && request('fecha_hasta') != '') {
+        $query->whereDate('created_at', '<=', request('fecha_hasta'));
+    }
+
+    $solicitudes = $query->orderBy('created_at', 'desc')->paginate(12);
+
+    // Procesar los datos aquí
+    $solicitudes->getCollection()->transform(function ($solicitud) {
+        $solicitud->resumen_moneda = $this->getResumenMoneda($solicitud);
+        $solicitud->multiple_currencies = $this->hasMultipleCurrencies($solicitud);
+        $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
+        return $solicitud;
+    });
+
+    return view('solicitud.solicitudcompra.gestionadministracion', compact('solicitudes'));
+}
 
     private function getResumenMoneda($solicitud)
     {
