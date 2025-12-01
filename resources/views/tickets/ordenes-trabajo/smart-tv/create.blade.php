@@ -879,7 +879,7 @@
             async function expandShortURL(shortURL) {
                 try {
                     const response = await fetch(
-                        `https://beyritech.com/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                        `https://erp.beyritech.com/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
                     const data = await response.json();
                     if (data.expanded_url) {
                         extractCoordinates(data.expanded_url);
@@ -901,11 +901,6 @@
             // Primera carga
             updateInputs(initialLat, initialLng);
         }
-
-        //     // ✅ Select2 personalizado
-        //     document.querySelectorAll('.select2').forEach(function (select) {
-        //     NiceSelect.bind(select, { searchable: true });
-        // });
     </script>
     <script>
         // document.addEventListener("DOMContentLoaded", function() {

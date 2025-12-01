@@ -649,7 +649,7 @@
             </ul>
             </li> --}}
 
-            {{-- ELEMENTS
+            ELEMENTS
 
             <li class="menu nav-item">
                 <button type="button" class="nav-link group"
@@ -736,7 +736,7 @@
             </li>
 
 
-             --}}
+            
 
              {{-- CHARTS 
             <li class="menu nav-item">
