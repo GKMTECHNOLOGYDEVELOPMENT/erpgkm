@@ -60,15 +60,8 @@ class OrdenesHelpdeskController extends Controller
         $marcas = Marca::all();
         $modelos = Modelo::all();
 
-        // Determinar la carpeta de vistas según el rol
-        $carpetaVista = match ($rol) {
-            'COORDINACION SMART' => 'smart-tv',
-            'COORDINACION HELP DESK' => 'helpdesk',
-            'INVITADO' => 'invitado',
-            default => '',
-        };
 
-        if ($carpetaVista) {
+
             return view("tickets.ordenes-trabajo.helpdesk.index", compact(
                 'clientesGenerales',
                 'tiposServicio',
@@ -79,9 +72,7 @@ class OrdenesHelpdeskController extends Controller
                 'marcas',
                 'modelos'
             ));
-        } else {
-            abort(403, 'No tienes permiso para acceder a esta vista.');
-        }
+        
     }
 
     // Cargar la vista de creación según el rol del usuario

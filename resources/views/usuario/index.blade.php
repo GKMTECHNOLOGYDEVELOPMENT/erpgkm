@@ -151,6 +151,7 @@
                         <th>Tipo Documento</th>
                         <th>Documento</th>
                         <th>Teléfono</th>
+                        <th>Nombre de Usuario</th>
                         <th>Email</th>
                         <th>Tipo Usuario</th>
                         <th>Rol</th>

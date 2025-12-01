@@ -29,6 +29,7 @@ document.addEventListener('alpine:init', () => {
                     { data: 'tipoDocumento', className: 'text-center' },
                     { data: 'documento', className: 'text-center' },
                     { data: 'telefono', className: 'text-center' },
+                    { data: 'usuario', className: 'text-center' },
                     { data: 'correo', className: 'text-center' },
                     { data: 'tipoUsuario', className: 'text-center' },
                     { data: 'rol', className: 'text-center' },
