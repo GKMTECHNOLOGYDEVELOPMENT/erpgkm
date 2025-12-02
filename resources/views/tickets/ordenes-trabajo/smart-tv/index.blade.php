@@ -345,7 +345,7 @@
     <script>
     window.permisosSmart = {
         puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR ORDEN DE TRABAJO SMART') ? 'true' : 'false' }},
-        puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO SMART ') ? 'true' : 'false' }}
+        puedeVerPDF: {{ \App\Helpers\PermisoHelper::tienePermiso('VER PDF ORDEN DE TRABAJO SMART') ? 'true' : 'false' }}
     };
 </script>
 
