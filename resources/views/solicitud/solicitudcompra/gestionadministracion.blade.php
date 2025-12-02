@@ -1,4 +1,14 @@
 <x-layout.default>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .flatpickr-wrapper {
+            display: block !important;
+            /* Cambiar inline-block por block */
+            width: 100% !important;
+            /* Asegurar que ocupe todo el ancho */
+        }
+    </style>
     <div class="mx-auto w-full px-4 py-6">
         <div class="mb-4">
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -34,41 +44,119 @@
             </div>
         </div>
 
-        <!-- Filtros -->
-        <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                       <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-            <select name="estado" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                <option value="">Todos los estados</option>
-                <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                <option value="aprobada" {{ request('estado') == 'aprobada' ? 'selected' : '' }}>Aprobada</option>
-                <option value="rechazada" {{ request('estado') == 'rechazada' ? 'selected' : '' }}>Rechazada</option>
-                <option value="en_proceso" {{ request('estado') == 'en_proceso' ? 'selected' : '' }}>En Proceso</option>
-                <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
-                <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
-                <option value="presupuesto_aprobado" {{ request('estado') == 'presupuesto_aprobado' ? 'selected' : '' }}>Presupuesto Aprobado</option>
-                <option value="pagado" {{ request('estado') == 'pagado' ? 'selected' : '' }}>Pagado</option>
-                <option value="finalizado" {{ request('estado') == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
-            </select>
+        <!-- Filtros con AJAX - VERSIÓN MEJORADA Y LIMPIA -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+            <!-- Título de la sección con botón de limpiar -->
+            <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-3">
+                <div class="flex-1">
+                    <h3 class="text-lg font-semibold text-gray-800">Filtrar Solicitudes</h3>
+                    <p class="text-sm text-gray-500 mt-1">Selecciona los criterios de búsqueda</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
-                    <select
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        <option value="">Todas las prioridades</option>
-                        <!-- Aquí irían las opciones de prioridad -->
+
+                <!-- Botón de limpiar en el header -->
+                <div class="flex items-center space-x-3">
+                    <button type="button" onclick="limpiarFiltros()"
+                        class="inline-flex items-center px-3.5 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-all duration-200 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1">
+                        <i class="fas fa-redo mr-1.5 text-sm"></i>
+                        Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contenedor de filtros - Ajustado para inputs más anchos -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <!-- Estado -->
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-tag mr-1.5 text-gray-400"></i>
+                        Estado
+                    </label>
+                    <select id="filtroEstado" name="estado"
+                        class="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-300 transition-all duration-200 filtro-input">
+                        <option value="">Todos</option>
+                        <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>
+                            Pendiente
+                        </option>
+                        <option value="aprobada" {{ request('estado') == 'aprobada' ? 'selected' : '' }}>
+                            Aprobada
+                        </option>
+                        <option value="rechazada" {{ request('estado') == 'rechazada' ? 'selected' : '' }}>
+                            Rechazada
+                        </option>
+                        <option value="en_proceso" {{ request('estado') == 'en_proceso' ? 'selected' : '' }}>
+                            En Proceso
+                        </option>
+                        <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>
+                            Completada
+                        </option>
+                        <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>
+                            Cancelada
+                        </option>
+                        <option value="presupuesto_aprobado"
+                            {{ request('estado') == 'presupuesto_aprobado' ? 'selected' : '' }}>
+                            Presupuesto Aprobado
+                        </option>
+                        <option value="pagado" {{ request('estado') == 'pagado' ? 'selected' : '' }}>
+                            Pagado
+                        </option>
+                        <option value="finalizado" {{ request('estado') == 'finalizado' ? 'selected' : '' }}>
+                            Finalizado
+                        </option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha desde</label>
-                    <input type="date"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+                <!-- Prioridad -->
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-exclamation-circle mr-1.5 text-gray-400"></i>
+                        Prioridad
+                    </label>
+                    <select id="filtroPrioridad" name="prioridad"
+                        class="w-full px-3 py-2.5 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-300 transition-all duration-200 filtro-input">
+                        <option value="">Todas</option>
+                        <option value="1" {{ request('prioridad') == '1' ? 'selected' : '' }}>
+                            Alta
+                        </option>
+                        <option value="2" {{ request('prioridad') == '2' ? 'selected' : '' }}>
+                            Media
+                        </option>
+                        <option value="3" {{ request('prioridad') == '3' ? 'selected' : '' }}>
+                            Baja
+                        </option>
+                    </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha hasta</label>
-                    <input type="date"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+                <!-- Fecha desde - MÁS ANCHO -->
+                <div class="space-y-1.5 lg:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-calendar-alt mr-1.5 text-gray-400"></i>
+                        Fecha desde
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="filtroFechaDesde" name="fecha_desde" placeholder="Seleccionar fecha"
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-300 transition-all duration-200 filtro-input cursor-pointer text-sm"
+                            value="{{ request('fecha_desde') }}">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fecha hasta - MÁS ANCHO -->
+                <div class="space-y-1.5 lg:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700">
+                        <i class="fas fa-calendar-check mr-1.5 text-gray-400"></i>
+                        Fecha hasta
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="filtroFechaHasta" name="fecha_hasta" placeholder="Seleccionar fecha"
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white focus:bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-300 transition-all duration-200 filtro-input cursor-pointer text-sm"
+                            value="{{ request('fecha_hasta') }}">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-calendar text-gray-400"></i>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,34 +191,30 @@
                                 <div class="flex flex-col items-end">
                                     <span
                                         class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm
-    @if ($solicitud->estado == 'pendiente') bg-warning/10 text-warning border border-warning/20
-    @elseif($solicitud->estado == 'aprobada') bg-primary/10 text-primary border border-primary/20
-    @elseif($solicitud->estado == 'rechazada') bg-danger/10 text-danger border border-danger/20
-    @elseif($solicitud->estado == 'en_proceso') bg-info/10 text-info border border-info/20
-    @elseif($solicitud->estado == 'completada') bg-success/10 text-success border border-success/20
-    @else bg-secondary/10 text-secondary border border-secondary/20 @endif">
+                @if ($solicitud->estado == 'pendiente') bg-warning/10 text-warning border border-warning/20
+                @elseif($solicitud->estado == 'en_proceso') bg-primary/10 text-primary-dark border border-primary/20
+                @elseif($solicitud->estado == 'completada') bg-secondary-light text-secondary border border-secondary
+                @elseif($solicitud->estado == 'presupuesto_aprobado') bg-yellow-100 text-yellow-800 border border-yellow-300
+                @elseif($solicitud->estado == 'pagado') bg-blue-100 text-blue-800 border border-blue-300
+                @elseif($solicitud->estado == 'finalizado') bg-gray-100 text-gray-800 border border-gray-400
+                @elseif($solicitud->estado == 'cancelada') bg-gray-100 text-gray-800 border border-gray-400
+                @elseif($solicitud->estado == 'rechazada') bg-danger/10 text-danger-dark border border-danger/20
+                @elseif($solicitud->estado == 'aprobada') bg-green-100 text-green-800 border border-green-300
+                @else bg-gray-100 text-gray-700 border border-gray-300 @endif">
+
                                         @switch($solicitud->estado)
                                             @case('pendiente')
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg class="w-3 h-3 mr-1 text-warning" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                     <path fill-rule="evenodd"
                                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
                                                         clip-rule="evenodd"></path>
                                                 </svg>
                                             @break
 
-                                            @case('aprobada')
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd"
-                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                        clip-rule="evenodd"></path>
-                                                </svg>
-                                            @break
-
                                             @case('en_proceso')
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg class="w-3 h-3 mr-1 text-primary" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                     <path fill-rule="evenodd"
                                                         d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z"
                                                         clip-rule="evenodd"></path>
@@ -138,8 +222,62 @@
                                             @break
 
                                             @case('completada')
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
+                                                <svg class="w-3 h-3 mr-1 text-secondary" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('presupuesto_aprobado')
+                                                <svg class="w-3 h-3 mr-1 text-yellow-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a1 1 0 11-2 0 1 1 0 012 0zm11-1a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V9z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('pagado')
+                                                <svg class="w-3 h-3 mr-1 text-blue-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2h6a2 2 0 002-2V6a2 2 0 00-2-2H4zm2 6a1 1 0 11-2 0 1 1 0 012 0zm11-1a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V9z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('finalizado')
+                                                <svg class="w-3 h-3 mr-1 text-gray-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('cancelada')
+                                                <svg class="w-3 h-3 mr-1 text-gray-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('rechazada')
+                                                <svg class="w-3 h-3 mr-1 text-danger" fill="currentColor" viewBox="0 0 20 20"
                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                        clip-rule="evenodd"></path>
+                                                </svg>
+                                            @break
+
+                                            @case('aprobada')
+                                                <svg class="w-3 h-3 mr-1 text-green-600" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                     <path fill-rule="evenodd"
                                                         d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                         clip-rule="evenodd"></path>
@@ -147,13 +285,14 @@
                                             @break
 
                                             @default
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"
-                                                    xmlns="http://www.w3.org/2000/svg">
+                                                <svg class="w-3 h-3 mr-1 text-gray-500" fill="currentColor"
+                                                    viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                     <path fill-rule="evenodd"
                                                         d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z"
                                                         clip-rule="evenodd"></path>
                                                 </svg>
                                         @endswitch
+
                                         {{ ucfirst(str_replace('_', ' ', $solicitud->estado)) }}
                                     </span>
                                     <span
@@ -471,50 +610,333 @@
             </div>
         @endif
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        // Función para ver detalles - REDIRIGE A EVALUACIÓN
+        // Configurar Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        // Variables para controlar el debounce
+        let timeoutId;
+        let isLoading = false;
+        let currentRequest = null;
+
+        // Variables para Flatpickr
+        let flatpickrDesde = null;
+        let flatpickrHasta = null;
+
+        // Configuración de filtros con AJAX
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar Flatpickr para fechas
+            inicializarFlatpickr();
+
+            // Añadir event listeners a todos los inputs de filtro
+            const filtros = document.querySelectorAll('.filtro-input');
+            filtros.forEach(filtro => {
+                // Para selects
+                if (filtro.tagName === 'SELECT') {
+                    filtro.addEventListener('change', function() {
+                        aplicarFiltrosConDebounce();
+                    });
+                }
+
+                // Para inputs de fecha con Flatpickr
+                if (filtro.id === 'filtroFechaDesde' || filtro.id === 'filtroFechaHasta') {
+                    // El cambio se maneja en la configuración de Flatpickr
+                }
+            });
+
+            // Función con debounce para evitar múltiples requests rápidos
+            function aplicarFiltrosConDebounce() {
+                clearTimeout(timeoutId);
+
+                // Mostrar toast de cargando
+                if (!isLoading) {
+                    toastr.info('Aplicando filtros...', 'Cargando', {
+                        timeOut: 2000
+                    });
+                }
+
+                timeoutId = setTimeout(() => {
+                    aplicarFiltrosAJAX();
+                }, 800); // 800ms de delay
+            }
+
+            function inicializarFlatpickr() {
+                // Configuración común
+                const commonOptions = {
+                    dateFormat: "Y-m-d",
+                    locale: "es",
+                    allowInput: false,
+                    clickOpens: true,
+                    static: true,
+                    disableMobile: true,
+                    // SOLO onChange
+                    onChange: function(selectedDates, dateStr, instance) {
+                        // Pequeño delay para asegurar que el valor se actualizó
+                        setTimeout(() => {
+                            if (validarFechas()) {
+                                aplicarFiltrosConDebounce();
+                            }
+                        }, 50);
+                    }
+                    // QUITAR onClose
+                };
+
+                flatpickrDesde = flatpickr("#filtroFechaDesde", commonOptions);
+                flatpickrHasta = flatpickr("#filtroFechaHasta", commonOptions);
+            }
+            // Validación de fechas - VERSIÓN SIMPLE
+            function validarFechas() {
+                const fechaDesde = document.getElementById('filtroFechaDesde');
+                const fechaHasta = document.getElementById('filtroFechaHasta');
+
+                // Solo validar si AMBAS fechas están seleccionadas
+                if (fechaDesde && fechaHasta && fechaDesde.value && fechaHasta.value) {
+                    const desde = new Date(fechaDesde.value);
+                    const hasta = new Date(fechaHasta.value);
+
+                    // Solo verificar que desde no sea mayor que hasta
+                    if (desde > hasta) {
+                        toastr.error('La fecha "desde" no puede ser mayor que la fecha "hasta"',
+                            'Error de validación');
+                        return false;
+                    }
+                }
+                return true;
+            }
+        });
+
+        // Función principal para aplicar filtros con AJAX
+        function aplicarFiltrosAJAX() {
+            if (isLoading) {
+                if (currentRequest) {
+                    currentRequest.abort();
+                }
+            }
+
+            // Obtener elementos por ID
+            const filtroEstado = document.getElementById('filtroEstado');
+            const filtroPrioridad = document.getElementById('filtroPrioridad');
+            const filtroFechaDesde = document.getElementById('filtroFechaDesde');
+            const filtroFechaHasta = document.getElementById('filtroFechaHasta');
+
+            // Verificar que los elementos existan
+            if (!filtroEstado || !filtroPrioridad || !filtroFechaDesde || !filtroFechaHasta) {
+                console.error('No se encontraron todos los elementos de filtro');
+                toastr.error('Error en los filtros', 'Error');
+                return;
+            }
+
+            // Obtener valores de los filtros
+            const filtros = {
+                estado: filtroEstado.value,
+                prioridad: filtroPrioridad.value,
+                fecha_desde: filtroFechaDesde.value,
+                fecha_hasta: filtroFechaHasta.value
+            };
+
+            // Mostrar indicador de carga
+            isLoading = true;
+            mostrarLoading(true);
+
+            // Crear URL con parámetros
+            let url = '{{ route('solicitudcompra.gestionadministracion') }}?ajax=true';
+            Object.keys(filtros).forEach(key => {
+                if (filtros[key]) {
+                    url += `&${key}=${encodeURIComponent(filtros[key])}`;
+                }
+            });
+
+            console.log('URL de filtro:', url);
+
+            // Hacer la petición AJAX con fetch (más moderno)
+            fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la respuesta del servidor');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        const container = document.getElementById('solicitudes-container');
+                        if (container) {
+                            container.innerHTML = data.html;
+
+                            // Mostrar toast de éxito solo si hubo interacción del usuario
+                            const totalFiltros = Object.values(filtros).filter(val => val).length;
+                            const urlParams = new URLSearchParams(window.location.search);
+
+                            // Si NO es la carga inicial (hay parámetros en la URL o filtros activos)
+                            if (totalFiltros > 0 || urlParams.toString() !== '') {
+                                if (totalFiltros > 0) {
+                                    toastr.success(`Filtros aplicados. Se encontraron ${data.total} solicitudes`,
+                                        'Éxito');
+                                } else {
+                                    toastr.info('Mostrando todas las solicitudes', 'Información');
+                                }
+                            }
+                            // Si es carga inicial sin filtros, NO mostrar toast
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en filtro AJAX:', error);
+                    if (error.name !== 'AbortError') {
+                        toastr.error('Error de conexión: ' + error.message, 'Error');
+                    }
+                })
+                .finally(() => {
+                    isLoading = false;
+                    mostrarLoading(false);
+                    currentRequest = null;
+                });
+        }
+
+        // Función para limpiar filtros - VERSIÓN SIMPLE
+        function limpiarFiltros() {
+            // Limpiar selects
+            document.getElementById('filtroEstado').value = '';
+            document.getElementById('filtroPrioridad').value = '';
+
+            // Limpiar Flatpickr (forma más simple)
+            if (flatpickrDesde) flatpickrDesde.clear();
+            if (flatpickrHasta) flatpickrHasta.clear();
+
+            // Mostrar mensaje y aplicar
+            toastr.info('Filtros limpiados', 'Éxito');
+            aplicarFiltrosAJAX();
+        }
+
+        // Función para mostrar/ocultar loading
+        function mostrarLoading(mostrar) {
+            const container = document.getElementById('solicitudes-container');
+            const limpiarBtn = document.querySelector('button[onclick="limpiarFiltros()"]');
+
+            if (mostrar && container) {
+                // Guardar contenido original si es la primera vez
+                if (!container.dataset.originalContent) {
+                    container.dataset.originalContent = container.innerHTML;
+                }
+
+                // Mostrar skeleton loader
+                container.innerHTML = `
+            <div class="col-span-full">
+                <div class="animate-pulse">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${Array(6).fill().map(() => `
+                                                                            <div class="bg-gray-200 rounded-xl h-96"></div>
+                                                                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+                // Deshabilitar botón
+                if (limpiarBtn) {
+                    limpiarBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Filtrando...';
+                    limpiarBtn.disabled = true;
+                }
+            } else {
+                // Habilitar botón
+                if (limpiarBtn) {
+                    limpiarBtn.innerHTML = '<i class="fas fa-redo mr-2"></i> Limpiar Filtros';
+                    limpiarBtn.disabled = false;
+                }
+            }
+        }
+
+        // Funciones para las cards
         function verDetalle(idSolicitud) {
-            console.log('Redirigiendo a evaluación de solicitud:', idSolicitud);
             window.location.href = `/solicitudcompra/${idSolicitud}/evaluacion`;
         }
 
         function aprobarSolicitud(idSolicitud) {
             if (confirm('¿Estás seguro de que deseas aprobar esta solicitud?')) {
-                console.log('Aprobar solicitud:', idSolicitud);
-                // Aquí puedes agregar lógica AJAX para aprobar
+                // Lógica AJAX para aprobar
             }
         }
 
         function rechazarSolicitud(idSolicitud) {
             const motivo = prompt('Ingrese el motivo del rechazo:');
             if (motivo !== null && motivo.trim() !== '') {
-                console.log('Rechazar solicitud:', idSolicitud, 'Motivo:', motivo);
-                // Aquí puedes agregar lógica AJAX para rechazar
+                // Lógica AJAX para rechazar
             }
         }
 
-        // Filtros dinámicos
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM cargado - funciones JavaScript disponibles');
+        // Función para seleccionar rangos de fecha comunes
+        function seleccionarRangoFechas(rango) {
+            const hoy = new Date();
+            let fechaDesde = new Date();
+            let fechaHasta = new Date();
 
-            const filtros = document.querySelectorAll('select, input[type="date"]');
-            filtros.forEach(filtro => {
-                filtro.addEventListener('change', function() {
-                    aplicarFiltros();
-                });
-            });
-        });
+            switch (rango) {
+                case 'hoy':
+                    fechaDesde = new Date(hoy);
+                    fechaHasta = new Date(hoy);
+                    break;
+                case 'ayer':
+                    fechaDesde = new Date(hoy);
+                    fechaDesde.setDate(hoy.getDate() - 1);
+                    fechaHasta = new Date(fechaDesde);
+                    break;
+                case 'esta_semana':
+                    fechaDesde = new Date(hoy);
+                    fechaDesde.setDate(hoy.getDate() - hoy.getDay()); // Domingo
+                    fechaHasta = new Date(hoy);
+                    break;
+                case 'semana_pasada':
+                    fechaHasta = new Date(hoy);
+                    fechaHasta.setDate(hoy.getDate() - hoy.getDay() - 1); // Sábado pasado
+                    fechaDesde = new Date(fechaHasta);
+                    fechaDesde.setDate(fechaDesde.getDate() - 6); // Domingo pasado
+                    break;
+                case 'este_mes':
+                    fechaDesde = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                    fechaHasta = new Date(hoy);
+                    break;
+                case 'mes_pasado':
+                    fechaDesde = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+                    fechaHasta = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+                    break;
+            }
 
-        function aplicarFiltros() {
-            console.log('Aplicando filtros...');
-            // Aquí puedes agregar la lógica para filtrar las solicitudes
-            // Puede ser mediante AJAX o recargando la página con parámetros
+            // Formatear fechas a YYYY-MM-DD
+            const formatDate = (date) => date.toISOString().split('T')[0];
+
+            // Establecer fechas en Flatpickr
+            if (flatpickrDesde) {
+                flatpickrDesde.setDate(formatDate(fechaDesde));
+            }
+            if (flatpickrHasta) {
+                flatpickrHasta.setDate(formatDate(fechaHasta));
+            }
+
+            // Aplicar filtros
+            aplicarFiltrosConDebounce();
         }
-
-        // Verificar que las funciones estén disponibles globalmente
-        console.log('verDetalle function is defined:', typeof verDetalle === 'function');
-        console.log('aprobarSolicitud function is defined:', typeof aprobarSolicitud === 'function');
-        console.log('rechazarSolicitud function is defined:', typeof rechazarSolicitud === 'function');
     </script>
 </x-layout.default>

@@ -830,7 +830,7 @@ Route::prefix('cotizacionesL')->name('cotizacionesL.')->group(function () {
 Route::prefix('solicitudcompra')->name('solicitudcompra.')->group(function () {
     Route::get('/', [SolicitudcompraController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudcompraController::class, 'create'])->name('create');
-        Route::get('/gestionadministracion', [SolicitudcompraController::class, 'gestionadministracion'])->name('gestionadministracion');
+    Route::get('/gestionadministracion', [SolicitudcompraController::class, 'gestionadministracion'])->name('gestionadministracion');
 
     Route::post('/store', [SolicitudcompraController::class, 'store'])->name('store');
     Route::get('/{id}', [SolicitudcompraController::class, 'show'])->name('show');

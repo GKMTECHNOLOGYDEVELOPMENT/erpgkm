@@ -15,6 +15,7 @@ use App\Models\CentroCosto;
 use App\Models\Moneda;
 use App\Models\Proveedore;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SolicitudcompraController extends Controller
 {
@@ -953,55 +954,132 @@ class SolicitudcompraController extends Controller
 
 
 
-public function gestionadministracion()
-{
-    $query = SolicitudCompra::with([
-        'detalles.moneda',
-        'detalles' => function ($query) {
-            $query->select(
-                'idSolicitudCompraDetalle',
-                'idSolicitudCompra',
-                'descripcion_producto',
-                'cantidad',
-                'unidad',
-                'precio_unitario_estimado',
-                'idMonedas'
-            );
+    public function gestionadministracion(Request $request)
+    {
+        try {
+            Log::info('====== FILTROS FECHAS ======');
+            Log::info('Fecha desde:', ['value' => $request->fecha_desde, 'filled' => $request->filled('fecha_desde')]);
+            Log::info('Fecha hasta:', ['value' => $request->fecha_hasta, 'filled' => $request->filled('fecha_hasta')]);
+
+            $query = SolicitudCompra::with([
+                'detalles.moneda',
+                'tipoArea',
+                'prioridad',
+                'detalles' => function ($query) {
+                    $query->select(
+                        'idSolicitudCompraDetalle',
+                        'idSolicitudCompra',
+                        'descripcion_producto',
+                        'cantidad',
+                        'unidad',
+                        'precio_unitario_estimado',
+                        'idMonedas'
+                    );
+                }
+            ]);
+
+            // Filtrar por estado si se proporciona
+            if ($request->filled('estado')) {
+                $query->where('estado', $request->estado);
+            }
+
+            // Filtrar por prioridad si se proporciona
+            if ($request->filled('prioridad')) {
+                $query->where('idPrioridad', $request->prioridad);
+            }
+
+            // Filtrar por fecha desde - DEBUG DETALLADO
+            if ($request->filled('fecha_desde')) {
+                Log::info('Aplicando filtro fecha_desde:', [
+                    'valor' => $request->fecha_desde,
+                    'tipo' => gettype($request->fecha_desde)
+                ]);
+
+                // Asegúrate de usar el campo correcto (puede ser 'fecha_creacion', 'created_at', etc.)
+                $query->whereDate('created_at', '>=', $request->fecha_desde);
+            }
+
+            // Filtrar por fecha hasta - DEBUG DETALLADO
+            if ($request->filled('fecha_hasta')) {
+                Log::info('Aplicando filtro fecha_hasta:', [
+                    'valor' => $request->fecha_hasta,
+                    'tipo' => gettype($request->fecha_hasta)
+                ]);
+
+                $query->whereDate('created_at', '<=', $request->fecha_hasta);
+            }
+
+            Log::info('Query SQL:', ['sql' => $query->toSql()]);
+            Log::info('Bindings:', ['bindings' => $query->getBindings()]);
+
+            $solicitudes = $query->orderBy('created_at', 'desc')->paginate(12);
+
+
+            // Procesar los datos aquí con manejo de errores
+            $solicitudes->getCollection()->transform(function ($solicitud) {
+                try {
+                    $solicitud->resumen_moneda = $this->getResumenMoneda($solicitud);
+                    $solicitud->multiple_currencies = $this->hasMultipleCurrencies($solicitud);
+                    $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
+                } catch (\Exception $e) {
+                    Log::error('Error procesando solicitud ID: ' . ($solicitud->id ?? 'N/A'), [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    // Valores por defecto en caso de error
+                    $solicitud->resumen_moneda = 'S/';
+                    $solicitud->multiple_currencies = false;
+                    $solicitud->monedas_utilizadas = '';
+                }
+                return $solicitud;
+            });
+
+            Log::info('Solicitudes encontradas:', ['count' => $solicitudes->count()]);
+
+            // Si es petición AJAX, devolver JSON con el HTML
+            if ($request->ajax() || $request->has('ajax')) {
+                try {
+                    $html = view('solicitud.solicitudcompra.gestionadministracion-cards', compact('solicitudes'))->render();
+
+                    return response()->json([
+                        'success' => true,
+                        'html' => $html,
+                        'total' => $solicitudes->total(),
+                        'count' => $solicitudes->count()
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Error generando HTML:', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al generar la vista: ' . $e->getMessage(),
+                        'html' => '<div class="alert alert-danger">Error al cargar los datos</div>'
+                    ], 500);
+                }
+            }
+
+            return view('solicitud.solicitudcompra.gestionadministracion', compact('solicitudes'));
+        } catch (\Exception $e) {
+            Log::error('Error en gestión administración:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request' => $request->all()
+            ]);
+
+            if ($request->ajax() || $request->has('ajax')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error interno del servidor: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->withErrors(['error' => 'Ocurrió un error al procesar la solicitud']);
         }
-    ]);
-
-    // Filtrar por estado si se proporciona
-    if (request()->has('estado') && request('estado') != '') {
-        $query->where('estado', request('estado'));
     }
-
-    // Filtrar por prioridad si se proporciona
-    if (request()->has('prioridad') && request('prioridad') != '') {
-        $query->where('idPrioridad', request('prioridad'));
-    }
-
-    // Filtrar por fecha desde
-    if (request()->has('fecha_desde') && request('fecha_desde') != '') {
-        $query->whereDate('created_at', '>=', request('fecha_desde'));
-    }
-
-    // Filtrar por fecha hasta
-    if (request()->has('fecha_hasta') && request('fecha_hasta') != '') {
-        $query->whereDate('created_at', '<=', request('fecha_hasta'));
-    }
-
-    $solicitudes = $query->orderBy('created_at', 'desc')->paginate(12);
-
-    // Procesar los datos aquí
-    $solicitudes->getCollection()->transform(function ($solicitud) {
-        $solicitud->resumen_moneda = $this->getResumenMoneda($solicitud);
-        $solicitud->multiple_currencies = $this->hasMultipleCurrencies($solicitud);
-        $solicitud->monedas_utilizadas = $this->getMonedasUtilizadas($solicitud);
-        return $solicitud;
-    });
-
-    return view('solicitud.solicitudcompra.gestionadministracion', compact('solicitudes'));
-}
 
     private function getResumenMoneda($solicitud)
     {
