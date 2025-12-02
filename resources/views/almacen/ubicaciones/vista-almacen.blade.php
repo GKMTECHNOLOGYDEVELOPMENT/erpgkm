@@ -159,9 +159,9 @@
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         @foreach ($sedes as $sede)
-                        <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
-                            {{ $sede }}
-                        </option>
+                            <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
+                                {{ $sede }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -189,48 +189,44 @@
             <div class="flex flex-wrap gap-3 items-center">
 
                 @if (\App\Helpers\PermisoHelper::tienePermiso('ETIQUETAS RACK'))
-                <button @click="toggleLabels()"
-                    :class="labels ? 'btn btn-primary' : 'btn btn-secondary'"
-                    class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
-                    <i class="fas fa-tag"></i>
-                    Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
-                </button>
+                    <button @click="toggleLabels()" :class="labels ? 'btn btn-primary' : 'btn btn-secondary'"
+                        class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition">
+                        <i class="fas fa-tag"></i>
+                        Etiquetas: <span x-text="labels ? 'ON' : 'OFF'"></span>
+                    </button>
                 @endif
 
-                @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
-                <button @click="abrirModalSeleccionRack()"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
-                    <i class="fas fa-edit"></i>
-                    Editar Dimensiones
-                </button>
+                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
+                    <button @click="abrirModalSeleccionRack()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
+                        <i class="fas fa-edit"></i>
+                        Editar Dimensiones
+                    </button>
                 @endif
 
                 @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
-                <button @click="cargarDatos()"
-                    class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
-                    <i class="fas fa-sync-alt"></i>
-                    Actualizar
-                </button>
+                    <button @click="cargarDatos()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
                 @endif
 
                 <!-- Accesos rápidos (cada uno con color distinto, nueva pestaña) -->
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('unity.racks.modelo.create') }}"
-                        target="_blank" rel="noopener noreferrer"
+                    <a href="{{ route('unity.racks.modelo.create') }}" target="_blank" rel="noopener noreferrer"
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                         <i class="fas fa-cubes"></i>
                         Crear modelo Rack
                     </a>
 
-                    <a href="{{ route('unity.racks.asignar.index') }}"
-                        target="_blank" rel="noopener noreferrer"
+                    <a href="{{ route('unity.racks.asignar.index') }}" target="_blank" rel="noopener noreferrer"
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                         <i class="fas fa-th-large"></i>
                         Asignar Rack
                     </a>
 
-                    <a href="{{ route('unity.cajas.create') }}"
-                        target="_blank" rel="noopener noreferrer"
+                    <a href="{{ route('unity.cajas.create') }}" target="_blank" rel="noopener noreferrer"
                         class="inline-flex items-center gap-2 rounded-lg bg-amber-500 text-white px-4 py-2 text-sm font-medium hover:bg-amber-600 transition">
                         <i class="fas fa-box"></i>
                         Creación de Cajas
@@ -319,7 +315,8 @@
                                 class="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
                                 <i class="fa-solid fa-warehouse text-white text-xl"></i>
                             </div>
-                            <div class="absolute -inset-2 bg-indigo-200 rounded-2xl blur-lg opacity-30 animate-ping"></div>
+                            <div class="absolute -inset-2 bg-indigo-200 rounded-2xl blur-lg opacity-30 animate-ping">
+                            </div>
                         </div>
                         <div class="relative mb-4">
                             <div class="w-12 h-12 border-4 border-indigo-200 rounded-full"></div>
@@ -382,13 +379,15 @@
                                                 <i class="fas fa-warehouse text-indigo-600"></i>
                                             </div>
                                             <div>
-                                                <div class="font-semibold text-gray-800" x-text="'Rack ' + rack.nombre">
+                                                <div class="font-semibold text-gray-800"
+                                                    x-text="'Rack ' + rack.nombre">
                                                 </div>
                                                 <div class="text-sm text-gray-600" x-text="rack.sede"></div>
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            <div class="text-sm text-gray-500" x-text="rack.filas + 'x' + rack.columnas">
+                                            <div class="text-sm text-gray-500"
+                                                x-text="rack.filas + 'x' + rack.columnas">
                                             </div>
                                             <div class="text-xs text-gray-400"
                                                 x-text="(rack.filas * rack.columnas) + ' ubicaciones'"></div>
@@ -435,11 +434,12 @@
                                     <label
                                         class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Sede
                                         *</label>
-                                    <select x-model="modalCrearRack.form.sede" required @change="sugerirSiguienteLetra()"
+                                    <select x-model="modalCrearRack.form.sede" required
+                                        @change="sugerirSiguienteLetra()"
                                         class="form-select w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20">
                                         <option value="">Seleccione una sede</option>
                                         @foreach ($sedes as $sede)
-                                        <option value="{{ $sede }}">{{ $sede }}</option>
+                                            <option value="{{ $sede }}">{{ $sede }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -459,7 +459,8 @@
 
                                 <!-- Nombre del Rack con Sugerencia Automática -->
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                         Nombre del Rack *
                                         <span x-show="modalCrearRack.sugerencia" class="text-green-600 text-xs ml-2">
                                             💡 Sugerencia: <span x-text="modalCrearRack.sugerencia"
@@ -470,8 +471,9 @@
                                         <input type="text" x-model="modalCrearRack.form.nombre" required
                                             class="form-input flex-1 rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                             placeholder="Ej: A, B, C, A1..."
-                                            :class="modalCrearRack.form.nombre && modalCrearRack.sugerencia && modalCrearRack.form
-                                            .nombre !== modalCrearRack.sugerencia ? 'border-orange-500' : ''">
+                                            :class="modalCrearRack.form.nombre && modalCrearRack.sugerencia && modalCrearRack
+                                                .form
+                                                .nombre !== modalCrearRack.sugerencia ? 'border-orange-500' : ''">
                                         <button type="button" @click="usarSugerencia()"
                                             x-show="modalCrearRack.sugerencia"
                                             class="btn btn-outline-primary whitespace-nowrap text-sm px-3 py-2">
@@ -485,7 +487,8 @@
                                         <div class="font-medium mb-1">Letras usadas en <span
                                                 x-text="modalCrearRack.form.sede" class="font-bold"></span>:</div>
                                         <div class="flex flex-wrap gap-1">
-                                            <template x-for="letra in modalCrearRack.letrasUsadas" :key="letra">
+                                            <template x-for="letra in modalCrearRack.letrasUsadas"
+                                                :key="letra">
                                                 <span class="px-2 py-1 bg-slate-200 rounded" x-text="letra"></span>
                                             </template>
                                         </div>
@@ -494,7 +497,8 @@
                                     <!-- Información de disponibilidad -->
                                     <div x-show="modalCrearRack.letrasUsadas && modalCrearRack.letrasUsadas.length > 0"
                                         class="text-xs text-slate-500 mt-1">
-                                        <span x-text="26 - modalCrearRack.letrasUsadas.length"></span> letras disponibles
+                                        <span x-text="26 - modalCrearRack.letrasUsadas.length"></span> letras
+                                        disponibles
                                         de 26
                                     </div>
                                 </div>
@@ -505,8 +509,8 @@
                                         <label
                                             class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas
                                             *</label>
-                                        <input type="number" x-model="modalCrearRack.form.filas" required min="1"
-                                            max="12"
+                                        <input type="number" x-model="modalCrearRack.form.filas" required
+                                            min="1" max="12"
                                             class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                             placeholder="Número de filas">
                                     </div>
@@ -541,7 +545,7 @@
                                     </button>
                                     <button type="submit" :disabled="modalCrearRack.loading"
                                         :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        'bg-indigo-600 hover:bg-indigo-700'"
+                                            'bg-indigo-600 hover:bg-indigo-700'"
                                         class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                         <i class="fas fa-spinner fa-spin" x-show="modalCrearRack.loading"></i>
                                         <span x-text="modalCrearRack.loading ? 'Creando...' : 'Crear Rack'"></span>
@@ -554,9 +558,11 @@
             </div>
 
             <!-- Modal para Editar Dimensiones del Rack -->
-            <div x-show="modalEditarDimensiones.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            <div x-show="modalEditarDimensiones.open"
+                class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
                 :class="modalEditarDimensiones.open && '!block'">
-                <div class="flex items-start justify-center min-h-screen px-4" @click="cerrarModalEditarDimensiones()">
+                <div class="flex items-start justify-center min-h-screen px-4"
+                    @click="cerrarModalEditarDimensiones()">
                     <div x-show="modalEditarDimensiones.open" x-transition x-transition.duration.300
                         class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg" @click.stop>
                         <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
@@ -597,7 +603,8 @@
 
                                 <!-- Tipo de Rack -->
                                 <div>
-                                    <label class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
+                                    <label
+                                        class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">
                                         Tipo de Rack
                                         <span x-show="!modalEditarDimensiones.puedeCambiarTipo"
                                             class="text-amber-600 text-xs ml-2">
@@ -657,18 +664,20 @@
                                         class="btn btn-outline-danger">
                                         Cancelar
                                     </button>
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR DIMENSIONES RACK'))
-                                    <button type="submit"
-                                        :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
-                                        :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                        (!modalEditarDimensiones.puedeActualizar ? 'bg-gray-400 cursor-not-allowed' :
-                                            'bg-indigo-600 hover:bg-indigo-700')"
-                                        class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                                        <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
-                                        <span
-                                            x-text="modalEditarDimensiones.loading ? 'Actualizando...' :
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR DIMENSIONES RACK'))
+                                        <button type="submit"
+                                            :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
+                                            :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
+                                                (!modalEditarDimensiones.puedeActualizar ?
+                                                    'bg-gray-400 cursor-not-allowed' :
+                                                    'bg-indigo-600 hover:bg-indigo-700')"
+                                            class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                                            <i class="fas fa-spinner fa-spin"
+                                                x-show="modalEditarDimensiones.loading"></i>
+                                            <span
+                                                x-text="modalEditarDimensiones.loading ? 'Actualizando...' :
                                         (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
-                                    </button>
+                                        </button>
                                     @endif
                                 </div>
                             </form>
@@ -1170,17 +1179,44 @@
                         return colors[piso] || '#f3f4f6';
                     },
 
-                    // ✅ NUEVAS FUNCIONES PARA ESTADOS
-                    getIconByCantidad(cantidad) {
-                        if (cantidad === 0) return "⚪";
-                        if (cantidad <= 100) return "🟢";
-                        if (cantidad <= 500) return "🟡";
-                        if (cantidad <= 1000) return "🟠";
-                        return "🔴";
+                    getIconByCantidad(cantidad, tipo = 'html') {
+                        const getColor = (cant) => {
+                            if (cant === 0) return '#d1d5db'; // gris - vacío
+                            if (cant <= 100) return '#10b981'; // verde - bajo
+                            if (cant <= 500) return '#f59e0b'; // amarillo - medio
+                            if (cant <= 1000) return '#f97316'; // naranja - alto
+                            return '#ef4444'; // rojo - muy alto
+                        };
+
+                        const color = getColor(cantidad);
+
+                        if (tipo === 'html') {
+                            // Para tooltip - DIV simple con CSS
+                            return `<div style="
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: ${color};
+            border-radius: 50%;
+            margin-right: 4px;
+            vertical-align: middle;
+        "></div>`;
+                        } else {
+                            // Para ECharts label - solo el caracter ●
+                            return '●';
+                        }
+                    },
+
+                    getIconColor(cantidad) {
+                        if (cantidad === 0) return '#d1d5db';
+                        if (cantidad <= 100) return '#10b981';
+                        if (cantidad <= 500) return '#f59e0b';
+                        if (cantidad <= 1000) return '#f97316';
+                        return '#ef4444';
                     },
 
                     getEstadoText(cantidad) {
-                        if (cantidad === 0) return 'Vacío';
+                        if (cantidad === 0) return 'Vac&iacute;o';
                         if (cantidad <= 100) return 'Bajo';
                         if (cantidad <= 500) return 'Medio';
                         if (cantidad <= 1000) return 'Alto';
@@ -1202,7 +1238,7 @@
                 <h3>No hay datos disponibles</h3>
                 <p>No se encontraron racks para mostrar</p>
             </div>
-        `;
+            `;
                             return;
                         }
 
@@ -1239,7 +1275,7 @@
                 <h3>Error al cargar el mapa de calor</h3>
                 <p>${error.message}</p>
             </div>
-        `;
+            `;
                         }
                     },
 
@@ -1325,31 +1361,33 @@
                                             categoria, sede, tipoArticulo, nivel
                                         ] = p.data;
 
-                                        // ✅ CAMBIADO: Obtener estado basado en cantidad
+                                        // ✅ USAR UNICODE ESCAPE PARA LOS EMOJIS
                                         const estado = this.getEstadoText(cantidadTotal);
                                         const icono = this.getIconByCantidad(cantidadTotal);
 
+                                        // Construir el HTML con entidades HTML
                                         return `
-            <div style="padding:12px; min-width: 320px;">
-                <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">
-                    🏢 Rack ${rack} - ${sede}
-                    ${tipoArticulo.includes('CUSTODIA') ? '<span style="font-size:12px;background:#ef4444;color:white;padding:2px 6px;border-radius:10px;margin-left:8px;">CUSTODIA</span>' : ''}
-                </div>
+                                    <div style="padding:12px; min-width: 320px;">
+                                        <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">
+                                            &#127970; Rack ${rack} - ${sede}
+                                            ${tipoArticulo.includes('CUSTODIA') ? 
+                                            '<span style="font-size:12px;background:#ef4444;color:white;padding:2px 6px;border-radius:10px;margin-left:8px;">CUSTODIA</span>' : ''}
+                                        </div>
 
-                <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
-                <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
-                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidadTotal} unidades</div>
-                <div style="margin-bottom:6px;">📈 <strong>Estado:</strong> ${icono} ${estado}</div>
-                <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
-                <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
+                                        <div style="margin-bottom:6px;">&#128205; <strong>Ubicaci&oacute;n:</strong> ${ubicacion}</div>
+                                        <div style="margin-bottom:6px;">&#127991; <strong>Categor&iacute;a:</strong> ${categoria}</div>
+                                        <div style="margin-bottom:6px;">&#128200; <strong>Cantidad:</strong> ${cantidadTotal} unidades</div>
+                                        <div style="margin-bottom:6px;">&#128200; <strong>Estado:</strong> ${icono} ${estado}</div>
+                                        <div style="margin-bottom:6px;">&#128296; <strong>Tipo Art&iacute;culo:</strong> ${tipoArticulo}</div>
+                                        <div style="margin-bottom:6px;">&#127970; <strong>Piso:</strong> ${piso}</div>
 
-                <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-                <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
-            </div>
-        `;
+                                        <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+                                        <div style="font-size:13px;color:#fbbf24;margin-top:6px;">&#128161; Click para ver detalles</div>
+                                    </div>
+                                            `;
                                     } catch (error) {
                                         console.error('Error en tooltip:', error);
-                                        return '<div>Error al cargar información</div>';
+                                        return '<div>Error al cargar informaci&oacute;n</div>';
                                     }
                                 }
                             },
@@ -1404,22 +1442,34 @@
                                 progressive: 2000,
                                 label: {
                                     show: this.labels,
-                                    formatter: (p) => {
+                                    formatter: (params) => {
                                         try {
-                                            const ubicacion = p.data[3] || 'N/A';
-                                            const cantidad = p.data[6] || 0;
-                                            const icono = this.getIconByCantidad(cantidad);
-                                            return `${icono}\n${ubicacion}`;
+                                            const ubicacion = params.data[3] || 'N/A';
+                                            // Solo mostrar la ubicación, el círculo lo haremos con symbol
+                                            return `${ubicacion}`;
                                         } catch (error) {
                                             return 'N/A';
                                         }
                                     },
                                     color: '#1e293b',
                                     fontSize: 10,
-                                    fontWeight: "bold"
+                                    fontWeight: "bold",
+                                    lineHeight: 20
                                 },
+                                // ✅ AGREGAR SYMBOL PARA EL CÍRCULO DE COLOR
+                                symbol: 'circle',
+                                symbolSize: 8,
+                                symbolKeepAspect: true,
+                                symbolPosition: 'top',
+                                symbolOffset: [0, -10], // Ajustar posición arriba del label
+                                symbolColor: (params) => {
+                                    const cantidad = params.data[6] || 0;
+                                    return this.getIconColor(cantidad);
+                                },
+                                // ✅ MANTENER EL SYMBOL SIEMPRE VISIBLE
+                                symbolRepeat: false,
+                                symbolClip: false,
                                 itemStyle: {
-                                    // ✅ MANTENIDO: Seguimos usando getFillColorByFloor para los colores de fondo
                                     color: p => this.getFillColorByFloor(p.data[4] || 1),
                                     borderColor: '#fff',
                                     borderWidth: 2,

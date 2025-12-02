@@ -1,5 +1,5 @@
 <x-layout.default>
-    <link rel="stylesheet" href="{{ asset('assets/css/solicitudalmacen.css') }}">
+  
     <div x-data="warehouseRequests()" x-init="init()">
         <div class="container">
             <!-- Header -->

@@ -745,6 +745,7 @@ Route::get('/enviar-almacen/modal-data', [SolicitudarticuloController::class, 'g
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
     Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
+    Route::get('/create/provincia', [SolicitudrepuestoController::class, 'createProvincia'])->name('create.provincia');
     Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
     Route::get('/{id}', [SolicitudrepuestoController::class, 'show'])->name('show');
     Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'edit'])->name('edit');
