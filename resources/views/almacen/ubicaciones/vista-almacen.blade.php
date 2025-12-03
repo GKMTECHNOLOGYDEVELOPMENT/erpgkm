@@ -59,7 +59,7 @@
     <div x-data="almacenHeatmap" x-init="init()" class="container">
         <!-- Header -->
         <div class="mb-6 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
                         <i class="fa-solid fa-warehouse text-indigo-600"></i>
@@ -74,16 +74,26 @@
                     </div>
                 </div>
 
-                <!-- Botones de gestión -->
-                {{-- <div class="flex gap-3">
-                    @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR RACK'))
-                    <button @click="abrirModalCrearRack()"
-                        class="inline-flex items-center gap-2 rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition">
-                        <i class="fas fa-plus"></i>
-                        Crear Rack
-                    </button>
-                    @endif
-                </div> --}}
+                <!-- Botones de accesos rápidos -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="{{ route('unity.racks.modelo.create') }}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
+                        <i class="fas fa-cubes"></i>
+                        Crear modelo Rack
+                    </a>
+
+                    <a href="{{ route('unity.racks.asignar.index') }}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-secondary text-white px-4 py-2 text-sm font-medium hover:bg-purple-700 transition">
+                        <i class="fas fa-th-large"></i>
+                        Asignar Rack
+                    </a>
+
+                    <a href="{{ route('unity.cajas.create') }}" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 rounded-lg bg-amber-500 text-white px-4 py-2 text-sm font-medium hover:bg-amber-600 transition">
+                        <i class="fas fa-box"></i>
+                        Creación de Cajas
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -196,13 +206,13 @@
                     </button>
                 @endif
 
-                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
+                {{-- @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
                     <button @click="abrirModalSeleccionRack()"
                         class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
                         <i class="fas fa-edit"></i>
                         Editar Dimensiones
                     </button>
-                @endif
+                @endif --}}
 
                 @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
                     <button @click="cargarDatos()"
@@ -211,27 +221,6 @@
                         Actualizar
                     </button>
                 @endif
-
-                <!-- Accesos rápidos (cada uno con color distinto, nueva pestaña) -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('unity.racks.modelo.create') }}" target="_blank" rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
-                        <i class="fas fa-cubes"></i>
-                        Crear modelo Rack
-                    </a>
-
-                    <a href="{{ route('unity.racks.asignar.index') }}" target="_blank" rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
-                        <i class="fas fa-th-large"></i>
-                        Asignar Rack
-                    </a>
-
-                    <a href="{{ route('unity.cajas.create') }}" target="_blank" rel="noopener noreferrer"
-                        class="inline-flex items-center gap-2 rounded-lg bg-amber-500 text-white px-4 py-2 text-sm font-medium hover:bg-amber-600 transition">
-                        <i class="fas fa-box"></i>
-                        Creación de Cajas
-                    </a>
-                </div>
 
             </div>
 
@@ -1179,44 +1168,17 @@
                         return colors[piso] || '#f3f4f6';
                     },
 
-                    getIconByCantidad(cantidad, tipo = 'html') {
-                        const getColor = (cant) => {
-                            if (cant === 0) return '#d1d5db'; // gris - vacío
-                            if (cant <= 100) return '#10b981'; // verde - bajo
-                            if (cant <= 500) return '#f59e0b'; // amarillo - medio
-                            if (cant <= 1000) return '#f97316'; // naranja - alto
-                            return '#ef4444'; // rojo - muy alto
-                        };
-
-                        const color = getColor(cantidad);
-
-                        if (tipo === 'html') {
-                            // Para tooltip - DIV simple con CSS
-                            return `<div style="
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background-color: ${color};
-            border-radius: 50%;
-            margin-right: 4px;
-            vertical-align: middle;
-        "></div>`;
-                        } else {
-                            // Para ECharts label - solo el caracter ●
-                            return '●';
-                        }
-                    },
-
-                    getIconColor(cantidad) {
-                        if (cantidad === 0) return '#d1d5db';
-                        if (cantidad <= 100) return '#10b981';
-                        if (cantidad <= 500) return '#f59e0b';
-                        if (cantidad <= 1000) return '#f97316';
-                        return '#ef4444';
+                    // ✅ NUEVAS FUNCIONES PARA ESTADOS
+                    getIconByCantidad(cantidad) {
+                        if (cantidad === 0) return "⚪";
+                        if (cantidad <= 100) return "🟢";
+                        if (cantidad <= 500) return "🟡";
+                        if (cantidad <= 1000) return "🟠";
+                        return "🔴";
                     },
 
                     getEstadoText(cantidad) {
-                        if (cantidad === 0) return 'Vac&iacute;o';
+                        if (cantidad === 0) return 'Vacío';
                         if (cantidad <= 100) return 'Bajo';
                         if (cantidad <= 500) return 'Medio';
                         if (cantidad <= 1000) return 'Alto';
@@ -1238,7 +1200,7 @@
                 <h3>No hay datos disponibles</h3>
                 <p>No se encontraron racks para mostrar</p>
             </div>
-            `;
+        `;
                             return;
                         }
 
@@ -1275,7 +1237,7 @@
                 <h3>Error al cargar el mapa de calor</h3>
                 <p>${error.message}</p>
             </div>
-            `;
+        `;
                         }
                     },
 
@@ -1361,33 +1323,31 @@
                                             categoria, sede, tipoArticulo, nivel
                                         ] = p.data;
 
-                                        // ✅ USAR UNICODE ESCAPE PARA LOS EMOJIS
+                                        // ✅ CAMBIADO: Obtener estado basado en cantidad
                                         const estado = this.getEstadoText(cantidadTotal);
                                         const icono = this.getIconByCantidad(cantidadTotal);
 
-                                        // Construir el HTML con entidades HTML
                                         return `
-                                    <div style="padding:12px; min-width: 320px;">
-                                        <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">
-                                            &#127970; Rack ${rack} - ${sede}
-                                            ${tipoArticulo.includes('CUSTODIA') ? 
-                                            '<span style="font-size:12px;background:#ef4444;color:white;padding:2px 6px;border-radius:10px;margin-left:8px;">CUSTODIA</span>' : ''}
-                                        </div>
+            <div style="padding:12px; min-width: 320px;">
+                <div style="font-size:18px;font-weight:bold;margin-bottom:10px;color:#60a5fa;">
+                    🏢 Rack ${rack} - ${sede}
+                    ${tipoArticulo.includes('CUSTODIA') ? '<span style="font-size:12px;background:#ef4444;color:white;padding:2px 6px;border-radius:10px;margin-left:8px;">CUSTODIA</span>' : ''}
+                </div>
 
-                                        <div style="margin-bottom:6px;">&#128205; <strong>Ubicaci&oacute;n:</strong> ${ubicacion}</div>
-                                        <div style="margin-bottom:6px;">&#127991; <strong>Categor&iacute;a:</strong> ${categoria}</div>
-                                        <div style="margin-bottom:6px;">&#128200; <strong>Cantidad:</strong> ${cantidadTotal} unidades</div>
-                                        <div style="margin-bottom:6px;">&#128200; <strong>Estado:</strong> ${icono} ${estado}</div>
-                                        <div style="margin-bottom:6px;">&#128296; <strong>Tipo Art&iacute;culo:</strong> ${tipoArticulo}</div>
-                                        <div style="margin-bottom:6px;">&#127970; <strong>Piso:</strong> ${piso}</div>
+                <div style="margin-bottom:6px;">📍 <strong>Ubicación:</strong> ${ubicacion}</div>
+                <div style="margin-bottom:6px;">🏷️ <strong>Categoría:</strong> ${categoria}</div>
+                <div style="margin-bottom:6px;">📊 <strong>Cantidad:</strong> ${cantidadTotal} unidades</div>
+                <div style="margin-bottom:6px;">📈 <strong>Estado:</strong> ${icono} ${estado}</div>
+                <div style="margin-bottom:6px;">🔧 <strong>Tipo Artículo:</strong> ${tipoArticulo}</div>
+                <div style="margin-bottom:6px;">🏗️ <strong>Piso:</strong> ${nivel}</div>
 
-                                        <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
-                                        <div style="font-size:13px;color:#fbbf24;margin-top:6px;">&#128161; Click para ver detalles</div>
-                                    </div>
-                                            `;
+                <div style="font-size:13px;color:#94a3b8;margin-top:10px;">${this.periodoLabel()}</div>
+                <div style="font-size:13px;color:#fbbf24;margin-top:6px;">💡 Click para ver detalles</div>
+            </div>
+        `;
                                     } catch (error) {
                                         console.error('Error en tooltip:', error);
-                                        return '<div>Error al cargar informaci&oacute;n</div>';
+                                        return '<div>Error al cargar información</div>';
                                     }
                                 }
                             },
@@ -1442,34 +1402,22 @@
                                 progressive: 2000,
                                 label: {
                                     show: this.labels,
-                                    formatter: (params) => {
+                                    formatter: (p) => {
                                         try {
-                                            const ubicacion = params.data[3] || 'N/A';
-                                            // Solo mostrar la ubicación, el círculo lo haremos con symbol
-                                            return `${ubicacion}`;
+                                            const ubicacion = p.data[3] || 'N/A';
+                                            const cantidad = p.data[6] || 0;
+                                            const icono = this.getIconByCantidad(cantidad);
+                                            return `${icono}\n${ubicacion}`;
                                         } catch (error) {
                                             return 'N/A';
                                         }
                                     },
                                     color: '#1e293b',
                                     fontSize: 10,
-                                    fontWeight: "bold",
-                                    lineHeight: 20
+                                    fontWeight: "bold"
                                 },
-                                // ✅ AGREGAR SYMBOL PARA EL CÍRCULO DE COLOR
-                                symbol: 'circle',
-                                symbolSize: 8,
-                                symbolKeepAspect: true,
-                                symbolPosition: 'top',
-                                symbolOffset: [0, -10], // Ajustar posición arriba del label
-                                symbolColor: (params) => {
-                                    const cantidad = params.data[6] || 0;
-                                    return this.getIconColor(cantidad);
-                                },
-                                // ✅ MANTENER EL SYMBOL SIEMPRE VISIBLE
-                                symbolRepeat: false,
-                                symbolClip: false,
                                 itemStyle: {
+                                    // ✅ MANTENIDO: Seguimos usando getFillColorByFloor para los colores de fondo
                                     color: p => this.getFillColorByFloor(p.data[4] || 1),
                                     borderColor: '#fff',
                                     borderWidth: 2,
