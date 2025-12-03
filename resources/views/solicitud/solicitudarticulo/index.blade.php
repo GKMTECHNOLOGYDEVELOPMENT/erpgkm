@@ -1,7 +1,5 @@
 <x-layout.default title="Solicitud Articulos - ERP Solutions Force">
     <style>
-        <style>
-
         /* Estilos para las animaciones de los modales */
         .modal-active .modal-overlay {
             opacity: 0.5;
@@ -37,7 +35,6 @@
             transform: translateX(-2px);
             transition: transform 0.2s ease;
         }
-    </style>
     </style>
     <div class="container mx-auto px-4 py-8">
 
@@ -244,8 +241,12 @@
                         Artículos
                     </button>
                     <button type="submit" name="tipo" value="solicitud_repuesto"
-                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-                        Repuestos
+                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green-600 transition">
+                        Repuestos (Lima)
+                    </button>
+                    <button type="submit" name="tipo" value="solicitud_repuesto_provincia"
+                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto_provincia' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
+                        Repuestos (Provincia)
                     </button>
 
                     <!-- Filtro por estado -->
@@ -288,7 +289,7 @@
                 <!-- Búsqueda -->
                 <div class="flex gap-2">
                     <div class="relative w-full md:w-64">
-                        <input type="text" name="search" placeholder="Buscar por código..."
+                        <input type="text" name="search" placeholder="Buscar por código o ticket..."
                             value="{{ request('search') }}"
                             class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none"
@@ -319,7 +320,16 @@
                             @if (request('tipo'))
                                 <span
                                     class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                    Tipo: {{ request('tipo') == 'solicitud_articulo' ? 'Artículos' : 'Repuestos' }}
+                                    Tipo: 
+                                    @if (request('tipo') == 'solicitud_articulo')
+                                        Artículos
+                                    @elseif(request('tipo') == 'solicitud_repuesto')
+                                        Repuestos (Lima)
+                                    @elseif(request('tipo') == 'solicitud_repuesto_provincia')
+                                        Repuestos (Provincia)
+                                    @else
+                                        {{ request('tipo') }}
+                                    @endif
                                     <a href="{{ request()->fullUrlWithoutQuery('tipo') }}"
                                         class="ml-1 text-blue-600 hover:text-blue-800">×</a>
                                 </span>
@@ -361,7 +371,8 @@
                 <div
                     class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
                     @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
-                    @else border-green-500 @endif
+                    @elseif($solicitud->tipoorden == 'solicitud_repuesto') border-green-500
+                    @else border-purple-500 @endif
                     transition transform hover:scale-[1.02] hover:shadow-lg">
 
                     <!-- Header de la Card -->
@@ -372,11 +383,14 @@
                                 <span
                                     class="px-2 py-1 text-xs font-semibold rounded-full 
                                     @if ($solicitud->tipoorden == 'solicitud_articulo') bg-blue-100 text-blue-800
-                                    @else bg-green-100 text-green-800 @endif">
+                                    @elseif($solicitud->tipoorden == 'solicitud_repuesto') bg-green-100 text-green-800
+                                    @else bg-purple-100 text-purple-800 @endif">
                                     @if ($solicitud->tipoorden == 'solicitud_articulo')
                                         📦 Artículo
+                                    @elseif($solicitud->tipoorden == 'solicitud_repuesto')
+                                        🔧 Repuesto (Lima)
                                     @else
-                                        🔧 Repuesto
+                                        🌍 Repuesto (Provincia)
                                     @endif
                                 </span>
 
@@ -418,8 +432,10 @@
                             <p class="text-sm text-gray-500 font-medium">
                                 @if ($solicitud->tipoorden == 'solicitud_articulo')
                                     Artículos
+                                @elseif($solicitud->tipoorden == 'solicitud_repuesto')
+                                    Repuestos (Lima)
                                 @else
-                                    Repuestos
+                                    Repuestos (Provincia)
                                 @endif
                             </p>
                             <p class="font-medium text-gray-800">
@@ -427,6 +443,16 @@
                                 ({{ $solicitud->totalcantidadproductos ?? 0 }} unidades)
                             </p>
                         </div>
+
+                        <!-- Mostrar número de ticket para provincia -->
+                        @if ($solicitud->tipoorden == 'solicitud_repuesto_provincia' && $solicitud->numeroticket)
+                            <div class="mb-3">
+                                <p class="text-sm text-gray-500 font-medium">Número de Ticket</p>
+                                <p class="font-medium text-gray-800">
+                                    🎫 {{ $solicitud->numeroticket }}
+                                </p>
+                            </div>
+                        @endif
 
                         <!-- Código de Cotización -->
                         @if ($solicitud->codigo_cotizacion ?? false)
@@ -621,8 +647,8 @@
                                 @endif
                             @endif
 
-                            <!-- Botones para Repuestos (VERDE) -->
-                        @else
+                        <!-- Botones para Repuestos Lima (VERDE) -->
+                        @elseif($solicitud->tipoorden == 'solicitud_repuesto')
                             @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
                                 <!-- Botón Ver -->
                                 <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
@@ -674,6 +700,67 @@
                                 @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
                                     <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
                                         class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                            </path>
+                                        </svg>
+                                        Editar
+                                    </a>
+                                @endif
+                            @endif
+
+                        <!-- Botones para Repuestos Provincia (PURPURA) -->
+                        @else
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
+                                <a href="{{ route('solicitudrepuestoprovincia.show', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                        </path>
+                                    </svg>
+                                    Ver
+                                </a>
+                            @endif
+                            
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
+                                <a href="{{ route('solicitudrepuestoprovincia.opciones', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                                        </path>
+                                    </svg>
+                                    Opciones
+                                </a>
+                            @endif
+
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR OPCIONES REPUESTO'))
+                                <a href="{{ route('solicitudrepuestoprovincia.gestionar', $solicitud->idsolicitudesordenes) }}"
+                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Gestionar
+                                </a>
+                            @endif
+
+                            <!-- Botón Editar - solo para pendientes -->
+                            @if ($solicitud->estado == 'pendiente')
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
+                                    <a href="{{ route('solicitudrepuestoprovincia.edit', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
