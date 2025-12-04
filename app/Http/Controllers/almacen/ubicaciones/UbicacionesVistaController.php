@@ -17,8 +17,11 @@ class UbicacionesVistaController extends Controller
             ->select('nombre')
             ->where('estado', 1) // Asumiendo que 1 = activo
             ->orderBy('nombre')
-            ->pluck('nombre');
+            ->pluck('nombre')
+            ->toArray(); // Convertir a array
 
+        // Agregar opción para ambas sedes al principio
+        array_unshift($sedes, 'Seleccionar todas las sedes');
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 

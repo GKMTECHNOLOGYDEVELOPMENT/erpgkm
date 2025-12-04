@@ -169,9 +169,14 @@
                     <select x-model="filtro.sede" @change="aplicarFiltros()"
                         class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                         @foreach ($sedes as $sede)
-                            <option value="{{ $sede }}" {{ $sede == 'LOS OLIVOS' ? 'selected' : '' }}>
-                                {{ $sede }}
-                            </option>
+                            @if ($loop->first)
+                                <!-- Primera opción será "Seleccionar todas las sedes" -->
+                                <option value="">{{ $sede }}</option>
+                            @else
+                                <option value="{{ $sede }}">
+                                    {{ $sede }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
@@ -215,10 +220,10 @@
                 @endif --}}
 
                 @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
-                    <button @click="cargarDatos()"
-                        class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition">
-                        <i class="fas fa-sync-alt"></i>
-                        Actualizar
+                    <button @click="resetFiltros()"
+                        class="inline-flex items-center gap-2 rounded-lg bg-green-500 text-white px-4 py-2 text-sm font-medium hover:bg-green-600 transition-colors duration-200">
+                        <i class="fas fa-redo-alt"></i>
+                        Reiniciar Filtros
                     </button>
                 @endif
 
@@ -277,7 +282,7 @@
                             <div class="flex flex-col sm:flex-row sm:items-center gap-1">
                                 <span class="text-primary font-semibold text-sm">Tip:</span>
                                 <span class="text-primary text-sm">
-                                    Los racks en de letra <span class="font-bold text-green-600">VERDE</span> son Spark
+                                    Los racks de letra <span class="font-bold text-green-600">VERDE</span> son Spark
                                     y en <span class="font-bold text-amber-500">AMARILLO</span> son Panel
                                 </span>
                             </div>
@@ -794,6 +799,22 @@
                         this.modalSeleccionRack.rackSeleccionado = null;
                     },
 
+                    // Método para resetear filtros y recargar datos
+                    resetearYCargar() {
+                        // Resetear filtros a valores por defecto
+                        this.filtro = {
+                            periodo: '30',
+                            sede: '', // O "LOS OLIVOS" si quieres que tenga un valor por defecto
+                            buscar: ''
+                        };
+
+                        // Cargar datos con los filtros reseteados
+                        this.cargarDatos();
+
+                        // Mostrar notificación (opcional)
+                        console.log('Filtros reseteados y datos actualizados');
+                    },
+
                     async sugerirSiguienteLetra() {
                         if (!this.modalCrearRack.form.sede) {
                             this.modalCrearRack.sugerencia = null;
@@ -1137,7 +1158,7 @@
                     resetFiltros() {
                         this.filtro = {
                             periodo: '30',
-                            sede: 'LOS OLIVOS',
+                            sede: '',
                             buscar: ''
                         };
                         this.cargarDatos();
@@ -1195,12 +1216,12 @@
 
                             // Mostrar mensaje en el contenedor
                             heatmapEl.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #666;">
-                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 16px;"></i>
-                <h3>No hay datos disponibles</h3>
-                <p>No se encontraron racks para mostrar</p>
-            </div>
-        `;
+                            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #666;">
+                                <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 16px;"></i>
+                                <h3>No hay datos disponibles</h3>
+                                <p>No se encontraron racks para mostrar</p>
+                            </div>
+                        `;
                             return;
                         }
 
@@ -1232,12 +1253,12 @@
                             this.loading = false;
 
                             heatmapEl.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #dc2626;">
-                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
-                <h3>Error al cargar el mapa de calor</h3>
-                <p>${error.message}</p>
-            </div>
-        `;
+                            <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; color: #dc2626;">
+                                <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                                <h3>Error al cargar el mapa de calor</h3>
+                                <p>${error.message}</p>
+                            </div>
+                        `;
                         }
                     },
 
