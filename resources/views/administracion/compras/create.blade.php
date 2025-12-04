@@ -159,15 +159,15 @@
                              </div>
                          </div>
 
-                        @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO COMPRA'))
-                         <!-- Botón fijo -->
-                         <button
-                             class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
-                             @click="abrirModalVerificacion">
-                             <i class="fas fa-check-circle"></i>
-                             BUSCAR PRODUCTO
-                         </button>
-                            @endif
+                         @if (\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO COMPRA'))
+                             <!-- Botón fijo -->
+                             <button
+                                 class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
+                                 @click="abrirModalVerificacion">
+                                 <i class="fas fa-check-circle"></i>
+                                 BUSCAR PRODUCTO
+                             </button>
+                         @endif
                      </div>
 
 
@@ -263,94 +263,67 @@
 
 
 
-             <!-- <div x-show="mostrarModalSeries" x-transition @keydown.window.escape="mostrarModalSeries=false"
-                 class="fixed inset-0 z-[999] flex items-center justify-center">
-                 <div class="absolute inset-0 bg-black/60" @click="mostrarModalSeries=false"></div>
-
-                 <div class="relative mx-auto w-full max-w-3xl px-4">
-                     <div class="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden" style="height:85vh;">
-
-                         <div class="px-6 py-4 border-b flex justify-between items-start shrink-0">
-                             <div>
-                                 <h2 class="text-lg font-semibold">Registrar series</h2>
-                                 <p class="text-xs text-gray-500">
-                                     Producto: <span x-text="productoSeleccionado?.nombre || ''"></span> ·
-                                     Cant.: <span x-text="productoSeleccionado?.cantidad || 0"></span>
-                                 </p>
-                             </div>
-                             <button @click="mostrarModalSeries=false"
-                                 class="text-gray-400 hover:text-gray-600 text-lg">×</button>
-                         </div>
-
-                         <div class="px-6 py-4 flex-1 overflow-y-auto">
-                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                 <template x-for="(serie, idx) in seriesTemp" :key="idx">
-                                     <div class="space-y-1">
-                                         <label class="block text-sm font-medium text-gray-700">
-                                             Serie <span x-text="idx + 1"></span>
-                                         </label>
-                                         <input type="text" x-model="seriesTemp[idx]"
-                                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                             :placeholder="'Serie ' + (idx + 1)">
-                                     </div>
-                                 </template>
-                             </div>
-                         </div>
-
-                         <div class="px-6 py-3 border-t flex justify-end gap-2 shrink-0">
-                             <button @click="mostrarModalSeries=false"
-                                 class="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
-                             <button @click="guardarSeries()"
-                                 class="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700">Guardar</button>
-                         </div>
-
-                     </div>
-                 </div>
-             </div>
- -->
-
-
              <!-- Sección derecha - Datos de la compra -->
              <div class="lg:col-span-1">
                  <div class="panel mt-2 p-5 max-w-xl mx-auto sticky top-4">
-                     <h2 class="text-lg font-semibold mb-4">DATOS DE LA COMPRA</h2>
+                     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                         <i class="fas fa-shopping-cart text-blue-600"></i>
+                         DATOS DE LA COMPRA
+                     </h2>
 
                      <div class="space-y-4">
                          <!-- Primera fila: Documento -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Documento <span
-                                     class="text-red-500">*</span></label>
-                             <select class="clean-input w-full" x-model="documentoId" required>
-                                 <option value="">Seleccione un documento</option>
-                                 <template x-for="documento in documentos" :key="documento.idDocumento">
-                                     <option :value="documento.idDocumento" x-text="documento.nombre"></option>
-                                 </template>
-                             </select>
+                             <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                
+                                 Documento <span class="text-red-500">*</span>
+                             </label>
+                             <div class="relative">
+                                 <i
+                                     class="fas fa-file absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                 <select class="clean-input w-full pl-10" x-model="documentoId" required>
+                                     <option value="">Seleccione un documento</option>
+                                     <template x-for="documento in documentos" :key="documento.idDocumento">
+                                         <option :value="documento.idDocumento" x-text="documento.nombre"></option>
+                                     </template>
+                                 </select>
+                             </div>
 
                              <!-- Loading state -->
                              <template x-if="documentos.length === 0">
-                                 <div class="text-sm text-gray-500 mt-1">Cargando documentos...</div>
+                                 <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                     <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                     Cargando documentos...
+                                 </div>
                              </template>
                          </div>
 
                          <!-- Segunda fila: Serie - Número con guion en el centro -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Serie y Número <span
-                                     class="text-red-500">*</span></label>
+                             <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                 
+                                 Serie y Número <span class="text-red-500">*</span>
+                             </label>
                              <div class="flex gap-2 items-center">
                                  <!-- Campo Serie -->
-                                 <div class="w-1/2">
+                                 <div class="w-1/2 relative">
+                                     <i
+                                         class="fas fa-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                                      <input type="text" x-model="serie" placeholder="Serie"
-                                         class="clean-input w-full" />
+                                         class="clean-input w-full pl-10" />
                                  </div>
 
                                  <!-- Separador visual "-" -->
-                                 <div class="text-lg text-gray-600 dark:text-gray-300">-</div>
+                                 <div class="text-lg text-gray-600 dark:text-gray-300">
+                                     <i class="fas fa-minus"></i>
+                                 </div>
 
                                  <!-- Campo Número -->
-                                 <div class="w-1/2">
+                                 <div class="w-1/2 relative">
+                                     <i
+                                         class="fas fa-sort-numeric-up absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                                      <input type="text" x-model="nro" placeholder="Número"
-                                         class="clean-input w-full" />
+                                         class="clean-input w-full pl-10" />
                                  </div>
                              </div>
                          </div>
@@ -358,143 +331,221 @@
                          <!-- Tercera fila: Fechas -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Emisión <span
-                                         class="text-red-500">*</span></label>
-                                 <input type="text" x-ref="fechaInput" x-model="fecha"
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                     placeholder="Selecciona fecha" />
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                     
+                                     Fecha Emisión <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-calendar-day absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <input type="text" x-ref="fechaInput" x-model="fecha"
+                                         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 pl-10 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                         placeholder="Selecciona fecha" />
+                                 </div>
                              </div>
 
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Vencimiento <span
-                                         class="text-red-500">*</span></label>
-                                 <input type="text" value="2025-08-27" x-ref="fechaVencimientoInput"
-                                     x-model="fechaVencimiento"
-                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm" />
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                     
+                                     Fecha Vencimiento <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-clock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <input type="text" value="2025-08-27" x-ref="fechaVencimientoInput"
+                                         x-model="fechaVencimiento"
+                                         class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 pl-10 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm" />
+                                 </div>
                              </div>
                          </div>
 
                          <!-- Cuarta fila: Moneda y Tipo de Cambio -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Moneda <span
-                                         class="text-red-500">*</span></label>
-                                 <select class="clean-input w-full" x-model="monedaId" @change="cambiarMoneda"
-                                     required>
-                                     <option value="">Seleccione una moneda</option>
-                                     <template x-for="moneda in monedas" :key="moneda.id">
-                                         <option :value="moneda.id"
-                                             x-text="moneda.nombre + ' (' + moneda.simbolo + ')'"></option>
-                                     </template>
-                                 </select>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    
+                                     Moneda <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-coins absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <select class="clean-input w-full pl-10" x-model="monedaId"
+                                         @change="cambiarMoneda" required>
+                                         <option value="">Seleccione una moneda</option>
+                                         <template x-for="moneda in monedas" :key="moneda.id">
+                                             <option :value="moneda.id"
+                                                 x-text="moneda.nombre + ' (' + moneda.simbolo + ')'"></option>
+                                         </template>
+                                     </select>
+                                 </div>
 
                                  <!-- Loading state -->
                                  <template x-if="monedas.length === 0">
-                                     <div class="text-sm text-gray-500 mt-1">Cargando monedas...</div>
+                                     <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                         <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                         Cargando monedas...
+                                     </div>
                                  </template>
                              </div>
 
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Cambio</label>
-                                 <input type="number" step="0.001" x-model="tipoCambio"
-                                     class="clean-input w-full" @change="cambiarMoneda" />
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                     
+                                     Tipo Cambio
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-percentage absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <input type="number" step="0.001" x-model="tipoCambio"
+                                         class="clean-input w-full pl-10" @change="cambiarMoneda" />
+                                 </div>
                              </div>
                          </div>
 
                          <!-- Quinta fila: Impuesto y DUA -->
                          <div class="grid grid-cols-2 gap-4 items-end">
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Impuesto <span
-                                         class="text-red-500">*</span></label>
-                                 <select class="clean-input w-full" x-model="impuestoId" required>
-                                     <option value="">Seleccione un impuesto</option>
-                                     <template x-for="impuesto in impuestos" :key="impuesto.id">
-                                         <option :value="impuesto.id"
-                                             x-text="impuesto.nombre + ' (' + impuesto.monto + '%)'"></option>
-                                     </template>
-                                 </select>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    
+                                     Impuesto <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-chart-bar absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <select class="clean-input w-full pl-10" x-model="impuestoId" required>
+                                         <option value="">Seleccione un impuesto</option>
+                                         <template x-for="impuesto in impuestos" :key="impuesto.id">
+                                             <option :value="impuesto.id"
+                                                 x-text="impuesto.nombre + ' (' + impuesto.monto + '%)'"></option>
+                                         </template>
+                                     </select>
+                                 </div>
 
                                  <!-- Loading state -->
                                  <template x-if="impuestos.length === 0">
-                                     <div class="text-sm text-gray-500 mt-1">Cargando impuestos...</div>
+                                     <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                         <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                         Cargando impuestos...
+                                     </div>
                                  </template>
                              </div>
 
                              <div class="flex items-center h-10">
                                  <input type="checkbox" id="dua" checked
                                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
-                                 <label for="dua" class="ms-2 text-sm font-medium text-gray-700">DUA</label>
+                                 <label for="dua"
+                                     class="ms-2 text-sm font-medium text-gray-700 flex items-center gap-2">
+                                    
+                                     DUA
+                                 </label>
                              </div>
                          </div>
 
                          <!-- Sexta fila: Proveedor -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor <span
-                                     class="text-red-500">*</span></label>
-                             <select id="proveedorSelect"
-                                 class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
-                                 x-model="proveedorId">
-                                 <option value="">Seleccione una opción</option>
-                                 <template x-for="proveedor in proveedores" :key="proveedor.id">
-                                     <option :value="proveedor.id"
-                                         x-text="proveedor.nombre + ' - ' + proveedor.numeroDocumento"></option>
-                                 </template>
-                             </select>
+                             <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                 
+                                 Proveedor <span class="text-red-500">*</span>
+                             </label>
+                             <div class="relative">
+                                 <i
+                                     class="fas fa-user-tie absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                 <select id="proveedorSelect"
+                                     class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-white text-sm"
+                                     x-model="proveedorId">
+                                     <option value="">Seleccione una opción</option>
+                                     <template x-for="proveedor in proveedores" :key="proveedor.id">
+                                         <option :value="proveedor.id"
+                                             x-text="proveedor.nombre + ' - ' + proveedor.numeroDocumento"></option>
+                                     </template>
+                                 </select>
+                             </div>
 
                              <!-- Loading state -->
                              <template x-if="proveedores.length === 0">
-                                 <div class="text-sm text-gray-500 mt-1">Cargando proveedores...</div>
+                                 <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                     <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                     Cargando proveedores...
+                                 </div>
                              </template>
                          </div>
 
                          <!-- Séptima fila: Condición de Compra y Sujeto a -->
                          <div class="grid grid-cols-2 gap-4">
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Condición Compra <span
-                                         class="text-red-500">*</span></label>
-                                 <select class="clean-input w-full" x-model="condicionCompraId" required>
-                                     <option value="">Seleccione una condición</option>
-                                     <template x-for="condicion in condicionesCompra" :key="condicion.id">
-                                         <option :value="condicion.id" x-text="condicion.nombre"></option>
-                                     </template>
-                                 </select>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    
+                                     Condición Compra <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-file-signature absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <select class="clean-input w-full pl-10" x-model="condicionCompraId" required>
+                                         <option value="">Seleccione una condición</option>
+                                         <template x-for="condicion in condicionesCompra" :key="condicion.id">
+                                             <option :value="condicion.id" x-text="condicion.nombre"></option>
+                                         </template>
+                                     </select>
+                                 </div>
 
                                  <!-- Loading state -->
                                  <template x-if="condicionesCompra.length === 0">
-                                     <div class="text-sm text-gray-500 mt-1">Cargando condiciones...</div>
+                                     <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                         <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                         Cargando condiciones...
+                                     </div>
                                  </template>
                              </div>
 
                              <div>
-                                 <label class="block text-sm font-medium text-gray-700 mb-1">Sujeto a <span
-                                         class="text-red-500">*</span></label>
-                                 <select class="clean-input w-full" x-model="sujetoId" required>
-                                     <option value="">Seleccione una opción</option>
-                                     <template x-for="sujeto in sujetos" :key="sujeto.id">
-                                         <option :value="sujeto.id" x-text="sujeto.nombre"></option>
-                                     </template>
-                                 </select>
+                                 <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                    
+                                     Sujeto a <span class="text-red-500">*</span>
+                                 </label>
+                                 <div class="relative">
+                                     <i
+                                         class="fas fa-user-tag absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                     <select class="clean-input w-full pl-10" x-model="sujetoId" required>
+                                         <option value="">Seleccione una opción</option>
+                                         <template x-for="sujeto in sujetos" :key="sujeto.id">
+                                             <option :value="sujeto.id" x-text="sujeto.nombre"></option>
+                                         </template>
+                                     </select>
+                                 </div>
 
                                  <!-- Loading state -->
                                  <template x-if="sujetos.length === 0">
-                                     <div class="text-sm text-gray-500 mt-1">Cargando sujetos...</div>
+                                     <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                         <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                         Cargando sujetos...
+                                     </div>
                                  </template>
                              </div>
                          </div>
 
                          <!-- Octava fila: Tipo de Pago -->
                          <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pago</label>
-                             <select class="clean-input w-full" x-model="tipoPagoId">
-                                 <option value="">Seleccione un tipo de pago</option>
-                                 <template x-for="tipoPago in tiposPago" :key="tipoPago.id">
-                                     <option :value="tipoPago.id" x-text="tipoPago.nombre"></option>
-                                 </template>
-                             </select>
+                             <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                 
+                                 Tipo de Pago
+                             </label>
+                             <div class="relative">
+                                 <i
+                                     class="fas fa-money-check-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                                 <select class="clean-input w-full pl-10" x-model="tipoPagoId">
+                                     <option value="">Seleccione un tipo de pago</option>
+                                     <template x-for="tipoPago in tiposPago" :key="tipoPago.id">
+                                         <option :value="tipoPago.id" x-text="tipoPago.nombre"></option>
+                                     </template>
+                                 </select>
+                             </div>
 
                              <!-- Loading state -->
                              <template x-if="tiposPago.length === 0">
-                                 <div class="text-sm text-gray-500 mt-1">Cargando tipos de pago...</div>
+                                 <div class="text-sm text-gray-500 mt-1 flex items-center gap-2">
+                                     <i class="fas fa-spinner fa-spin text-blue-500"></i>
+                                     Cargando tipos de pago...
+                                 </div>
                              </template>
                          </div>
 
@@ -524,25 +575,33 @@
                                  $refs.fileInput.value = '';
                              }
                          }">
-                             <label class="block text-sm font-medium text-gray-700 mb-2">Adjuntar archivo</label>
+                             <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                                 <i class="fas fa-paperclip text-blue-500 text-xs"></i>
+                                 Adjuntar archivo
+                             </label>
 
                              <!-- Dropzone -->
                              <label @dragover.prevent="over=true" @dragleave="over=false"
                                  @drop.prevent="
-      over=false;
-      $refs.fileInput.files = $event.dataTransfer.files;
-      onFileChange({ target: $refs.fileInput })
-    "
+                    over=false;
+                    $refs.fileInput.files = $event.dataTransfer.files;
+                    onFileChange({ target: $refs.fileInput })
+                    "
                                  class="w-full cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-6 text-center transition
-           hover:border-blue-400"
+                        hover:border-blue-400"
                                  :class="over ? 'border-blue-500 bg-blue-50/60' : ''">
                                  <div class="flex flex-col items-center gap-2 text-gray-600">
-                                     <i class="fas fa-cloud-upload-alt text-2xl"></i>
+                                     <i class="fas fa-cloud-upload-alt text-3xl text-blue-400"></i>
                                      <div class="text-sm">
                                          <span class="font-medium text-blue-600">Haz clic</span> o arrastra tu archivo
                                          aquí
                                      </div>
-                                     <div class="text-xs text-gray-500">(pdf/doc/docx/jpg/jpeg/png/qif) · máx 5MB</div>
+                                     <div class="text-xs text-gray-500 flex items-center gap-1">
+                                         <i class="fas fa-file-alt text-gray-400"></i>
+                                         (pdf/doc/docx/jpg/jpeg/png/qif)
+                                         <i class="fas fa-weight-hanging text-gray-400 ml-2"></i>
+                                         máx 5MB
+                                     </div>
                                  </div>
                                  <input x-ref="fileInput" type="file" class="sr-only" @change="onFileChange"
                                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.qif" />
@@ -553,82 +612,90 @@
                                  <div
                                      class="mt-3 flex items-center justify-between gap-3 rounded-lg border border-gray-200 p-3">
                                      <div class="flex items-center gap-3">
-                                         <i class="fas fa-file-alt text-gray-500"></i>
+                                         <i class="fas fa-file-alt text-blue-500 text-lg"></i>
                                          <div>
                                              <p class="text-sm font-medium text-gray-800" x-text="fileName"></p>
-                                             <p class="text-xs text-gray-500"
-                                                 x-text="(fileSize/1024).toFixed(1) + ' KB'"></p>
+                                             <p class="text-xs text-gray-500 flex items-center gap-1">
+                                                 <i class="fas fa-weight-hanging text-gray-400"></i>
+                                                 <span x-text="(fileSize/1024).toFixed(1) + ' KB'"></span>
+                                             </p>
                                          </div>
                                      </div>
                                      <button type="button" @click="clear()"
-                                         class="text-sm text-red-600 hover:underline">Quitar</button>
+                                         class="text-sm text-red-600 hover:underline flex items-center gap-1">
+                                         <i class="fas fa-times"></i>
+                                         Quitar
+                                     </button>
                                  </div>
                              </template>
                          </div>
 
-
                          <!-- Separador -->
-                         <div class="border-t border-gray-200 pt-4"></div>
+                         <div class="border-t border-gray-200 pt-4 flex items-center">
+                             <i class="fas fa-calculator text-blue-500 mr-2"></i>
+                             <span class="text-sm font-medium text-gray-600">RESUMEN FINANCIERO</span>
+                         </div>
 
                          <!-- Totales con moneda dinámica -->
                          <div class="space-y-2">
-                             <div class="flex justify-between">
-                                 <span class="text-gray-600 text-sm">Subtotal:</span>
+                             <div class="flex justify-between items-center">
+                                 <span class="text-gray-600 text-sm flex items-center gap-2">
+                                     <i class="fas fa-receipt text-gray-400"></i>
+                                     Subtotal:
+                                 </span>
                                  <span class="font-medium text-sm" x-text="formatCurrency(subtotal)"></span>
                              </div>
-                             <div class="flex justify-between">
-                                 <span class="text-gray-600 text-sm">
+                             <div class="flex justify-between items-center">
+                                 <span class="text-gray-600 text-sm flex items-center gap-2">
+                                     <i class="fas fa-chart-pie text-gray-400"></i>
                                      <span
                                          x-text="impuestos.find(i => i.id == impuestoId)?.nombre || 'Impuesto'"></span>
                                      (<span x-text="impuestos.find(i => i.id == impuestoId)?.monto || 18"></span>%):
                                  </span>
                                  <span class="font-medium text-sm" x-text="formatCurrency(itbis)"></span>
                              </div>
-                             <div class="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200">
-                                 <span class="text-gray-700">Total:</span>
+                             <div
+                                 class="flex justify-between text-lg font-semibold pt-2 border-t border-gray-200 items-center">
+                                 <span class="text-gray-700 flex items-center gap-2">
+                                     <i class="fas fa-file-invoice-dollar text-blue-500"></i>
+                                     Total:
+                                 </span>
                                  <span class="text-blue-600" x-text="formatCurrency(total)"></span>
                              </div>
                          </div>
 
                          <!-- Botón Guardar con Loading -->
                          <div class="pt-4">
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR COMPRA'))
-                             <button
-                                 class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
-                                 :disabled="!puedeGuardar || guardandoCompra"
-                                 :class="{
-                                     'bg-blue-600 hover:bg-blue-700 text-white': puedeGuardar && !guardandoCompra,
-                                     'bg-gray-400 text-gray-600 cursor-not-allowed': !puedeGuardar || guardandoCompra
-                                 }"
-                                 @click="guardarCompra">
+                             @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR COMPRA'))
+                                 <button
+                                     class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                                     :disabled="!puedeGuardar || guardandoCompra"
+                                     :class="{
+                                         'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg': puedeGuardar &&
+                                             !guardandoCompra,
+                                         'bg-gray-400 text-gray-600 cursor-not-allowed': !puedeGuardar ||
+                                             guardandoCompra
+                                     }"
+                                     @click="guardarCompra">
 
-                                 <!-- Spinner de loading -->
-                                 <template x-if="guardandoCompra">
-                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                                         fill="none" viewBox="0 0 24 24">
-                                         <circle class="opacity-25" cx="12" cy="12" r="10"
-                                             stroke="currentColor" stroke-width="4"></circle>
-                                         <path class="opacity-75" fill="currentColor"
-                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                         </path>
-                                     </svg>
-                                 </template>
+                                     <!-- Spinner de loading -->
+                                     <template x-if="guardandoCompra">
+                                         <i class="fas fa-spinner fa-spin h-5 w-5"></i>
+                                     </template>
 
-                                 <!-- Ícono normal cuando no está cargando -->
-                                 <template x-if="!guardandoCompra">
-                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M5 13l4 4L19 7"></path>
-                                     </svg>
-                                 </template>
+                                     <!-- Ícono normal cuando no está cargando -->
+                                     <template x-if="!guardandoCompra">
+                                         <i class="fas fa-save"></i>
+                                     </template>
 
-                                 <!-- Texto del botón -->
-                                 <span x-text="guardandoCompra ? 'GUARDANDO...' : 'GUARDAR COMPRA'"></span>
-                             </button>
+                                     <!-- Texto del botón -->
+                                     <span x-text="guardandoCompra ? 'GUARDANDO...' : 'GUARDAR COMPRA'"></span>
+                                 </button>
                              @endif
                          </div>
 
-                         <p class="text-xs text-gray-500 text-center">
+                         <p class="text-xs text-gray-500 text-center flex items-center justify-center gap-2">
+                             <i class="fas fa-exclamation-circle text-red-500"></i>
                              Los campos marcados con <span class="text-red-500">*</span> son obligatorios
                          </p>
                      </div>
