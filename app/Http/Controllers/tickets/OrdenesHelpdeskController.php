@@ -2147,7 +2147,6 @@ $contactos = [];
             ->with('success', 'Orden actualizada correctamente.');
     }
 
-
 public function getAll(Request $request)
 {
     try {
@@ -2165,7 +2164,7 @@ public function getAll(Request $request)
             'numero_ticket',
             'fecha_creacion',
             'idCliente',
-            'idClienteGeneral',
+            'idClienteGeneral', // ✅ ESTO YA ESTÁ
             'idContactoFinal',
             'idTienda',
             'idTicketFlujo',
@@ -2184,7 +2183,8 @@ public function getAll(Request $request)
             'ticketflujo:idTicketFlujo,idTicket,idEstadflujo',
             'ticketflujo.estadoflujo:idEstadflujo,descripcion,color',
             'manejoEnvio:idmanejo_envio,idTickets,tipo',
-            'contactofinal:idContactoFinal,nombre_completo', // 👈 RELACIÓN CORREGIDA
+            'contactofinal:idContactoFinal,nombre_completo',
+            'clientegeneral:idClienteGeneral,descripcion', // ✅ AÑADE ESTA RELACIÓN
 
             // Última visita programada
             'visitas' => fn($q) => $q->select('idVisitas', 'idTickets', 'fecha_programada')
@@ -2203,10 +2203,22 @@ public function getAll(Request $request)
                 }),
         ]);
 
-        // Filtros
+        // Filtros - VERIFICA QUE SE ESTÉ RECIBIENDO EL PARÁMETRO
         if ($request->filled('clienteGeneral')) {
+            Log::info("🔍 Aplicando filtro por clienteGeneral:", ['clienteGeneral' => $request->clienteGeneral]);
             $query->where('idClienteGeneral', $request->clienteGeneral);
+        } else {
+            Log::info("🔍 No se recibió clienteGeneral o está vacío");
         }
+
+        // Mostrar todos los parámetros recibidos para debug
+        Log::info("📋 Parámetros recibidos en getAll:", [
+            'all_params' => $request->all(),
+            'clienteGeneral_value' => $request->input('clienteGeneral'),
+            'tipoTicket_value' => $request->input('tipoTicket'),
+            'startDate' => $request->input('startDate'),
+            'endDate' => $request->input('endDate')
+        ]);
 
         // 👈 NUEVO FILTRO POR CONTACTO FINAL
         if ($request->filled('contactoFinal') && $request->contactoFinal != '') {
@@ -2238,7 +2250,8 @@ public function getAll(Request $request)
                     ->orWhereHas('tienda', fn($q) => $q->where('nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
                     ->orWhereHas('visitas.tecnico', fn($q) => $q->where('Nombre', 'LIKE', "%{$searchValue}%"))
-                    ->orWhereHas('contactofinal', fn($q) => $q->where('nombre_completo', 'LIKE', "%{$searchValue}%")) // 👈 BÚSQUEDA EN CONTACTO
+                    ->orWhereHas('contactofinal', fn($q) => $q->where('nombre_completo', 'LIKE', "%{$searchValue}%"))
+                    ->orWhereHas('clientegeneral', fn($q) => $q->where('descripcion', 'LIKE', "%{$searchValue}%")) // ✅ BÚSQUEDA EN CLIENTE GENERAL
                     ->orWhereHas(
                         'ticketflujo.estadoFlujo',
                         fn($q) =>
@@ -2277,6 +2290,14 @@ public function getAll(Request $request)
                 array_walk_recursive($arr, fn(&$v) => $v = is_string($v) ? mb_convert_encoding($v, 'UTF-8', 'UTF-8') : $v);
                 return $arr;
             });
+
+        // Log para ver qué datos se están devolviendo
+        Log::info("📤 Datos devueltos:", [
+            'total' => $recordsTotal,
+            'filtrados' => $recordsFiltered,
+            'devueltos' => count($ordenes),
+            'primer_elemento' => $ordenes->first() ?? 'No hay datos'
+        ]);
 
         return response()->json([
             "draw" => intval($request->input('draw')),
@@ -2539,7 +2560,7 @@ public function getAll(Request $request)
             'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
             'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
             'idTienda' => 'required|exists:tienda,idTienda',
-
+            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
             'fallaReportada' => 'nullable|string',
         ]);
 
@@ -2554,7 +2575,7 @@ public function getAll(Request $request)
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
         $orden->tipoServicio = $request->tipoServicio;
-
+        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
         $orden->fallaReportada = $request->fallaReportada;
 
         // Guardar los cambios

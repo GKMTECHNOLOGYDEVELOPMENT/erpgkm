@@ -12,15 +12,11 @@
     <!-- Botón para abrir el modal -->
     <!-- Botón para abrir el modal -->
     <div class="flex items-center gap-2 mt-4">
-        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK SOPORTE'))
             <button id="abrirModalAgregarImagen" class="btn btn-primary"
                 @click="$dispatch('toggle-modal-agregar-imagen')">
                 Agregar Imagen
             </button>
-        @endif
-        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK SOPORTE'))
             <button id="eliminarTodas" class="btn btn-danger hidden">Eliminar Todas</button>
-        @endif
     </div>
     <!-- Swiper Container -->
     <div class="swiper w-full max-w-4x2 h-80 rounded-lg overflow-hidden mt-4" id="slider5">

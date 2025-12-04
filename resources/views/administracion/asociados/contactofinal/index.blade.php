@@ -12,9 +12,68 @@
         #myTableContactoFinal {
             min-width: 1000px;
         }
+        
+        /* Estilos para el botón de limpiar búsqueda */
+        #clearInputContacto {
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        /* Ocultar el buscador de DataTables */
+        .dataTables_filter {
+            display: none !important;
+        }
+        
+        /* Estilos para el selector de registros por página */
+        .dataTables_length {
+            margin-bottom: 15px;
+        }
+        
+        /* Estilos responsive */
+        @media (max-width: 768px) {
+            .panel {
+                padding: 10px;
+            }
+            
+            #myTableContactoFinal_wrapper {
+                overflow-x: auto;
+            }
+            
+            .flex-wrap {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .relative.w-64 {
+                width: 100%;
+            }
+            
+            .mb-4.flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .mb-4.flex .relative.w-64 {
+                width: 100%;
+            }
+            
+            .mb-4.flex button {
+                width: 100%;
+            }
+            
+            .dataTables_length {
+                margin-left: 10px;
+            }
+            
+            .dataTables_info {
+                margin-left: 10px;
+                margin-bottom: 10px;
+            }
+        }
     </style>
 
     <div x-data="contactoFinalTable">
+        <!-- Breadcrumb -->
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
                 <li>
@@ -26,10 +85,11 @@
             </ul>
         </div>
 
+        <!-- Panel Principal -->
         <div class="panel mt-6">
+            <!-- Botón Agregar Contacto -->
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
-                    <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm flex items-center gap-2"
                         @click="$dispatch('toggle-modal')">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
@@ -42,24 +102,25 @@
                 </div>
             </div>
 
+            <!-- Buscador Personalizado (ÚNICO BUSCADOR) -->
             <div class="mb-4 flex justify-end items-center gap-3">
-                <!-- Input de búsqueda -->
                 <div class="relative w-64">
                     <input type="text" id="searchInputContacto" placeholder="Buscar contactos..."
                         class="pr-10 pl-4 py-2 text-sm w-full border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
                     <button type="button" id="clearInputContacto"
                         class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hidden">
-                        <i class="fas fa-times-circle"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
                     </button>
                 </div>
-
-                <!-- Botón Buscar -->
                 <button id="btnSearchContacto"
                     class="btn btn-sm bg-primary text-white hover:bg-primary-dark px-4 py-2 rounded shadow-sm">
                     Buscar
                 </button>
             </div>
 
+            <!-- Tabla de Contactos Finales -->
             <table id="myTableContactoFinal" class="w-full min-w-[1000px] table whitespace-nowrap">
                 <thead>
                     <tr>
@@ -138,6 +199,15 @@
                                 <input id="telefono" type="text" name="telefono" class="form-input w-full"
                                     placeholder="Ingrese el teléfono">
                             </div>
+
+                            <!-- Estado -->
+                            <div>
+                                <label for="estado" class="block text-sm font-medium">Estado</label>
+                                <select id="estado" name="estado" class="form-select w-full">
+                                    <option value="Activo" selected>Activo</option>
+                                    <option value="Inactivo">Inactivo</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- Botones -->
@@ -156,13 +226,14 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
 
     <script>
-        // JavaScript similar al que ya tienes para clientes, adaptado para contactos finales
         document.addEventListener("alpine:init", () => {
             Alpine.data("contactoFinalTable", () => ({
                 datatable: null,
+                searchInput: null,
 
                 init() {
                     this.fetchDataAndInitTable();
+                    this.initSearchFunctionality();
                 },
 
                 async fetchDataAndInitTable() {
@@ -177,8 +248,16 @@
                             { data: 'tipo_documento', className: 'text-center' },
                             { data: 'numero_documento', className: 'text-center' },
                             { data: 'nombre_completo', className: 'text-center' },
-                            { data: 'correo', className: 'text-center', render: email => email || 'N/A' },
-                            { data: 'telefono', className: 'text-center', render: telefono => telefono || 'N/A' },
+                            { 
+                                data: 'correo', 
+                                className: 'text-center', 
+                                render: email => email || '<span class="text-gray-400">N/A</span>' 
+                            },
+                            { 
+                                data: 'telefono', 
+                                className: 'text-center', 
+                                render: telefono => telefono || '<span class="text-gray-400">N/A</span>' 
+                            },
                             {
                                 data: 'estado',
                                 className: 'text-center',
@@ -194,13 +273,18 @@
                                 render: (_, __, row) => {
                                     return `
                                         <div class="flex justify-center items-center gap-2">
-                                            <a href="/contactofinal/${row.idContactoFinal}/edit" x-tooltip="Editar">
+                                            <a href="/contactofinal/${row.idContactoFinal}/edit" 
+                                               class="text-primary hover:text-primary-dark"
+                                               x-tooltip="Editar">
                                                 <svg width="24" height="24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                                     <path d="M15.29 3.15L14.36 4.08 5.84 12.6c-.58.58-.87.87-1.11 1.2-.29.38-.54.79-.75 1.2-.17.36-.3.73-.56 1.51L2.32 19.8l-.27.8c-.13.38-.03.8.27 1.1.3.3.72.4 1.1.27l.8-.27 3.28-1.1c.78-.26 1.15-.39 1.51-.56.41-.21.82-.46 1.2-.75.33-.24.62-.53 1.2-1.11l8.52-8.52.93-.93c1.54-1.54 1.54-4.04 0-5.58-1.54-1.54-4.04-1.54-5.58 0z" stroke-width="1.5"/>
                                                     <path d="M14.36 4.08s.12 1.97 1.85 3.74c1.73 1.77 3.74 1.79 3.74 1.79M4.2 21.68l-1.88-1.88" opacity="0.5" stroke-width="1.5"/>
                                                 </svg>
                                             </a>
-                                            <button type="button" x-tooltip="Eliminar" class="text-danger" onclick="deleteContactoFinal(${row.idContactoFinal})">
+                                            <button type="button" 
+                                                    class="text-danger hover:text-red-700" 
+                                                    x-tooltip="Eliminar" 
+                                                    onclick="deleteContactoFinal(${row.idContactoFinal})">
                                                 <svg width="24" height="24" class="w-5 h-5" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                                     <path d="M9.17 4c.41-1.17 1.52-2 2.83-2s2.42.83 2.83 2" opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
                                                     <path d="M20.5 6h-17" stroke-width="1.5" stroke-linecap="round"/>
@@ -218,21 +302,80 @@
                         autoWidth: false,
                         order: [[0, 'desc']],
                         pageLength: 10,
+                        lengthMenu: [5, 10, 25, 50],
+                        // CONFIGURACIÓN PARA OCULTAR EL BUSCADOR DE DATATABLES
+                        dom: '<"flex justify-between items-center mb-4"<"flex items-center"l><"flex items-center"i>><"overflow-x-auto"t><"flex justify-between items-center mt-4"<"flex items-center"p>>',
                         language: {
-                            search: 'Buscar...',
+                            search: '', // Vacío para que no muestre el label de búsqueda
+                            searchPlaceholder: '', // Vacío también
                             zeroRecords: 'No se encontraron registros',
                             lengthMenu: 'Mostrar _MENU_ registros por página',
                             loadingRecords: 'Cargando...',
                             info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+                            infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+                            infoFiltered: '(filtrado de _MAX_ registros totales)',
                             paginate: {
                                 first: 'Primero',
                                 last: 'Último',
                                 next: 'Siguiente',
                                 previous: 'Anterior'
                             }
+                        },
+                        drawCallback: function() {
+                            // Actualizar información de paginación
+                            const info = this.api().page.info();
+                            $('.dataTables_info').text(`Mostrando ${info.start + 1} a ${info.end} de ${info.recordsTotal} registros`);
                         }
                     });
                 },
+
+                initSearchFunctionality() {
+                    const searchInput = document.getElementById('searchInputContacto');
+                    const searchBtn = document.getElementById('btnSearchContacto');
+                    const clearBtn = document.getElementById('clearInputContacto');
+
+                    // Esperar a que DataTable se inicialice
+                    setTimeout(() => {
+                        // Buscar al hacer clic
+                        searchBtn.addEventListener('click', () => {
+                            if (this.datatable) {
+                                this.datatable.search(searchInput.value).draw();
+                            }
+                        });
+
+                        // Buscar al presionar Enter
+                        searchInput.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (this.datatable) {
+                                    this.datatable.search(searchInput.value).draw();
+                                }
+                            }
+                        });
+
+                        // Mostrar/ocultar botón de limpiar
+                        searchInput.addEventListener('input', () => {
+                            if (searchInput.value.length > 0) {
+                                clearBtn.classList.remove('hidden');
+                            } else {
+                                clearBtn.classList.add('hidden');
+                                if (this.datatable) {
+                                    this.datatable.search('').draw();
+                                }
+                            }
+                        });
+
+                        // Limpiar búsqueda
+                        clearBtn.addEventListener('click', () => {
+                            searchInput.value = '';
+                            clearBtn.classList.add('hidden');
+                            if (this.datatable) {
+                                this.datatable.search('').draw();
+                            }
+                            searchInput.focus();
+                        });
+                    }, 1000);
+                }
             }));
         });
 
@@ -245,6 +388,8 @@
                 showCancelButton: true,
                 confirmButtonText: 'Eliminar',
                 cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 padding: '2em',
                 customClass: 'sweet-alerts',
             }).then((result) => {
@@ -253,6 +398,7 @@
                         method: "DELETE",
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
                         },
                     })
                     .then(async response => {
@@ -285,76 +431,72 @@
             });
         };
 
-       // Form submission para contacto final - VERSIÓN CORREGIDA
-document.getElementById('contactoFinalForm').addEventListener('submit', function (event) {
-    event.preventDefault();
+        // Form submission para contacto final
+        document.getElementById('contactoFinalForm').addEventListener('submit', function (event) {
+            event.preventDefault();
 
-    let formData = new FormData(this);
+            let formData = new FormData(this);
 
-    fetch('/contactofinal/store', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        },
-        body: formData,
-    })
-    .then(response => {
-        // Primero verificar el estado de la respuesta
-        if (!response.ok) {
-            throw new Error('Error en la respuesta del servidor');
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Respuesta recibida:', data); // Para debug
-        
-        if (data.success) {
-            Swal.fire({
-                title: '¡Éxito!',
-                text: data.message,
-                icon: 'success',
-                customClass: 'sweet-alerts',
-                timer: 1500,
-                showConfirmButton: false,
+            fetch('/contactofinal/store', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message,
+                        icon: 'success',
+                        customClass: 'sweet-alerts',
+                        timer: 1500,
+                        showConfirmButton: false,
+                    });
+
+                    // Limpiar formulario
+                    document.getElementById('contactoFinalForm').reset();
+                    
+                    // Recargar tabla
+                    if ($.fn.DataTable.isDataTable('#myTableContactoFinal')) {
+                        $('#myTableContactoFinal').DataTable().ajax.reload(null, false);
+                    }
+                    
+                    // Cerrar modal
+                    const modalEvent = new CustomEvent('toggle-modal');
+                    window.dispatchEvent(modalEvent);
+                    
+                } else {
+                    let errorMessage = data.message || 'Error desconocido';
+                    if (data.errors) {
+                        errorMessage = Object.values(data.errors).flat().join(', ');
+                    }
+                    
+                    Swal.fire({
+                        title: 'Error',
+                        text: errorMessage,
+                        icon: 'error',
+                        customClass: 'sweet-alerts',
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error en fetch:', error);
+                Swal.fire({
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
+                    icon: 'error',
+                    customClass: 'sweet-alerts',
+                });
             });
-
-            // Limpiar formulario
-            document.getElementById('contactoFinalForm').reset();
-            
-            // Recargar tabla si existe
-            if ($.fn.DataTable.isDataTable('#myTableContactoFinal')) {
-                $('#myTableContactoFinal').DataTable().ajax.reload(null, false);
-            }
-            
-            // Cerrar modal de Alpine.js
-            const modalEvent = new CustomEvent('toggle-modal');
-            window.dispatchEvent(modalEvent);
-            
-        } else {
-            // Mostrar errores de validación si existen
-            let errorMessage = data.message || 'Error desconocido';
-            if (data.errors) {
-                errorMessage = Object.values(data.errors).flat().join(', ');
-            }
-            
-            Swal.fire({
-                title: 'Error',
-                text: errorMessage,
-                icon: 'error',
-                customClass: 'sweet-alerts',
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error en fetch:', error);
-        Swal.fire({
-            title: 'Error de conexión',
-            text: 'No se pudo conectar con el servidor. Verifica tu conexión.',
-            icon: 'error',
-            customClass: 'sweet-alerts',
         });
-    });
-});
     </script>
 </x-layout.default>

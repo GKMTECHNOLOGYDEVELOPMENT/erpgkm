@@ -12,13 +12,14 @@
     <!-- Botón para abrir el modal -->
     <!-- Botón para abrir el modal -->
     <div class="flex items-center gap-2 mt-4">
-        @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR IMAGEN HELP DESK LABORATORIO'))
-        <button id="abrirModalAgregarImagen" class="btn btn-primary" @click="$dispatch('toggle-modal-agregar-imagen')">
-            Agregar Imagen
-        </button>
+        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK SOPORTE'))
+            <button id="abrirModalAgregarImagen" class="btn btn-primary"
+                @click="$dispatch('toggle-modal-agregar-imagen')">
+                Agregar Imagen
+            </button>
         @endif
-        @if (\App\Helpers\PermisoHelper::tienePermiso('ELIMINAR IMAGENES TODAS HELP DESK LABORATORIO'))
-        <button id="eliminarTodas" class="btn btn-danger hidden">Eliminar Todas</button>
+        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR DETALLES DE EQUIPO RETIRAR HELP DESK SOPORTE'))
+            <button id="eliminarTodas" class="btn btn-danger hidden">Eliminar Todas</button>
         @endif
     </div>
     <!-- Swiper Container -->
@@ -62,7 +63,7 @@
                 <!-- Header del Modal -->
                 <div class="flex items-center justify-between bg-[#fbfbfb] dark:bg-[#121c2c] px-5 py-3">
                     <h5 class="font-bold text-lg">Agregar Imágenes</h5>
-                    <button class="text-gray-600 hover:text-black" @click="open = false">
+                    <button id="cerrarModal" class="text-gray-600 hover:text-black">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                             fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                             stroke-linejoin="round" class="w-6 h-6">
@@ -218,8 +219,6 @@
                 imagePreviewContainer.appendChild(preview);
             });
         });
-
-
 
 
 
@@ -380,7 +379,6 @@
         } else {
             console.error("guardarImagenBtn no encontrado en el DOM");
         }
-
 
         document.getElementById("eliminarTodas").addEventListener("click", function() {
             if (!confirm(

@@ -1910,6 +1910,7 @@ Route::prefix('contactofinal')->group(function () {
     Route::put('/{id}', [ContactoFinalController::class, 'update'])->name('contactofinal.update');
     Route::delete('/{id}', [ContactoFinalController::class, 'destroy'])->name('contactofinal.destroy');
     Route::get('/all', [ContactoFinalController::class, 'getAll'])->name('contactofinal.getAll');
+
 });
 
 

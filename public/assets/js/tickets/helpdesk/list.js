@@ -5,57 +5,118 @@ document.addEventListener('alpine:init', () => {
         marcas: [],
         marcaFilter: '',
         clienteGeneralFilter: '',
+        clienteGenerales: [],
+        clienteGeneralesLoading: true,
+        contactoFinalFilter: '',
+        contactosPorCliente: [],
+        contactoFinalLoading: false,
         startDate: '',
         endDate: '',
         debouncedFetch: null,
         isLoading: false,
 
         init() {
-            this.$nextTick(() => {
+            console.log('🔵 [INIT] Alpine componente multipleTable inicializando');
+            
+            // ✅ Inicializar debouncedFetch inmediatamente
+            this.debouncedFetch = this.debounce(() => {
+                console.log('🔄 [DEBOUNCE] Ejecutando debouncedFetch');
+                this.fetchDataAndInitTable();
+            }, 300);
+            
+            this.$nextTick(async () => {
                 this.injectStyles();
-                this.fetchMarcas();
-
-                // ✅ Inicializar debounce
-                this.debouncedFetch = this.debounce(this.fetchDataAndInitTable, 300);
+                await this.fetchMarcas();
+                await this.fetchClientesGenerales();
 
                 // ✅ Primera carga
+                console.log('📥 [INIT] Realizando primera carga de datos');
                 this.fetchDataAndInitTable();
 
-                this.$watch('marcaFilter', () => this.debouncedFetch());
-                this.$watch('startDate', () => this.debouncedFetch());
-                this.$watch('endDate', () => this.debouncedFetch());
-                this.$watch('clienteGeneralFilter', () => this.debouncedFetch());
-
-                // ✅ Manejar evento de cambio de cliente general
-                this.$el.addEventListener('cliente-general-cambio', (e) => {
-                    this.clienteGeneralFilter = e.detail;
-                    this.isLoading = true;
-                    this.debouncedFetch();
+                // Observadores
+                this.$watch('marcaFilter', () => {
+                    console.log('👁️ [WATCHER] marcaFilter cambiado:', this.marcaFilter);
+                    if (this.debouncedFetch) this.debouncedFetch();
+                });
+                this.$watch('startDate', () => {
+                    console.log('👁️ [WATCHER] startDate cambiado:', this.startDate);
+                    if (this.debouncedFetch) this.debouncedFetch();
+                });
+                this.$watch('endDate', () => {
+                    console.log('👁️ [WATCHER] endDate cambiado:', this.endDate);
+                    if (this.debouncedFetch) this.debouncedFetch();
+                });
+                this.$watch('clienteGeneralFilter', () => {
+                    console.log('👁️ [WATCHER] clienteGeneralFilter cambiado:', this.clienteGeneralFilter);
+                    if (this.debouncedFetch) this.debouncedFetch();
+                });
+                this.$watch('contactoFinalFilter', () => {
+                    console.log('👁️ [WATCHER] contactoFinalFilter cambiado:', this.contactoFinalFilter);
+                    if (this.debouncedFetch) this.debouncedFetch();
                 });
             });
+            
+            console.log('✅ [INIT] Alpine componente inicializado completamente');
         },
 
         // ✅ Función para resetear filtros
         resetFilters() {
+            console.log('🔄 [RESET] Reseteando todos los filtros');
+            
             this.startDate = '';
             this.endDate = '';
             this.marcaFilter = '';
             this.clienteGeneralFilter = '';
+            this.contactoFinalFilter = '';
+            this.contactosPorCliente = [];
             
-            // Resetear el select
-            const selectEl = document.getElementById('clienteGeneralFilter');
-            if (selectEl) {
-                selectEl.value = '';
-                // Re-inicializar NiceSelect si está disponible
-                if (typeof NiceSelect !== 'undefined' && NiceSelect.bind) {
-                    NiceSelect.bind(selectEl);
-                }
+            // Resetear selects
+            const selectCliente = document.getElementById('clienteGeneralFilter');
+            const selectContacto = document.getElementById('contactoFinalFilter');
+            
+            if (selectCliente) selectCliente.value = '';
+            if (selectContacto) selectContacto.value = '';
+            
+            if (this.debouncedFetch) {
+                this.debouncedFetch();
             }
-            
-            this.debouncedFetch();
         },
 
-        // ✅ función debounce
+        // ✅ Función para cargar clientes generales
+        async fetchClientesGenerales() {
+            console.log('📥 [FETCH] Cargando clientes generales');
+            this.clienteGeneralesLoading = true;
+            try {
+                const response = await fetch('/api/clientegeneralfiltros/2');
+                if (!response.ok) throw new Error('Error al cargar clientes');
+                this.clienteGenerales = await response.json();
+                console.log('✅ [FETCH] Clientes generales cargados:', this.clienteGenerales.length);
+            } catch (error) {
+                console.error('❌ [FETCH] Error cargando clientes generales:', error);
+                this.clienteGenerales = [];
+            } finally {
+                this.clienteGeneralesLoading = false;
+            }
+        },
+
+        // ✅ Función para cargar contactos por cliente general
+        async fetchContactosPorCliente(idClienteGeneral) {
+            console.log('📥 [FETCH] Cargando contactos para cliente:', idClienteGeneral);
+            this.contactoFinalLoading = true;
+            try {
+                const response = await fetch(`/api/contactos-por-cliente-general/${idClienteGeneral}`);
+                if (!response.ok) throw new Error('Error al cargar contactos');
+                this.contactosPorCliente = await response.json();
+                console.log('✅ [FETCH] Contactos cargados:', this.contactosPorCliente.length);
+            } catch (error) {
+                console.error('❌ [FETCH] Error cargando contactos:', error);
+                this.contactosPorCliente = [];
+            } finally {
+                this.contactoFinalLoading = false;
+            }
+        },
+
+        // ✅ función debounce mejorada
         debounce(func, delay) {
             let timeout;
             return (...args) => {
@@ -111,38 +172,96 @@ document.addEventListener('alpine:init', () => {
         },
 
         fetchDataAndInitTable() {
+            console.log('📊 [FETCH] Iniciando fetchDataAndInitTable');
+            console.log('📊 [FETCH] Parámetros actuales:', {
+                clienteGeneralFilter: this.clienteGeneralFilter,
+                contactoFinalFilter: this.contactoFinalFilter,
+                startDate: this.startDate,
+                endDate: this.endDate,
+                marcaFilter: this.marcaFilter
+            });
+            
             this.isLoading = true;
 
             // 🔹 Destruir DataTable antes de inicializarlo de nuevo
             if ($.fn.DataTable.isDataTable('#myTable1')) {
+                console.log('🗑️ [FETCH] Destruyendo DataTable existente');
                 $('#myTable1').DataTable().destroy();
             }
 
+            console.log('🌐 [FETCH] Configurando DataTable con AJAX');
+            console.log('🌐 [FETCH] URL AJAX: /api/ordenes/helpdesk');
+            
             this.datatable1 = $('#myTable1').DataTable({
                 processing: false,
                 serverSide: true,
                 ordering: false,
-                order: [[1, 'desc']], // 👈 ORDENAR POR ID (columna 1)
+                order: [[1, 'desc']],
                 ajax: {
                     url: '/api/ordenes/helpdesk',
                     type: 'GET',
                     data: (d) => {
-                        d.tipoTicket = 2;
-                        d.clienteGeneral = this.clienteGeneralFilter;
-                        d.startDate = this.startDate;
-                        d.endDate = this.endDate;
+                        const params = {
+                            tipoTicket: 2,
+                            clienteGeneral: this.clienteGeneralFilter,
+                            contactoFinal: this.contactoFinalFilter === 'sin_contacto' ? 'null' : this.contactoFinalFilter,
+                            startDate: this.startDate,
+                            endDate: this.endDate,
+                            // Datatables parameters
+                            draw: d.draw,
+                            start: d.start,
+                            length: d.length,
+                            search: d.search
+                        };
+                        
+                        console.log('🔍 [AJAX] Parámetros enviados al servidor:', params);
+                        return params;
                     },
                     beforeSend: () => {
+                        console.log('⏳ [AJAX] Enviando petición AJAX');
                         this.isLoading = true;
                     },
                     complete: () => {
+                        console.log('✅ [AJAX] Petición AJAX completada');
                         this.isLoading = false;
                     },
                     dataSrc: (json) => {
-                        console.log('📦 Data completa:', json.data);
-                        this.ordenesData = json.data;
-                        return json.data;
+                        console.log('📦 [AJAX] Respuesta recibida del servidor:', {
+                            draw: json.draw,
+                            recordsTotal: json.recordsTotal,
+                            recordsFiltered: json.recordsFiltered,
+                            dataLength: json.data ? json.data.length : 0,
+                            error: json.error || 'No hay error'
+                        });
+                        
+                        if (json.error) {
+                            console.error('❌ [AJAX] Error del servidor:', json.error);
+                        }
+                        
+                        this.ordenesData = json.data || [];
+                        return json.data || [];
                     },
+                    error: (xhr, error, thrown) => {
+                        console.error('❌ [AJAX] Error en petición AJAX:', {
+                            xhr: xhr,
+                            error: error,
+                            thrown: thrown,
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText
+                        });
+                        
+                        if (xhr.responseText) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.error) {
+                                    alert('Error al cargar datos: ' + response.error);
+                                }
+                            } catch (e) {
+                                console.error('Error parseando respuesta:', e);
+                            }
+                        }
+                    }
                 },
                 columns: [
                     { 
@@ -172,6 +291,18 @@ document.addEventListener('alpine:init', () => {
                     },
                     { title: 'CLIENTE', data: 'cliente.nombre', defaultContent: 'N/A' },
                     { title: 'TIENDA', data: 'tienda.nombre', defaultContent: 'N/A' },
+                    { 
+                        title: 'CLIENTE GENERAL',
+                        data: 'clientegeneral.descripcion',
+                        defaultContent: 'N/A',
+                        visible: false
+                    },
+                    { 
+                        title: 'CONTACTO FINAL',
+                        data: 'contactofinal.nombre_completo',
+                        defaultContent: 'N/A',
+                        visible: false
+                    },
                     {
                         title: 'TIPO TEXTO',
                         data: 'tipoServicio',
@@ -225,7 +356,11 @@ document.addEventListener('alpine:init', () => {
                         render: (data) => this.getMoreButton(data) 
                     },
                 ],
-                columnDefs: [{ targets: '_all', className: 'text-center' }],
+                columnDefs: [
+                    { targets: '_all', className: 'text-center' },
+                    { targets: 7, visible: false }, // CLIENTE GENERAL
+                    { targets: 8, visible: false }  // CONTACTO FINAL
+                ],
                 searching: true,
                 paging: true,
                 pageLength: 10,
@@ -244,6 +379,8 @@ document.addEventListener('alpine:init', () => {
                 },
                 dom: 'rt<"flex flex-wrap justify-between items-center mt-4"ilp>',
                 initComplete: function () {
+                    console.log('✅ [DATATABLE] DataTable inicializado completamente');
+                    
                     setTimeout(() => {
                         const wrapper = document.querySelector('.dataTables_wrapper');
                         const scrollTopContainer = document.getElementById('scroll-top');
@@ -297,6 +434,8 @@ document.addEventListener('alpine:init', () => {
                     }
                 },
                 drawCallback: () => {
+                    console.log('🔄 [DATATABLE] Tabla redibujada');
+                    
                     $('#myTable1 tbody tr.estado-bg').each(function () {
                         const bgColor = $(this).attr('data-bg');
                         $(this).attr('style', `background-color: ${bgColor} !important;`);
@@ -318,6 +457,7 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
+        
         getEditButton(data) {
             // Normaliza a array
             const envios = Array.isArray(data.manejo_envio) ? data.manejo_envio : data.manejo_envio ? [data.manejo_envio] : [];
@@ -398,8 +538,9 @@ document.addEventListener('alpine:init', () => {
                     const estadoColor = record.ticketflujo?.estadoflujo?.color || '';
                     const estadoDescripcion = record.ticketflujo?.estadoflujo?.descripcion || 'N/A';
                     const tecnicoNombre = record.seleccionar_visita?.visita?.tecnico?.Nombre || 'N/A';
+                    const contactoFinal = record.contactofinal?.nombre_completo || 'Sin contacto';
 
-                    let newRow = $('<tr class="expanded-row"><td colspan="11"></td></tr>');
+                    let newRow = $('<tr class="expanded-row"><td colspan="13"></td></tr>'); // 👈 Actualizado a 13 columnas
                     newRow.find('td').attr('style', `background-color: ${estadoColor} !important; color: black !important;`);
                     newRow.find('td').html(`
                         <div class="p-2" style="font-size: 13px;">
@@ -407,6 +548,7 @@ document.addEventListener('alpine:init', () => {
                                 <li><strong>SOLUCIÓN:</strong> <span class="solucion-text">${justificacion}</span></li>
                                 <li><strong>ESTADO FLUJO:</strong> ${estadoDescripcion}</li>
                                 <li><strong>TÉCNICO:</strong> ${tecnicoNombre}</li>
+                                <li><strong>CONTACTO FINAL:</strong> ${contactoFinal}</li>
                             </ul>
                         </div>
                     `);
@@ -427,6 +569,8 @@ document.addEventListener('alpine:init', () => {
     }
 
     $(document).ready(function () {
+        console.log('📄 [DOCUMENT READY] Documento completamente cargado');
+        
         setTimeout(() => {
             $('.dataTables_length select').css('background-image', 'none');
         }, 500);
