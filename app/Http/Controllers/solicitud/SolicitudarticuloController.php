@@ -21,51 +21,55 @@ use Illuminate\Support\Facades\Log;
 class SolicitudarticuloController extends Controller
 {
     public function index()
-    {
-        $query = DB::table('solicitudesordenes as so')
-            ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.codigo_cotizacion', // Asegúrate de incluir este campo
-                'so.estado',
-                'so.fechacreacion',
-                'so.fecharequerida',
-                'so.niveldeurgencia',
-                'so.tiposervicio',
-                'so.tipoorden',
-                'so.cantidad as total_productos',
-                'so.totalcantidadproductos',
-                'so.observaciones',
-                DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante")
-            )
-            ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
-            ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto']);
+{
+    $query = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.codigo_cotizacion',
+            'so.estado',
+            'so.fechacreacion',
+            'so.fecharequerida',
+            'so.niveldeurgencia',
+            'so.tiposervicio',
+            'so.tipoorden',
+            'so.cantidad as total_productos',
+            'so.totalcantidadproductos',
+            'so.observaciones',
+            'so.numeroticket', // Nuevo campo para mostrar número de ticket
+            DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante")
+        )
+        ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+        ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto', 'solicitud_repuesto_provincia']);
 
-        // Aplicar filtro por tipo
-        if (request()->has('tipo') && !empty(request('tipo'))) {
-            $query->where('so.tipoorden', request('tipo'));
-        }
-
-        // Aplicar filtro por estado
-        if (request()->has('estado') && !empty(request('estado'))) {
-            $query->where('so.estado', request('estado'));
-        }
-
-        // Aplicar filtro por urgencia
-        if (request()->has('urgencia') && !empty(request('urgencia'))) {
-            $query->where('so.niveldeurgencia', request('urgencia'));
-        }
-
-        // Aplicar filtro por búsqueda
-        if (request()->has('search') && !empty(request('search'))) {
-            $search = request('search');
-            $query->where('so.codigo', 'LIKE', "%{$search}%");
-        }
-
-        $solicitudes = $query->orderBy('so.fechacreacion', 'desc')->paginate(10);
-
-        return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
+    // Aplicar filtro por tipo
+    if (request()->has('tipo') && !empty(request('tipo'))) {
+        $query->where('so.tipoorden', request('tipo'));
     }
+
+    // Aplicar filtro por estado
+    if (request()->has('estado') && !empty(request('estado'))) {
+        $query->where('so.estado', request('estado'));
+    }
+
+    // Aplicar filtro por urgencia
+    if (request()->has('urgencia') && !empty(request('urgencia'))) {
+        $query->where('so.niveldeurgencia', request('urgencia'));
+    }
+
+    // Aplicar filtro por búsqueda
+    if (request()->has('search') && !empty(request('search'))) {
+        $search = request('search');
+        $query->where(function($q) use ($search) {
+            $q->where('so.codigo', 'LIKE', "%{$search}%")
+              ->orWhere('so.numeroticket', 'LIKE', "%{$search}%"); // Buscar también por número de ticket
+        });
+    }
+
+    $solicitudes = $query->orderBy('so.fechacreacion', 'desc')->paginate(10);
+
+    return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
+}
 
 
     

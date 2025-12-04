@@ -756,7 +756,35 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
+    Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
+    ->name('solicitudrepuesto.store-provincia')
+    ->middleware('auth');
+
 Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
+    ->name('conformidad-pdf');
+
+});
+
+
+Route::prefix('solicitudrepuestoprovincia')->name('solicitudrepuestoprovincia.')->group(function () {
+    Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
+    Route::get('/create', [SolicitudrepuestoController::class, 'create'])->name('create');
+    Route::get('/create/provincia', [SolicitudrepuestoController::class, 'createProvincia'])->name('create.provincia');
+    Route::post('/store', [SolicitudrepuestoController::class, 'store'])->name('store');
+    Route::get('/{id}', [SolicitudrepuestoController::class, 'showprovincia'])->name('show');
+    Route::get('/{id}/edit', [SolicitudrepuestoController::class, 'editProvincia'])->name('edit');
+    Route::put('/{id}', [SolicitudrepuestoController::class, 'updateProvincia'])->name('update');
+    Route::delete('/{id}', [SolicitudrepuestoController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}/opciones', [SolicitudrepuestoController::class, 'opcionesProvincia'])->name('opciones');
+    Route::get('/{id}/gestionar', [SolicitudrepuestoController::class, 'gestionar'])->name('gestionar'); // Editar una categoría
+    Route::post('/{id}/aceptar-provincia', [SolicitudRepuestoController::class, 'aceptarProvincia'])->name('solicitudrepuesto.aceptar');
+    Route::post('/{id}/aceptar-provincia-individual', [SolicitudRepuestoController::class, 'aceptarProvinciaIndividual'])->name('solicitudrepuesto.aceptar.individual');
+
+    Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
+    ->name('solicitudrepuesto.store-provincia')
+    ->middleware('auth');
+
+Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidadProvincia'])
     ->name('conformidad-pdf');
 
 });

@@ -712,3 +712,15 @@ Route::get('/contactos-finales/{idClienteGeneral}', function ($idClienteGeneral)
         return response()->json([], 500);
     }
 });
+
+
+
+// Obtener información de CAST
+Route::get('/cast-info/{id}', function($id) {
+    $cast = DB::table('cast')
+        ->where('idCast', $id)
+        ->where('estado', 1)
+        ->first();
+    
+    return response()->json($cast);
+});

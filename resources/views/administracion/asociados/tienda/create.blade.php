@@ -182,7 +182,7 @@
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
     <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1XZ84dlEl7hAAsMR-myjaMpPURq5G3tE&libraries=places&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDQKbJK_7JMR45InjGsGuHQcsQ7toEVIf4&libraries=places&callback=initMap">
 </script>
 
 <script>
@@ -306,7 +306,7 @@
 
         async function expandShortURL(shortURL) {
             try {
-                const response = await fetch(`http://127.0.0.1:8000/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
+                const response = await fetch(`https://erp.beyritech.com/ubicacion/direccion.php?url=${encodeURIComponent(shortURL)}`);
                 const data = await response.json();
                 if (data.expanded_url) {
                     extractCoordinates(data.expanded_url);
