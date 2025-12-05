@@ -1,14 +1,27 @@
 <x-layout.default>
 
     <!-- Incluir el archivo CSS de Nice Select -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    
+
     <!-- Toastr CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
 
 
-
+    <style>
+        /* Estilo general del select */
+        .select2-container--default .select2-selection--single {
+            /* azul claro suave */
+            border-radius: 0.5rem;
+            height: 2.5rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px rgba(67, 97, 238, 0.1);
+        }
+    </style>
 
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -19,7 +32,7 @@
                 <span>Agregar Usuario</span>
             </li>
         </ul>
-        
+
         <div class="pt-5">
             <div x-data="{ tab: 'home' }">
                 <ul
@@ -40,11 +53,11 @@
                             Perfil
                         </a>
                     </li>
-                   
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
-                    <form id="usuario-form" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+                        <form id="usuario-form" method="POST" enctype="multipart/form-data"
+                            class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
 
                             @csrf
                             <h6 class="text-lg font-bold mb-5">Información General</h6>
@@ -57,7 +70,8 @@
                                             class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
                                     </label>
                                     <!-- Input file oculto -->
-                                    <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
+                                    <input type="file" id="profile-image" name="profile-image" style="display:none;"
+                                        accept="image/*" onchange="previewImage(event)" />
                                 </div>
 
                                 <!-- Formulario de campos -->
@@ -65,31 +79,37 @@
                                     <!-- Nombre Completo -->
                                     <div>
                                         <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text" placeholder="Darlin Josue" class="form-input" />
+                                        <input id="Nombre" name="Nombre" type="text" placeholder="Pedro Pablo"
+                                            class="form-input" />
                                     </div>
 
                                     <!-- Apellido Paterno -->
                                     <div>
                                         <label for="apellidoPaterno">Apellido Paterno</label>
-                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" placeholder="Saldarriaga" class="form-input" />
+                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text"
+                                            placeholder="Figueron" class="form-input" />
                                     </div>
 
                                     <!-- Apellido Materno -->
                                     <div>
                                         <label for="apellidoMaterno">Apellido Materno</label>
-                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" placeholder="Cruz" class="form-input" />
+                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text"
+                                            placeholder="Lampa" class="form-input" />
                                     </div>
 
                                     <!-- Tipo Documento -->
                                     <div>
-                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento" class="form-input" >
-                                            <option value="" disabled selected>Seleccionar Tipo Documento</option>
+                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo
+                                            Documento</label>
+                                        <select id="idTipoDocumento" name="idTipoDocumento" class="select2 w-full">
+
+                                            <option value="" disabled selected>Seleccionar Tipo Documento
+                                            </option>
 
                                             @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
+                                                <option value="{{ $tipoDocumento->idTipoDocumento }}">
+                                                    {{ $tipoDocumento->nombre }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -97,21 +117,23 @@
                                     <!-- Documento -->
                                     <div>
                                         <label for="documento">Documento</label>
-                                        <input id="documento" name="documento" type="text" placeholder="12345678" class="form-input" />
+                                        <input id="documento" name="documento" type="text" placeholder="12345678"
+                                            class="form-input" />
                                     </div>
 
                                     <!-- Teléfono -->
                                     <div>
                                         <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239" class="form-input" />
+                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239"
+                                            class="form-input" />
                                     </div>
 
                                     <!-- Email -->
                                     <div>
                                         <label for="correo">Correo Electronico</label>
-                                        <input id="correo" name="correo" type="email" placeholder="darlin@gmail.com" class="form-input" />
+                                        <input id="correo" name="correo" type="email"
+                                            placeholder="darlin@gmail.com" class="form-input" />
                                     </div>
-
                                     <!-- Estado Civil -->
                                     <div>
                                         <label for="estadocivil">Estado Civil</label>
@@ -123,140 +145,155 @@
                                             <option value="4">Viudo</option>
                                         </select>
                                     </div>
-                                    
+
+
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR USUARIO'))
                                     <!-- Botones -->
                                     <div class="sm:col-span-2 mt-3">
                                         <button type="submit" class="btn btn-primary mr-2">Guardar</button>
                                         <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
                                     </div>
+                                    @endif
+
                                 </div>
                             </div>
                         </form>
 
 
                         <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Cuando se envía el formulario
-        document.getElementById('usuario-form').addEventListener('submit', function (e) {
-            e.preventDefault(); // Evita que el formulario se envíe de manera tradicional
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Cuando se envía el formulario
+                                document.getElementById('usuario-form').addEventListener('submit', function(e) {
+                                    e.preventDefault(); // Evita que el formulario se envíe de manera tradicional
 
-            // Creamos un objeto FormData para capturar todos los datos del formulario
-            var formData = new FormData(this);
-            console.log("Formulario enviado con los siguientes datos:");
-            console.log(formData); // Log de los datos del formulario
+                                    // Creamos un objeto FormData para capturar todos los datos del formulario
+                                    var formData = new FormData(this);
+                                    console.log("Formulario enviado con los siguientes datos:");
+                                    console.log(formData); // Log de los datos del formulario
 
-            // Usamos fetch para enviar los datos de forma asíncrona
-            fetch(`/usuario/store`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                console.log("Respuesta del servidor:");
-                console.log(response); // Log de la respuesta del servidor
-                return response.json();
-            })
-            .then(data => {
-                console.log("Datos recibidos del servidor:");
-                console.log(data); // Log de los datos del servidor
+                                    // Usamos fetch para enviar los datos de forma asíncrona
+                                    fetch(`/usuario/store`, {
+                                            method: 'POST',
+                                            body: formData,
+                                            headers: {
+                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                                    .getAttribute('content')
+                                            }
+                                        })
+                                        .then(response => {
+                                            console.log("Respuesta del servidor:");
+                                            console.log(response); // Log de la respuesta del servidor
+                                            return response.json();
+                                        })
+                                        .then(data => {
+                                            console.log("Datos recibidos del servidor:");
+                                            console.log(data); // Log de los datos del servidor
 
-                // Si la respuesta contiene éxito, muestra un mensaje de éxito con toastr
-                if (data.success) {
-                    toastr.success(data.message, "Éxito", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 1000,
-                        onHidden: function () {
-                            // Redirige a la página de edición del usuario después de que el toastr desaparezca
-                            window.location.href = '/usuario/' + data.usuarioId + '/edit'; // Redirección usando el ID del usuario
-                        }
-                    });
-                } else if (data.errors) {
-                    // Si el servidor envía errores, mostramos cada error en un toastr de error
-                    let errorMessages = '';
-                    for (let key in data.errors) {
-                        if (data.errors.hasOwnProperty(key)) {
-                            errorMessages += data.errors[key].join('<br>') + '<br>'; // Concatenamos los errores
-                        }
-                    }
-                    toastr.error(errorMessages, "Errores en el formulario", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 5000
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error durante la petición:");
-                console.error(error); // Log de errores en la solicitud
-                toastr.error("Ocurrió un error inesperado.", "Error", {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: "toast-top-right",
-                    timeOut: 5000
-                });
-            });
-        });
-    });
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tipoDocumentoSelect = document.getElementById('idTipoDocumento');
-    const documentoInput = document.getElementById('documento');
-    const formulario = document.getElementById('usuario-form');
+                                            // Si la respuesta contiene éxito, muestra un mensaje de éxito con toastr
+                                            if (data.success) {
+                                                toastr.success(data.message, "Éxito", {
+                                                    closeButton: true,
+                                                    progressBar: true,
+                                                    positionClass: "toast-top-right",
+                                                    timeOut: 1000,
+                                                    onHidden: function() {
+                                                        // Redirige a la página de edición del usuario después de que el toastr desaparezca
+                                                        window.location.href = '/usuario/' + data.usuarioId +
+                                                            '/edit'; // Redirección usando el ID del usuario
+                                                    }
+                                                });
+                                            } else if (data.errors) {
+                                                // Si el servidor envía errores, mostramos cada error en un toastr de error
+                                                let errorMessages = '';
+                                                for (let key in data.errors) {
+                                                    if (data.errors.hasOwnProperty(key)) {
+                                                        errorMessages += data.errors[key].join('<br>') +
+                                                            '<br>'; // Concatenamos los errores
+                                                    }
+                                                }
+                                                toastr.error(errorMessages, "Errores en el formulario", {
+                                                    closeButton: true,
+                                                    progressBar: true,
+                                                    positionClass: "toast-top-right",
+                                                    timeOut: 5000
+                                                });
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error durante la petición:");
+                                            console.error(error); // Log de errores en la solicitud
+                                            toastr.error("Ocurrió un error inesperado.", "Error", {
+                                                closeButton: true,
+                                                progressBar: true,
+                                                positionClass: "toast-top-right",
+                                                timeOut: 5000
+                                            });
+                                        });
+                                });
+                            });
+                        </script>
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const tipoDocumentoSelect = document.getElementById('idTipoDocumento');
+                                const documentoInput = document.getElementById('documento');
+                                const formulario = document.getElementById('usuario-form');
 
-    // Mapeo de los tipos de documentos con su longitud correspondiente
-    const tipoDocumentoLongitudes = {
-        'DNI': 8,
-        'RUC': 11,
-        'PASAPORTE': 12,
-        'CPP': 12,
-        'CARNET DE EXTRANJERIA': 20
-    };
+                                // Mapeo de los tipos de documentos con su longitud correspondiente
+                                const tipoDocumentoLongitudes = {
+                                    'DNI': 8,
+                                    'RUC': 11,
+                                    'PASAPORTE': 12,
+                                    'CPP': 12,
+                                    'CARNET DE EXTRANJERIA': 20
+                                };
 
-    // Función para ajustar la longitud del documento
-    tipoDocumentoSelect.addEventListener('change', function() {
-        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
+                                // Función para ajustar la longitud del documento
+                                tipoDocumentoSelect.addEventListener('change', function() {
+                                    const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex]
+                                        .text;
 
-        // Establecemos el número de caracteres requeridos para el tipo de documento
-        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado] || 255;  // por defecto, 255 caracteres si no coincide
+                                    // Establecemos el número de caracteres requeridos para el tipo de documento
+                                    const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado] ||
+                                        255; // por defecto, 255 caracteres si no coincide
 
-        // Establecemos el atributo 'maxlength' del input de documento
-        documentoInput.setAttribute('maxlength', longitudMaxima);
-        documentoInput.placeholder = `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
-    });
+                                    // Establecemos el atributo 'maxlength' del input de documento
+                                    documentoInput.setAttribute('maxlength', longitudMaxima);
+                                    documentoInput.placeholder =
+                                        `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
+                                });
 
-    // Validación al enviar el formulario
-    formulario.addEventListener('submit', function(event) {
-        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
-        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado];
+                                // Validación al enviar el formulario
+                                formulario.addEventListener('submit', function(event) {
+                                    const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex]
+                                        .text;
+                                    const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado];
 
-        // Verifica si la longitud del documento es válida
-        if (documentoInput.value.length !== longitudMaxima) {
-            event.preventDefault();  // Evita que el formulario se envíe
-            toastr.error(`El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`);
-        }
-    });
+                                    // Verifica si la longitud del documento es válida
+                                    if (documentoInput.value.length !== longitudMaxima) {
+                                        event.preventDefault(); // Evita que el formulario se envíe
+                                        toastr.error(
+                                            `El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`
+                                        );
+                                    }
+                                });
 
-    // Disparar el evento de 'change' para inicializar la longitud del campo al cargar la página
-    tipoDocumentoSelect.dispatchEvent(new Event('change'));
-});
-</script>
+                                // Disparar el evento de 'change' para inicializar la longitud del campo al cargar la página
+                                tipoDocumentoSelect.dispatchEvent(new Event('change'));
+                            });
+                        </script>
 
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                     
+
                             <h6 class="text-lg font-bold mb-5">Información Importante</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
                                 <!-- Sueldo por Hora -->
                                 <div>
                                     <label for="sueldoPorHora">Sueldo por Hora</label>
-                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="" />
+                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora"
+                                        placeholder="Ejemplo: 20.5" class="form-input" step="0.01"
+                                        value="" />
                                 </div>
 
                                 <!-- Sucursal -->
@@ -265,7 +302,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <select name="idSucursal" id="idSucursal" class="form-input">
                                         <option value="" disabled selected>Selecciona una Sucursal</option>
                                         @foreach ($sucursales as $sucursal)
-                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
+                                            <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -276,7 +314,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
                                         <option value="" disabled selected>Selecciona un Tipo de Usuario</option>
                                         @foreach ($tiposUsuario as $tipoUsuario)
-                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
+                                            <option value="{{ $tipoUsuario->idTipoUsuario }}">
+                                                {{ $tipoUsuario->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -287,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <select name="idSexo" id="idSexo" class="form-input">
                                         <option value="" disabled selected>Selecciona un Sexo</option>
                                         @foreach ($sexos as $sexo)
-                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
+                                            <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -298,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <select name="idRol" id="idRol" class="form-input">
                                         <option value="" disabled selected>Selecciona un Rol</option>
                                         @foreach ($roles as $rol)
-                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
+                                            <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -309,7 +348,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <select name="idTipoArea" id="idTipoArea" class="form-input">
                                         <option value="" disabled selected>Selecciona un Tipo de Área</option>
                                         @foreach ($tiposArea as $tipoArea)
-                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
+                                            <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -380,8 +420,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-americanexpress.svg"
-                                                    alt="image" />
+                                                <img src="/assets/images/card-americanexpress.svg" alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 Mastercard <span
@@ -395,8 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <div class="border-b border-[#ebedf2] dark:border-[#1b2e4b]">
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-mastercard.svg"
-                                                    alt="image" />
+                                                <img src="/assets/images/card-mastercard.svg" alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 American Express<span
@@ -410,8 +448,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <div>
                                         <div class="flex items-start justify-between py-3">
                                             <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                                <img src="/assets/images/card-visa.svg"
-                                                    alt="image" />
+                                                <img src="/assets/images/card-visa.svg" alt="image" />
                                             </div>
                                             <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
                                                 Visa<span
@@ -659,29 +696,18 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
     </div>
 
-    <script>
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-        })
-    </script>
-    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
-    <!-- Agrega Select2 JS antes del cierre de </body> -->
-
-    <!-- Cargar jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-    <!-- <script>
-    $(document).ready(function() {
-        $('select').niceSelect();  // Aplica Nice Select a todos los selectores en la página
-    });
-</script> -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                width: '100%',
+                placeholder: 'Seleccionar una opción',
+                allowClear: true
+            });
+        });
+    </script>
     <script>
         // Función para mostrar la imagen seleccionada
         function previewImage(event) {
@@ -694,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     </script>
 
-        <!-- Toastr JS -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 </x-layout.default>

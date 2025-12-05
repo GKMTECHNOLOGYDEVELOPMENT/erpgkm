@@ -2663,32 +2663,30 @@ class OrdenesTrabajoController extends Controller
 
 
 
-
-
-    public function obtenerImagenes($ticketId)
+      public function obtenerImagenes($ticketId)
     {
         // Buscar el idVisitas en la tabla seleccionarvisita con base en el idTickets
         $seleccionada = DB::table('seleccionarvisita')
             ->where('idTickets', $ticketId)
             ->first();  // Solo buscamos por ticketId
 
-        // Si se encontró una visita asociada al ticket
+        // Si se encontrÃ³ una visita asociada al ticket
         if ($seleccionada) {
             // Tomamos el idVisitas de la visita seleccionada
             $visitaId = $seleccionada->idVisitas;
 
-            // Buscar las imágenes asociadas al ticket y la visita
+            // Buscar las imÃ¡genes asociadas al ticket y la visita
             $imagenes = DB::table('fotostickest')
                 ->where('idTickets', $ticketId)
                 ->where('idVisitas', $visitaId)  // Usamos el idVisitas obtenido
                 ->get();
 
-            // Si no hay imágenes asociadas, retornar un mensaje
+            // Si no hay imÃ¡genes asociadas, retornar un mensaje
             if ($imagenes->isEmpty()) {
-                return response()->json(['success' => false, 'message' => 'No se encontraron imágenes para este ticket y visita.']);
+                return response()->json(['success' => false, 'message' => 'No se encontraron imÃ¡genes para este ticket y visita.']);
             }
 
-            // Convertir las imágenes a base64 para poder mostrarlas en el frontend
+            // Convertir las imÃ¡genes a base64 para poder mostrarlas en el frontend
             $imagenes = $imagenes->map(function ($imagen) {
                 return [
                     'id' => $imagen->idfotostickest,
@@ -2697,13 +2695,14 @@ class OrdenesTrabajoController extends Controller
                 ];
             });
 
-            // Retornar la respuesta con las imágenes
+            // Retornar la respuesta con las imÃ¡genes
             return response()->json(['imagenes' => $imagenes]);
         } else {
-            // Si no se encontró una visita para el ticket, devolver error
-            return response()->json(['success' => false, 'message' => 'No se encontró una visita seleccionada para este ticket.']);
+            // Si no se encontrÃ³ una visita para el ticket, devolver error
+            return response()->json(['success' => false, 'message' => 'No se encontrÃ³ una visita seleccionada para este ticket.']);
         }
     }
+
 
 
 

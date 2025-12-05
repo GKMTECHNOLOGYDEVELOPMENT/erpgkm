@@ -1,26 +1,18 @@
 <x-layout.default>
 
-    <!-- Incluir el archivo CSS de Nice Select -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
-
-    
-    <!-- Toastr CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet">
-
-
-
-
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
-                <a href="{{ route('usuario') }}" class="text-primary hover:underline">Usuarios</a>
+                <a href="javascript:;" class="text-primary hover:underline">Users</a>
             </li>
             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                <span>Agregar Usuario</span>
+                <span>Account Settings</span>
             </li>
         </ul>
-        
         <div class="pt-5">
+            <div class="flex items-center justify-between mb-5">
+                <h5 class="font-semibold text-lg dark:text-white-light">Settings</h5>
+            </div>
             <div x-data="{ tab: 'home' }">
                 <ul
                     class="sm:flex font-semibold border-b border-[#ebedf2] dark:border-[#191e3a] mb-5 whitespace-nowrap overflow-y-auto">
@@ -37,288 +29,205 @@
                                 <path d="M12 15L12 18" stroke="currentColor" stroke-width="1.5"
                                     stroke-linecap="round" />
                             </svg>
-                            Perfil
+                            Home
                         </a>
                     </li>
-                   
+                    <li class="inline-block">
+                        <a href="javascript:;"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
+                            :class="{ '!border-primary text-primary': tab == 'payment-details' }"
+                            @click="tab='payment-details'">
+
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <circle opacity="0.5" cx="12" cy="12" r="10"
+                                    stroke="currentColor" stroke-width="1.5" />
+                                <path d="M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <path
+                                    d="M15 9.5C15 8.11929 13.6569 7 12 7C10.3431 7 9 8.11929 9 9.5C9 10.8807 10.3431 12 12 12C13.6569 12 15 13.1193 15 14.5C15 15.8807 13.6569 17 12 17C10.3431 17 9 15.8807 9 14.5"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                            Payment Details
+                        </a>
+                    </li>
+                    <li class="inline-block">
+                        <a href="javascript:;"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
+                            :class="{ '!border-primary text-primary': tab == 'preferences' }"
+                            @click="tab='preferences'">
+
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <circle cx="12" cy="6" r="4" stroke="currentColor"
+                                    stroke-width="1.5" />
+                                <ellipse opacity="0.5" cx="12" cy="17" rx="7" ry="4"
+                                    stroke="currentColor" stroke-width="1.5" />
+                            </svg>
+                            Preferences
+                        </a>
+                    </li>
+                    <li class="inline-block">
+                        <a href="javascript:;"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
+                            :class="{ '!border-primary text-primary': tab == 'danger-zone' }"
+                            @click="tab='danger-zone'">
+
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <path
+                                    d="M16.1007 13.359L16.5562 12.9062C17.1858 12.2801 18.1672 12.1515 18.9728 12.5894L20.8833 13.628C22.1102 14.2949 22.3806 15.9295 21.4217 16.883L20.0011 18.2954C19.6399 18.6546 19.1917 18.9171 18.6763 18.9651M4.00289 5.74561C3.96765 5.12559 4.25823 4.56668 4.69185 4.13552L6.26145 2.57483C7.13596 1.70529 8.61028 1.83992 9.37326 2.85908L10.6342 4.54348C11.2507 5.36691 11.1841 6.49484 10.4775 7.19738L10.1907 7.48257"
+                                    stroke="currentColor" stroke-width="1.5" />
+                                <path opacity="0.5"
+                                    d="M18.6763 18.9651C17.0469 19.117 13.0622 18.9492 8.8154 14.7266C4.81076 10.7447 4.09308 7.33182 4.00293 5.74561"
+                                    stroke="currentColor" stroke-width="1.5" />
+                                <path opacity="0.5"
+                                    d="M16.1007 13.3589C16.1007 13.3589 15.0181 14.4353 12.0631 11.4971C9.10807 8.55886 10.1907 7.48242 10.1907 7.48242"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            </svg>
+                            Danger Zone
+                        </a>
+                    </li>
                 </ul>
                 <template x-if="tab === 'home'">
                     <div>
-                    <form id="usuario-form" method="POST" enctype="multipart/form-data" class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
-
-                            @csrf
-                            <h6 class="text-lg font-bold mb-5">Información General</h6>
+                        <form
+                            class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
+                            <h6 class="text-lg font-bold mb-5">Informaccon General</h6>
                             <div class="flex flex-col sm:flex-row">
-                                <!-- Imagen de perfil -->
                                 <div class="ltr:sm:mr-4 rtl:sm:ml-4 w-full sm:w-2/12 mb-5">
-                                    <!-- Imagen que se puede hacer clic para cambiarla -->
-                                    <label for="profile-image">
-                                        <img id="profile-img" src="/assets/images/profile-34.jpeg" alt="image"
-                                            class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto cursor-pointer" />
-                                    </label>
-                                    <!-- Input file oculto -->
-                                    <input type="file" id="profile-image" name="profile-image" style="display:none;" accept="image/*" onchange="previewImage(event)" />
+                                    <img src="/assets/images/profile-34.jpeg" alt="image"
+                                        class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto" />
                                 </div>
-
-                                <!-- Formulario de campos -->
                                 <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <!-- Nombre Completo -->
                                     <div>
-                                        <label for="Nombre">Nombre Completo</label>
-                                        <input id="Nombre" name="Nombre" type="text" placeholder="Darlin Josue" class="form-input" />
+                                        <label for="name">Full Name</label>
+                                        <input id="name" type="text" placeholder="Jimmy Turner"
+                                            class="form-input" />
                                     </div>
-
-                                    <!-- Apellido Paterno -->
                                     <div>
-                                        <label for="apellidoPaterno">Apellido Paterno</label>
-                                        <input id="apellidoPaterno" name="apellidoPaterno" type="text" placeholder="Saldarriaga" class="form-input" />
+                                        <label for="profession">Profession</label>
+                                        <input id="profession" type="text" placeholder="Web Developer"
+                                            class="form-input" />
                                     </div>
-
-                                    <!-- Apellido Materno -->
                                     <div>
-                                        <label for="apellidoMaterno">Apellido Materno</label>
-                                        <input id="apellidoMaterno" name="apellidoMaterno" type="text" placeholder="Cruz" class="form-input" />
-                                    </div>
-
-                                    <!-- Tipo Documento -->
-                                    <div>
-                                        <label for="idTipoDocumento" class="block text-sm font-medium">Tipo Documento</label>
-                                        <select id="idTipoDocumento" name="idTipoDocumento" class="form-input" >
-                                            <option value="" disabled selected>Seleccionar Tipo Documento</option>
-
-                                            @foreach ($tiposDocumento as $tipoDocumento)
-                                            <option value="{{ $tipoDocumento->idTipoDocumento }}">
-                                                {{ $tipoDocumento->nombre }}
-                                            </option>
-                                            @endforeach
+                                        <label for="country">Country</label>
+                                        <select id="country" class="form-select text-white-dark">
+                                            <option>All Countries</option>
+                                            <option selected="">United States</option>
+                                            <option>India</option>
+                                            <option>Japan</option>
+                                            <option>China</option>
+                                            <option>Brazil</option>
+                                            <option>Norway</option>
+                                            <option>Canada</option>
                                         </select>
                                     </div>
-
-                                    <!-- Documento -->
                                     <div>
-                                        <label for="documento">Documento</label>
-                                        <input id="documento" name="documento" type="text" placeholder="12345678" class="form-input" />
+                                        <label for="address">Address</label>
+                                        <input id="address" type="text" placeholder="New York"
+                                            class="form-input" />
                                     </div>
-
-                                    <!-- Teléfono -->
                                     <div>
-                                        <label for="telefono">Teléfono</label>
-                                        <input id="telefono" type="text" name="telefono" placeholder="962 952 239" class="form-input" />
+                                        <label for="location">Location</label>
+                                        <input id="location" type="text" placeholder="Location"
+                                            class="form-input" />
                                     </div>
-
-                                    <!-- Email -->
                                     <div>
-                                        <label for="correo">Correo Electronico</label>
-                                        <input id="correo" name="correo" type="email" placeholder="darlin@gmail.com" class="form-input" />
+                                        <label for="phone">Phone</label>
+                                        <input id="phone" type="text" placeholder="+1 (530) 555-12121"
+                                            class="form-input" />
                                     </div>
-
-                                    <!-- Estado Civil -->
                                     <div>
-                                        <label for="estadocivil">Estado Civil</label>
-                                        <select id="estadocivil" name="estadocivil" class="form-input">
-                                            <option value="" disabled selected>Seleccionar Estado Civil</option>
-                                            <option value="1">Soltero</option>
-                                            <option value="2">Casado</option>
-                                            <option value="3">Divorciado</option>
-                                            <option value="4">Viudo</option>
-                                        </select>
+                                        <label for="email">Email</label>
+                                        <input id="email" type="email" placeholder="Jimmy@gmail.com"
+                                            class="form-input" />
                                     </div>
-                                    
-                                    <!-- Botones -->
+                                    <div>
+                                        <label for="web">Website</label>
+                                        <input id="web" type="text" placeholder="Enter URL"
+                                            class="form-input" />
+                                    </div>
+                                    <div>
+                                        <label class="inline-flex cursor-pointer">
+                                            <input type="checkbox" class="form-checkbox" />
+                                            <span class="text-white-dark relative checked:bg-none">Make this my default
+                                                address</span>
+                                        </label>
+                                    </div>
                                     <div class="sm:col-span-2 mt-3">
-                                        <button type="submit" class="btn btn-primary mr-2">Guardar</button>
-                                        <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
+                                        <button type="button" class="btn btn-primary">Save</button>
                                     </div>
                                 </div>
                             </div>
                         </form>
-
-
-                        <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Cuando se envía el formulario
-        document.getElementById('usuario-form').addEventListener('submit', function (e) {
-            e.preventDefault(); // Evita que el formulario se envíe de manera tradicional
-
-            // Creamos un objeto FormData para capturar todos los datos del formulario
-            var formData = new FormData(this);
-            console.log("Formulario enviado con los siguientes datos:");
-            console.log(formData); // Log de los datos del formulario
-
-            // Usamos fetch para enviar los datos de forma asíncrona
-            fetch(`/usuario/store`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                console.log("Respuesta del servidor:");
-                console.log(response); // Log de la respuesta del servidor
-                return response.json();
-            })
-            .then(data => {
-                console.log("Datos recibidos del servidor:");
-                console.log(data); // Log de los datos del servidor
-
-                // Si la respuesta contiene éxito, muestra un mensaje de éxito con toastr
-                if (data.success) {
-                    toastr.success(data.message, "Éxito", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 1000,
-                        onHidden: function () {
-                            // Redirige a la página de edición del usuario después de que el toastr desaparezca
-                            window.location.href = '/usuario/' + data.usuarioId + '/edit'; // Redirección usando el ID del usuario
-                        }
-                    });
-                } else if (data.errors) {
-                    // Si el servidor envía errores, mostramos cada error en un toastr de error
-                    let errorMessages = '';
-                    for (let key in data.errors) {
-                        if (data.errors.hasOwnProperty(key)) {
-                            errorMessages += data.errors[key].join('<br>') + '<br>'; // Concatenamos los errores
-                        }
-                    }
-                    toastr.error(errorMessages, "Errores en el formulario", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 5000
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error durante la petición:");
-                console.error(error); // Log de errores en la solicitud
-                toastr.error("Ocurrió un error inesperado.", "Error", {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: "toast-top-right",
-                    timeOut: 5000
-                });
-            });
-        });
-    });
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const tipoDocumentoSelect = document.getElementById('idTipoDocumento');
-    const documentoInput = document.getElementById('documento');
-    const formulario = document.getElementById('usuario-form');
-
-    // Mapeo de los tipos de documentos con su longitud correspondiente
-    const tipoDocumentoLongitudes = {
-        'DNI': 8,
-        'RUC': 11,
-        'PASAPORTE': 12,
-        'CPP': 12,
-        'CARNET DE EXTRANJERIA': 20
-    };
-
-    // Función para ajustar la longitud del documento
-    tipoDocumentoSelect.addEventListener('change', function() {
-        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
-
-        // Establecemos el número de caracteres requeridos para el tipo de documento
-        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado] || 255;  // por defecto, 255 caracteres si no coincide
-
-        // Establecemos el atributo 'maxlength' del input de documento
-        documentoInput.setAttribute('maxlength', longitudMaxima);
-        documentoInput.placeholder = `Introduce un ${tipoSeleccionado} de ${longitudMaxima} dígitos`;
-    });
-
-    // Validación al enviar el formulario
-    formulario.addEventListener('submit', function(event) {
-        const tipoSeleccionado = tipoDocumentoSelect.options[tipoDocumentoSelect.selectedIndex].text;
-        const longitudMaxima = tipoDocumentoLongitudes[tipoSeleccionado];
-
-        // Verifica si la longitud del documento es válida
-        if (documentoInput.value.length !== longitudMaxima) {
-            event.preventDefault();  // Evita que el formulario se envíe
-            toastr.error(`El número de dígitos para ${tipoSeleccionado} debe ser ${longitudMaxima} caracteres.`);
-        }
-    });
-
-    // Disparar el evento de 'change' para inicializar la longitud del campo al cargar la página
-    tipoDocumentoSelect.dispatchEvent(new Event('change'));
-});
-</script>
-
                         <form
                             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                     
-                            <h6 class="text-lg font-bold mb-5">Información Importante</h6>
+                            <h6 class="text-lg font-bold mb-5">Social</h6>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div class="flex">
+                                    <div
+                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                <!-- Sueldo por Hora -->
-                                <div>
-                                    <label for="sueldoPorHora">Sueldo por Hora</label>
-                                    <input type="number" name="sueldoPorHora" id="sueldoPorHora" placeholder="Ejemplo: 20.5" class="form-input" step="0.01" value="" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="w-5 h-5">
+                                            <path
+                                                d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
+                                            </path>
+                                            <rect x="2" y="9" width="4" height="12">
+                                            </rect>
+                                            <circle cx="4" cy="4" r="2"></circle>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
                                 </div>
+                                <div class="flex">
+                                    <div
+                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                <!-- Sucursal -->
-                                <div>
-                                    <label for="idSucursal">Sucursal</label>
-                                    <select name="idSucursal" id="idSucursal" class="form-input">
-                                        <option value="" disabled selected>Selecciona una Sucursal</option>
-                                        @foreach ($sucursales as $sucursal)
-                                        <option value="{{ $sucursal->idSucursal }}">{{ $sucursal->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="w-5 h-5">
+                                            <path
+                                                d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
                                 </div>
+                                <div class="flex">
+                                    <div
+                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                <!-- Tipo de Usuario -->
-                                <div>
-                                    <label for="idTipoUsuario">Tipo de Usuario</label>
-                                    <select name="idTipoUsuario" id="idTipoUsuario" class="form-input">
-                                        <option value="" disabled selected>Selecciona un Tipo de Usuario</option>
-                                        @foreach ($tiposUsuario as $tipoUsuario)
-                                        <option value="{{ $tipoUsuario->idTipoUsuario }}">{{ $tipoUsuario->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="w-5 h-5">
+                                            <path
+                                                d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
                                 </div>
+                                <div class="flex">
+                                    <div
+                                        class="bg-[#eee] flex justify-center items-center rounded px-3 font-semibold dark:bg-[#1b2e4b] ltr:mr-2 rtl:ml-2">
 
-                                <!-- Sexo -->
-                                <div>
-                                    <label for="idSexo">Sexo</label>
-                                    <select name="idSexo" id="idSexo" class="form-input">
-                                        <option value="" disabled selected>Selecciona un Sexo</option>
-                                        @foreach ($sexos as $sexo)
-                                        <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
-                                        @endforeach
-                                    </select>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                                            class="w-5 h-5">
+                                            <path
+                                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <input type="text" placeholder="jimmy_turner" class="form-input" />
                                 </div>
-
-                                <!-- Rol -->
-                                <div>
-                                    <label for="idRol">Rol</label>
-                                    <select name="idRol" id="idRol" class="form-input">
-                                        <option value="" disabled selected>Selecciona un Rol</option>
-                                        @foreach ($roles as $rol)
-                                        <option value="{{ $rol->idRol }}">{{ $rol->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Tipo de Área -->
-                                <div>
-                                    <label for="idTipoArea">Tipo de Área</label>
-                                    <select name="idTipoArea" id="idTipoArea" class="form-input">
-                                        <option value="" disabled selected>Selecciona un Tipo de Área</option>
-                                        @foreach ($tiposArea as $tipoArea)
-                                        <option value="{{ $tipoArea->idTipoArea }}">{{ $tipoArea->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Botones -->
-                                <div class="sm:col-span-2 mt-3">
-                                    <button type="submit" disabled class="btn btn-primary mr-2">Actualizar</button>
-                                    <!-- <button type="reset" class="btn btn-primary">Limpiar</button> -->
-                                </div>
+                            </div>
                         </form>
                     </div>
                 </template>
@@ -658,43 +567,5 @@ document.addEventListener('DOMContentLoaded', function () {
             </div>
         </div>
     </div>
-
-    <script>
-        // Inicializar Select2
-        document.addEventListener("DOMContentLoaded", function() {
-            // Inicializar todos los select con la clase "select2"
-            document.querySelectorAll('.select2').forEach(function(select) {
-                NiceSelect.bind(select, {
-                    searchable: true
-                });
-            });
-        })
-    </script>
-    <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
-    <!-- Agrega Select2 JS antes del cierre de </body> -->
-
-    <!-- Cargar jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-    <!-- <script>
-    $(document).ready(function() {
-        $('select').niceSelect();  // Aplica Nice Select a todos los selectores en la página
-    });
-</script> -->
-    <script>
-        // Función para mostrar la imagen seleccionada
-        function previewImage(event) {
-            var reader = new FileReader();
-            reader.onload = function() {
-                var output = document.getElementById('profile-img');
-                output.src = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-    </script>
-
-        <!-- Toastr JS -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
 </x-layout.default>

@@ -724,3 +724,20 @@ Route::get('/cast-info/{id}', function($id) {
     
     return response()->json($cast);
 });
+
+
+Route::get('/contactos-por-cliente-general/{idClienteGeneral}', function($idClienteGeneral) {
+    try {
+        $contactos = DB::table('cliente_general_contacto_final as cgcf')
+            ->join('contactofinal as cf', 'cgcf.idContactoFinal', '=', 'cf.idContactoFinal')
+            ->where('cgcf.idClienteGeneral', $idClienteGeneral)
+            ->where('cf.estado', 1) // Solo contactos activos
+            ->select('cf.idContactoFinal', 'cf.nombre_completo')
+            ->orderBy('cf.nombre_completo')
+            ->get();
+            
+        return response()->json($contactos);
+    } catch (\Exception $e) {
+        return response()->json([], 500);
+    }
+});

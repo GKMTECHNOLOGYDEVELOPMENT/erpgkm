@@ -82,11 +82,14 @@
                     <option value="4" {{ $usuario->estadocivil == 4 ? 'selected' : '' }}>Viudo</option>
                 </select>
             </div>
+                                    @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR USUARIO INFORMACION GENERAL'))
 
             <!-- Botón de actualización -->
             <div class="sm:col-span-2 mt-3">
                 <button type="button" id="update-button" class="btn btn-primary mr-2">Actualizar</button>
             </div>
+                                                @endif
+
         </div>
     </div>
 </form>
@@ -221,8 +224,10 @@ $(document).ready(function() {
                             </div>
                         </div>
 
+                        @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR USUARIO DIRECCION'))
                         <!-- Botón de Actualización -->
                         <button type="submit" class="btn btn-primary">Actualizar</button>
+                        @endif
                     </form>
 
                     <script>

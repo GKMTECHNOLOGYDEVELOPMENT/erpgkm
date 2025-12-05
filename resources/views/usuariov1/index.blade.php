@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nice-select2/dist/css/nice-select2.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <style>
@@ -59,6 +59,9 @@
         <div class="panel mt-6">
             <div class="md:absolute md:top-5 ltr:md:left-5 rtl:md:right-5">
                 <div class="flex flex-wrap items-center justify-center gap-2 mb-5 sm:justify-start md:flex-nowrap">
+
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL USUARIOS'))
                     <!-- Botón Exportar a Excel -->
                     <button type="button" class="btn btn-success btn-sm flex items-center gap-2"
                         @click="exportTable('excel')">
@@ -72,6 +75,9 @@
                         </svg>
                         <span>Excel</span>
                     </button>
+                    @endif
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR PDF USUARIOS'))
 
                     <!-- Botón Exportar a PDF -->
                     <button type="button" class="btn btn-danger btn-sm flex items-center gap-2"
@@ -85,9 +91,11 @@
                         </svg>
                         <span>PDF</span>
                     </button>
+                    @endif
 
+                    <!-- @if(\App\Helpers\PermisoHelper::tienePermiso('DESCARGAR EXCEL CLIENTE')) -->
                     <!-- Botón Imprimir -->
-                    <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
+                    <!-- <button type="button" class="btn btn-warning btn-sm flex items-center gap-2" @click="printTable">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                             <path
@@ -97,7 +105,10 @@
                         </svg>
                         <span>Imprimir</span>
                     </button>
+                    @endif -->
 
+
+                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR USUARIO'))
                     <!-- Botón Agregar -->
                     <a href="{{ route('usuario.create') }}" class="btn btn-primary btn-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"
@@ -111,12 +122,13 @@
                         </svg>
                         <span>Agregar</span>
                     </a>
+                    @endif
                 </div>
             </div>
             <div class="mb-4 flex justify-end items-center gap-3">
                 <!-- Input de búsqueda -->
                 <div class="relative w-64">
-                    <input type="text" id="searchInput" placeholder="Buscar usuario..."
+                    <input type="text" id="searchInput" placeholder="Buscar clientes..."
                         class="pr-10 pl-4 py-2 text-sm w-full border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
                     <button type="button" id="clearInput"
                         class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 hidden">
@@ -139,6 +151,7 @@
                         <th>Tipo Documento</th>
                         <th>Documento</th>
                         <th>Teléfono</th>
+                        <th>Nombre de Usuario</th>
                         <th>Email</th>
                         <th>Tipo Usuario</th>
                         <th>Rol</th>
@@ -183,6 +196,17 @@
             });
         });
     </script>
+
+
+   <script>
+    window.permisos = {
+        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR USUARIO') ? 'true' : 'false' }},
+        puedeActualizarEstado: {{ \App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO USUARIO') ? 'true' : 'false' }}
+    };
+</script>
+
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
