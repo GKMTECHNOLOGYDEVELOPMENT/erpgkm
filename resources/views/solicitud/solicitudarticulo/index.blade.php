@@ -364,11 +364,11 @@
             @endif
         </form>
 
-        <!-- Resto del código permanece igual -->      
+        <!-- Resto del código permanece igual -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    @forelse($solicitudes as $solicitud)
-                        <div
-                            class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
+            @forelse($solicitudes as $solicitud)
+                <div
+                    class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
                     @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
                     @elseif($solicitud->tipoorden == 'solicitud_repuesto') border-green-500
                     @else border-purple-500 @endif
