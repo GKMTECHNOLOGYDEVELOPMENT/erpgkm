@@ -1,165 +1,213 @@
 <x-layout.default>
-    <div x-data="{ activeTab: 'articulos' }" class="min-h-screen bg-gray-50 py-8">
-        <div class="container mx-auto px-4 max-w-7xl">
-            <!-- Header Principal para Provincia -->
-            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <div x-data="{ activeTab: 'articulos' }" class="min-h-screen bg-gray-50 py-4 sm:py-6 lg:py-8">
+        <div class="mx-auto px-3 sm:px-4 lg:px-6 w-full">
+
+            <!-- Breadcrumb responsive -->
+            <div class="mb-4 sm:mb-6">
+                <ul class="flex flex-wrap gap-1 sm:gap-2 rtl:space-x-reverse">
+                    <li>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="text-primary hover:underline text-xs sm:text-sm">
+                            <i class="fas fa-list mr-1"></i>
+                            Solicitudes
+                        </a>
+                    </li>
+                    <li class="text-xs sm:text-sm text-gray-500 before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                        <span>Ver Solicitud Provincia</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Header Principal para Provincia - Responsive -->
+            <div
+                class="bg-white rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 mb-4 sm:mb-6 lg:mb-8 border border-gray-200">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
-                        <div class="flex items-center space-x-4 mb-4">
-                            <div class="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                                    Orden Provincia #<span class="text-purple-600">{{ $solicitud->codigo ?? 'N/A' }}</span>
+                        <div
+                            class="flex items-start sm:items-center flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 lg:space-x-4 mb-4">
+
+                            <div class="flex-1 min-w-0">
+                                <h1
+                                    class="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold text-gray-900 mb-2 truncate">
+                                    <i class="fas fa-truck text-purple-500 mr-2"></i>
+                                    Orden Provincia #<span
+                                        class="text-purple-600">{{ $solicitud->codigo ?? 'N/A' }}</span>
                                 </h1>
-                                <div class="flex flex-wrap items-center gap-2">
+                                <div class="flex flex-wrap gap-1 sm:gap-2">
                                     <span
-                                        class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold border border-blue-200">
+                                        class="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs sm:text-sm font-semibold border border-blue-200 whitespace-nowrap">
+                                        <i class="fas fa-circle text-blue-500 mr-1 text-xs"></i>
                                         {{ ucfirst($solicitud->estado ?? 'pendiente') }}
                                     </span>
                                     <span
-                                        class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold border border-purple-200">
-                                        Solicitud para Provincia
+                                        class="px-2 sm:px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs sm:text-sm font-semibold border border-purple-200 whitespace-nowrap">
+                                        <i class="fas fa-truck mr-1 text-xs"></i>
+                                        Solicitud Provincia
                                     </span>
-                                    @if($solicitud->cast_nombre)
-                                    <span
-                                        class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold border border-green-200">
-                                        {{ $solicitud->cast_nombre }}
-                                    </span>
+                                    @if ($solicitud->cast_nombre)
+                                        <span
+                                            class="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-semibold border border-green-200 truncate max-w-[200px]">
+                                            <i class="fas fa-store mr-1 text-xs"></i>
+                                            {{ $solicitud->cast_nombre }}
+                                        </span>
                                     @endif
                                 </div>
                             </div>
+                            <!-- Botones responsive -->
+                            <div class="flex flex-wrap gap-2 sm:gap-3 mt-4 lg:mt-0">
+                                <a href="{{ route('solicitudarticulo.index') ?? route('solicitudarticulo.index') }}"
+                                    class="flex items-center justify-center px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-sm text-xs sm:text-sm flex-1 sm:flex-none">
+                                    <i class="fas fa-arrow-left mr-1 sm:mr-2 text-xs sm:text-sm"></i>
+                                    <span class="hidden sm:inline">Volver</span>
+                                    <span class="sm:hidden">←</span>
+                                </a>
+                                @if (($solicitud->estado ?? '') != 'completada')
+                                    <a href="{{ route('solicitudrepuestoprovincia.edit', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex items-center justify-center px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm text-xs sm:text-sm flex-1 sm:flex-none">
+                                        <i class="fas fa-edit mr-1 sm:mr-2 text-xs sm:text-sm"></i>
+                                        <span class="hidden sm:inline">Editar</span>
+                                        <span class="sm:hidden">✎</span>
+                                    </a>
+                                @endif
+                            </div>
                         </div>
-                        
-                        <!-- Información específica de provincia -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">CAST</label>
-        <p class="text-lg font-bold text-gray-900">{{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
-        @if($solicitud->cast_direccion)
-        <p class="text-sm text-gray-600 mt-1">{{ $solicitud->cast_direccion }}</p>
-        @endif
-    </div>
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Ticket Manual</label>
-        <p class="text-lg font-bold text-gray-900">{{ $solicitud->numeroticket ?? 'N/A' }}</p>
-    </div>
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-        <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Ubicación CAST</label>
-        <p class="text-lg font-bold text-gray-900">
-            @if($solicitud->cast_departamento || $solicitud->cast_provincia)
-                {{ $solicitud->cast_departamento ?? '' }} - {{ $solicitud->cast_provincia ?? '' }}
-            @else
-                No especificada
-            @endif
-        </p>
-    </div>
-</div>
-                    </div>
 
-                    <div class="flex flex-wrap gap-3 mt-4 lg:mt-0">
-                        <!-- Modifica esta ruta según tu configuración -->
-                        <a href="{{ route('solicitudrepuesto.index') ?? route('solicitudarticulo.index') }}"
-                            class="flex items-center px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-sm">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Volver
-                        </a>
-                        @if (($solicitud->estado ?? '') != 'completada')
-                            <!-- Modifica esta ruta si tienes edición para provincia -->
-                            <a href="#"
-                                class="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                Editar
-                            </a>
-                        @endif
+                        <!-- Información específica de provincia - Responsive -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
+                            <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                <label
+                                    class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide truncate">
+                                    <i class="fas fa-store mr-1"></i>
+                                    CAST
+                                </label>
+                                <p class="text-base sm:text-lg font-bold text-gray-900 truncate">
+                                    {{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
+                                @if ($solicitud->cast_direccion)
+                                    <p class="text-xs sm:text-sm text-gray-600 mt-1 truncate">
+                                        <i class="fas fa-location-dot mr-1 text-xs"></i>
+                                        {{ $solicitud->cast_direccion }}
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                <label
+                                    class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide truncate">
+                                    <i class="fas fa-ticket-alt mr-1"></i>
+                                    Ticket Manual
+                                </label>
+                                <p class="text-base sm:text-lg font-bold text-gray-900">
+                                    {{ $solicitud->numeroticket ?? 'N/A' }}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                <label
+                                    class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide truncate">
+                                    <i class="fas fa-map-pin mr-1"></i>
+                                    Ubicación
+                                </label>
+                                <p class="text-base sm:text-lg font-bold text-gray-900 truncate">
+                                    @if ($solicitud->cast_departamento || $solicitud->cast_provincia)
+                                        {{ $solicitud->cast_provincia ?? '' }} -
+                                        {{ $solicitud->cast_departamento ?? '' }}
+                                    @else
+                                        No especificada
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Navegación por Tabs -->
-            <div class="bg-white rounded-2xl shadow-sm p-2 mb-6 border border-gray-200">
+            <!-- Navegación por Tabs responsive -->
+            <div class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-1 sm:p-2 mb-4 sm:mb-6 border border-gray-200">
                 <div class="flex space-x-1">
                     <button @click="activeTab = 'articulos'"
                         :class="activeTab === 'articulos' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-900'"
-                        class="flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200">
+                        class="flex-1 py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 truncate">
+                        <i class="fas fa-boxes mr-2 hidden sm:inline"></i>
                         Repuestos Solicitados
                     </button>
                     <button @click="activeTab = 'detalles'"
                         :class="activeTab === 'detalles' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:text-gray-900'"
-                        class="flex-1 py-3 px-4 rounded-lg font-semibold text-sm transition-all duration-200">
+                        class="flex-1 py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-200 truncate">
+                        <i class="fas fa-info-circle mr-2 hidden sm:inline"></i>
                         Detalles de la Orden
                     </button>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
                 <!-- Columna Principal -->
-                <div class="xl:col-span-2 space-y-6">
+                <div class="xl:col-span-2 space-y-4 sm:space-y-6">
                     <!-- Repuestos Solicitados -->
                     <div x-show="activeTab === 'articulos'"
-                        class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <div class="flex items-center justify-between mb-6">
-                            <div class="flex items-center space-x-3">
+                        class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-200">
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+                            <div class="flex items-center space-x-2 sm:space-x-3">
                                 <div
-                                    class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-sm">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                    class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-green-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+                                    <i class="fas fa-box-open text-white text-lg sm:text-xl"></i>
                                 </div>
-                                <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">Repuestos Solicitados</h2>
-                                    <p class="text-gray-600 text-sm">Lista completa de repuestos para provincia</p>
+                                <div class="min-w-0">
+                                    <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">
+
+                                        Repuestos Solicitados
+                                    </h2>
+                                    <p class="text-gray-600 text-xs sm:text-sm truncate">Lista completa de repuestos
+                                        para provincia</p>
                                 </div>
                             </div>
-                            <div class="text-right bg-purple-50 rounded-xl px-4 py-3 border border-purple-200">
-                                <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide">Total</p>
-                                <p class="text-2xl font-bold text-purple-800">{{ $articulos->count() }}</p>
+                            <div
+                                class="text-right bg-purple-50 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 border border-purple-200">
+                                <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide truncate">
+                                    <i class="fas fa-calculator mr-1"></i>
+                                    Total
+                                </p>
+                                <p class="text-xl sm:text-2xl font-bold text-purple-800">{{ $articulos->count() }}</p>
                             </div>
                         </div>
 
-                        @if($articulos->count() > 0)
-                        <div class="mb-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
-                            <div class="flex items-center space-x-2 text-blue-800">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="text-sm font-medium">
-                                    Esta orden está asociada al CAST: <strong>{{ $solicitud->cast_nombre }}</strong> 
-                                    con ticket manual: <strong>{{ $solicitud->numeroticket }}</strong>
-                                </span>
+                        @if ($articulos->count() > 0)
+                            <div class="mb-4 bg-blue-50 rounded-lg p-3 sm:p-4 border border-blue-200">
+                                <div class="flex items-center space-x-2 text-blue-800">
+                                    <i class="fas fa-info-circle text-blue-600 flex-shrink-0"></i>
+                                    <span class="text-xs sm:text-sm font-medium truncate">
+                                        CAST: <strong>{{ $solicitud->cast_nombre }}</strong> • Ticket:
+                                        <strong>{{ $solicitud->numeroticket }}</strong>
+                                    </span>
+                                </div>
                             </div>
-                        </div>
                         @endif
 
-                        <div class="overflow-hidden rounded-xl border border-gray-200">
-                            <table class="w-full">
+                        <!-- Tabla responsive con scroll horizontal -->
+                        <div class="overflow-x-auto rounded-lg sm:rounded-xl border border-gray-200">
+                            <table class="w-full min-w-[640px]">
                                 <thead class="bg-gray-50 border-b border-gray-200">
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                                            Código Repuesto
+                                        <th
+                                            class="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                                            <i class="fas fa-barcode mr-1"></i>
+                                            Código
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <th
+                                            class="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                                            <i class="fas fa-file-alt mr-1"></i>
                                             Descripción
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <th
+                                            class="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                                            <i class="fas fa-hashtag mr-1"></i>
                                             Cantidad
                                         </th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                        <th
+                                            class="px-3 sm:px-4 py-2 sm:py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider whitespace-nowrap">
+                                            <i class="fas fa-tasks mr-1"></i>
                                             Estado
                                         </th>
                                     </tr>
@@ -167,61 +215,85 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @forelse($articulos as $articulo)
                                         <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                            <td class="px-4 py-3 whitespace-nowrap">
+                                            <td class="px-3 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                                                 <div class="space-y-1">
-                                                    <span class="font-mono font-semibold text-blue-700 block text-sm">
+                                                    <span
+                                                        class="font-mono font-semibold text-blue-700 block text-xs sm:text-sm truncate">
+                                                        <i class="fas fa-qrcode mr-1 text-xs text-blue-500"></i>
                                                         {{ $articulo->codigo_repuesto ?? 'N/A' }}
                                                     </span>
                                                     @if ($articulo->codigo_barras)
-                                                        <span class="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 inline-block">
-                                                            Barras: {{ $articulo->codigo_barras }}
+                                                        <span
+                                                            class="text-xs text-gray-500 bg-gray-100 rounded px-1.5 sm:px-2 py-0.5 sm:py-1 inline-block truncate max-w-[120px] sm:max-w-none">
+                                                            <i class="fas fa-barcode mr-1 text-xs"></i>
+                                                            {{ $articulo->codigo_barras }}
                                                         </span>
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="px-4 py-3">
+                                            <td class="px-3 sm:px-4 py-2 sm:py-3">
                                                 <div>
-                                                    <span class="font-medium text-gray-900 block">
+                                                    <span
+                                                        class="font-medium text-gray-900 block text-xs sm:text-sm truncate">
+
                                                         {{ $articulo->nombre_articulo ?? 'Sin descripción' }}
                                                     </span>
-                                                    <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold">
+                                                    <span
+                                                        class="px-2 py-0.5 sm:py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-semibold whitespace-nowrap">
+                                                        <i class="fas fa-tag mr-1 text-xs"></i>
                                                         {{ $articulo->tipo_articulo ?? 'General' }}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="px-4 py-3">
-                                                <span class="text-xl font-bold text-gray-900 bg-gray-100 rounded-lg px-3 py-1 inline-block">
+                                            <td class="px-3 sm:px-4 py-2 sm:py-3">
+                                                <span
+                                                    class="text-base sm:text-xl font-bold text-gray-900 bg-gray-100 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1 inline-block whitespace-nowrap">
+                                                    <i class="fas fa-layer-group mr-1 text-gray-500 text-xs"></i>
                                                     {{ $articulo->cantidad ?? 0 }}
                                                 </span>
                                             </td>
-                                            <td class="px-4 py-3">
+                                            <td class="px-3 sm:px-4 py-2 sm:py-3">
                                                 @php
-                                                    $estadoClase = [
-                                                        '0' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                                        '1' => 'bg-green-100 text-green-800 border border-green-200',
-                                                        '2' => 'bg-red-100 text-red-800 border border-red-200',
-                                                    ][$articulo->estado ?? 0] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
+                                                    $estadoClase =
+                                                        [
+                                                            '0' =>
+                                                                'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                            '1' =>
+                                                                'bg-green-100 text-green-800 border border-green-200',
+                                                            '2' => 'bg-red-100 text-red-800 border border-red-200',
+                                                        ][$articulo->estado ?? 0] ??
+                                                        'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                                    $estadoTexto = [
-                                                        '0' => 'Pendiente',
-                                                        '1' => 'Completado',
-                                                        '2' => 'Rechazado',
-                                                    ][$articulo->estado ?? 0] ?? 'Desconocido';
+                                                    $estadoTexto =
+                                                        [
+                                                            '0' => 'Pendiente',
+                                                            '1' => 'Completado',
+                                                            '2' => 'Rechazado',
+                                                        ][$articulo->estado ?? 0] ?? 'Desconocido';
+
+                                                    $estadoIcono =
+                                                        [
+                                                            '0' => 'fa-clock',
+                                                            '1' => 'fa-check-circle',
+                                                            '2' => 'fa-times-circle',
+                                                        ][$articulo->estado ?? 0] ?? 'fa-question-circle';
                                                 @endphp
-                                                <span class="px-3 py-1 {{ $estadoClase }} rounded-full text-xs font-semibold">
+                                                <span
+                                                    class="px-2 sm:px-3 py-0.5 sm:py-1 {{ $estadoClase }} rounded-full text-xs font-semibold whitespace-nowrap">
+                                                    <i class="fas {{ $estadoIcono }} mr-1 text-xs"></i>
                                                     {{ $estadoTexto }}
                                                 </span>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4" class="px-4 py-12 text-center">
-                                                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                                </svg>
-                                                <p class="mt-4 text-lg font-semibold text-gray-500">No hay repuestos registrados</p>
-                                                <p class="mt-1 text-gray-400 text-sm">Esta orden no tiene repuestos solicitados</p>
+                                            <td colspan="4" class="px-4 py-8 sm:py-12 text-center">
+                                                <i
+                                                    class="fas fa-box-open text-gray-300 text-4xl sm:text-5xl mb-3 sm:mb-4"></i>
+                                                <p class="mt-2 sm:mt-4 text-sm sm:text-lg font-semibold text-gray-500">
+                                                    No hay repuestos registrados</p>
+                                                <p class="mt-1 text-gray-400 text-xs sm:text-sm">Esta orden no tiene
+                                                    repuestos solicitados</p>
                                             </td>
                                         </tr>
                                     @endforelse
@@ -230,77 +302,111 @@
                         </div>
 
                         @if ($articulos->count() > 0)
-                            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
-                                    <p class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1">Total Repuestos</p>
-                                    <p class="text-2xl font-bold text-blue-800">{{ $articulos->count() }}</p>
+                            <div class="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                                <div
+                                    class="bg-blue-50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center border border-blue-200">
+                                    <p
+                                        class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1 truncate">
+                                        <i class="fas fa-boxes mr-1"></i>
+                                        Total Repuestos
+                                    </p>
+                                    <p class="text-xl sm:text-2xl font-bold text-blue-800">{{ $articulos->count() }}
+                                    </p>
                                 </div>
-                                <div class="bg-green-50 rounded-xl p-4 text-center border border-green-200">
-                                    <p class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1">Total Cantidad</p>
-                                    <p class="text-2xl font-bold text-green-800">{{ $articulos->sum('cantidad') }}</p>
+                                <div
+                                    class="bg-green-50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center border border-green-200">
+                                    <p
+                                        class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1 truncate">
+                                        <i class="fas fa-layer-group mr-1"></i>
+                                        Total Cantidad
+                                    </p>
+                                    <p class="text-xl sm:text-2xl font-bold text-green-800">
+                                        {{ $articulos->sum('cantidad') }}</p>
                                 </div>
-                                <div class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
-                                    <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1">Tipos Diferentes</p>
-                                    <p class="text-2xl font-bold text-purple-800">
+                                <div
+                                    class="bg-purple-50 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center border border-purple-200">
+                                    <p
+                                        class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1 truncate">
+                                        <i class="fas fa-tags mr-1"></i>
+                                        Tipos Diferentes
+                                    </p>
+                                    <p class="text-xl sm:text-2xl font-bold text-purple-800">
                                         {{ $articulos->unique('tipo_articulo')->count() }}</p>
                                 </div>
                             </div>
                         @endif
-                        
-                        <!-- Sección debajo de Artículos en 2 columnas - Adaptada para provincia -->
-                        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                        <!-- Sección debajo de Artículos en 2 columnas - Responsive -->
+                        <div class="mt-6 sm:mt-8 grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <!-- Información CAST -->
-                            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-    <h3 class="text-xl font-bold text-gray-900 mb-4">Información del CAST</h3>
-    <div class="space-y-4">
-        <div class="flex items-center space-x-4">
-            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-            </div>
-            <div>
-                <p class="font-semibold text-gray-900">{{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
-                <p class="text-xs text-gray-500 mt-1">Ticket: {{ $solicitud->numeroticket ?? 'N/A' }}</p>
-            </div>
-        </div>
-        
-        @if($solicitud->cast_direccion || $solicitud->cast_provincia)
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h4 class="text-sm font-semibold text-gray-700 mb-2">Ubicación</h4>
-            <div class="space-y-1">
-                @if($solicitud->cast_direccion)
-                <p class="text-sm text-gray-600">{{ $solicitud->cast_direccion }}</p>
-                @endif
-                @if($solicitud->cast_departamento || $solicitud->cast_provincia)
-                <p class="text-sm text-gray-600">
-                    {{ $solicitud->cast_distrito ?? '' }} - 
-                    {{ $solicitud->cast_provincia ?? '' }} - 
-                    {{ $solicitud->cast_departamento ?? '' }}
-                </p>
-                @endif
-            </div>
-        </div>
-        @endif
-    </div>
-</div>
+                            <div
+                                class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-200">
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
+                                    <i class="fas fa-store mr-2 text-green-600"></i>
+                                    Información del CAST
+                                </h3>
+                                <div class="space-y-3 sm:space-y-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-store text-green-600 text-lg sm:text-xl"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                                                {{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
+                                            <p class="text-xs text-gray-500 mt-0.5">
+                                                <i class="fas fa-ticket-alt mr-1"></i>
+                                                Ticket: {{ $solicitud->numeroticket ?? 'N/A' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    @if ($solicitud->cast_direccion || $solicitud->cast_provincia)
+                                        <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                            <h4 class="text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                                                <i class="fas fa-map-marker-alt mr-1 text-blue-500"></i>
+                                                Ubicación
+                                            </h4>
+                                            <div class="space-y-1">
+                                                @if ($solicitud->cast_direccion)
+                                                    <p class="text-xs sm:text-sm text-gray-600 truncate">
+                                                        <i class="fas fa-location-dot mr-1 text-xs"></i>
+                                                        {{ $solicitud->cast_direccion }}
+                                                    </p>
+                                                @endif
+                                                @if ($solicitud->cast_departamento || $solicitud->cast_provincia)
+                                                    <p class="text-xs sm:text-sm text-gray-600 truncate">
+                                                        <i class="fas fa-map mr-1 text-xs"></i>
+                                                        {{ $solicitud->cast_distrito ?? '' }} -
+                                                        {{ $solicitud->cast_provincia ?? '' }} -
+                                                        {{ $solicitud->cast_departamento ?? '' }}
+                                                    </p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
 
                             <!-- Solicitante -->
-                            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                                <h3 class="text-xl font-bold text-gray-900 mb-4">Solicitante</h3>
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
+                            <div
+                                class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-200">
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
+                                    <i class="fas fa-user-tie mr-2 text-primary"></i>
+                                    Solicitante
+                                </h3>
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-user-tie text-primary text-lg sm:text-xl"></i>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">{{ $solicitud->nombre_solicitante ?? 'No especificado' }}</p>
-                                        <p class="text-sm text-gray-600">{{ $solicitud->nombre_area ?? 'Área no especificada' }}</p>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                                            {{ $solicitud->nombre_solicitante ?? 'No especificado' }}</p>
+                                        <p class="text-xs sm:text-sm text-gray-600 truncate">
+                                            <i class="fas fa-building mr-1 text-xs"></i>
+                                            {{ $solicitud->nombre_area ?? 'Área no especificada' }}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -309,64 +415,112 @@
 
                     <!-- Detalles de la Orden -->
                     <div x-show="activeTab === 'detalles'"
-                        class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Detalles de la Orden Provincia</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Código Orden</label>
-                                    <p class="text-lg font-bold text-gray-900">{{ $solicitud->codigo ?? 'N/A' }}</p>
+                        class="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-5 lg:p-6 border border-gray-200">
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
+                            <i class="fas fa-clipboard-list mr-2 text-purple-600"></i>
+                            Detalles de la Orden Provincia
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                            <div class="space-y-3 sm:space-y-4">
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-hashtag mr-1"></i>
+                                        Código Orden
+                                    </label>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900">
+                                        {{ $solicitud->codigo ?? 'N/A' }}</p>
                                 </div>
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">CAST Destino</label>
-                                    <p class="text-lg font-bold text-gray-900">{{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
-                                   @if($solicitud->cast_direccion)
-                                    <p class="text-sm text-gray-600 mt-1">{{ $solicitud->cast_direccion }}</p>
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-store mr-1"></i>
+                                        CAST Destino
+                                    </label>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900 truncate">
+                                        {{ $solicitud->cast_nombre ?? 'No especificado' }}</p>
+                                    @if ($solicitud->cast_direccion)
+                                        <p class="text-xs sm:text-sm text-gray-600 mt-1 truncate">
+                                            <i class="fas fa-location-dot mr-1 text-xs"></i>
+                                            {{ $solicitud->cast_direccion }}
+                                        </p>
                                     @endif
-                                    @if($solicitud->cast_departamento || $solicitud->cast_provincia)
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        {{ $solicitud->cast_distrito ?? '' }} - 
-                                        {{ $solicitud->cast_provincia ?? '' }} - 
-                                        {{ $solicitud->cast_departamento ?? '' }}
-                                    </p>
+                                    @if ($solicitud->cast_departamento || $solicitud->cast_provincia)
+                                        <p class="text-xs text-gray-500 mt-1 truncate">
+                                            <i class="fas fa-map mr-1 text-xs"></i>
+                                            {{ $solicitud->cast_distrito ?? '' }} -
+                                            {{ $solicitud->cast_provincia ?? '' }} -
+                                            {{ $solicitud->cast_departamento ?? '' }}
+                                        </p>
                                     @endif
                                 </div>
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Ticket Manual</label>
-                                    <p class="text-lg font-bold text-gray-900">{{ $solicitud->numeroticket ?? 'N/A' }}</p>
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-ticket-alt mr-1"></i>
+                                        Ticket Manual
+                                    </label>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900">
+                                        {{ $solicitud->numeroticket ?? 'N/A' }}</p>
                                 </div>
                             </div>
-                            <div class="space-y-4">
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Fecha Requerida</label>
-                                    <p class="text-lg font-bold text-gray-900">
+                            <div class="space-y-3 sm:space-y-4">
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        Fecha Requerida
+                                    </label>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900">
                                         @if ($solicitud->fecharequerida)
+                                            <i class="fas fa-clock mr-1 text-gray-400"></i>
                                             {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y') }}
                                         @else
                                             No definida
                                         @endif
                                     </p>
                                 </div>
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Tipo de Servicio</label>
-                                    <p class="text-lg font-bold text-gray-900">{{ $solicitud->tiposervicio ?? 'No especificado' }}</p>
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-cogs mr-1"></i>
+                                        Tipo de Servicio
+                                    </label>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900">
+                                        {{ $solicitud->tiposervicio ?? 'No especificado' }}</p>
                                 </div>
-                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                    <label class="block text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Urgencia</label>
+                                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <label
+                                        class="block text-xs font-semibold text-gray-600 mb-1 sm:mb-2 uppercase tracking-wide">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Urgencia
+                                    </label>
                                     @php
-                                        $urgenciaClase = [
-                                            'baja' => 'bg-green-100 text-green-800 border border-green-200',
-                                            'media' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                            'alta' => 'bg-red-100 text-red-800 border border-red-200',
-                                        ][$solicitud->urgencia ?? 'baja'] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
+                                        $urgenciaClase =
+                                            [
+                                                'baja' => 'bg-green-100 text-green-800 border border-green-200',
+                                                'media' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                'alta' => 'bg-red-100 text-red-800 border border-red-200',
+                                            ][$solicitud->urgencia ?? 'baja'] ??
+                                            'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                        $urgenciaTexto = [
-                                            'baja' => 'Baja',
-                                            'media' => 'Media',
-                                            'alta' => 'Alta',
-                                        ][$solicitud->urgencia ?? 'baja'] ?? 'No especificado';
+                                        $urgenciaTexto =
+                                            [
+                                                'baja' => 'Baja',
+                                                'media' => 'Media',
+                                                'alta' => 'Alta',
+                                            ][$solicitud->urgencia ?? 'baja'] ?? 'No especificado';
+
+                                        $urgenciaIcono =
+                                            [
+                                                'baja' => 'fa-check-circle',
+                                                'media' => 'fa-exclamation-circle',
+                                                'alta' => 'fa-exclamation-triangle',
+                                            ][$solicitud->urgencia ?? 'baja'] ?? 'fa-question-circle';
                                     @endphp
-                                    <span class="px-3 py-1 {{ $urgenciaClase }} rounded-full text-sm font-semibold">
+                                    <span
+                                        class="px-2 sm:px-3 py-0.5 sm:py-1 {{ $urgenciaClase }} rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap">
+                                        <i class="fas {{ $urgenciaIcono }} mr-1 text-xs"></i>
                                         {{ $urgenciaTexto }}
                                     </span>
                                 </div>
@@ -375,109 +529,121 @@
 
                         <!-- Observaciones -->
                         @if (!empty($solicitud->observaciones))
-                            <div class="mt-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Observaciones</label>
-                                <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                                    <p class="text-sm text-yellow-800 leading-relaxed">{{ $solicitud->observaciones }}</p>
+                            <div class="mt-4 sm:mt-6">
+                                <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-comment-alt mr-1"></i>
+                                    Observaciones
+                                </label>
+                                <div class="bg-yellow-50 rounded-lg p-3 sm:p-4 border border-yellow-200">
+                                    <p class="text-xs sm:text-sm text-yellow-800 leading-relaxed">
+                                        <i class="fas fa-sticky-note mr-1"></i>
+                                        {{ $solicitud->observaciones }}
+                                    </p>
                                 </div>
                             </div>
                         @endif
                     </div>
                 </div>
 
-                <!-- Sidebar Mejorado para Provincia -->
-                <div class="space-y-6">
+                <!-- Sidebar Mejorado para Provincia - Responsive -->
+                <div class="space-y-4 sm:space-y-6">
                     <!-- Resumen Rápido Mejorado para Provincia -->
-                    <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center space-x-3 mb-5">
-                            <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                    <div
+                        class="bg-gradient-to-br from-white to-gray-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-5">
+                            <div
+                                class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                                <i class="fas fa-chart-pie text-white text-sm sm:text-base lg:text-lg"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Resumen Provincia</h3>
+                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">Resumen
+                                Provincia</h3>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-3 sm:space-y-4">
                             <!-- Estado -->
-                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 hover:border-purple-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                            <div
+                                class="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border border-gray-200 hover:border-purple-300 transition-colors duration-200">
+                                <div class="flex items-center space-x-2 sm:space-x-3">
+                                    <div
+                                        class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-circle text-purple-600 text-xs sm:text-sm"></i>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700">Estado</span>
+                                    <span
+                                        class="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Estado</span>
                                 </div>
-                                <span class="px-3 py-1.5 bg-purple-100 text-purple-800 rounded-full text-xs font-bold border border-purple-200">
+                                <span
+                                    class="px-2 sm:px-3 py-0.5 sm:py-1.5 bg-purple-100 text-purple-800 rounded-full text-xs font-bold border border-purple-200 whitespace-nowrap">
+                                    <i class="fas fa-check-circle mr-1 text-xs"></i>
                                     {{ ucfirst($solicitud->estado ?? 'pendiente') }}
                                 </span>
                             </div>
 
                             <!-- CAST -->
-                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 hover:border-green-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
+                            <div
+                                class="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border border-gray-200 hover:border-green-300 transition-colors duration-200">
+                                <div class="flex items-center space-x-2 sm:space-x-3">
+                                    <div
+                                        class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-store text-green-600 text-xs sm:text-sm"></i>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700">CAST</span>
+                                    <span
+                                        class="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">CAST</span>
                                 </div>
-                                <span class="text-sm font-bold text-gray-900">{{ $solicitud->cast_nombre ?? 'N/A' }}</span>
+                                <span
+                                    class="text-xs sm:text-sm font-bold text-gray-900 truncate max-w-[120px] sm:max-w-none">
+                                    <i class="fas fa-store mr-1 text-xs"></i>
+                                    {{ $solicitud->cast_nombre ?? 'N/A' }}
+                                </span>
                             </div>
 
                             <!-- Total Repuestos -->
-                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 hover:border-blue-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
+                            <div
+                                class="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border border-gray-200 hover:border-blue-300 transition-colors duration-200">
+                                <div class="flex items-center space-x-2 sm:space-x-3">
+                                    <div
+                                        class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-boxes text-blue-600 text-xs sm:text-sm"></i>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700">Total Repuestos</span>
+                                    <span class="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Total
+                                        Repuestos</span>
                                 </div>
-                                <span class="text-lg font-bold text-gray-900 bg-gray-100 rounded-lg px-3 py-1.5">
+                                <span
+                                    class="text-base sm:text-lg font-bold text-gray-900 bg-gray-100 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1.5 whitespace-nowrap">
+                                    <i class="fas fa-hashtag mr-1 text-xs text-gray-500"></i>
                                     {{ $articulos->count() }}
                                 </span>
                             </div>
 
                             <!-- Cantidad Total -->
-                            <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-200 hover:border-orange-300 transition-colors duration-200">
-                                <div class="flex items-center space-x-3">
-                                    <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
+                            <div
+                                class="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg sm:rounded-xl border border-gray-200 hover:border-orange-300 transition-colors duration-200">
+                                <div class="flex items-center space-x-2 sm:space-x-3">
+                                    <div
+                                        class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-layer-group text-orange-600 text-xs sm:text-sm"></i>
                                     </div>
-                                    <span class="text-sm font-medium text-gray-700">Cantidad Total</span>
+                                    <span
+                                        class="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">Cantidad
+                                        Total</span>
                                 </div>
-                                <span class="text-lg font-bold text-gray-900 bg-gray-100 rounded-lg px-3 py-1.5">
+                                <span
+                                    class="text-base sm:text-lg font-bold text-gray-900 bg-gray-100 rounded-lg px-2 sm:px-3 py-0.5 sm:py-1.5 whitespace-nowrap">
+                                    <i class="fas fa-sort-amount-up mr-1 text-xs text-gray-500"></i>
                                     {{ $articulos->sum('cantidad') }}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tiempos Mejorado -->
-                    <div class="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center space-x-3 mb-5">
-                            <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                    <!-- Tiempos Mejorado - Responsive -->
+                    <div
+                        class="bg-gradient-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-5">
+                            <div
+                                class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                                <i class="fas fa-clock text-white text-sm sm:text-base lg:text-lg"></i>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Tiempos</h3>
+                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">Tiempos</h3>
                         </div>
 
                         <!-- Días Restantes -->
@@ -491,52 +657,98 @@
                             $diasConfig = [
                                 'vencida' => [
                                     'class' => 'bg-red-100 border-red-200 text-red-800',
-                                    'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                                    'icon' => 'fa-exclamation-triangle',
                                     'text' => 'Vencida',
+                                    'textShort' => 'Vencida',
                                 ],
                                 'urgente' => [
                                     'class' => 'bg-orange-100 border-orange-200 text-orange-800',
-                                    'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+                                    'icon' => 'fa-exclamation-circle',
                                     'text' => $diasRestantes . ' días',
+                                    'textShort' => $diasRestantes . 'd',
                                 ],
                                 'normal' => [
                                     'class' => 'bg-green-100 border-green-200 text-green-800',
-                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                    'icon' => 'fa-check-circle',
                                     'text' => $diasRestantes . ' días',
+                                    'textShort' => $diasRestantes . 'd',
                                 ],
                             ];
 
-                            $diasEstado = $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
+                            $diasEstado =
+                                $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
                         @endphp
 
-                        <div class="bg-white rounded-xl p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
-                            <div class="flex items-center space-x-3 mb-3">
-                                <div class="w-8 h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="{{ $diasConfig[$diasEstado]['icon'] }}" />
-                                    </svg>
+                        <div
+                            class="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
+                            <div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
+                                <div
+                                    class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i
+                                        class="fas {{ $diasConfig[$diasEstado]['icon'] }} {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }} text-sm"></i>
                                 </div>
-                                <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Días Restantes</label>
+                                <label
+                                    class="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide truncate">
+                                    <i class="fas fa-calendar-alt mr-1 text-xs"></i>
+                                    Días Restantes
+                                </label>
                             </div>
 
-                            <div class="flex items-center justify-between pl-11">
-                                <p class="text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }}">
-                                    {{ $diasConfig[$diasEstado]['text'] }}
+                            <div
+                                class="flex flex-col sm:flex-row sm:items-center sm:justify-between pl-8 sm:pl-9 lg:pl-11 space-y-2 sm:space-y-0">
+                                <p
+                                    class="text-2xl sm:text-3xl lg:text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }} text-center sm:text-left">
+                                    <span class="hidden sm:inline">{{ $diasConfig[$diasEstado]['text'] }}</span>
+                                    <span class="sm:hidden">{{ $diasConfig[$diasEstado]['textShort'] }}</span>
                                 </p>
 
                                 @if ($diasRestantes > 0 && $diasRestantes <= 7)
-                                    <div class="w-16 bg-gray-200 rounded-full h-2">
-                                        <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-2 rounded-full"
-                                            style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
+                                    <div class="flex items-center justify-center sm:justify-end space-x-2">
+                                        <div class="w-16 sm:w-20 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                                            <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-1.5 sm:h-2 rounded-full"
+                                                style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
+                                        </div>
+                                        <span class="text-xs text-gray-500 hidden sm:inline">
+                                            {{ $diasRestantes }}/7 días
+                                        </span>
+                                        <span class="text-xs text-gray-500 sm:hidden">
+                                            {{ $diasRestantes }}/7
+                                        </span>
+                                    </div>
+                                @elseif($diasRestantes > 7)
+                                    <div class="text-center sm:text-right">
+                                        <span class="text-xs text-gray-500">
+                                            <i class="fas fa-calendar-plus mr-1"></i>
+                                            <span class="hidden sm:inline">Más de 7 días</span>
+                                            <span class="sm:hidden">+7 días</span>
+                                        </span>
                                     </div>
                                 @endif
                             </div>
+
+                            <!-- Información adicional para móviles -->
+                            @if ($diasRestantes <= 0)
+                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
+                                    <p class="text-xs text-red-600 font-medium sm:hidden">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Solicitud vencida
+                                    </p>
+                                </div>
+                            @elseif($diasRestantes <= 2)
+                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
+                                    <p class="text-xs text-amber-600 font-medium sm:hidden">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Urgente
+                                    </p>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </x-layout.default>

@@ -1,10 +1,10 @@
 <x-layout.default>
     <!-- Incluir Select2 CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <style>
         .select2-container--default .select2-selection--single {
             border: 1px solid #d1d5db;
@@ -726,119 +726,176 @@
                 <!-- Sidebar -->
                 <div class="xl:col-span-1 space-y-8">
                     <!-- Resumen de la Orden -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Resumen de Orden</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Productos Únicos</span>
-                                <span class="text-2xl font-bold text-blue-600" x-text="totalUniqueProducts"></span>
+                    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-blue-100">
+                        <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Resumen de
+                            Orden</h3>
+                        <div class="space-y-3 md:space-y-4">
+                            <!-- Productos Únicos -->
+                            <div
+                                class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Productos
+                                    Únicos</span>
+                                <span class="text-xl sm:text-2xl font-bold text-blue-600"
+                                    x-text="totalUniqueProducts"></span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Total Cantidad</span>
-                                <span class="text-2xl font-bold text-green-600" x-text="totalQuantity"></span>
+
+                            <!-- Total Cantidad -->
+                            <div
+                                class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Total
+                                    Cantidad</span>
+                                <span class="text-xl sm:text-2xl font-bold text-green-600"
+                                    x-text="totalQuantity"></span>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Fecha Requerida</span>
-                                <span class="text-lg font-bold text-orange-600"
+
+                            <!-- Fecha Requerida -->
+                            <div
+                                class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Fecha
+                                    Requerida</span>
+                                <span class="text-base sm:text-lg font-bold text-orange-600"
                                     x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
                             </div>
-                            <div class="flex justify-between items-center py-3">
-                                <span class="text-gray-700 font-medium">Estado</span>
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold">En
-                                    creación</span>
+
+                            <!-- Estado -->
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3">
+                                <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Estado</span>
+                                <span
+                                    class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap">
+                                    En creación
+                                </span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Acciones Rápidas -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
-                        <div class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-blue-100">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6 text-center">
+                            <i class="fas fa-bolt text-blue-500 mr-2 hidden sm:inline"></i>Acciones
+                        </h3>
+
+                        <div class="space-y-3 sm:space-y-4">
+                            <!-- Botón Limpiar Todo -->
                             <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
-                                :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder }"
-                                class="w-full px-6 py-4 bg-warning text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                :class="{
+                                    'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder,
+                                    'hover:scale-[1.02] active:scale-95': products.length > 0 && !isCreatingOrder
+                                }"
+                                class="w-full px-4 sm:px-5 lg:px-6 py-3 sm:py-4 bg-warning text-white rounded-lg font-bold 
+                       hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center 
+                       space-x-2 sm:space-x-3 shadow-md hover:shadow-lg">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                     </path>
                                 </svg>
-                                <span>Limpiar Todo</span>
+                                <span class="text-sm sm:text-base font-medium">Limpiar Todo</span>
                             </button>
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD REPUESTO'))
-                            <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
-                                    'hover:scale-[1.02]': canCreateOrder && !isCreatingOrder
-                                }"
-                                class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                <template x-if="!isCreatingOrder">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                </template>
-                                <template x-if="isCreatingOrder">
-                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                </template>
-                                <span class="text-lg"
-                                    x-text="isCreatingOrder ? 'Guardando Solicitud...' : 'Guardar Solicitud Repuesto'"></span>
-                            </button>
+
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD REPUESTO'))
+                                <!-- Botón Guardar Solicitud -->
+                                <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
+                                    :class="{
+                                        'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
+                                        'hover:scale-[1.02] active:scale-95': canCreateOrder && !isCreatingOrder
+                                    }"
+                                    class="w-full px-4 sm:px-5 lg:px-6 py-3 sm:py-4 bg-green-500 text-white rounded-lg 
+                           font-bold hover:bg-green-600 transition-all duration-200 flex items-center 
+                           justify-center space-x-2 sm:space-x-3 shadow-lg hover:shadow-xl">
+                                    <template x-if="!isCreatingOrder">
+                                        <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </template>
+                                    <template x-if="isCreatingOrder">
+                                        <div
+                                            class="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white flex-shrink-0">
+                                        </div>
+                                    </template>
+                                    <span class="text-sm sm:text-base lg:text-lg font-medium whitespace-nowrap"
+                                        x-text="isCreatingOrder ? 'Guardando...' : 'Guardar Solicitud'"></span>
+                                </button>
                             @endif
                         </div>
                     </div>
 
                     <!-- Información de Contacto -->
-                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
-                        <h4 class="text-lg font-bold text-blue-700 mb-6 text-center">¿Necesita Ayuda?</h4>
-                        <div class="space-y-4">
+                    <div
+                        class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-5 lg:p-6 border border-blue-200">
+                        <h4
+                            class="text-base sm:text-lg lg:text-xl font-bold text-blue-700 mb-4 sm:mb-5 lg:mb-6 text-center">
+                            <i class="fas fa-question-circle mr-2 hidden sm:inline"></i>
+                            ¿Necesita Ayuda?
+                        </h4>
+
+                        <div class="space-y-3 sm:space-y-4 lg:space-y-5">
                             <!-- Teléfono -->
                             <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
+                                class="flex items-start sm:items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
-                                    class="flex-shrink-0 w-12 h-12 bg-success rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-success rounded-xl flex items-center justify-center shadow-md">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Soporte Técnico</p>
-                                    <p class="text-lg font-bold text-gray-900">+1 (555) 123-4567</p>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Soporte Técnico</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold text-gray-900 truncate"
+                                        title="+1 (555) 123-4567">
+                                        +1 (555) 123-4567
+                                    </p>
                                 </div>
+                                <a href="tel:+15551234567" class="sm:hidden flex-shrink-0 ml-2">
+                                    <i class="fas fa-phone text-success text-sm"></i>
+                                </a>
                             </div>
 
                             <!-- Email -->
                             <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
+                                class="flex items-start sm:items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
-                                    class="flex-shrink-0 w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-xl flex items-center justify-center shadow-md">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Email</p>
-                                    <p class="text-lg font-bold text-gray-900">soporte@empresa.com</p>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Email</p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold text-gray-900 truncate"
+                                        title="soporte@empresa.com">
+                                        soporte@empresa.com
+                                    </p>
                                 </div>
+                                <a href="mailto:soporte@empresa.com" class="sm:hidden flex-shrink-0 ml-2">
+                                    <i class="fas fa-envelope text-primary text-sm"></i>
+                                </a>
                             </div>
 
                             <!-- Horario -->
                             <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
+                                class="flex items-start sm:items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
-                                    class="flex-shrink-0 w-12 h-12 bg-secondary rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-secondary rounded-xl flex items-center justify-center shadow-md">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Horario de Atención</p>
-                                    <p class="text-lg font-bold text-gray-900">24/7</p>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Horario de Atención
+                                    </p>
+                                    <p class="text-sm sm:text-base lg:text-lg font-bold text-gray-900">24/7</p>
+                                </div>
+                                <div class="sm:hidden flex-shrink-0 ml-2">
+                                    <i class="fas fa-clock text-secondary text-sm"></i>
                                 </div>
                             </div>
                         </div>
@@ -891,26 +948,6 @@
                 </div>
             </div>
         </div>
-        <!-- Notificación Toast -->
-        <div x-show="notification.show" x-transition:enter="transition ease-out duration-300 transform"
-            x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
-            x-transition:leave="transition ease-in duration-200 transform"
-            x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-full opacity-0"
-            :class="getNotificationClass()"
-            class="fixed top-6 right-6 text-white px-6 py-4 rounded-xl shadow-2xl z-50 max-w-sm">
-            <div class="flex items-center space-x-3">
-                <div class="flex-shrink-0 text-xl" x-html="getNotificationIcon()"></div>
-                <div class="flex-1">
-                    <p class="text-sm font-medium" x-text="notification.message"></p>
-                </div>
-                <button @click="notification.show = false" class="flex-shrink-0 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Incluir jQuery y Select2 JS -->
@@ -919,17 +956,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('solicitudRepuesto', () => ({
                 // Estado de la aplicación
                 currentDate: '',
-                orderNumber: {{ $nextOrderNumber ?? 1 }}, // Número desde la base de datos
+                orderNumber: {{ $nextOrderNumber ?? 1 }},
                 selectedTicket: '',
                 selectedTicketInfo: null,
                 loadingTicket: false,
-                showClearModal: false, // ← AGREGAR ESTA LÍNEA
+                showClearModal: false,
                 loadingTipos: false,
                 loadingCodigos: false,
                 products: [],
@@ -945,14 +983,8 @@
                     observaciones: '',
                     fechaRequerida: ''
                 },
-                notification: {
-                    show: false,
-                    message: '',
-                    type: 'info'
-                },
-                notificationTimeout: null,
                 minDate: '',
-                isCreatingOrder: false, // Nuevo estado para el preloader
+                isCreatingOrder: false,
 
                 // Tickets desde Laravel
                 tickets: @json($tickets),
@@ -1048,7 +1080,7 @@
 
                     this.$nextTick(() => {
                         this.initSelect2();
-                        this.initFlatpickr(); // Agregar esta línea
+                        this.initFlatpickr();
                     });
                 },
 
@@ -1061,7 +1093,7 @@
                         }
                     } catch (error) {
                         console.error('Error obteniendo número de orden:', error);
-                        // Si falla, usar el número por defecto
+                        toastr.error('Error al obtener el número de orden');
                         this.orderNumber = {{ $nextOrderNumber ?? 1 }};
                     }
                 },
@@ -1083,7 +1115,7 @@
                         });
                     }
 
-                    // Modelo Select (solo lectura)
+                    // Modelo Select
                     if (this.$refs.modeloSelect) {
                         $(this.$refs.modeloSelect).select2({
                             placeholder: 'Seleccione un ticket primero',
@@ -1106,7 +1138,7 @@
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
                                 this.loadCodigosRepuesto(this.newProduct.modelo, e.target
-                                    .value);
+                                .value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -1125,8 +1157,8 @@
                         });
                     }
                 },
+
                 initFlatpickr() {
-                    // Esperar a que el DOM esté listo
                     this.$nextTick(() => {
                         if (this.$refs.fechaRequeridaInput && typeof flatpickr !==
                             'undefined') {
@@ -1142,47 +1174,18 @@
                                         this.orderInfo.fechaRequerida = dateStr;
                                     },
                                     onReady: (selectedDates, dateStr, instance) => {
-                                        // Sincronizar cualquier valor existente
                                         if (this.orderInfo.fechaRequerida) {
                                             instance.setDate(this.orderInfo
                                                 .fechaRequerida);
                                         }
                                     }
                                 });
-                                console.log('Flatpickr inicializado correctamente');
                             } catch (error) {
                                 console.error('Error al inicializar Flatpickr:', error);
+                                toastr.error('Error al inicializar el calendario');
                             }
-                        } else {
-                            console.warn('Flatpickr no disponible o elemento no encontrado');
                         }
                     });
-                },
-                // Métodos para notificación
-                getNotificationClass() {
-                    switch (this.notification.type) {
-                        case 'success':
-                            return 'bg-green-500';
-                        case 'error':
-                            return 'bg-red-500';
-                        case 'warning':
-                            return 'bg-yellow-500';
-                        default:
-                            return 'bg-blue-500';
-                    }
-                },
-
-                getNotificationIcon() {
-                    switch (this.notification.type) {
-                        case 'success':
-                            return '✅';
-                        case 'error':
-                            return '❌';
-                        case 'warning':
-                            return '⚠️';
-                        default:
-                            return 'ℹ️';
-                    }
                 },
 
                 formatDateForDisplay(dateString) {
@@ -1211,16 +1214,10 @@
                                     .modelo_nombre);
                                 this.loadTiposRepuesto(ticketData.idModelo);
                             }
-
-                            this.showNotification('✅ Información del ticket cargada', 'success');
-                        } else {
-                            this.showNotification('❌ No se encontró información del ticket',
-                                'error');
                         }
                     } catch (error) {
                         console.error('Error loading ticket info:', error);
-                        this.showNotification('❌ Error al cargar la información del ticket',
-                            'error');
+                        toastr.error('Error al cargar la información del ticket');
                     } finally {
                         this.loadingTicket = false;
                     }
@@ -1269,18 +1266,6 @@
                             });
 
                             $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`,
-                                'success');
-                        } else {
-                            $(this.$refs.tipoSelect).empty().append(
-                                $('<option>', {
-                                    value: '',
-                                    text: 'No hay tipos disponibles'
-                                })
-                            ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron tipos de repuesto para este modelo',
-                                'warning');
                         }
                     } catch (error) {
                         console.error('Error loading tipos repuesto:', error);
@@ -1290,7 +1275,7 @@
                                 text: 'Error al cargar tipos'
                             })
                         ).prop('disabled', true).trigger('change');
-                        this.showNotification('❌ Error al cargar los tipos de repuesto', 'error');
+                        toastr.error('Error al cargar los tipos de repuesto');
                     } finally {
                         this.loadingTipos = false;
                     }
@@ -1327,18 +1312,6 @@
                             });
 
                             $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${codigos.length} códigos cargados`,
-                                'success');
-                        } else {
-                            $(this.$refs.codigoSelect).empty().append(
-                                $('<option>', {
-                                    value: '',
-                                    text: 'No hay códigos disponibles'
-                                })
-                            ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron códigos para este tipo de repuesto',
-                                'warning');
                         }
                     } catch (error) {
                         console.error('Error loading codigos:', error);
@@ -1348,28 +1321,26 @@
                                 text: 'Error al cargar códigos'
                             })
                         ).prop('disabled', true).trigger('change');
-                        this.showNotification('❌ Error al cargar los códigos', 'error');
+                        toastr.error('Error al cargar los códigos');
                     } finally {
                         this.loadingCodigos = false;
                     }
                 },
 
                 clearTicketSelection() {
-                    // Primero limpia el Select2 sin disparar eventos
                     if (this.$refs.ticketSelect) {
                         $(this.$refs.ticketSelect).val('').trigger('change.select2');
                     }
 
-                    // Luego limpia el estado de Alpine
                     this.selectedTicket = '';
                     this.selectedTicketInfo = null;
                     this.clearModeloSelect();
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
 
-                    // Mostrar notificación de éxito
-                    this.showNotification('Ticket removido correctamente', 'info');
+                    toastr.info('Ticket removido correctamente');
                 },
+
                 clearModeloSelect() {
                     this.newProduct.modelo = '';
                     if (this.$refs.modeloSelect) {
@@ -1426,8 +1397,7 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto',
-                            'error');
+                        toastr.error('Por favor complete todos los campos del producto');
                         return;
                     }
 
@@ -1448,9 +1418,9 @@
 
                     if (existingProductIndex !== -1) {
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(
-                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
-                            'success');
+                        toastr.success(
+                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
+                            );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
@@ -1466,7 +1436,7 @@
                         };
 
                         this.products.push(product);
-                        this.showNotification('✅ Producto agregado correctamente', 'success');
+                        toastr.success('Producto agregado correctamente');
                     }
 
                     this.newProduct.cantidad = 1;
@@ -1480,7 +1450,7 @@
 
                 removeProduct(index) {
                     this.products.splice(index, 1);
-                    this.showNotification('🗑️ Producto eliminado de la orden', 'info');
+                    toastr.info('Producto eliminado de la orden');
                 },
 
                 updateQuantity(index, change) {
@@ -1492,7 +1462,7 @@
 
                 clearAll() {
                     if (this.products.length === 0) {
-                        this.showNotification('No hay artículos para limpiar', 'info');
+                        toastr.info('No hay artículos para limpiar');
                         return;
                     }
                     this.showClearModal = true;
@@ -1501,7 +1471,7 @@
                 confirmClearAll() {
                     this.products = [];
                     this.showClearModal = false;
-                    this.showNotification('Todos los artículos han sido eliminados', 'info');
+                    toastr.info('Todos los artículos han sido eliminados');
                 },
 
                 cancelClearAll() {
@@ -1510,17 +1480,13 @@
 
                 async createOrder() {
                     if (!this.canCreateOrder) {
-                        this.showNotification(
-                            '❌ Complete todos los campos requeridos para crear la orden',
-                            'error');
+                        toastr.error('Complete todos los campos requeridos para crear la orden');
                         return;
                     }
 
-                    // Mostrar preloader
                     this.isCreatingOrder = true;
 
                     try {
-                        // Preparar datos para enviar
                         const orderData = {
                             ticketId: this.selectedTicket,
                             orderInfo: this.orderInfo,
@@ -1528,9 +1494,6 @@
                             orderNumber: this.orderNumber
                         };
 
-                        console.log('Enviando datos de la orden:', orderData);
-
-                        // Enviar datos al servidor
                         const response = await fetch('/solicitudrepuesto/store', {
                             method: 'POST',
                             headers: {
@@ -1544,17 +1507,7 @@
                         const result = await response.json();
 
                         if (result.success) {
-                            this.showNotification(
-                                `🎉 ¡Orden ${result.codigo_orden} creada exitosamente!`,
-                                'success');
-
-                            console.log('Orden guardada:', {
-                                id: result.solicitud_id,
-                                codigo: result.codigo_orden,
-                                numeroticket: result.numeroticket,
-                                productos_unicos: result.estadisticas.productos_unicos,
-                                total_cantidad: result.estadisticas.total_cantidad
-                            });
+                            toastr.success(`¡Orden ${result.codigo_orden} creada exitosamente!`);
 
                             // Obtener el próximo número de orden después de guardar
                             await this.getNextOrderNumber();
@@ -1569,34 +1522,37 @@
                                     observaciones: '',
                                     fechaRequerida: ''
                                 };
-                                // No incrementar manualmente, ya se obtuvo el nuevo número
-                            }, 3000);
+                            }, 2000);
                         } else {
                             throw new Error(result.message);
                         }
 
                     } catch (error) {
                         console.error('Error al crear la orden:', error);
-                        this.showNotification(`❌ Error: ${error.message}`, 'error');
+                        toastr.error(`Error: ${error.message}`);
                     } finally {
                         this.isCreatingOrder = false;
                     }
                 },
 
+                // Método auxiliar para compatibilidad (opcional)
                 showNotification(message, type = 'info') {
-                    this.notification.message = message;
-                    this.notification.type = type;
-                    this.notification.show = true;
-
-                    if (this.notificationTimeout) {
-                        clearTimeout(this.notificationTimeout);
+                    switch (type) {
+                        case 'success':
+                            toastr.success(message);
+                            break;
+                        case 'error':
+                            toastr.error(message);
+                            break;
+                        case 'warning':
+                            toastr.warning(message);
+                            break;
+                        default:
+                            toastr.info(message);
+                            break;
                     }
-
-                    this.notificationTimeout = setTimeout(() => {
-                        this.notification.show = false;
-                    }, 4000);
                 }
-            }))
+            }));
         });
     </script>
 </x-layout.default>

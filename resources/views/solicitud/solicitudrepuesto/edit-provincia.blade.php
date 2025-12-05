@@ -1,10 +1,10 @@
 <x-layout.default>
     <!-- Incluir Select2 CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <style>
         .select2-container--default .select2-selection--single {
             border: 1px solid #d1d5db;
@@ -33,33 +33,37 @@
             <div class="mb-6">
                 <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
                     <li>
-                        <a href="{{ route('solicitudarticulo.index') }}" class="text-primary hover:underline">Solicitudes</a>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="text-primary hover:underline">Solicitudes</a>
                     </li>
-                  
                     <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                        <span>Editar Solicitud de Provincia</span>
+                        <span>Editar Solicitud de Repuesto Provincia</span>
                     </li>
                 </ul>
             </div>
 
-            <!-- Header Principal -->
-            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
+            <!-- Header Principal - Diseño actualizado -->
+            <div
+                class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-8">
                     <!-- Contenido Principal -->
                     <div class="flex-1">
                         <!-- Título y Descripción -->
                         <div class="mb-4">
                             <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                                Editar Orden de Provincia
+                                Editar Orden de Repuesto Provincia
                             </h1>
-                            <p class="text-gray-600 text-lg">Modifique la información de la orden de repuestos para provincia</p>
+                            <p class="text-gray-600 text-lg">Modifique la información de la orden de repuestos para
+                                provincia</p>
                         </div>
 
                         <!-- Información en Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
                                         </path>
@@ -67,13 +71,16 @@
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Usuario</p>
-                                    <p class="font-semibold text-gray-900">{{ auth()->user()->name ?? 'Administrador' }}</p>
+                                    <p class="font-semibold text-gray-900">{{ auth()->user()->name ?? 'Administrador' }}
+                                    </p>
                                 </div>
                             </div>
 
                             <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                                         </path>
@@ -81,13 +88,16 @@
                                 </div>
                                 <div>
                                     <p class="text-sm text-gray-500">Fecha de Creación</p>
-                                    <p class="font-semibold text-gray-900" x-text="formatDate(solicitud.fechaCreacion)"></p>
+                                    <p class="font-semibold text-gray-900" x-text="formatDate(solicitud.fechaCreacion)">
+                                    </p>
                                 </div>
                             </div>
 
                             <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div
+                                    class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
@@ -100,11 +110,13 @@
                         </div>
                     </div>
 
-                    <!-- Número de Orden -->
+                    <!-- Número de Orden - Diseño actualizado -->
                     <div class="mt-6 lg:mt-0 lg:ml-6">
-                        <div class="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl p-6 text-center shadow-lg border border-blue-200">
+                        <div
+                            class="bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl p-6 text-center shadow-lg border border-blue-200">
                             <p class="text-white/80 text-sm font-medium mb-1">Orden N°</p>
-                            <div class="text-2xl lg:text-3xl font-black text-white tracking-wide" x-text="solicitud.codigo"></div>
+                            <div class="text-2xl lg:text-3xl font-black text-white tracking-wide"
+                                x-text="solicitud.codigo"></div>
                             <div class="w-12 h-1 bg-white/30 rounded-full mx-auto mt-2"></div>
                         </div>
                     </div>
@@ -114,158 +126,246 @@
             <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
                 <!-- Columna Principal -->
                 <div class="xl:col-span-3 space-y-8">
-                    <!-- Información de CAST y Ticket -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4">
+                    <!-- Información de CAST y Ticket - Diseño actualizado -->
+                    <div
+                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                             <div class="flex items-center space-x-3">
-                                <div class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
-                                    <i class="fas fa-map-marker-alt text-white text-lg"></i>
+                                <div
+                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
+                                    <i class="fas fa-ticket-alt text-white text-lg"></i>
                                 </div>
                                 <div>
-                                    <h2 class="text-xl font-bold text-white">Información de CAST</h2>
-                                    <p class="text-white/80 text-sm">Seleccione el CAST y número de ticket manual</p>
+                                    <h2 class="text-xl font-bold text-white">Información del Ticket</h2>
+                                    <p class="text-white/80 text-sm">Ingrese el número del ticket</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="p-6">
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <!-- CAST -->
-                                <div>
-                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
-                                        <i class="fas fa-building text-blue-500 mr-2"></i>
-                                        CAST
-                                    </label>
-                                    <select x-model="orderInfo.castId" class="w-full">
-                                        <option value="">Seleccione un CAST</option>
-                                        <template x-for="castOption in castList" :key="castOption.idCast">
-                                            <option :value="castOption.idCast" x-text="castOption.nombre"></option>
-                                        </template>
-                                    </select>
-                                </div>
+                            <div class="mb-4">
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">Número de Ticket</label>
+                                <input type="text" x-model="orderInfo.ticketNumber"
+                                    placeholder="Escriba el número de ticket"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                            </div>
+                        </div>
+                    </div>
 
-                                <!-- Ticket Manual -->
+                    <!-- Selección de CAST - Diseño actualizado -->
+                    <div
+                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        <div class="bg-green-600 px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
+                                    <i class="fas fa-building text-white text-lg"></i>
+                                </div>
                                 <div>
-                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
-                                        <i class="fas fa-ticket-alt text-blue-500 mr-2"></i>
-                                        Número de Ticket
-                                    </label>
-                                    <input type="text" x-model="orderInfo.ticketNumber"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200"
-                                        placeholder="Ingrese número de ticket manual">
+                                    <h2 class="text-xl font-bold text-white">Selección de CAST</h2>
+                                    <p class="text-white/80 text-sm">Seleccione el CAST para esta orden</p>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- Información del CAST seleccionado -->
-                            <div x-show="selectedCastInfo" 
-                                x-transition:enter="transition ease-out duration-300"
+                        <div class="p-6">
+                            <div class="mb-4">
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">CAST</label>
+                                <select x-model="orderInfo.castId" x-ref="castSelect" class="w-full">
+                                    <option value="">Seleccione un CAST...</option>
+                                    <template x-for="cast in castList" :key="cast.idCast">
+                                        <option :value="cast.idCast" x-text="cast.nombre"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Mostrar información del CAST seleccionado -->
+                            <div x-show="selectedCastInfo" x-transition:enter="transition ease-out duration-300"
                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
                                 x-transition:enter-end="opacity-100 transform translate-y-0"
-                                class="mt-6 bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                                <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-bold text-gray-900">Información del CAST</h3>
-                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                                        <i class="fas fa-check-circle mr-1"></i> Seleccionado
-                                    </span>
-                                </div>
+                                class="bg-green-50 rounded-xl p-4 border border-green-200 mt-4">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <p class="text-sm text-gray-600">Nombre</p>
-                                        <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.nombre"></p>
+                                        <p class="text-sm text-gray-600">Contacto:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.telefono || 'No especificado'"></p>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Dirección</p>
-                                        <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.direccion"></p>
+                                        <p class="text-sm text-gray-600">Email:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.email || 'No especificado'"></p>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Provincia</p>
-                                        <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.provincia"></p>
+                                        <p class="text-sm text-gray-600">RUC:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.ruc || 'No especificado'"></p>
                                     </div>
                                     <div>
-                                        <p class="text-sm text-gray-600">Departamento</p>
-                                        <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.departamento"></p>
+                                        <p class="text-sm text-gray-600">Ubicación:</p>
+                                        <p class="font-semibold text-gray-900">
+                                            <span x-text="selectedCastInfo?.departamento || 'No especificado'"></span>
+                                            /
+                                            <span x-text="selectedCastInfo?.provincia || 'No especificado'"></span>
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Selección de Productos -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                            <div class="flex items-center space-x-3">
-                                <div class="flex items-center justify-center w-10 h-10 bg-white text-blue-600 rounded-full font-bold shadow-md">
+                    <!-- Selección de Productos - Diseño actualizado -->
+                    <div
+                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        <!-- Header con gradiente -->
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 md:px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 
+                        bg-white text-blue-600 rounded-full font-bold shadow-md">
                                     1
                                 </div>
-                                <div>
-                                    <h2 class="text-xl font-bold text-white">Selección de Productos</h2>
-                                    <p class="text-blue-100 text-sm">Modifique los repuestos de la orden</p>
+                                <div class="min-w-0 flex-1">
+                                    <h2 class="text-lg md:text-xl font-bold text-white truncate">
+                                        Selección de Productos
+                                    </h2>
+                                    <p class="text-blue-100 text-xs md:text-sm truncate">
+                                        Agregue los repuestos necesarios para la orden
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="p-6">
+                        <div class="p-4 md:p-6">
                             <!-- Tabla de Productos -->
-                            <div class="mb-8">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-xl font-semibold text-gray-900">Productos Seleccionados</h3>
-                                    <div class="flex items-center space-x-4">
+                            <div class="mb-6 md:mb-8">
+                                <div
+                                    class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 md:mb-6">
+                                    <h3 class="text-lg md:text-xl font-semibold text-gray-900">
+                                        Productos Seleccionados
+                                    </h3>
+                                    <div class="flex items-center gap-4">
                                         <span class="text-sm text-gray-600"
-                                            x-text="`${totalUniqueProducts} producto${totalUniqueProducts !== 1 ? 's' : ''}`"></span>
+                                            x-text="`${totalUniqueProducts} producto${totalUniqueProducts !== 1 ? 's' : ''}`">
+                                        </span>
                                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
-                                            x-show="products.length > 0"></div>
+                                            x-show="products.length > 0">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="overflow-hidden rounded-xl border border-blue-100">
-                                    <table class="w-full">
+                                <!-- Tabla responsive - contenedor scroll horizontal -->
+                                <div class="overflow-x-auto rounded-xl border border-blue-100">
+                                    <table class="w-full min-w-[600px] md:min-w-full">
                                         <thead class="bg-blue-50">
                                             <tr>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Modelo</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Tipo de Repuesto</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Código</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Cantidad</th>
-                                                <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">Acciones</th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Ticket
+                                                </th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Modelo
+                                                </th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Tipo
+                                                </th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Código
+                                                </th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Cantidad
+                                                </th>
+                                                <th
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Acciones
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-blue-100">
+                                            <!-- Estado vacío -->
                                             <template x-if="products.length === 0">
                                                 <tr>
-                                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                                        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                                    <td colspan="6"
+                                                        class="px-4 md:px-6 py-8 md:py-12 text-center text-gray-500">
+                                                        <svg class="mx-auto h-12 w-12 md:h-16 md:w-16 text-gray-300"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="1"
                                                                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                                                             </path>
                                                         </svg>
-                                                        <p class="mt-4 text-lg font-medium text-gray-900">No hay productos agregados</p>
-                                                        <p class="text-sm mt-2">Agregue productos usando el formulario inferior</p>
+                                                        <p
+                                                            class="mt-3 md:mt-4 text-base md:text-lg font-medium text-gray-900">
+                                                            No hay productos agregados
+                                                        </p>
+                                                        <p class="text-xs md:text-sm mt-1 md:mt-2">
+                                                            Agregue productos usando el formulario inferior
+                                                        </p>
                                                     </td>
                                                 </tr>
                                             </template>
+
+                                            <!-- Productos -->
                                             <template x-for="(product, index) in products" :key="product.uniqueId">
                                                 <tr class="product-row hover:bg-blue-50 transition-all duration-200">
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base font-semibold text-gray-900"
-                                                        x-text="product.modelo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-700"
-                                                        x-text="product.tipo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-blue-600 font-mono font-bold"
-                                                        x-text="product.codigo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
-                                                        <div class="flex items-center space-x-3">
+                                                    <!-- Ticket -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base font-semibold text-purple-600 truncate max-w-[100px]"
+                                                        :title="product.ticket" x-text="product.ticket">
+                                                    </td>
+
+                                                    <!-- Modelo -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base font-semibold text-gray-900 truncate max-w-[120px]"
+                                                        :title="product.modelo" x-text="product.modelo">
+                                                    </td>
+
+                                                    <!-- Tipo -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-gray-700 truncate max-w-[120px]"
+                                                        :title="product.tipo" x-text="product.tipo">
+                                                    </td>
+
+                                                    <!-- Código -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-blue-600 font-mono font-bold truncate max-w-[100px]"
+                                                        :title="product.codigo" x-text="product.codigo">
+                                                    </td>
+
+                                                    <!-- Cantidad -->
+                                                    <td
+                                                        class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-gray-900">
+                                                        <div class="flex items-center gap-2">
                                                             <span class="font-bold" x-text="product.cantidad"></span>
-                                                            <div class="flex space-x-1">
+                                                            <div class="flex gap-1">
                                                                 <button @click="updateQuantity(index, -1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    class="p-1 text-blue-600 hover:text-blue-700 
+                                                           hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
                                                                             d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
                                                                         </path>
                                                                     </svg>
                                                                 </button>
                                                                 <button @click="updateQuantity(index, 1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    class="p-1 text-blue-600 hover:text-blue-700 
+                                                           hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
                                                                             d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z">
                                                                         </path>
                                                                     </svg>
@@ -273,15 +373,23 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
+
+                                                    <!-- Acciones -->
+                                                    <td
+                                                        class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base">
                                                         <button @click="removeProduct(index)"
-                                                            class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            class="text-red-600 hover:text-red-700 font-semibold 
+                                                   flex items-center gap-1 md:gap-2 transition-colors">
+                                                            <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0"
+                                                                fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
                                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                                                 </path>
                                                             </svg>
-                                                            <span>Eliminar</span>
+                                                            <span class="hidden sm:inline">Eliminar</span>
+                                                            <span class="inline sm:hidden">Elim.</span>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -292,14 +400,20 @@
                             </div>
 
                             <!-- Formulario para Agregar Producto -->
-                            <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Producto</h3>
+                            <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-200">
+                                <h3 class="text-lg md:text-xl font-semibold text-gray-900 mb-4 md:mb-6">
+                                    Agregar Nuevo Producto
+                                </h3>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                                <!-- Grid de formulario responsive -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
                                     <!-- Modelo -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Modelo</label>
-                                        <select x-model="newProduct.modelo" x-ref="modeloSelect" class="w-full">
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Modelo
+                                        </label>
+                                        <select x-model="newProduct.modelo" x-ref="modeloSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg">
                                             <option value="">Seleccione un modelo</option>
                                             <template x-for="modelo in modelosList" :key="modelo.idModelo">
                                                 <option :value="modelo.idModelo" x-text="modelo.nombre"></option>
@@ -308,72 +422,107 @@
                                     </div>
 
                                     <!-- Tipo de Repuesto -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de Repuesto</label>
-                                        <select x-model="newProduct.tipo" x-ref="tipoSelect" class="w-full" :disabled="!newProduct.modelo">
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Tipo de Repuesto
+                                        </label>
+                                        <select x-model="newProduct.tipo" x-ref="tipoSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg"
+                                            :disabled="!newProduct.modelo">
                                             <option value="">Seleccione modelo primero</option>
                                         </select>
-                                        <div x-show="loadingTipos" class="text-xs text-blue-500 mt-1">Cargando tipos de repuesto...</div>
+                                        <div x-show="loadingTipos" class="text-xs text-blue-500 mt-1">
+                                            Cargando tipos de repuesto...
+                                        </div>
                                     </div>
 
                                     <!-- Código -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Código</label>
-                                        <select x-model="newProduct.codigo" x-ref="codigoSelect" class="w-full" :disabled="!newProduct.tipo">
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Código
+                                        </label>
+                                        <select x-model="newProduct.codigo" x-ref="codigoSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg"
+                                            :disabled="!newProduct.tipo">
                                             <option value="">Seleccione tipo primero</option>
                                         </select>
-                                        <div x-show="loadingCodigos" class="text-xs text-blue-500 mt-1">Cargando códigos...</div>
+                                        <div x-show="loadingCodigos" class="text-xs text-blue-500 mt-1">
+                                            Cargando códigos...
+                                        </div>
                                     </div>
 
                                     <!-- Cantidad -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Cantidad</label>
-                                        <div class="flex w-full">
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Cantidad
+                                        </label>
+                                        <div class="flex w-full max-w-[200px] mx-auto lg:mx-0">
                                             <button @click="decreaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                                                class="bg-blue-600 text-white flex justify-center items-center 
+                                       rounded-l-lg px-3 md:px-4 font-semibold border border-r-0 
+                                       border-blue-600 hover:bg-blue-700 transition-colors
+                                       active:scale-95">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M20 12H4"></path>
                                                 </svg>
                                             </button>
-                                            <input type="number" x-model="newProduct.cantidad" min="1" max="100"
-                                                class="w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold"
+                                            <input type="number" x-model="newProduct.cantidad" min="1"
+                                                max="100"
+                                                class="w-16 text-center border-y border-blue-600 focus:ring-0 
+                                      bg-white text-gray-900 font-semibold text-sm md:text-base"
                                                 readonly />
                                             <button @click="increaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                class="bg-blue-600 text-white flex justify-center items-center 
+                                       rounded-r-lg px-3 md:px-4 font-semibold border border-l-0 
+                                       border-blue-600 hover:bg-blue-700 transition-colors
+                                       active:scale-95">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                 </svg>
                                             </button>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2 text-center">Mín: 1 - Máx: 100</div>
+                                        <div class="text-xs text-gray-500 mt-2 text-center lg:text-left">
+                                            Mín: 1 - Máx: 100
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Botón Agregar Producto -->
                                 <button @click="addProduct()" :disabled="!canAddProduct"
                                     :class="{
                                         'opacity-50 cursor-not-allowed': !canAddProduct,
-                                        'hover:scale-[1.02]': canAddProduct
+                                        'hover:scale-[1.02] active:scale-95': canAddProduct
                                     }"
-                                    class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    class="w-full bg-blue-600 text-white py-3 md:py-4 px-4 md:px-6 rounded-lg 
+                           font-bold transition-all duration-200 flex items-center justify-center 
+                           gap-2 md:gap-3 shadow-lg text-sm md:text-base">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4"></path>
                                     </svg>
-                                    <span class="text-lg">Agregar Producto a la Orden</span>
+                                    <span class="truncate">Agregar Producto a la Orden</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Información Adicional -->
-                    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                    <div
+                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
                         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                             <div class="flex items-center space-x-3">
-                                <div class="flex items-center justify-center w-10 h-10 bg-white text-cyan-600 rounded-full font-bold shadow-md">
+                                <div
+                                    class="flex items-center justify-center w-10 h-10 bg-white text-cyan-600 rounded-full font-bold shadow-md">
                                     2
                                 </div>
                                 <div>
                                     <h2 class="text-xl font-bold text-white">Información Adicional</h2>
-                                    <p class="text-blue-100 text-sm">Modifique los detalles de la orden</p>
+                                    <p class="text-blue-100 text-sm">Complete los detalles de la orden</p>
                                 </div>
                             </div>
                         </div>
@@ -387,11 +536,19 @@
                                         Tipo de Servicio
                                     </label>
                                     <div class="relative">
-                                        <select x-model="orderInfo.tipoServicio"
+                                        <select x-model="orderInfo.tipoServicio" x-init="console.log('Select init - valor:', orderInfo.tipoServicio);
+                                        $nextTick(() => {
+                                            // Forzar la actualización después de que Alpine termine
+                                            if (orderInfo.tipoServicio) {
+                                                $el.value = orderInfo.tipoServicio;
+                                                console.log('Valor establecido en select:', $el.value);
+                                            }
+                                        });"
                                             class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white cursor-pointer shadow-sm hover:shadow-md">
                                             <option value="">Seleccione un tipo de servicio</option>
                                             <template x-for="servicio in tiposServicio" :key="servicio.value">
-                                                <option :value="servicio.value" x-text="servicio.text"></option>
+                                                <option :value="servicio.value" x-text="servicio.text"
+                                                    :selected="servicio.value === orderInfo.tipoServicio"></option>
                                             </template>
                                         </select>
                                     </div>
@@ -404,17 +561,42 @@
                                         Fecha Requerida
                                     </label>
                                     <div class="relative">
-                                        <input type="text" x-ref="fechaRequeridaInput" x-model="orderInfo.fechaRequerida"
+                                        <input type="text" x-ref="fechaRequeridaInput"
+                                            x-model="orderInfo.fechaRequerida"
                                             class="w-full pr-11 pl-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200 shadow-sm hover:shadow-md"
                                             placeholder="Seleccione una fecha">
-                                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <div
+                                            class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                             <i class="fas fa-calendar-alt text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                    <div class="text-xs text-gray-500 mt-2 flex items-center">
+                                        <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+                                        Fecha límite para tener todos los repuestos
+                                    </div>
+                                    <div class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 transition-all duration-300"
+                                        x-show="orderInfo.fechaRequerida"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 transform scale-95"
+                                        x-transition:enter-end="opacity-100 transform scale-100">
+                                        <div class="flex items-center space-x-3">
+                                            <div
+                                                class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-check-circle text-blue-600 text-lg"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-semibold text-blue-800">Fecha establecida</p>
+                                                <p class="text-sm text-blue-700 font-medium">
+                                                    <span
+                                                        x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Nivel de Urgencia -->
+                            <!-- Nivel de Urgencia - Versión Cards -->
                             <div class="mt-8 space-y-4">
                                 <label class="block text-lg font-semibold text-gray-900 mb-4">
                                     <i class="fas fa-gauge-high text-blue-500 mr-2"></i>
@@ -427,30 +609,42 @@
                                             class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
                                             <div class="p-5 rounded-xl border-2 transition-all duration-300 h-full shadow-sm hover:shadow-md"
                                                 :class="{
-                                                    [urgencia.borderColor + ' ' + urgencia.bgColor]: orderInfo.urgencia === urgencia.value,
-                                                    'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo.urgencia !== urgencia.value
+                                                    [urgencia.borderColor + ' ' + urgencia.bgColor]: orderInfo
+                                                        .urgencia === urgencia.value,
+                                                        'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
+                                                        .urgencia !== urgencia.value
                                                 }">
+
+                                                <!-- Header con icono y título -->
                                                 <div class="flex items-center justify-between mb-3">
                                                     <div class="flex items-center space-x-2">
-                                                        <i class="fas text-xl" :class="urgencia.icon + ' ' + urgencia.iconColor"></i>
-                                                        <h3 class="font-bold text-gray-900 text-lg" x-text="urgencia.text"></h3>
+                                                        <i class="fas text-xl"
+                                                            :class="urgencia.icon + ' ' + urgencia.iconColor"></i>
+                                                        <h3 class="font-bold text-gray-900 text-lg"
+                                                            x-text="urgencia.text"></h3>
                                                     </div>
                                                     <div class="w-6 h-6 flex items-center justify-center transition-all duration-300"
                                                         :class="{
                                                             [urgencia.iconColor]: orderInfo.urgencia === urgencia.value,
-                                                            'text-gray-400': orderInfo.urgencia !== urgencia.value
+                                                                'text-gray-400': orderInfo.urgencia !== urgencia.value
                                                         }">
                                                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path x-show="orderInfo.urgencia === urgencia.value" fill-rule="evenodd"
+                                                            <path x-show="orderInfo.urgencia === urgencia.value"
+                                                                fill-rule="evenodd"
                                                                 d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                                                 clip-rule="evenodd" />
-                                                            <path x-show="orderInfo.urgencia !== urgencia.value" fill-rule="evenodd"
+                                                            <path x-show="orderInfo.urgencia !== urgencia.value"
+                                                                fill-rule="evenodd"
                                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                     </div>
                                                 </div>
-                                                <p class="text-sm text-gray-600 leading-relaxed" x-text="urgencia.description"></p>
+
+                                                <!-- Descripción -->
+                                                <p class="text-sm text-gray-600 leading-relaxed"
+                                                    x-text="urgencia.description"></p>
+
                                             </div>
                                         </button>
                                     </template>
@@ -459,7 +653,8 @@
 
                             <!-- Observaciones -->
                             <div class="mt-8">
-                                <label class="block text-lg font-semibold text-gray-900 mb-4">Observaciones y Comentarios</label>
+                                <label class="block text-lg font-semibold text-gray-900 mb-4">Observaciones y
+                                    Comentarios</label>
                                 <textarea x-model="orderInfo.observaciones" rows="5"
                                     class="w-full px-4 py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 resize-none transition-all duration-200"
                                     placeholder="Describa cualquier observación, comentario adicional o instrucción especial para esta orden..."></textarea>
@@ -468,77 +663,229 @@
                     </div>
                 </div>
 
-                <!-- Sidebar -->
+                <!-- Sidebar - Diseño actualizado -->
                 <div class="xl:col-span-1 space-y-8">
-                    <!-- Resumen de la Orden -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Resumen de Orden</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Productos Únicos</span>
-                                <span class="text-2xl font-bold text-blue-600" x-text="totalUniqueProducts"></span>
+                    <!-- Resumen de la Orden - Versión Grid para móvil -->
+                    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-blue-100">
+                        <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 text-center md:text-left">
+                            Resumen de Orden
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                            <!-- Productos Únicos -->
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Productos Únicos
+                                    </span>
+                                    <span class="text-xl font-bold text-blue-600" x-text="totalUniqueProducts">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Total Cantidad</span>
-                                <span class="text-2xl font-bold text-green-600" x-text="totalQuantity"></span>
+
+                            <!-- Total Cantidad -->
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Total Cantidad
+                                    </span>
+                                    <span class="text-xl font-bold text-green-600" x-text="totalQuantity">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">CAST</span>
-                                <span class="text-lg font-bold text-purple-600" x-text="selectedCastInfo?.nombre || 'No seleccionado'"></span>
+
+                            <!-- Fecha Requerida -->
+                            <div class="bg-orange-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Fecha Requerida
+                                    </span>
+                                    <span class="text-base font-bold text-orange-600 truncate"
+                                        x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"
+                                        :title="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : ''">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Fecha Requerida</span>
-                                <span class="text-lg font-bold text-orange-600"
-                                    x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
+
+                            <!-- CAST -->
+                            <div class="bg-purple-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        CAST
+                                    </span>
+                                    <span class="text-xs font-bold text-purple-600 truncate max-w-[200px]"
+                                        x-text="selectedCastInfo ? selectedCastInfo.nombre : 'No seleccionado'"
+                                        :title="selectedCastInfo ? selectedCastInfo.nombre : ''">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3">
-                                <span class="text-gray-700 font-medium">Estado</span>
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold capitalize" x-text="solicitud.estado"></span>
+
+                            <!-- Estado -->
+                            <div class="bg-yellow-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Estado
+                                    </span>
+                                    <span
+                                        class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full 
+                            text-xs font-bold capitalize"
+                                        x-text="solicitud.estado">
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Acciones Rápidas -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
-                        <div class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-blue-100">
+                        <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Acciones</h3>
+
+                        <div class="space-y-3 md:space-y-4">
+                            <!-- Botón Limpiar Todo -->
                             <button @click="clearAll()" :disabled="products.length === 0 || isUpdatingOrder"
-                                :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isUpdatingOrder }"
-                                class="w-full px-6 py-4 bg-warning text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                :class="{
+                                    'opacity-50 cursor-not-allowed': products.length === 0 || isUpdatingOrder,
+                                    'active:scale-95': products.length > 0 && !isUpdatingOrder
+                                }"
+                                class="w-full px-4 md:px-6 py-3 md:py-4 bg-warning text-white rounded-lg font-bold 
+                       hover:bg-yellow-600 transition-all duration-200 
+                       flex items-center justify-center gap-2 md:gap-3 
+                       text-sm md:text-base">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                     </path>
                                 </svg>
-                                <span>Limpiar Todo</span>
+                                <span class="truncate">Limpiar Todo</span>
                             </button>
-                            
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
-                            <button @click="updateOrder()" :disabled="!canUpdateOrder || isUpdatingOrder"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed': !canUpdateOrder || isUpdatingOrder,
-                                    'hover:scale-[1.02]': canUpdateOrder && !isUpdatingOrder
-                                }"
-                                class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                <template x-if="!isUpdatingOrder">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                </template>
-                                <template x-if="isUpdatingOrder">
-                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                </template>
-                                <span class="text-lg" x-text="isUpdatingOrder ? 'Actualizando...' : 'Actualizar Solicitud'"></span>
-                            </button>
+
+                            <!-- Botón Actualizar Solicitud -->
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
+                                <button @click="updateOrder()" :disabled="!canUpdateOrder || isUpdatingOrder"
+                                    :class="{
+                                        'opacity-50 cursor-not-allowed': !canUpdateOrder || isUpdatingOrder,
+                                        'hover:scale-[1.02] active:scale-95': canUpdateOrder && !isUpdatingOrder
+                                    }"
+                                    class="w-full px-4 md:px-6 py-3 md:py-4 bg-green-500 text-white rounded-lg font-bold 
+                           hover:bg-green-600 transition-all duration-200 
+                           flex items-center justify-center gap-2 md:gap-3 
+                           text-sm md:text-base shadow-lg">
+                                    <!-- Spinner cuando está actualizando -->
+                                    <template x-if="isUpdatingOrder">
+                                        <div
+                                            class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white flex-shrink-0">
+                                        </div>
+                                    </template>
+
+                                    <!-- Icono de check cuando no está actualizando -->
+                                    <template x-if="!isUpdatingOrder">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </template>
+
+                                    <!-- Texto del botón -->
+                                    <span class="truncate"
+                                        x-text="isUpdatingOrder ? 'Actualizando...' : 'Actualizar Solicitud'"></span>
+                                </button>
                             @endif
 
+                            <!-- Botón Cancelar -->
                             <a href="{{ route('solicitudarticulo.index') }}"
-                                class="w-full px-6 py-4 bg-gray-500 text-white rounded-lg font-bold hover:bg-gray-600 transition-all duration-200 flex items-center justify-center space-x-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                class="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-500 text-white rounded-lg font-bold 
+                       hover:bg-gray-600 transition-all duration-200 
+                       flex items-center justify-center gap-2 md:gap-3 
+                       text-sm md:text-base">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                <span>Cancelar</span>
+                                <span class="truncate">Cancelar</span>
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- Información de Contacto - Versión minimalista -->
+                    <div
+                        class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 md:p-6 border border-blue-200">
+                        <h4 class="text-base md:text-lg font-bold text-blue-700 mb-4 md:mb-6 text-center">
+                            ¿Necesita Ayuda?
+                        </h4>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                            <!-- Teléfono -->
+                            <div class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-success rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Soporte Técnico
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900 truncate">
+                                            +1 (555) 123-4567
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-primary rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Email
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900 truncate">
+                                            soporte@empresa.com
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Horario -->
+                            <div
+                                class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100 sm:col-span-2 lg:col-span-1">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-secondary rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Horario de Atención
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900">
+                                            24/7
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -558,17 +905,25 @@
                 x-transition:leave-start="opacity-100 transform scale-100"
                 x-transition:leave-end="opacity-0 transform scale-95"
                 class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 mx-auto">
+
+                <!-- Icono de advertencia -->
                 <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
                     <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                 </div>
+
+                <!-- Contenido -->
                 <div class="text-center mb-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-2">¿Eliminar todos los artículos?</h3>
                     <p class="text-gray-600">
-                        Esta acción eliminará <span class="font-semibold text-red-600" x-text="totalUniqueProducts"></span> artículo(s)
-                        con un total de <span class="font-semibold text-red-600" x-text="totalQuantity"></span> unidades.
+                        Esta acción eliminará <span class="font-semibold text-red-600"
+                            x-text="totalUniqueProducts"></span> artículo(s)
+                        con un total de <span class="font-semibold text-red-600" x-text="totalQuantity"></span>
+                        unidades.
                     </p>
                     <p class="text-sm text-gray-500 mt-2">Esta acción no se puede deshacer.</p>
                 </div>
+
+                <!-- Botones -->
                 <div class="flex space-x-3">
                     <button @click="cancelClearAll()"
                         class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
@@ -597,7 +952,8 @@
                 </div>
                 <button @click="notification.show = false" class="flex-shrink-0 text-white hover:text-gray-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
@@ -610,6 +966,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -647,14 +1004,24 @@
                 isUpdatingOrder: false,
 
                 // Datos para los selects
-                tiposServicio: [
-                    { value: 'mantenimiento', text: 'Mantenimiento Preventivo' },
-                    { value: 'reparacion', text: 'Reparación Correctiva' },
-                    { value: 'instalacion', text: 'Instalación' },
-                    { value: 'garantia', text: 'Garantía' }
-                ],
-                nivelesUrgencia: [
+                tiposServicio: [{
+                        value: 'mantenimiento',
+                        text: 'Mantenimiento Preventivo'
+                    },
                     {
+                        value: 'reparacion',
+                        text: 'Reparación Correctiva'
+                    },
+                    {
+                        value: 'instalacion',
+                        text: 'Instalación'
+                    },
+                    {
+                        value: 'garantia',
+                        text: 'Garantía'
+                    }
+                ],
+                nivelesUrgencia: [{
                         value: 'baja',
                         text: 'Baja',
                         icon: 'fa-circle-check',
@@ -690,7 +1057,8 @@
                 get totalUniqueProducts() {
                     const uniqueProducts = new Set();
                     this.products.forEach(product => {
-                        const key = `${product.modeloId}-${product.tipoId}-${product.codigoId}`;
+                        const key =
+                            `${product.modeloId}-${product.tipoId}-${product.codigoId}`;
                         uniqueProducts.add(key);
                     });
                     return uniqueProducts.size;
@@ -699,27 +1067,57 @@
                     return this.newProduct.modelo &&
                         this.newProduct.tipo &&
                         this.newProduct.codigo &&
-                        this.newProduct.cantidad > 0;
+                        this.newProduct.cantidad > 0 &&
+                        this.orderInfo.ticketNumber;
                 },
                 get canUpdateOrder() {
-    return this.products.length > 0 &&
-        this.orderInfo.castId &&
-        this.orderInfo.ticketNumber &&
-        this.orderInfo.tipoServicio &&
-        this.orderInfo.urgencia &&
-        this.orderInfo.fechaRequerida &&
-        // Verificar que cada producto tenga los datos mínimos necesarios
-        this.products.every(product => 
-            product.codigoId && 
-            product.tipoId && // tipoId es requerido
-            product.cantidad > 0
-            // modeloId es opcional en provincia
-        );
-},
+                    return this.products.length > 0 &&
+                        this.orderInfo.ticketNumber &&
+                        this.orderInfo.castId &&
+                        this.orderInfo.tipoServicio &&
+                        this.orderInfo.urgencia &&
+                        this.orderInfo.fechaRequerida;
+                },
 
                 // Métodos
                 init() {
-                    this.initializeFormData();
+                    console.log('Solicitud data:', this.solicitud);
+                    console.log('Articulos data:', this.articulos);
+
+                    // Cargar datos de la solicitud existente
+                    this.orderInfo = {
+                        castId: this.solicitud.idCast || '',
+                        ticketNumber: this.solicitud.numeroticket || '',
+                        tipoServicio: this.solicitud.tiposervicio || '',
+                        urgencia: this.solicitud.urgencia || '',
+                        observaciones: this.solicitud.observaciones || '',
+                        fechaRequerida: this.solicitud.fecharequerida ?
+                            new Date(this.solicitud.fecharequerida).toISOString().split('T')[0] : ''
+                    };
+
+                    // Cargar información del CAST si existe
+                    if (this.orderInfo.castId) {
+                        this.loadCastInfo(this.orderInfo.castId);
+                    }
+
+                    // Cargar productos existentes
+                    if (this.articulos && this.articulos.length > 0) {
+                        this.products = this.articulos.map(articulo => {
+                            return {
+                                uniqueId: Date.now() + Math.random(),
+                                ticket: this.orderInfo.ticketNumber,
+                                ticketNumber: this.orderInfo.ticketNumber,
+                                modelo: articulo.modelo_nombre || 'Sin modelo',
+                                modeloId: articulo.modelo_id || '',
+                                tipo: articulo.tipo_articulo || 'General',
+                                tipoId: articulo.subcategoria_id || '',
+                                codigo: articulo.codigo_repuesto || 'N/A',
+                                codigoId: articulo.codigo_repuesto || '',
+                                cantidad: articulo.cantidad || 1
+                            };
+                        });
+                    }
+
                     this.$nextTick(() => {
                         this.initSelect2();
                         this.initFlatpickr();
@@ -727,86 +1125,7 @@
                     });
                 },
 
-               initializeFormData() {
-    console.log('Solicitud data:', this.solicitud);
-    console.log('Articulos data (RAW):', this.articulos);
-
-    // Cargar datos de la solicitud existente
-    this.orderInfo = {
-        castId: this.solicitud.idCast || '',
-        ticketNumber: this.solicitud.numeroticket || '',
-        tipoServicio: this.solicitud.tiposervicio || '',
-        urgencia: this.solicitud.urgencia || '',
-        observaciones: this.solicitud.observaciones || '',
-        fechaRequerida: this.solicitud.fecharequerida ? 
-            new Date(this.solicitud.fecharequerida).toISOString().split('T')[0] : ''
-    };
-
-    // Cargar información del CAST
-    if (this.orderInfo.castId) {
-        this.loadCastInfo(this.orderInfo.castId);
-    }
-
-    // Cargar productos existentes - USANDO LOS CAMPOS CORRECTOS
-    if (this.articulos && this.articulos.length > 0) {
-        this.products = this.articulos.map(articulo => {
-            // Extraer info del CAST y ticket desde observacion
-            let ticketText = this.orderInfo.ticketNumber;
-            let castInfo = this.solicitud.cast_nombre || '';
-            
-            if (articulo.observacion) {
-                try {
-                    if (articulo.observacion.includes('Ticket:')) {
-                        const parts = articulo.observacion.split(' | ');
-                        if (parts[0]) {
-                            const ticketMatch = parts[0].match(/Ticket:\s*(.+)/);
-                            if (ticketMatch) {
-                                ticketText = ticketMatch[1].trim();
-                            }
-                        }
-                        if (parts[1]) {
-                            const castMatch = parts[1].match(/CAST:\s*(.+)/);
-                            if (castMatch) {
-                                castInfo = castMatch[1].trim();
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error parsing observacion:', error);
-                }
-            }
-
-            return {
-                uniqueId: Date.now() + Math.random(),
-                modelo: articulo.modelo_nombre || 'Sin modelo', // ← USAR modelo_nombre
-                modeloId: articulo.modelo_id || '', // ← USAR modelo_id (NO idModelo)
-                tipo: articulo.tipo_articulo || 'General',
-                tipoId: articulo.subcategoria_id || '', // ← USAR subcategoria_id
-                codigo: articulo.codigo_repuesto || 'N/A',
-                codigoId: articulo.codigo_repuesto || '',
-                cantidad: articulo.cantidad || 1,
-                ticketText: ticketText,
-                castInfo: castInfo,
-                originalArticuloId: articulo.idArticulos
-            };
-        });
-
-        console.log('Productos cargados CORRECTAMENTE:', this.products);
-        
-        // DEBUG: Verificar que los IDs estén correctos
-        this.products.forEach((product, index) => {
-            console.log(`Producto ${index}:`, {
-                modeloId: product.modeloId,
-                modelo: product.modelo,
-                tipoId: product.tipoId,
-                tipo: product.tipo,
-                codigoId: product.codigoId
-            });
-        });
-    }
-},
                 watchCastChanges() {
-                    // Observar cambios en CAST para cargar info
                     this.$watch('orderInfo.castId', (value) => {
                         if (value) {
                             this.loadCastInfo(value);
@@ -824,7 +1143,10 @@
                             direccion: cast.direccion,
                             provincia: cast.provincia,
                             departamento: cast.departamento,
-                            distrito: cast.distrito
+                            distrito: cast.distrito,
+                            telefono: cast.telefono,
+                            email: cast.email,
+                            ruc: cast.ruc
                         };
                     }
                 },
@@ -834,7 +1156,7 @@
                     const castSelect = this.$el.querySelector('[x-model="orderInfo.castId"]');
                     if (castSelect) {
                         $(castSelect).select2({
-                            placeholder: 'Seleccione un CAST',
+                            placeholder: 'Seleccione un CAST...',
                             language: 'es',
                             width: '100%'
                         }).on('change', (e) => {
@@ -866,14 +1188,15 @@
                     // Tipo Select
                     if (this.$refs.tipoSelect) {
                         $(this.$refs.tipoSelect).select2({
-                            placeholder: 'Seleccione modelo primero',
+                            placeholder: 'Seleccione tipo de repuesto',
                             language: 'es',
                             width: '100%',
                             disabled: true
                         }).on('change', (e) => {
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
-                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target.value);
+                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target
+                                .value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -883,7 +1206,7 @@
                     // Código Select
                     if (this.$refs.codigoSelect) {
                         $(this.$refs.codigoSelect).select2({
-                            placeholder: 'Seleccione tipo primero',
+                            placeholder: 'Seleccione código',
                             language: 'es',
                             width: '100%',
                             disabled: true
@@ -895,7 +1218,8 @@
 
                 initFlatpickr() {
                     this.$nextTick(() => {
-                        if (this.$refs.fechaRequeridaInput && typeof flatpickr !== 'undefined') {
+                        if (this.$refs.fechaRequeridaInput && typeof flatpickr !==
+                            'undefined') {
                             try {
                                 flatpickr(this.$refs.fechaRequeridaInput, {
                                     locale: 'es',
@@ -909,7 +1233,8 @@
                                     },
                                     onReady: (selectedDates, dateStr, instance) => {
                                         if (this.orderInfo.fechaRequerida) {
-                                            instance.setDate(this.orderInfo.fechaRequerida);
+                                            instance.setDate(this.orderInfo
+                                                .fechaRequerida);
                                         }
                                     }
                                 });
@@ -924,27 +1249,52 @@
                     this.loadingTipos = true;
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
+
                     try {
                         const response = await fetch(`/api/tipos-repuesto/${modeloId}`);
-                        if (response.ok) {
-                            const tipos = await response.json();
-                            if (this.$refs.tipoSelect && tipos.length > 0) {
-                                $(this.$refs.tipoSelect).empty().append(
-                                    $('<option>', { value: '', text: 'Seleccione tipo de repuesto' })
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const tipos = await response.json();
+
+                        if (this.$refs.tipoSelect && tipos.length > 0) {
+                            $(this.$refs.tipoSelect).empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: 'Seleccione tipo de repuesto'
+                                })
+                            );
+
+                            tipos.forEach(tipo => {
+                                $(this.$refs.tipoSelect).append(
+                                    $('<option>', {
+                                        value: tipo.idsubcategoria,
+                                        text: tipo.tipo_repuesto
+                                    })
                                 );
-                                tipos.forEach(tipo => {
-                                    $(this.$refs.tipoSelect).append(
-                                        $('<option>', { 
-                                            value: tipo.idsubcategoria, 
-                                            text: tipo.tipo_repuesto 
-                                        })
-                                    );
-                                });
-                                $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
-                            }
+                            });
+
+                            $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
+                            toastr.success(`${tipos.length} tipos de repuesto cargados`);
+                        } else {
+                            $(this.$refs.tipoSelect).empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: 'No hay tipos disponibles'
+                                })
+                            ).prop('disabled', true).trigger('change');
+                            toastr.warning('No se encontraron tipos de repuesto para este modelo');
                         }
                     } catch (error) {
                         console.error('Error loading tipos repuesto:', error);
+                        $(this.$refs.tipoSelect).empty().append(
+                            $('<option>', {
+                                value: '',
+                                text: 'Error al cargar tipos'
+                            })
+                        ).prop('disabled', true).trigger('change');
+                        toastr.error('Error al cargar los tipos de repuesto');
                     } finally {
                         this.loadingTipos = false;
                     }
@@ -953,27 +1303,53 @@
                 async loadCodigosRepuesto(modeloId, subcategoriaId) {
                     this.loadingCodigos = true;
                     this.clearCodigoSelect();
+
                     try {
-                        const response = await fetch(`/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
-                        if (response.ok) {
-                            const codigos = await response.json();
-                            if (this.$refs.codigoSelect && codigos.length > 0) {
-                                $(this.$refs.codigoSelect).empty().append(
-                                    $('<option>', { value: '', text: 'Seleccione código' })
+                        const response = await fetch(
+                            `/api/codigos-repuesto/${modeloId}/${subcategoriaId}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const codigos = await response.json();
+
+                        if (this.$refs.codigoSelect && codigos.length > 0) {
+                            $(this.$refs.codigoSelect).empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: 'Seleccione código'
+                                })
+                            );
+
+                            codigos.forEach(codigo => {
+                                $(this.$refs.codigoSelect).append(
+                                    $('<option>', {
+                                        value: codigo.codigo_repuesto,
+                                        text: `${codigo.codigo_repuesto} - ${codigo.nombre}`
+                                    })
                                 );
-                                codigos.forEach(codigo => {
-                                    $(this.$refs.codigoSelect).append(
-                                        $('<option>', { 
-                                            value: codigo.codigo_repuesto, 
-                                            text: `${codigo.codigo_repuesto} - ${codigo.nombre}` 
-                                        })
-                                    );
-                                });
-                                $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
-                            }
+                            });
+
+                            $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
+                            toastr.success(`${codigos.length} códigos cargados`);
+                        } else {
+                            $(this.$refs.codigoSelect).empty().append(
+                                $('<option>', {
+                                    value: '',
+                                    text: 'No hay códigos disponibles'
+                                })
+                            ).prop('disabled', true).trigger('change');
+                            toastr.warning('No se encontraron códigos para este tipo de repuesto');
                         }
                     } catch (error) {
                         console.error('Error loading codigos:', error);
+                        $(this.$refs.codigoSelect).empty().append(
+                            $('<option>', {
+                                value: '',
+                                text: 'Error al cargar códigos'
+                            })
+                        ).prop('disabled', true).trigger('change');
+                        toastr.error('Error al cargar los códigos');
                     } finally {
                         this.loadingCodigos = false;
                     }
@@ -983,7 +1359,10 @@
                     this.newProduct.tipo = '';
                     if (this.$refs.tipoSelect) {
                         $(this.$refs.tipoSelect).empty().append(
-                            $('<option>', { value: '', text: 'Seleccione modelo primero' })
+                            $('<option>', {
+                                value: '',
+                                text: 'Seleccione tipo primero'
+                            })
                         ).prop('disabled', true).trigger('change');
                     }
                 },
@@ -992,7 +1371,10 @@
                     this.newProduct.codigo = '';
                     if (this.$refs.codigoSelect) {
                         $(this.$refs.codigoSelect).empty().append(
-                            $('<option>', { value: '', text: 'Seleccione tipo primero' })
+                            $('<option>', {
+                                value: '',
+                                text: 'Seleccione tipo primero'
+                            })
                         ).prop('disabled', true).trigger('change');
                     }
                 },
@@ -1013,35 +1395,47 @@
                 },
 
                 increaseQuantity() {
-                    if (this.newProduct.cantidad < 100) this.newProduct.cantidad++;
+                    if (this.newProduct.cantidad < 100) {
+                        this.newProduct.cantidad++;
+                    }
                 },
 
                 decreaseQuantity() {
-                    if (this.newProduct.cantidad > 1) this.newProduct.cantidad--;
+                    if (this.newProduct.cantidad > 1) {
+                        this.newProduct.cantidad--;
+                    }
                 },
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto', 'error');
+                        toastr.error('Por favor complete todos los campos del producto y el ticket');
                         return;
                     }
 
-                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this.newProduct.modelo;
-                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this.newProduct.tipo;
-                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this.newProduct.codigo;
+                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this
+                        .newProduct.modelo;
+                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this
+                        .newProduct.tipo;
+                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this
+                        .newProduct.codigo;
 
                     const existingProductIndex = this.products.findIndex(product =>
-                        product.modeloId == this.newProduct.modelo &&
-                        product.tipoId == this.newProduct.tipo &&
-                        product.codigoId == this.newProduct.codigo
+                        product.ticketNumber === this.orderInfo.ticketNumber &&
+                        product.modeloId === this.newProduct.modelo &&
+                        product.tipoId === this.newProduct.tipo &&
+                        product.codigoId === this.newProduct.codigo
                     );
 
                     if (existingProductIndex !== -1) {
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(`Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`, 'success');
+                        toastr.success(
+                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
+                        );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
+                            ticket: this.orderInfo.ticketNumber,
+                            ticketNumber: this.orderInfo.ticketNumber,
                             modelo: modeloText,
                             modeloId: this.newProduct.modelo,
                             tipo: tipoText,
@@ -1050,13 +1444,15 @@
                             codigoId: this.newProduct.codigo,
                             cantidad: this.newProduct.cantidad
                         };
+
                         this.products.push(product);
-                        this.showNotification('✅ Producto agregado correctamente', 'success');
+                        toastr.success('Producto agregado correctamente');
                     }
 
                     this.newProduct.cantidad = 1;
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
+
                     if (this.newProduct.modelo) {
                         this.loadTiposRepuesto(this.newProduct.modelo);
                     }
@@ -1064,7 +1460,7 @@
 
                 removeProduct(index) {
                     this.products.splice(index, 1);
-                    this.showNotification('🗑️ Producto eliminado de la orden', 'info');
+                    toastr.info('Producto eliminado de la orden');
                 },
 
                 updateQuantity(index, change) {
@@ -1076,7 +1472,7 @@
 
                 clearAll() {
                     if (this.products.length === 0) {
-                        this.showNotification('No hay artículos para limpiar', 'info');
+                        toastr.info('No hay artículos para limpiar');
                         return;
                     }
                     this.showClearModal = true;
@@ -1085,7 +1481,7 @@
                 confirmClearAll() {
                     this.products = [];
                     this.showClearModal = false;
-                    this.showNotification('Todos los artículos han sido eliminados', 'info');
+                    toastr.info('Todos los artículos han sido eliminados');
                 },
 
                 cancelClearAll() {
@@ -1094,13 +1490,8 @@
 
                 async updateOrder() {
                     if (!this.canUpdateOrder) {
-                        this.showNotification('❌ Complete todos los campos requeridos', 'error');
-                        return;
-                    }
-
-                    const solicitudId = this.solicitud.idsolicitudesordenes;
-                    if (!solicitudId) {
-                        this.showNotification('❌ Error: ID de solicitud no encontrado', 'error');
+                        toastr.error(
+                            'Complete todos los campos requeridos para actualizar la orden');
                         return;
                     }
 
@@ -1116,35 +1507,50 @@
                                 fechaRequerida: this.orderInfo.fechaRequerida,
                                 observaciones: this.orderInfo.observaciones
                             },
-                            products: this.products
+                            products: this.products.map(product => ({
+                                modeloId: product.modeloId,
+                                tipoId: product.tipoId,
+                                codigoId: product.codigoId,
+                                cantidad: product.cantidad
+                            }))
                         };
 
-                        const response = await fetch('/solicitudrepuestoprovincia/' + solicitudId, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(orderData)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
+                        const response = await fetch('/solicitudrepuestoprovincia/' + this.solicitud
+                            .idsolicitudesordenes, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify(orderData)
+                            });
 
                         const result = await response.json();
 
                         if (result.success) {
-                            this.showNotification(`✅ ¡Orden ${result.codigo_orden} actualizada exitosamente!`, 'success');
-                            setTimeout(() => {
-                                window.location.href = "{{ route('solicitudarticulo.index') }}";
-                            }, 2000);
+                            toastr.success(
+                                `¡Orden ${result.codigo_orden} actualizada exitosamente!`);
+
+                            toastr.success(`Redirigiendo al listado de solicitudes...`, '', {
+                                timeOut: 2000,
+                                onHidden: () => {
+                                    if (result.redirect_url) {
+                                        window.location.href = result.redirect_url;
+                                    } else {
+                                        window.location.href =
+                                            '{{ route('solicitudarticulo.index') }}';
+                                    }
+                                }
+                            });
+
                         } else {
                             throw new Error(result.message);
                         }
+
                     } catch (error) {
                         console.error('Error al actualizar la orden:', error);
-                        this.showNotification(`❌ Error: ${error.message}`, 'error');
+                        toastr.error(`Error: ${error.message}`);
                     } finally {
                         this.isUpdatingOrder = false;
                     }
@@ -1152,19 +1558,27 @@
 
                 getNotificationClass() {
                     switch (this.notification.type) {
-                        case 'success': return 'bg-green-500';
-                        case 'error': return 'bg-red-500';
-                        case 'warning': return 'bg-yellow-500';
-                        default: return 'bg-blue-500';
+                        case 'success':
+                            return 'bg-green-500';
+                        case 'error':
+                            return 'bg-red-500';
+                        case 'warning':
+                            return 'bg-yellow-500';
+                        default:
+                            return 'bg-blue-500';
                     }
                 },
 
                 getNotificationIcon() {
                     switch (this.notification.type) {
-                        case 'success': return '✅';
-                        case 'error': return '❌';
-                        case 'warning': return '⚠️';
-                        default: return 'ℹ️';
+                        case 'success':
+                            return '✅';
+                        case 'error':
+                            return '❌';
+                        case 'warning':
+                            return '⚠️';
+                        default:
+                            return 'ℹ️';
                     }
                 },
 

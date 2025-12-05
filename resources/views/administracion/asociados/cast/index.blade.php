@@ -291,13 +291,12 @@
                     $('#ruc-error').text('El RUC debe tener al menos 8 dígitos y solo números').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('
-                        validar.ruccast ') }}', {
-                            ruc: ruc,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        function(response) {
-                            if (response.exists) {
+                    $.post('{{ route('validar.ruccast') }}', {
+                        ruc: ruc,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    function(response) {
+                        if (response.exists) {
                                 $('#ruc').addClass('border-red-500');
                                 $('#ruc-error').text('El RUC ya está registrado').show();
                                 formValid = false;
@@ -316,8 +315,7 @@
             $('#nombre').on('input', function() {
                 let nombre = $(this).val();
                 formValid = true; // Resetear la bandera antes de realizar la validación
-                $.post('{{ route('
-                    validar.nombrecast ') }}', {
+                $.post('{{ route('validar.nombrecast') }}', {
                         nombre: nombre,
                         _token: '{{ csrf_token() }}'
                     },
@@ -344,8 +342,7 @@
                     $('#email-error').text('Por favor ingrese un correo válido').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('
-                        validar.emailcast ') }}', {
+                    $.post('{{ route('validar.emailcast') }}', {
                             email: email,
                             _token: '{{ csrf_token() }}'
                         },
@@ -375,8 +372,7 @@
                     $('#telefono-error').text('El teléfono debe tener al menos 9 dígitos').show();
                     formValid = false;
                 } else {
-                    $.post('{{ route('
-                        validar.telefonocast ') }}', {
+                    $.post('{{ route('validar.telefonocast') }}', {
                             telefono: telefono,
                             _token: '{{ csrf_token() }}'
                         },
@@ -403,23 +399,19 @@
 
                 // Verificar que las validaciones asíncronas se han completado
                 $.when(
-                    $.post('{{ route('
-                        validar.ruccast ') }}', {
+                    $.post('{{ route('validar.ruccast') }}', {
                             ruc: $('#ruc').val(),
                             _token: '{{ csrf_token() }}'
                         }),
-                    $.post('{{ route('
-                        validar.nombrecast ') }}', {
+                    $.post('{{ route('validar.nombrecast') }}', {
                             nombre: $('#nombre').val(),
                             _token: '{{ csrf_token() }}'
                         }),
-                    $.post('{{ route('
-                        validar.emailcast ') }}', {
+                    $.post('{{ route('validar.emailcast') }}', {
                             email: $('#email').val(),
                             _token: '{{ csrf_token() }}'
                         }),
-                    $.post('{{ route('
-                        validar.telefonocast ') }}', {
+                    $.post('{{ route('validar.telefonocast') }}', {
                             telefono: $('#telefono').val(),
                             _token: '{{ csrf_token() }}'
                         })
@@ -476,8 +468,7 @@
     <script>
         window.Laravel = {
             csrfToken: '{{ csrf_token() }}', // Define el token CSRF
-            routeCastStore: '{{ route('
-            cast.store ') }}' // Define la ruta del endpoint
+            routeCastStore: '{{ route('cast.store') }}' // Define la ruta del endpoint
         };
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

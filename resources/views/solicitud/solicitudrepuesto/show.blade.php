@@ -1,13 +1,27 @@
 <x-layout.default>
     <div x-data="{ activeTab: 'articulos' }" class="min-h-screen bg-gray-50 py-8">
-        <div class="container mx-auto px-4 max-w-7xl">
+        <div class="mx-auto px-4 w-full">
+
+            <div class="mb-6">
+                <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
+                    <li>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="text-primary hover:underline">Solicitudes</a>
+                    </li>
+
+                    <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                        <span>Ver Solicitud Repuesto</span>
+                    </li>
+                </ul>
+            </div>
             <!-- Header Principal -->
             <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
                         <div class="flex items-center space-x-4 mb-4">
                             <div class="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -422,19 +436,19 @@
                         </div>
                     </div>
 
-                    <!-- Tiempos Mejorado -->
+                    <!-- Tiempos Mejorado - Responsive -->
                     <div
-                        class="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center space-x-3 mb-5">
+                        class="bg-gradient-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
+                        <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-5">
                             <div
-                                class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <h3 class="text-xl font-bold text-gray-900">Tiempos</h3>
+                            <h3 class="text-lg sm:text-xl lg:text-xl font-bold text-gray-900 truncate">Tiempos</h3>
                         </div>
 
                         <!-- Días Restantes -->
@@ -451,17 +465,20 @@
                                     'class' => 'bg-red-100 border-red-200 text-red-800',
                                     'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
                                     'text' => 'Vencida',
+                                    'textShort' => 'Vencida',
                                 ],
                                 'urgente' => [
                                     'class' => 'bg-orange-100 border-orange-200 text-orange-800',
                                     'icon' =>
                                         'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
                                     'text' => $diasRestantes . ' días',
+                                    'textShort' => $diasRestantes . 'd',
                                 ],
                                 'normal' => [
                                     'class' => 'bg-green-100 border-green-200 text-green-800',
                                     'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
                                     'text' => $diasRestantes . ' días',
+                                    'textShort' => $diasRestantes . 'd',
                                 ],
                             ];
 
@@ -470,35 +487,70 @@
                         @endphp
 
                         <div
-                            class="bg-white rounded-xl p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
-                            <div class="flex items-center space-x-3 mb-3">
+                            class="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
+                            <div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
                                 <div
-                                    class="w-8 h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center">
-                                    <svg class="w-4 h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
+                                    class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-3 h-3 sm:w-4 sm:h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="{{ $diasConfig[$diasEstado]['icon'] }}" />
                                     </svg>
                                 </div>
-                                <label class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Días
-                                    Restantes</label>
+                                <label
+                                    class="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide truncate">
+                                    Días Restantes
+                                </label>
                             </div>
 
-                            <div class="flex items-center justify-between pl-11">
+                            <div
+                                class="flex flex-col sm:flex-row sm:items-center sm:justify-between pl-8 sm:pl-9 lg:pl-11 space-y-2 sm:space-y-0">
                                 <p
-                                    class="text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }}">
-                                    {{ $diasConfig[$diasEstado]['text'] }}
+                                    class="text-2xl sm:text-3xl lg:text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }} text-center sm:text-left">
+                                    <span class="hidden sm:inline">{{ $diasConfig[$diasEstado]['text'] }}</span>
+                                    <span class="sm:hidden">{{ $diasConfig[$diasEstado]['textShort'] }}</span>
                                 </p>
 
                                 @if ($diasRestantes > 0 && $diasRestantes <= 7)
-                                    <div class="w-16 bg-gray-200 rounded-full h-2">
-                                        <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-2 rounded-full"
-                                            style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
+                                    <div class="flex items-center justify-center sm:justify-end space-x-2">
+                                        <div class="w-16 sm:w-20 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                                            <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-1.5 sm:h-2 rounded-full"
+                                                style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
+                                        </div>
+                                        <span class="text-xs text-gray-500 hidden sm:inline">
+                                            {{ $diasRestantes }}/7 días
+                                        </span>
+                                        <span class="text-xs text-gray-500 sm:hidden">
+                                            {{ $diasRestantes }}/7
+                                        </span>
+                                    </div>
+                                @elseif($diasRestantes > 7)
+                                    <div class="text-center sm:text-right">
+                                        <span class="text-xs text-gray-500">
+                                            <span class="hidden sm:inline">Más de 7 días</span>
+                                            <span class="sm:hidden">+7 días</span>
+                                        </span>
                                     </div>
                                 @endif
                             </div>
-                        </div>
 
+                            <!-- Información adicional para móviles -->
+                            @if ($diasRestantes <= 0)
+                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
+                                    <p class="text-xs text-red-600 font-medium sm:hidden">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Solicitud vencida
+                                    </p>
+                                </div>
+                            @elseif($diasRestantes <= 2)
+                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
+                                    <p class="text-xs text-amber-600 font-medium sm:hidden">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        Urgente
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

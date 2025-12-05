@@ -1,10 +1,10 @@
 <x-layout.default>
     <!-- Incluir Select2 CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <style>
         .select2-container--default .select2-selection--single {
             border: 1px solid #d1d5db;
@@ -145,10 +145,8 @@
                         <div class="p-6">
                             <div class="mb-4">
                                 <label class="block text-lg font-semibold text-gray-900 mb-4">Número de Ticket</label>
-                                <input type="text" 
-                                       x-model="ticketNumber" 
-                                       placeholder="Escriba el número de ticket"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                                <input type="text" x-model="ticketNumber" placeholder="Escriba el número de ticket"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                             </div>
                         </div>
                     </div>
@@ -156,7 +154,7 @@
                     <!-- Selección de CAST -->
                     <div
                         class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-green-600 to-teal-600 px-6 py-4">
+                        <div class="bg-green-600 px-6 py-4">
                             <div class="flex items-center space-x-3">
                                 <div
                                     class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
@@ -180,125 +178,179 @@
                                 </select>
                             </div>
 
-                           <!-- Mostrar información del CAST seleccionado -->
-<div x-show="selectedCastInfo" 
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0 transform -translate-y-2"
-     x-transition:enter-end="opacity-100 transform translate-y-0"
-     class="bg-green-50 rounded-xl p-4 border border-green-200 mt-4">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <p class="text-sm text-gray-600">Contacto:</p>
-            <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.telefono || 'No especificado'"></p>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600">Email:</p>
-            <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.email || 'No especificado'"></p>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600">RUC:</p>
-            <p class="font-semibold text-gray-900" x-text="selectedCastInfo?.ruc || 'No especificado'"></p>
-        </div>
-        <div>
-            <p class="text-sm text-gray-600">Ubicación:</p>
-            <p class="font-semibold text-gray-900">
-                <span x-text="selectedCastInfo?.departamento || 'No especificado'"></span> / 
-                <span x-text="selectedCastInfo?.provincia || 'No especificado'"></span>
-            </p>
-        </div>
-    </div>
-</div>
+                            <!-- Mostrar información del CAST seleccionado -->
+                            <div x-show="selectedCastInfo" x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                x-transition:enter-end="opacity-100 transform translate-y-0"
+                                class="bg-green-50 rounded-xl p-4 border border-green-200 mt-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <p class="text-sm text-gray-600">Contacto:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.telefono || 'No especificado'"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Email:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.email || 'No especificado'"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">RUC:</p>
+                                        <p class="font-semibold text-gray-900"
+                                            x-text="selectedCastInfo?.ruc || 'No especificado'"></p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-600">Ubicación:</p>
+                                        <p class="font-semibold text-gray-900">
+                                            <span x-text="selectedCastInfo?.departamento || 'No especificado'"></span>
+                                            /
+                                            <span x-text="selectedCastInfo?.provincia || 'No especificado'"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Selección de Productos -->
                     <div
                         class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                            <div class="flex items-center space-x-3">
+                        <!-- Header con gradiente -->
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 md:px-6 py-4">
+                            <div class="flex items-center gap-3">
                                 <div
-                                    class="flex items-center justify-center w-10 h-10 bg-white text-blue-600 rounded-full font-bold shadow-md">
+                                    class="flex-shrink-0 flex items-center justify-center w-8 h-8 md:w-10 md:h-10 
+                        bg-white text-blue-600 rounded-full font-bold shadow-md">
                                     1
                                 </div>
-                                <div>
-                                    <h2 class="text-xl font-bold text-white">Selección de Productos</h2>
-                                    <p class="text-blue-100 text-sm">Agregue los repuestos necesarios para la orden</p>
+                                <div class="min-w-0 flex-1">
+                                    <h2 class="text-lg md:text-xl font-bold text-white truncate">
+                                        Selección de Productos
+                                    </h2>
+                                    <p class="text-blue-100 text-xs md:text-sm truncate">
+                                        Agregue los repuestos necesarios para la orden
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="p-6">
+                        <div class="p-4 md:p-6">
                             <!-- Tabla de Productos -->
-                            <div class="mb-8">
-                                <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-xl font-semibold text-gray-900">Productos Seleccionados</h3>
-                                    <div class="flex items-center space-x-4">
+                            <div class="mb-6 md:mb-8">
+                                <div
+                                    class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 md:mb-6">
+                                    <h3 class="text-lg md:text-xl font-semibold text-gray-900">
+                                        Productos Seleccionados
+                                    </h3>
+                                    <div class="flex items-center gap-4">
                                         <span class="text-sm text-gray-600"
-                                            x-text="`${totalUniqueProducts} producto${totalUniqueProducts !== 1 ? 's' : ''}`"></span>
+                                            x-text="`${totalUniqueProducts} producto${totalUniqueProducts !== 1 ? 's' : ''}`">
+                                        </span>
                                         <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
-                                            x-show="products.length > 0"></div>
+                                            x-show="products.length > 0">
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="overflow-hidden rounded-xl border border-blue-100">
-                                    <table class="w-full">
+                                <!-- Tabla responsive - contenedor scroll horizontal -->
+                                <div class="overflow-x-auto rounded-xl border border-blue-100">
+                                    <table class="w-full min-w-[600px] md:min-w-full">
                                         <thead class="bg-blue-50">
                                             <tr>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Ticket</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Ticket
+                                                </th>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Modelo</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Modelo
+                                                </th>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Tipo de Repuesto</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Tipo
+                                                </th>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Código</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Código
+                                                </th>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Cantidad</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Cantidad
+                                                </th>
                                                 <th
-                                                    class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                    Acciones</th>
+                                                    class="px-4 md:px-6 py-3 md:py-4 text-left text-xs md:text-sm font-semibold 
+                                       text-blue-600 uppercase tracking-wider whitespace-nowrap">
+                                                    Acciones
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-blue-100">
+                                            <!-- Estado vacío -->
                                             <template x-if="products.length === 0">
                                                 <tr>
-                                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                                        <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
-                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                    <td colspan="6"
+                                                        class="px-4 md:px-6 py-8 md:py-12 text-center text-gray-500">
+                                                        <svg class="mx-auto h-12 w-12 md:h-16 md:w-16 text-gray-300"
+                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="1"
                                                                 d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
                                                             </path>
                                                         </svg>
-                                                        <p class="mt-4 text-lg font-medium text-gray-900">No hay
-                                                            productos agregados</p>
-                                                        <p class="text-sm mt-2">Agregue productos usando el formulario
-                                                            inferior</p>
+                                                        <p
+                                                            class="mt-3 md:mt-4 text-base md:text-lg font-medium text-gray-900">
+                                                            No hay productos agregados
+                                                        </p>
+                                                        <p class="text-xs md:text-sm mt-1 md:mt-2">
+                                                            Agregue productos usando el formulario inferior
+                                                        </p>
                                                     </td>
                                                 </tr>
                                             </template>
+
+                                            <!-- Productos -->
                                             <template x-for="(product, index) in products" :key="product.uniqueId">
                                                 <tr class="product-row hover:bg-blue-50 transition-all duration-200">
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base font-semibold text-purple-600"
-                                                        x-text="product.ticket"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base font-semibold text-gray-900"
-                                                        x-text="product.modelo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-700"
-                                                        x-text="product.tipo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-blue-600 font-mono font-bold"
-                                                        x-text="product.codigo"></td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base text-gray-900">
-                                                        <div class="flex items-center space-x-3">
+                                                    <!-- Ticket -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base font-semibold text-purple-600 truncate max-w-[100px]"
+                                                        :title="product.ticket" x-text="product.ticket">
+                                                    </td>
+
+                                                    <!-- Modelo -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base font-semibold text-gray-900 truncate max-w-[120px]"
+                                                        :title="product.modelo" x-text="product.modelo">
+                                                    </td>
+
+                                                    <!-- Tipo -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-gray-700 truncate max-w-[120px]"
+                                                        :title="product.tipo" x-text="product.tipo">
+                                                    </td>
+
+                                                    <!-- Código -->
+                                                    <td class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-blue-600 font-mono font-bold truncate max-w-[100px]"
+                                                        :title="product.codigo" x-text="product.codigo">
+                                                    </td>
+
+                                                    <!-- Cantidad -->
+                                                    <td
+                                                        class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap 
+                                           text-sm md:text-base text-gray-900">
+                                                        <div class="flex items-center gap-2">
                                                             <span class="font-bold" x-text="product.cantidad"></span>
-                                                            <div class="flex space-x-1">
+                                                            <div class="flex gap-1">
                                                                 <button @click="updateQuantity(index, -1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none"
+                                                                    class="p-1 text-blue-600 hover:text-blue-700 
+                                                           hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none"
                                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round"
                                                                             stroke-linejoin="round" stroke-width="2"
@@ -307,8 +359,9 @@
                                                                     </svg>
                                                                 </button>
                                                                 <button @click="updateQuantity(index, 1)"
-                                                                    class="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors">
-                                                                    <svg class="w-5 h-5" fill="none"
+                                                                    class="p-1 text-blue-600 hover:text-blue-700 
+                                                           hover:bg-blue-100 rounded transition-colors">
+                                                                    <svg class="w-4 h-4 md:w-5 md:h-5" fill="none"
                                                                         stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path stroke-linecap="round"
                                                                             stroke-linejoin="round" stroke-width="2"
@@ -319,17 +372,23 @@
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="px-6 py-4 whitespace-nowrap text-base">
+
+                                                    <!-- Acciones -->
+                                                    <td
+                                                        class="px-4 md:px-6 py-3 md:py-4 whitespace-nowrap text-sm md:text-base">
                                                         <button @click="removeProduct(index)"
-                                                            class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            class="text-red-600 hover:text-red-700 font-semibold 
+                                                   flex items-center gap-1 md:gap-2 transition-colors">
+                                                            <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0"
+                                                                fill="none" stroke="currentColor"
                                                                 viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                                                 </path>
                                                             </svg>
-                                                            <span>Eliminar</span>
+                                                            <span class="hidden sm:inline">Eliminar</span>
+                                                            <span class="inline sm:hidden">Elim.</span>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -340,14 +399,20 @@
                             </div>
 
                             <!-- Formulario para Agregar Producto -->
-                            <div class="bg-blue-50 rounded-2xl p-6 border border-blue-200">
-                                <h3 class="text-xl font-semibold text-gray-900 mb-6">Agregar Nuevo Producto</h3>
+                            <div class="bg-blue-50 rounded-2xl p-4 md:p-6 border border-blue-200">
+                                <h3 class="text-lg md:text-xl font-semibold text-gray-900 mb-4 md:mb-6">
+                                    Agregar Nuevo Producto
+                                </h3>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                                    <!-- Modelo (se selecciona manualmente) -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Modelo</label>
-                                        <select x-model="newProduct.modelo" x-ref="modeloSelect" class="w-full">
+                                <!-- Grid de formulario responsive -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+                                    <!-- Modelo -->
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Modelo
+                                        </label>
+                                        <select x-model="newProduct.modelo" x-ref="modeloSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg">
                                             <option value="">Seleccione un modelo</option>
                                             <template x-for="modelo in modelos" :key="modelo.idModelo">
                                                 <option :value="modelo.idModelo" x-text="modelo.nombre"></option>
@@ -355,35 +420,47 @@
                                         </select>
                                     </div>
 
-                                    <!-- Tipo de Repuesto (idsubcategoria) -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Tipo de
-                                            Repuesto</label>
-                                        <select x-model="newProduct.tipo" x-ref="tipoSelect" class="w-full"
+                                    <!-- Tipo de Repuesto -->
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Tipo de Repuesto
+                                        </label>
+                                        <select x-model="newProduct.tipo" x-ref="tipoSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg"
                                             :disabled="!newProduct.modelo">
                                             <option value="">Seleccione modelo primero</option>
                                         </select>
-                                        <div x-show="loadingTipos" class="text-xs text-blue-500 mt-1">Cargando tipos
-                                            de repuesto...</div>
+                                        <div x-show="loadingTipos" class="text-xs text-blue-500 mt-1">
+                                            Cargando tipos de repuesto...
+                                        </div>
                                     </div>
 
                                     <!-- Código -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Código</label>
-                                        <select x-model="newProduct.codigo" x-ref="codigoSelect" class="w-full"
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Código
+                                        </label>
+                                        <select x-model="newProduct.codigo" x-ref="codigoSelect"
+                                            class="w-full text-sm md:text-base px-3 py-2 border rounded-lg"
                                             :disabled="!newProduct.tipo">
                                             <option value="">Seleccione tipo primero</option>
                                         </select>
-                                        <div x-show="loadingCodigos" class="text-xs text-blue-500 mt-1">Cargando
-                                            códigos...</div>
+                                        <div x-show="loadingCodigos" class="text-xs text-blue-500 mt-1">
+                                            Cargando códigos...
+                                        </div>
                                     </div>
 
                                     <!-- Cantidad -->
-                                    <div>
-                                        <label class="block text-sm font-semibold text-gray-700 mb-3">Cantidad</label>
-                                        <div class="flex w-full">
+                                    <div class="sm:col-span-2 lg:col-span-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                            Cantidad
+                                        </label>
+                                        <div class="flex w-full max-w-[200px] mx-auto lg:mx-0">
                                             <button @click="decreaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                class="bg-blue-600 text-white flex justify-center items-center 
+                                       rounded-l-lg px-3 md:px-4 font-semibold border border-r-0 
+                                       border-blue-600 hover:bg-blue-700 transition-colors
+                                       active:scale-95">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -392,10 +469,14 @@
                                             </button>
                                             <input type="number" x-model="newProduct.cantidad" min="1"
                                                 max="100"
-                                                class="w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold"
+                                                class="w-16 text-center border-y border-blue-600 focus:ring-0 
+                                      bg-white text-gray-900 font-semibold text-sm md:text-base"
                                                 readonly />
                                             <button @click="increaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                class="bg-blue-600 text-white flex justify-center items-center 
+                                       rounded-r-lg px-3 md:px-4 font-semibold border border-l-0 
+                                       border-blue-600 hover:bg-blue-700 transition-colors
+                                       active:scale-95">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -403,21 +484,27 @@
                                                 </svg>
                                             </button>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2 text-center">Mín: 1 - Máx: 100</div>
+                                        <div class="text-xs text-gray-500 mt-2 text-center lg:text-left">
+                                            Mín: 1 - Máx: 100
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Botón Agregar Producto -->
                                 <button @click="addProduct()" :disabled="!canAddProduct"
                                     :class="{
                                         'opacity-50 cursor-not-allowed': !canAddProduct,
-                                        'hover:scale-[1.02]': canAddProduct
+                                        'hover:scale-[1.02] active:scale-95': canAddProduct
                                     }"
-                                    class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-full bg-blue-600 text-white py-3 md:py-4 px-4 md:px-6 rounded-lg 
+                           font-bold transition-all duration-200 flex items-center justify-center 
+                           gap-2 md:gap-3 shadow-lg text-sm md:text-base">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 flex-shrink-0" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M12 4v16m8-8H4"></path>
                                     </svg>
-                                    <span class="text-lg">Agregar Producto a la Orden</span>
+                                    <span class="truncate">Agregar Producto a la Orden</span>
                                 </button>
                             </div>
                         </div>
@@ -569,125 +656,211 @@
 
                 <!-- Sidebar -->
                 <div class="xl:col-span-1 space-y-8">
-                    <!-- Resumen de la Orden -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Resumen de Orden</h3>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Productos Únicos</span>
-                                <span class="text-2xl font-bold text-blue-600" x-text="totalUniqueProducts"></span>
+                    <!-- Resumen de la Orden - Versión Grid para móvil -->
+                    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-blue-100">
+                        <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 text-center md:text-left">
+                            Resumen de Orden
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
+                            <!-- Productos Únicos -->
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Productos Únicos
+                                    </span>
+                                    <span class="text-xl font-bold text-blue-600" x-text="totalUniqueProducts">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Total Cantidad</span>
-                                <span class="text-2xl font-bold text-green-600" x-text="totalQuantity"></span>
+
+                            <!-- Total Cantidad -->
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Total Cantidad
+                                    </span>
+                                    <span class="text-xl font-bold text-green-600" x-text="totalQuantity">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">Fecha Requerida</span>
-                                <span class="text-lg font-bold text-orange-600"
-                                    x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
+
+                            <!-- Fecha Requerida -->
+                            <div class="bg-orange-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Fecha Requerida
+                                    </span>
+                                    <span class="text-base font-bold text-orange-600 truncate"
+                                        x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"
+                                        :title="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : ''">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3 border-b border-blue-100">
-                                <span class="text-gray-700 font-medium">CAST</span>
-                                <span class="text-sm font-bold text-purple-600"
-                                    x-text="selectedCastInfo ? selectedCastInfo.nombre.substring(0, 10) + '...' : 'No seleccionado'"></span>
+
+                            <!-- CAST -->
+                            <div class="bg-purple-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        CAST
+                                    </span>
+                                    <span class="text-xs font-bold text-purple-600 truncate max-w-[200px]"
+                                        x-text="selectedCastInfo ? selectedCastInfo.nombre : 'No seleccionado'"
+                                        :title="selectedCastInfo ? selectedCastInfo.nombre : ''">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex justify-between items-center py-3">
-                                <span class="text-gray-700 font-medium">Estado</span>
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-bold">En
-                                    creación</span>
+
+                            <!-- Estado -->
+                            <div class="bg-yellow-50 p-3 rounded-lg sm:col-span-2 lg:col-span-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-700 font-medium text-sm">
+                                        Estado
+                                    </span>
+                                    <span
+                                        class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full 
+                            text-xs font-bold">
+                                        En creación
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Acciones Rápidas -->
-                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-                        <h3 class="text-xl font-bold text-gray-900 mb-6 text-center">Acciones</h3>
-                        <div class="space-y-4">
+                    <div class="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-blue-100">
+                        <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6 text-center">Acciones</h3>
+
+                        <div class="space-y-3 md:space-y-4">
+                            <!-- Botón Limpiar Todo -->
                             <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
-                                :class="{ 'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder }"
-                                class="w-full px-6 py-4 bg-warning text-white rounded-lg font-bold hover:bg-yellow-600 transition-all duration-200 flex items-center justify-center space-x-3">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                :class="{
+                                    'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder,
+                                    'active:scale-95': products.length > 0 && !isCreatingOrder
+                                }"
+                                class="w-full px-4 md:px-6 py-3 md:py-4 bg-warning text-white rounded-lg font-bold 
+                       hover:bg-yellow-600 transition-all duration-200 
+                       flex items-center justify-center gap-2 md:gap-3 
+                       text-sm md:text-base">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                     </path>
                                 </svg>
-                                <span>Limpiar Todo</span>
+                                <span class="truncate">Limpiar Todo</span>
                             </button>
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD REPUESTO'))
-                            <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
-                                :class="{
-                                    'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
-                                    'hover:scale-[1.02]': canCreateOrder && !isCreatingOrder
-                                }"
-                                class="w-full px-6 py-4 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-all duration-200 flex items-center justify-center space-x-3 shadow-lg">
-                                <template x-if="!isCreatingOrder">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                </template>
-                                <template x-if="isCreatingOrder">
-                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                </template>
-                                <span class="text-lg"
-                                    x-text="isCreatingOrder ? 'Guardando Solicitud...' : 'Guardar Solicitud Repuesto'"></span>
-                            </button>
+
+                            <!-- Botón Guardar Solicitud -->
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR SOLICITUD REPUESTO'))
+                                <button @click="createOrder()" :disabled="!canCreateOrder || isCreatingOrder"
+                                    :class="{
+                                        'opacity-50 cursor-not-allowed': !canCreateOrder || isCreatingOrder,
+                                        'hover:scale-[1.02] active:scale-95': canCreateOrder && !isCreatingOrder
+                                    }"
+                                    class="w-full px-4 md:px-6 py-3 md:py-4 bg-green-500 text-white rounded-lg font-bold 
+                           hover:bg-green-600 transition-all duration-200 
+                           flex items-center justify-center gap-2 md:gap-3 
+                           text-sm md:text-base shadow-lg">
+                                    <!-- Spinner cuando está guardando -->
+                                    <template x-if="isCreatingOrder">
+                                        <div
+                                            class="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white flex-shrink-0">
+                                        </div>
+                                    </template>
+
+                                    <!-- Icono de check cuando no está guardando -->
+                                    <template x-if="!isCreatingOrder">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </template>
+
+                                    <!-- Texto del botón -->
+                                    <span class="truncate"
+                                        x-text="isCreatingOrder ? 'Guardando...' : 'Guardar Solicitud'"></span>
+                                </button>
                             @endif
                         </div>
                     </div>
 
-                    <!-- Información de Contacto -->
-                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
-                        <h4 class="text-lg font-bold text-blue-700 mb-6 text-center">¿Necesita Ayuda?</h4>
-                        <div class="space-y-4">
+                    <!-- Información de Contacto - Versión minimalista -->
+                    <div
+                        class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 md:p-6 border border-blue-200">
+                        <h4 class="text-base md:text-lg font-bold text-blue-700 mb-4 md:mb-6 text-center">
+                            ¿Necesita Ayuda?
+                        </h4>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3 md:gap-4">
                             <!-- Teléfono -->
-                            <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
-                                <div
-                                    class="flex-shrink-0 w-12 h-12 bg-success rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Soporte Técnico</p>
-                                    <p class="text-lg font-bold text-gray-900">+1 (555) 123-4567</p>
+                            <div class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-success rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Soporte Técnico
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900 truncate">
+                                            +1 (555) 123-4567
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Email -->
-                            <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
-                                <div
-                                    class="flex-shrink-0 w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Email</p>
-                                    <p class="text-lg font-bold text-gray-900">soporte@empresa.com</p>
+                            <div class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-primary rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Email
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900 truncate">
+                                            soporte@empresa.com
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Horario -->
                             <div
-                                class="flex items-center space-x-4 p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
-                                <div
-                                    class="flex-shrink-0 w-12 h-12 bg-secondary rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-gray-600">Horario de Atención</p>
-                                    <p class="text-lg font-bold text-gray-900">24/7</p>
+                                class="bg-white/80 p-3 md:p-4 rounded-xl border border-blue-100 sm:col-span-2 lg:col-span-1">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-secondary rounded-lg 
+                            flex items-center justify-center">
+                                        <svg class="w-4 h-4 md:w-5 md:h-5 text-white" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-xs font-medium text-gray-600">
+                                            Horario de Atención
+                                        </p>
+                                        <p class="text-sm font-bold text-gray-900">
+                                            24/7
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -768,6 +941,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -778,7 +952,6 @@
                 ticketNumber: '', // Solo es un campo de texto
                 selectedCast: '',
                 selectedCastInfo: null,
-                // ticketError removido
                 castList: @json($castList ?? []),
                 modelos: @json($modelos ?? []),
                 loadingTipos: false,
@@ -796,12 +969,6 @@
                     observaciones: '',
                     fechaRequerida: ''
                 },
-                notification: {
-                    show: false,
-                    message: '',
-                    type: 'info'
-                },
-                notificationTimeout: null,
                 minDate: '',
                 isCreatingOrder: false,
                 showClearModal: false,
@@ -932,7 +1099,7 @@
                         });
                     }
 
-                    // Modelo Select (se selecciona manualmente)
+                    // Modelo Select
                     if (this.$refs.modeloSelect) {
                         $(this.$refs.modeloSelect).select2({
                             placeholder: 'Seleccione un modelo',
@@ -959,7 +1126,8 @@
                         }).on('change', (e) => {
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
-                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target.value);
+                                this.loadCodigosRepuesto(this.newProduct.modelo, e.target
+                                    .value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -981,7 +1149,8 @@
 
                 initFlatpickr() {
                     this.$nextTick(() => {
-                        if (this.$refs.fechaRequeridaInput && typeof flatpickr !== 'undefined') {
+                        if (this.$refs.fechaRequeridaInput && typeof flatpickr !==
+                            'undefined') {
                             try {
                                 flatpickr(this.$refs.fechaRequeridaInput, {
                                     locale: 'es',
@@ -995,7 +1164,8 @@
                                     },
                                     onReady: (selectedDates, dateStr, instance) => {
                                         if (this.orderInfo.fechaRequerida) {
-                                            instance.setDate(this.orderInfo.fechaRequerida);
+                                            instance.setDate(this.orderInfo
+                                                .fechaRequerida);
                                         }
                                     }
                                 });
@@ -1011,13 +1181,13 @@
                     try {
                         const response = await fetch(`/api/cast-info/${castId}`);
                         const castData = await response.json();
-                        
+
                         if (castData) {
                             this.selectedCastInfo = castData;
                         }
                     } catch (error) {
                         console.error('Error loading CAST info:', error);
-                        this.showNotification('❌ Error al cargar información del CAST', 'error');
+                        toastr.error('Error al cargar información del CAST');
                     }
                 },
 
@@ -1052,7 +1222,7 @@
                             });
 
                             $(this.$refs.tipoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${tipos.length} tipos de repuesto cargados`, 'success');
+                            toastr.success(`${tipos.length} tipos de repuesto cargados`);
                         } else {
                             $(this.$refs.tipoSelect).empty().append(
                                 $('<option>', {
@@ -1060,9 +1230,7 @@
                                     text: 'No hay tipos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron tipos de repuesto para este modelo',
-                                'warning');
+                            toastr.warning('No se encontraron tipos de repuesto para este modelo');
                         }
                     } catch (error) {
                         console.error('Error loading tipos repuesto:', error);
@@ -1072,7 +1240,7 @@
                                 text: 'Error al cargar tipos'
                             })
                         ).prop('disabled', true).trigger('change');
-                        this.showNotification('❌ Error al cargar los tipos de repuesto', 'error');
+                        toastr.error('Error al cargar los tipos de repuesto');
                     } finally {
                         this.loadingTipos = false;
                     }
@@ -1109,7 +1277,7 @@
                             });
 
                             $(this.$refs.codigoSelect).prop('disabled', false).trigger('change');
-                            this.showNotification(`✅ ${codigos.length} códigos cargados`, 'success');
+                            toastr.success(`${codigos.length} códigos cargados`);
                         } else {
                             $(this.$refs.codigoSelect).empty().append(
                                 $('<option>', {
@@ -1117,9 +1285,7 @@
                                     text: 'No hay códigos disponibles'
                                 })
                             ).prop('disabled', true).trigger('change');
-                            this.showNotification(
-                                '⚠️ No se encontraron códigos para este tipo de repuesto',
-                                'warning');
+                            toastr.warning('No se encontraron códigos para este tipo de repuesto');
                         }
                     } catch (error) {
                         console.error('Error loading codigos:', error);
@@ -1129,7 +1295,7 @@
                                 text: 'Error al cargar códigos'
                             })
                         ).prop('disabled', true).trigger('change');
-                        this.showNotification('❌ Error al cargar los códigos', 'error');
+                        toastr.error('Error al cargar los códigos');
                     } finally {
                         this.loadingCodigos = false;
                     }
@@ -1182,13 +1348,16 @@
 
                 addProduct() {
                     if (!this.canAddProduct) {
-                        this.showNotification('Por favor complete todos los campos del producto', 'error');
+                        toastr.error('Por favor complete todos los campos del producto');
                         return;
                     }
 
-                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this.newProduct.modelo;
-                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this.newProduct.tipo;
-                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this.newProduct.codigo;
+                    const modeloText = $(this.$refs.modeloSelect).find('option:selected').text() || this
+                        .newProduct.modelo;
+                    const tipoText = $(this.$refs.tipoSelect).find('option:selected').text() || this
+                        .newProduct.tipo;
+                    const codigoText = $(this.$refs.codigoSelect).find('option:selected').text() || this
+                        .newProduct.codigo;
 
                     const existingProductIndex = this.products.findIndex(product =>
                         product.ticketNumber === this.ticketNumber &&
@@ -1199,9 +1368,9 @@
 
                     if (existingProductIndex !== -1) {
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        this.showNotification(
-                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`,
-                            'success');
+                        toastr.success(
+                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
+                        );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
@@ -1217,7 +1386,7 @@
                         };
 
                         this.products.push(product);
-                        this.showNotification('✅ Producto agregado correctamente', 'success');
+                        toastr.success('Producto agregado correctamente');
                     }
 
                     this.newProduct.cantidad = 1;
@@ -1231,7 +1400,7 @@
 
                 removeProduct(index) {
                     this.products.splice(index, 1);
-                    this.showNotification('🗑️ Producto eliminado de la orden', 'info');
+                    toastr.info('Producto eliminado de la orden');
                 },
 
                 updateQuantity(index, change) {
@@ -1243,7 +1412,7 @@
 
                 clearAll() {
                     if (this.products.length === 0) {
-                        this.showNotification('No hay artículos para limpiar', 'info');
+                        toastr.info('No hay artículos para limpiar');
                         return;
                     }
                     this.showClearModal = true;
@@ -1252,123 +1421,82 @@
                 confirmClearAll() {
                     this.products = [];
                     this.showClearModal = false;
-                    this.showNotification('Todos los artículos han sido eliminados', 'info');
+                    toastr.info('Todos los artículos han sido eliminados');
                 },
 
                 cancelClearAll() {
                     this.showClearModal = false;
                 },
 
-               async createOrder() {
-    if (!this.canCreateOrder) {
-        this.showNotification(
-            '❌ Complete todos los campos requeridos para crear la orden',
-            'error');
-        return;
-    }
+                async createOrder() {
+                    if (!this.canCreateOrder) {
+                        toastr.error('Complete todos los campos requeridos para crear la orden');
+                        return;
+                    }
 
-    this.isCreatingOrder = true;
+                    this.isCreatingOrder = true;
 
-    try {
-        const orderData = {
-            ticketNumber: this.ticketNumber,
-            castId: this.selectedCast,
-            orderInfo: this.orderInfo,
-            products: this.products.map(product => ({
-                modeloId: product.modeloId,
-                tipoId: product.tipoId,
-                codigoId: product.codigoId,
-                cantidad: product.cantidad
-            })),
-            orderNumber: this.orderNumber,
-            esProvincia: true // Bandera para identificar que es para provincia
-        };
+                    try {
+                        const orderData = {
+                            ticketNumber: this.ticketNumber,
+                            castId: this.selectedCast,
+                            orderInfo: this.orderInfo,
+                            products: this.products.map(product => ({
+                                modeloId: product.modeloId,
+                                tipoId: product.tipoId,
+                                codigoId: product.codigoId,
+                                cantidad: product.cantidad
+                            })),
+                            orderNumber: this.orderNumber,
+                            esProvincia: true
+                        };
 
-        console.log('Enviando datos de la orden provincia:', orderData);
+                        console.log('Enviando datos de la orden provincia:', orderData);
 
-        // Cambiar la ruta según tu configuración
-        const response = await fetch('/solicitudrepuesto/store-provincia', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(orderData)
-        });
+                        const response = await fetch('/solicitudrepuesto/store-provincia', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(orderData)
+                        });
 
-        const result = await response.json();
+                        const result = await response.json();
 
-        if (result.success) {
-            this.showNotification(
-                `🎉 ¡Orden ${result.codigo_orden} creada exitosamente!`,
-                'success');
+                        if (result.success) {
+                            toastr.success(`¡Orden ${result.codigo_orden} creada exitosamente!`);
 
-            await this.getNextOrderNumber();
+                            // Mostrar mensaje de éxito
+                            toastr.success(`Redirigiendo al listado de solicitudes...`, '', {
+                                timeOut: 2000,
+                                onHidden: () => {
+                                    // Redirigir después de que el toast se oculte
+                                    if (result.redirect_url) {
+                                        // Si el backend devuelve una URL específica
+                                        window.location.href = result.redirect_url;
+                                    } else {
+                                        // Redirigir al index de solicitudes
+                                        window.location.href =
+                                            '{{ route('solicitudarticulo.index') }}';
+                                    }
+                                }
+                            });
 
-            setTimeout(() => {
-                this.products = [];
-                this.ticketNumber = '';
-                this.selectedCast = '';
-                this.selectedCastInfo = null;
-                this.newProduct.modelo = '';
-                this.orderInfo = {
-                    tipoServicio: '',
-                    urgencia: '',
-                    observaciones: '',
-                    fechaRequerida: ''
-                };
-            }, 3000);
-        } else {
-            throw new Error(result.message);
-        }
+                        } else {
+                            throw new Error(result.message);
+                        }
 
-    } catch (error) {
-        console.error('Error al crear la orden:', error);
-        this.showNotification(`❌ Error: ${error.message}`, 'error');
-    } finally {
-        this.isCreatingOrder = false;
-    }
-},
-
-                getNotificationClass() {
-                    switch (this.notification.type) {
-                        case 'success':
-                            return 'bg-green-500';
-                        case 'error':
-                            return 'bg-red-500';
-                        case 'warning':
-                            return 'bg-yellow-500';
-                        default:
-                            return 'bg-blue-500';
+                    } catch (error) {
+                        console.error('Error al crear la orden:', error);
+                        toastr.error(`Error: ${error.message}`);
+                    } finally {
+                        this.isCreatingOrder = false;
                     }
                 },
 
-                getNotificationIcon() {
-                    switch (this.notification.type) {
-                        case 'success':
-                            return '✅';
-                        case 'error':
-                            return '❌';
-                        case 'warning':
-                            return '⚠️';
-                        default:
-                            return 'ℹ️';
-                    }
-                },
-
-                showNotification(message, type = 'info') {
-                    this.notification.message = message;
-                    this.notification.type = type;
-                    this.notification.show = true;
-
-                    if (this.notificationTimeout) {
-                        clearTimeout(this.notificationTimeout);
-                    }
-
-                    this.notificationTimeout = setTimeout(() => {
-                        this.notification.show = false;
-                    }, 4000);
-                }
+                // Métodos de notificación removidos ya que usamos toastr
             }));
         });
     </script>

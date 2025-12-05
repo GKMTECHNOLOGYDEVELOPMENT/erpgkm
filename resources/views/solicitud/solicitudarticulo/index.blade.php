@@ -320,7 +320,7 @@
                             @if (request('tipo'))
                                 <span
                                     class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                                    Tipo: 
+                                    Tipo:
                                     @if (request('tipo') == 'solicitud_articulo')
                                         Artículos
                                     @elseif(request('tipo') == 'solicitud_repuesto')
@@ -364,69 +364,87 @@
             @endif
         </form>
 
-        <!-- Resto del código permanece igual -->
-        <!-- Grid de Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @forelse($solicitudes as $solicitud)
-                <div
-                    class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
+        <!-- Resto del código permanece igual -->      
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    @forelse($solicitudes as $solicitud)
+                        <div
+                            class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
                     @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
                     @elseif($solicitud->tipoorden == 'solicitud_repuesto') border-green-500
                     @else border-purple-500 @endif
                     transition transform hover:scale-[1.02] hover:shadow-lg">
 
                     <!-- Header de la Card -->
-                    <div class="px-6 py-4 bg-gray-50 border-b flex justify-between items-start">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <!-- Badge de tipo de solicitud -->
-                                <span
-                                    class="px-2 py-1 text-xs font-semibold rounded-full 
+                    <div class="px-4 md:px-6 py-4 bg-gray-50 border-b">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <!-- Badges en línea -->
+                                <div class="flex flex-wrap items-center gap-2 mb-2">
+                                    <!-- Badge de tipo de solicitud -->
+                                    <span
+                                        class="px-2 py-1 text-xs font-semibold rounded-full 
                                     @if ($solicitud->tipoorden == 'solicitud_articulo') bg-blue-100 text-blue-800
                                     @elseif($solicitud->tipoorden == 'solicitud_repuesto') bg-green-100 text-green-800
                                     @else bg-purple-100 text-purple-800 @endif">
-                                    @if ($solicitud->tipoorden == 'solicitud_articulo')
-                                        📦 Artículo
-                                    @elseif($solicitud->tipoorden == 'solicitud_repuesto')
-                                        🔧 Repuesto (Lima)
-                                    @else
-                                        🌍 Repuesto (Provincia)
-                                    @endif
-                                </span>
+                                        @if ($solicitud->tipoorden == 'solicitud_articulo')
+                                            📦 Artículo
+                                        @elseif($solicitud->tipoorden == 'solicitud_repuesto')
+                                            🔧 Repuesto (Lima)
+                                        @else
+                                            🌍 Repuesto (Provincia)
+                                        @endif
+                                    </span>
 
-                                <!-- Badge de urgencia -->
-                                @if ($solicitud->niveldeurgencia == 'alta')
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                        🔴 Alta
-                                    </span>
-                                @elseif($solicitud->niveldeurgencia == 'media')
-                                    <span
-                                        class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        🟡 Media
-                                    </span>
-                                @endif
+                                    <!-- Badge de urgencia -->
+                                    @if ($solicitud->niveldeurgencia == 'alta')
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                            🔴 Alta
+                                        </span>
+                                    @elseif($solicitud->niveldeurgencia == 'media')
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            🟡 Media
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <h3 class="font-bold text-lg text-gray-800 truncate">
+                                    {{ $solicitud->codigo ?? 'Sin código' }}
+                                </h3>
+                                <p class="text-sm text-gray-600 mt-1 truncate">
+                                    <span class="font-medium">Solicitante:</span>
+                                    {{ $solicitud->nombre_solicitante ?? 'No especificado' }}
+                                </p>
                             </div>
 
-                            <h3 class="font-bold text-lg text-gray-800">
-                                {{ $solicitud->codigo ?? 'Sin código' }}
-                            </h3>
-                            <p class="text-sm text-gray-600 mt-1">
-                                <span class="font-medium">Solicitante:</span>
-                                {{ $solicitud->nombre_solicitante ?? 'No especificado' }}
-                            </p>
+                            <!-- Badge de estado - alineado a la derecha -->
+                            <div class="flex-shrink-0">
+                                @php
+                                    $estados = [
+                                        'aprobada' => ['class' => 'bg-success', 'text' => 'Aprobada'],
+                                        'rechazada' => ['class' => 'bg-danger', 'text' => 'Rechazada'],
+                                        'pendiente' => ['class' => 'bg-warning', 'text' => 'Pendiente'],
+                                        'en_proceso' => ['class' => 'bg-info', 'text' => 'En Proceso'],
+                                        'completada' => ['class' => 'bg-primary', 'text' => 'Completada'],
+                                        'cancelada' => ['class' => 'bg-dark', 'text' => 'Cancelada'],
+                                    ];
+                                    $estado = $solicitud->estado ?? 'pendiente';
+                                    $badgeInfo = $estados[$estado] ?? [
+                                        'class' => 'bg-secondary',
+                                        'text' => ucfirst($estado),
+                                    ];
+                                @endphp
+
+                                <span class="badge {{ $badgeInfo['class'] }} inline-block">
+                                    {{ $badgeInfo['text'] }}
+                                </span>
+                            </div>
                         </div>
-                        <span
-                            class="px-3 py-1 text-xs font-semibold rounded-full 
-                            @if ($solicitud->estado == 'aprobada') bg-green-100 text-green-800 
-                            @elseif($solicitud->estado == 'rechazada') bg-red-100 text-red-800 
-                            @elseif($solicitud->estado == 'pendiente') bg-yellow-100 text-yellow-800 
-                            @else bg-blue-100 text-blue-800 @endif">
-                            {{ ucfirst($solicitud->estado ?? 'pendiente') }}
-                        </span>
                     </div>
 
                     <!-- Contenido de la Card -->
-                    <div class="px-6 py-4">
+                    <div class="px-4 md:px-6 py-4">
                         <!-- Información de Productos -->
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 font-medium">
@@ -448,7 +466,7 @@
                         @if ($solicitud->tipoorden == 'solicitud_repuesto_provincia' && $solicitud->numeroticket)
                             <div class="mb-3">
                                 <p class="text-sm text-gray-500 font-medium">Número de Ticket</p>
-                                <p class="font-medium text-gray-800">
+                                <p class="font-medium text-gray-800 truncate">
                                     🎫 {{ $solicitud->numeroticket }}
                                 </p>
                             </div>
@@ -458,7 +476,7 @@
                         @if ($solicitud->codigo_cotizacion ?? false)
                             <div class="mb-3">
                                 <p class="text-sm text-gray-500 font-medium">Cotización</p>
-                                <p class="font-medium text-purple-600">
+                                <p class="font-medium text-purple-600 truncate">
                                     📋 {{ $solicitud->codigo_cotizacion }}
                                 </p>
                             </div>
@@ -467,7 +485,7 @@
                         <!-- Tipo de Servicio -->
                         <div class="mb-4">
                             <p class="text-sm text-gray-500 font-medium">Tipo de Servicio</p>
-                            <p class="font-medium text-gray-800">
+                            <p class="font-medium text-gray-800 truncate">
                                 @switch($solicitud->tiposervicio)
                                     @case('solicitud_articulo')
                                         📦 Solicitud de Artículo
@@ -499,28 +517,31 @@
                             </p>
                         </div>
 
-                        <!-- Fecha de Creación -->
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium">Fecha de Creación</p>
-                            <p class="font-medium text-gray-800">
-                                @if ($solicitud->fechacreacion)
-                                    {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
-                                @else
-                                    No especificada
-                                @endif
-                            </p>
-                        </div>
+                        <!-- Fechas (en grid para móvil) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                            <!-- Fecha de Creación -->
+                            <div>
+                                <p class="text-sm text-gray-500 font-medium">Fecha Creación</p>
+                                <p class="font-medium text-gray-800 text-sm">
+                                    @if ($solicitud->fechacreacion)
+                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y') }}
+                                    @else
+                                        No especificada
+                                    @endif
+                                </p>
+                            </div>
 
-                        <!-- Fecha Requerida -->
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium">Fecha Requerida</p>
-                            <p class="font-medium text-gray-800">
-                                @if ($solicitud->fecharequerida)
-                                    {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
-                                @else
-                                    No especificada
-                                @endif
-                            </p>
+                            <!-- Fecha Requerida -->
+                            <div>
+                                <p class="text-sm text-gray-500 font-medium">Fecha Requerida</p>
+                                <p class="font-medium text-gray-800 text-sm">
+                                    @if ($solicitud->fecharequerida)
+                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y') }}
+                                    @else
+                                        No especificada
+                                    @endif
+                                </p>
+                            </div>
                         </div>
 
                         @php
@@ -550,10 +571,10 @@
                                 <p class="text-sm text-gray-500 font-medium">Tiempo Restante</p>
                                 <p
                                     class="text-xs font-semibold 
-                                    @if ($diasRestantes <= 0) text-red-500
-                                    @elseif($diasRestantes <= 2) text-red-500 
-                                    @elseif($diasRestantes <= 5) text-yellow-500 
-                                    @else text-green-500 @endif">
+                            @if ($diasRestantes <= 0) text-red-500
+                            @elseif($diasRestantes <= 2) text-red-500 
+                            @elseif($diasRestantes <= 5) text-yellow-500 
+                            @else text-green-500 @endif">
                                     @if ($diasRestantes > 0)
                                         {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }}
                                     @else
@@ -564,10 +585,10 @@
 
                             <div class="w-full bg-gray-200 rounded-full h-2">
                                 <div class="h-2 rounded-full transition-all duration-500 ease-in-out
-                                    @if ($diasRestantes <= 0) bg-red-500 
-                                    @elseif($diasRestantes <= 2) bg-red-500 
-                                    @elseif($diasRestantes <= 5) bg-yellow-500 
-                                    @else bg-green-500 @endif"
+                            @if ($diasRestantes <= 0) bg-red-500 
+                            @elseif($diasRestantes <= 2) bg-red-500 
+                            @elseif($diasRestantes <= 5) bg-yellow-500 
+                            @else bg-green-500 @endif"
                                     style="width: {{ $progreso }}%;">
                                 </div>
                             </div>
@@ -576,202 +597,182 @@
                         @if (!empty($solicitud->observaciones))
                             <div class="mb-4">
                                 <p class="text-sm text-gray-500 font-medium">Observaciones</p>
-                                <p class="text-sm text-gray-700">{{ Str::limit($solicitud->observaciones, 100) }}</p>
+                                <p class="text-sm text-gray-700 line-clamp-2">{{ $solicitud->observaciones }}</p>
                             </div>
                         @endif
                     </div>
 
-                    <!-- Footer de la Card -->
-                    <div class="px-6 py-3 bg-gray-50 border-t flex justify-end space-x-2">
-                        <!-- Botones para Artículos (AZUL) -->
-                        @if ($solicitud->tipoorden == 'solicitud_articulo')
-                            <!-- Botón Ver -->
+                    <!-- Footer de la Card - BOTONES RESPONSIVE -->
+                    <div class="px-4 md:px-6 py-3 bg-gray-50 border-t">
+                        <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                            <!-- Botones para Artículos (AZUL) -->
+                            @if ($solicitud->tipoorden == 'solicitud_articulo')
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD ARTICULO DETALLE'))
+                                    <a href="{{ route('solicitudarticulo.show', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                            </path>
+                                        </svg>
+                                        <span class="truncate">Ver</span>
+                                    </a>
+                                @endif
 
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD ARTICULO DETALLE'))
-                                <a href="{{ route('solicitudarticulo.show', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    Ver
-                                </a>
-                            @endif
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('OPCIONES SOLICITUD ARTICULO'))
+                                    <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                                            </path>
+                                        </svg>
+                                        <span class="truncate">Opciones</span>
+                                    </a>
+                                @endif
 
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('OPCIONES SOLICITUD ARTICULO'))
-                                <!-- Botón Opciones -->
-                                <a href="{{ route('solicitudarticulo.opciones', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
-                                        </path>
-                                    </svg>
-                                    Opciones
-                                </a>
-                            @endif
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR SOLICITUD ARTICULO'))
-                                <!-- NUEVO BOTÓN GESTIONAR -->
-                                <a href="{{ route('solicitudarticulo.gestionar', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                        </path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Gestionar
-                                </a>
-                            @endif
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR SOLICITUD ARTICULO'))
+                                    <a href="{{ route('solicitudarticulo.gestionar', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span class="truncate">Gestionar</span>
+                                    </a>
+                                @endif
 
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD ARTICULO'))
-                                <!-- Botón Editar - solo para pendientes -->
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD ARTICULO'))
+                                    @if ($solicitud->estado == 'pendiente')
+                                        <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
+                                            class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition min-w-[80px]">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                </path>
+                                            </svg>
+                                            <span class="truncate">Editar</span>
+                                        </a>
+                                    @endif
+                                @endif
+
+                                <!-- Botones para Repuestos Lima (VERDE) -->
+                            @elseif($solicitud->tipoorden == 'solicitud_repuesto')
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
+                                    <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                            </path>
+                                        </svg>
+                                        <span class="truncate">Ver</span>
+                                    </a>
+                                @endif
+
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
+                                    <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
+                                            </path>
+                                        </svg>
+                                        <span class="truncate">Opciones</span>
+                                    </a>
+                                @endif
+
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR OPCIONES REPUESTO'))
+                                    <a href="{{ route('solicitudrepuesto.gestionar', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition min-w-[80px]">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                            </path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <span class="truncate">Gestionar</span>
+                                    </a>
+                                @endif
+
                                 @if ($solicitud->estado == 'pendiente')
-                                    <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
-                                        class="flex items-center px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
+                                        <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
+                                            class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition min-w-[80px]">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                </path>
+                                            </svg>
+                                            <span class="truncate">Editar</span>
+                                        </a>
+                                    @endif
+                                @endif
+
+                                <!-- Botones para Repuestos Provincia (PURPURA) -->
+                            @else
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
+                                    <a href="{{ route('solicitudrepuestoprovincia.show', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-secondary text-white rounded hover:bg-gray-600 transition min-w-[80px]">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
                                             </path>
                                         </svg>
-                                        Editar
+                                        <span class="truncate">Ver</span>
                                     </a>
                                 @endif
-                            @endif
 
-                        <!-- Botones para Repuestos Lima (VERDE) -->
-                        @elseif($solicitud->tipoorden == 'solicitud_repuesto')
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
-                                <!-- Botón Ver -->
-                                <a href="{{ route('solicitudrepuesto.show', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    Ver
-                                </a>
-                            @endif
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
-                                <!-- Botón Opciones -->
-                                <a href="{{ route('solicitudrepuesto.opciones', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
-                                        </path>
-                                    </svg>
-                                    Opciones
-                                </a>
-                            @endif
-
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR OPCIONES REPUESTO'))
-                                <!-- NUEVO BOTÓN GESTIONAR -->
-                                <a href="{{ route('solicitudrepuesto.gestionar', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                        </path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Gestionar
-                                </a>
-                            @endif
-
-
-                            <!-- Botón Editar - solo para pendientes -->
-                            @if ($solicitud->estado == 'pendiente')
-                                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
-                                    <a href="{{ route('solicitudrepuesto.edit', $solicitud->idsolicitudesordenes) }}"
-                                        class="flex items-center px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
+                                    <a href="{{ route('solicitudrepuestoprovincia.opciones', $solicitud->idsolicitudesordenes) }}"
+                                        class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-secondary text-white rounded hover:bg-gray-600 transition min-w-[80px]">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
                                             </path>
                                         </svg>
-                                        Editar
+                                        <span class="truncate">Opciones</span>
                                     </a>
                                 @endif
-                            @endif
 
-                        <!-- Botones para Repuestos Provincia (PURPURA) -->
-                        @else
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER SOLICITUD REPUESTO'))
-                                <a href="{{ route('solicitudrepuestoprovincia.show', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                        </path>
-                                    </svg>
-                                    Ver
-                                </a>
-                            @endif
-                            
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER OPCIONES REPUESTO'))
-                                <a href="{{ route('solicitudrepuestoprovincia.opciones', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z">
-                                        </path>
-                                    </svg>
-                                    Opciones
-                                </a>
-                            @endif
+                                <!-- BOTÓN GESTIONAR REMOVIDO -->
 
-                            @if (\App\Helpers\PermisoHelper::tienePermiso('GESTIONAR OPCIONES REPUESTO'))
-                                <a href="{{ route('solicitudrepuestoprovincia.gestionar', $solicitud->idsolicitudesordenes) }}"
-                                    class="flex items-center px-3 py-1.5 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                        </path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Gestionar
-                                </a>
-                            @endif
-
-                            <!-- Botón Editar - solo para pendientes -->
-                            @if ($solicitud->estado == 'pendiente')
-                                @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
-                                    <a href="{{ route('solicitudrepuestoprovincia.edit', $solicitud->idsolicitudesordenes) }}"
-                                        class="flex items-center px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                            </path>
-                                        </svg>
-                                        Editar
-                                    </a>
+                                @if ($solicitud->estado == 'pendiente')
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
+                                        <a href="{{ route('solicitudrepuestoprovincia.edit', $solicitud->idsolicitudesordenes) }}"
+                                            class="flex-1 sm:flex-none flex items-center justify-center px-3 py-2 text-sm bg-secondary text-white rounded hover:bg-gray-600 transition min-w-[80px]">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                </path>
+                                            </svg>
+                                            <span class="truncate">Editar</span>
+                                        </a>
+                                    @endif
                                 @endif
                             @endif
-                        @endif
+                        </div>
                     </div>
                 </div>
                 @empty
@@ -821,248 +822,214 @@
                 </div>
             @endif
 
-            <!-- Estilos adicionales para la paginación -->
-            <style>
-                .pagination {
-                    display: flex;
-                    justify-content: center;
-                    list-style: none;
-                    padding: 0;
-                }
+            <!-- JavaScript para manejar el modal -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const modal = document.getElementById('solicitudModal');
+                    const openModalBtn = document.getElementById('openModalBtn');
+                    const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
+                    const closeModalBtn = document.getElementById('closeModalBtn');
 
-                .page-item {
-                    margin: 0 4px;
-                }
+                    // Abrir modal desde el botón principal
+                    if (openModalBtn) {
+                        openModalBtn.addEventListener('click', function() {
+                            modal.classList.remove('hidden');
+                        });
+                    }
 
-                .page-link {
-                    display: block;
-                    padding: 8px 16px;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    color: #4b5563;
-                    text-decoration: none;
-                }
+                    // Abrir modal desde el botón cuando no hay solicitudes
+                    if (openModalBtnEmpty) {
+                        openModalBtnEmpty.addEventListener('click', function() {
+                            modal.classList.remove('hidden');
+                        });
+                    }
 
-                .page-item.active .page-link {
-                    background-color: #3b82f6;
-                    color: white;
-                    border-color: #3b82f6;
-                }
-
-                .page-link:hover:not(.active) {
-                    background-color: #f3f4f6;
-                }
-            </style>
-        </div>
-
-        <!-- JavaScript para manejar el modal -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const modal = document.getElementById('solicitudModal');
-                const openModalBtn = document.getElementById('openModalBtn');
-                const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
-                const closeModalBtn = document.getElementById('closeModalBtn');
-
-                // Abrir modal desde el botón principal
-                if (openModalBtn) {
-                    openModalBtn.addEventListener('click', function() {
-                        modal.classList.remove('hidden');
-                    });
-                }
-
-                // Abrir modal desde el botón cuando no hay solicitudes
-                if (openModalBtnEmpty) {
-                    openModalBtnEmpty.addEventListener('click', function() {
-                        modal.classList.remove('hidden');
-                    });
-                }
-
-                // Cerrar modal con el botón cancelar
-                if (closeModalBtn) {
-                    closeModalBtn.addEventListener('click', function() {
-                        modal.classList.add('hidden');
-                    });
-                }
-
-                // Cerrar modal al hacer clic fuera del contenido
-                if (modal) {
-                    modal.addEventListener('click', function(e) {
-                        if (e.target === modal) {
+                    // Cerrar modal con el botón cancelar
+                    if (closeModalBtn) {
+                        closeModalBtn.addEventListener('click', function() {
                             modal.classList.add('hidden');
-                        }
-                    });
-                }
-
-                // Cerrar modal con la tecla Escape
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                        modal.classList.add('hidden');
-                    }
-                });
-            });
-
-            document.addEventListener('DOMContentLoaded', function() {
-                // Elementos del primer modal
-                const firstModal = document.getElementById('solicitudModal');
-                const openModalBtn = document.getElementById('openModalBtn');
-                const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
-                const closeModalBtn = document.getElementById('closeModalBtn');
-                const btnRepuesto = document.getElementById('btnRepuesto');
-
-                // Elementos del segundo modal
-                const provinciaModal = document.getElementById('provinciaModal');
-                const backToFirstModal = document.getElementById('backToFirstModal');
-                const closeProvinciaModal = document.getElementById('closeProvinciaModal');
-                const btnSiProvincia = document.getElementById('btnSiProvincia');
-                const btnNoProvincia = document.getElementById('btnNoProvincia');
-
-                // Rutas
-                const rutaParaProvincia = "{{ route('solicitudrepuesto.create.provincia') }}";
-                const rutaNoParaProvincia = "{{ route('solicitudrepuesto.create') }}";
-
-                // Función para abrir modal con animación
-                function openModalWithAnimation(modal) {
-                    if (!modal) return;
-
-                    modal.classList.remove('hidden');
-                    // Pequeño delay para que el DOM registre el cambio antes de la animación
-                    setTimeout(() => {
-                        const content = modal.querySelector('.bg-white');
-                        if (content) {
-                            content.classList.remove('scale-95', 'opacity-0');
-                            content.classList.add('scale-100', 'opacity-100');
-                        }
-                    }, 10);
-                }
-
-                // Función para cerrar modal con animación
-                function closeModalWithAnimation(modal) {
-                    if (!modal) return;
-
-                    const content = modal.querySelector('.bg-white');
-                    if (content) {
-                        content.classList.remove('scale-100', 'opacity-100');
-                        content.classList.add('scale-95', 'opacity-0');
+                        });
                     }
 
-                    // Esperar a que termine la animación antes de ocultar
-                    setTimeout(() => {
-                        modal.classList.add('hidden');
-                    }, 300);
-                }
-
-                // 1. Abrir primer modal con animación
-                if (openModalBtn) {
-                    openModalBtn.addEventListener('click', function() {
-                        openModalWithAnimation(firstModal);
-                    });
-                }
-
-                if (openModalBtnEmpty) {
-                    openModalBtnEmpty.addEventListener('click', function() {
-                        openModalWithAnimation(firstModal);
-                    });
-                }
-
-                // 2. Cerrar primer modal con animación
-                if (closeModalBtn) {
-                    closeModalBtn.addEventListener('click', function() {
-                        closeModalWithAnimation(firstModal);
-                    });
-                }
-
-                // 3. Cuando hacen clic en "Solicitud de Repuesto" - Transición suave entre modales
-                if (btnRepuesto) {
-                    btnRepuesto.addEventListener('click', function() {
-                        // Cerrar primer modal con animación
-                        closeModalWithAnimation(firstModal);
-
-                        // Esperar a que termine la animación de cierre antes de abrir el segundo
-                        setTimeout(() => {
-                            openModalWithAnimation(provinciaModal);
-                        }, 300);
-                    });
-                }
-
-                // 4. Volver al primer modal desde el segundo con animación
-                if (backToFirstModal) {
-                    backToFirstModal.addEventListener('click', function() {
-                        // Cerrar segundo modal con animación
-                        closeModalWithAnimation(provinciaModal);
-
-                        // Esperar a que termine la animación de cierre antes de abrir el primero
-                        setTimeout(() => {
-                            openModalWithAnimation(firstModal);
-                        }, 300);
-                    });
-                }
-
-                // 5. Cerrar segundo modal con animación
-                if (closeProvinciaModal) {
-                    closeProvinciaModal.addEventListener('click', function() {
-                        closeModalWithAnimation(provinciaModal);
-                    });
-                }
-
-                // 6. Cuando seleccionan SÍ (para provincia) - Con animación de clic
-                if (btnSiProvincia) {
-                    btnSiProvincia.addEventListener('click', function(e) {
-                        // Animación de clic
-                        e.currentTarget.style.transform = 'scale(0.95)';
-
-                        // Pequeño delay para que se vea la animación
-                        setTimeout(() => {
-                            window.location.href = rutaParaProvincia;
-                        }, 150);
-                    });
-                }
-
-                // 7. Cuando seleccionan NO (no para provincia) - Con animación de clic
-                if (btnNoProvincia) {
-                    btnNoProvincia.addEventListener('click', function(e) {
-                        // Animación de clic
-                        e.currentTarget.style.transform = 'scale(0.95)';
-
-                        // Pequeño delay para que se vea la animación
-                        setTimeout(() => {
-                            window.location.href = rutaNoParaProvincia;
-                        }, 150);
-                    });
-                }
-
-                // 8. Cerrar modales al hacer clic fuera (con animación)
-                function setupModalClose(modal) {
+                    // Cerrar modal al hacer clic fuera del contenido
                     if (modal) {
                         modal.addEventListener('click', function(e) {
-                            // Verificar si se hizo clic en el fondo (no en el contenido)
                             if (e.target === modal) {
-                                closeModalWithAnimation(modal);
+                                modal.classList.add('hidden');
                             }
                         });
                     }
-                }
 
-                setupModalClose(firstModal);
-                setupModalClose(provinciaModal);
+                    // Cerrar modal con la tecla Escape
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                            modal.classList.add('hidden');
+                        }
+                    });
+                });
 
-                // 9. Cerrar modales con tecla ESC (con animación)
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        if (provinciaModal && !provinciaModal.classList.contains('hidden')) {
-                            closeModalWithAnimation(provinciaModal);
-                        } else if (firstModal && !firstModal.classList.contains('hidden')) {
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Elementos del primer modal
+                    const firstModal = document.getElementById('solicitudModal');
+                    const openModalBtn = document.getElementById('openModalBtn');
+                    const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
+                    const closeModalBtn = document.getElementById('closeModalBtn');
+                    const btnRepuesto = document.getElementById('btnRepuesto');
+
+                    // Elementos del segundo modal
+                    const provinciaModal = document.getElementById('provinciaModal');
+                    const backToFirstModal = document.getElementById('backToFirstModal');
+                    const closeProvinciaModal = document.getElementById('closeProvinciaModal');
+                    const btnSiProvincia = document.getElementById('btnSiProvincia');
+                    const btnNoProvincia = document.getElementById('btnNoProvincia');
+
+                    // Rutas
+                    const rutaParaProvincia = "{{ route('solicitudrepuesto.create.provincia') }}";
+                    const rutaNoParaProvincia = "{{ route('solicitudrepuesto.create') }}";
+
+                    // Función para abrir modal con animación
+                    function openModalWithAnimation(modal) {
+                        if (!modal) return;
+
+                        modal.classList.remove('hidden');
+                        // Pequeño delay para que el DOM registre el cambio antes de la animación
+                        setTimeout(() => {
+                            const content = modal.querySelector('.bg-white');
+                            if (content) {
+                                content.classList.remove('scale-95', 'opacity-0');
+                                content.classList.add('scale-100', 'opacity-100');
+                            }
+                        }, 10);
+                    }
+
+                    // Función para cerrar modal con animación
+                    function closeModalWithAnimation(modal) {
+                        if (!modal) return;
+
+                        const content = modal.querySelector('.bg-white');
+                        if (content) {
+                            content.classList.remove('scale-100', 'opacity-100');
+                            content.classList.add('scale-95', 'opacity-0');
+                        }
+
+                        // Esperar a que termine la animación antes de ocultar
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                        }, 300);
+                    }
+
+                    // 1. Abrir primer modal con animación
+                    if (openModalBtn) {
+                        openModalBtn.addEventListener('click', function() {
+                            openModalWithAnimation(firstModal);
+                        });
+                    }
+
+                    if (openModalBtnEmpty) {
+                        openModalBtnEmpty.addEventListener('click', function() {
+                            openModalWithAnimation(firstModal);
+                        });
+                    }
+
+                    // 2. Cerrar primer modal con animación
+                    if (closeModalBtn) {
+                        closeModalBtn.addEventListener('click', function() {
                             closeModalWithAnimation(firstModal);
+                        });
+                    }
+
+                    // 3. Cuando hacen clic en "Solicitud de Repuesto" - Transición suave entre modales
+                    if (btnRepuesto) {
+                        btnRepuesto.addEventListener('click', function() {
+                            // Cerrar primer modal con animación
+                            closeModalWithAnimation(firstModal);
+
+                            // Esperar a que termine la animación de cierre antes de abrir el segundo
+                            setTimeout(() => {
+                                openModalWithAnimation(provinciaModal);
+                            }, 300);
+                        });
+                    }
+
+                    // 4. Volver al primer modal desde el segundo con animación
+                    if (backToFirstModal) {
+                        backToFirstModal.addEventListener('click', function() {
+                            // Cerrar segundo modal con animación
+                            closeModalWithAnimation(provinciaModal);
+
+                            // Esperar a que termine la animación de cierre antes de abrir el primero
+                            setTimeout(() => {
+                                openModalWithAnimation(firstModal);
+                            }, 300);
+                        });
+                    }
+
+                    // 5. Cerrar segundo modal con animación
+                    if (closeProvinciaModal) {
+                        closeProvinciaModal.addEventListener('click', function() {
+                            closeModalWithAnimation(provinciaModal);
+                        });
+                    }
+
+                    // 6. Cuando seleccionan SÍ (para provincia) - Con animación de clic
+                    if (btnSiProvincia) {
+                        btnSiProvincia.addEventListener('click', function(e) {
+                            // Animación de clic
+                            e.currentTarget.style.transform = 'scale(0.95)';
+
+                            // Pequeño delay para que se vea la animación
+                            setTimeout(() => {
+                                window.location.href = rutaParaProvincia;
+                            }, 150);
+                        });
+                    }
+
+                    // 7. Cuando seleccionan NO (no para provincia) - Con animación de clic
+                    if (btnNoProvincia) {
+                        btnNoProvincia.addEventListener('click', function(e) {
+                            // Animación de clic
+                            e.currentTarget.style.transform = 'scale(0.95)';
+
+                            // Pequeño delay para que se vea la animación
+                            setTimeout(() => {
+                                window.location.href = rutaNoParaProvincia;
+                            }, 150);
+                        });
+                    }
+
+                    // 8. Cerrar modales al hacer clic fuera (con animación)
+                    function setupModalClose(modal) {
+                        if (modal) {
+                            modal.addEventListener('click', function(e) {
+                                // Verificar si se hizo clic en el fondo (no en el contenido)
+                                if (e.target === modal) {
+                                    closeModalWithAnimation(modal);
+                                }
+                            });
+                        }
+                    }
+
+                    setupModalClose(firstModal);
+                    setupModalClose(provinciaModal);
+
+                    // 9. Cerrar modales con tecla ESC (con animación)
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') {
+                            if (provinciaModal && !provinciaModal.classList.contains('hidden')) {
+                                closeModalWithAnimation(provinciaModal);
+                            } else if (firstModal && !firstModal.classList.contains('hidden')) {
+                                closeModalWithAnimation(firstModal);
+                            }
+                        }
+                    });
+
+                    // 10. Asegurar que el primer modal también tenga animación
+                    if (firstModal) {
+                        const content = firstModal.querySelector('.bg-white');
+                        if (content && !content.classList.contains('transform')) {
+                            content.classList.add('transform', 'transition-all', 'duration-300', 'scale-95', 'opacity-0');
                         }
                     }
                 });
-
-                // 10. Asegurar que el primer modal también tenga animación
-                if (firstModal) {
-                    const content = firstModal.querySelector('.bg-white');
-                    if (content && !content.classList.contains('transform')) {
-                        content.classList.add('transform', 'transition-all', 'duration-300', 'scale-95', 'opacity-0');
-                    }
-                }
-            });
-        </script>
+            </script>
     </x-layout.default>

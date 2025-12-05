@@ -1,59 +1,53 @@
 <x-layout.default>
+    <!-- Solo iconos sólidos (la mayoría de iconos) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
-        <div class="container mx-auto px-4 max-w-7xl">
-            <!-- Header Principal Mejorado -->
-            <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200 relative overflow-hidden">
-                <!-- Elemento decorativo -->
-                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16"></div>
+        <div class=" mx-auto px-4 w-full">
 
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between relative z-10">
+            <div class="mb-6">
+                <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
+                    <li>
+                        <a href="{{ route('solicitudarticulo.index') }}"
+                            class="text-primary hover:underline">Solicitudes</a>
+                    </li>
+
+                    <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                        <span>Ver Solicitud Artículo</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Header Principal Mejorado -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                     <div class="flex-1">
-                        <div class="flex items-start space-x-4 mb-4">
-                            <div
-                                class="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
+                        <div class="flex items-center space-x-4 mb-4">
                             <div class="flex-1">
-                                <!-- En el Header Principal, después de la información del solicitante -->
-                                <div class="flex flex-wrap gap-4 text-sm text-gray-600">
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span>Creada: {{ $solicitud->fechacreacion ? \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') : 'N/A' }}</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        <span>{{ $solicitud->nombre_solicitante ?? 'Solicitante no especificado' }}</span>
-                                    </div>
-                                    <!-- Nuevos campos agregados -->
-                                    @if($solicitud->nombre_area_destino)
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        <span>Área Destino: {{ $solicitud->nombre_area_destino }}</span>
-                                    </div>
-                                    @endif
-                                    @if($solicitud->usuario_destino_nombre)
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                        <span>Destinatario: {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}</span>
-                                    </div>
+                                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+                                    Orden #<span class="text-blue-600">{{ $solicitud->codigo ?? 'N/A' }}</span>
+                                </h1>
+                                <div class="flex flex-wrap items-center gap-2 mb-4">
+                                    <span
+                                        class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold border border-blue-200">
+                                        {{ ucfirst($solicitud->estado ?? 'pendiente') }}
+                                    </span>
+                                    <span
+                                        class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold border border-purple-200">
+                                        Solicitud de Artículo
+                                    </span>
+                                    @if ($solicitud->urgencia)
+                                        <span
+                                            class="px-4 py-2 
+                            @if ($solicitud->urgencia == 'alta') bg-red-100 text-red-800 border-red-200
+                            @elseif($solicitud->urgencia == 'media') bg-yellow-100 text-yellow-800 border-yellow-200
+                            @else bg-green-100 text-green-800 border-green-200 @endif
+                            rounded-full text-sm font-semibold border">
+                                            Urgencia: {{ ucfirst($solicitud->urgencia) }}
+                                        </span>
                                     @endif
                                 </div>
-                                <div class="flex flex-wrap gap-4 text-sm text-gray-600">
+
+                                <!-- Información adicional debajo de los badges -->
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-600 mt-2">
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -69,18 +63,42 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
-                                        <span>{{ $solicitud->nombre_solicitante ?? 'Solicitante no especificado' }}</span>
+                                        <span>Solicitante:
+                                            {{ $solicitud->nombre_solicitante ?? 'No especificado' }}</span>
                                     </div>
+
+                                    <!-- Área Destino -->
+                                    @if ($solicitud->nombre_area_destino)
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1 text-green-500" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                            <span>Área Destino: {{ $solicitud->nombre_area_destino }}</span>
+                                        </div>
+                                    @endif
+
+                                    <!-- Usuario Destino -->
+                                    @if ($solicitud->usuario_destino_nombre)
+                                        <div class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1 text-purple-500" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                            </svg>
+                                            <span>Destinatario: {{ $solicitud->usuario_destino_nombre }}
+                                                {{ $solicitud->usuario_destino_apellido }}</span>
+                                        </div>
+                                    @endif
                                 </div>
-
-
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-wrap gap-3 mt-4 lg:mt-0">
                         <a href="{{ route('solicitudarticulo.index') }}"
-                            class="flex items-center px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md">
+                            class="flex items-center px-5 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -88,14 +106,14 @@
                             Volver
                         </a>
                         @if (($solicitud->estado ?? '') != 'completada')
-                        <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
-                            class="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Editar
-                        </a>
+                            <a href="{{ route('solicitudarticulo.edit', $solicitud->idsolicitudesordenes) }}"
+                                class="flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Editar
+                            </a>
                         @endif
                     </div>
                 </div>
@@ -104,345 +122,548 @@
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 <!-- Columna Principal -->
                 <div class="xl:col-span-2 space-y-6">
-                    <!-- Artículos Solicitados - VISTA MEJORADA -->
+                    <!-- Artículos Solicitados - Mejorado con Font Awesome -->
                     <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100">
-                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                        <!-- Header con gradiente -->
+                        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-4">
                             <div class="flex items-center space-x-3">
                                 <div
-                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
-                                    <i class="fas fa-box text-white text-lg"></i>
+                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full shadow-lg border border-white/30">
+                                    <i class="fas fa-boxes text-white text-lg"></i>
                                 </div>
-                                <div>
-                                    <h2 class="text-xl font-bold text-white">Artículos Solicitados</h2>
-                                    <p class="text-white/80 text-sm">Lista completa de artículos requeridos</p>
+                                <div class="flex-1 min-w-0">
+                                    <h2 class="text-lg sm:text-xl font-bold text-white truncate">Artículos Solicitados
+                                    </h2>
+                                    <p class="text-white/80 text-xs sm:text-sm truncate">Lista completa de artículos
+                                        requeridos</p>
+                                </div>
+                                <div class="hidden sm:flex items-center space-x-2">
+                                    <span class="text-sm font-semibold text-white bg-white/20 px-3 py-1 rounded-full">
+                                        {{ $articulos->count() }} item{{ $articulos->count() !== 1 ? 's' : '' }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-6">
-                                <h3 class="text-xl font-semibold text-gray-900">Detalle de Artículos</h3>
-                                <div class="flex items-center space-x-4">
-                                    <span class="text-sm text-gray-600">
+                        <div class="p-4 sm:p-6">
+                            <!-- Encabezado de la tabla -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6">
+                                <div>
+                                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Detalle de Artículos</h3>
+                                    <p class="text-xs sm:text-sm text-gray-600 mt-1">
+                                        Total de unidades: <span
+                                            class="font-semibold text-blue-600">{{ $articulos->sum('cantidad') }}</span>
+                                    </p>
+                                </div>
+                                <div class="flex items-center space-x-2 sm:space-x-4">
+                                    <span class="text-xs sm:text-sm text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full">
+                                        <i class="fas fa-layer-group mr-1.5 text-blue-500"></i>
                                         {{ $articulos->count() }} artículo{{ $articulos->count() !== 1 ? 's' : '' }}
                                     </span>
-                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
-                                        x-show="{{ $articulos->count() > 0 }}"></div>
+                                    @if ($articulos->count() > 0)
+                                        <div class="hidden sm:block w-2 h-2 bg-green-500 rounded-full animate-pulse">
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
-                            <div class="overflow-hidden rounded-xl border border-blue-100">
-                                <table class="w-full">
+                            <!-- Tabla Responsive -->
+                            <div class="overflow-x-auto rounded-xl border border-blue-100">
+                                <table class="w-full min-w-[640px]">
                                     <thead class="bg-blue-50">
                                         <tr>
-                                            <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                Artículo</th>
-                                            <th class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                Código</th>
-                                            <th class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                Cantidad</th>
-                                            <th class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                Estado</th>
+                                            <th
+                                                class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                                                <i class="fas fa-cube mr-2"></i>Artículo
+                                            </th>
+                                            <th
+                                                class="px-4 sm:px-6 py-3 text-left text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                                                <i class="fas fa-barcode mr-2"></i>Código
+                                            </th>
+                                            <th
+                                                class="px-4 sm:px-6 py-3 text-center text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                                                <i class="fas fa-hashtag mr-2"></i>Cantidad
+                                            </th>
+                                            <th
+                                                class="px-4 sm:px-6 py-3 text-center text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                                                <i class="fas fa-info-circle mr-2"></i>Estado
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-blue-100">
                                         @forelse($articulos as $articulo)
-                                        <tr class="product-row hover:bg-blue-50 transition-all duration-200">
-                                            <!-- Columna Artículo con información completa -->
-                                            <td class="px-6 py-4">
-                                                <div class="space-y-1">
-                                                    <!-- Nombre principal -->
-                                                    <div class="text-base font-semibold text-gray-900">
-                                                        {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}
+                                            <tr class="hover:bg-blue-50 transition-all duration-200">
+                                                <!-- Columna Artículo - Responsive -->
+                                                <td class="px-4 sm:px-6 py-4">
+                                                    <div class="space-y-2">
+                                                        <!-- Nombre principal -->
+                                                        <div class="flex items-start">
+                                                            <div class="flex-shrink-0 mr-3 mt-1">
+                                                                <div
+                                                                    class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                                    <i class="fas fa-box text-blue-600 text-sm"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <h4
+                                                                    class="text-sm sm:text-base font-semibold text-gray-900 truncate">
+                                                                    {{ $articulo->nombre_articulo ?? 'Artículo no especificado' }}
+                                                                </h4>
+
+                                                                <!-- Información adicional en móvil (compacta) -->
+                                                                <div class="sm:hidden mt-2 space-y-1">
+                                                                    @if ($articulo->tipo_articulo)
+                                                                        <div
+                                                                            class="flex items-center text-xs text-gray-500">
+                                                                            <i
+                                                                                class="fas fa-tag mr-1.5 text-gray-400"></i>
+                                                                            <span
+                                                                                class="truncate">{{ $articulo->tipo_articulo }}</span>
+                                                                        </div>
+                                                                    @endif
+                                                                    @if ($articulo->modelo || $articulo->marca)
+                                                                        <div
+                                                                            class="flex items-center text-xs text-gray-500">
+                                                                            <i
+                                                                                class="fas fa-info-circle mr-1.5 text-gray-400"></i>
+                                                                            <span class="truncate">
+                                                                                @if ($articulo->marca)
+                                                                                    {{ $articulo->marca }}
+                                                                                @endif
+                                                                                @if ($articulo->modelo && $articulo->marca)
+                                                                                    -
+                                                                                @endif
+                                                                                @if ($articulo->modelo)
+                                                                                    {{ $articulo->modelo }}
+                                                                                @endif
+                                                                            </span>
+                                                                        </div>
+                                                                    @endif
+                                                                </div>
+
+                                                                <!-- Información adicional en desktop -->
+                                                                <div class="hidden sm:block mt-2 space-y-1">
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @if ($articulo->tipo_articulo)
+                                                                            <span
+                                                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                                                                <i class="fas fa-tag mr-1 text-xs"></i>
+                                                                                {{ $articulo->tipo_articulo }}
+                                                                            </span>
+                                                                        @endif
+                                                                        @if ($articulo->marca)
+                                                                            <span
+                                                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                                                <i
+                                                                                    class="fas fa-industry mr-1 text-xs"></i>
+                                                                                {{ $articulo->marca }}
+                                                                            </span>
+                                                                        @endif
+                                                                        @if ($articulo->modelo)
+                                                                            <span
+                                                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                                                <i class="fas fa-cog mr-1 text-xs"></i>
+                                                                                {{ $articulo->modelo }}
+                                                                            </span>
+                                                                        @endif
+                                                                    </div>
+                                                                    @if ($articulo->subcategoria)
+                                                                        <p class="text-xs text-gray-500">
+                                                                            <i class="fas fa-folder mr-1"></i>
+                                                                            Categoría: {{ $articulo->subcategoria }}
+                                                                        </p>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Descripción (si existe) -->
+                                                        @if ($articulo->descripcion)
+                                                            <div
+                                                                class="mt-2 sm:mt-3 p-2 sm:p-3 bg-gray-50 rounded border border-gray-200">
+                                                                <div class="flex items-start">
+                                                                    <i
+                                                                        class="fas fa-sticky-note text-gray-400 mt-0.5 mr-2 flex-shrink-0"></i>
+                                                                    <p class="text-xs text-gray-600 flex-1">
+                                                                        <span class="font-medium">Nota:</span>
+                                                                        {{ $articulo->descripcion }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        @endif
                                                     </div>
+                                                </td>
 
-                                                    <!-- Información adicional -->
-                                                    <div class="text-xs text-gray-500 space-y-0.5">
-                                                        <!-- Tipo de artículo -->
-                                                        @if($articulo->tipo_articulo)
-                                                        <div class="flex items-center space-x-1">
-                                                            <span class="font-medium">Tipo:</span>
-                                                            <span>{{ $articulo->tipo_articulo }}</span>
+                                                <!-- Columna Código - Responsive -->
+                                                <td class="px-4 sm:px-6 py-4">
+                                                    <div class="text-center sm:text-left">
+                                                        <div
+                                                            class="font-mono font-bold text-blue-600 text-sm sm:text-base break-all">
+                                                            {{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}
                                                         </div>
-                                                        @endif
-
-                                                        <!-- Modelo -->
-                                                        @if($articulo->modelo)
-                                                        <div class="flex items-center space-x-1">
-                                                            <span class="font-medium">Modelo:</span>
-                                                            <span>{{ $articulo->modelo }}</span>
-                                                        </div>
-                                                        @endif
-
-                                                        <!-- Marca -->
-                                                        @if($articulo->marca)
-                                                        <div class="flex items-center space-x-1">
-                                                            <span class="font-medium">Marca:</span>
-                                                            <span>{{ $articulo->marca }}</span>
-                                                        </div>
-                                                        @endif
-
-                                                        <!-- Subcategoría -->
-                                                        @if($articulo->subcategoria)
-                                                        <div class="flex items-center space-x-1">
-                                                            <span class="font-medium">Categoría:</span>
-                                                            <span>{{ $articulo->subcategoria }}</span>
-                                                        </div>
-                                                        @endif
                                                     </div>
+                                                </td>
 
-                                                    <!-- Descripción adicional si existe -->
-                                                    @if($articulo->descripcion)
-                                                    <div class="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-                                                        <p class="text-xs text-gray-600">
-                                                            <span class="font-medium">Nota:</span> {{ $articulo->descripcion }}
+                                                <!-- Columna Cantidad - Responsive -->
+                                                <td class="px-4 sm:px-6 py-4">
+                                                    <div class="flex items-center justify-center">
+                                                        <div class="flex flex-col items-center">
+                                                            <span
+                                                                class="font-bold text-lg sm:text-xl bg-blue-100 text-blue-800 rounded-lg px-3 sm:px-4 py-2 border border-blue-200">
+                                                                {{ $articulo->cantidad ?? 0 }}
+                                                            </span>
+                                                            <span
+                                                                class="text-xs text-gray-500 mt-1 hidden sm:block">unidades</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Columna Estado - Responsive -->
+                                                <td class="px-4 sm:px-6 py-4">
+                                                    @php
+                                                        $estadoConfig = [
+                                                            '0' => [
+                                                                'class' =>
+                                                                    'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                                'text' => 'Pendiente',
+                                                                'icon' => 'fas fa-clock',
+                                                                'iconColor' => 'text-yellow-600',
+                                                            ],
+                                                            '1' => [
+                                                                'class' =>
+                                                                    'bg-green-100 text-green-800 border border-green-200',
+                                                                'text' => 'Completado',
+                                                                'icon' => 'fas fa-check-circle',
+                                                                'iconColor' => 'text-green-600',
+                                                            ],
+                                                            '2' => [
+                                                                'class' =>
+                                                                    'bg-red-100 text-red-800 border border-red-200',
+                                                                'text' => 'Rechazado',
+                                                                'icon' => 'fas fa-times-circle',
+                                                                'iconColor' => 'text-red-600',
+                                                            ],
+                                                        ][$articulo->estado ?? 0] ?? [
+                                                            'class' =>
+                                                                'bg-gray-100 text-gray-800 border border-gray-200',
+                                                            'text' => 'Desconocido',
+                                                            'icon' => 'fas fa-question-circle',
+                                                            'iconColor' => 'text-gray-600',
+                                                        ];
+                                                    @endphp
+
+                                                    <div class="flex justify-center">
+                                                        <span
+                                                            class="inline-flex items-center px-3 py-2 {{ $estadoConfig['class'] }} rounded-full text-xs sm:text-sm font-semibold">
+                                                            <i
+                                                                class="{{ $estadoConfig['icon'] }} {{ $estadoConfig['iconColor'] }} mr-2"></i>
+                                                            <span
+                                                                class="hidden sm:inline">{{ $estadoConfig['text'] }}</span>
+                                                            <span
+                                                                class="sm:hidden">{{ substr($estadoConfig['text'], 0, 3) }}</span>
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-4 sm:px-6 py-8 sm:py-12 text-center">
+                                                    <div class="flex flex-col items-center justify-center">
+                                                        <div
+                                                            class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                                            <i
+                                                                class="fas fa-box-open text-gray-400 text-2xl sm:text-3xl"></i>
+                                                        </div>
+                                                        <p class="text-base sm:text-lg font-medium text-gray-900 mb-2">
+                                                            No hay artículos registrados
+                                                        </p>
+                                                        <p class="text-xs sm:text-sm text-gray-500 max-w-sm mx-auto">
+                                                            No se han agregado artículos a esta solicitud
                                                         </p>
                                                     </div>
-                                                    @endif
-                                                </div>
-                                            </td>
-
-                                            <!-- Columna Código -->
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-base text-blue-600 font-mono font-bold">
-                                                    {{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}
-                                                </div>
-                                                <div class="text-xs text-gray-400 mt-1">
-                                                    {{ $articulo->codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto' }}
-                                                </div>
-                                            </td>
-
-                                            <!-- Columna Cantidad -->
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center justify-center">
-                                                    <span class="font-bold text-lg bg-blue-100 text-blue-800 rounded-lg px-4 py-2 border border-blue-200">
-                                                        {{ $articulo->cantidad ?? 0 }}
-                                                    </span>
-                                                </div>
-                                            </td>
-
-                                            <!-- Columna Estado -->
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                @php
-                                                $estadoClase = [
-                                                '0' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                                '1' => 'bg-green-100 text-green-800 border border-green-200',
-                                                '2' => 'bg-red-100 text-red-800 border border-red-200',
-                                                ][$articulo->estado ?? 0] ?? 'bg-gray-100 text-gray-800 border border-gray-200';
-
-                                                $estadoTexto = [
-                                                '0' => 'Pendiente',
-                                                '1' => 'Completado',
-                                                '2' => 'Rechazado',
-                                                ][$articulo->estado ?? 0] ?? 'Desconocido';
-
-                                                $estadoIcono = [
-                                                '0' => '⏳',
-                                                '1' => '✅',
-                                                '2' => '❌',
-                                                ][$articulo->estado ?? 0] ?? '❓';
-                                                @endphp
-                                                <div class="flex justify-center">
-                                                    <span class="px-3 py-2 {{ $estadoClase }} rounded-full text-sm font-semibold flex items-center gap-2">
-                                                        <span>{{ $estadoIcono }}</span>
-                                                        {{ $estadoTexto }}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        @empty
-                                        <tr>
-                                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                                <svg class="mx-auto h-16 w-16 text-gray-300" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="1"
-                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                                </svg>
-                                                <p class="mt-4 text-lg font-medium text-gray-900">No hay
-                                                    artículos registrados</p>
-                                                <p class="text-sm mt-2">No se han agregado artículos a esta solicitud</p>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                            </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
 
-                            @if($articulos->count() > 0)
-                            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
-                                    <p class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1">Total Artículos</p>
-                                    <p class="text-2xl font-bold text-blue-800">{{ $articulos->count() }}</p>
+                            <!-- Resumen de estadísticas -->
+                            @if ($articulos->count() > 0)
+                                <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                                    <div class="bg-blue-50 rounded-xl p-3 sm:p-4 text-center border border-blue-200">
+                                        <p
+                                            class="text-xs text-blue-700 font-semibold uppercase tracking-wide mb-1 sm:mb-2">
+                                            <i class="fas fa-box mr-1"></i>Total Artículos
+                                        </p>
+                                        <p class="text-xl sm:text-2xl font-bold text-blue-800">
+                                            {{ $articulos->count() }}</p>
+                                    </div>
+                                    <div class="bg-green-50 rounded-xl p-3 sm:p-4 text-center border border-green-200">
+                                        <p
+                                            class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1 sm:mb-2">
+                                            <i class="fas fa-layer-group mr-1"></i>Total Cantidad
+                                        </p>
+                                        <p class="text-xl sm:text-2xl font-bold text-green-800">
+                                            {{ $articulos->sum('cantidad') }}</p>
+                                    </div>
+                                    <div
+                                        class="bg-purple-50 rounded-xl p-3 sm:p-4 text-center border border-purple-200">
+                                        <p
+                                            class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1 sm:mb-2">
+                                            <i class="fas fa-tags mr-1"></i>Tipos Diferentes
+                                        </p>
+                                        <p class="text-xl sm:text-2xl font-bold text-purple-800">
+                                            {{ $articulos->unique('tipo_articulo')->count() }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div class="bg-green-50 rounded-xl p-4 text-center border border-green-200">
-                                    <p class="text-xs text-green-700 font-semibold uppercase tracking-wide mb-1">Total Cantidad</p>
-                                    <p class="text-2xl font-bold text-green-800">{{ $articulos->sum('cantidad') }}</p>
-                                </div>
-                                <div class="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
-                                    <p class="text-xs text-purple-700 font-semibold uppercase tracking-wide mb-1">Tipos Diferentes</p>
-                                    <p class="text-2xl font-bold text-purple-800">
-                                        {{ $articulos->unique('tipo_articulo')->count() }}
-                                    </p>
-                                </div>
-                            </div>
                             @endif
                         </div>
                     </div>
 
-                    <!-- Información de la Orden -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            INFORMACIÓN DE LA ORDEN
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-4">
+                    <!-- Información de la Orden - Completamente Responsive con Font Awesome -->
+                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-200">
+                        <!-- Header Responsive -->
+                        <div class="flex items-start sm:items-center mb-4 sm:mb-6">
+                            <div
+                                class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg sm:rounded-xl flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                                <i class="fas fa-info-circle text-blue-600 text-base sm:text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">INFORMACIÓN
+                                    DE LA ORDEN</h3>
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1 truncate">Detalles completos de la
+                                    solicitud</p>
+                            </div>
+                        </div>
+
+                        <!-- Grid Responsive -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                            <!-- Columna Izquierda -->
+                            <div class="space-y-3 sm:space-y-4">
+                                <!-- Código Orden -->
                                 <div
-                                    class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                                    <label
-                                        class="block text-xs font-semibold text-blue-700 mb-2 uppercase tracking-wide">Código
-                                        Orden</label>
-                                    <p class="text-lg font-bold text-blue-800">{{ $solicitud->codigo ?? 'N/A' }}</p>
+                                    class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-3 sm:p-4 border border-blue-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i
+                                            class="fas fa-hashtag text-blue-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-blue-700 uppercase tracking-wide truncate">
+                                            Código Orden
+                                        </label>
+                                    </div>
+                                    <p class="text-base sm:text-lg font-bold text-blue-800 truncate">
+                                        {{ $solicitud->codigo ?? 'N/A' }}</p>
                                 </div>
+
+                                <!-- Tipo de Servicio -->
                                 <div
-                                    class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                                    <label
-                                        class="block text-xs font-semibold text-green-700 mb-2 uppercase tracking-wide">Tipo
-                                        de Servicio</label>
-                                    <p class="text-lg font-bold text-green-800">
+                                    class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-3 sm:p-4 border border-green-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i class="fas fa-tools text-green-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-green-700 uppercase tracking-wide truncate">
+                                            Tipo de Servicio
+                                        </label>
+                                    </div>
+                                    <p class="text-base sm:text-lg font-bold text-green-800 truncate">
                                         {{ $solicitud->tiposervicio ?? 'No especificado' }}
                                     </p>
                                 </div>
 
-
-                                <!-- NUEVO: Área Destino -->
-                                @if($solicitud->nombre_area_destino)
-                                <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-                                    <label class="block text-xs font-semibold text-green-700 mb-2 uppercase tracking-wide">Área Destino</label>
-                                    <div class="flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                        <p class="text-lg font-bold text-green-800">{{ $solicitud->nombre_area_destino }}</p>
-                                    </div>
-                                </div>
-                                @endif
-
-                                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                                    <label class="block text-xs font-semibold text-purple-700 mb-2 uppercase tracking-wide">Fecha de Creación</label>
-                                    <p class="text-lg font-bold text-purple-800">
-                                        @if ($solicitud->fechacreacion)
-                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
-                                        @else
-                                        No especificada
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="space-y-4">
-                                <!-- NUEVO: Usuario Destino -->
-                                @if($solicitud->usuario_destino_nombre)
-                                <div class="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
-                                    <label class="block text-xs font-semibold text-indigo-700 mb-2 uppercase tracking-wide">Usuario Destino</label>
-                                    <div class="space-y-2">
+                                <!-- Área Destino -->
+                                @if ($solicitud->nombre_area_destino)
+                                    <div
+                                        class="bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg p-3 sm:p-4 border border-emerald-200">
+                                        <div class="flex items-center mb-1 sm:mb-2">
+                                            <i
+                                                class="fas fa-building text-emerald-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                            <label
+                                                class="block text-xs font-semibold text-emerald-700 uppercase tracking-wide truncate">
+                                                Área Destino
+                                            </label>
+                                        </div>
                                         <div class="flex items-center">
-                                            <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                            <p class="text-lg font-bold text-indigo-800">
-                                                {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}
+                                            <p class="text-base sm:text-lg font-bold text-emerald-800 truncate">
+                                                {{ $solicitud->nombre_area_destino }}
                                             </p>
                                         </div>
-                                        @if($solicitud->usuario_destino_correo)
-                                        <div class="flex items-center text-sm text-indigo-600 ml-7">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                            </svg>
-                                            {{ $solicitud->usuario_destino_correo }}
-                                        </div>
-                                        @endif
                                     </div>
-                                </div>
                                 @endif
 
-
-
-
+                                <!-- Fecha de Creación -->
                                 <div
-                                    class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-                                    <label
-                                        class="block text-xs font-semibold text-purple-700 mb-2 uppercase tracking-wide">Fecha
-                                        de Creación</label>
-                                    <p class="text-lg font-bold text-purple-800">
+                                    class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-3 sm:p-4 border border-purple-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i
+                                            class="fas fa-calendar-plus text-purple-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-purple-700 uppercase tracking-wide truncate">
+                                            Fecha de Creación
+                                        </label>
+                                    </div>
+                                    <p class="text-base sm:text-lg font-bold text-purple-800 truncate">
                                         @if ($solicitud->fechacreacion)
-                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y, h:i A') }}
+                                            <span
+                                                class="block">{{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y') }}</span>
+                                            <span class="text-xs sm:text-sm text-purple-600 block mt-0.5">
+                                                {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('h:i A') }}
+                                            </span>
                                         @else
-                                        No especificada
+                                            No especificada
                                         @endif
                                     </p>
                                 </div>
                             </div>
-                            <div class="space-y-4">
+
+                            <!-- Columna Derecha -->
+                            <div class="space-y-3 sm:space-y-4">
+                                <!-- Usuario Destino -->
+                                @if ($solicitud->usuario_destino_nombre)
+                                    <div
+                                        class="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg p-3 sm:p-4 border border-indigo-200">
+                                        <div class="flex items-center mb-1 sm:mb-2">
+                                            <i
+                                                class="fas fa-user-tag text-indigo-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                            <label
+                                                class="block text-xs font-semibold text-indigo-700 uppercase tracking-wide truncate">
+                                                Usuario Destino
+                                            </label>
+                                        </div>
+                                        <div class="space-y-1.5 sm:space-y-2">
+                                            <div class="flex items-center">
+                                                <i
+                                                    class="fas fa-user-circle text-indigo-500 text-sm sm:text-base mr-1.5 sm:mr-2 flex-shrink-0"></i>
+                                                <p class="text-base sm:text-lg font-bold text-indigo-800 truncate">
+                                                    {{ $solicitud->usuario_destino_nombre }}
+                                                    {{ $solicitud->usuario_destino_apellido }}
+                                                </p>
+                                            </div>
+                                            @if ($solicitud->usuario_destino_correo)
+                                                <div
+                                                    class="flex items-center text-xs sm:text-sm text-indigo-600 ml-4 sm:ml-6">
+                                                    <i class="fas fa-envelope mr-1 sm:mr-1.5 flex-shrink-0"></i>
+                                                    <span
+                                                        class="truncate">{{ $solicitud->usuario_destino_correo }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <!-- Fecha Requerida -->
                                 <div
-                                    class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-                                    <label
-                                        class="block text-xs font-semibold text-orange-700 mb-2 uppercase tracking-wide">Fecha
-                                        Requerida</label>
-                                    <p class="text-lg font-bold text-orange-800">
+                                    class="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-3 sm:p-4 border border-orange-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i
+                                            class="fas fa-calendar-check text-orange-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-orange-700 uppercase tracking-wide truncate">
+                                            Fecha Requerida
+                                        </label>
+                                    </div>
+                                    <p class="text-base sm:text-lg font-bold text-orange-800">
                                         @if ($solicitud->fecharequerida)
-                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
+                                            <span
+                                                class="block">{{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y') }}</span>
                                         @else
-                                        No definida
+                                            <span class="text-red-500">No definida</span>
                                         @endif
                                     </p>
                                 </div>
-                                <div
-                                    class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-                                    <label
-                                        class="block text-xs font-semibold text-red-700 mb-2 uppercase tracking-wide">Urgencia</label>
-                                    @php
-                                    $urgenciaClase =
-                                    [
-                                    'baja' => 'bg-green-100 text-green-800 border border-green-200',
-                                    'media' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
-                                    'alta' => 'bg-red-100 text-red-800 border border-red-200',
-                                    ][$solicitud->urgencia ?? 'baja'] ??
-                                    'bg-gray-100 text-gray-800 border border-gray-200';
 
-                                    $urgenciaTexto =
-                                    [
-                                    'baja' => 'Baja',
-                                    'media' => 'Media',
-                                    'alta' => 'Alta',
-                                    ][$solicitud->urgencia ?? 'baja'] ?? 'No especificado';
-                                    @endphp
-                                    <span
-                                        class="px-3 py-1 {{ $urgenciaClase }} rounded-full text-sm font-semibold flex items-center w-fit">
-                                        <span
-                                            class="w-2 h-2 rounded-full mr-2 
-                                            @if (($solicitud->urgencia ?? 'baja') == 'baja') bg-green-500
-                                            @elseif(($solicitud->urgencia ?? 'baja') == 'media') bg-yellow-500
-                                            @else bg-red-500 @endif">
-                                        </span>
-                                        {{ $urgenciaTexto }}
-                                    </span>
-                                </div>
+                                <!-- Urgencia -->
                                 <div
-                                    class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-                                    <label
-                                        class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Productos
-                                        Únicos</label>
-                                    <p class="text-lg font-bold text-gray-900">
+                                    class="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-3 sm:p-4 border border-red-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i
+                                            class="fas fa-exclamation-triangle text-red-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-red-700 uppercase tracking-wide truncate">
+                                            Urgencia
+                                        </label>
+                                    </div>
+                                    @php
+                                        $urgenciaConfig = [
+                                            'baja' => [
+                                                'class' => 'bg-green-100 text-green-800 border border-green-200',
+                                                'icon' => 'fas fa-check-circle',
+                                                'iconColor' => 'text-green-500',
+                                                'short' => 'Baja',
+                                            ],
+                                            'media' => [
+                                                'class' => 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+                                                'icon' => 'fas fa-exclamation-circle',
+                                                'iconColor' => 'text-yellow-500',
+                                                'short' => 'Media',
+                                            ],
+                                            'alta' => [
+                                                'class' => 'bg-red-100 text-red-800 border border-red-200',
+                                                'icon' => 'fas fa-exclamation-triangle',
+                                                'iconColor' => 'text-red-500',
+                                                'short' => 'Alta',
+                                            ],
+                                        ][$solicitud->urgencia ?? 'baja'] ?? [
+                                            'class' => 'bg-gray-100 text-gray-800 border border-gray-200',
+                                            'icon' => 'fas fa-question-circle',
+                                            'iconColor' => 'text-gray-500',
+                                            'short' => 'N/A',
+                                        ];
+                                    @endphp
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <div class="flex items-center">
+                                            <i
+                                                class="{{ $urgenciaConfig['icon'] }} {{ $urgenciaConfig['iconColor'] }} mr-1.5 sm:mr-2 text-base sm:text-lg"></i>
+                                            <span
+                                                class="px-2 sm:px-3 py-1 {{ $urgenciaConfig['class'] }} rounded-full text-xs sm:text-sm font-semibold flex items-center">
+                                                <span
+                                                    class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full mr-1.5 sm:mr-2 {{ $urgenciaConfig['iconColor'] }}"></span>
+                                                <span
+                                                    class="hidden sm:inline">{{ ucfirst($solicitud->urgencia ?? 'baja') }}</span>
+                                                <span class="sm:hidden">{{ $urgenciaConfig['short'] }}</span>
+                                            </span>
+                                        </div>
+
+                                        <!-- Indicador visual para urgencia alta en móvil -->
+                                        @if (($solicitud->urgencia ?? 'baja') == 'alta')
+                                            <div
+                                                class="sm:hidden flex items-center text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                                                <i class="fas fa-bolt mr-1"></i>
+                                                <span>Urgencia máxima</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Productos Únicos -->
+                                <div
+                                    class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                    <div class="flex items-center mb-1 sm:mb-2">
+                                        <i class="fas fa-cubes text-gray-600 text-sm sm:text-base mr-1.5 sm:mr-2"></i>
+                                        <label
+                                            class="block text-xs font-semibold text-gray-700 uppercase tracking-wide truncate">
+                                            Productos Únicos
+                                        </label>
+                                    </div>
+                                    <p class="text-base sm:text-lg font-bold text-gray-900">
                                         {{ $solicitud->productos_unicos ?? 0 }}
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional para móviles -->
+                        <div class="mt-4 pt-4 border-t border-gray-200 sm:hidden">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500 mb-1">Tipo Solicitud</p>
+                                    <p class="text-sm font-semibold text-blue-700">Artículos</p>
+                                </div>
+                                <div class="text-center">
+                                    <p class="text-xs text-gray-500 mb-1">Estado Actual</p>
+                                    <p class="text-sm font-semibold text-blue-700">
+                                        {{ ucfirst($solicitud->estado ?? 'pendiente') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -452,174 +673,246 @@
                 <!-- Sidebar Mejorado -->
                 <div class="space-y-6">
                     <!-- En el Sidebar, después de "Información del Solicitante" -->
-                    @if($solicitud->nombre_area_destino || $solicitud->usuario_destino_nombre)
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>
-                            DESTINO FINAL
-                        </h3>
+                    @if ($solicitud->nombre_area_destino || $solicitud->usuario_destino_nombre)
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                DESTINO FINAL
+                            </h3>
 
-                        @if($solicitud->nombre_area_destino)
-                        <div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
+                            @if ($solicitud->nombre_area_destino)
+                                <div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-green-700 font-semibold uppercase">Área Destino</p>
+                                            <p class="text-sm font-bold text-green-800">
+                                                {{ $solicitud->nombre_area_destino }}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-xs text-green-700 font-semibold uppercase">Área Destino</p>
-                                    <p class="text-sm font-bold text-green-800">{{ $solicitud->nombre_area_destino }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
+                            @endif
 
-                        @if($solicitud->usuario_destino_nombre)
-                        <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                            @if ($solicitud->usuario_destino_nombre)
+                                <div class="p-3 bg-indigo-50 rounded-lg border border-indigo-200">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-indigo-700 font-semibold uppercase">Usuario Destino
+                                            </p>
+                                            <p class="text-sm font-bold text-indigo-800">
+                                                {{ $solicitud->usuario_destino_nombre }}
+                                                {{ $solicitud->usuario_destino_apellido }}
+                                            </p>
+                                            @if ($solicitud->usuario_destino_correo)
+                                                <p class="text-xs text-indigo-600 mt-1">
+                                                    {{ $solicitud->usuario_destino_correo }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-xs text-indigo-700 font-semibold uppercase">Usuario Destino</p>
-                                    <p class="text-sm font-bold text-indigo-800">
-                                        {{ $solicitud->usuario_destino_nombre }} {{ $solicitud->usuario_destino_apellido }}
-                                    </p>
-                                    @if($solicitud->usuario_destino_correo)
-                                    <p class="text-xs text-indigo-600 mt-1">{{ $solicitud->usuario_destino_correo }}</p>
-                                    @endif
-                                </div>
-                            </div>
+                            @endif
                         </div>
-                        @endif
-                    </div>
                     @endif
 
-                    <!-- Resumen de la Orden -->
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            RESUMEN DE LA ORDEN
-                        </h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Estado:
+                    <!-- Resumen de la Orden - Mejorado con Font Awesome y Responsive -->
+                    <div class="bg-white rounded-2xl shadow-sm p-4 sm:p-6 border border-gray-200">
+                        <div class="flex items-center mb-4 sm:mb-5">
+                            <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                                <i class="fas fa-chart-pie text-blue-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900">RESUMEN DE LA ORDEN</h3>
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1">Resumen general de la solicitud</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 sm:space-y-3">
+                            <!-- Estado -->
+                            <div class="flex justify-between items-center py-2 sm:py-2.5 border-b border-gray-100">
+                                <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-circle-info text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                    <span class="hidden sm:inline">Estado:</span>
+                                    <span class="sm:hidden">Estado</span>
                                 </span>
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
+                                <span
+                                    class="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded text-xs sm:text-sm font-semibold">
                                     {{ ucfirst($solicitud->estado ?? 'pendiente') }}
                                 </span>
                             </div>
 
-                            <!-- Nuevos campos en el resumen -->
-                            @if($solicitud->nombre_area_destino)
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    Área Destino:
-                                </span>
-                                <span class="text-sm font-semibold text-green-700">{{ $solicitud->nombre_area_destino }}</span>
-                            </div>
+                            <!-- Área Destino -->
+                            @if ($solicitud->nombre_area_destino)
+                                <div class="flex justify-between items-center py-2 sm:py-2.5 border-b border-gray-100">
+                                    <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-building text-emerald-500 mr-2 text-sm sm:text-base"></i>
+                                        <span class="hidden sm:inline">Área Destino:</span>
+                                        <span class="sm:hidden">Destino</span>
+                                    </span>
+                                    <span
+                                        class="text-xs sm:text-sm font-semibold text-emerald-700 text-right max-w-[120px] sm:max-w-none truncate">
+                                        {{ $solicitud->nombre_area_destino }}
+                                    </span>
+                                </div>
                             @endif
 
-                            @if($solicitud->usuario_destino_nombre)
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    Destinatario:
-                                </span>
-                                <span class="text-sm font-semibold text-indigo-700 text-right">
-                                    {{ $solicitud->usuario_destino_nombre }}<br>
-                                    <span class="text-xs">{{ $solicitud->usuario_destino_apellido }}</span>
-                                </span>
-                            </div>
+                            <!-- Usuario Destino -->
+                            @if ($solicitud->usuario_destino_nombre)
+                                <div
+                                    class="flex justify-between items-center py-2 sm:py-2.5 @if (!$solicitud->nombre_area_destino) border-b border-gray-100 @endif">
+                                    <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                        <i class="fas fa-user-tag text-indigo-500 mr-2 text-sm sm:text-base"></i>
+                                        <span class="hidden sm:inline">Destinatario:</span>
+                                        <span class="sm:hidden">Para</span>
+                                    </span>
+                                    <span
+                                        class="text-xs sm:text-sm font-semibold text-indigo-700 text-right max-w-[130px] sm:max-w-none">
+                                        <span class="block truncate">{{ $solicitud->usuario_destino_nombre }}</span>
+                                        <span
+                                            class="text-xs text-indigo-600 hidden sm:block">{{ $solicitud->usuario_destino_apellido }}</span>
+                                    </span>
+                                </div>
                             @endif
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
-                                    Total Artículos:
+
+                            <!-- Total Artículos -->
+                            <div class="flex justify-between items-center py-2 sm:py-2.5 border-b border-gray-100">
+                                <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-box text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                    <span class="hidden sm:inline">Total Artículos:</span>
+                                    <span class="sm:hidden">Artículos</span>
                                 </span>
-                                <span class="font-semibold text-gray-900">{{ $articulos->count() }}</span>
-                            </div>
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                    </svg>
-                                    Cantidad Total:
+                                <span class="font-semibold text-gray-900 text-sm sm:text-base">
+                                    {{ $articulos->count() }}
                                 </span>
-                                <span class="font-semibold text-gray-900">{{ $articulos->sum('cantidad') }}</span>
                             </div>
-                            <div class="flex justify-between items-center py-2">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    Urgencia:
+
+                            <!-- Cantidad Total -->
+                            <div class="flex justify-between items-center py-2 sm:py-2.5 border-b border-gray-100">
+                                <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-layer-group text-purple-500 mr-2 text-sm sm:text-base"></i>
+                                    <span class="hidden sm:inline">Cantidad Total:</span>
+                                    <span class="sm:hidden">Cantidad</span>
+                                </span>
+                                <span class="font-semibold text-gray-900 text-sm sm:text-base">
+                                    {{ $articulos->sum('cantidad') }}
+                                </span>
+                            </div>
+
+                            <!-- Urgencia -->
+                            <div class="flex justify-between items-center py-2 sm:py-2.5">
+                                <span class="text-xs sm:text-sm text-gray-600 flex items-center">
+                                    <i class="fas fa-exclamation-triangle text-red-500 mr-2 text-sm sm:text-base"></i>
+                                    <span class="hidden sm:inline">Urgencia:</span>
+                                    <span class="sm:hidden">Urgencia</span>
                                 </span>
                                 @php
-                                $urgenciaColor =
-                                [
-                                'baja' => 'text-green-600 bg-green-100',
-                                'media' => 'text-yellow-600 bg-yellow-100',
-                                'alta' => 'text-red-600 bg-red-100',
-                                ][$solicitud->urgencia ?? 'baja'] ?? 'text-gray-600 bg-gray-100';
+                                    $urgenciaConfig = [
+                                        'baja' => [
+                                            'text' => 'text-green-600',
+                                            'bg' => 'bg-green-100',
+                                            'icon' => 'fas fa-check-circle text-green-500',
+                                            'short' => 'Baja',
+                                        ],
+                                        'media' => [
+                                            'text' => 'text-yellow-600',
+                                            'bg' => 'bg-yellow-100',
+                                            'icon' => 'fas fa-exclamation-circle text-yellow-500',
+                                            'short' => 'Media',
+                                        ],
+                                        'alta' => [
+                                            'text' => 'text-red-600',
+                                            'bg' => 'bg-red-100',
+                                            'icon' => 'fas fa-exclamation-triangle text-red-500',
+                                            'short' => 'Alta',
+                                        ],
+                                    ][$solicitud->urgencia ?? 'baja'] ?? [
+                                        'text' => 'text-gray-600',
+                                        'bg' => 'bg-gray-100',
+                                        'icon' => 'fas fa-question-circle text-gray-500',
+                                        'short' => 'N/A',
+                                    ];
                                 @endphp
-                                <span class="px-2 py-1 {{ $urgenciaColor }} rounded text-xs font-semibold">
-                                    {{ ucfirst($solicitud->urgencia ?? 'baja') }}
+                                <span
+                                    class="px-2 sm:px-3 py-1 {{ $urgenciaConfig['bg'] }} {{ $urgenciaConfig['text'] }} rounded text-xs sm:text-sm font-semibold inline-flex items-center">
+                                    <i class="{{ $urgenciaConfig['icon'] }} mr-1.5 text-xs sm:text-sm"></i>
+                                    <span
+                                        class="hidden sm:inline">{{ ucfirst($solicitud->urgencia ?? 'baja') }}</span>
+                                    <span class="sm:hidden">{{ $urgenciaConfig['short'] }}</span>
                                 </span>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional para móviles -->
+                        @if ($solicitud->usuario_destino_correo)
+                            <div class="mt-4 pt-4 border-t border-gray-200 sm:hidden">
+                                <div class="flex items-center text-xs text-gray-600">
+                                    <i class="fas fa-envelope text-indigo-400 mr-2"></i>
+                                    <span class="truncate">{{ $solicitud->usuario_destino_correo }}</span>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Badge de estado general -->
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-gray-500">Estado General:</span>
+                                <div class="flex items-center space-x-2">
+                                    @if ($articulos->count() > 0)
+                                        @php
+                                            $completados = $articulos->where('estado', '1')->count();
+                                            $porcentaje =
+                                                $articulos->count() > 0
+                                                    ? round(($completados / $articulos->count()) * 100)
+                                                    : 0;
+                                        @endphp
+                                        <div class="w-16 sm:w-20 bg-gray-200 rounded-full h-1.5 sm:h-2">
+                                            <div class="bg-green-500 h-1.5 sm:h-2 rounded-full"
+                                                style="width: {{ $porcentaje }}%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-gray-700">{{ $porcentaje }}%</span>
+                                    @else
+                                        <span class="text-xs text-gray-500">Sin artículos</span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Observaciones -->
                     @if (!empty($solicitud->observaciones))
-                    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
-                        <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                            <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
-                            </svg>
-                            Observaciones
-                        </h3>
-                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-                            <p class="text-sm text-yellow-800 leading-relaxed">
-                                {{ $solicitud->observaciones }}
-                            </p>
+                        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                                Observaciones
+                            </h3>
+                            <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                                <p class="text-sm text-yellow-800 leading-relaxed">
+                                    {{ $solicitud->observaciones }}
+                                </p>
+                            </div>
                         </div>
-                    </div>
                     @endif
 
                     <!-- Tiempos -->
@@ -639,26 +932,26 @@
                                     Requerida</label>
                                 <p class="text-sm font-semibold text-gray-900">
                                     @if ($solicitud->fecharequerida)
-                                    {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
+                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y, h:i A') }}
                                     @else
-                                    <span class="text-red-500">No definida</span>
+                                        <span class="text-red-500">No definida</span>
                                     @endif
                                 </p>
                             </div>
                             @php
-                            $fechaRequerida = $solicitud->fecharequerida
-                            ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                            : now();
-                            $diasRestantes = now()->diffInDays($fechaRequerida, false);
+                                $fechaRequerida = $solicitud->fecharequerida
+                                    ? \Carbon\Carbon::parse($solicitud->fecharequerida)
+                                    : now();
+                                $diasRestantes = now()->diffInDays($fechaRequerida, false);
 
-                            $diasColor =
-                            $diasRestantes <= 0
-                                ? 'text-red-600 bg-red-50 border-red-200'
-                                : ($diasRestantes <=2
-                                ? 'text-orange-600 bg-orange-50 border-orange-200'
-                                : 'text-green-600 bg-green-50 border-green-200' );
-                                @endphp
-                                <div class="rounded-lg p-4 border {{ $diasColor }}">
+                                $diasColor =
+                                    $diasRestantes <= 0
+                                        ? 'text-red-600 bg-red-50 border-red-200'
+                                        : ($diasRestantes <= 2
+                                            ? 'text-orange-600 bg-orange-50 border-orange-200'
+                                            : 'text-green-600 bg-green-50 border-green-200');
+                            @endphp
+                            <div class="rounded-lg p-4 border {{ $diasColor }}">
                                 <label
                                     class="block text-xs font-semibold mb-2 uppercase tracking-wide
                                     @if ($diasRestantes <= 0) text-red-700
@@ -669,19 +962,19 @@
                                 <p class="text-2xl font-bold">
                                     {{ $diasRestantes > 0 ? floor($diasRestantes) . ' días' : 'Vencida' }}
                                 </p>
-                                @if ($diasRestantes <= 2 && $diasRestantes> 0)
+                                @if ($diasRestantes <= 2 && $diasRestantes > 0)
                                     <p
                                         class="text-xs mt-1 
                                         @if ($diasRestantes <= 2) text-orange-600 @endif">
                                         ¡Quedan pocos días!
                                     </p>
-                                    @endif
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 
 
