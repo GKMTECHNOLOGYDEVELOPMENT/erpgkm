@@ -2,6 +2,9 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
     <style>
         .cliente-item {
             display: flex;
@@ -59,14 +62,12 @@
             <form @submit.prevent="submitForm" class="space-y-6">
                 @csrf
                 @method('PUT')
-                
+
                 <!-- Nombre del Área -->
                 <div>
                     <label for="nombre" class="block text-sm font-medium mb-2">Nombre del Área</label>
-                    <input type="text" id="nombre" x-model="formData.nombre" 
-                        class="form-input w-full" 
-                        placeholder="Ingrese el nombre del área" 
-                        required>
+                    <input type="text" id="nombre" x-model="formData.nombre" class="form-input w-full"
+                        placeholder="Ingrese el nombre del área" required>
                     <template x-if="errors.nombre">
                         <span class="text-red-500 text-sm" x-text="errors.nombre[0]"></span>
                     </template>
@@ -98,8 +99,7 @@
                         <template x-for="cliente in selectedClientes" :key="cliente.id">
                             <div class="flex items-center justify-between bg-white px-3 py-2 rounded border">
                                 <span class="text-sm font-medium" x-text="cliente.text"></span>
-                                <button type="button" 
-                                    @click="removeCliente(cliente.id)"
+                                <button type="button" @click="removeCliente(cliente.id)"
                                     class="text-red-500 hover:text-red-700 text-sm">
                                     <i class="fas fa-times"></i>
                                 </button>
@@ -131,8 +131,29 @@
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
     <script>
+        // Configurar Toastr globalmente
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('editArea', () => ({
                 formData: {
@@ -154,11 +175,14 @@
                 async loadClientesGenerales() {
                     try {
                         const response = await fetch('/areas/api/clientes-generales');
+                        if (!response.ok) {
+                            throw new Error(`Error HTTP ${response.status}`);
+                        }
                         this.allClientes = await response.json();
-                        
+
                     } catch (error) {
                         console.error('Error cargando clientes:', error);
-                        this.showError('Error al cargar la lista de clientes');
+                        toastr.error('Error al cargar la lista de clientes');
                     }
                 },
 
@@ -170,9 +194,9 @@
                     // Llenar con todos los clientes
                     this.allClientes.forEach(cliente => {
                         const option = new Option(
-                            cliente.descripcion, 
-                            cliente.idClienteGeneral, 
-                            false, 
+                            cliente.descripcion,
+                            cliente.idClienteGeneral,
+                            false,
                             false
                         );
                         selectElement.append(option);
@@ -224,8 +248,13 @@
                     this.errors = {};
 
                     try {
+                        // Validar nombre
+                        if (!this.formData.nombre || this.formData.nombre.trim() === '') {
+                            throw new Error('El nombre del área es requerido');
+                        }
+
                         const formData = new FormData();
-                        formData.append('nombre', this.formData.nombre);
+                        formData.append('nombre', this.formData.nombre.trim());
                         formData.append('_method', 'PUT');
 
                         // Agregar clientes seleccionados
@@ -250,7 +279,7 @@
                         if (!contentType || !contentType.includes('application/json')) {
                             const text = await response.text();
                             console.error('Respuesta no JSON:', text.substring(0, 200));
-                            throw new Error('El servidor devolvió una respuesta no JSON. Verifica la consola para más detalles.');
+                            throw new Error('Error en la respuesta del servidor');
                         }
 
                         const data = await response.json();
@@ -263,57 +292,62 @@
                         }
 
                         // Éxito
-                        this.showSuccess('Área actualizada exitosamente');
-                        
+                        toastr.success(data.message || 'Área actualizada exitosamente');
+
                         setTimeout(() => {
                             window.location.href = '{{ route('areas.index') }}';
                         }, 1500);
 
                     } catch (error) {
                         console.error('Error completo:', error);
-                        this.showError(error.message || 'Error al actualizar el área');
+
+                        // Mostrar errores de validación específicos
+                        if (this.errors.nombre) {
+                            toastr.error(this.errors.nombre[0]);
+                        } else if (this.errors.clientes_generales) {
+                            toastr.error(this.errors.clientes_generales[0]);
+                        } else {
+                            // Mostrar error general
+                            toastr.error(error.message || 'Error al actualizar el área');
+                        }
                     } finally {
                         this.loading = false;
-                    }
-                },
-
-                showSuccess(message) {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Éxito!',
-                            text: message,
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        alert(message);
-                    }
-                },
-
-                showError(message) {
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: message,
-                            confirmButtonText: 'Entendido'
-                        });
-                    } else {
-                        alert('Error: ' + message);
                     }
                 }
             }));
         });
 
+        // Mostrar mensajes de sesión si existen
+        @if(session('success'))
+            toastr.success('{{ session('success') }}');
+        @endif
+
+        @if(session('error'))
+            toastr.error('{{ session('error') }}');
+        @endif
+
+        @if(session('info'))
+            toastr.info('{{ session('info') }}');
+        @endif
+
+        @if(session('warning'))
+            toastr.warning('{{ session('warning') }}');
+        @endif
+
         // Manejar navegación away con cambios sin guardar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             let formChanged = false;
             const form = document.querySelector('form');
-            
+
             if (form) {
-                form.addEventListener('input', () => {
-                    formChanged = true;
+                const inputs = form.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    input.addEventListener('input', () => {
+                        formChanged = true;
+                    });
+                    input.addEventListener('change', () => {
+                        formChanged = true;
+                    });
                 });
 
                 form.addEventListener('submit', () => {
@@ -323,14 +357,17 @@
                 window.addEventListener('beforeunload', (e) => {
                     if (formChanged) {
                         e.preventDefault();
-                        e.returnValue = '';
+                        e.returnValue = 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
+                        return 'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?';
                     }
                 });
 
                 document.addEventListener('click', (e) => {
-                    if (formChanged && e.target.closest('a') && !e.target.closest('button')) {
+                    const link = e.target.closest('a');
+                    if (formChanged && link && !link.closest('button')) {
                         if (!confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?')) {
                             e.preventDefault();
+                            return false;
                         }
                     }
                 });

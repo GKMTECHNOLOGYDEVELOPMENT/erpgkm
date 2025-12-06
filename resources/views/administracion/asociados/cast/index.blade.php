@@ -441,27 +441,15 @@
 
     <script>
         window.permisosTiendas = {
-            puedeEditar: {
-                {
-                    \
-                    App\ Helpers\ PermisoHelper::tienePermiso('EDITAR CAST') ? 'true' : 'false'
-                }
-            },
-            puedeEliminar: {
-                {
-                    \
-                    App\ Helpers\ PermisoHelper::tienePermiso('ELIMINAR CAST') ? 'true' : 'false'
-                }
-            }
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR CAST') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR CAST') ? 'true' : 'false' }}
         };
     </script>
 
     <script>
         window.sessionMessages = {
-            success: '{{ session('
-            success ') }}',
-            error: '{{ session('
-            error ') }}',
+            success: '{{ session('success') }}',
+            error: '{{ session('error') }}',
         };
     </script>
 

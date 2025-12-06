@@ -110,7 +110,6 @@ class AreasController extends Controller
     public function edit($id)
     {
         $area = Tipoarea::findOrFail($id);
-        $clientesGenerales = Clientegeneral::where('estado', 1)->get();
 
         // Obtener IDs de clientes ya asignados a esta área
         $clientesAsignadosIds = DB::table('clientegeneral_area')
@@ -118,7 +117,10 @@ class AreasController extends Controller
             ->pluck('idClienteGeneral')
             ->toArray();
 
-        return view('administracion.areas.edit', compact('area', 'clientesGenerales', 'clientesAsignadosIds'));
+        // Debug: verifica los datos
+        Log::info('Clientes asignados IDs para área ' . $id . ':', $clientesAsignadosIds);
+
+        return view('administracion.areas.edit', compact('area', 'clientesAsignadosIds'));
     }
 
     /**

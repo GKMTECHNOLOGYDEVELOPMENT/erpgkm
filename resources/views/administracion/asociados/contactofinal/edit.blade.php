@@ -1,6 +1,8 @@
 <x-layout.default>
     <!-- Cargar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <style>
         /* Estilos para Select2 */
@@ -134,8 +136,29 @@
     <!-- Cargar jQuery y el plugin -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
+        // Configuración global de Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
         $(document).ready(function() {
             // ✅ Inicializar Select2 para Cliente General (MÚLTIPLE)
             $('#idClienteGeneral').select2({
@@ -155,7 +178,7 @@
     </script>
 
     <script>
-        // Script para manejar el formulario de edición
+        // Script para manejar el formulario de edición con Toastr
         document.getElementById('contactoFinalForm').addEventListener('submit', function (event) {
             event.preventDefault();
 
@@ -172,14 +195,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    Swal.fire({
-                        title: '¡Éxito!',
-                        text: data.message,
-                        icon: 'success',
-                        customClass: 'sweet-alerts',
-                    }).then(() => {
+                    // Toastr success
+                    toastr.success(data.message, '¡Éxito!');
+                    
+                    // Redirigir después de 1.5 segundos
+                    setTimeout(() => {
                         window.location.href = "{{ route('contactofinal.index') }}";
-                    });
+                    }, 1500);
                 } else {
                     // Mostrar errores de validación si existen
                     let errorMessage = data.message || 'Error desconocido';
@@ -187,23 +209,39 @@
                         errorMessage = Object.values(data.errors).flat().join(', ');
                     }
                     
-                    Swal.fire({
-                        title: 'Error',
-                        text: errorMessage,
-                        icon: 'error',
-                        customClass: 'sweet-alerts',
-                    });
+                    // Toastr error
+                    toastr.error(errorMessage, 'Error');
                 }
             })
             .catch(error => {
                 console.error('Error en fetch:', error);
-                Swal.fire({
-                    title: 'Error de conexión',
-                    text: 'No se pudo conectar con el servidor.',
-                    icon: 'error',
-                    customClass: 'sweet-alerts',
-                });
+                // Toastr error de conexión
+                toastr.error('No se pudo conectar con el servidor.', 'Error de conexión');
             });
         });
+
+        // También puedes mostrar errores de validación del lado del servidor si existen
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
+                toastr.error('{{ $error }}', 'Error de validación');
+            @endforeach
+        @endif
+
+        // Mostrar mensajes de sesión si existen
+        @if(session('success'))
+            toastr.success('{{ session('success') }}', '¡Éxito!');
+        @endif
+
+        @if(session('error'))
+            toastr.error('{{ session('error') }}', 'Error');
+        @endif
+
+        @if(session('info'))
+            toastr.info('{{ session('info') }}', 'Información');
+        @endif
+
+        @if(session('warning'))
+            toastr.warning('{{ session('warning') }}', 'Advertencia');
+        @endif
     </script>
 </x-layout.default>

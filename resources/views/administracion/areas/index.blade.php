@@ -1,7 +1,11 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.tailwindcss.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- SlimSelect CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slim-select@1.27.1/dist/slimselect.css" />
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+
     <style>
         #areasTable {
             min-width: 1000px;
@@ -31,6 +35,35 @@
         .cliente-item:last-child {
             margin-bottom: 0;
         }
+
+        /* Estilos para SlimSelect */
+        .ss-main {
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+            padding: 6px 12px;
+            min-height: 42px;
+            background: white;
+        }
+
+        .ss-main:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+
+        .ss-main .ss-values .ss-value {
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .ss-content {
+            z-index: 9999 !important;
+        }
+
+        /* Asegurar que SlimSelect se muestre sobre el modal */
+        .fixed.inset-0 .ss-content {
+            z-index: 10000 !important;
+        }
     </style>
 
     <div x-data="multipleTable">
@@ -50,10 +83,14 @@
                 <div class="flex items-center flex-wrap mb-5">
                     <!-- Botón Agregar -->
                     <button type="button" class="btn btn-primary btn-sm m-1" @click="$dispatch('toggle-modal-areas')">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ltr:mr-2 rtl:ml-2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5 ltr:mr-2 rtl:ml-2">
                             <circle cx="10" cy="6" r="4" stroke="currentColor" stroke-width="1.5" />
-                            <path opacity="0.5" d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z" stroke="currentColor" stroke-width="1.5" />
-                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                            <path opacity="0.5"
+                                d="M18 17.5C18 19.9853 18 22 10 22C2 22 2 19.9853 2 17.5C2 15.0147 5.58172 13 10 13C14.4183 13 18 15.0147 18 17.5Z"
+                                stroke="currentColor" stroke-width="1.5" />
+                            <path d="M21 10H19M19 10H17M19 10L19 8M19 10L19 12" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" />
                         </svg>
                         Agregar Área
                     </button>
@@ -91,9 +128,8 @@
         </div>
     </div>
 
-    <!-- Modal para Crear Área -->
-    <div x-data="{ open: false, formData: { nombre: '', clientes_generales: [] }, errors: {}, loading: false }" 
-         class="mb-5" @toggle-modal-areas.window="open = true">
+    <!-- Modal para Crear Área CON SLIMSELECT -->
+    <div x-data="areasModal" class="mb-5">
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
                 <div x-show="open" x-transition.duration.300
@@ -101,7 +137,7 @@
                     <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg">Agregar Nueva Área</h5>
-                        <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
+                        <button type="button" class="text-white-dark hover:text-dark" @click="closeModal()">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
                                 stroke-linejoin="round" class="w-6 h-6">
@@ -110,28 +146,30 @@
                             </svg>
                         </button>
                     </div>
-                    
+
                     <!-- Formulario -->
                     <form @submit.prevent="submitForm" class="p-5 space-y-4">
                         @csrf
-                        
+
                         <!-- Nombre del Área -->
                         <div>
                             <label for="nombre" class="block text-sm font-medium">Nombre del Área</label>
-                            <input type="text" id="nombre" x-model="formData.nombre" 
-                                class="form-input w-full" placeholder="Ingrese el nombre del área" required>
+                            <input type="text" id="nombre" x-model="formData.nombre" class="form-input w-full"
+                                placeholder="Ingrese el nombre del área" required>
                             <template x-if="errors.nombre">
                                 <span class="text-red-500 text-sm" x-text="errors.nombre[0]"></span>
                             </template>
                         </div>
 
-                        <!-- Clientes Generales -->
+                        <!-- Clientes Generales CON SLIMSELECT -->
                         <div>
-                            <label for="clientes_generales" class="block text-sm font-medium mb-2">Clientes Generales Asociados</label>
-                            <select id="clientes_generales" x-ref="clientesSelect" class="form-select w-full" multiple>
-                                <!-- Las opciones se cargarán con JavaScript -->
+                            <label for="clientes_generales" class="block text-sm font-medium mb-2">Clientes Generales
+                                Asociados</label>
+                            <select id="clientes_generales" x-ref="clientesSelect" class="form-input w-full" multiple>
+                                <!-- Las opciones se cargarán dinámicamente -->
                             </select>
-                            <p class="mt-1 text-xs text-gray-500">Seleccione los clientes generales que pertenecerán a esta área</p>
+                            <p class="mt-1 text-xs text-gray-500">Seleccione los clientes generales que pertenecerán a
+                                esta área</p>
                             <template x-if="errors.clientes_generales">
                                 <span class="text-red-500 text-sm" x-text="errors.clientes_generales[0]"></span>
                             </template>
@@ -139,12 +177,11 @@
 
                         <!-- Botones -->
                         <div class="flex justify-end items-center mb-4">
-                            <button type="button" class="btn btn-outline-danger" 
-                                @click="open = false" :disabled="loading">
+                            <button type="button" class="btn btn-outline-danger" @click="closeModal()"
+                                :disabled="loading">
                                 Cancelar
                             </button>
-                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" 
-                                :disabled="loading">
+                            <button type="submit" class="btn btn-primary ltr:ml-4 rtl:mr-4" :disabled="loading">
                                 <template x-if="loading">
                                     <i class="fas fa-spinner fa-spin mr-2"></i>
                                 </template>
@@ -160,7 +197,7 @@
         </div>
     </div>
 
-    <!-- Modal para Ver Clientes del Área - CON EL MISMO DISEÑO DEL MODAL AGREGAR ÁREAS -->
+    <!-- Modal para Ver Clientes del Área -->
     <div x-data="{ 
         open: false, 
         areaNombre: '', 
@@ -168,9 +205,7 @@
         loading: false,
         searchTerm: '',
         filteredClientes: []
-    }" 
-    class="mb-5" 
-    @toggle-modal-clientes.window="
+    }" class="mb-5" @toggle-modal-clientes.window="
         open = true;
         areaNombre = $event.detail.nombre;
         clientes = $event.detail.clientes || [];
@@ -182,8 +217,8 @@
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
                 <div x-show="open" x-transition.duration.300
                     class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-lg my-8 animate__animated animate__zoomInUp">
-                    
-                    <!-- Header del Modal - Mismo diseño que agregar áreas -->
+
+                    <!-- Header del Modal -->
                     <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                         <h5 class="font-bold text-lg" x-text="'Clientes del Área: ' + areaNombre"></h5>
                         <button type="button" class="text-white-dark hover:text-dark" @click="open = false">
@@ -195,21 +230,18 @@
                             </svg>
                         </button>
                     </div>
-                    
-                    <!-- Contenido del Modal - Mismo diseño que agregar áreas -->
+
+                    <!-- Contenido del Modal -->
                     <div class="p-5 space-y-4">
                         <!-- Barra de búsqueda -->
                         <div>
                             <label class="block text-sm font-medium mb-2">Buscar Cliente</label>
                             <div class="relative">
-                                <input type="text" 
-                                    x-model="searchTerm" 
-                                    @input="filteredClientes = searchTerm ? 
+                                <input type="text" x-model="searchTerm" @input="filteredClientes = searchTerm ? 
                                         clientes.filter(cliente => 
                                             cliente.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                             cliente.idClienteGeneral.toString().includes(searchTerm)
-                                        ) : clientes"
-                                    class="form-input w-full pr-10" 
+                                        ) : clientes" class="form-input w-full pr-10"
                                     placeholder="Buscar por nombre o ID...">
                                 <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                                     <i class="fas fa-search"></i>
@@ -221,7 +253,7 @@
                         <div class="p-3 bg-primary/10 rounded-lg">
                             <p class="text-sm text-primary font-medium text-center">
                                 <i class="fas fa-users mr-2"></i>
-                                Total: <span x-text="clientes.length"></span> cliente(s) | 
+                                Total: <span x-text="clientes.length"></span> cliente(s) |
                                 Mostrando: <span x-text="filteredClientes.length"></span>
                             </p>
                         </div>
@@ -229,7 +261,7 @@
                         <!-- Lista de clientes -->
                         <div>
                             <label class="block text-sm font-medium mb-2">Clientes Asociados</label>
-                            
+
                             <template x-if="loading">
                                 <div class="text-center py-8">
                                     <i class="fas fa-spinner fa-spin text-2xl text-primary mb-2"></i>
@@ -243,14 +275,16 @@
                                         <template x-for="cliente in filteredClientes" :key="cliente.idClienteGeneral">
                                             <div class="cliente-item hover:bg-gray-50 transition-colors duration-200">
                                                 <div class="flex-1 min-w-0">
-                                                    <p class="font-medium text-gray-800 truncate" 
-                                                       x-text="cliente.descripcion"
-                                                       x-tooltip="cliente.descripcion"></p>
+                                                    <p class="font-medium text-gray-800 truncate"
+                                                        x-text="cliente.descripcion" x-tooltip="cliente.descripcion">
+                                                    </p>
                                                     <p class="text-xs text-gray-500 mt-1">
-                                                        ID: <span x-text="cliente.idClienteGeneral" class="font-mono"></span>
+                                                        ID: <span x-text="cliente.idClienteGeneral"
+                                                            class="font-mono"></span>
                                                     </p>
                                                 </div>
-                                                <span class="flex-shrink-0 ml-3 text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">
+                                                <span
+                                                    class="flex-shrink-0 ml-3 text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full font-medium">
                                                     <i class="fas fa-check-circle mr-1"></i>
                                                     Activo
                                                 </span>
@@ -264,7 +298,8 @@
                                 <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="fas fa-users-slash text-4xl text-gray-400 mb-4"></i>
                                     <p class="text-lg font-medium text-gray-600">No hay clientes asignados</p>
-                                    <p class="text-sm text-gray-500 mt-2">Esta área no tiene clientes generales asociados</p>
+                                    <p class="text-sm text-gray-500 mt-2">Esta área no tiene clientes generales
+                                        asociados</p>
                                 </div>
                             </template>
 
@@ -272,12 +307,13 @@
                                 <div class="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
                                     <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
                                     <p class="text-lg font-medium text-gray-600">No se encontraron resultados</p>
-                                    <p class="text-sm text-gray-500 mt-2">No hay clientes que coincidan con tu búsqueda</p>
+                                    <p class="text-sm text-gray-500 mt-2">No hay clientes que coincidan con tu búsqueda
+                                    </p>
                                 </div>
                             </template>
                         </div>
 
-                        <!-- Botones - Mismo diseño que agregar áreas -->
+                        <!-- Botones -->
                         <div class="flex justify-end items-center pt-4 border-t">
                             <button type="button" class="btn btn-outline-primary" @click="open = false">
                                 <i class="fas fa-times mr-2"></i>
@@ -300,22 +336,42 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
-    <script src="/assets/js/simple-datatables.js"></script>
+    <!-- SlimSelect JS -->
+    <script src="https://cdn.jsdelivr.net/npm/slim-select@1.27.1/dist/slimselect.min.js"></script>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Configuración global de Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
         document.addEventListener('alpine:init', () => {
+            // DataTable principal para Áreas
             Alpine.data('multipleTable', () => ({
                 datatable1: null,
 
                 init() {
                     this.fetchDataAndInitTable();
                     this.initSearch();
-
-                    document.addEventListener('borrar-area', (e) => {
-                        this.deleteArea(e.detail.id);
-                    });
                 },
 
                 async fetchDataAndInitTable() {
@@ -352,7 +408,7 @@
                                         <div class="flex justify-center items-center gap-2">
                                             <!-- Botón para ver detalles de clientes -->
                                             <button type="button" class="ltr:mr-2 rtl:ml-2" x-tooltip="Ver Clientes" 
-                                                onclick="verClientesArea(${row.idTipoArea}, '${row.nombre.replace(/'/g, "\\'")}')">
+                                                onclick="window.verClientesArea(${row.idTipoArea}, '${row.nombre.replace(/'/g, "\\'")}')">
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-primary">
                                                     <path opacity="0.5" d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70431C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70431C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-width="1.5"/>
                                                     <path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-width="1.5"/>
@@ -365,7 +421,7 @@
                                                     <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5" />
                                                 </svg>
                                             </a>
-                                            <button type="button" class="ltr:mr-2 rtl:ml-2" x-tooltip="Eliminar" @click="deleteArea(${row.idTipoArea})">
+                                            <button type="button" class="ltr:mr-2 rtl:ml-2" x-tooltip="Eliminar" onclick="window.showDeleteConfirmation(${row.idTipoArea}, '${row.nombre.replace(/'/g, "\\'")}')">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
                                                     <path opacity="0.5" d="M9.17065 4C9.58249 2.83481 10.6937 2 11.9999 2C13.3062 2 14.4174 2.83481 14.8292 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                                                     <path d="M20.5001 6H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -475,46 +531,247 @@
                         clearBtn.classList.add('hidden');
                         this.datatable1.search('').draw();
                     });
-                },
+                }
+            }));
 
-                deleteArea(idTipoArea) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: '¿Estás seguro?',
-                        text: '¡No podrás revertir esta acción!',
-                        showCancelButton: true,
-                        confirmButtonText: 'Eliminar',
-                        cancelButtonText: 'Cancelar',
-                        padding: '2em',
-                        customClass: 'sweet-alerts',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            fetch(`/areas/${idTipoArea}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                },
-                            })
-                            .then(async res => {
-                                const data = await res.json();
-                                if (!res.ok) {
-                                    throw new Error(data.message || 'Error al eliminar área.');
-                                }
+            // Modal de creación de áreas con SlimSelect
+            Alpine.data('areasModal', () => ({
+                open: false,
+                formData: { nombre: '', clientes_generales: [] },
+                errors: {},
+                loading: false,
+                slimSelectInstance: null,
+                clientesOptions: [],
 
-                                Swal.fire('¡Eliminado!', data.message, 'success');
-                                this.datatable1.ajax.reload();
-                            })
-                            .catch(error => {
-                                Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
-                            });
+                init() {
+                    // Escuchar evento para abrir el modal
+                    this.$watch('open', (value) => {
+                        if (value) {
+                            setTimeout(() => {
+                                this.initSlimSelect();
+                            }, 100);
+                        } else {
+                            this.cleanupSlimSelect();
                         }
                     });
+
+                    // Escuchar evento desde fuera
+                    window.addEventListener('toggle-modal-areas', () => {
+                        this.open = true;
+                    });
+                },
+
+                // Cargar opciones de clientes
+                async loadClientesOptions() {
+                    try {
+                        const response = await fetch('/areas/api/clientes-generales');
+                        const clientes = await response.json();
+
+                        this.clientesOptions = clientes.map(cliente => ({
+                            value: cliente.idClienteGeneral.toString(),
+                            text: cliente.descripcion
+                        }));
+
+                        return this.clientesOptions;
+                    } catch (error) {
+                        console.error('Error cargando clientes:', error);
+                        toastr.error('Error al cargar los clientes generales', 'Error');
+                        return [];
+                    }
+                },
+
+                // Inicializar SlimSelect
+                async initSlimSelect() {
+                    // Cargar opciones primero
+                    const options = await this.loadClientesOptions();
+
+                    // Obtener el elemento select
+                    const selectElement = this.$refs.clientesSelect;
+
+                    // Limpiar opciones previas
+                    selectElement.innerHTML = '';
+
+                    // Agregar opciones
+                    options.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option.value;
+                        optionElement.textContent = option.text;
+                        selectElement.appendChild(optionElement);
+                    });
+
+                    // Destruir instancia anterior si existe
+                    if (this.slimSelectInstance) {
+                        this.slimSelectInstance.destroy();
+                    }
+
+                    // Crear nueva instancia de SlimSelect
+                    this.slimSelectInstance = new SlimSelect({
+                        select: selectElement,
+                        placeholder: 'Seleccione clientes generales',
+                        searchPlaceholder: 'Buscar clientes...',
+                        searchText: 'No se encontraron resultados',
+                        searchingText: 'Buscando...',
+                        allowDeselect: true,
+                        closeOnSelect: false,
+                        hideSelectedOption: true,
+                        showSearch: true,
+                        searchHighlight: true,
+                        limit: 10,
+                        maxValuesShown: 3,
+                        maxValuesMessage: 'Seleccionados: {number}',
+                        addToBody: true, // IMPORTANTE: Esto permite que el dropdown se renderice fuera del modal
+                    });
+                },
+
+                // Limpiar SlimSelect
+                cleanupSlimSelect() {
+                    if (this.slimSelectInstance) {
+                        this.slimSelectInstance.destroy();
+                        this.slimSelectInstance = null;
+                    }
+
+                    // Limpiar el select
+                    const selectElement = this.$refs.clientesSelect;
+                    if (selectElement) {
+                        selectElement.innerHTML = '';
+                    }
+
+                    this.clientesOptions = [];
+                },
+
+                // Cerrar modal
+                closeModal() {
+                    this.open = false;
+                    this.formData = { nombre: '', clientes_generales: [] };
+                    this.errors = {};
+                    this.cleanupSlimSelect();
+                },
+
+                // Enviar formulario
+                async submitForm() {
+                    this.loading = true;
+                    this.errors = {};
+
+                    try {
+                        // Validar nombre
+                        if (!this.formData.nombre || this.formData.nombre.trim() === '') {
+                            throw new Error('El nombre del área es requerido');
+                        }
+
+                        const formData = new FormData();
+                        formData.append('nombre', this.formData.nombre.trim());
+
+                        // Obtener valores seleccionados
+                        if (this.slimSelectInstance) {
+                            const valoresSeleccionados = this.slimSelectInstance.selected();
+                            if (valoresSeleccionados && valoresSeleccionados.length > 0) {
+                                valoresSeleccionados.forEach(valor => {
+                                    formData.append('clientes_generales[]', valor.value);
+                                });
+                            }
+                        }
+
+                        const response = await fetch('/areas', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Éxito
+                            toastr.success(data.message, '¡Éxito!');
+                            this.closeModal();
+
+                            // Recargar tabla
+                            const multipleTable = Alpine.$data(document.querySelector('[x-data="multipleTable"]'));
+                            if (multipleTable && multipleTable.datatable1) {
+                                multipleTable.datatable1.ajax.reload();
+                            }
+                        } else {
+                            // Error de validación
+                            if (data.errors) {
+                                this.errors = data.errors;
+                            }
+                            throw new Error(data.message || 'Error al crear el área');
+                        }
+
+                    } catch (error) {
+                        console.error('Error:', error);
+                        if (!this.errors.nombre) {
+                            toastr.error(error.message || 'Error al crear el área', 'Error');
+                        }
+                    } finally {
+                        this.loading = false;
+                    }
                 }
             }));
         });
 
-        // Función para mostrar clientes en el modal con Alpine
-        function verClientesArea(idArea, nombreArea) {
+        // ========== FUNCIONES GLOBALES ==========
+
+        // Función para mostrar confirmación de eliminación con SweetAlert2
+        window.showDeleteConfirmation = function (idTipoArea, nombreArea) {
+            Swal.fire({
+                title: '¿Eliminar Área?',
+                html: `¿Estás seguro de que deseas eliminar el área "<b>${nombreArea}</b>"?<br><br>
+                       <small class="text-gray-500">Esta acción eliminará permanentemente el área y sus asociaciones con clientes.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '<i class="fas fa-trash mr-2"></i> Sí, eliminar',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i> Cancelar',
+                reverseButtons: true,
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`/areas/${idTipoArea}`, {
+                        method: "DELETE",
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                        },
+                    })
+                        .then(async response => {
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                throw new Error(data.message || "Error al eliminar el área.");
+                            }
+
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Error: ${error.message}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Mostrar Toastr de éxito
+                    toastr.success('Área eliminada correctamente.', '¡Eliminado!');
+
+                    // Recargar la tabla
+                    const multipleTable = Alpine.$data(document.querySelector('[x-data="multipleTable"]'));
+                    if (multipleTable && multipleTable.datatable1) {
+                        multipleTable.datatable1.ajax.reload();
+                    }
+                }
+            });
+        };
+
+        // Función antigua para compatibilidad
+        window.deleteArea = function (idTipoArea) {
+            // Llamar a la nueva función con un nombre por defecto
+            window.showDeleteConfirmation(idTipoArea, 'esta área');
+        };
+
+        // Función para mostrar clientes en el modal
+        window.verClientesArea = function (idArea, nombreArea) {
             // Hacer petición para obtener los clientes del área
             fetch(`/areas/${idArea}/clientes-modal`)
                 .then(response => {
@@ -524,7 +781,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Disparar evento para abrir el modal con Alpine
+                    // Disparar evento para abrir el modal
                     window.dispatchEvent(new CustomEvent('toggle-modal-clientes', {
                         detail: {
                             nombre: nombreArea,
@@ -534,108 +791,20 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    Swal.fire('Error', 'No se pudieron cargar los clientes', 'error');
+                    toastr.error('No se pudieron cargar los clientes', 'Error');
                 });
-        }
+        };
 
-        // Inicializar modal cuando se abre
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar clientes generales cuando se abre el modal
-            document.addEventListener('toggle-modal-areas', function() {
-                setTimeout(() => {
-                    cargarClientesGenerales();
-                }, 100);
-            });
+        // ========== INICIALIZACIÓN ==========
 
-            async function cargarClientesGenerales() {
-                try {
-                    const response = await fetch('/areas/api/clientes-generales');
-                    const clientes = await response.json();
-                    
-                    const select = $('#clientes_generales');
-                    
-                    // Destruir Select2 anterior si existe
-                    if (select.data('select2')) {
-                        select.select2('destroy');
-                    }
-                    
-                    select.empty();
-                    
-                    clientes.forEach(cliente => {
-                        select.append(new Option(cliente.descripcion, cliente.idClienteGeneral, false, false));
-                    });
-                    
-                    // Inicializar Select2
-                    select.select2({
-                        placeholder: 'Seleccione clientes generales',
-                        allowClear: true,
-                        width: '100%',
-                        dropdownParent: $('.fixed.inset-0')
-                    });
-                    
-                } catch (error) {
-                    console.error('Error cargando clientes:', error);
-                }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mostrar mensajes de sesión si existen
+            if (window.sessionMessages.success) {
+                toastr.success(window.sessionMessages.success, '¡Éxito!');
             }
 
-            // Manejar envío del formulario del modal
-            const modal = document.querySelector('[x-data]');
-            if (modal) {
-                modal.__x.$data.submitForm = async function() {
-                    this.loading = true;
-                    this.errors = {};
-                    
-                    try {
-                        const formData = new FormData();
-                        formData.append('nombre', this.formData.nombre);
-                        
-                        const clientesSeleccionados = $('#clientes_generales').val();
-                        if (clientesSeleccionados && clientesSeleccionados.length > 0) {
-                            clientesSeleccionados.forEach(id => {
-                                formData.append('clientes_generales[]', id);
-                            });
-                        }
-                        
-                        const response = await fetch('{{ route('areas.store') }}', {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            },
-                            body: formData
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            // Éxito
-                            this.open = false;
-                            this.formData = { nombre: '', clientes_generales: [] };
-                            $('#clientes_generales').val(null).trigger('change');
-                            
-                            // Recargar tabla
-                            if (window.Alpine && Alpine.$data && Alpine.$data.multipleTable) {
-                                Alpine.$data.multipleTable.datatable1.ajax.reload();
-                            }
-                            
-                            Swal.fire('¡Éxito!', data.message, 'success');
-                        } else {
-                            // Error de validación
-                            if (data.errors) {
-                                this.errors = data.errors;
-                            }
-                            throw new Error(data.message || 'Error al crear el área');
-                        }
-                        
-                    } catch (error) {
-                        console.error('Error:', error);
-                        if (!this.errors.nombre) {
-                            Swal.fire('Error', error.message || 'Error al crear el área', 'error');
-                        }
-                    } finally {
-                        this.loading = false;
-                    }
-                };
+            if (window.sessionMessages.error) {
+                toastr.error(window.sessionMessages.error, 'Error');
             }
         });
     </script>
