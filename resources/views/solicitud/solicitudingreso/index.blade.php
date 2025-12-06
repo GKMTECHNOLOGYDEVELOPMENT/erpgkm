@@ -88,7 +88,7 @@
     <div x-data="solicitudApp()" class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Solicitudes de Ingreso</h1>
+            <h1 class="text-3xl font-bold text-gray-800">SolicitudesSSSSS de Ingreso</h1>
             <p class="text-gray-600">Gestiona las solicitudes de ingreso agrupadas por origen</p>
         </div>
 
@@ -219,8 +219,7 @@
                                 </span>
                             </div>
                             <div class="text-right">
-                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium"
-                                    :class="grupo.origen === 'compra' ? 'bg-blue-100 text-blue-800' :
+                                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium" :class="grupo.origen === 'compra' ? 'bg-blue-100 text-blue-800' :
                                         'bg-green-100 text-green-800'">
                                     <i :class="grupo.origen === 'compra' ? 'fas fa-shopping-cart' : 'fas fa-truck'"
                                         class="mr-1"></i>
@@ -304,11 +303,11 @@
                                                     <div>
                                                         <span class="text-gray-500">Series:</span>
                                                         @if(\App\Helpers\PermisoHelper::tienePermiso('VER SERIES SOLICITUD INGRESO'))
-                                                        <button
-                                                            @click="seriesModal = true; seriesSeleccionadas = solicitud.series"
-                                                            class="ml-2 text-blue-600 text-xs underline hover:text-blue-800">
-                                                            Ver series (<span x-text="solicitud.series.length"></span>)
-                                                        </button>
+                                                            <button
+                                                                @click="seriesModal = true; seriesSeleccionadas = solicitud.series"
+                                                                class="ml-2 text-blue-600 text-xs underline hover:text-blue-800">
+                                                                Ver series (<span x-text="solicitud.series.length"></span>)
+                                                            </button>
                                                         @endif
                                                     </div>
                                                 </template>
@@ -317,30 +316,29 @@
 
                                             <!-- Botones -->
                                             <div class="flex space-x-1 mt-2">
-                                                
-                                                 @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
-                                                <button
-                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
-                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'pendiente')"
-                                                    :class="getBotonIndividualClasses(solicitud, 'pendiente')">
-                                                    Pendiente
-                                                </button>
-                                                <button
-                                                    @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
-                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'recibido')"
-                                                    :class="getBotonIndividualClasses(solicitud, 'recibido')">
-                                                    Recibido
-                                                </button>
-                                                <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'ubicado')"
-                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'ubicado')"
-                                                    :class="getBotonIndividualClasses(solicitud, 'ubicado')">
-                                                    Ubicar
-                                                </button>
-                                                <button @click="abrirModalActualizar(solicitud)"
-                                                    :disabled="botonIndividualDeshabilitado(solicitud, 'actualizar')"
-                                                    :class="getBotonIndividualClasses(solicitud, 'actualizar')">
-                                                    Actualizar
-                                                </button>
+
+                                                @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
+                                                    <button
+                                                        @click="cambiarEstado(solicitud.idSolicitudIngreso, 'pendiente')"
+                                                        :disabled="botonIndividualDeshabilitado(solicitud, 'pendiente')"
+                                                        :class="getBotonIndividualClasses(solicitud, 'pendiente')">
+                                                        Pendiente
+                                                    </button>
+                                                    <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'recibido')"
+                                                        :disabled="botonIndividualDeshabilitado(solicitud, 'recibido')"
+                                                        :class="getBotonIndividualClasses(solicitud, 'recibido')">
+                                                        Recibido
+                                                    </button>
+                                                    <button @click="cambiarEstado(solicitud.idSolicitudIngreso, 'ubicado')"
+                                                        :disabled="botonIndividualDeshabilitado(solicitud, 'ubicado')"
+                                                        :class="getBotonIndividualClasses(solicitud, 'ubicado')">
+                                                        Ubicar
+                                                    </button>
+                                                    <button @click="abrirModalActualizar(solicitud)"
+                                                        :disabled="botonIndividualDeshabilitado(solicitud, 'actualizar')"
+                                                        :class="getBotonIndividualClasses(solicitud, 'actualizar')">
+                                                        Actualizar
+                                                    </button>
                                                 @endif
 
 
@@ -358,36 +356,34 @@
                                         x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
                                     <div class="flex space-x-2">
                                         @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
-                                        <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
-                                            :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
-                                            :class="getBotonGrupalClasses(grupo, 'pendiente')">
-                                            Todos Pendiente
-                                        </button>
-                                        <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
-                                            :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
-                                            :class="getBotonGrupalClasses(grupo, 'recibido')">
-                                            Todos Recibido
-                                        </button>
-                                        <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
-                                            :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
-                                            :class="getBotonGrupalClasses(grupo, 'ubicado')">
-                                            Todos Ubicado
-                                        </button>
-                                        <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
-                                            :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
-                                            :class="getBotonGrupalClasses(grupo, 'actualizar')">
-                                            Todos Actualizar
-                                        </button>
-                                        <!-- 🔴 NUEVO: Botón Unity a nivel grupo -->
-                                        <button
-                                            @click="ubicarPrimeraSolicitudEnUnity(grupo)"
-                                            :disabled="esBotonUnityGrupoDeshabilitado(grupo)"
-                                            class="px-3 py-1 text-xs rounded-lg transition-colors
-                       bg-purple-100 text-purple-800 hover:bg-purple-200
-                       disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                            <i class="fas fa-tv mr-1"></i>
-                                            Unity Grupo
-                                        </button>
+                                                                <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
+                                                                    :class="getBotonGrupalClasses(grupo, 'pendiente')">
+                                                                    Todos Pendiente
+                                                                </button>
+                                                                <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
+                                                                    :class="getBotonGrupalClasses(grupo, 'recibido')">
+                                                                    Todos Recibido
+                                                                </button>
+                                                                <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
+                                                                    :class="getBotonGrupalClasses(grupo, 'ubicado')">
+                                                                    Todos Ubicado
+                                                                </button>
+                                                                <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
+                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
+                                                                    :class="getBotonGrupalClasses(grupo, 'actualizar')">
+                                                                    Todos Actualizar
+                                                                </button>
+                                                                <!-- 🔴 NUEVO: Botón Unity a nivel grupo -->
+                                                                <button @click="ubicarPrimeraSolicitudEnUnity(grupo)"
+                                                                    :disabled="esBotonUnityGrupoDeshabilitado(grupo)" class="px-3 py-1 text-xs rounded-lg transition-colors
+                                               bg-purple-100 text-purple-800 hover:bg-purple-200
+                                               disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                                                    <i class="fas fa-tv mr-1"></i>
+                                                                    Unity Grupo
+                                                                </button>
                                         @endif
                                     </div>
                                 </div>
@@ -505,12 +501,12 @@
                                         Ubicaciones
                                     </h4>
                                     @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR UBICACIONES SUGERIDAS SOLICITUD INGRESO'))
-                                    <!-- Botón para buscar sugerencias -->
-                                    <button type="button" @click="buscarSugerencias()"
-                                        class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded-lg border border-green-200">
-                                        <i class="fas fa-magic"></i>
-                                        Buscar Ubicaciones Sugeridas
-                                    </button>
+                                        <!-- Botón para buscar sugerencias -->
+                                        <button type="button" @click="buscarSugerencias()"
+                                            class="flex items-center gap-2 text-green-600 hover:text-green-800 text-sm bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                                            <i class="fas fa-magic"></i>
+                                            Buscar Ubicaciones Sugeridas
+                                        </button>
                                     @endif
                                 </div>
 
@@ -524,8 +520,7 @@
                                                 class="ubicacion-select w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                                 <option value="">Seleccionar ubicación</option>
                                                 <template x-for="ubic in ubicaciones" :key="ubic.idUbicacion">
-                                                    <option :value="ubic.idUbicacion" x-text="ubic.nombre"
-                                                        :class="ubic.nombre.includes('Espacio:') ?
+                                                    <option :value="ubic.idUbicacion" x-text="ubic.nombre" :class="ubic.nombre.includes('Espacio:') ?
                                                             'text-green-600 font-medium' : ''">
                                                     </option>
                                                 </template>
@@ -547,11 +542,9 @@
                                             </template>
                                         </div>
                                         <div class="w-32">
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Cantidad</label>
                                             <input type="number" x-model="ubicacion.cantidad"
-                                                :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)"
-                                                min="1"
+                                                :max="cantidadDisponible + (parseInt(ubicacion.cantidad) || 0)" min="1"
                                                 class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                                         </div>
                                         <div class="pt-6">
@@ -572,12 +565,12 @@
                                     </p>
                                 </div>
                                 @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR UBICACIONES SOLICITUD INGRESO'))
-                                <!-- Botón para agregar más ubicaciones -->
-                                <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
-                                    class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                    <i class="fas fa-plus"></i>
-                                    Agregar otra ubicación
-                                </button>
+                                    <!-- Botón para agregar más ubicaciones -->
+                                    <button type="button" @click="agregarUbicacion" :disabled="cantidadDisponible === 0"
+                                        class="flex items-center gap-2 text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                        <i class="fas fa-plus"></i>
+                                        Agregar otra ubicación
+                                    </button>
                                 @endif
                             </div>
 
@@ -674,18 +667,17 @@
                             <!-- Footer -->
                             <div
                                 class="flex justify-end items-center gap-3 px-5 py-3 border-t bg-[#fbfbfb] dark:bg-[#121c2c]">
-                                <button type="button" class="btn btn-outline-danger"
-                                    @click="cerrarModalUbicacion()">
+                                <button type="button" class="btn btn-outline-danger" @click="cerrarModalUbicacion()">
                                     Cancelar
                                 </button>
                                 @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR UBICACIONES SOLICITUD INGRESO'))
-                                <button type="button" class="btn btn-primary" :disabled="!puedeGuardar"
-                                    @click="guardarUbicaciones">
-                                    <i class="fas fa-save mr-2"></i>
-                                    Guardar&nbsp;
-                                    <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
-                                    <span x-show="!articuloRequiereSeries">Ubicaciones</span>
-                                </button>
+                                    <button type="button" class="btn btn-primary" :disabled="!puedeGuardar"
+                                        @click="guardarUbicaciones">
+                                        <i class="fas fa-save mr-2"></i>
+                                        Guardar&nbsp;
+                                        <span x-show="articuloRequiereSeries">Ubicaciones y Series</span>
+                                        <span x-show="!articuloRequiereSeries">Ubicaciones</span>
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -739,8 +731,7 @@
                                     <p class="text-sm"
                                         x-text="solicitudActualizar?.origen === 'compra' ? 'Compra' : 'Entrada Proveedor'">
                                     </p>
-                                    <p class="text-sm text-gray-600"
-                                        x-text="solicitudActualizar?.origen === 'compra' ?
+                                    <p class="text-sm text-gray-600" x-text="solicitudActualizar?.origen === 'compra' ?
                                        solicitudActualizar?.origen_especifico?.codigocompra :
                                        solicitudActualizar?.origen_especifico?.codigo_entrada">
                                     </p>
@@ -786,7 +777,8 @@
                                         <i class="fas fa-sticky-note mr-1"></i>
                                         Observaciones
                                     </label>
-                                    <textarea x-model="formActualizar.observaciones" rows="3" placeholder="Ingrese observaciones adicionales..."
+                                    <textarea x-model="formActualizar.observaciones" rows="3"
+                                        placeholder="Ingrese observaciones adicionales..."
                                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"></textarea>
                                 </div>
                             </div>
@@ -799,11 +791,11 @@
                             Cancelar
                         </button>
                         @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR SOLICITUD INGRESO'))
-                        <button type="button" class="btn btn-warning" :disabled="!puedeActualizar"
-                            @click="guardarActualizacion">
-                            <i class="fas fa-sync-alt mr-2"></i>
-                            Actualizar Solicitud
-                        </button>
+                            <button type="button" class="btn btn-warning" :disabled="!puedeActualizar"
+                                @click="guardarActualizacion">
+                                <i class="fas fa-sync-alt mr-2"></i>
+                                Actualizar Solicitud
+                            </button>
                         @endif
                     </div>
                 </div>
@@ -1459,7 +1451,7 @@
                 // MODIFICADO: Método para cerrar modal
                 cerrarModalUbicacion() {
                     // Destruir todas las instancias de Select2
-                    $('.ubicacion-select').each(function() {
+                    $('.ubicacion-select').each(function () {
                         if ($(this).hasClass('select2-hidden-accessible')) {
                             $(this).select2('destroy');
                         }
@@ -1502,7 +1494,7 @@
                         let mensaje = 'Por favor completa todas las ubicaciones correctamente';
 
                         if (this.articuloRequiereSeries && this.seriesCompletadas < (this.solicitudSeleccionada
-                                ?.cantidad || 0)) {
+                            ?.cantidad || 0)) {
                             mensaje =
                                 `Debe completar todos los números de serie. Faltan ${(this.solicitudSeleccionada?.cantidad || 0) - this.seriesCompletadas} serie(s)`;
                         }
@@ -1747,8 +1739,8 @@
 
                     try {
                         if (confirm(
-                                `¿Estás seguro de cambiar el estado de todos los artículos (${grupo.solicitudes.length}) a ${nuevoEstado}?`
-                            )) {
+                            `¿Estás seguro de cambiar el estado de todos los artículos (${grupo.solicitudes.length}) a ${nuevoEstado}?`
+                        )) {
                             // Filtrar solo las solicitudes que no están ubicadas
                             const solicitudesParaActualizar = grupo.solicitudes.filter(s => s.estado !== 'ubicado');
 
