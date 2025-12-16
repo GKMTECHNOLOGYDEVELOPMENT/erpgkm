@@ -20,7 +20,7 @@
             </ul>
         </div>
         <!-- Header con icono y estilo elegante -->
-        <div class="mb-6 p-5 bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="panel mb-6 p-5 rounded-xl shadow-sm border border-gray-100">
             <div class="flex items-center space-x-4">
                 <div
                     class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-sm">
@@ -45,7 +45,7 @@
         </div>
 
         <!-- Filtros con AJAX - VERSIÓN MEJORADA Y LIMPIA -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+        <div class="panel rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
             <!-- Título de la sección con botón de limpiar -->
             <div
                 class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-3">

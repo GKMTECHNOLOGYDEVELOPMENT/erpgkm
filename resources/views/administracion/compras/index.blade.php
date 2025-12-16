@@ -1,19 +1,18 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
-     <div class="mb-6">
-         <ul class="flex space-x-2 rtl:space-x-reverse">
-             <li>
-                 <a href="" class="text-primary hover:underline">Administración</a>
-             </li>
-             <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
-                 <span>Lista de Compras</span>
-             </li>
-         </ul>
-     </div>
+    <div class="mb-6">
+        <ul class="flex space-x-2 rtl:space-x-reverse">
+            <li>
+                <a href="" class="text-primary hover:underline">Administración</a>
+            </li>
+            <li class="before:content-['/'] ltr:before:mr-1 rtl:before:ml-1">
+                <span>Lista de Compras</span>
+            </li>
+        </ul>
+    </div>
     <div x-data="comprasList" x-init="init()">
         <!-- Filtros - Agregar filtro por estado -->
-        <div
-            class="bg-gradient-to-br from-white via-blue-50/40 to-indigo-50/30 p-6 rounded-2xl shadow-lg border border-white/60 backdrop-blur-sm space-y-6">
+        <div class="panel p-6 rounded-2xl shadow-lg border border-white/60 backdrop-blur-sm space-y-6">
 
             <!-- Título de Filtros -->
             <div class="flex items-center gap-2 border-b pb-3">
@@ -33,8 +32,7 @@
                         </svg>
                         Fecha Inicio
                     </label>
-                    <input type="date" x-model="filters.fecha_inicio" @change="handleDateChange('fecha_inicio')"
-                        class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
+                    <input type="date" x-model="filters.fecha_inicio" @change="handleDateChange('fecha_inicio')" class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
                focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
                bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
                 </div>
@@ -48,8 +46,7 @@
                         </svg>
                         Fecha Fin
                     </label>
-                    <input type="date" x-model="filters.fecha_fin" @change="handleDateChange('fecha_fin')"
-                        class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
+                    <input type="date" x-model="filters.fecha_fin" @change="handleDateChange('fecha_fin')" class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
                focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
                bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
                 </div>
@@ -63,17 +60,16 @@
                         </svg>
                         Estado
                     </label>
-                    <select x-model="filters.estado" @change="loadCompras()"
-    class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
+                    <select x-model="filters.estado" @change="loadCompras()" class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
            focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
            bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
-    <option value="">✨ Todos los estados</option>
-    <option value="pendiente">🟡 Pendiente</option>
-    <option value="recibido">🟢 Recibido</option>
-    <option value="enviado_almacen">🔵 Enviado a Almacén</option>
-    <option value="aprobado">🟢 Aprobado</option>
-    <option value="anulado">🔴 Anulado</option>
-</select>
+                        <option value="">✨ Todos los estados</option>
+                        <option value="pendiente">🟡 Pendiente</option>
+                        <option value="recibido">🟢 Recibido</option>
+                        <option value="enviado_almacen">🔵 Enviado a Almacén</option>
+                        <option value="aprobado">🟢 Aprobado</option>
+                        <option value="anulado">🔴 Anulado</option>
+                    </select>
                 </div>
 
                 <!-- Botón Buscar -->
@@ -106,8 +102,7 @@
                         </svg>
                     </span>
                     <input type="text" x-model="filters.q" @keyup.enter="buscar()"
-                        placeholder="Serie, N° o Proveedor... ✨"
-                        class="form-input w-full pl-12 pr-4 rounded-xl border border-gray-200 focus:border-green-500 
+                        placeholder="Serie, N° o Proveedor... ✨" class="form-input w-full pl-12 pr-4 rounded-xl border border-gray-200 focus:border-green-500 
                focus:ring-2 focus:ring-green-100 transition-all duration-300 hover:border-green-400
                bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 placeholder-gray-400">
                 </div>
@@ -124,15 +119,14 @@
         <!-- Botón Nueva Compra - CON ESPACIOS -->
         <div class="flex justify-end mt-6">
             @if(\App\Helpers\PermisoHelper::tienePermiso('NUEVA COMPRA'))
-            <a href="{{ route('compras.create') }}"
-                class="inline-flex items-center gap-2 px-6 py-3 
-               btn btn-primary space-x-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                <span>Nueva Compra</span>
-            </a>
+                <a href="{{ route('compras.create') }}" class="inline-flex items-center gap-2 px-6 py-3 
+                               btn btn-primary space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Nueva Compra</span>
+                </a>
             @endif
         </div>
 
@@ -163,10 +157,9 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="divide-y divide-gray-200">
                         <template x-for="(compra, index) in compras" :key="compra.idCompra">
-                            <tr class="transition-all duration-150 hover:bg-gray-50"
-                                :class="{ 'bg-gray-50/50': index % 2 === 0 }">
+                            <tr>
                                 <!-- Serie/Nro -->
                                 <td class="px-6 py-4">
                                     <div class="flex items-center">
@@ -225,31 +218,31 @@
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex space-x-2 justify-center">
                                         @if(\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO COMPRA'))
-                                        <!-- Botón Cambiar Estado -->
-                                        <button @click="openEstadoModal(compra)" class="btn btn-secondary">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                                </path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-                                                </path>
-                                            </svg>
-                                            Estado
-                                        </button>
+                                            <!-- Botón Cambiar Estado -->
+                                            <button @click="openEstadoModal(compra)" class="btn btn-secondary">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                                    </path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                                    </path>
+                                                </svg>
+                                                Estado
+                                            </button>
                                         @endif
                                         @if(\App\Helpers\PermisoHelper::tienePermiso('VER DETALLES COMPRA'))
-                                        <!-- Botón Detalles de Compra -->
-                                        <button @click="detallesCompra(compra.idCompra)" class="btn btn-warning">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                </path>
-                                            </svg>
-                                            Detalles
-                                        </button>
+                                            <!-- Botón Detalles de Compra -->
+                                            <button @click="detallesCompra(compra.idCompra)" class="btn btn-warning">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                    </path>
+                                                </svg>
+                                                Detalles
+                                            </button>
                                         @endif
 
                                         <!-- Botón Imprimir Factura -->
@@ -294,8 +287,8 @@
                     <div class="flex bg-[#fbfbfb] items-center justify-between px-5 py-3 border-b">
                         <h5 class="font-bold text-lg text-gray-800">Cambiar Estado de Compra</h5>
                         <button type="button" class="text-gray-500 hover:text-gray-700" @click="closeEstadoModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -354,14 +347,13 @@
                         <button type="button" class="btn btn-outline-danger" @click="closeEstadoModal">
                             Cancelar
                         </button>
-                        <button type="button" class="btn btn-primary" :disabled="updatingEstado"
-                            @click="updateEstado">
+                        <button type="button" class="btn btn-primary" :disabled="updatingEstado" @click="updateEstado">
                             <span x-show="!updatingEstado">Actualizar</span>
                             <span x-show="updatingEstado" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                        stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor"
                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                     </path>
@@ -498,15 +490,15 @@
                     try {
                         const response = await fetch(
                             `/compras/${this.selectedCompra.idCompra}/estado`, {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                },
-                                body: JSON.stringify({
-                                    estado: this.nuevoEstado
-                                })
-                            });
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                estado: this.nuevoEstado
+                            })
+                        });
 
                         const data = await response.json();
 

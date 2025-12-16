@@ -58,14 +58,14 @@
 
     <div x-data="almacenHeatmap" x-init="init()" class="container">
         <!-- Header -->
-        <div class="mb-6 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+        <div class="mb-6 rounded-xl border border-slate-200 panel px-5 py-4 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <span class="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50">
                         <i class="fa-solid fa-warehouse text-indigo-600"></i>
                     </span>
                     <div>
-                        <h1 class="text-xl md:text-2xl font-bold text-slate-800">
+                        <h1 class="text-xl md:text-2xl font-bold">
                             Vista del Almacén por SEDES
                         </h1>
                         <p class="mt-0.5 text-sm text-slate-500">
@@ -99,51 +99,50 @@
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+            <div class="panel rounded-xl p-4 border border-slate-200 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-blue-50 rounded-lg">
                         <i class="fas fa-box text-blue-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-600">Total Racks</p>
-                        <p class="text-2xl font-bold text-slate-800" x-text="stats.totalRacks">0</p>
+                        <p class="text-sm">Total Racks</p>
+                        <p class="text-2xl font-bold" x-text="stats.totalRacks">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+            <div class="panel rounded-xl p-4 border border-slate-200 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-green-50 rounded-lg">
                         <i class="fas fa-check-circle text-green-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-600">Racks Activos</p>
-                        <p class="text-2xl font-bold text-slate-800" x-text="stats.activeRacks">0</p>
+                        <p class="text-sm">Racks Activos</p>
+                        <p class="text-2xl font-bold" x-text="stats.activeRacks">0</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+            <div class="panel rounded-xl p-4 border border-slate-200 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-purple-50 rounded-lg">
                         <i class="fas fa-chart-line text-purple-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-600">Actividad Promedio</p>
-                        <p class="text-2xl font-bold text-slate-800" x-text="stats.avgActivity + '%'">0%</p>
+                        <p class="text-sm">Actividad Promedio</p>
+                        <p class="text-2xl font-bold" x-text="stats.avgActivity + '%'">0%</p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
+            <div class="panel rounded-xl p-4 border border-slate-200 shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="p-2 bg-amber-50 rounded-lg">
                         <i class="fas fa-cube text-amber-600"></i>
                     </div>
                     <div>
-                        <p class="text-sm text-slate-600">Ubicaciones Ocupadas</p>
-                        <p class="text-2xl font-bold text-slate-800"
-                            x-text="stats.ocupadas + '/' + stats.totalUbicaciones">0/0</p>
+                        <p class="text-sm">Ubicaciones Ocupadas</p>
+                        <p class="text-2xl font-bold" x-text="stats.ocupadas + '/' + stats.totalUbicaciones">0/0</p>
                     </div>
                 </div>
             </div>
@@ -184,8 +183,7 @@
                 <!-- Buscador -->
                 <div>
                     <label class="block text-sm font-medium text-slate-600 mb-2">Buscar Rack</label>
-                    <input x-model="filtro.buscar" @input="debounceFilter()" type="text"
-                        placeholder="Ej: R01, R02..."
+                    <input x-model="filtro.buscar" @input="debounceFilter()" type="text" placeholder="Ej: R01, R02..."
                         class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm placeholder-slate-400 focus:border-indigo-500 focus:ring focus:ring-indigo-200">
                 </div>
 
@@ -212,11 +210,11 @@
                 @endif
 
                 {{-- @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR DIMENSIONES RACK'))
-                    <button @click="abrirModalSeleccionRack()"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
-                        <i class="fas fa-edit"></i>
-                        Editar Dimensiones
-                    </button>
+                <button @click="abrirModalSeleccionRack()"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-2 text-sm font-medium hover:bg-blue-700 transition">
+                    <i class="fas fa-edit"></i>
+                    Editar Dimensiones
+                </button>
                 @endif --}}
 
                 @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR RACK'))
@@ -232,7 +230,7 @@
             <!-- Contenido Principal -->
             <div class="content-section space-y-4 mt-4">
                 <!-- Leyenda -->
-                <div class="legend-container bg-white rounded-xl p-4 shadow-sm border border-gray-200 w-full">
+                <div class="legend-container panel rounded-xl p-4 shadow-sm border border-gray-200 w-full">
                     <div class="legend-horizontal flex flex-wrap items-center gap-6 justify-between">
                         <!-- Niveles -->
                         <div class="flex items-center gap-4">
@@ -341,9 +339,9 @@
                             <div class="font-bold text-lg">Seleccionar Rack para Editar</div>
                             <button type="button" class="text-white-dark hover:text-dark"
                                 @click="cerrarModalSeleccionRack()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-x">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -373,8 +371,7 @@
                                                 <i class="fas fa-warehouse text-indigo-600"></i>
                                             </div>
                                             <div>
-                                                <div class="font-semibold text-gray-800"
-                                                    x-text="'Rack ' + rack.nombre">
+                                                <div class="font-semibold text-gray-800" x-text="'Rack ' + rack.nombre">
                                                 </div>
                                                 <div class="text-sm text-gray-600" x-text="rack.sede"></div>
                                             </div>
@@ -413,9 +410,9 @@
                             <div class="font-bold text-lg">Crear Nuevo Rack</div>
                             <button type="button" class="text-white-dark hover:text-dark"
                                 @click="cerrarModalCrearRack()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-x">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -464,8 +461,7 @@
                                     <div class="flex gap-2">
                                         <input type="text" x-model="modalCrearRack.form.nombre" required
                                             class="form-input flex-1 rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
-                                            placeholder="Ej: A, B, C, A1..."
-                                            :class="modalCrearRack.form.nombre && modalCrearRack.sugerencia && modalCrearRack
+                                            placeholder="Ej: A, B, C, A1..." :class="modalCrearRack.form.nombre && modalCrearRack.sugerencia && modalCrearRack
                                                 .form
                                                 .nombre !== modalCrearRack.sugerencia ? 'border-orange-500' : ''">
                                         <button type="button" @click="usarSugerencia()"
@@ -481,8 +477,7 @@
                                         <div class="font-medium mb-1">Letras usadas en <span
                                                 x-text="modalCrearRack.form.sede" class="font-bold"></span>:</div>
                                         <div class="flex flex-wrap gap-1">
-                                            <template x-for="letra in modalCrearRack.letrasUsadas"
-                                                :key="letra">
+                                            <template x-for="letra in modalCrearRack.letrasUsadas" :key="letra">
                                                 <span class="px-2 py-1 bg-slate-200 rounded" x-text="letra"></span>
                                             </template>
                                         </div>
@@ -503,8 +498,8 @@
                                         <label
                                             class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Filas
                                             *</label>
-                                        <input type="number" x-model="modalCrearRack.form.filas" required
-                                            min="1" max="12"
+                                        <input type="number" x-model="modalCrearRack.form.filas" required min="1"
+                                            max="12"
                                             class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                             placeholder="Número de filas">
                                     </div>
@@ -512,8 +507,8 @@
                                         <label
                                             class="block text-sm font-medium text-slate-700 mb-2 dark:text-white-dark/70">Columnas
                                             *</label>
-                                        <input type="number" x-model="modalCrearRack.form.columnas" required
-                                            min="1" max="24"
+                                        <input type="number" x-model="modalCrearRack.form.columnas" required min="1"
+                                            max="24"
                                             class="form-input w-full rounded-lg border border-slate-300 dark:border-[#17263c] dark:bg-[#121c2c] dark:text-white-dark px-3 py-2 text-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 dark:focus:ring-indigo-500/20"
                                             placeholder="Número de columnas">
                                     </div>
@@ -537,8 +532,7 @@
                                         class="btn btn-outline-danger">
                                         Cancelar
                                     </button>
-                                    <button type="submit" :disabled="modalCrearRack.loading"
-                                        :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' :
+                                    <button type="submit" :disabled="modalCrearRack.loading" :class="modalCrearRack.loading ? 'bg-indigo-400 cursor-not-allowed' :
                                             'bg-indigo-600 hover:bg-indigo-700'"
                                         class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
                                         <i class="fas fa-spinner fa-spin" x-show="modalCrearRack.loading"></i>
@@ -552,20 +546,18 @@
             </div>
 
             <!-- Modal para Editar Dimensiones del Rack -->
-            <div x-show="modalEditarDimensiones.open"
-                class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            <div x-show="modalEditarDimensiones.open" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
                 :class="modalEditarDimensiones.open && '!block'">
-                <div class="flex items-start justify-center min-h-screen px-4"
-                    @click="cerrarModalEditarDimensiones()">
+                <div class="flex items-start justify-center min-h-screen px-4" @click="cerrarModalEditarDimensiones()">
                     <div x-show="modalEditarDimensiones.open" x-transition x-transition.duration.300
                         class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg" @click.stop>
                         <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
                             <div class="font-bold text-lg">Editar Dimensiones del Rack</div>
                             <button type="button" class="text-white-dark hover:text-dark"
                                 @click="cerrarModalEditarDimensiones()">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
-                                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-x">
                                     <line x1="18" y1="6" x2="6" y2="18"></line>
                                     <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -662,15 +654,14 @@
                                         <button type="submit"
                                             :disabled="modalEditarDimensiones.loading || !modalEditarDimensiones.puedeActualizar"
                                             :class="modalEditarDimensiones.loading ? 'bg-indigo-400 cursor-not-allowed' :
-                                                (!modalEditarDimensiones.puedeActualizar ?
-                                                    'bg-gray-400 cursor-not-allowed' :
-                                                    'bg-indigo-600 hover:bg-indigo-700')"
+                                                                        (!modalEditarDimensiones.puedeActualizar ?
+                                                                            'bg-gray-400 cursor-not-allowed' :
+                                                                            'bg-indigo-600 hover:bg-indigo-700')"
                                             class="btn btn-primary text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2">
-                                            <i class="fas fa-spinner fa-spin"
-                                                x-show="modalEditarDimensiones.loading"></i>
+                                            <i class="fas fa-spinner fa-spin" x-show="modalEditarDimensiones.loading"></i>
                                             <span
                                                 x-text="modalEditarDimensiones.loading ? 'Actualizando...' :
-                                        (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
+                                                                (!modalEditarDimensiones.puedeActualizar ? 'No se puede actualizar' : 'Actualizar Dimensiones')"></span>
                                         </button>
                                     @endif
                                 </div>
@@ -920,14 +911,14 @@
 
                             const response = await fetch(
                                 `/almacen/racks/${this.modalEditarDimensiones.rack.idRack}/actualizar-dimensiones`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRF-TOKEN': document.querySelector(
-                                            'meta[name="csrf-token"]').getAttribute('content')
-                                    },
-                                    body: JSON.stringify(this.modalEditarDimensiones.form)
-                                });
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify(this.modalEditarDimensiones.form)
+                            });
 
                             const result = await response.json();
                             console.log('Respuesta del servidor:', result);

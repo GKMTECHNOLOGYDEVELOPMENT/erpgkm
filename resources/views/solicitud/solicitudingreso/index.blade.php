@@ -88,7 +88,7 @@
     <div x-data="solicitudApp()" class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">SolicitudesSSSSS de Ingreso</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Solicitudes de Ingreso</h1>
             <p class="text-gray-600">Gestiona las solicitudes de ingreso agrupadas por origen</p>
         </div>
 
@@ -208,7 +208,7 @@
                 <div
                     class="panel rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-300">
                     <!-- Header de la Card Grupal -->
-                    <div class="border-b border-gray-200 p-4 bg-gray-50">
+                    <div class="border-b border-gray-200 p-4">
                         <div class="flex justify-between items-start mb-2">
                             <div>
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
@@ -233,7 +233,7 @@
                                 <h3 class="font-semibold text-gray-800"
                                     x-text="grupo.origen === 'compra' ? grupo.origen_especifico.codigocompra : grupo.origen_especifico.codigo_entrada">
                                 </h3>
-                                <p class="text-sm text-gray-600"
+                                <p class="text-sm text-gray-700"
                                     x-text="grupo.mostrar_cliente ? 'Cliente: ' + grupo.cliente_general.descripcion : 'Proveedor: ' + grupo.proveedor.nombre">
                                 </p>
                             </div>
@@ -356,34 +356,35 @@
                                         x-text="'Fecha origen: ' + formatFecha(grupo.fecha_origen)"></span>
                                     <div class="flex space-x-2">
                                         @if(\App\Helpers\PermisoHelper::tienePermiso('VER ESTADOS SOLICITUD INGRESO'))
-                                                                <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
-                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
-                                                                    :class="getBotonGrupalClasses(grupo, 'pendiente')">
-                                                                    Todos Pendiente
-                                                                </button>
-                                                                <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
-                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
-                                                                    :class="getBotonGrupalClasses(grupo, 'recibido')">
-                                                                    Todos Recibido
-                                                                </button>
-                                                                <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
-                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
-                                                                    :class="getBotonGrupalClasses(grupo, 'ubicado')">
-                                                                    Todos Ubicado
-                                                                </button>
-                                                                <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
-                                                                    :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
-                                                                    :class="getBotonGrupalClasses(grupo, 'actualizar')">
-                                                                    Todos Actualizar
-                                                                </button>
-                                                                <!-- 🔴 NUEVO: Botón Unity a nivel grupo -->
-                                                                <button @click="ubicarPrimeraSolicitudEnUnity(grupo)"
-                                                                    :disabled="esBotonUnityGrupoDeshabilitado(grupo)" class="px-3 py-1 text-xs rounded-lg transition-colors
-                                               bg-purple-100 text-purple-800 hover:bg-purple-200
-                                               disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
-                                                                    <i class="fas fa-tv mr-1"></i>
-                                                                    Unity Grupo
-                                                                </button>
+                                            <button @click="cambiarEstadoGrupo(grupo, 'pendiente')"
+                                                :disabled="botonGrupalDeshabilitado(grupo, 'pendiente')"
+                                                :class="getBotonGrupalClasses(grupo, 'pendiente')">
+                                                Todos Pendiente
+                                            </button>
+                                            <button @click="cambiarEstadoGrupo(grupo, 'recibido')"
+                                                :disabled="botonGrupalDeshabilitado(grupo, 'recibido')"
+                                                :class="getBotonGrupalClasses(grupo, 'recibido')">
+                                                Todos Recibido
+                                            </button>
+                                            <button @click="cambiarEstadoGrupo(grupo, 'ubicado')"
+                                                :disabled="botonGrupalDeshabilitado(grupo, 'ubicado')"
+                                                :class="getBotonGrupalClasses(grupo, 'ubicado')">
+                                                Todos Ubicado
+                                            </button>
+                                            <button @click="cambiarEstadoGrupo(grupo, 'actualizar')"
+                                                :disabled="botonGrupalDeshabilitado(grupo, 'actualizar')"
+                                                :class="getBotonGrupalClasses(grupo, 'actualizar')">
+                                                Todos Actualizar
+                                            </button>
+                                            <!-- 🔴 NUEVO: Botón Unity a nivel grupo -->
+                                            <button @click="ubicarPrimeraSolicitudEnUnity(grupo)"
+                                                :disabled="esBotonUnityGrupoDeshabilitado(grupo)"
+                                                class="px-3 py-1 text-xs rounded-lg transition-colors
+                                                           bg-purple-100 text-purple-800 hover:bg-purple-200
+                                                           disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                                <i class="fas fa-tv mr-1"></i>
+                                                Unity Grupo
+                                            </button>
                                         @endif
                                     </div>
                                 </div>

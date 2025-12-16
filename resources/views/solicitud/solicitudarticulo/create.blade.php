@@ -27,7 +27,7 @@
         }
     </style>
 
-    <div x-data="solicitudArticulo()" class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+    <div x-data="solicitudArticulo()" class="min-h-screen py-8">
         <div class="container mx-auto px-4 w-full">
             <div class="mb-6">
                 <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
@@ -43,7 +43,7 @@
             </div>
             <!-- Header Principal -->
             <div
-                class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
+                class="panel rounded-2xl shadow-lg p-8 mb-8 border border-blue-100 transition-all duration-300 hover:shadow-xl">
                 <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-8">
                     <!-- Contenido Principal -->
                     <div class="flex-1">
@@ -58,7 +58,7 @@
 
                         <!-- Información en Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3 p-3 rounded-lg">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor"
@@ -75,7 +75,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3 p-3 rounded-lg">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor"
@@ -91,7 +91,7 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3 p-3 rounded-lg">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor"
@@ -127,7 +127,7 @@
                 <div class="xl:col-span-3 space-y-8">
                     <!-- Selección de Artículos -->
                     <div
-                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        class="panel rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
                         <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                             <div class="flex items-center space-x-3">
                                 <div
@@ -211,8 +211,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody class="bg-white divide-y divide-green-100">
-                                                <template x-for="(product, index) in cotizacionProducts"
-                                                    :key="index">
+                                                <template x-for="(product, index) in cotizacionProducts" :key="index">
                                                     <tr class="hover:bg-green-50 transition-colors">
                                                         <td class="px-4 py-3">
                                                             <div class="space-y-1">
@@ -250,11 +249,10 @@
                                                         <td class="px-4 py-3 text-sm">
                                                             <button @click="addProductFromCotizacion(product)"
                                                                 class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center space-x-2">
-                                                                <svg class="w-4 h-4" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M12 4v16m8-8H4"></path>
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                                 </svg>
                                                                 <span>Agregar</span>
                                                             </button>
@@ -269,8 +267,7 @@
                                     <div class="mt-4 flex justify-end">
                                         <button @click="addAllCotizacionProducts()"
                                             class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-bold flex items-center space-x-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
                                                 </path>
@@ -321,8 +318,7 @@
                                             <tbody class="bg-white divide-y divide-blue-100">
                                                 <template x-if="products.length === 0">
                                                     <tr>
-                                                        <td colspan="4"
-                                                            class="px-6 py-12 text-center text-gray-500">
+                                                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
                                                             <i class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
                                                             <p class="mt-2 text-lg font-medium text-gray-900">No hay
                                                                 artículos agregados</p>
@@ -341,8 +337,7 @@
                                                                 <div class="text-xs text-gray-500 space-y-0.5">
                                                                     <div class="flex items-center space-x-1"
                                                                         x-show="product.tipo_articulo">
-                                                                        <i
-                                                                            class="fas fa-tag text-xs text-blue-500"></i>
+                                                                        <i class="fas fa-tag text-xs text-blue-500"></i>
                                                                         <span class="font-medium">Tipo:</span>
                                                                         <span x-text="product.tipo_articulo"></span>
                                                                     </div>
@@ -385,8 +380,7 @@
                                                                 <div class="flex space-x-2">
                                                                     <button @click="updateQuantity(index, -1)"
                                                                         class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad <= 1"
-                                                                        :class="{
+                                                                        :disabled="product.cantidad <= 1" :class="{
                                                                             'opacity-50 cursor-not-allowed': product
                                                                                 .cantidad <= 1
                                                                         }">
@@ -394,8 +388,7 @@
                                                                     </button>
                                                                     <button @click="updateQuantity(index, 1)"
                                                                         class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad >= 1000"
-                                                                        :class="{
+                                                                        :disabled="product.cantidad >= 1000" :class="{
                                                                             'opacity-50 cursor-not-allowed': product
                                                                                 .cantidad >= 1000
                                                                         }">
@@ -423,7 +416,7 @@
                                 <!-- Para pantallas medianas y pequeñas: tarjetas -->
                                 <div class="lg:hidden space-y-4">
                                     <template x-if="products.length === 0">
-                                        <div class="bg-white rounded-xl border border-blue-100 p-6 text-center">
+                                        <div class="panel rounded-xl border border-blue-100 p-6 text-center">
                                             <i class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
                                             <p class="text-lg font-medium text-gray-900">No hay artículos agregados</p>
                                             <p class="text-sm mt-2 text-gray-600">Agregue artículos usando el
@@ -433,7 +426,7 @@
 
                                     <template x-for="(product, index) in products" :key="product.uniqueId">
                                         <div
-                                            class="bg-white rounded-xl border border-blue-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                                            class="panel rounded-xl border border-blue-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
                                             <!-- Header de la tarjeta -->
                                             <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
                                                 <div class="flex justify-between items-center">
@@ -522,8 +515,7 @@
                                                                 <div class="flex space-x-2">
                                                                     <button @click="updateQuantity(index, -1)"
                                                                         class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad <= 1"
-                                                                        :class="{
+                                                                        :disabled="product.cantidad <= 1" :class="{
                                                                             'opacity-50 cursor-not-allowed': product
                                                                                 .cantidad <= 1
                                                                         }">
@@ -531,8 +523,7 @@
                                                                     </button>
                                                                     <button @click="updateQuantity(index, 1)"
                                                                         class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad >= 1000"
-                                                                        :class="{
+                                                                        :disabled="product.cantidad >= 1000" :class="{
                                                                             'opacity-50 cursor-not-allowed': product
                                                                                 .cantidad >= 1000
                                                                         }">
@@ -554,8 +545,7 @@
                                 <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Agregar Nuevo
                                     Artículo Manualmente</h3>
 
-                                <div
-                                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
                                     <!-- Artículo -->
                                     <div class="lg:col-span-2">
                                         <label
@@ -586,20 +576,19 @@
                                         <div class="flex w-full">
                                             <button @click="decreaseQuantity()"
                                                 class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-3 sm:px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M20 12H4"></path>
                                                 </svg>
                                             </button>
-                                            <input type="number" x-model="newProduct.cantidad" min="1"
-                                                max="1000"
+                                            <input type="number" x-model="newProduct.cantidad" min="1" max="1000"
                                                 class="w-12 sm:w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold text-sm sm:text-base"
                                                 readonly />
                                             <button @click="increaseQuantity()"
                                                 class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-3 sm:px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none"
-                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                 </svg>
@@ -619,8 +608,7 @@
                                     </div>
                                 </div>
 
-                                <button @click="addProduct()" :disabled="!canAddProduct"
-                                    :class="{
+                                <button @click="addProduct()" :disabled="!canAddProduct" :class="{
                                         'opacity-50 cursor-not-allowed': !canAddProduct,
                                         'hover:scale-[1.02]': canAddProduct
                                     }"
@@ -638,7 +626,7 @@
 
                     <!-- Información Adicional -->
                     <div
-                        class="bg-white rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                        class="panel rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
                         <div
                             class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-lg shadow-xl border border-white/10 relative overflow-hidden">
                             <!-- Efecto sutil de brillo -->
@@ -788,8 +776,7 @@
                                                 <!-- Header con icono y título -->
                                                 <div class="flex items-center justify-between mb-2 sm:mb-3">
                                                     <div class="flex items-center space-x-1 sm:space-x-2">
-                                                        <i class="fas"
-                                                            :class="urgencia.icon + ' ' + urgencia.iconColor +
+                                                        <i class="fas" :class="urgencia.icon + ' ' + urgencia.iconColor +
                                                                 ' text-lg sm:text-xl'"></i>
                                                         <h3 class="font-bold text-gray-900 text-sm sm:text-base md:text-lg"
                                                             x-text="urgencia.text"></h3>
@@ -840,7 +827,7 @@
                 <!-- Sidebar -->
                 <div class="xl:col-span-1 space-y-8">
                     <!-- Resumen de la Solicitud -->
-                    <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100">
+                    <div class="panel rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100">
                         <!-- Título -->
                         <div class="flex items-center justify-center mb-4 sm:mb-6">
                             <i class="fas fa-clipboard-list text-blue-600 text-xl mr-3"></i>
@@ -997,7 +984,7 @@
                     </div>
 
                     <!-- Acciones Rápidas -->
-                    <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100">
+                    <div class="panel rounded-2xl shadow-lg p-4 sm:p-6 border border-blue-100">
                         <!-- Título -->
                         <div class="flex items-center justify-center mb-4 sm:mb-6">
                             <i class="fas fa-bolt text-blue-600 text-xl mr-3"></i>
@@ -1006,8 +993,7 @@
 
                         <div class="space-y-3 sm:space-y-4">
                             <!-- Botón Limpiar Todo -->
-                            <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
-                                :class="{
+                            <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder" :class="{
                                     'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder,
                                     'hover:bg-yellow-600': products.length > 0 && !isCreatingOrder
                                 }"
@@ -1020,11 +1006,11 @@
                                 <!-- Botón Guardar Solicitud -->
                                 <button @click="createSolicitud()" :disabled="!canCreateSolicitud || isCreatingOrder"
                                     :class="{
-                                        'opacity-50 cursor-not-allowed': !canCreateSolicitud || isCreatingOrder,
-                                        'hover:bg-green-600 active:scale-95': canCreateSolicitud && !isCreatingOrder,
-                                        'hover:scale-[1.02] sm:hover:scale-[1.02]': canCreateSolicitud && !
-                                            isCreatingOrder
-                                    }"
+                                                                                    'opacity-50 cursor-not-allowed': !canCreateSolicitud || isCreatingOrder,
+                                                                                    'hover:bg-green-600 active:scale-95': canCreateSolicitud && !isCreatingOrder,
+                                                                                    'hover:scale-[1.02] sm:hover:scale-[1.02]': canCreateSolicitud && !
+                                                                                        isCreatingOrder
+                                                                                }"
                                     class="w-full px-4 py-3 sm:px-6 sm:py-4 bg-green-500 text-white rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-2 sm:space-x-3 shadow-lg">
                                     <!-- Icono o spinner -->
                                     <template x-if="!isCreatingOrder">
@@ -1081,8 +1067,7 @@
                     </div>
 
                     <!-- Información de Contacto -->
-                    <div
-                        class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl p-4 sm:p-6 border border-blue-200">
+                    <div class="panel rounded-2xl p-4 sm:p-6 border border-blue-200">
                         <h4 class="text-base sm:text-lg font-bold text-blue-700 mb-4 sm:mb-6 text-center">¿Necesita
                             Ayuda?</h4>
                         <div class="space-y-3 sm:space-y-4">
@@ -1091,8 +1076,8 @@
                                 class="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
@@ -1109,8 +1094,8 @@
                                 class="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
@@ -1241,32 +1226,32 @@
 
                 // Niveles de urgencia
                 nivelesUrgencia: [{
-                        value: 'baja',
-                        text: 'Baja',
-                        icon: 'fa-circle-check',
-                        iconColor: 'text-green-500',
-                        bgColor: 'bg-green-50',
-                        borderColor: 'border-green-200',
-                        description: 'Sin urgencia específica'
-                    },
-                    {
-                        value: 'media',
-                        text: 'Media',
-                        icon: 'fa-clock',
-                        iconColor: 'text-yellow-500',
-                        bgColor: 'bg-yellow-50',
-                        borderColor: 'border-yellow-200',
-                        description: 'Necesario en los próximos días'
-                    },
-                    {
-                        value: 'alta',
-                        text: 'Alta',
-                        icon: 'fa-triangle-exclamation',
-                        iconColor: 'text-red-500',
-                        bgColor: 'bg-red-50',
-                        borderColor: 'border-red-200',
-                        description: 'Urgente - necesario inmediatamente'
-                    }
+                    value: 'baja',
+                    text: 'Baja',
+                    icon: 'fa-circle-check',
+                    iconColor: 'text-green-500',
+                    bgColor: 'bg-green-50',
+                    borderColor: 'border-green-200',
+                    description: 'Sin urgencia específica'
+                },
+                {
+                    value: 'media',
+                    text: 'Media',
+                    icon: 'fa-clock',
+                    iconColor: 'text-yellow-500',
+                    bgColor: 'bg-yellow-50',
+                    borderColor: 'border-yellow-200',
+                    description: 'Necesario en los próximos días'
+                },
+                {
+                    value: 'alta',
+                    text: 'Alta',
+                    icon: 'fa-triangle-exclamation',
+                    iconColor: 'text-red-500',
+                    bgColor: 'bg-red-50',
+                    borderColor: 'border-red-200',
+                    description: 'Urgente - necesario inmediatamente'
+                }
                 ],
 
                 // Computed properties
@@ -1330,7 +1315,7 @@
 
                 initSelect2() {
                     console.log('Inicializando Select2 - articulos disponibles:', this.articulos
-                    .length);
+                        .length);
 
                     // Artículo Select
                     if (this.$refs.articuloSelect && this.articulos.length > 0) {
@@ -1344,7 +1329,7 @@
                     } else {
                         console.warn(
                             'No se pudo inicializar Select2 - no hay artículos o elemento no encontrado'
-                            );
+                        );
                     }
 
                     // Cotización Select
@@ -1443,14 +1428,14 @@
                         if (nuevaCantidad > cantidadMaxima) {
                             toastr.error(
                                 `No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`
-                                );
+                            );
                             return;
                         }
 
                         this.products[existingProductIndex].cantidad = nuevaCantidad;
                         toastr.info(
                             `Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`
-                            );
+                        );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
@@ -1476,7 +1461,7 @@
                         this.products.push(product);
                         toastr.success(
                             `Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`
-                            );
+                        );
                     }
                 },
 
@@ -1497,7 +1482,7 @@
                         if (articuloCompleto) {
                             const existingProductIndex = this.products.findIndex(
                                 product => product.articuloId == cotizacionProduct
-                                .articulo_id
+                                    .articulo_id
                             );
 
                             if (existingProductIndex !== -1) {
@@ -1598,7 +1583,7 @@
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
                         toastr.success(
                             `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
-                            );
+                        );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
@@ -1643,7 +1628,7 @@
                         if (newQuantity > product.cantidadCotizacion) {
                             toastr.error(
                                 `No puede exceder la cantidad de la cotización: ${product.cantidadCotizacion} unidades`
-                                );
+                            );
                             return;
                         }
 
@@ -1714,7 +1699,7 @@
                 async createSolicitud() {
                     if (!this.canCreateSolicitud) {
                         toastr.error(
-                        'Complete todos los campos requeridos para crear la solicitud');
+                            'Complete todos los campos requeridos para crear la solicitud');
                         return;
                     }
 

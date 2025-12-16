@@ -1758,24 +1758,6 @@ Route::prefix('permisos')->group(function () {
 });
 
 
-// Rutas para el sistema de racks
-// Route::get('/almacen/ubicaciones/vista', [UbicacionesVistaController::class, 'vistaAlmacen'])->name('almacen.ubicaciones.vista');
-// Route::get('/almacen/ubicaciones/detalle/{rackId?}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
-
-// Route::prefix('almacen/ubicaciones')->group(function () {
-//     // Vistas
-//     Route::get('/vista-almacen', [UbicacionesVistaController::class, 'vistaAlmacen'])->name('almacen.ubicaciones.vista');
-//     Route::get('/detalle-rack/{rackNombre}', [UbicacionesVistaController::class, 'detalleRack'])->name('almacen.ubicaciones.detalle');
-
-//     // APIs
-//     Route::get('/heatmap-data', [UbicacionesVistaController::class, 'getHeatmapData'])->name('almacen.ubicaciones.heatmap-data');
-//     Route::get('/rack-data/{rackNombre}', [UbicacionesVistaController::class, 'getRackData'])->name('almacen.ubicaciones.rack-data');
-//     Route::get('/all-racks', [UbicacionesVistaController::class, 'getAllRacks'])->name('almacen.ubicaciones.all-racks');
-//     Route::post('/reubicar', [UbicacionesVistaController::class, 'reubicarProducto'])->name('almacen.ubicaciones.reubicar');
-//     Route::post('/vaciar-ubicacion', [UbicacionesVistaController::class, 'vaciarUbicacion'])->name('almacen.ubicaciones.vaciar');
-// });
-
-
 // Ruta para el detalle de un rack específico
 Route::get('/almacen/ubicaciones/detalle-rack/{rack}', [UbicacionesVistaController::class, 'detalleRack'])
     ->name('almacen.detalle-rack');
@@ -1783,9 +1765,6 @@ Route::get('/almacen/ubicaciones/detalle-rack/{rack}', [UbicacionesVistaControll
 // Para racks panel
 Route::get('/almacen/ubicaciones/detalle-rack-panel/{rack}', [UbicacionesVistaController::class, 'detalleRackPanel'])
     ->name('almacen.detalle-rack-panel');
-
-
-
 
 // Rutas para reubicación
 Route::post('/almacen/reubicacion/iniciar', [UbicacionesVistaController::class, 'iniciarReubicacion'])->name('almacen.reubicacion.iniciar');
@@ -1844,6 +1823,18 @@ Route::get('/almacen/racks/{id}/tiene-productos', [UbicacionesVistaController::c
 
 
 
+
+// RUTAS MOVER PANELES RACKS
+
+// RUTAS PARA MOVIMIENTOS EN PANEL
+// En web.php, cambia la ruta:
+Route::post('/almacen/ubicaciones/disponibles-panel', [UbicacionesVistaController::class, 'getUbicacionesParaMovimientoPanel']);
+Route::post('/almacen/mover-caja-panel', [UbicacionesVistaController::class, 'moverCajaPanel']);
+Route::post('/almacen/mover-producto-panel', [UbicacionesVistaController::class, 'moverProductoPanel']);
+// En web.php, AÑADE esta ruta:
+Route::post('/almacen/mover-articulo-en-caja-panel', [UbicacionesVistaController::class, 'moverProductoPanel']);
+
+Route::post('/almacen/mover-articulo-en-caja-panel', [UbicacionesVistaController::class, 'moverArticuloEnCajaPanel']);
 // Rutas para suministros
 // Route::post('/guardar-suministros', [OrdenesHelpdeskController::class, 'guardarSuministros'])->name('guardar.suministros');
 // Route::get('/get-suministros/{ticketId}/{visitaId}', [OrdenesHelpdeskController::class, 'obtenerSuministros'])->name('get.suministros');
