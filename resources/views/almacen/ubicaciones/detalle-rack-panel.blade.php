@@ -233,8 +233,9 @@
                     <div class="p-6">
                         <!-- Información Principal -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <!-- Columna Izquierda - Información General -->
+                            <!-- Columna Izquierda - Información General y Estadísticas -->
                             <div class="space-y-4">
+                                <!-- Ubicación -->
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Ubicación:</span>
@@ -242,6 +243,7 @@
                                         x-text="ubicacion?.codigo || 'N/A'"></span>
                                 </div>
 
+                                <!-- Estado -->
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Estado:</span>
@@ -249,23 +251,21 @@
                                         x-text="getEstadoTexto(ubicacion?.estado)"></span>
                                 </div>
 
+                                <!-- Nivel -->
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Nivel:</span>
                                     <span class="font-bold text-lg text-blue-600"
                                         x-text="ubicacion?.nivel || 'N/A'"></span>
                                 </div>
-                            </div>
 
-                            <!-- Columna Derecha - Estadísticas -->
-                            <div class="space-y-4">
+                                <!-- Cantidad Total -->
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Cantidad Total:</span>
                                     <div class="text-right">
                                         <span class="font-bold text-lg"
                                             :class="ubicacion?.capacidad_total_cajas > 0 ? 'text-amber-600' : 'text-green-600'">
-                                            <!-- Muestra cantidad/ capacidad si hay cajas -->
                                             <span x-text="ubicacion?.cantidad_total || 0"></span>
                                             <span x-show="ubicacion?.capacidad_total_cajas > 0">
                                                 /<span x-text="ubicacion?.capacidad_total_cajas"></span>
@@ -274,18 +274,75 @@
                                     </div>
                                 </div>
 
-                                <div
-                                    class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
-                                    <span class="font-semibold text-gray-700">Productos Diferentes:</span>
-                                    <span class="font-bold text-lg text-purple-600"
-                                        x-text="ubicacion?.productos?.length || 0"></span>
-                                </div>
-
+                                <!-- Categoría -->
                                 <div
                                     class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border">
                                     <span class="font-semibold text-gray-700">Categoría:</span>
                                     <span class="font-bold text-lg text-orange-600"
                                         x-text="ubicacion?.categoria || 'Sin categoría'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha - Solo QR Code -->
+                            <div class="space-y-4">
+                                <div
+                                    class="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border h-full flex flex-col">
+                                    <div class="text-center mb-3">
+                                        <h3 class="font-semibold text-gray-700 mb-2">Código QR de Ubicación</h3>
+                                        <p class="text-sm text-gray-500 mb-3">Escanea este código para acceder
+                                            rápidamente</p>
+                                    </div>
+
+                                    <!-- QR Code Container -->
+                                    <div class="flex flex-col items-center justify-center flex-1">
+                                        <!-- QR Image -->
+                                        <div class="mb-4 p-2 bg-white rounded-lg shadow-sm border">
+                                            <img :src="'/almacen/ubicaciones/qr/' + encodeURIComponent(ubicacion?.codigo_unico ||
+                                                ubicacion?.codigo)"
+                                                :alt="'QR Code - ' + (ubicacion?.codigo || 'N/A')"
+                                                class="w-48 h-48 object-contain" id="qr-image" x-ref="qrImage">
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="flex space-x-3 mt-auto">
+                                            <!-- Download Button -->
+                                            <button type="button" @click="downloadQR()"
+                                                class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                    </path>
+                                                </svg>
+                                                Descargar QR
+                                            </button>
+
+                                            <!-- Copy Link Button -->
+                                            <button type="button" @click="copyQRUrl()"
+                                                class="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                                    </path>
+                                                </svg>
+                                                Copiar URL
+                                            </button>
+                                        </div>
+
+                                        <!-- Info Text -->
+                                        <div class="mt-3 text-center">
+                                            <p class="text-xs text-gray-500">
+                                                Código: <span x-text="ubicacion?.codigo_unico || ubicacion?.codigo"
+                                                    class="font-medium"></span>
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                Tamaño: 350x350px | Tipo: PNG
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

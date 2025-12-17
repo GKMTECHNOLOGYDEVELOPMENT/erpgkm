@@ -1013,6 +1013,84 @@ function modalDetalleUbicacion() {
             return textos[estado] || textos['vacio'];
         },
 
+        // ========== CAMBIA ESTAS FUNCIONES ==========
+        downloadQR() {
+            console.log('downloadQR ejecutado');
+            console.log('this.ubicacion:', this.ubicacion);
+
+            // Usa this.ubicacion del componente actual
+            const qrCode = this.ubicacion?.codigo_unico || this.ubicacion?.codigo;
+
+            if (!qrCode) {
+                console.error('No se pudo obtener código de ubicación:', this.ubicacion);
+                toastr.error('No hay código de ubicación disponible', 'Error');
+                return;
+            }
+
+            console.log('Código para QR:', qrCode);
+
+            // Crear enlace de descarga
+            const downloadUrl = `/almacen/ubicaciones/qr/${encodeURIComponent(qrCode)}?download=true`;
+            console.log('URL de descarga:', downloadUrl);
+
+            // Mostrar mensaje de carga
+            toastr.info('Preparando descarga...', 'Procesando');
+
+            // Crear un enlace temporal para la descarga
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = `qr-ubicacion-${qrCode}.svg`; // Cambia a .svg
+            document.body.appendChild(link);
+
+            // Simular clic para iniciar descarga
+            link.click();
+            document.body.removeChild(link);
+
+            // Mostrar notificación de éxito
+            toastr.success('QR descargado correctamente', '¡Listo!', {
+                timeOut: 3000,
+                progressBar: true,
+                closeButton: true,
+            });
+
+            console.log('QR descargado:', qrCode);
+        },
+
+        copyQRUrl() {
+            console.log('copyQRUrl ejecutado');
+            console.log('this.ubicacion:', this.ubicacion);
+
+            // Usa this.ubicacion del componente actual
+            const qrCode = this.ubicacion?.codigo_unico || this.ubicacion?.codigo;
+
+            if (!qrCode) {
+                console.error('No se pudo obtener código de ubicación:', this.ubicacion);
+                toastr.error('No hay código de ubicación disponible', 'Error');
+                return;
+            }
+
+            const qrUrl = `${window.location.origin}/almacen/ubicaciones/qr/${encodeURIComponent(qrCode)}`;
+            console.log('URL para copiar:', qrUrl);
+
+            // Mostrar mensaje de procesando
+            toastr.info('Copiando al portapapeles...', 'Procesando');
+
+            // Usar Clipboard API
+            navigator.clipboard
+                .writeText(qrUrl)
+                .then(() => {
+                    // Éxito
+                    toastr.success('URL copiada al portapapeles', '¡Copiado!', {
+                        timeOut: 3000,
+                        progressBar: true,
+                        closeButton: true,
+                    });
+                })
+                .catch((err) => {
+                    console.error('Error al copiar:', err);
+                    toastr.error('Error al copiar URL', 'Error');
+                });
+        },
         // FUNCIÓN SIMPLIFICADA - SOLUCIÓN
         iniciarMovimientoDesdeModalConArticulo(articulo, ubicacion = null) {
             console.log('=== INICIAR MOVIMIENTO DESDE MODAL ===');

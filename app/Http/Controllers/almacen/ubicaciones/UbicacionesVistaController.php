@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Str; // ¡Agrega esta línea!
+
 
 class UbicacionesVistaController extends Controller
 {
@@ -26,7 +28,7 @@ class UbicacionesVistaController extends Controller
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 
-    public function generarQrPorNombre(string $nombre)
+    public function generarQrPorNombre(string $nombre, Request $request)
     {
         $nombre = trim($nombre);
 
@@ -34,15 +36,25 @@ class UbicacionesVistaController extends Controller
             return response()->json(['message' => 'Nombre inválido'], 422);
         }
 
-        $png = QrCode::format('png')
+        // Opción A: Forzar a usar SVG (no requiere imagick)
+        $qr = QrCode::format('svg')
             ->size(350)
             ->margin(2)
             ->errorCorrection('M')
             ->generate($nombre);
 
-        return response($png, 200)
-            ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'inline; filename="qr.png"');
+        $fileName = 'qr-ubicacion-' . Str::slug($nombre) . '.svg';
+
+        // Verificar si se solicita descarga
+        if ($request->has('download')) {
+            return response($qr, 200)
+                ->header('Content-Type', 'image/svg+xml')
+                ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+        }
+
+        return response($qr, 200)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
     }
 
     // En UbicacionesVistaController.php
