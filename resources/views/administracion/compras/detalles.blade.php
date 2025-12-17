@@ -15,7 +15,7 @@
                     </div>
                     <h1 class="text-2xl font-bold text-gray-800">DETALLES DE COMPRA</h1>
                 </div>
-                <p class="text-gray-600 text-sm md:text-base max-w-3xl">
+                <p class="text-gray-700 text-sm md:text-base max-w-3xl">
                     En el módulo COMPRAS usted podrá registrar compras de productos ya sea nuevos o ya registrados en
                     sistema. También puede ver la lista de todas las compras realizadas, buscar compras y ver
                     información
@@ -28,22 +28,13 @@
         <div class="rounded-lg shadow-sm p-4 mb-8">
             <div class="flex flex-wrap items-center justify-center gap-4 md:gap-10 text-gray-700">
                 <a href="{{ route('compras.create') }}" class="btn btn-primary">
-                    <div class="p-2 bg-sky-100 rounded-full group-hover:bg-sky-200 transition-colors">
-                        <i class="fa-solid fa-bag-shopping text-sky-600"></i>
-                    </div>
                     <span class="font-medium text-sm">NUEVA COMPRA</span>
                 </a>
 
                 <a href="{{ route('compras.index') }}" class="btn btn-warning">
-                    <div class="p-2 bg-sky-100 rounded-full group-hover:bg-sky-200 transition-colors">
-                        <i class="fa-solid fa-clipboard-list text-sky-600"></i>
-                    </div>
                     <span class="font-medium text-sm">COMPRAS REALIZADAS</span>
                 </a>
                 <a href="#" class="btn btn-secondary">
-                    <div class="p-2 bg-sky-100 rounded-full group-hover:bg-sky-200 transition-colors">
-                        <i class="fa-solid fa-magnifying-glass text-sky-600"></i>
-                    </div>
                     <span class="font-medium text-sm">BUSCAR COMPRA</span>
                 </a>
             </div>
@@ -208,7 +199,7 @@
         <div class="rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
             <!-- Encabezado de la tabla -->
             <div class="px-6 py-5 bg-gradient-to-r from-indigo-600 to-purple-700">
-                <h2 class="text-xl font-bol flex items-center gap-3">
+                <h2 class="text-xl text-white flex items-center gap-3">
                     <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                         <i class="fa-solid fa-cart-shopping"></i>
                     </div>
@@ -224,17 +215,13 @@
                             </th>
                             <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100">
                                 DESCRIPCIÓN</th>
-                            <th
-                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
                                 CANTIDAD</th>
-                            <th
-                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
                                 PRECIO</th>
-                            <th
-                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-48">
                                 SUBTOTAL</th>
-                            <th
-                                class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
+                            <th class="px-6 py-4 text-left font-bold uppercase text-xs border-b border-indigo-100 w-40">
                                 ACCIÓN</th>
                         </tr>
                     </thead>
@@ -268,8 +255,7 @@
                                 <td class="px-6 py-4 font-medium">{{ $loop->iteration }}</td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                                        <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
                                             <i class="fa-solid fa-box text-indigo-600"></i>
                                         </div>
                                         <span
@@ -291,8 +277,7 @@
                                 <td class="px-6 py-4">
                                     <button
                                         class="devolver-btn text-emerald-600 hover:text-emerald-700 p-1 rounded-md hover:bg-emerald-50"
-                                        title="Registrar devolución"
-                                        data-id-detalle="{{ $detalle->idDetalleCompra }}"
+                                        title="Registrar devolución" data-id-detalle="{{ $detalle->idDetalleCompra }}"
                                         data-id-compra="{{ $compra->idCompra }}"
                                         data-producto="{{ $detalle->producto->nombre ?? $detalle->articulo->nombre }}"
                                         data-max="{{ $cantNeta }}"
@@ -322,22 +307,26 @@
                                 <td class="px-6 py-4" colspan="3"></td>
                                 <td class="px-6 py-4 font-bold text-indigo-700 text-right">SUBTOTAL</td>
                                 <td class="px-6 py-4 font-bold text-blue-600">
-                                    {{ $monedaSimbolo }}{{ number_format($subtotal, 2) }}</td>
+                                    {{ $monedaSimbolo }}{{ number_format($subtotal, 2) }}
+                                </td>
                                 <td class="px-6 py-4"></td>
                             </tr>
                             <tr>
                                 <td class="px-6 py-4" colspan="3"></td>
                                 <td class="px-6 py-4 font-bold text-indigo-700 text-right">IGV
-                                    {{ $compra->sujetoporcentaje ?? 0 }}%</td>
+                                    {{ $compra->sujetoporcentaje ?? 0 }}%
+                                </td>
                                 <td class="px-6 py-4 font-bold text-blue-600">
-                                    {{ $monedaSimbolo }}{{ number_format($igv, 2) }}</td>
+                                    {{ $monedaSimbolo }}{{ number_format($igv, 2) }}
+                                </td>
                                 <td class="px-6 py-4"></td>
                             </tr>
                             <tr class="bg-gradient-to-r from-indigo-100 to-purple-100 border-t-2 border-indigo-200">
                                 <td class="px-6 py-4" colspan="3"></td>
                                 <td class="px-6 py-4 font-bold text-indigo-900 text-lg text-right">TOTAL</td>
                                 <td class="px-6 py-4 font-bold text-indigo-900 text-lg">
-                                    {{ $monedaSimbolo }}{{ number_format($total, 2) }}</td>
+                                    {{ $monedaSimbolo }}{{ number_format($total, 2) }}
+                                </td>
                                 <td class="px-6 py-4"></td>
                             </tr>
                         </tfoot>
@@ -359,8 +348,8 @@
                         <div class="flex bg-[#fbfbfb] items-center justify-between px-5 py-3">
                             <div class="font-bold text-lg">Registrar Devolución</div>
                             <button type="button" class="text-gray-500 hover:text-gray-700" @click="open=false">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -389,8 +378,7 @@
                                     </label>
                                     <input id="cantidad" name="cantidad" type="number"
                                         class="w-full px-4 py-2 rounded-lg bg-gray-50 text-gray-700 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
-                                        min="1" :max="form.maxCantidad" x-model.number="form.cantidad"
-                                        required>
+                                        min="1" :max="form.maxCantidad" x-model.number="form.cantidad" required>
                                 </div>
 
                                 <div class="mb-4">
@@ -437,7 +425,7 @@
         <section class="rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100">
             <!-- Encabezado -->
             <div class="px-6 py-5 bg-gradient-to-r from-rose-500 to-pink-600">
-                <h2 class="text-xl font-bold flex items-center gap-3">
+                <h2 class="text-xl text-white flex items-center gap-3">
                     <div class="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
                         <i class="fa-solid fa-arrow-rotate-left"></i>
                     </div>
@@ -482,7 +470,8 @@
                                     {{ $monedaSimbolo }}{{ number_format($devolucion->total_devolucion, 2) }}
                                 </td>
                                 <td class="px-6 py-4">{{ $devolucion->usuario_nombre ?? 'N/A' }}
-                                    {{ $devolucion->usuario_apellido ?? '' }}</td>
+                                    {{ $devolucion->usuario_apellido ?? '' }}
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -535,7 +524,7 @@
 
         // Helper de borde rojo en inputs inválidos
         function markInvalid($el, msg) {
-            $el.addClass('ring-2 ring-red-400 focus:ring-red-400').one('input', function() {
+            $el.addClass('ring-2 ring-red-400 focus:ring-red-400').one('input', function () {
                 $(this).removeClass('ring-2 ring-red-400 focus:ring-red-400');
             });
             if (msg) toast.warn(msg);
@@ -578,7 +567,7 @@
             }));
         });
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Vars del backend
             let monedaSimbolo = '{{ $compra->moneda->simbolo ?? 'S/.' }}';
             let porcentajeIGV = {{ $compra->sujetoporcentaje ?? 18 }};
@@ -603,7 +592,7 @@
             // Cerrar modal (botón cancelar ya cierra por Alpine). Aquí nada extra.
 
             // Enviar formulario de devolución por AJAX
-            $('#devolucionForm').on('submit', function(e) {
+            $('#devolucionForm').on('submit', function (e) {
                 e.preventDefault();
 
                 const $form = $(this);
@@ -632,7 +621,7 @@
                     url: '{{ route('compras.devolucion') }}',
                     method: 'POST',
                     data: $form.serialize(),
-                    success: function(response) {
+                    success: function (response) {
                         if (!response || !response.success) {
                             toast.err(response?.message ??
                                 'No se pudo registrar la devolución.');
@@ -648,7 +637,7 @@
 
                         if (nuevaCantidad === 0) {
                             // quitar fila y renumerar
-                            $row.fadeOut(150, function() {
+                            $row.fadeOut(150, function () {
                                 $(this).remove();
 
                                 // Renumerar dentro del mismo tbody (usa id si existe)
@@ -656,7 +645,7 @@
                                     $('#tabla-productos tbody') :
                                     btnSel.closest('table').find('tbody').first();
 
-                                $tbody.children('tr').each(function(i) {
+                                $tbody.children('tr').each(function (i) {
                                     $(this).find('td').first().text(i +
                                         1); // primera col = #
                                 });
@@ -671,7 +660,7 @@
                             $row.find('[data-col="cantidad"]').text(nuevaCantidad);
 
                             const nuevoSubtotalTxt = (window.monedaSimbolo ||
-                                    '{{ $compra->moneda->simbolo ?? 'S/.' }}') +
+                                '{{ $compra->moneda->simbolo ?? 'S/.' }}') +
                                 (nuevaCantidad * precioUnit).toFixed(2);
 
                             const $subCell = $row.find('[data-col="subtotal"]');
@@ -719,7 +708,7 @@
                         window.dispatchEvent(new CustomEvent('close-devolucion'));
                         toast.ok('Devolución registrada correctamente.');
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
                             const errs = xhr.responseJSON.errors;
                             Object.keys(errs).forEach(k => toast.err(errs[k][0]));
@@ -727,7 +716,7 @@
                             toast.err('Error al procesar la devolución. Intente nuevamente.');
                         }
                     },
-                    complete: function() {
+                    complete: function () {
                         $submit.html('Registrar Devolución').prop('disabled', false);
                     }
                 });

@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use Symfony\Component\HttpFoundation\Response;
 
 class UbicacionesVistaController extends Controller
 {
@@ -27,24 +25,6 @@ class UbicacionesVistaController extends Controller
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 
-    public function generarQrPorNombre(string $nombre)
-    {
-        $nombre = trim($nombre);
-
-        if ($nombre === '') {
-            return response()->json(['message' => 'Nombre inválido'], 422);
-        }
-
-        $png = QrCode::format('png')
-            ->size(350)
-            ->margin(2)
-            ->errorCorrection('M')
-            ->generate($nombre);
-
-        return response($png, 200)
-            ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'inline; filename="qr.png"');
-    }
 
 
     // En UbicacionesVistaController.php

@@ -13,7 +13,7 @@
             </div>
             <!-- Header -->
             <div
-                class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+                class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 p-4 panel rounded-lg shadow-sm border border-gray-100">
                 <div class="mb-4 md:mb-0">
                     <div class="flex items-center space-x-3">
                         <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-lg shadow-sm">
@@ -146,7 +146,7 @@
             </div>
 
             <!-- Filters - Design Mejorado -->
-            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+            <div class="panel rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -253,8 +253,7 @@
                         }">
 
                         <!-- Header con color según ESTADO -->
-                        <div class="px-6 py-4 text-white relative overflow-hidden"
-                            :class="{
+                        <div class="px-6 py-4 text-white relative overflow-hidden" :class="{
                                 'bg-warning': request.estado === 'pendiente',
                                 'bg-success': request.estado === 'aprobada',
                                 'bg-danger': request.estado === 'rechazada',
@@ -287,14 +286,12 @@
 
                             <!-- Indicador de prioridad en esquina superior derecha -->
                             <div class="absolute top-3 right-3">
-                                <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm"
-                                    :class="{
+                                <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm" :class="{
                                         'bg-danger': request.prioridad?.nivel === 'high',
                                         'bg-warning': request.prioridad?.nivel === 'medium',
                                         'bg-success': request.prioridad?.nivel === 'low',
                                         'bg-dark': !request.prioridad?.nivel
-                                    }"
-                                    :title="'Prioridad: ' + (request.prioridad?.nombre || 'No definida')">
+                                    }" :title="'Prioridad: ' + (request.prioridad?.nombre || 'No definida')">
                                 </div>
                             </div>
                         </div>

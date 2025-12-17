@@ -50,7 +50,7 @@
         </div>
 
         <!-- Barra de Herramientas Mejorada -->
-        <div class="card mb-6 border-0 shadow-xl bg-gradient-to-r from-white to-gray-50/50">
+        <div class="panel mb-4 border-0 rounded-xl shadow-lg">
             <div class="p-8">
                 <!-- Header Principal -->
                 <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
@@ -61,8 +61,7 @@
                                 <i class="fas fa-file-invoice-dollar text-white text-2xl"></i>
                             </div>
                             <div>
-                                <h1
-                                    class="text-xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                                <h1 class="text-xl font-bold text-gray-700">
                                     Gestión de Cotizaciones
                                 </h1>
                                 <p class="text-gray-600 mt-1 flex items-center text-sm">
@@ -103,8 +102,8 @@
                                     class="fas fa-search text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
                             </div>
                             <input type="text" x-model="searchTerm" @input="filtrarCotizaciones()"
-    placeholder="Buscar por número, cliente, documento..."
-    class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm hover:border-gray-300 placeholder-gray-400">
+                                placeholder="Buscar por número, cliente, documento..."
+                                class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 bg-white shadow-sm hover:border-gray-300 placeholder-gray-400">
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                                 <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full"
                                     x-text="`${cotizacionesFiltradas.length} resultados`"></span>
@@ -232,9 +231,9 @@
         </div>
 
         <!-- Lista de Cotizaciones - Diseño Elegante y Formal -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="panel rounded-lg shadow-sm border border-gray-200">
             <!-- Header de la Tabla -->
-            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div class="px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">Registro de Cotizaciones</h3>
@@ -271,8 +270,7 @@
                             <th
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
                                 Válida Hasta</th>
-                            <th
-                                class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
                                 Valor Total</th>
                             <th
                                 class="px-6 py-3 text-center text-xs font-medium text-gray-700 uppercase tracking-wider">
@@ -294,8 +292,7 @@
                                         </div>
                                         <h4 class="text-lg font-medium text-gray-900 mb-2">No se encontraron
                                             cotizaciones</h4>
-                                        <p class="text-gray-600 max-w-md text-center"
-                                            x-text="searchTerm || filtroEstado ?
+                                        <p class="text-gray-600 max-w-md text-center" x-text="searchTerm || filtroEstado ?
                                           'No hay resultados que coincidan con los criterios de búsqueda' :
                                           'El registro de cotizaciones se encuentra vacío'">
                                         </p>
@@ -306,7 +303,7 @@
 
                         <!-- Items de Cotizaciones -->
                         <template x-for="(cotizacion, index) in cotizacionesFiltradas" :key="cotizacion.id">
-                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <tr>
                                 <!-- Número -->
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="text-sm text-gray-600 font-medium" x-text="index + 1"></span>
@@ -327,8 +324,7 @@
                                             <div class="text-xs text-gray-500 flex items-center space-x-1 mt-1">
                                                 <span x-text="cotizacion.moneda"></span>
                                                 <span>•</span>
-                                                <span
-                                                    x-text="cotizacion.incluirIGV ? 'Incluye IGV' : 'Sin IGV'"></span>
+                                                <span x-text="cotizacion.incluirIGV ? 'Incluye IGV' : 'Sin IGV'"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -347,8 +343,8 @@
 
                                 <!-- Fechas -->
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <div class="text-sm text-gray-900"
-                                        x-text="formatearFecha(cotizacion.fechaEmision)"></div>
+                                    <div class="text-sm text-gray-900" x-text="formatearFecha(cotizacion.fechaEmision)">
+                                    </div>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -426,7 +422,7 @@
             </div>
 
             <!-- Paginación -->
-            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div class="px-6 py-4 border-t border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-700">
                         Mostrando <span class="font-medium" x-text="cotizacionesFiltradas.length"></span> de
@@ -447,8 +443,7 @@
                                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
                                     :class="pagina === paginaActual ?
                                         'bg-blue-600 text-white' :
-                                        'text-gray-700 hover:bg-gray-100 border border-gray-300'"
-                                    x-text="pagina">
+                                        'text-gray-700 hover:bg-gray-100 border border-gray-300'" x-text="pagina">
                                 </button>
                             </template>
                         </div>
@@ -469,12 +464,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-    // Configuración de toastr
-    toastr.options = {
-        "closeButton": true,
-        "progressBar": true,
-        "positionClass": "toast-top-right",
-        "timeOut": "5000"
-    };
-</script>
+        // Configuración de toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "5000"
+        };
+    </script>
 </x-layout.default>
