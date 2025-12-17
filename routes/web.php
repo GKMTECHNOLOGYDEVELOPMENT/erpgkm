@@ -134,7 +134,13 @@ Route::prefix('unity')->name('unity.')->group(function () {
 
     Route::get('/cajas/create', [UnityController::class, 'cajasCreate'])
         ->name('cajas.create');
+
+    Route::get('/almacen/vistageneral', [UnityController::class, 'vistaGeneral'])
+        ->name('vistageneral.index');
 });
+
+Route::get('/almacen/ubicaciones/qr/{nombre}', [UbicacionesVistaController::class, 'generarQrPorNombre']);
+
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Ruta para mostrar el formulario de login
@@ -161,7 +167,7 @@ Route::post('/configuracion/delete', [ConfiguracionController::class, 'delete'])
 // Ruta para el dashboard de almacén
 Route::middleware(['auth', 'permiso:VER DASHBOARD ALMACEN'])->group(function () {
     Route::get('/almacen', [AlmacenController::class, 'index'])->name('almacen');
-});// Ruta para el dashboard comercial
+}); // Ruta para el dashboard comercial
 Route::middleware(['auth', 'permiso:VER DASHBOARD COMERCIAL'])->group(function () {
     Route::get('/comercial', [ComercialController::class, 'index'])->name('commercial');
 });
@@ -177,10 +183,10 @@ Route::get('/administracion/compras', [ComprasController::class, 'index'])->name
 Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])
     ->name('administracion.cliente-general')
     ->middleware(['auth', 'permiso:VER CLIENTE GENERAL']);
-    
-    Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 
-    
+Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
+
+
 Route::get('/exportar-clientes-general', function () {
     return Excel::download(new ClientesGeneralExport, 'clientes_general.xlsx');
 })->name('clientes-general.exportExcel');
@@ -195,7 +201,8 @@ Route::get('/get-distrito/{provinciaId}', [UbigeoController::class, 'getDistrito
 //Rutas para Tiendas
 Route::get('/tienda', [TiendaController::class, 'index'])
     ->name('administracion.tienda')
-    ->middleware(['auth', 'permiso:VER TIENDA']);Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
+    ->middleware(['auth', 'permiso:VER TIENDA']);
+Route::post('/tiendas', [TiendaController::class, 'store'])->name('tiendas.store');
 Route::get('/tienda/{idTienda}/edit', [TiendaController::class, 'edit'])->name('tienda.edit');
 Route::put('/tienda/{idTienda}', [TiendaController::class, 'update'])->name('tiendas.update');
 Route::get('/tienda/create', [TiendaController::class, 'create'])->name('tienda.create')->middleware('auth');
@@ -507,7 +514,7 @@ Route::prefix('ventas')->name('ventas.')->group(function () {
     Route::delete('/{id}', [VentasVentasController::class, 'destroy'])->name('destroy'); // Eliminar un artículo
     Route::get('/export-pdf', [VentasVentasController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [VentasVentasController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
-    
+
 });
 
 /// INICIO VENTAS ///
@@ -726,21 +733,21 @@ Route::prefix('solicitudarticulo')->name('solicitudarticulo.')->group(function (
     Route::post('/{id}/aceptar-individual', [SolicitudarticuloController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
     Route::get('/{id}/conformidad-pdf', [SolicitudarticuloController::class, 'generarConformidad'])
-    ->name('conformidad-pdf');
+        ->name('conformidad-pdf');
 
 
-Route::get('/{id}/gestionar', [SolicitudarticuloController::class, 'gestionar'])->name('gestionar');
-Route::post('/{id}/marcar-usado', [SolicitudarticuloController::class, 'marcarUsado'])->name('marcar-usado');
-Route::post('/{id}/marcar-no-usado', [SolicitudarticuloController::class, 'marcarNoUsado'])->name('marcar-no-usado');
+    Route::get('/{id}/gestionar', [SolicitudarticuloController::class, 'gestionar'])->name('gestionar');
+    Route::post('/{id}/marcar-usado', [SolicitudarticuloController::class, 'marcarUsado'])->name('marcar-usado');
+    Route::post('/{id}/marcar-no-usado', [SolicitudarticuloController::class, 'marcarNoUsado'])->name('marcar-no-usado');
 
-// En web.php (rutas de solicitudarticulo)
-Route::post('/{id}/enviar-almacen', [SolicitudarticuloController::class, 'enviarAlmacen'])->name('enviar-almacen');
-Route::get('/enviar-almacen/modal-data', [SolicitudarticuloController::class, 'getModalData'])->name('modal-data');
+    // En web.php (rutas de solicitudarticulo)
+    Route::post('/{id}/enviar-almacen', [SolicitudarticuloController::class, 'enviarAlmacen'])->name('enviar-almacen');
+    Route::get('/enviar-almacen/modal-data', [SolicitudarticuloController::class, 'getModalData'])->name('modal-data');
 });
 
-    Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])
-        ->name('solicitudarticulo.index')
-        ->middleware('permiso:VER SOLICITUD DE ARTICULO');
+Route::get('solicitudarticulo/', [SolicitudarticuloController::class, 'index'])
+    ->name('solicitudarticulo.index')
+    ->middleware('permiso:VER SOLICITUD DE ARTICULO');
 
 Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
@@ -757,12 +764,11 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
     Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
-    ->name('solicitudrepuesto.store-provincia')
-    ->middleware('auth');
+        ->name('solicitudrepuesto.store-provincia')
+        ->middleware('auth');
 
-Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
-    ->name('conformidad-pdf');
-
+    Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
+        ->name('conformidad-pdf');
 });
 
 
@@ -781,12 +787,11 @@ Route::prefix('solicitudrepuestoprovincia')->name('solicitudrepuestoprovincia.')
     Route::post('/{id}/aceptar-provincia-individual', [SolicitudRepuestoController::class, 'aceptarProvinciaIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
     Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
-    ->name('solicitudrepuesto.store-provincia')
-    ->middleware('auth');
+        ->name('solicitudrepuesto.store-provincia')
+        ->middleware('auth');
 
-Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidadProvincia'])
-    ->name('conformidad-pdf');
-
+    Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidadProvincia'])
+        ->name('conformidad-pdf');
 });
 
 
@@ -813,9 +818,9 @@ Route::prefix('solicitudingreso')->name('solicitudingreso.')->group(function () 
     })->name('exportExcel');
 });
 
-   Route::get('solicitudingreso/', [SolicitudingresoController::class, 'index'])
-        ->name('solicitudingreso.index')
-        ->middleware('permiso:VER SOLICITUD DE INGRESO');
+Route::get('solicitudingreso/', [SolicitudingresoController::class, 'index'])
+    ->name('solicitudingreso.index')
+    ->middleware('permiso:VER SOLICITUD DE INGRESO');
 
 Route::get('/solicitudes-ingreso/por-compra/{compraId}', [SolicitudIngresoController::class, 'porCompra'])->name('solicitudes.por-compra');
 Route::post('/solicitudes-ingreso/procesar', [SolicitudIngresoController::class, 'procesar'])->name('solicitudes.procesar');
@@ -872,7 +877,7 @@ Route::prefix('solicitudcompra')->name('solicitudcompra.')->group(function () {
 
     Route::post('/{idSolicitud}/articulo/{idDetalle}/aprobar', [SolicitudcompraController::class, 'aprobarArticulo'])->name('articulo.aprobar');
     Route::post('/{idSolicitud}/articulo/{idDetalle}/rechazar', [SolicitudcompraController::class, 'rechazarArticulo'])->name('articulo.rechazar');
-     Route::post('/{id}/cambiar-estado', [SolicitudcompraController::class, 'cambiarEstado'])->name('cambiar.estado');
+    Route::post('/{id}/cambiar-estado', [SolicitudcompraController::class, 'cambiarEstado'])->name('cambiar.estado');
     Route::post('/{id}/cancelar', [SolicitudcompraController::class, 'cancelarSolicitud'])->name('cancelar');
 });
 
@@ -884,21 +889,19 @@ Route::prefix('solicitudalmacen')->name('solicitudalmacen.')->group(function () 
     Route::post('/', [SolicitudalmacenController::class, 'store'])->name('store');
     Route::get('/select-data', [SolicitudalmacenController::class, 'getSelectData'])->name('select-data');
     Route::get('/buscar-articulo/{codigo}', [SolicitudalmacenController::class, 'buscarArticulo'])->name('buscar-articulo');
-    
+
     // Rutas para detalles
     Route::get('/{id}/detalles', [SolicitudalmacenController::class, 'show'])->name('show');
     Route::get('/{id}/detalles-data', [SolicitudalmacenController::class, 'getDetailData'])->name('detalles-data');
-    
+
     // Rutas para edición
     Route::get('/{id}/edit', [SolicitudalmacenController::class, 'edit'])->name('edit');
     Route::get('/{id}/edit-data', [SolicitudalmacenController::class, 'getEditData'])->name('edit-data');
     Route::put('/{id}', [SolicitudalmacenController::class, 'update'])->name('update');
-    
+
     // Rutas para gestión de estados - CORREGIDAS
     Route::post('/detalle/{id}/cambiar-estado', [SolicitudalmacenController::class, 'changeDetailStatus'])->name('detalle.cambiar-estado');
     Route::post('/{id}/cambiar-estado-final', [SolicitudalmacenController::class, 'changeFinalStatus'])->name('cambiar-estado-final');
-    
-
 });
 
 
@@ -1418,7 +1421,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     // Rutas para tickets
- // Solo ver lista
+    // Solo ver lista
     Route::get('Seguimiento-Cliente/', [ClienteSeguimientoController::class, 'index'])
         ->name('Seguimiento.index')
         ->middleware('permiso:VER SEGUIMIENTO CLIENTE');
@@ -1892,7 +1895,7 @@ Route::prefix('areas')->group(function () {
     Route::get('/{id}/edit', [AreasController::class, 'edit'])->name('areas.edit');
     Route::put('/{id}', [AreasController::class, 'update'])->name('areas.update');
     Route::delete('/{id}', [AreasController::class, 'destroy'])->name('areas.destroy');
-    
+
     // API Routes
     Route::get('/api/areas', [AreasController::class, 'getAreas'])->name('api.areas');
     Route::get('/api/areas-data', [AreasController::class, 'getAll'])->name('api.areas.data');
@@ -1910,7 +1913,6 @@ Route::prefix('contactofinal')->group(function () {
     Route::put('/{id}', [ContactoFinalController::class, 'update'])->name('contactofinal.update');
     Route::delete('/{id}', [ContactoFinalController::class, 'destroy'])->name('contactofinal.destroy');
     Route::get('/all', [ContactoFinalController::class, 'getAll'])->name('contactofinal.getAll');
-
 });
 
 
