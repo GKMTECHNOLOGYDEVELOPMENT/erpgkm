@@ -139,7 +139,7 @@ Route::prefix('unity')->name('unity.')->group(function () {
         ->name('vistageneral.index');
 });
 
-Route::match(['GET', 'POST'], 'almacen/ubicaciones/disponibles-panel', [UbicacionesVistaController::class, 'disponiblesPanel']);
+Route::get('/almacen/ubicaciones/qr/{nombre}', [UbicacionesVistaController::class, 'generarQrPorNombre']);
 
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
