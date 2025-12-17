@@ -57,6 +57,24 @@ class UbicacionesVistaController extends Controller
             ->header('Content-Disposition', 'inline; filename="' . $fileName . '"');
     }
 
+    public function vistaQR(string $nombre)
+    {
+        $nombre = trim($nombre);
+
+        // Obtener las sedes disponibles desde la tabla sucursal
+        $sedes = DB::table('sucursal')
+            ->select('nombre')
+            ->where('estado', 1)
+            ->orderBy('nombre')
+            ->pluck('nombre')
+            ->toArray();
+
+        // Agregar opción para ambas sedes al principio
+        array_unshift($sedes, 'Seleccionar todas las sedes');
+
+        return view('almacen.ubicaciones.vista_qr', compact('sedes', 'nombre'));
+    }
+
     // En UbicacionesVistaController.php
     public function obtenerTipoRack(Request $request)
     {
