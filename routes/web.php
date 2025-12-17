@@ -141,6 +141,7 @@ Route::prefix('unity')->name('unity.')->group(function () {
 
 Route::get('/almacen/ubicaciones/qr/{nombre}', [UbicacionesVistaController::class, 'generarQrPorNombre']);
 
+Route::get('almacen/ubicaciones/qr/vista/{nombre}', [UbicacionesVistaController::class, 'vistaQR']);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 // Ruta para mostrar el formulario de login

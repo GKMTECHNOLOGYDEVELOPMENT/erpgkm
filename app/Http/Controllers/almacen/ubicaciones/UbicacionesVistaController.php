@@ -25,6 +25,25 @@ class UbicacionesVistaController extends Controller
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 
+    public function vistaQR(string $nombre)
+    {
+        $nombre = trim($nombre);
+
+        // Obtener las sedes disponibles desde la tabla sucursal
+        $sedes = DB::table('sucursal')
+            ->select('nombre')
+            ->where('estado', 1)
+            ->orderBy('nombre')
+            ->pluck('nombre')
+            ->toArray();
+
+        // Agregar opción para ambas sedes al principio
+        array_unshift($sedes, 'Seleccionar todas las sedes');
+
+        return view('almacen.ubicaciones.vista_qr', compact('sedes', 'nombre'));
+    }
+
+
     public function generarQrPorNombre(string $nombre)
     {
         $nombre = trim($nombre);
@@ -144,9 +163,9 @@ class UbicacionesVistaController extends Controller
                 'ta.nombre as tipo_articulo',
                 'ta.idTipoArticulo',
                 // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
-                DB::raw('CASE 
-            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-            ELSE c_normal.nombre 
+                DB::raw('CASE
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre
+            ELSE c_normal.nombre
         END as categoria'),
                 'cg.descripcion as cliente_general_nombre'
             )
@@ -373,7 +392,7 @@ class UbicacionesVistaController extends Controller
         }
 
 
-        // Stats finales 
+        // Stats finales
         $stats = [
             'totalRacks' => count($rackGroups),
             'activeRacks' => count(array_filter($actividadPorRack)), // ✅ Usar actividadPorRack, no normalizada
@@ -513,10 +532,10 @@ class UbicacionesVistaController extends Controller
 
                 // Campos para productos normales
                 'a.idArticulos',
-                DB::raw('CASE 
-            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-            THEN a.codigo_repuesto 
-            ELSE a.nombre 
+                DB::raw('CASE
+            WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != ""
+            THEN a.codigo_repuesto
+            ELSE a.nombre
         END as producto'),
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
@@ -525,9 +544,9 @@ class UbicacionesVistaController extends Controller
                 'ta.idTipoArticulo',
 
                 // ✅ CATEGORÍA CORRECTA
-                DB::raw('CASE 
-            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-            ELSE c_normal.nombre 
+                DB::raw('CASE
+            WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre
+            ELSE c_normal.nombre
         END as categoria'),
 
                 'cg.descripcion as cliente_general_nombre',
@@ -739,10 +758,10 @@ class UbicacionesVistaController extends Controller
                 'a.idArticulos',
 
                 // ✅ Lógica de repuestos
-                DB::raw('CASE 
-                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                THEN a.codigo_repuesto 
-                ELSE a.nombre 
+                DB::raw('CASE
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != ""
+                THEN a.codigo_repuesto
+                ELSE a.nombre
             END as producto'),
 
                 'a.nombre as nombre_original',
@@ -1123,10 +1142,10 @@ class UbicacionesVistaController extends Controller
                 'ru.updated_at',
                 'rua.idRackUbicacionArticulo',
                 'a.idArticulos',
-                DB::raw('CASE 
-                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                THEN a.codigo_repuesto 
-                ELSE a.nombre 
+                DB::raw('CASE
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != ""
+                THEN a.codigo_repuesto
+                ELSE a.nombre
             END as producto'),
                 'a.nombre as nombre_original',
                 'a.codigo_repuesto',
@@ -2589,10 +2608,10 @@ class UbicacionesVistaController extends Controller
                         'a.nombre',
                         'a.codigo_repuesto',
                         'ta.idTipoArticulo',
-                        DB::raw('CASE 
-                        WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                        THEN a.codigo_repuesto 
-                        ELSE a.nombre 
+                        DB::raw('CASE
+                        WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != ""
+                        THEN a.codigo_repuesto
+                        ELSE a.nombre
                     END as producto_mostrar')
                     )
                     ->first();
@@ -3282,14 +3301,14 @@ class UbicacionesVistaController extends Controller
                     'cg.descripcion as cliente_nombre',
                     'c.serie as serie_custodia',
                     'c.codigocustodias as codigo_custodia',
-                    DB::raw('CASE 
-                    WHEN rua.custodia_id IS NOT NULL THEN 
+                    DB::raw('CASE
+                    WHEN rua.custodia_id IS NOT NULL THEN
                         COALESCE(c.serie, c.codigocustodias, CONCAT("Custodia ", c.id))
-                    WHEN a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" THEN 
+                    WHEN a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" THEN
                         a.codigo_repuesto
-                    WHEN a.nombre IS NOT NULL AND a.nombre != "" THEN 
+                    WHEN a.nombre IS NOT NULL AND a.nombre != "" THEN
                         a.nombre
-                    ELSE 
+                    ELSE
                         CONCAT("Artículo ", a.idArticulos)
                 END as nombre_mostrar')
                 )
@@ -3647,10 +3666,10 @@ class UbicacionesVistaController extends Controller
                 ->whereNull('rua.custodia_id')
                 ->select(
                     'a.idArticulos as id',
-                    DB::raw('CASE 
-                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != "" 
-                THEN a.codigo_repuesto 
-                ELSE a.nombre 
+                    DB::raw('CASE
+                WHEN ta.idTipoArticulo = 2 AND a.codigo_repuesto IS NOT NULL AND a.codigo_repuesto != ""
+                THEN a.codigo_repuesto
+                ELSE a.nombre
             END as nombre'),
                     'a.nombre as nombre_original',
                     'a.codigo_repuesto',
@@ -3658,9 +3677,9 @@ class UbicacionesVistaController extends Controller
                     'ta.nombre as tipo_articulo',
                     'ta.idTipoArticulo',
                     // ✅ CATEGORÍA CORRECTA: Si es repuesto usa c_repuesto, sino c_normal
-                    DB::raw('CASE 
-                WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre 
-                ELSE c_normal.nombre 
+                    DB::raw('CASE
+                WHEN a.idTipoArticulo = 2 THEN c_repuesto.nombre
+                ELSE c_normal.nombre
             END as categoria'),
                     'rua.cantidad',
                     'rua.cliente_general_id',
