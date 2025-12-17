@@ -1,8 +1,21 @@
+<script>
+    // LO MÁS SIMPLE - Sin complicaciones
+    window.rackData = <?= json_encode($rack, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    window.todosRacks =
+        <?= json_encode($todosRacks ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    window.rackActual =
+        <?= json_encode($rackActual ?? '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+    window.sedeActual =
+        <?= json_encode($sedeActual ?? '', JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+
+    console.log('rackData:', window.rackData);
+</script>
 <x-layout.default title="Rack Panel - {{ $rack['nombre'] }} - ERP Solutions Force">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/detalle-rack-panel.css') }}">
-    <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
+    <div x-data="rackDetalle" x-init="init()" class="min-h-screen flex flex-col">
         <!-- Header Mejorado - ESTÁTICO -->
         <div class="relative overflow-hidden bg-black text-white px-6 py-8">
             <div
@@ -126,8 +139,14 @@
                                                                     <template x-if="ubicacion.estado !== 'vacio'">
                                                                         <div>
                                                                             <!-- ✅ SOLO mostrar cantidad (sin capacidad) -->
-                                                                            <div class="ubicacion-cantidad"
-                                                                                x-text="ubicacion.cantidad_total || ubicacion.cantidad || 0">
+                                                                            <div class="ubicacion-cantidad">
+                                                                                <span
+                                                                                    x-text="ubicacion.cantidad_total || ubicacion.cantidad || 0"></span>
+                                                                                <span
+                                                                                    x-show="ubicacion?.capacidad_total_cajas > 0">
+                                                                                    /<span
+                                                                                        x-text="ubicacion?.capacidad_total_cajas"></span>
+                                                                                </span>
                                                                             </div>
                                                                             <div class="ubicacion-categoria"
                                                                                 x-text="ubicacion.categoria || 'Sin categoría'">
@@ -419,11 +438,11 @@
                                                         </div>
                                                     </template>
 
-                                                    <!-- Botón para mover la caja -->
+                                                    <!-- Botón para mover la caja
                                                     <button @click="iniciarMovimientoDesdeModalConArticulo(caja)"
                                                         class="mt-3 px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-lg flex items-center transition-colors">
                                                         <i class="fas fa-exchange-alt mr-2"></i> Mover esta caja
-                                                    </button>
+                                                    </button>-->
                                                 </div>
                                             </template>
                                         </div>
@@ -500,7 +519,8 @@
             @click.self="$store.rackDetalle.cancelarMovimiento()">
 
             <div x-show="$store.rackDetalle.modoMovimiento.activo" x-transition x-transition.duration.300
-                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-2xl my-8">
+                class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-4xl my-8">
+                <!-- Cambiado a max-w-4xl -->
 
                 <!-- Header del Modal -->
                 <div class="flex bg-primary items-center justify-between px-6 py-4">
@@ -525,29 +545,102 @@
                         <h4 class="font-bold text-gray-700 mb-4 flex items-center">
                             <i class="fas fa-box mr-2"></i>Artículo a Mover
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Cambiado: Mostrar código de repuesto en lugar de nombre -->
-                            <div class="flex items-center justify-between p-3 bg-white rounded border">
-                                <span class="font-semibold text-gray-700">Código Repuesto:</span>
-                                <span class="font-bold text-primary truncate max-w-[150px]"
-                                    x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.codigo_repuesto || 
-                                   $store.rackDetalle.modoMovimiento.articuloSeleccionado?.codigo_barras || 
-                                   $store.rackDetalle.modoMovimiento.articuloSeleccionado?.sku || 'N/A'"></span>
+                        <!-- Fila 1: Código Repuesto - Ocupa toda la fila -->
+                        <div class="mb-4">
+                            <div
+                                class="p-4 bg-gradient-to-r from-blue-50 to-white rounded-xl border border-blue-200 shadow-sm">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-barcode text-2xl text-blue-500 mr-3"></i>
+                                        <div>
+                                            <div
+                                                class="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-1">
+                                                Código Repuesto
+                                            </div>
+                                            <div class="font-mono text-2xl md:text-3xl font-bold text-blue-600 break-all"
+                                                x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.codigo_repuesto || 
+                               $store.rackDetalle.modoMovimiento.articuloSeleccionado?.codigo_barras || 
+                               $store.rackDetalle.modoMovimiento.articuloSeleccionado?.sku || 'N/A'">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="$store.rackDetalle.copiarCodigo()"
+                                            class="px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg font-medium transition-colors flex items-center"
+                                            title="Copiar código al portapapeles">
+                                            <i class="fas fa-copy mr-2"></i>
+                                            Copiar
+                                        </button>
+
+                                        <!-- Mostrar nombre del artículo si existe -->
+                                        <div x-show="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.nombre"
+                                            class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg border">
+                                            <span class="font-medium">Nombre:</span>
+                                            <span class="ml-2"
+                                                x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.nombre"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 bg-white rounded border">
-                                <span class="font-semibold text-gray-700">Disponible:</span>
-                                <span class="font-bold text-lg text-amber-600"
-                                    x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 0"></span>
+                        </div>
+
+                        <!-- Fila 2: Disponible, Origen y Categoría en 3 columnas - COMPACTO -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <!-- Disponible -->
+                            <div class="p-3 bg-white rounded-lg border border-amber-100 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-box-open text-amber-500 text-sm mr-2"></i>
+                                        <span class="text-sm font-semibold text-gray-700">Disponible</span>
+                                    </div>
+                                    <span class="text-xs text-amber-600 font-medium">
+                                        <i class="fas fa-mouse-pointer mr-1"></i>Para mover
+                                    </span>
+                                </div>
+                                <div class="flex items-baseline justify-between">
+                                    <div class="text-2xl font-bold text-amber-600"
+                                        x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 0">
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-base font-bold text-gray-800"
+                                            x-text="$store.rackDetalle.modoMovimiento.cantidad"></div>
+                                        <div class="text-xs text-gray-500">seleccionadas</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 bg-white rounded border">
-                                <span class="font-semibold text-gray-700">Origen:</span>
-                                <span class="font-bold text-lg text-green-600"
-                                    x-text="$store.rackDetalle.modoMovimiento.ubicacionOrigen?.codigo || 'N/A'"></span>
+
+                            <!-- Origen -->
+                            <div class="p-3 bg-white rounded-lg border border-green-100 shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-map-marker-alt text-green-500 text-sm mr-2"></i>
+                                    <span class="text-sm font-semibold text-gray-700">Origen</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-arrow-right text-green-600 mr-2"></i>
+                                    <div class="text-lg font-bold text-green-700 truncate"
+                                        x-text="$store.rackDetalle.modoMovimiento.ubicacionOrigen?.codigo || 'N/A'">
+                                    </div>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1 truncate"
+                                    x-text="$store.rackDetalle.modoMovimiento.ubicacionOrigen?.rack_nombre || ''">
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between p-3 bg-white rounded border">
-                                <span class="font-semibold text-gray-700">Categoría:</span>
-                                <span class="font-bold text-lg text-orange-600"
-                                    x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.categoria || 'N/A'"></span>
+
+                            <!-- Categoría -->
+                            <div class="p-3 bg-white rounded-lg border border-orange-100 shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-tag text-orange-500 text-sm mr-2"></i>
+                                    <span class="text-sm font-semibold text-gray-700">Categoría</span>
+                                </div>
+                                <div class="text-lg font-bold text-orange-600 mb-1 truncate"
+                                    x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.categoria || 'Sin categoría'">
+                                </div>
+                                <div class="text-xs text-gray-600 flex items-center">
+                                    <i class="fas fa-cube mr-1"></i>
+                                    <span class="truncate"
+                                        x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.tipo_articulo || 'Sin tipo'"></span>
+                                </div>
                             </div>
                         </div>
                         <!-- Mostrar nombre del artículo si existe (opcional) -->
@@ -560,51 +653,85 @@
                         </template>
                     </div>
 
-                    <!-- Cantidad a mover -->
-                    <div class="mb-6">
-                        <h4 class="font-bold text-gray-700 mb-4 flex items-center">
-                            <i class="fas fa-sort-amount-up mr-2"></i>Cantidad a mover
-                        </h4>
-                        <div class="flex items-center">
-                            <button
-                                @click="$store.rackDetalle.modoMovimiento.cantidad > 1 && $store.rackDetalle.modoMovimiento.cantidad--"
-                                :class="$store.rackDetalle.modoMovimiento.cantidad <= 1 ? 'opacity-50 cursor-not-allowed' :
-                                    'hover:bg-gray-200'"
-                                class="bg-gray-100 rounded-l-lg px-4 py-3 border border-gray-300">
-                                <i class="fas fa-minus"></i>
-                            </button>
+                    <!-- Cantidad y observaciones - COMPACTO Y RESPONSIVE -->
+                    <div class="space-y-4 mb-6">
+                        <!-- Cantidad a mover - Diseño compacto -->
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-700 mb-3 flex items-center">
+                                        <i class="fas fa-sort-amount-up text-primary mr-2"></i>
+                                        <span>Cantidad a mover</span>
+                                    </h4>
 
-                            <input type="number" x-model="$store.rackDetalle.modoMovimiento.cantidad" min="1"
-                                :max="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 1"
-                                class="w-24 text-center border-y border-gray-300 py-3 focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <div class="flex items-center">
+                                        <button
+                                            @click="$store.rackDetalle.modoMovimiento.cantidad > 1 && $store.rackDetalle.modoMovimiento.cantidad--"
+                                            :class="$store.rackDetalle.modoMovimiento.cantidad <= 1 ?
+                                                'opacity-50 cursor-not-allowed bg-gray-100' :
+                                                'hover:bg-gray-100 active:bg-gray-200'"
+                                            class="w-10 h-10 flex items-center justify-center rounded-l-lg border border-gray-300 transition-colors"
+                                            title="Disminuir">
+                                            <i class="fas fa-minus text-gray-600"></i>
+                                        </button>
 
-                            <button
-                                @click="$store.rackDetalle.modoMovimiento.cantidad < ($store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 1) && $store.rackDetalle.modoMovimiento.cantidad++"
-                                :class="$store.rackDetalle.modoMovimiento.cantidad >= ($store.rackDetalle.modoMovimiento
-                                        .articuloSeleccionado?.cantidad || 1) ? 'opacity-50 cursor-not-allowed' :
-                                    'hover:bg-gray-200'"
-                                class="bg-gray-100 rounded-r-lg px-4 py-3 border border-gray-300">
-                                <i class="fas fa-plus"></i>
-                            </button>
+                                        <input type="number" x-model="$store.rackDetalle.modoMovimiento.cantidad"
+                                            min="1"
+                                            :max="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 1"
+                                            class="w-16 h-10 text-center border-y border-gray-300 font-bold text-gray-800 focus:ring-2 focus:ring-primary focus:border-transparent">
 
-                            <div class="ml-4 p-3 bg-blue-50 rounded border border-blue-200">
-                                <span class="text-gray-600 text-sm">
-                                    Máximo: <span class="font-bold text-blue-600"
-                                        x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 0"></span>
-                                    unidades
-                                </span>
+                                        <button
+                                            @click="$store.rackDetalle.modoMovimiento.cantidad < ($store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 1) && $store.rackDetalle.modoMovimiento.cantidad++"
+                                            :class="$store.rackDetalle.modoMovimiento.cantidad >= ($store.rackDetalle
+                                                    .modoMovimiento.articuloSeleccionado?.cantidad || 1) ?
+                                                'opacity-50 cursor-not-allowed bg-gray-100' :
+                                                'hover:bg-gray-100 active:bg-gray-200'"
+                                            class="w-10 h-10 flex items-center justify-center rounded-r-lg border border-gray-300 transition-colors"
+                                            title="Aumentar">
+                                            <i class="fas fa-plus text-gray-600"></i>
+                                        </button>
+
+                                        <div class="ml-3 flex items-center space-x-2">
+                                            <div class="px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
+                                                <span class="text-sm text-gray-600">
+                                                    Máx: <span class="font-bold text-blue-600"
+                                                        x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 0"></span>
+                                                </span>
+                                            </div>
+                                            <div class="text-xs text-gray-500 hidden sm:block">
+                                                unidades disponibles
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Info en móviles -->
+                                    <div class="text-xs text-gray-500 mt-2 sm:hidden">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Máximo: <span class="font-bold text-blue-600"
+                                            x-text="$store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 0"></span>
+                                        unidades
+                                    </div>
+                                </div>
+
+                                <!-- Indicador visual de porcentaje -->
+                                <div class="sm:w-32">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-primary"
+                                            x-text="Math.round(($store.rackDetalle.modoMovimiento.cantidad / ($store.rackDetalle.modoMovimiento.articuloSeleccionado?.cantidad || 1)) * 100) + '%'">
+                                        </div>
+                                        <div class="text-xs text-gray-500">del total</div>
+                                    </div>
+                                    <!-- Barra de progreso -->
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                        <div class="bg-primary h-2 rounded-full transition-all duration-300"
+                                            :style="'width: ' + Math.min(($store.rackDetalle.modoMovimiento.cantidad / ($store
+                                                .rackDetalle.modoMovimiento.articuloSeleccionado
+                                                ?.cantidad || 1)) * 100, 100) + '%'">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Observaciones -->
-                    <div class="mb-6">
-                        <h4 class="font-bold text-gray-700 mb-4 flex items-center">
-                            <i class="fas fa-sticky-note mr-2"></i>Observaciones (opcional)
-                        </h4>
-                        <textarea x-model="$store.rackDetalle.modoMovimiento.observaciones"
-                            class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-transparent"
-                            rows="2" placeholder="Motivo del movimiento..."></textarea>
                     </div>
 
                     <!-- Ubicaciones disponibles -->
@@ -613,16 +740,35 @@
                             <h4 class="font-bold text-gray-700 flex items-center">
                                 <i class="fas fa-map-marker-alt mr-2"></i>Ubicaciones Disponibles
                                 <span class="ml-2 text-sm bg-primary text-white px-2 py-0.5 rounded-full"
-                                    x-text="$store.rackDetalle.modoMovimiento.ubicacionesDisponibles.length || 0"></span>
+                                    x-text="($store.rackDetalle.modoMovimiento.ubicacionesFiltradas || $store.rackDetalle.modoMovimiento.ubicacionesDisponibles).length || 0"></span>
                             </h4>
-                            <button @click="cargarUbicacionesDisponibles()"
-                                :disabled="$store.rackDetalle.modoMovimiento.cargandoUbicaciones"
-                                :class="$store.rackDetalle.modoMovimiento.cargandoUbicaciones ?
-                                    'opacity-50 cursor-not-allowed' : 'hover:text-primary-dark'"
-                                class="text-primary">
-                                <i class="fas fa-sync-alt"
-                                    :class="$store.rackDetalle.modoMovimiento.cargandoUbicaciones && 'animate-spin'"></i>
-                            </button>
+                            <div class="flex items-center space-x-3">
+                                <!-- BUSCADOR -->
+                                <div class="relative">
+                                    <input type="text"
+                                        x-model="$store.rackDetalle.modoMovimiento.busquedaUbicacion"
+                                        placeholder="Buscar por código..."
+                                        class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm w-64"
+                                        @input="$store.rackDetalle.filtrarUbicaciones()">
+                                    <i
+                                        class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                    <!-- Botón para limpiar búsqueda -->
+                                    <button x-show="$store.rackDetalle.modoMovimiento.busquedaUbicacion"
+                                        @click="$store.rackDetalle.modoMovimiento.busquedaUbicacion = ''; $store.rackDetalle.filtrarUbicaciones()"
+                                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+
+                                <button @click="cargarUbicacionesDisponibles()"
+                                    :disabled="$store.rackDetalle.modoMovimiento.cargandoUbicaciones"
+                                    :class="$store.rackDetalle.modoMovimiento.cargandoUbicaciones ?
+                                        'opacity-50 cursor-not-allowed' : 'hover:text-primary-dark'"
+                                    class="text-primary">
+                                    <i class="fas fa-sync-alt"
+                                        :class="$store.rackDetalle.modoMovimiento.cargandoUbicaciones && 'animate-spin'"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Loading -->
@@ -633,118 +779,129 @@
                         </div>
 
                         <!-- Sin ubicaciones -->
-                        <div x-show="!$store.rackDetalle.modoMovimiento.cargandoUbicaciones && $store.rackDetalle.modoMovimiento.ubicacionesDisponibles.length === 0"
+                        <div x-show="!$store.rackDetalle.modoMovimiento.cargandoUbicaciones && 
+                    (($store.rackDetalle.modoMovimiento.ubicacionesFiltradas || $store.rackDetalle.modoMovimiento.ubicacionesDisponibles).length === 0)"
                             class="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                             <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
                             <p class="text-gray-600 font-medium">No hay ubicaciones disponibles</p>
-                            <p class="text-gray-500 text-sm mt-1">Intenta recargar la lista</p>
+                            <p class="text-gray-500 text-sm mt-1"
+                                x-show="$store.rackDetalle.modoMovimiento.busquedaUbicacion">
+                                No se encontraron resultados para "<span
+                                    x-text="$store.rackDetalle.modoMovimiento.busquedaUbicacion"></span>"
+                            </p>
+                            <p class="text-gray-500 text-sm mt-1"
+                                x-show="!$store.rackDetalle.modoMovimiento.busquedaUbicacion">
+                                Intenta recargar la lista
+                            </p>
                         </div>
 
-                        <!-- Lista de ubicaciones -->
+                        <!-- CONTENEDOR CON SCROLL -->
                         <div x-show="!$store.rackDetalle.modoMovimiento.cargandoUbicaciones 
-        && $store.rackDetalle.modoMovimiento.ubicacionesDisponibles.length > 0"
-                            class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-72 overflow-y-auto p-1">
+                    && (($store.rackDetalle.modoMovimiento.ubicacionesFiltradas || $store.rackDetalle.modoMovimiento.ubicacionesDisponibles).length > 0)"
+                            class="border rounded-lg bg-gray-50">
 
-                            <template x-for="ubicacion in $store.rackDetalle.modoMovimiento.ubicacionesDisponibles"
-                                :key="ubicacion.idRackUbicacion">
+                            <!-- CONTENEDOR SCROLLEABLE -->
+                            <div class="max-h-80 overflow-y-auto p-3">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <!-- Cambiado a 3 columnas -->
+                                    <template
+                                        x-for="ubicacion in ($store.rackDetalle.modoMovimiento.ubicacionesFiltradas || $store.rackDetalle.modoMovimiento.ubicacionesDisponibles)"
+                                        :key="ubicacion.idRackUbicacion">
 
-                                <div @click="seleccionarUbicacionDestino(ubicacion)"
-                                    class="p-4 border rounded-lg cursor-pointer transition-all duration-200"
-                                    :class="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada?.idRackUbicacion ===
-                                        ubicacion.idRackUbicacion ?
-                                        'border-primary border-2 bg-blue-50 shadow-sm' :
-                                        'border-gray-200 hover:border-primary hover:shadow-sm'">
+                                        <div @click="seleccionarUbicacionDestino(ubicacion)"
+                                            class="p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md bg-white"
+                                            :class="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada
+                                                ?.idRackUbicacion ===
+                                                ubicacion.idRackUbicacion ?
+                                                'border-primary border-2 bg-blue-50 ring-2 ring-primary/20' :
+                                                'border-gray-200 hover:border-primary'">
 
-                                    <!-- Header -->
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex-1">
-                                            <div class="font-bold text-gray-800 text-lg" x-text="ubicacion.codigo">
+                                            <!-- Header -->
+                                            <div class="flex justify-between items-start mb-2">
+                                                <div class="flex-1">
+                                                    <div class="font-bold text-gray-800 text-lg mb-1">
+                                                        <span x-text="ubicacion.codigo_unico"></span>
+                                                    </div>
+                                                    <div class="text-xs font-semibold px-2 py-1 rounded-full inline-block"
+                                                        :class="ubicacion.clase_css ||
+                                                            (ubicacion.cantidad_ocupada == 0 ?
+                                                                'bg-green-100 text-green-800' :
+                                                                ubicacion.tiene_mismo_articulo ?
+                                                                'bg-blue-100 text-blue-800' :
+                                                                'bg-yellow-100 text-yellow-800')"
+                                                        x-text="ubicacion.estado_visual ||
+                                                    (ubicacion.cantidad_ocupada == 0
+                                                        ? 'Vacía'
+                                                        : ubicacion.tiene_mismo_articulo
+                                                            ? 'Mismo artículo'
+                                                            : 'Ocupada')">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Cantidades -->
+                                                <div class="text-right">
+                                                    <div class="text-lg font-bold"
+                                                        :class="ubicacion.cantidad_ocupada == 0 ?
+                                                            'text-green-600' :
+                                                            'text-amber-600'">
+                                                        <span x-text="ubicacion.cantidad_ocupada"></span>
+                                                        <span class="text-xs">art.</span>
+                                                    </div>
+                                                    <div class="text-xs text-gray-500 mt-1">
+                                                        <i class="fas fa-box-open mr-1"></i>
+                                                        <span x-text="ubicacion.espacio_disponible"></span> disp.
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="text-xs font-semibold px-2 py-1 rounded-full inline-block mt-1"
-                                                :class="ubicacion.clase_css ||
-                                                    (ubicacion.cantidad_ocupada == 0 ?
-                                                        'bg-green-100 text-green-800' :
-                                                        ubicacion.tiene_mismo_articulo ?
-                                                        'bg-blue-100 text-blue-800' :
-                                                        'bg-yellow-100 text-yellow-800')"
-                                                x-text="ubicacion.estado_visual ||
-                            (ubicacion.cantidad_ocupada == 0
-                                ? 'Vacía'
-                                : ubicacion.tiene_mismo_articulo
-                                    ? 'Mismo artículo'
-                                    : 'Ocupada')">
+                                            <!-- Detalles -->
+                                            <div class="space-y-2 mt-3 pt-3 border-t border-gray-100">
+                                                <div class="flex items-center justify-between text-sm">
+                                                    <span class="text-gray-600 flex items-center">
+                                                        <i class="fas fa-layer-group text-gray-500 mr-2 text-xs"></i>
+                                                        Nivel
+                                                    </span>
+                                                    <span class="font-medium" x-text="ubicacion.nivel || '0'"></span>
+                                                </div>
+                                                <div class="flex items-center justify-between text-sm">
+                                                    <span class="text-gray-600 flex items-center">
+                                                        <i class="fas fa-warehouse text-purple-500 mr-2 text-xs"></i>
+                                                        Capacidad
+                                                    </span>
+                                                    <span class="font-medium text-purple-600"
+                                                        x-text="ubicacion.capacidad_maxima"></span>
+                                                </div>
+                                                <div class="flex items-center justify-between text-sm">
+                                                    <span class="text-gray-600 flex items-center">
+                                                        <i
+                                                            class="fas fa-tachometer-alt text-green-500 mr-2 text-xs"></i>
+                                                        Ocupación
+                                                    </span>
+                                                    <span class="font-medium">
+                                                        <span x-text="ubicacion.cantidad_ocupada"></span>/
+                                                        <span x-text="ubicacion.capacidad_maxima"></span>
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <!-- Cantidades -->
-                                        <div class="text-right">
-                                            <div class="text-lg font-bold"
-                                                :class="ubicacion.cantidad_ocupada == 0 ?
-                                                    'text-green-600' :
-                                                    'text-amber-600'">
-                                                <span x-text="ubicacion.cantidad_ocupada"></span>
-                                                <span class="text-xs">art.</span>
-                                            </div>
-
-                                            <div class="text-xs text-gray-500">
-                                                <span x-text="ubicacion.espacio_disponible"></span> disp.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Detalles -->
-                                    <div class="text-sm text-gray-600 flex flex-wrap gap-2 mt-3">
-
-                                        <!-- Nivel -->
-                                        <span class="flex items-center bg-gray-100 px-2 py-1 rounded">
-                                            <i class="fas fa-layer-group text-gray-500 mr-1 text-xs"></i>
-                                            <span x-text="'Nivel ' + (ubicacion.nivel || '0')"></span>
-                                        </span>
-
-                                        <!-- Artículos -->
-                                        <span class="flex items-center bg-gray-100 px-2 py-1 rounded">
-                                            <i class="fas fa-boxes text-gray-500 mr-1 text-xs"></i>
-                                            <span x-text="ubicacion.cantidad_ocupada + ' artículos'"></span>
-                                        </span>
-
-                                        <!-- Capacidad máxima -->
-                                        <span class="flex items-center bg-purple-50 text-purple-700 px-2 py-1 rounded">
-                                            <i class="fas fa-warehouse mr-1 text-xs"></i>
-                                            <span x-text="ubicacion.capacidad_maxima + ' máx.'"></span>
-                                        </span>
-
-                                        <!-- Ocupación usada / total -->
-                                        <span class="flex items-center bg-purple-50 text-purple-700 px-2 py-1 rounded">
-                                            <i class="fas fa-box-open mr-1 text-xs"></i>
-                                            <span
-                                                x-text="ubicacion.cantidad_ocupada + ' / ' + ubicacion.capacidad_maxima">
-                                            </span>
-                                        </span>
-
-                                        <!-- Espacio disponible -->
-                                        <span class="flex items-center bg-green-50 text-green-700 px-2 py-1 rounded">
-                                            <i class="fas fa-tachometer-alt mr-1 text-xs"></i>
-                                            <span x-text="ubicacion.espacio_disponible + ' disp.'"></span>
-                                        </span>
-                                    </div>
+                                    </template>
                                 </div>
-                            </template>
+                            </div>
                         </div>
-
                     </div>
 
                     <!-- Ubicación destino seleccionada -->
                     <div x-show="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada"
-                        class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg animate-pulse">
+                        class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                         <h4 class="font-bold text-green-800 mb-4 flex items-center">
                             <i class="fas fa-check-circle mr-2"></i>Ubicación Destino Seleccionada
                         </h4>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4"> <!-- Cambiado a 4 columnas -->
                             <div class="flex items-center justify-between p-3 bg-white rounded border">
                                 <span class="font-semibold text-green-700">Código:</span>
                                 <span class="font-bold text-lg text-green-600"
-                                    x-text="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada?.codigo"></span>
+                                    x-text="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada?.codigo_unico || 
+                                   $store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada?.codigo"></span>
                             </div>
                             <div class="flex items-center justify-between p-3 bg-white rounded border">
                                 <span class="font-semibold text-green-700">Rack:</span>
@@ -766,30 +923,37 @@
                     </div>
 
                     <!-- Botones de Acción -->
-                    <div class="flex justify-end items-center space-x-3 pt-4 border-t">
-                        <button type="button" class="btn btn-outline-danger px-6 py-2"
-                            @click="$store.rackDetalle.cancelarMovimiento()">
-                            <i class="fas fa-times mr-2"></i>Cancelar
-                        </button>
-                        <button @click="moverArticulo()"
-                            :disabled="!$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada || $store.rackDetalle
-                                .modoMovimiento.moviendoArticulo"
-                            :class="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada && !$store.rackDetalle
-                                .modoMovimiento.moviendoArticulo ?
-                                'btn-primary px-6 py-2 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] border-0' :
-                                'btn-outline-secondary px-6 py-2 opacity-50 cursor-not-allowed'"
-                            class="flex items-center">
-
-                            <template x-if="$store.rackDetalle.modoMovimiento.moviendoArticulo">
-                                <i class="fas fa-spinner fa-spin mr-2"></i>
-                            </template>
-                            <template x-if="!$store.rackDetalle.modoMovimiento.moviendoArticulo">
-                                <i class="fas fa-exchange-alt mr-2"></i>
-                            </template>
-
+                    <div class="flex justify-between items-center space-x-3 pt-4 border-t">
+                        <div class="text-sm text-gray-500">
                             <span
-                                x-text="$store.rackDetalle.modoMovimiento.moviendoArticulo ? 'Moviendo...' : 'Mover Artículo'"></span>
-                        </button>
+                                x-text="($store.rackDetalle.modoMovimiento.ubicacionesFiltradas || $store.rackDetalle.modoMovimiento.ubicacionesDisponibles).length || 0"></span>
+                            ubicaciones encontradas
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="button" class="btn btn-outline-danger px-6 py-2"
+                                @click="$store.rackDetalle.cancelarMovimiento()">
+                                <i class="fas fa-times mr-2"></i>Cancelar
+                            </button>
+                            <button @click="moverArticulo()"
+                                :disabled="!$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada || $store.rackDetalle
+                                    .modoMovimiento.moviendoArticulo"
+                                :class="$store.rackDetalle.modoMovimiento.ubicacionDestinoSeleccionada && !$store.rackDetalle
+                                    .modoMovimiento.moviendoArticulo ?
+                                    'btn-primary px-6 py-2 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] border-0 hover:shadow-lg' :
+                                    'btn-outline-secondary px-6 py-2 opacity-50 cursor-not-allowed'"
+                                class="flex items-center transition-all duration-200">
+
+                                <template x-if="$store.rackDetalle.modoMovimiento.moviendoArticulo">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                                </template>
+                                <template x-if="!$store.rackDetalle.modoMovimiento.moviendoArticulo">
+                                    <i class="fas fa-exchange-alt mr-2"></i>
+                                </template>
+
+                                <span
+                                    x-text="$store.rackDetalle.modoMovimiento.moviendoArticulo ? 'Moviendo...' : 'Mover Artículo'"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -797,13 +961,9 @@
     </div>
 
     <!-- Script de Swiper -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script>
-        // Pasar datos del PHP a JavaScript
-        const rackData = @json($rack);
-        const todosRacks = @json($todosRacks);
-        const rackActual = @json($rackActual);
-        const sedeActual = @json($sedeActual);
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="{{ asset('assets/js/almacen/detalle-rack/panel.js') }}"></script>
 </x-layout.default>

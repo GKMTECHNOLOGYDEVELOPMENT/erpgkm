@@ -1545,67 +1545,50 @@ class UbicacionesVistaController extends Controller
         $request->validate([
             'ubicacion_origen_id' => 'required|integer|exists:rack_ubicaciones,idRackUbicacion',
             'tipo_articulo'       => 'required|in:articulo,custodia,caja',
+            'articulo_id'         => 'nullable|integer|exists:articulos,idArticulos',
             'caja_id'             => 'nullable|integer|exists:cajas,idCaja',
             'rack_id'             => 'nullable|integer|exists:racks,idRack',
         ]);
 
-        $ubicacionOrigenId = (int) $request->ubicacion_origen_id;
-        $tipoArticulo      = $request->tipo_articulo;
-        $cajaId            = $request->caja_id;
-        $rackId            = $request->rack_id;
-
-        /* =========================
-     * UBICACIÓN ORIGEN
-     * ========================= */
-        $ubicacionOrigen = DB::table('rack_ubicaciones as ru')
-            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
-            ->select(
-                'ru.idRackUbicacion',
-                'ru.codigo',
-                'ru.codigo_unico',
-                'ru.nivel',
-                'r.nombre as rack_nombre',
-                'r.sede',
-                'r.tipo_rack'
-            )
-            ->where('ru.idRackUbicacion', $ubicacionOrigenId)
+        // 1. OBTENER UBICACIÓN ORIGEN (MÁS RÁPIDO)
+        $ubicacionOrigen = DB::table('rack_ubicaciones')
+            ->select('rack_ubicaciones.*', 'racks.nombre as rack_nombre', 'racks.sede', 'racks.tipo_rack')
+            ->join('racks', 'rack_ubicaciones.rack_id', '=', 'racks.idRack')
+            ->where('rack_ubicaciones.idRackUbicacion', $request->ubicacion_origen_id)
             ->first();
 
         if (!$ubicacionOrigen) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ubicación origen no encontrada'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Ubicación origen no encontrada'], 404);
         }
 
-        /* =========================
-     * INFO CAJA (SI APLICA)
-     * ========================= */
-        $cajaInfo = null;
-
-        if ($tipoArticulo === 'caja' && $cajaId) {
-            $cajaInfo = DB::table('cajas as cj')
-                ->leftJoin('articulos as a', 'cj.idArticulo', '=', 'a.idArticulos')
+        // 2. OBTENER INFO DEL ARTÍCULO (MEJORADO)
+        $articuloInfo = null;
+        if ($request->articulo_id) {
+            $articuloInfo = DB::table('articulos')
                 ->select(
-                    'cj.idCaja',
-                    'cj.nombre',
-                    'cj.cantidad_actual',
-                    'cj.capacidad',
-                    'cj.estado',
-                    'a.nombre as articulo_nombre',
-                    'a.codigo_barras',
-                    'a.codigo_repuesto'
+                    'articulos.idArticulos',
+                    'articulos.codigo_barras',
+                    'articulos.codigo_repuesto',
+                    'articulos.nombre',
+                    'articulos.sku',
+                    'articulos.stock_total',
+                    'tipoarticulos.nombre as tipo_articulo',
+                    DB::raw('COALESCE(categoria.nombre, "Sin categoría") as categoria')
                 )
-                ->where('cj.idCaja', $cajaId)
+                ->leftJoin('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+                ->leftJoin('articulo_modelo', 'articulos.idArticulos', '=', 'articulo_modelo.articulo_id')
+                ->leftJoin('modelo', function ($join) {
+                    $join->on('articulo_modelo.modelo_id', '=', 'modelo.idModelo')
+                        ->orOn('articulos.idModelo', '=', 'modelo.idModelo');
+                })
+                ->leftJoin('categoria', 'modelo.idCategoria', '=', 'categoria.idCategoria')
+                ->where('articulos.idArticulos', $request->articulo_id)
                 ->first();
         }
 
-        /* =========================
-     * UBICACIONES PANEL
-     * ========================= */
-        $query = DB::table('rack_ubicaciones as ru')
-            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
-            ->leftJoin('cajas as cj', 'ru.idRackUbicacion', '=', 'cj.idubicaciones_rack')
+        // 3. CONSULTA OPTIMIZADA - SEPARAR EN 2 PARTES
+        // Parte A: Obtener ubicaciones base (sin cálculos pesados)
+        $ubicacionesBase = DB::table('rack_ubicaciones as ru')
             ->select(
                 'ru.idRackUbicacion',
                 'ru.codigo',
@@ -1615,81 +1598,121 @@ class UbicacionesVistaController extends Controller
                 'ru.estado_ocupacion',
                 'r.nombre as rack_nombre',
                 'r.sede',
-                'r.tipo_rack',
-
-                // 🔥 MÉTRICAS REALES DESDE CAJAS
-                DB::raw('COUNT(DISTINCT cj.idCaja) as total_cajas'),
-                DB::raw('COALESCE(SUM(cj.cantidad_actual), 0) as total_articulos'),
-                DB::raw('COALESCE(SUM(cj.capacidad), 0) as capacidad_total')
+                'r.tipo_rack'
             )
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
             ->where('r.sede', $ubicacionOrigen->sede)
             ->where('r.estado', 'activo')
             ->where('r.tipo_rack', 'panel')
-            ->where('ru.idRackUbicacion', '!=', $ubicacionOrigenId)
-            ->groupBy(
-                'ru.idRackUbicacion',
-                'ru.codigo',
-                'ru.codigo_unico',
-                'ru.nivel',
-                'ru.posicion',
-                'ru.estado_ocupacion',
-                'r.nombre',
-                'r.sede',
-                'r.tipo_rack'
-            );
+            ->where('ru.idRackUbicacion', '!=', $ubicacionOrigen->idRackUbicacion);
 
-        if ($rackId) {
-            $query->where('r.idRack', $rackId);
+        if ($request->rack_id) {
+            $ubicacionesBase->where('r.idRack', $request->rack_id);
         }
 
-        /* =========================
-     * POST PROCESO
-     * ========================= */
-        $ubicaciones = $query->get()->map(function ($u) {
-            $u->total_cajas        = (int) $u->total_cajas;
-            $u->total_articulos    = (int) $u->total_articulos;
-            $u->capacidad_total    = (int) $u->capacidad_total;
+        $ubicaciones = $ubicacionesBase->get();
 
-            // 🔑 ALIAS PARA EL FRONT
-            $u->cantidad_ocupada   = $u->total_articulos;
-            $u->capacidad_maxima   = $u->capacidad_total;
+        if ($ubicaciones->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'articulo_info' => $articuloInfo,
+                'ubicacion_origen' => $ubicacionOrigen,
+                'ubicaciones_disponibles' => [],
+                'total_disponibles' => 0,
+            ]);
+        }
 
-            $u->espacio_disponible = max(
-                $u->capacidad_maxima - $u->cantidad_ocupada,
-                0
-            );
+        // Parte B: Obtener métricas de cajas POR LOTE (mucho más eficiente)
+        $idsUbicaciones = $ubicaciones->pluck('idRackUbicacion')->toArray();
 
-            return $u;
+        // Consulta optimizada para métricas de cajas
+        $metricasCajas = DB::table('cajas')
+            ->select(
+                'idubicaciones_rack as ubicacion_id',
+                DB::raw('COUNT(*) as total_cajas'),
+                DB::raw('COALESCE(SUM(cantidad_actual), 0) as total_articulos'),
+                DB::raw('COALESCE(SUM(capacidad), 0) as capacidad_total'),
+                DB::raw('MAX(CASE WHEN idArticulo = ? THEN 1 ELSE 0 END) as tiene_mismo_articulo')
+            )
+            ->addBinding($request->articulo_id ?: 0, 'select')
+            ->whereIn('idubicaciones_rack', $idsUbicaciones)
+            ->groupBy('idubicaciones_rack')
+            ->get()
+            ->keyBy('ubicacion_id');
+
+        // 4. POST-PROCESAMIENTO EN PHP (más rápido que hacerlo en SQL)
+        $ubicacionesProcesadas = $ubicaciones->map(function ($ubicacion) use ($metricasCajas, $request) {
+            $metricas = $metricasCajas->get($ubicacion->idRackUbicacion);
+
+            // Si no hay métricas, la ubicación está vacía
+            if (!$metricas) {
+                $cantidadOcupada = 0;
+                $capacidadMaxima = 0;
+                $tieneMismoArticulo = false;
+            } else {
+                $cantidadOcupada = (int) $metricas->total_articulos;
+                $capacidadMaxima = (int) $metricas->capacidad_total;
+                $tieneMismoArticulo = (bool) $metricas->tiene_mismo_articulo;
+            }
+
+            $espacioDisponible = max($capacidadMaxima - $cantidadOcupada, 0);
+
+            // Determinar estado visual
+            if ($cantidadOcupada == 0) {
+                $claseCss = 'bg-green-100 text-green-800';
+                $estadoVisual = 'Vacía';
+            } elseif ($tieneMismoArticulo && $request->articulo_id) {
+                $claseCss = 'bg-blue-100 text-blue-800';
+                $estadoVisual = 'Mismo artículo';
+            } else {
+                $claseCss = 'bg-yellow-100 text-yellow-800';
+                $estadoVisual = 'Ocupada';
+            }
+
+            return (object) [
+                'idRackUbicacion' => $ubicacion->idRackUbicacion,
+                'codigo' => $ubicacion->codigo,
+                'codigo_unico' => $ubicacion->codigo_unico,
+                'nivel' => $ubicacion->nivel,
+                'posicion' => $ubicacion->posicion,
+                'estado_ocupacion' => $ubicacion->estado_ocupacion,
+                'rack_nombre' => $ubicacion->rack_nombre,
+                'sede' => $ubicacion->sede,
+                'tipo_rack' => $ubicacion->tipo_rack,
+
+                // Métricas
+                'cantidad_ocupada' => $cantidadOcupada,
+                'capacidad_maxima' => $capacidadMaxima,
+                'espacio_disponible' => $espacioDisponible,
+                'tiene_mismo_articulo' => $tieneMismoArticulo,
+
+                // Para frontend
+                'clase_css' => $claseCss,
+                'estado_visual' => $estadoVisual,
+            ];
         });
 
-        /* =========================
-     * RESPONSE
-     * ========================= */
+        // 5. ORDENAR (si es necesario) - Hacerlo en PHP es más eficiente para pocos resultados
+        $ubicacionesOrdenadas = $ubicacionesProcesadas->sortBy([
+            ['cantidad_ocupada', 'asc'],  // Primero las vacías
+            ['nivel', 'asc'],             // Luego por nivel
+            ['codigo_unico', 'asc']       // Finalmente por código
+        ])->values();
+
         return response()->json([
             'success' => true,
-            'tipo_operacion' => $tipoArticulo === 'caja'
-                ? 'mover_caja'
-                : 'mover_articulo',
-
-            'caja_info' => $cajaInfo,
-
+            'tipo_operacion' => $request->tipo_articulo === 'caja' ? 'mover_caja' : 'mover_articulo',
+            'articulo_info' => $articuloInfo,
             'ubicacion_origen' => [
-                'id'           => $ubicacionOrigen->idRackUbicacion,
-                'codigo'       => $ubicacionOrigen->codigo,
+                'id' => $ubicacionOrigen->idRackUbicacion,
+                'codigo' => $ubicacionOrigen->codigo,
                 'codigo_unico' => $ubicacionOrigen->codigo_unico,
-                'rack_nombre'  => $ubicacionOrigen->rack_nombre,
-                'sede'         => $ubicacionOrigen->sede,
-                'tipo_rack'    => $ubicacionOrigen->tipo_rack,
+                'rack_nombre' => $ubicacionOrigen->rack_nombre,
+                'sede' => $ubicacionOrigen->sede,
+                'tipo_rack' => $ubicacionOrigen->tipo_rack,
             ],
-
-            'ubicaciones_disponibles' => $ubicaciones->values(),
-            'total_disponibles'       => $ubicaciones->count(),
-
-            'filtros_aplicados' => [
-                'sede'      => $ubicacionOrigen->sede,
-                'tipo_rack' => 'panel',
-                'rack_id'   => $rackId ?: 'todos',
-            ],
+            'ubicaciones_disponibles' => $ubicacionesOrdenadas,
+            'total_disponibles' => $ubicacionesOrdenadas->count(),
         ]);
     }
 

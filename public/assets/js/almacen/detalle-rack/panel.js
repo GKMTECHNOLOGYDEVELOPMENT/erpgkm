@@ -5,16 +5,230 @@ document.addEventListener('alpine:init', () => {
         modoMovimiento: {
             activo: false,
             articuloSeleccionado: null,
-            cajaSeleccionada: null, // ✅ NUEVO: Para manejar cajas
+            cajaSeleccionada: null,
             ubicacionOrigen: null,
             cantidad: 1,
             observaciones: '',
             ubicacionesDisponibles: [],
+            ubicacionesFiltradas: null,
+            busquedaUbicacion: '',
             cargandoUbicaciones: false,
             ubicacionDestinoSeleccionada: null,
             moviendoArticulo: false,
-            moviendoCaja: false, // ✅ NUEVO: Para mostrar loading en cajas
-            tipoMovimiento: 'articulo', // ✅ 'articulo', 'caja', 'articulo_en_caja'
+            moviendoCaja: false,
+            tipoMovimiento: 'articulo',
+            _ubicacionesPreparadas: null,
+            _timeoutBusqueda: null,
+        },
+
+        // ✅ NUEVO MÉTODO PARA FILTRAR UBICACIONES
+        filtrarUbicaciones() {
+            const modoMov = this.modoMovimiento;
+            const busqueda = modoMov.busquedaUbicacion.trim();
+
+            // Limpiar timeout anterior
+            if (modoMov._timeoutBusqueda) {
+                clearTimeout(modoMov._timeoutBusqueda);
+            }
+
+            // Si la búsqueda está vacía
+            if (!busqueda) {
+                modoMov.ubicacionesFiltradas = null;
+                modoMov._ubicacionesPreparadas = null; // Liberar memoria
+                return;
+            }
+
+            // Debouncing: Esperar 150ms después de la última tecla
+            modoMov._timeoutBusqueda = setTimeout(() => {
+                this._ejecutarBusquedaReal(busqueda.toLowerCase());
+            }, 150);
+        },
+
+        copiarCodigo() {
+            console.log('=== COPIAR CÓDIGO ===');
+
+            // Acceder correctamente a los datos
+            const modoMov = this.modoMovimiento;
+
+            if (!modoMov.articuloSeleccionado) {
+                console.error('No hay artículo seleccionado');
+
+                // Toastr de error
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('No hay artículo seleccionado', 'Error');
+                } else {
+                    alert('Error: No hay artículo seleccionado');
+                }
+                return;
+            }
+
+            // Obtener el código del artículo
+            const codigo =
+                modoMov.articuloSeleccionado?.codigo_repuesto || modoMov.articuloSeleccionado?.codigo_barras || modoMov.articuloSeleccionado?.sku || 'N/A';
+
+            console.log('Código a copiar:', codigo);
+
+            if (codigo === 'N/A') {
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('No hay código disponible para copiar', 'Aviso');
+                } else {
+                    alert('No hay código para copiar');
+                }
+                return;
+            }
+
+            // Crear un elemento temporal para copiar
+            const textarea = document.createElement('textarea');
+            textarea.value = codigo;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                // Intentar usar la API moderna del portapapeles
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard
+                        .writeText(codigo)
+                        .then(() => {
+                            this.mostrarToastrExito(codigo);
+                        })
+                        .catch((err) => {
+                            console.error('Error con clipboard API:', err);
+                            this.copiarConFallbackToastr(codigo, textarea);
+                        });
+                } else {
+                    // Fallback para navegadores antiguos
+                    this.copiarConFallbackToastr(codigo, textarea);
+                }
+            } catch (error) {
+                console.error('Error general al copiar:', error);
+                this.copiarConFallbackToastr(codigo, textarea);
+            } finally {
+                // Limpiar
+                document.body.removeChild(textarea);
+            }
+        },
+
+        // Función para mostrar Toastr de éxito
+        mostrarToastrExito(codigo) {
+            if (typeof toastr !== 'undefined') {
+                // Toastr con HTML personalizado
+                toastr.success(
+                    `<div class="flex items-start">
+                <div class="flex-1">
+                    <div class="font-semibold">Código copiado al portapapeles</div>
+                    <div class="text-sm font-mono mt-1 p-1 rounded">${codigo}</div>
+                </div>
+            </div>`,
+                    '¡Listo!',
+                    {
+                        closeButton: true,
+                        timeOut: 4000,
+                        extendedTimeOut: 2000,
+                        progressBar: true,
+                        escapeHtml: false, // IMPORTANTE: Permite HTML
+                        tapToDismiss: false,
+                    },
+                );
+            } else {
+                // Fallback si Toastr no está disponible
+                alert('✓ Código copiado: ' + codigo);
+            }
+        },
+
+        // Método fallback con Toastr
+        copiarConFallbackToastr(codigo, textarea) {
+            try {
+                const exitoso = document.execCommand('copy');
+                if (exitoso) {
+                    this.mostrarToastrExito(codigo);
+                } else {
+                    // Mostrar Toastr con opción para copiar
+                    if (typeof toastr !== 'undefined') {
+                        const toast = toastr.warning(
+                            `<div class="flex flex-col">
+                        <div class="font-semibold mb-2">Copia manualmente:</div>
+                        <div class="font-mono text-lg bg-gray-100 p-2 rounded mb-2 select-all cursor-pointer" onclick="navigator.clipboard.writeText('${codigo}')">
+                            ${codigo}
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('${codigo}')" 
+                                class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-copy mr-1"></i>Haz clic para copiar
+                        </button>
+                    </div>`,
+                            'Copiar código',
+                            {
+                                timeOut: 0, // No desaparece automáticamente
+                                extendedTimeOut: 0,
+                                closeButton: true,
+                                escapeHtml: false,
+                            },
+                        );
+                    } else {
+                        prompt('Selecciona y copia manualmente:', codigo);
+                    }
+                }
+            } catch (err) {
+                console.error('Error con execCommand:', err);
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('Error al copiar el código', 'Error');
+                } else {
+                    prompt('Copia manualmente este código:', codigo);
+                }
+            }
+        },
+
+        // ✅ MÉTODO PRIVADO: Ejecuta la búsqueda real
+        _ejecutarBusquedaReal(busqueda) {
+            const modoMov = this.modoMovimiento;
+            const ubicaciones = modoMov.ubicacionesDisponibles;
+
+            // Si no hay ubicaciones, no buscar
+            if (!ubicaciones || ubicaciones.length === 0) {
+                modoMov.ubicacionesFiltradas = [];
+                return;
+            }
+
+            // ✅ OPTIMIZACIÓN 1: Preparar datos una sola vez
+            if (!modoMov._ubicacionesPreparadas) {
+                modoMov._ubicacionesPreparadas = ubicaciones.map((ubicacion) => ({
+                    id: ubicacion.idRackUbicacion,
+                    // Pre-calcular valores en minúsculas
+                    codigoUnico: (ubicacion.codigo_unico || '').toLowerCase(),
+                    codigo: (ubicacion.codigo || '').toLowerCase(),
+                    rackNombre: (ubicacion.rack_nombre || '').toLowerCase(),
+                    // Mantener referencia al objeto original
+                    original: ubicacion,
+                }));
+            }
+
+            // ✅ OPTIMIZACIÓN 2: Búsqueda más eficiente
+            const resultados = [];
+            const preCalculadas = modoMov._ubicacionesPreparadas;
+
+            // Para búsquedas muy cortas, buscar solo en código único
+            if (busqueda.length <= 3) {
+                for (let i = 0; i < preCalculadas.length; i++) {
+                    const item = preCalculadas[i];
+                    if (item.codigoUnico.includes(busqueda)) {
+                        resultados.push(item.original);
+                        // Si ya encontramos suficientes, parar
+                        if (resultados.length > 100) break;
+                    }
+                }
+            } else {
+                // Para búsquedas más largas, buscar en todos los campos
+                for (let i = 0; i < preCalculadas.length; i++) {
+                    const item = preCalculadas[i];
+                    if (item.codigoUnico.includes(busqueda) || item.codigo.includes(busqueda) || item.rackNombre.includes(busqueda)) {
+                        resultados.push(item.original);
+                        if (resultados.length > 100) break;
+                    }
+                }
+            }
+
+            modoMov.ubicacionesFiltradas = resultados;
         },
 
         iniciarMovimiento(articulo, ubicacion, tipo = 'articulo') {
@@ -29,6 +243,8 @@ document.addEventListener('alpine:init', () => {
             this.modoMovimiento.cantidad = 1;
             this.modoMovimiento.observaciones = '';
             this.modoMovimiento.ubicacionesDisponibles = [];
+            this.modoMovimiento.ubicacionesFiltradas = null; // ✅ Resetear filtros
+            this.modoMovimiento.busquedaUbicacion = ''; // ✅ Resetear búsqueda
             this.modoMovimiento.ubicacionDestinoSeleccionada = null;
             this.modoMovimiento.moviendoArticulo = false;
             this.modoMovimiento.moviendoCaja = false;
@@ -61,6 +277,13 @@ document.addEventListener('alpine:init', () => {
             }
 
             store.cargandoUbicaciones = true;
+
+            // Limpiar cache de búsqueda anterior
+            store._ubicacionesPreparadas = null;
+            if (store._timeoutBusqueda) {
+                clearTimeout(store._timeoutBusqueda);
+                store._timeoutBusqueda = null;
+            }
 
             try {
                 // Preparar datos según el tipo
@@ -107,9 +330,18 @@ document.addEventListener('alpine:init', () => {
 
                 if (data.success) {
                     store.ubicacionesDisponibles = data.ubicaciones_disponibles || [];
+                    store.ubicacionesFiltradas = null;
+                    store.busquedaUbicacion = '';
+                    store._ubicacionesPreparadas = null; // Resetear cache
+
+                    // ✅ OPCIONAL: Ordenar por código para búsquedas más rápidas
+                    if (store.ubicacionesDisponibles.length > 0) {
+                        store.ubicacionesDisponibles.sort((a, b) => {
+                            return (a.codigo_unico || '').localeCompare(b.codigo_unico || '');
+                        });
+                    }
+
                     console.log('Ubicaciones cargadas:', store.ubicacionesDisponibles.length);
-                } else {
-                    alert('Error: ' + (data.message || 'No se pudieron cargar las ubicaciones'));
                 }
             } catch (error) {
                 console.error('Error de conexión:', error);
@@ -117,6 +349,25 @@ document.addEventListener('alpine:init', () => {
             } finally {
                 store.cargandoUbicaciones = false;
             }
+        },
+
+        // ✅ LIMPIAR CACHE cuando ya no se necesita
+        cancelarMovimiento() {
+            const modoMov = this.modoMovimiento;
+
+            if (modoMov._timeoutBusqueda) {
+                clearTimeout(modoMov._timeoutBusqueda);
+            }
+
+            modoMov.activo = false;
+            modoMov.articuloSeleccionado = null;
+            modoMov.cajaSeleccionada = null;
+            modoMov.ubicacionOrigen = null;
+            modoMov.ubicacionesDisponibles = [];
+            modoMov.ubicacionesFiltradas = null;
+            modoMov.busquedaUbicacion = '';
+            modoMov._ubicacionesPreparadas = null; // ✅ Liberar memoria
+            modoMov.ubicacionDestinoSeleccionada = null;
         },
 
         iniciarMovimientoArticuloEnCaja(articulo, ubicacion, caja) {
@@ -136,6 +387,8 @@ document.addEventListener('alpine:init', () => {
             this.modoMovimiento.cajaSeleccionada = null;
             this.modoMovimiento.ubicacionOrigen = null;
             this.modoMovimiento.ubicacionesDisponibles = [];
+            this.modoMovimiento.ubicacionesFiltradas = null; // ✅ Limpiar filtros
+            this.modoMovimiento.busquedaUbicacion = ''; // ✅ Limpiar búsqueda
             this.modoMovimiento.ubicacionDestinoSeleccionada = null;
         },
 
@@ -155,10 +408,27 @@ document.addEventListener('alpine:init', () => {
 function rackDetalle() {
     return {
         // DATOS DINÁMICOS DESDE EL CONTROLADOR
-        rack: rackData,
-        todosRacks: todosRacks,
-        rackActual: rackActual,
-        sedeActual: sedeActual,
+        rack: window.rackData || {}, // <-- USA window.
+        todosRacks: window.todosRacks || [],
+        rackActual: window.rackActual || '',
+        sedeActual: window.sedeActual || '',
+
+        // ✅ NUEVO: Función para manejar la búsqueda
+        manejarBusquedaUbicacion(event) {
+            this.$store.rackDetalle.filtrarUbicaciones();
+        },
+
+        // ✅ NUEVO: Función para limpiar búsqueda
+        limpiarBusquedaUbicacion() {
+            this.$store.rackDetalle.modoMovimiento.busquedaUbicacion = '';
+            this.$store.rackDetalle.modoMovimiento.ubicacionesFiltradas = null;
+        },
+
+        // ✅ NUEVO: Getter para obtener ubicaciones visibles (filtradas o todas)
+        get ubicacionesVisibles() {
+            const store = this.$store.rackDetalle.modoMovimiento;
+            return store.ubicacionesFiltradas !== null ? store.ubicacionesFiltradas : store.ubicacionesDisponibles;
+        },
 
         // FUNCIONES AUXILIARES
         getUbicacion(codigo) {
@@ -385,6 +655,8 @@ function rackDetalle() {
             }
 
             store.cargandoUbicaciones = true;
+            store.busquedaUbicacion = ''; // ✅ Resetear búsqueda
+            store.ubicacionesFiltradas = null; // ✅ Resetear filtros
 
             try {
                 // Preparar datos según el tipo
@@ -446,13 +718,19 @@ function rackDetalle() {
         seleccionarUbicacionDestino(ubicacion) {
             this.$store.rackDetalle.seleccionarUbicacionDestino(ubicacion);
         },
-
-        // MOVER ARTÍCULO
+        // MOVER ARTÍCULO CON SWEETALERT2
         async moverArticulo() {
             const store = this.$store.rackDetalle.modoMovimiento;
 
             if (!store.ubicacionDestinoSeleccionada || !store.articuloSeleccionado || !store.ubicacionOrigen) {
-                alert('Selecciona una ubicación destino');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ubicación requerida',
+                    text: 'Por favor, selecciona una ubicación destino',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#4f46e5',
+                    backdrop: true,
+                });
                 return;
             }
 
@@ -467,20 +745,126 @@ function rackDetalle() {
 
             // Validar cantidad
             if (store.cantidad < 1) {
-                alert('Cantidad inválida');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Cantidad inválida',
+                    text: 'La cantidad debe ser mayor a 0',
+                    confirmButtonText: 'Corregir',
+                    confirmButtonColor: '#ef4444',
+                });
                 return;
             }
 
-            // Mensaje de confirmación
-            let mensajeConfirmacion = `¿Mover ${store.cantidad} unidad(es) de "${store.articuloSeleccionado.nombre}"\nde ${store.ubicacionOrigen.codigo} a ${store.ubicacionDestinoSeleccionada.codigo}?`;
+            // ========== CONFIRMACIÓN CON SWEETALERT2 ==========
+            const result = await Swal.fire({
+                title: '¿Confirmar movimiento?',
+                html: `
+        <div class="text-center">
+            
+            <p class="text-lg font-semibold text-gray-800 mb-2">¿Estás seguro de mover este artículo?</p>
+            <p class="text-gray-600 mb-6">No podrás deshacer esta acción.</p>
+            
+            <!-- Detalles del movimiento -->
+            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                <div class="space-y-3 text-left">
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 mr-3">
+                            <i class="fas fa-box text-sm"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500">Artículo</div>
+                            <div class="font-medium text-gray-800">${store.articuloSeleccionado?.codigo_repuesto || store.articuloSeleccionado?.codigo_barras || 'Artículo'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-100 text-amber-600 mr-3">
+                            <i class="fas fa-layer-group text-sm"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500">Cantidad</div>
+                            <div class="font-medium text-gray-800">${store.cantidad} unidad(es)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-600 mr-3">
+                            <i class="fas fa-sign-out-alt text-sm"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500">Origen</div>
+                            <div class="font-medium text-gray-800">${store.ubicacionOrigen.codigo}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-600 mr-3">
+                            <i class="fas fa-sign-in-alt text-sm"></i>
+                        </span>
+                        <div class="flex-1">
+                            <div class="text-xs text-gray-500">Destino</div>
+                            <div class="font-medium text-gray-800">${store.ubicacionDestinoSeleccionada.codigo_unico}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+               
+            <div class="text-xs text-gray-500 mt-4">
+                <i class="fas fa-exclamation-circle mr-1"></i>
+                Esta acción moverá el artículo a la nueva ubicación
+            </div>
+        </div>
+    `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, mover artículo',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#3085d6', // Rojo como en la imagen
+                cancelButtonColor: '#d33', // Azul como en la imagen
+                reverseButtons: true, // Cancelar primero, luego Confirmar
+                focusCancel: true, // Enfocar el botón de cancelar por defecto
+                showLoaderOnConfirm: true,
+                customClass: {
+                    popup: 'rounded-xl',
+                    title: 'hidden', // Ocultamos el título por defecto porque lo incluimos en el HTML
+                    htmlContainer: 'pt-0',
+                    confirmButton: 'px-5 py-2.5 font-medium rounded-lg',
+                    cancelButton: 'px-5 py-2.5 font-medium rounded-lg mr-2',
+                },
+                preConfirm: () => {
+                    return this.ejecutarMovimiento(store);
+                },
+                allowOutsideClick: () => !Swal.isLoading(),
+                backdrop: 'rgba(0,0,0,0.4)',
+            });
 
-            if (!confirm(mensajeConfirmacion)) {
+            // Si el usuario canceló - USANDO TOASTR
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                toastr.info('Movimiento cancelado', 'Cancelado', {
+                    timeOut: 3000,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    closeButton: true,
+                });
                 return;
             }
 
-            // Marcar como procesando
-            store.moviendoArticulo = true;
+            // Si hubo éxito en el movimiento - USANDO TOASTR
+            if (result.value && result.value.success) {
+                toastr.success('El artículo ha sido movido exitosamente', '¡Movimiento exitoso!', {
+                    timeOut: 3000,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    closeButton: true,
+                    onHidden: () => {
+                        window.location.reload();
+                    },
+                });
+            }
+        },
 
+        // ========== FUNCIÓN PARA EJECUTAR EL MOVIMIENTO ==========
+        async ejecutarMovimiento(store) {
             try {
                 let endpoint = '';
                 let requestBody = {};
@@ -520,8 +904,8 @@ function rackDetalle() {
                     };
                 } else {
                     // NO SE PUEDE IDENTIFICAR EL TIPO
-                    alert('Error: No se puede identificar el tipo de artículo. Contacta al administrador.');
-                    return;
+                    Swal.showValidationMessage('Error: No se puede identificar el tipo de artículo');
+                    return null;
                 }
 
                 console.log('Enviando a endpoint:', endpoint);
@@ -540,16 +924,29 @@ function rackDetalle() {
                 console.log('Respuesta del servidor:', data);
 
                 if (data.success) {
-                    alert('✓ ' + (data.message || 'Operación realizada exitosamente'));
-                    window.location.reload();
+                    return { success: true, message: data.message };
                 } else {
-                    alert('✗ Error: ' + (data.message || 'Error desconocido'));
+                    // MOSTRAR ERROR CON TOASTR
+                    toastr.error(data.message || 'Error desconocido', 'Error', {
+                        timeOut: 5000,
+                        progressBar: true,
+                        positionClass: 'toast-top-right',
+                        closeButton: true,
+                    });
+                    Swal.showValidationMessage(data.message || 'Error desconocido');
+                    return null;
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('✗ Error de conexión');
-            } finally {
-                store.moviendoArticulo = false;
+                // MOSTRAR ERROR DE CONEXIÓN CON TOASTR
+                toastr.error('Error de conexión con el servidor', 'Error', {
+                    timeOut: 5000,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    closeButton: true,
+                });
+                Swal.showValidationMessage('Error de conexión con el servidor');
+                return null;
             }
         },
 
@@ -693,30 +1090,20 @@ function modalDetalleUbicacion() {
         iniciarMovimientoDesdeModalConArticulo(articulo, ubicacion = null) {
             console.log('=== INICIAR MOVIMIENTO DESDE MODAL ===');
             console.log('Artículo:', articulo);
-            console.log('Ubicación pasada:', ubicacion);
 
-            // Usar ubicación pasada o la del modal
             const ubicacionActual = ubicacion || this.ubicacion;
-
             if (!articulo || !ubicacionActual) {
                 alert('Error: Faltan datos para iniciar el movimiento');
                 return;
             }
 
-            // Cerrar el modal
             this.closeModal();
-
-            // Pequeña espera para que se cierre el modal
             setTimeout(() => {
-                // Determinar tipo de movimiento
                 let tipo = 'articulo';
-
                 if (articulo.es_caja === true) {
                     tipo = 'caja';
                 } else if (articulo.es_contenido_caja === true) {
                     tipo = 'articulo_en_caja';
-
-                    // Si es artículo en caja, buscar la caja padre
                     if (this.ubicacion && this.ubicacion.cajas) {
                         for (const caja of this.ubicacion.cajas) {
                             if (caja.articulo_en_caja && caja.articulo_en_caja.id === articulo.id) {
@@ -728,28 +1115,9 @@ function modalDetalleUbicacion() {
                 }
 
                 console.log('Tipo de movimiento:', tipo);
-                console.log('Artículo final:', articulo);
-
-                // LLAMAR DIRECTAMENTE AL STORE
                 Alpine.store('rackDetalle').iniciarMovimiento(articulo, ubicacionActual, tipo);
-
-                // Ahora necesitamos activar el modal de movimiento
-                // Esto se puede hacer de varias formas:
-
-                // Opción 1: Usar el store para mostrar el modal
-                setTimeout(() => {
-                    // Buscar el modal de movimiento y activarlo
-                    const modalesMovimiento = document.querySelectorAll('[x-show*="modoMovimiento.activo"]');
-                    if (modalesMovimiento.length > 0) {
-                        // Ya debería estar activo por el store
-                        console.log('Modal de movimiento activado');
-                    } else {
-                        console.warn('No se encontró el modal de movimiento');
-                    }
-                }, 200);
             }, 100);
         },
-
         // Función auxiliar para buscar la caja que contiene un artículo
         buscarCajaContenedora(articulo) {
             if (!this.ubicacion || !this.ubicacion.cajas) {
