@@ -25,7 +25,24 @@ class UbicacionesVistaController extends Controller
         return view('almacen.ubicaciones.vista-almacen', compact('sedes'));
     }
 
+    public function generarQrPorNombre(string $nombre)
+    {
+        $nombre = trim($nombre);
 
+        if ($nombre === '') {
+            return response()->json(['message' => 'Nombre inválido'], 422);
+        }
+
+        $png = QrCode::format('png')
+            ->size(350)
+            ->margin(2)
+            ->errorCorrection('M')
+            ->generate($nombre);
+
+        return response($png, 200)
+            ->header('Content-Type', 'image/png')
+            ->header('Content-Disposition', 'inline; filename="qr.png"');
+    }
 
     // En UbicacionesVistaController.php
     public function obtenerTipoRack(Request $request)

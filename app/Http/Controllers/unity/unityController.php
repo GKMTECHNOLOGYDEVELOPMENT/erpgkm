@@ -27,7 +27,7 @@ class UnityController extends Controller
         return response()->json(['ok' => true]);
     }
 
-       public function racksModeloCreate()
+    public function racksModeloCreate()
     {
         // Si existe la vista, la carga; si no, devuelve HTML simple para pruebas
         if (view()->exists('unity.racks.modelo.create')) {
@@ -52,6 +52,15 @@ class UnityController extends Controller
             return view('unity.cajas.create');
         }
         return response('<h1>Creación de Cajas</h1><p>Ruta de prueba activa (UnityController@cajasCreate).</p>', 200)
+            ->header('Content-Type', 'text/html; charset=utf-8');
+    }
+
+    public function vistaGeneral()
+    {
+        if (view()->exists('unity.vistaGeneral.index')) {
+            return view('unity.vistaGeneral.index');
+        }
+        return response('<h1>Vista General</h1><p>(UnityController@cajasCreate).</p>', 200)
             ->header('Content-Type', 'text/html; charset=utf-8');
     }
 }
