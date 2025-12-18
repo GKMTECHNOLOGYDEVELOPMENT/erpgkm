@@ -1727,17 +1727,33 @@ class UbicacionesVistaController extends Controller
             return redirect()->route('almacen.vista')->with('error', "Rack '{$rack}' no encontrado en la sede '{$sede}'");
         }
 
-        // ✅ Consulta corregida para mostrar ubicaciones únicas en orden correlativo
+        // ✅ CONSULTA CORREGIDA: Manejo de modelos para repuestos (idTipoArticulo = 2)
         $rackData = DB::table('racks as r')
             ->join('rack_ubicaciones as ru', 'r.idRack', '=', 'ru.rack_id')
             ->leftJoin('rack_ubicacion_articulos as rua', 'ru.idRackUbicacion', '=', 'rua.rack_ubicacion_id')
             ->leftJoin('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-            ->leftJoin('modelo as m', function ($join) {
-                $join->on('am.modelo_id', '=', 'm.idModelo')
-                    ->orOn('a.idModelo', '=', 'm.idModelo');
+
+            // ✅ IMPORTANTE: Para repuestos, usar articulo_modelo. Para otros, usar idModelo directo
+            ->leftJoin('articulo_modelo as am', function ($join) {
+                $join->on('a.idArticulos', '=', 'am.articulo_id')
+                    ->where('a.idTipoArticulo', '=', 2); // Solo para repuestos
             })
+
+            // ✅ Para repuestos: modelo desde articulo_modelo
+            // ✅ Para otros: modelo desde articulos.idModelo
+            ->leftJoin('modelo as m', function ($join) {
+                $join->on(function ($query) {
+                    // Para repuestos: usar el modelo de articulo_modelo
+                    $query->where('a.idTipoArticulo', '=', 2)
+                        ->on('am.modelo_id', '=', 'm.idModelo');
+                })->orOn(function ($query) {
+                    // Para otros tipos: usar el modelo directo
+                    $query->where('a.idTipoArticulo', '!=', 2)
+                        ->on('a.idModelo', '=', 'm.idModelo');
+                });
+            })
+
             ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
             ->leftJoin('custodias as cust', 'rua.custodia_id', '=', 'cust.id')
             ->leftJoin('modelo as m_cust', 'cust.idModelo', '=', 'm_cust.idModelo')
@@ -1770,6 +1786,13 @@ class UbicacionesVistaController extends Controller
                 'a.stock_total',
                 'ta.nombre as tipo_articulo',
                 'ta.idTipoArticulo',
+
+                // ✅ Información del modelo
+                'a.idModelo as articulo_modelo_id', // Solo válido para NO repuestos
+                'am.modelo_id as repuesto_modelo_id', // Solo válido para repuestos
+                'm.idModelo as modelo_id_final',
+                'm.nombre as modelo_nombre',
+
                 DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria'),
                 'rua.cantidad',
                 'rua.custodia_id',
@@ -1793,16 +1816,65 @@ class UbicacionesVistaController extends Controller
             ->orderBy('ru.posicion')
             ->get();
 
+        // ✅ Obtener TODOS los modelos para los repuestos encontrados
+        $repuestosIds = $rackData->where('idTipoArticulo', 2)->pluck('idArticulos')->unique();
+        $todosModelosRepuestos = [];
+
+        if ($repuestosIds->isNotEmpty()) {
+            $modelosData = DB::table('articulo_modelo as am')
+                ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+                ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+                ->leftJoin('categoria as cat', 'm.idCategoria', '=', 'cat.idCategoria')
+                ->whereIn('am.articulo_id', $repuestosIds)
+                ->select(
+                    'am.articulo_id',
+                    'm.idModelo',
+                    'm.nombre as modelo_nombre',
+                    'mar.nombre as marca_nombre',
+                    'cat.nombre as categoria_nombre'
+                )
+                ->orderBy('m.nombre')
+                ->get();
+
+            // Organizar por artículo_id
+            foreach ($modelosData as $modelo) {
+                $todosModelosRepuestos[$modelo->articulo_id][] = [
+                    'id' => $modelo->idModelo,
+                    'nombre' => $modelo->modelo_nombre,
+                    'marca' => $modelo->marca_nombre,
+                    'categoria' => $modelo->categoria_nombre
+                ];
+            }
+        }
+
         // ✅ CONSULTA SIMPLE para cajas con su artículo
-        // ✅ CONSULTA MEJORADA para cajas con su artículo Y categoría
         $cajasData = DB::table('cajas as cj')
             ->join('rack_ubicaciones as ru', 'cj.idubicaciones_rack', '=', 'ru.idRackUbicacion')
             ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
             ->leftJoin('articulos as a', 'cj.idArticulo', '=', 'a.idArticulos')
             ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-            ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo') // <-- Añade esto
-            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria') // <-- Añade esto
+
+            // ✅ IMPORTANTE: Para repuestos en cajas, también necesitamos articulo_modelo
+            ->leftJoin('articulo_modelo as am_caja', function ($join) {
+                $join->on('a.idArticulos', '=', 'am_caja.articulo_id')
+                    ->where('a.idTipoArticulo', '=', 2); // Solo para repuestos
+            })
+
+            // ✅ Para repuestos: modelo desde articulo_modelo
+            // ✅ Para otros: modelo desde articulos.idModelo
+            ->leftJoin('modelo as m', function ($join) {
+                $join->on(function ($query) {
+                    // Para repuestos: usar el modelo de articulo_modelo
+                    $query->where('a.idTipoArticulo', '=', 2)
+                        ->on('am_caja.modelo_id', '=', 'm.idModelo');
+                })->orOn(function ($query) {
+                    // Para otros tipos: usar el modelo directo
+                    $query->where('a.idTipoArticulo', '!=', 2)
+                        ->on('a.idModelo', '=', 'm.idModelo');
+                });
+            })
+
+            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
             ->select(
                 'cj.idCaja',
                 'cj.nombre',
@@ -1813,22 +1885,50 @@ class UbicacionesVistaController extends Controller
                 'cj.orden_en_pallet',
                 'cj.fecha_entrada',
                 'cj.idubicaciones_rack as idRackUbicacion',
-
-                // ARTÍCULO EN LA CAJA
                 'a.idArticulos',
                 'a.nombre as articulo_nombre',
                 'a.codigo_barras',
                 'a.codigo_repuesto',
                 'a.stock_total',
+                'a.idTipoArticulo',
                 'ta.nombre as tipo_articulo',
-
-                // ✅ NUEVO: CATEGORÍA DEL ARTÍCULO
                 DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria_articulo')
             )
             ->where('r.nombre', $rack)
             ->where('r.sede', $sede)
             ->where('r.estado', 'activo')
             ->get();
+
+        // ✅ Obtener TODOS los modelos para los repuestos dentro de cajas
+        $repuestosEnCajasIds = $cajasData->where('idTipoArticulo', 2)->pluck('idArticulos')->unique();
+        $todosModelosRepuestosEnCajas = [];
+
+        if ($repuestosEnCajasIds->isNotEmpty()) {
+            $modelosDataCajas = DB::table('articulo_modelo as am')
+                ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+                ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+                ->leftJoin('categoria as cat', 'm.idCategoria', '=', 'cat.idCategoria')
+                ->whereIn('am.articulo_id', $repuestosEnCajasIds)
+                ->select(
+                    'am.articulo_id',
+                    'm.idModelo',
+                    'm.nombre as modelo_nombre',
+                    'mar.nombre as marca_nombre',
+                    'cat.nombre as categoria_nombre'
+                )
+                ->orderBy('m.nombre')
+                ->get();
+
+            // Organizar por artículo_id
+            foreach ($modelosDataCajas as $modelo) {
+                $todosModelosRepuestosEnCajas[$modelo->articulo_id][] = [
+                    'id' => $modelo->idModelo,
+                    'nombre' => $modelo->modelo_nombre,
+                    'marca' => $modelo->marca_nombre,
+                    'categoria' => $modelo->categoria_nombre
+                ];
+            }
+        }
 
         // Si no existe el rack, redirigir
         if ($rackData->isEmpty() && $cajasData->isEmpty()) {
@@ -1872,7 +1972,6 @@ class UbicacionesVistaController extends Controller
                 ->get();
 
             foreach ($movimientos as $mov) {
-                // ... (mantener igual el código de historial)
                 $tipoNormalizado = match (strtolower($mov->tipo_movimiento)) {
                     'entrada', 'ingreso' => 'ingreso',
                     'salida' => 'salida',
@@ -1978,10 +2077,28 @@ class UbicacionesVistaController extends Controller
                                 'cliente_general_id' => $art->cliente_general_id_custodia,
                                 'cliente_general_nombre' => $art->cliente_general_nombre_custodia ?: 'Sin cliente',
                                 'es_caja' => false,
-                                'es_contenido_caja' => false // ✅ No es contenido de caja
+                                'es_contenido_caja' => false
                             ]);
                         } else {
                             $mostrandoCodigoRepuesto = ($art->idTipoArticulo == 2 && !empty($art->codigo_repuesto));
+
+                            // ✅ Obtener modelos según el tipo de artículo
+                            $modelosDelArticulo = [];
+
+                            if ($art->idTipoArticulo == 2) {
+                                // Para repuestos: obtener todos los modelos de la tabla articulo_modelo
+                                $modelosDelArticulo = $todosModelosRepuestos[$art->idArticulos] ?? [];
+                            } else {
+                                // Para otros tipos: usar el modelo directo (si existe)
+                                if ($art->modelo_nombre) {
+                                    $modelosDelArticulo = [[
+                                        'id' => $art->modelo_id_final,
+                                        'nombre' => $art->modelo_nombre,
+                                        'marca' => null,
+                                        'categoria' => $art->categoria
+                                    ]];
+                                }
+                            }
 
                             $productosAgrupados->push([
                                 'id' => $art->idArticulos,
@@ -1994,29 +2111,53 @@ class UbicacionesVistaController extends Controller
                                 'tipo_articulo' => $art->tipo_articulo,
                                 'idTipoArticulo' => $art->idTipoArticulo,
                                 'categoria' => $art->categoria,
+
+                                // ✅ Información del modelo
+                                'modelo_id' => $art->idTipoArticulo != 2 ? $art->articulo_modelo_id : null,
+                                'modelo_nombre' => $art->idTipoArticulo != 2 ? $art->modelo_nombre : null,
+
+                                // ✅ Para repuestos: todos los modelos
+                                'modelos' => $modelosDelArticulo,
+                                'tiene_multiple_modelos' => $art->idTipoArticulo == 2 && count($modelosDelArticulo) > 1,
+
                                 'custodia_id' => null,
                                 'es_repuesto' => $art->idTipoArticulo == 2,
                                 'mostrando_codigo_repuesto' => $mostrandoCodigoRepuesto,
                                 'cliente_general_id' => $art->cliente_general_id,
                                 'cliente_general_nombre' => $art->cliente_general_nombre ?: 'Sin cliente',
                                 'es_caja' => false,
-                                'es_contenido_caja' => false // ✅ No es contenido de caja
+                                'es_contenido_caja' => false
                             ]);
                         }
                     }
                 }
 
-                // ✅ PROCESAR CAJAS (MUY SIMPLE)
-                $categoriasDeArticulosEnCajas = collect(); // ✅ NUEVA COLECCIÓN
-                $tiposDeArticulosEnCajas = collect(); // ✅ NUEVA COLECCIÓN PARA TIPOS
-                $capacidadTotalCajas = 0; // ✅ NUEVA VARIABLE
-
+                // ✅ PROCESAR CAJAS (MEJORADO CON MODELOS)
+                $categoriasDeArticulosEnCajas = collect();
+                $tiposDeArticulosEnCajas = collect();
+                $capacidadTotalCajas = 0;
 
                 if ($cajasUbicacion->isNotEmpty()) {
                     foreach ($cajasUbicacion as $caja) {
-                        // ✅ CREAR el artículo que está DENTRO de la caja
+                        // ✅ CREAR el artículo que está DENTRO de la caja (CON MODELOS)
                         $articuloEnCaja = null;
                         if ($caja->idArticulos) {
+                            // ✅ Obtener modelos para repuestos dentro de cajas
+                            $modelosArticuloEnCaja = [];
+
+                            if ($caja->idTipoArticulo == 2) {
+                                // Para repuestos: obtener todos los modelos de la tabla articulo_modelo
+                                $modelosArticuloEnCaja = $todosModelosRepuestosEnCajas[$caja->idArticulos] ?? [];
+                            } else {
+                                // Para otros tipos: el modelo ya viene en la consulta
+                                if ($caja->categoria_articulo && $caja->categoria_articulo !== 'Sin categoría') {
+                                    $modelosArticuloEnCaja = [[
+                                        'nombre' => null, // No tenemos el nombre del modelo en esta consulta
+                                        'categoria' => $caja->categoria_articulo
+                                    ]];
+                                }
+                            }
+
                             $articuloEnCaja = [
                                 'id' => $caja->idArticulos,
                                 'nombre' => $caja->articulo_nombre,
@@ -2025,7 +2166,10 @@ class UbicacionesVistaController extends Controller
                                 'cantidad' => $caja->cantidad_actual,
                                 'stock_total' => $caja->stock_total,
                                 'tipo_articulo' => $caja->tipo_articulo,
-                                'categoria' => $caja->categoria_articulo, // ✅ ¡AQUÍ ESTÁ!
+                                'idTipoArticulo' => $caja->idTipoArticulo,
+                                'categoria' => $caja->categoria_articulo,
+                                'modelos' => $modelosArticuloEnCaja,
+                                'es_repuesto' => $caja->idTipoArticulo == 2,
                                 'es_contenido_caja' => true,
                                 'cajaPadre' => [
                                     'idCaja' => $caja->idCaja,
@@ -2048,7 +2192,6 @@ class UbicacionesVistaController extends Controller
                         }
 
                         $capacidadTotalCajas += $caja->capacidad;
-
 
                         // ✅ Agregar información de la CAJA
                         $cajasAgrupadas->push([
@@ -2102,10 +2245,6 @@ class UbicacionesVistaController extends Controller
                     ->unique()
                     ->sort();
 
-                $clientesUnicos = $productosAgrupados->pluck('cliente_general_nombre')
-                    ->filter(fn($cliente) => $cliente && $cliente !== 'Sin cliente')
-                    ->unique();
-
                 // ✅ Información para mostrar
                 $totalItems = $cantidadCajas + $cantidadArticulosSueltos;
                 $primerItem = $todosLosProductos->first();
@@ -2135,8 +2274,7 @@ class UbicacionesVistaController extends Controller
                     'producto' => $productoDisplay,
                     'cantidad' => $cantidadTotal,
                     'cantidad_total' => $cantidadTotal,
-                    'capacidad_total_cajas' => $capacidadTotalCajas, // ✅ AQUÍ PONES LA CAPACIDAD TOTAL
-
+                    'capacidad_total_cajas' => $capacidadTotalCajas,
                     'cantidad_cajas' => $cantidadCajas,
                     'cantidad_articulos_sueltos' => $cantidadArticulosSueltos,
                     'stock_total' => $productosAgrupados->isNotEmpty() ? $productosAgrupados->first()['stock_total'] : null,
@@ -2146,7 +2284,7 @@ class UbicacionesVistaController extends Controller
                     'nivel' => $ubicacion->nivel,
                     'fecha' => $ubicacion->updated_at,
                     'categorias_acumuladas' => $todasLasCategorias->isNotEmpty() ? $todasLasCategorias->join(', ') : 'Sin categoría',
-                    'tipos_acumulados' => $todosLosTipos->isNotEmpty() ? $todosLosTipos->join(', ') : 'Sin tipo', // ✅ ¡AQUÍ ESTÁN TODOS LOS TIPOS!
+                    'tipos_acumulados' => $todosLosTipos->isNotEmpty() ? $todosLosTipos->join(', ') : 'Sin tipo',
                     'clientes_acumulados' => $clientesUnicos->isNotEmpty() ? $clientesUnicos->join(', ') : 'Sin cliente',
                     'tiene_cajas' => $cantidadCajas > 0,
                     'tiene_articulos_sueltos' => $cantidadArticulosSueltos > 0,
