@@ -298,7 +298,7 @@
                                         <!-- QR Image -->
                                         <div class="mb-4 p-2 bg-white rounded-lg shadow-sm border">
                                             <img :src="'/almacen/ubicaciones/qr/' + encodeURIComponent(ubicacion?.codigo_unico ||
-                                                ubicacion?.codigo)"
+                                                ubicacion?.codigo) + '?ruta=vista'"
                                                 :alt="'QR Code - ' + (ubicacion?.codigo || 'N/A')"
                                                 class="w-48 h-48 object-contain" id="qr-image" x-ref="qrImage">
                                         </div>
@@ -306,7 +306,7 @@
                                         <!-- Actions -->
                                         <div class="flex space-x-3 mt-auto">
                                             <!-- Download Button -->
-                                            <button type="button" @click="downloadQR()"
+                                            <button type="button" @click="downloadQR('vista')"
                                                 class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -319,7 +319,7 @@
                                             </button>
 
                                             <!-- Copy Link Button -->
-                                            <button type="button" @click="copyQRUrl()"
+                                            <button type="button" @click="copyQRUrl('vista')"
                                                 class="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
