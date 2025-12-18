@@ -28,16 +28,81 @@ class KardexController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         
-        // Consulta base para obtener movimientos de kardex
+        // Primero: obtener SOLO los números de orden para SALIDAS (cantidad negativa)
+        $subqueryNumerosOrden = DB::table('inventario_ingresos_clientes')
+            ->select(
+                'articulo_id',
+                DB::raw('DATE(created_at) as fecha_orden'),
+                DB::raw("GROUP_CONCAT(DISTINCT numero_orden ORDER BY created_at DESC SEPARATOR ', ') as numeros_orden")
+            )
+            ->where('cantidad', '<', 0) // SOLO para salidas (cantidad negativa)
+            ->groupBy('articulo_id', DB::raw('DATE(created_at)'));
+        
+        // Consulta base para obtener movimientos de kardex con toda la información de relaciones
         $query = Kardex::with('articulo')
             ->join('articulos', 'kardex.idArticulo', '=', 'articulos.idArticulos')
-            ->select('kardex.*', 'articulos.nombre', 'articulos.codigo_barras');
+            ->leftJoin('tipoarticulos', 'articulos.idTipoArticulo', '=', 'tipoarticulos.idTipoArticulo')
+            ->leftJoin('modelo', 'articulos.idModelo', '=', 'modelo.idModelo')
+            ->leftJoin('marca', 'modelo.idMarca', '=', 'marca.idMarca')
+            ->leftJoin('categoria', 'modelo.idCategoria', '=', 'categoria.idCategoria')
+            ->leftJoin('subcategorias', 'articulos.idsubcategoria', '=', 'subcategorias.id')
+            ->leftJoinSub($subqueryNumerosOrden, 'ordenes', function($join) {
+                $join->on('kardex.idArticulo', '=', 'ordenes.articulo_id')
+                     ->on(DB::raw('DATE(kardex.fecha)'), '=', 'ordenes.fecha_orden');
+            })
+            ->select(
+                'kardex.*',
+                'tipoarticulos.nombre as tipo_articulo_nombre',
+                'modelo.nombre as modelo_nombre',
+                'marca.nombre as marca_nombre',
+                'categoria.nombre as categoria_nombre',
+                'subcategorias.nombre as subcategoria_nombre',
+                // Usar código de repuesto si idTipoArticulo = 2, sino usar nombre
+                DB::raw("CASE 
+                    WHEN articulos.idTipoArticulo = 2 THEN articulos.codigo_repuesto 
+                    ELSE articulos.nombre 
+                END as nombre_producto"),
+                'articulos.codigo_barras',
+                'articulos.idTipoArticulo',
+                'articulos.codigo_repuesto',
+                'ordenes.numeros_orden',
+                // Determinar región basado en CAS
+              DB::raw("CASE 
+    WHEN kardex.cas IN ('CAS GKM', 'INGRESO POR MARCA ASOCIADA') THEN 'LIMA'
+    WHEN kardex.cas IS NOT NULL AND kardex.cas != '' THEN 'PROVINCIA'
+    ELSE 'SIN REGISTRO'
+END as region")
+
+            );
         
         // Aplicar filtros si existen
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('articulos.nombre', 'like', "%{$search}%")
-                  ->orWhere('articulos.codigo_barras', 'like', "%{$search}%");
+                  ->orWhere('articulos.codigo_barras', 'like', "%{$search}%")
+                  ->orWhere('articulos.codigo_repuesto', 'like', "%{$search}%")
+                  ->orWhere('tipoarticulos.nombre', 'like', "%{$search}%")
+                  ->orWhere('modelo.nombre', 'like', "%{$search}%")
+                  ->orWhere('marca.nombre', 'like', "%{$search}%")
+                  ->orWhere('categoria.nombre', 'like', "%{$search}%")
+                  ->orWhere('subcategorias.nombre', 'like', "%{$search}%")
+                  ->orWhere('kardex.cas', 'like', "%{$search}%")
+                  // También buscar por región (LIMA o PROVINCIA)
+                  ->orWhere(DB::raw("CASE 
+    WHEN kardex.cas IN ('CAS GKM', 'INGRESO POR MARCA ASOCIADA TCL') THEN 'LIMA'
+    WHEN kardex.cas IS NOT NULL AND kardex.cas != '' THEN 'PROVINCIA'
+    ELSE 'SIN REGISTRO'
+END"), 'like', "%{$search}%")
+
+                  // Búsqueda por número de orden SOLO en salidas
+                  ->orWhereExists(function($subquery) use ($search) {
+                      $subquery->select(DB::raw(1))
+                          ->from('inventario_ingresos_clientes')
+                          ->whereColumn('inventario_ingresos_clientes.articulo_id', 'kardex.idArticulo')
+                          ->whereDate('inventario_ingresos_clientes.created_at', DB::raw('DATE(kardex.fecha)'))
+                          ->where('inventario_ingresos_clientes.cantidad', '<', 0) // Solo salidas
+                          ->where('inventario_ingresos_clientes.numero_orden', 'like', "%{$search}%");
+                  });
             });
         }
         
@@ -49,29 +114,57 @@ class KardexController extends Controller
             $query->whereDate('kardex.fecha', '<=', $endDate);
         }
         
-        // Ordenar y paginar resultados
+        // Crear una copia de la consulta para las estadísticas (sin paginación)
+        $queryStats = clone $query;
+        
+        // Obtener los datos paginados para la vista
         $movimientos = $query->orderBy('kardex.fecha', 'desc')
                             ->paginate(20);
+        
+        // Obtener estadísticas FILTRADAS
+        $movimientosFiltrados = $movimientos->total();
         
         // Obtener estadísticas generales
         $totalArticulos = Articulo::count();
         $totalMovimientos = Kardex::count();
         
-        // Si hay filtros aplicados, calcular movimientos filtrados
-        $movimientosFiltrados = $movimientos->total();
+        // Calcular estadísticas específicas de los resultados filtrados
+        if ($movimientosFiltrados > 0) {
+            // Obtener estadísticas de los resultados filtrados
+            $estadisticasFiltradas = $queryStats
+                ->select(
+                    DB::raw('COUNT(*) as total_movimientos'),
+                    DB::raw('SUM(kardex.unidades_entrada) as total_entradas'),
+                    DB::raw('SUM(kardex.unidades_salida) as total_salidas'),
+                    DB::raw('SUM(kardex.inventario_actual) as total_inventario_actual')
+                )
+                ->first();
+                
+            $totalMovimientosFiltrados = $estadisticasFiltradas->total_movimientos ?? 0;
+            $totalEntradasFiltradas = $estadisticasFiltradas->total_entradas ?? 0;
+            $totalSalidasFiltradas = $estadisticasFiltradas->total_salidas ?? 0;
+            $totalInventarioActualFiltrado = $estadisticasFiltradas->total_inventario_actual ?? 0;
+        } else {
+            $totalMovimientosFiltrados = 0;
+            $totalEntradasFiltradas = 0;
+            $totalSalidasFiltradas = 0;
+            $totalInventarioActualFiltrado = 0;
+        }
         
         return view('almacen.kardex.index', compact(
             'movimientos', 
             'totalArticulos',
             'totalMovimientos',
             'movimientosFiltrados',
+            'totalMovimientosFiltrados',
+            'totalEntradasFiltradas',
+            'totalSalidasFiltradas',
+            'totalInventarioActualFiltrado',
             'search',
             'startDate',
             'endDate'
         ));
     }
-
-
 
 
 public function kardexxproducto($id)
