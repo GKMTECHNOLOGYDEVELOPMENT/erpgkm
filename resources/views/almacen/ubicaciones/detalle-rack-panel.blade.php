@@ -298,7 +298,7 @@
                                         <!-- QR Image -->
                                         <div class="mb-4 p-2 bg-white rounded-lg shadow-sm border">
                                             <img :src="'/almacen/ubicaciones/qr/' + encodeURIComponent(ubicacion?.codigo_unico ||
-                                                ubicacion?.codigo)"
+                                                ubicacion?.codigo) + '?ruta=vista'"
                                                 :alt="'QR Code - ' + (ubicacion?.codigo || 'N/A')"
                                                 class="w-48 h-48 object-contain" id="qr-image" x-ref="qrImage">
                                         </div>
@@ -306,7 +306,7 @@
                                         <!-- Actions -->
                                         <div class="flex space-x-3 mt-auto">
                                             <!-- Download Button -->
-                                            <button type="button" @click="downloadQR()"
+                                            <button type="button" @click="downloadQR('vista')"
                                                 class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -319,7 +319,7 @@
                                             </button>
 
                                             <!-- Copy Link Button -->
-                                            <button type="button" @click="copyQRUrl()"
+                                            <button type="button" @click="copyQRUrl('vista')"
                                                 class="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -430,10 +430,94 @@
                                                                                 <span
                                                                                     class="text-base font-semibold text-gray-800"
                                                                                     x-text="caja.articulo_en_caja.codigo_repuesto || 
-                                                                   caja.articulo_en_caja.codigo_barras || 
-                                                                   caja.articulo_en_caja.nombre || 'Sin código'">
+                                                               caja.articulo_en_caja.codigo_barras || 
+                                                               caja.articulo_en_caja.nombre || 'Sin código'">
                                                                                 </span>
                                                                             </div>
+                                                                        </div>
+
+                                                                        <!-- ✅ NUEVO: SECCIÓN PARA MODELOS -->
+                                                                        <div class="mt-2 mb-2">
+                                                                            <!-- Para repuestos con modelos -->
+                                                                            <template
+                                                                                x-if="caja.articulo_en_caja.es_repuesto && 
+                                                                caja.articulo_en_caja.modelos && 
+                                                                caja.articulo_en_caja.modelos.length > 0">
+                                                                                <div>
+                                                                                    <div
+                                                                                        class="flex items-center gap-1 mb-1">
+                                                                                        <i
+                                                                                            class="fas fa-cubes text-xs text-blue-500"></i>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-600 font-medium">
+                                                                                            Modelos:
+                                                                                            <span
+                                                                                                class="text-gray-400">(</span>
+                                                                                            <span class="text-gray-400"
+                                                                                                x-text="caja.articulo_en_caja.modelos.length"></span>
+                                                                                            <span
+                                                                                                class="text-gray-400">)</span>
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div class="flex flex-wrap gap-1">
+                                                                                        <template
+                                                                                            x-for="(modelo, modelIdx) in caja.articulo_en_caja.modelos"
+                                                                                            :key="modelIdx">
+                                                                                            <div
+                                                                                                class="border border-gray-200 rounded px-2 py-1 bg-gray-50">
+                                                                                                <div
+                                                                                                    class="flex items-center gap-1">
+                                                                                                    <span
+                                                                                                        class="text-xs font-medium text-gray-700"
+                                                                                                        x-text="modelo.nombre || 'Sin nombre'"></span>
+                                                                                                
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </template>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </template>
+
+                                                                            <!-- Para repuestos sin modelos -->
+                                                                            <template
+                                                                                x-if="caja.articulo_en_caja.es_repuesto && 
+                                                                (!caja.articulo_en_caja.modelos || caja.articulo_en_caja.modelos.length == 0)">
+                                                                                <div class="flex items-center gap-1">
+                                                                                    <i
+                                                                                        class="fas fa-cubes text-xs text-gray-400"></i>
+                                                                                    <span
+                                                                                        class="text-xs text-gray-500 font-medium">
+                                                                                        Sin modelos específicos
+                                                                                    </span>
+                                                                                </div>
+                                                                            </template>
+
+                                                                            <!-- Para artículos no repuestos con modelo -->
+                                                                            <template
+                                                                                x-if="!caja.articulo_en_caja.es_repuesto && caja.articulo_en_caja.modelo_nombre">
+                                                                                <div class="flex items-center gap-1">
+                                                                                    <i
+                                                                                        class="fas fa-cube text-xs text-blue-500"></i>
+                                                                                    <span
+                                                                                        class="text-xs text-gray-600 font-medium">Modelo:</span>
+                                                                                    <span
+                                                                                        class="text-xs font-medium text-blue-700"
+                                                                                        x-text="caja.articulo_en_caja.modelo_nombre"></span>
+                                                                                </div>
+                                                                            </template>
+
+                                                                            <!-- Para artículos sin modelo -->
+                                                                            <template
+                                                                                x-if="!caja.articulo_en_caja.es_repuesto && !caja.articulo_en_caja.modelo_nombre">
+                                                                                <div class="flex items-center gap-1">
+                                                                                    <i
+                                                                                        class="fas fa-cube text-xs text-gray-400"></i>
+                                                                                    <span
+                                                                                        class="text-xs text-gray-500 font-medium">
+                                                                                        Sin modelo específico
+                                                                                    </span>
+                                                                                </div>
+                                                                            </template>
                                                                         </div>
 
                                                                         <!-- Tipo y Categoría -->
@@ -494,12 +578,6 @@
                                                                 artículo</p>
                                                         </div>
                                                     </template>
-
-                                                    <!-- Botón para mover la caja
-                                                    <button @click="iniciarMovimientoDesdeModalConArticulo(caja)"
-                                                        class="mt-3 px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-lg flex items-center transition-colors">
-                                                        <i class="fas fa-exchange-alt mr-2"></i> Mover esta caja
-                                                    </button>-->
                                                 </div>
                                             </template>
                                         </div>

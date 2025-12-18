@@ -251,7 +251,13 @@
         }
     </style>
 
-    <div x-data="rackDetalle()" x-init="init()" class="min-h-screen flex flex-col">
+    <div x-data="rackDetalle()"
+        x-init="init()"
+        data-rack='@json($rack)'
+        data-todos-racks='@json($todosRacks)'
+        data-rack-actual='{{ $rackActual }}'
+        data-idx-rack-actual='{{ array_search($rackActual, $todosRacks) }}'
+        class="min-h-screen flex flex-col">
         <!-- Header Mejorado -->
         <div class="relative overflow-hidden bg-black text-white px-6 py-8">
             <div
@@ -458,7 +464,7 @@
                                                 <div class="text-xs text-gray-600">Unidades</div>
                                             </div>
                                         </div>
-                                        @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MAS ARTICULO RACK'))            
+                                        @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR MAS ARTICULO RACK'))
                                         <!-- ✅ NUEVO: Botón para agregar más productos -->
                                         <button @click="abrirModalAgregarProducto(modal.ubi)"
                                             class="ml-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 text-sm transition-all duration-200 hover:scale-105">
@@ -635,6 +641,175 @@
                                                                             </span>
                                                                         </div>
 
+                                                                        <!-- ✅ NUEVO: SECCIÓN PARA MOSTRAR MODELOS -->
+                                                                        <div class="mt-2">
+                                                                            <!-- Para repuestos con múltiples modelos -->
+                                                                            <template
+                                                                                x-if="producto.tiene_multiple_modelos && producto.modelos && producto.modelos.length > 0">
+                                                                                <div class="mb-2">
+                                                                                    <div
+                                                                                        class="flex items-center gap-1 mb-1">
+                                                                                        <i
+                                                                                            class="fas fa-cubes text-xs text-blue-500"></i>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-600 font-medium">Modelos
+                                                                                            compatibles:</span>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-400">(</span>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-400"
+                                                                                            x-text="producto.modelos.length"></span>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-400">)</span>
+                                                                                    </div>
+                                                                                    <div class="flex flex-wrap gap-1">
+                                                                                        <template
+                                                                                            x-for="(modelo, modelIdx) in producto.modelos"
+                                                                                            :key="modelIdx">
+                                                                                            <div
+                                                                                                class="border border-gray-200 rounded px-2 py-1 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                                                                <div
+                                                                                                    class="flex items-center gap-1">
+                                                                                                    <span
+                                                                                                        class="text-xs font-medium text-gray-700"
+                                                                                                        x-text="modelo.nombre"></span>
+                                                                                                    <template
+                                                                                                        x-if="modelo.marca">
+                                                                                                        <span
+                                                                                                            class="text-xs text-gray-500">(</span>
+                                                                                                    </template>
+                                                                                                    <span
+                                                                                                        x-show="modelo.marca"
+                                                                                                        class="text-xs text-gray-500"
+                                                                                                        x-text="modelo.marca"></span>
+                                                                                                    <template
+                                                                                                        x-if="modelo.marca && modelo.categoria">
+                                                                                                        <span
+                                                                                                            class="text-xs text-gray-500">
+                                                                                                            - </span>
+                                                                                                    </template>
+                                                                                                    <span
+                                                                                                        x-show="modelo.categoria"
+                                                                                                        class="text-xs text-gray-500"
+                                                                                                        x-text="modelo.categoria"></span>
+                                                                                                    <template
+                                                                                                        x-if="modelo.marca">
+                                                                                                        <span
+                                                                                                            class="text-xs text-gray-500">)</span>
+                                                                                                    </template>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </template>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </template>
+
+                                                                            <!-- Para artículos con un solo modelo -->
+                                                                            <template
+                                                                                x-if="!producto.tiene_multiple_modelos && producto.modelo_nombre">
+                                                                                <div class="mb-2">
+                                                                                    <div
+                                                                                        class="flex items-center gap-1">
+                                                                                        <i
+                                                                                            class="fas fa-cube text-xs text-blue-500"></i>
+                                                                                        <span
+                                                                                            class="text-xs text-gray-600 font-medium">Modelo:</span>
+                                                                                        <span
+                                                                                            class="text-xs font-medium text-blue-700"
+                                                                                            x-text="producto.modelo_nombre"></span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </template>
+                                                                            <!-- ✅ NUEVO: SECCIÓN PARA MOSTRAR MODELOS -->
+                                                                            <div class="mt-2">
+                                                                                <!-- Para repuestos con múltiples modelos -->
+                                                                                <template
+                                                                                    x-if="producto.idTipoArticulo == 2 && producto.modelos && producto.modelos.length > 0">
+                                                                                    <div class="mb-2">
+                                                                                        <div
+                                                                                            class="flex items-center gap-1 mb-1">
+                                                                                            <i
+                                                                                                class="fas fa-cubes text-xs text-blue-500"></i>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-600 font-medium">Modelos
+                                                                                                compatibles:</span>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-400">(</span>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-400"
+                                                                                                x-text="producto.modelos.length"></span>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-400">)</span>
+                                                                                        </div>
+                                                                                        <div
+                                                                                            class="flex flex-wrap gap-1">
+                                                                                            <template
+                                                                                                x-for="(modelo, modelIdx) in producto.modelos"
+                                                                                                :key="modelIdx">
+                                                                                                <div
+                                                                                                    class="border border-gray-200 rounded px-2 py-1 bg-gray-50 hover:bg-gray-100 transition-colors">
+                                                                                                    <div
+                                                                                                        class="flex items-center gap-1">
+                                                                                                        <span
+                                                                                                            class="text-xs font-medium text-gray-700"
+                                                                                                            x-text="modelo.nombre"></span>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </template>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </template>
+
+                                                                                <!-- Para artículos con un solo modelo -->
+                                                                                <template
+                                                                                    x-if="producto.idTipoArticulo != 2 && producto.modelo_nombre">
+                                                                                    <div class="mb-2">
+                                                                                        <div
+                                                                                            class="flex items-center gap-1">
+                                                                                            <i
+                                                                                                class="fas fa-cube text-xs text-blue-500"></i>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-600 font-medium">Modelo:</span>
+                                                                                            <span
+                                                                                                class="text-xs font-medium text-blue-700"
+                                                                                                x-text="producto.modelo_nombre"></span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </template>
+
+                                                                                <!-- Para artículos sin modelo definido -->
+                                                                                <template
+                                                                                    x-if="producto.idTipoArticulo != 2 && !producto.modelo_nombre">
+                                                                                    <div class="mb-2">
+                                                                                        <div
+                                                                                            class="flex items-center gap-1">
+                                                                                            <i
+                                                                                                class="fas fa-cube text-xs text-gray-400"></i>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-500 font-medium">Sin
+                                                                                                modelo específico</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </template>
+
+                                                                                <!-- Para repuestos sin modelos (fallback) -->
+                                                                                <template
+                                                                                    x-if="producto.idTipoArticulo == 2 && (!producto.modelos || producto.modelos.length == 0)">
+                                                                                    <div class="mb-2">
+                                                                                        <div
+                                                                                            class="flex items-center gap-1">
+                                                                                            <i
+                                                                                                class="fas fa-cubes text-xs text-gray-400"></i>
+                                                                                            <span
+                                                                                                class="text-xs text-gray-500 font-medium">Sin
+                                                                                                modelos
+                                                                                                específicos</span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </template>
+                                                                            </div>
+                                                                        </div>
+
                                                                         <!-- ✅ NUEVO: Mostrar Cliente General solo para productos normales -->
                                                                         <div x-show="producto.cliente_general_nombre && producto.cliente_general_nombre !== 'Sin cliente'"
                                                                             class="mt-2">
@@ -692,12 +867,12 @@
 
                                                             <div class="flex gap-2">
                                                                 <!-- BOTÓN MOVER - AHORA DISPONIBLE PARA CUSTODIAS -->
-                                                                 @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER ARTICULO RACK'))
+                                                                @if (\App\Helpers\PermisoHelper::tienePermiso('MOVER ARTICULO RACK'))
                                                                 <button
                                                                     @click="iniciarReubicacionProducto(modal.ubi, producto)"
                                                                     :class="producto.custodia_id ?
-                                                                        'bg-secondary hover:bg-purple-600' :
-                                                                        'bg-primary hover:bg-blue-600'"
+                                                                            'bg-secondary hover:bg-purple-600' :
+                                                                            'bg-primary hover:bg-blue-600'"
                                                                     class="text-xs text-white px-3 py-1.5 rounded transition-all duration-200 hover:scale-105 flex items-center gap-1"
                                                                     :title="producto.custodia_id ? 'Mover' : 'Mover'">
                                                                     <i class="fas fa-arrows-alt text-xs"></i>
@@ -716,7 +891,7 @@
                                                             x-text="producto.cantidadOriginal"></span> → <span
                                                             x-text="producto.cantidad"></span> unidades</span>
                                                     <div class="flex gap-2">
-                                                        @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CAMBIOS PRODUCTO RACK'))
+                                                        @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CAMBIOS PRODUCTO RACK'))
                                                         <button @click="guardarCambiosProducto(idx)"
                                                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium">
                                                             Guardar
@@ -769,27 +944,91 @@
 
                                 <!-- Botones de acción MEJORADOS -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('REUBICAR ARTICULO TODO RACK'))
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('REUBICAR ARTICULO TODO RACK'))
                                     <button @click="iniciarReubicacionMultiple(modal.ubi)"
                                         class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-boxes text-xs"></i>
                                         Reubicar Todo
                                     </button>
                                     @endif
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('MOVER UN ARTICULO A OTRO RACK'))                                                        
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('MOVER UN ARTICULO A OTRO RACK'))
                                     <button @click="abrirModalReubicacionRack(modal.ubi)"
                                         class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-2.5 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
                                         <i class="fas fa-exchange-alt"></i>
                                         Mover a Otro Rack
                                     </button>
                                     @endif
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK'))                                                    
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK'))
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105 col-span-2">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
                                     @endif
+                                </div>
+                                <div class="mt-6 pt-6 border-t border-gray-200">
+                                    <div
+                                        class="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border h-full flex flex-col">
+                                        <div class="text-center mb-3">
+                                            <h3 class="font-semibold text-gray-700 mb-2">Código QR de Ubicación</h3>
+                                            <p class="text-sm text-gray-500 mb-3">Escanea este código para acceder
+                                                rápidamente</p>
+                                        </div>
+
+                                        <!-- QR Code Container -->
+                                        <div class="flex flex-col items-center justify-center flex-1">
+                                            <!-- QR Image -->
+                                            <div class="mb-4 p-2 bg-white rounded-lg shadow-sm border">
+                                                <img :src="'/almacen/ubicaciones/qr/' + encodeURIComponent(modal.ubi
+                                                    ?.codigo_unico || modal.ubi?.codigo) + '?ruta=spark'"
+                                                    :alt="'QR Code - ' + (modal.ubi?.codigo || 'N/A')"
+                                                    class="w-48 h-48 object-contain" x-ref="qrImage">
+                                            </div>
+
+                                            <!-- Actions -->
+                                            <div class="flex space-x-3 mt-auto">
+                                                <!-- Download Button -->
+                                                <button type="button" @click="downloadQR('spark')"
+                                                    class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                        </path>
+                                                    </svg>
+                                                    Descargar QR
+                                                </button>
+
+                                                <!-- Copy Link Button -->
+                                                <button type="button" @click="copyQRUrl('spark')"
+                                                    class="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                                                        </path>
+                                                    </svg>
+                                                    Copiar URL
+                                                </button>
+                                            </div>
+
+                                            <!-- Info Text -->
+                                            <div class="mt-3 text-center">
+                                                <p class="text-xs text-gray-500">
+                                                    Código: <span x-text="modal.ubi?.codigo_unico || modal.ubi?.codigo"
+                                                        class="font-medium"></span>
+                                                </p>
+                                                <p class="text-xs text-gray-400 mt-1">
+                                                    Vista Spark QR | Tamaño: 350x350px
+                                                </p>
+                                                <p class="text-xs text-blue-600 mt-1 font-medium">
+                                                    <i class="fas fa-bolt mr-1"></i> Información detallada
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -810,14 +1049,14 @@
 
                                 <!-- Botones para ubicación vacía -->
                                 <div class="grid grid-cols-2 gap-3 pt-4">
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK '))
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('VER HISTORIAL COMPLETO ARTICULO RACK '))
                                     <button @click="abrirHistorial(modal.ubi)"
                                         class="bg-gray-600 hover:bg-gray-700 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-history text-xs"></i>
                                         Historial Completo
                                     </button>
                                     @endif
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR ARTICULO EN RACK'))                                                             
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR ARTICULO EN RACK'))
                                     <button @click="abrirModalAgregarProducto(modal.ubi)"
                                         class="bg-green-500 hover:bg-green-600 text-white py-2.5 px-3 rounded-lg font-medium flex items-center justify-center gap-2 text-sm transition-all duration-200 hover:scale-105">
                                         <i class="fas fa-plus text-xs"></i>
@@ -840,7 +1079,7 @@
             :class="modalReubicacionRack.open && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalReubicacionRack()">
                 <div x-show="modalReubicacionRack.open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-4xl my-8 bg-white dark:bg-[#1b2e4b]">
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-6xl my-8 bg-white dark:bg-[#1b2e4b]">
 
                     <!-- Header -->
                     <div
@@ -928,7 +1167,7 @@
                                         <!-- Botón Seleccionar Todos -->
                                         <div class="flex items-center gap-2"
                                             x-show="modalReubicacionRack.articulos.length > 0">
-                                            @if(\App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR TODOS ARTICULOS RACK'))
+                                            @if (\App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR TODOS ARTICULOS RACK'))
                                             <button type="button" @click="seleccionarTodosArticulos()"
                                                 class="btn btn-outline-primary btn-sm py-1 px-3 text-xs flex items-center gap-1"
                                                 :class="todosSeleccionados ? 'bg-blue-500 text-white' : ''">
@@ -973,10 +1212,11 @@
                                                                     class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
 
                                                                 <div class="flex-1 min-w-0">
-                                                                    <p class="font-medium text-gray-800 dark:text-white text-sm truncate"
+                                                                    <p class="font-medium text-gray-800 dark:text-white text-xs truncate"
                                                                         x-text="articulo.nombre_mostrar || articulo.nombre || articulo.codigo_repuesto || 'Sin nombre'">
                                                                     </p>
                                                                 </div>
+
                                                             </div>
 
                                                             <!-- Cantidad badge -->
@@ -1209,13 +1449,14 @@
                                         <i class="fas fa-times ltr:mr-2 rtl:ml-2"></i>
                                         Cancelar
                                     </button>
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('CONFIRMAR REUBICACION ARTICULO RACK'))
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('CONFIRMAR REUBICACION ARTICULO RACK'))
                                     <button type="button" @click="confirmarReubicacionRack()"
                                         :disabled="!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
-                                            .length === 0"
+                                                .length === 0"
                                         class="btn btn-primary flex-1 py-3 text-sm"
-                                        :class="(!modalReubicacionRack.ubicacionDestinoSeleccionada || articulosSeleccionados
-                                            .length === 0) ? 'opacity-50 cursor-not-allowed' : ''">
+                                        :class="(!modalReubicacionRack.ubicacionDestinoSeleccionada ||
+                                                articulosSeleccionados
+                                                .length === 0) ? 'opacity-50 cursor-not-allowed' : ''">
                                         <i class="fas fa-check ltr:mr-2 rtl:ml-2"></i>
                                         Confirmar Reubicación
                                     </button>
@@ -1540,7 +1781,7 @@
                                                                 class="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                                                 <i class="fas fa-plus text-gray-600 text-xs"></i>
                                                             </button>
-                                                            @if(\App\Helpers\PermisoHelper::tienePermiso('REMOVER PRODUCTO SELECCIONADO RACK'))                                
+                                                            @if (\App\Helpers\PermisoHelper::tienePermiso('REMOVER PRODUCTO SELECCIONADO RACK'))
                                                             <!-- Remover -->
                                                             <button @click="removerProductoSeleccionado(index)"
                                                                 class="w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors ml-2">
@@ -1597,16 +1838,16 @@
                             <button @click="cerrarModalAgregarProducto()"
                                 class="flex-1 bg-gray-500 hover:bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
                                 <i class="fas fa-times"></i>
-                                Cancelar 
+                                Cancelar
                             </button>
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR PRODUCTOS RACK'))
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('AGREGAR PRODUCTOS RACK'))
                             <button @click="confirmarAgregarProducto()"
                                 :disabled="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
-                                    modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados()"
+                                        modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados()"
                                 :class="modalAgregarProducto.productosSeleccionados.length === 0 || getTotalCantidades() >
-                                    modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados() ?
-                                    'bg-gray-400 cursor-not-allowed' :
-                                    'bg-green-500 hover:from-green-600 hover:to-blue-600'"
+                                        modalAgregarProducto.capacidadMaxima || !todosClientesSeleccionados() ?
+                                        'bg-gray-400 cursor-not-allowed' :
+                                        'bg-green-500 hover:from-green-600 hover:to-blue-600'"
                                 class="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 shadow-lg">
                                 <i class="fas fa-check"></i>
                                 Agregar Productos
@@ -1641,7 +1882,7 @@
                                         class="font-semibold text-white"></span></div>
                             </div>
                         </div>
-                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER REPORTES RACK'))
+                        @if (\App\Helpers\PermisoHelper::tienePermiso('VER REPORTES RACK'))
                         <button type="button" class="text-white hover:text-blue-200 transition-colors"
                             @click="modalHistorial.open = false">
                             <i class="fas fa-times text-xl"></i>
@@ -1955,7 +2196,7 @@
                                     </p>
                                 </div>
                             </div>
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('CANCELAR REUBICACION RACK'))
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('CANCELAR REUBICACION RACK'))
                             <button type="button"
                                 class="text-white/80 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
                                 @click="modalReubicacion.open = false; cancelarReubicacion()">
@@ -2157,10 +2398,10 @@
         function rackDetalle() {
             return {
                 // ========== ESTADO DE LA APLICACIÓN ==========
-                rack: @json($rack),
-                todosRacks: @json($todosRacks),
-                rackActual: '{{ $rackActual }}',
-                idxRackActual: {{ array_search($rackActual, $todosRacks) }},
+                rack: {},
+                todosRacks: [],
+                rackActual: '',
+                idxRackActual: 0,
                 swipers: [],
 
                 // ========== MODALES ==========
@@ -2237,6 +2478,29 @@
 
                 // ========== INICIALIZACIÓN ==========
                 init() {
+                    console.log('🔄 Inicializando rackDetalle...');
+
+                    // ✅ CORREGIDO: Obtener datos desde los atributos del elemento
+                    if (this.$el && this.$el.dataset) {
+                        this.rack = JSON.parse(this.$el.dataset.rack || '{}');
+                        this.todosRacks = JSON.parse(this.$el.dataset.todosRacks || '[]');
+                        this.rackActual = this.$el.dataset.rackActual || '';
+                        this.idxRackActual = parseInt(this.$el.dataset.idxRackActual || '0');
+                    } else {
+                        console.error('❌ No se pudo acceder a los datos del elemento');
+                        this.rack = {};
+                        this.todosRacks = [];
+                        this.rackActual = '';
+                        this.idxRackActual = 0;
+                    }
+
+                    console.log('📥 Datos iniciales cargados:', {
+                        rackActual: this.rackActual,
+                        idxRackActual: this.idxRackActual,
+                        todosRacksCount: this.todosRacks.length,
+                        rack: this.rack ? 'Objeto cargado' : 'No cargado'
+                    });
+
                     toastr.options = {
                         closeButton: true,
                         progressBar: true,
@@ -2244,18 +2508,18 @@
                         timeOut: '3000',
                     };
 
-                    // ✅ DEBUG: Verificar datos iniciales
-                    console.log('📥 Datos iniciales del rack:', this.rack);
-                    this.rack.niveles.forEach((nivel, nivelIndex) => {
-                        nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
-                            if (ubicacion.codigo === 'A-A2-01') {
-                                console.log(`📍 Ubicación A-A2-01 INICIAL:`, {
-                                    productosCount: ubicacion.productos?.length || 0,
-                                    productos: ubicacion.productos
-                                });
-                            }
+                    if (this.rack && this.rack.niveles) {
+                        this.rack.niveles.forEach((nivel, nivelIndex) => {
+                            nivel.ubicaciones.forEach((ubicacion, ubiIndex) => {
+                                if (ubicacion.codigo === 'A-A2-01') {
+                                    console.log(`📍 Ubicación A-A2-01 INICIAL:`, {
+                                        productosCount: ubicacion.productos?.length || 0,
+                                        productos: ubicacion.productos
+                                    });
+                                }
+                            });
                         });
-                    });
+                    }
 
                     this.procesarDatosRack();
                     this.initSwipers();
@@ -2297,6 +2561,92 @@
                     }
                 },
 
+                // Métodos para el QR
+                downloadQR(tipo = 'spark') {
+                    // ✅ CAMBIAR: Usar this.modal.ubi en lugar de this.ubicacion
+                    const codigo = this.modal.ubi?.codigo_unico || this.modal.ubi?.codigo;
+
+                    if (!codigo) {
+                        console.error('ERROR downloadQR: modal.ubi:', this.modal.ubi);
+                        toastr.error('No se pudo obtener el código de la ubicación', 'Error', {
+                            timeOut: 3000,
+                            progressBar: true,
+                            closeButton: true
+                        });
+                        return;
+                    }
+
+                    // Mostrar mensaje de carga
+                    toastr.info('Preparando descarga del QR...', 'Procesando', {
+                        timeOut: 2000,
+                        progressBar: true
+                    });
+
+                    // Descargar QR de la vista Spark
+                    const url = `/almacen/ubicaciones/qr/${encodeURIComponent(codigo)}?download=1&ruta=spark`;
+
+                    // Usar descarga directa para mejor consistencia
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `qr-ubicacion-${codigo.replace(/\s+/g, '-')}-spark.svg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    // Mostrar mensaje de éxito después de un pequeño delay
+                    setTimeout(() => {
+                        toastr.success('QR descargado correctamente', '¡Descargado!', {
+                            timeOut: 3000,
+                            progressBar: true,
+                            closeButton: true
+                        });
+                    }, 500);
+                },
+
+                copyQRUrl(tipo = 'spark') {
+                    // ✅ CAMBIAR: Usar this.modal.ubi en lugar de this.ubicacion
+                    const codigo = this.modal.ubi?.codigo_unico || this.modal.ubi?.codigo;
+
+                    if (!codigo) {
+                        console.error('ERROR copyQRUrl: modal.ubi:', this.modal.ubi);
+                        toastr.error('No se pudo obtener el código de la ubicación', 'Error', {
+                            timeOut: 3000,
+                            progressBar: true,
+                            closeButton: true
+                        });
+                        return;
+                    }
+
+                    const url = `${window.location.origin}/almacen/ubicaciones/qr/spark/${encodeURIComponent(codigo)}`;
+
+                    console.log('Copiando URL:', url);
+
+                    // Mostrar mensaje de procesando
+                    toastr.info('Copiando URL al portapapeles...', 'Procesando', {
+                        timeOut: 2000,
+                        progressBar: true
+                    });
+
+                    navigator.clipboard.writeText(url)
+                        .then(() => {
+                            // Éxito
+                            toastr.success('URL copiada al portapapeles', '¡Copiado!', {
+                                timeOut: 3000,
+                                progressBar: true,
+                                closeButton: true
+                            });
+                        })
+                        .catch(err => {
+                            console.error('Error al copiar: ', err);
+                            toastr.error('No se pudo copiar la URL. Inténtalo de nuevo.', 'Error', {
+                                timeOut: 3000,
+                                progressBar: true,
+                                closeButton: true
+                            });
+                        });
+                },
+
+
                 // Actualizar Select2 cuando cambian los datos
                 actualizarSelectUbicacionesDestino() {
                     this.$nextTick(() => {
@@ -2323,7 +2673,7 @@
                                 ubicacion.cantidad_total = ubicacion.productos.reduce((sum, p) => sum + (p
                                     .cantidad || 0), 0);
                                 ubicacion.estado = this.calcularEstado(ubicacion
-                                .cantidad_total); // ✅ QUITADO: , ubicacion.capacidad
+                                    .cantidad_total); // ✅ QUITADO: , ubicacion.capacidad
 
                                 // ✅ ACUMULAR CATEGORÍAS Y TIPOS
                                 const categoriasUnicas = [...new Set(ubicacion.productos
@@ -3606,7 +3956,7 @@
                                     ...ubi,
                                     cantidad_total: cantidadTotal,
                                     estado: this.calcularEstado(
-                                    cantidadTotal), // ✅ QUITADO: , ubi.capacidad
+                                        cantidadTotal), // ✅ QUITADO: , ubi.capacidad
                                     fecha: new Date().toISOString()
                                 };
 
