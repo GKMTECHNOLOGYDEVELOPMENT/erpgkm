@@ -36,16 +36,17 @@ class UbicacionesVistaController extends Controller
             return response()->json(['message' => 'Nombre inválido'], 422);
         }
 
-        // Opción A: Forzar a usar SVG (no requiere imagick)
+        // Generar URL para ver el detalle de la ubicación
+        $qrContent = url("/almacen/ubicaciones/qr/vista/{$nombre}");
+
         $qr = QrCode::format('svg')
             ->size(350)
             ->margin(2)
             ->errorCorrection('M')
-            ->generate($nombre);
+            ->generate($qrContent);
 
         $fileName = 'qr-ubicacion-' . Str::slug($nombre) . '.svg';
 
-        // Verificar si se solicita descarga
         if ($request->has('download')) {
             return response($qr, 200)
                 ->header('Content-Type', 'image/svg+xml')
@@ -61,20 +62,218 @@ class UbicacionesVistaController extends Controller
     {
         $nombre = trim($nombre);
 
-        // Obtener las sedes disponibles desde la tabla sucursal
-        $sedes = DB::table('sucursal')
-            ->select('nombre')
-            ->where('estado', 1)
-            ->orderBy('nombre')
-            ->pluck('nombre')
-            ->toArray();
+        // Buscar la ubicación por código único o código normal
+        $ubicacion = DB::table('rack_ubicaciones as ru')
+            ->select(
+                'ru.*',
+                'r.nombre as rack_nombre',
+                'r.sede',
+                'r.tipo_rack',
+                'r.filas',
+                'r.columnas'
+            )
+            ->join('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where(function ($query) use ($nombre) {
+                $query->where('ru.codigo_unico', $nombre)
+                    ->orWhere('ru.codigo', $nombre);
+            })
+            ->where('r.estado', 'activo')
+            ->first();
 
-        // Agregar opción para ambas sedes al principio
-        array_unshift($sedes, 'Seleccionar todas las sedes');
+        if (!$ubicacion) {
+            // Si no encuentra, mostrar error
+            return view('almacen.ubicaciones.vista_qr', [
+                'error' => true,
+                'mensaje' => "Ubicación '{$nombre}' no encontrada",
+                'codigo' => $nombre
+            ]);
+        }
 
-        return view('almacen.ubicaciones.vista_qr', compact('sedes', 'nombre'));
+        // Obtener ARTÍCULOS SUELTOS en esta ubicación (NO en cajas) - SIMPLIFICADO
+        $articulosSueltos = DB::table('rack_ubicacion_articulos as rua')
+            ->select(
+                'rua.*',
+                'a.idArticulos',
+                'a.nombre as articulo_nombre',
+                'a.codigo_repuesto',
+                'a.codigo_barras',
+                'a.stock_total',
+                'ta.nombre as tipo_articulo',
+                'ta.idTipoArticulo',
+                DB::raw('COALESCE(c.nombre, "Sin categoría") as categoria'),
+                'cg.descripcion as cliente_nombre'
+            )
+            ->join('articulos as a', 'rua.articulo_id', '=', 'a.idArticulos')
+            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+            ->leftJoin('categoria as c', 'm.idCategoria', '=', 'c.idCategoria')
+            ->leftJoin('clientegeneral as cg', 'rua.cliente_general_id', '=', 'cg.idClienteGeneral')
+            ->where('rua.rack_ubicacion_id', $ubicacion->idRackUbicacion)
+            ->get();
+
+        // Obtener CAJAS con sus ARTÍCULOS DENTRO en esta ubicación - SIMPLIFICADO
+        $cajas = DB::table('cajas as cj')
+            ->select(
+                // Datos de la CAJA
+                'cj.idCaja',
+                'cj.nombre as nombre_caja',
+                'cj.cantidad_actual',
+                'cj.capacidad',
+                'cj.estado as estado_caja',
+                'cj.es_custodia',
+                'cj.fecha_entrada',
+
+                // Datos del ARTÍCULO dentro de la caja
+                'a.idArticulos',
+                'a.nombre as articulo_nombre',
+                'a.codigo_repuesto',
+                'a.stock_total',
+                'ta.nombre as tipo_articulo',
+                'ta.idTipoArticulo',
+                DB::raw('COALESCE(cat.nombre, "Sin categoría") as categoria'),
+
+                // Campos del modelo y marca del artículo
+                'm.nombre as modelo_nombre',
+                'mar.nombre as marca_nombre'
+            )
+            ->leftJoin('articulos as a', 'cj.idArticulo', '=', 'a.idArticulos')
+            ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+            ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+            ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+            ->leftJoin('categoria as cat', 'm.idCategoria', '=', 'cat.idCategoria')
+            ->where('cj.idubicaciones_rack', $ubicacion->idRackUbicacion)
+            ->get();
+
+        // Transformar cajas para mostrar artículos dentro
+        $cajasTransformadas = $cajas->map(function ($caja) {
+            $articuloInfo = null;
+
+            if ($caja->idArticulos) {
+                $articuloInfo = [
+                    'id' => $caja->idArticulos,
+                    'nombre' => $caja->articulo_nombre,
+                    'tipo_articulo' => $caja->tipo_articulo,
+                    'categoria' => $caja->categoria,
+                    'codigo_repuesto' => $caja->codigo_repuesto,
+                    'stock_total' => $caja->stock_total,
+                    'idTipoArticulo' => $caja->idTipoArticulo,
+                    'es_repuesto' => $caja->idTipoArticulo == 2,
+                    'modelo' => $caja->modelo_nombre,
+                    'marca' => $caja->marca_nombre
+                ];
+            }
+
+            return [
+                'caja' => [
+                    'id' => $caja->idCaja,
+                    'nombre' => $caja->nombre_caja ?: 'Caja',
+                    'cantidad_actual' => $caja->cantidad_actual,
+                    'capacidad' => $caja->capacidad,
+                    'estado' => $caja->estado_caja,
+                    'porcentaje_llenado' => $caja->capacidad > 0
+                        ? round(($caja->cantidad_actual / $caja->capacidad) * 100, 2)
+                        : 0,
+                    'es_custodia' => $caja->es_custodia,
+                    'fecha_entrada' => $caja->fecha_entrada
+                ],
+                'contenido' => $articuloInfo ?: ['nombre' => 'Vacía', 'tipo_articulo' => null]
+            ];
+        });
+
+        // Calcular estadísticas
+        $totalArticulosSueltos = $articulosSueltos->sum('cantidad');
+        $totalCajas = $cajas->count();
+        $totalArticulosEnCajas = $cajas->sum('cantidad_actual');
+        $totalItems = $totalArticulosSueltos + $totalArticulosEnCajas;
+
+        // Obtener todas las categorías (de artículos sueltos y de artículos en cajas)
+        $categorias = collect();
+
+        // Categorías de artículos sueltos
+        foreach ($articulosSueltos as $articulo) {
+            if ($articulo->categoria && $articulo->categoria !== 'Sin categoría') {
+                $categorias->push($articulo->categoria);
+            }
+        }
+
+        // Categorías de artículos dentro de cajas
+        foreach ($cajas as $caja) {
+            if ($caja->categoria && $caja->categoria !== 'Sin categoría') {
+                $categorias->push($caja->categoria);
+            }
+        }
+
+        $categoriasUnicas = $categorias->unique()->values();
+
+        // Obtener tipos de artículos únicos (SOLO tipos reales, no "CAJA")
+        $tiposArticulos = collect();
+
+        // Tipos de artículos sueltos
+        foreach ($articulosSueltos as $articulo) {
+            if ($articulo->tipo_articulo && trim($articulo->tipo_articulo) !== '') {
+                $tiposArticulos->push($articulo->tipo_articulo);
+            }
+        }
+
+        // Tipos de artículos en cajas
+        foreach ($cajas as $caja) {
+            if ($caja->tipo_articulo && trim($caja->tipo_articulo) !== '') {
+                $tiposArticulos->push($caja->tipo_articulo);
+            }
+        }
+
+        $tiposUnicos = $tiposArticulos->unique()->values();
+
+        // Obtener marcas únicas (de artículos en cajas)
+        $marcas = collect();
+
+        // Marcas de artículos en cajas
+        foreach ($cajas as $caja) {
+            if ($caja->marca_nombre && trim($caja->marca_nombre) !== '') {
+                $marcas->push($caja->marca_nombre);
+            }
+        }
+
+        $marcasUnicas = $marcas->unique()->values();
+
+        // Obtener historial de movimientos de esta ubicación
+        $historial = DB::table('rack_movimientos')
+            ->where('ubicacion_origen_id', $ubicacion->idRackUbicacion)
+            ->orWhere('ubicacion_destino_id', $ubicacion->idRackUbicacion)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Formatear datos para la vista
+        $datosUbicacion = [
+            'id' => $ubicacion->idRackUbicacion,
+            'codigo' => $ubicacion->codigo,
+            'codigo_unico' => $ubicacion->codigo_unico,
+            'nivel' => $ubicacion->nivel,
+            'posicion' => $ubicacion->posicion,
+            'estado_ocupacion' => $ubicacion->estado_ocupacion,
+            'rack_nombre' => $ubicacion->rack_nombre,
+            'sede' => $ubicacion->sede,
+            'tipo_rack' => $ubicacion->tipo_rack,
+            'total_articulos_sueltos' => $totalArticulosSueltos,
+            'total_cajas' => $totalCajas,
+            'total_articulos_en_cajas' => $totalArticulosEnCajas,
+            'total_items' => $totalItems,
+            'categorias' => $categoriasUnicas,
+            'tipos_articulos' => $tiposUnicos,
+            'marcas' => $marcasUnicas,
+            'articulos_sueltos' => $articulosSueltos,
+            'cajas' => $cajasTransformadas,
+            'historial' => $historial,
+            'fecha_actualizacion' => $ubicacion->updated_at,
+        ];
+
+        return view('almacen.ubicaciones.vista_qr', [
+            'ubicacion' => $datosUbicacion,
+            'error' => false
+        ]);
     }
-
+    
     // En UbicacionesVistaController.php
     public function obtenerTipoRack(Request $request)
     {
