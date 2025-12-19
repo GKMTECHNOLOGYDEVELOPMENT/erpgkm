@@ -208,24 +208,24 @@
                                             <th
                                                 class="px-3 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60 whitespace-nowrap">
                                                 <span>Solicitado</span>
-                                                
+
                                             </th>
                                             <th
                                                 class="px-3 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60 whitespace-nowrap">
                                                 <span>Disponible</span>
-                                                
+
                                             </th>
                                             <th
                                                 class="px-3 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60 whitespace-nowrap">
                                                 <i class="fas fa-map-marker-alt text-slate-500 mr-1"></i>
                                                 <span>Ubicación</span>
-                                                
+
                                             </th>
                                             <th
                                                 class="px-3 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60 whitespace-nowrap">
                                                 <i class="fas fa-truck text-slate-500 mr-1"></i>
                                                 <span>Destino</span>
-                                                
+
                                             </th>
                                             <th
                                                 class="px-3 sm:px-4 py-3 sm:py-4 text-center text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60 whitespace-nowrap">
@@ -878,129 +878,228 @@
             </div>
         </div>
 
-        <!-- Modal para registro de envío grupal a provincia - Responsive -->
-        <div x-show="mostrarModalEnvioGrupal" x-cloak
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl w-full max-w-xs sm:max-w-sm lg:max-w-lg transform transition-all duration-300 scale-100"
-                x-show="mostrarModalEnvioGrupal" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <!-- MODAL ENVÍO GRUPAL MEJORADO -->
+        <div x-show="mostrarModalEnvioGrupal" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto">
+            <div class="flex items-center justify-center min-h-screen p-4" @click.self="cerrarModalEnvioGrupal">
+                <div x-show="mostrarModalEnvioGrupal" x-transition x-transition.duration.300
+                    class="relative w-full max-w-lg rounded-2xl overflow-hidden bg-white shadow-2xl transform transition-all">
 
-                <!-- Header del Modal -->
-                <div
-                    class="bg-gradient-to-r from-green-600 to-emerald-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl sm:rounded-t-2xl">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2 sm:space-x-3">
-                            <div
-                                class="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-truck-loading text-white text-sm sm:text-base"></i>
+                    <!-- HEADER MEJORADO -->
+                    <div class="bg-primary px-6 py-5 relative">
+                        <div class="relative flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-truck-loading text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-bold text-xl">
+                                        Envío Grupal a Provincia
+                                    </h3>
+                                </div>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white truncate">
-                                    Envío Grupal a Provincia
-                                </h3>
-                                <p class="text-green-100 text-xs sm:text-sm">Todos los repuestos serán preparados</p>
+
+                            <button type="button"
+                                class="text-white/80 hover:text-white hover:bg-white/10 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                                @click="cerrarModalEnvioGrupal">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- CONTENIDO PRINCIPAL -->
+                    <form id="formEnvioProvinciaGrupal" @submit.prevent="confirmarEnvioGrupal">
+                        <div class="p-6 space-y-5">
+
+                            <!-- Encabezado de formulario -->
+                            <div class="mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-6 bg-gradient-to-b from-green-500 to-emerald-600 rounded-full">
+                                    </div>
+                                    <h4 class="font-semibold text-gray-800">Detalles del Envío</h4>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 ml-4">Complete los datos de transporte y logística
+                                </p>
+                            </div>
+
+                            <!-- Transportista -->
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <div
+                                        class="w-5 h-5 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-user-tie text-xs"></i>
+                                    </div>
+                                    Transportista
+                                </label>
+                                <input type="text" x-model="datosEnvioGrupal.transportista"
+                                    placeholder="Nombre del transportista"
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all hover:border-gray-400">
+                                <p class="text-xs text-gray-500 mt-1 ml-7">Persona o empresa responsable del transporte
+                                </p>
+                            </div>
+
+                            <!-- Placa -->
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <div
+                                        class="w-5 h-5 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-car text-xs"></i>
+                                    </div>
+                                    Placa del vehículo
+                                </label>
+                                <input type="text" x-model="datosEnvioGrupal.placa_vehiculo"
+                                    placeholder="Ej: ABC-123"
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all hover:border-gray-400 uppercase">
+                            </div>
+
+                            <!-- Fecha -->
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <div
+                                        class="w-5 h-5 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-calendar-alt text-xs"></i>
+                                    </div>
+                                    Fecha de entrega estimada
+                                </label>
+                                <input type="datetime-local" x-model="datosEnvioGrupal.fecha_entrega_transporte"
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all hover:border-gray-400">
+                            </div>
+
+                            <!-- Galería de Fotos - RESPONSIVA -->
+                            <div class="space-y-2 sm:space-y-2.5">
+                                <label
+                                    class="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium text-gray-700">
+                                    <div
+                                        class="w-4 h-4 sm:w-5 sm:h-5 bg-green-100 text-green-600 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-images text-[10px] sm:text-xs"></i>
+                                    </div>
+                                    Fotos de comprobante
+                                    <span class="text-xs font-normal text-gray-500">(opcional)</span>
+                                </label>
+
+                                <!-- Contador de fotos -->
+                                <div x-show="fotosGrupal.length > 0"
+                                    class="text-xs sm:text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+                                    <i class="fas fa-camera mr-1.5"></i>
+                                    <span x-text="fotosGrupal.length + ' foto(s) seleccionada(s)'"></span>
+                                </div>
+
+                                <!-- Área de subida -->
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-4 text-center hover:border-green-400 hover:bg-green-50 transition-colors"
+                                    @dragover.prevent="handleDragOverGrupal"
+                                    @dragleave.prevent="handleDragLeaveGrupal" @drop.prevent="handleDropGrupal">
+                                    <input type="file" id="fotoComprobanteGrupal" accept="image/*" multiple
+                                        @change="previsualizarFotoGrupal" class="hidden">
+                                    <template x-if="fotosGrupal.length === 0">
+                                        <div>
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-2xl sm:text-3xl text-gray-400 mb-2"></i>
+                                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Arrastra fotos o haz clic
+                                                para subir</p>
+                                            <p class="text-xs text-gray-500">Puedes seleccionar múltiples imágenes</p>
+                                            <button type="button"
+                                                class="mt-3 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-50 text-green-600 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-100 transition-colors"
+                                                onclick="document.getElementById('fotoComprobanteGrupal').click()">
+                                                <i class="fas fa-upload mr-1.5"></i> Seleccionar fotos
+                                            </button>
+                                        </div>
+                                    </template>
+
+                                    <!-- Grid de previsualización RESPONSIVA -->
+                                    <div x-show="fotosGrupal.length > 0" class="space-y-3 sm:space-y-4">
+                                        <!-- Controles para múltiples imágenes -->
+                                        <div class="flex flex-wrap gap-2 sm:gap-3">
+                                            <button type="button"
+                                                class="px-2.5 sm:px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                                                onclick="document.getElementById('fotoComprobanteGrupal').click()">
+                                                <i class="fas fa-plus mr-1"></i> Agregar más
+                                            </button>
+                                            <button type="button"
+                                                class="px-2.5 sm:px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100 transition-colors"
+                                                @click="eliminarTodasLasFotosGrupal">
+                                                <i class="fas fa-trash-alt mr-1"></i> Eliminar todas
+                                            </button>
+                                        </div>
+
+                                        <!-- Grid de imágenes -->
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
+                                            <template x-for="(foto, index) in fotosGrupal" :key="index">
+                                                <div class="relative group">
+                                                    <img :src="foto.preview"
+                                                        class="w-full h-20 sm:h-24 object-cover rounded-lg border hover:border-green-400 transition-colors cursor-pointer"
+                                                        @click="ampliarFotoGrupal(index)">
+                                                    <button type="button"
+                                                        class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                                        @click="eliminarFotoGrupal(index)">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    <div class="text-[10px] sm:text-xs text-gray-500 truncate mt-1 px-1"
+                                                        x-text="foto.name || `Foto ${index + 1}`"></div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="space-y-1.5">
+                                <label class="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                    <div
+                                        class="w-5 h-5 bg-green-100 text-green-600 rounded-md flex items-center justify-center">
+                                        <i class="fas fa-comment-alt text-xs"></i>
+                                    </div>
+                                    Observaciones adicionales
+                                </label>
+                                <textarea rows="3" x-model="datosEnvioGrupal.observaciones"
+                                    placeholder="Notas, instrucciones especiales, o detalles relevantes para el envío..."
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 transition-all hover:border-gray-400 resize-none"></textarea>
+                            </div>
+
+                        </div>
+
+                        <!-- FOOTER MEJORADO -->
+                        <div class="px-6 py-4 border-t bg-gradient-to-r from-gray-50 to-white">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <div class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1 text-green-600"></i>
+                                    Todos los repuestos seleccionados serán procesados juntos
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    <button type="button"
+                                        class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm min-w-[100px]"
+                                        @click="cerrarModalEnvioGrupal">
+                                        Cancelar
+                                    </button>
+
+                                    <button type="submit" :disabled="!datosEnvioGrupalValidos || isLoadingGrupal"
+                                        class="px-5 py-2.5 rounded-xl text-white font-medium transition-all text-sm min-w-[120px] relative overflow-hidden group"
+                                        :class="datosEnvioGrupalValidos && !isLoadingGrupal ?
+                                            'bg-success ' :
+                                            'bg-gray-400'">
+
+                                        <!-- Efecto de brillo al pasar el cursor -->
+                                        <div class="absolute inset-0 bg-gray-700 transition-transform duration-700">
+                                        </div>
+
+                                        <!-- Contenido del botón -->
+                                        <div class="relative flex items-center justify-center gap-2">
+                                            <i class="fas"
+                                                :class="isLoadingGrupal ? 'fa-spinner fa-spin' : 'fa-truck-loading'"></i>
+                                            <span
+                                                x-text="isLoadingGrupal ? 'Procesando...' : 'Confirmar Envío'"></span>
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <button @click="cerrarModalEnvioGrupal"
-                            class="text-white hover:text-green-200 transition-colors ml-2">
-                            <i class="fas fa-times text-base sm:text-lg"></i>
-                        </button>
-                    </div>
+                    </form>
+
                 </div>
-
-                <!-- Contenido del Modal -->
-                <form id="formEnvioProvinciaGrupal" @submit.prevent="confirmarEnvioGrupal">
-                    <div class="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-                        <p class="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-4">
-                            Complete los datos del envío grupal a provincia:
-                        </p>
-
-                        <!-- Transportista -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-user-tie mr-1 text-xs"></i>
-                                Transportista
-                            </label>
-                            <input type="text" x-model="datosEnvioGrupal.transportista"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                placeholder="Nombre del transportista">
-                        </div>
-
-                        <!-- Placa del Vehículo -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-car mr-1 text-xs"></i>
-                                Placa del Vehículo
-                            </label>
-                            <input type="text" x-model="datosEnvioGrupal.placa_vehiculo"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                placeholder="Placa del vehículo">
-                        </div>
-
-                        <!-- Fecha de Entrega al Transporte -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-calendar-alt mr-1 text-xs"></i>
-                                Fecha de Entrega
-                            </label>
-                            <input type="datetime-local" x-model="datosEnvioGrupal.fecha_entrega_transporte"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        </div>
-
-                        <!-- Subir Foto -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-camera mr-1 text-xs"></i>
-                                Foto (opcional)
-                            </label>
-                            <input type="file" id="fotoComprobanteGrupal" accept="image/*"
-                                @change="previsualizarFotoGrupal"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-green-500 focus:border-green-500">
-
-                            <!-- Previsualización de la foto -->
-                            <div x-show="previsualizacionFotoGrupal" class="mt-2 sm:mt-3">
-                                <p class="text-xs text-gray-600 mb-1 sm:mb-2">Vista previa:</p>
-                                <img :src="previsualizacionFotoGrupal" alt="Previsualización"
-                                    class="max-w-full sm:max-w-xs rounded-lg border border-gray-300">
-                                <button type="button" @click="eliminarPrevisualizacionGrupal"
-                                    class="mt-1 sm:mt-2 text-xs text-red-600 hover:text-red-800">
-                                    <i class="fas fa-trash mr-0.5"></i> Eliminar foto
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Observaciones -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-comment-alt mr-1 text-xs"></i>
-                                Observaciones
-                            </label>
-                            <textarea x-model="datosEnvioGrupal.observaciones" rows="2"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                                placeholder="Observaciones adicionales..."></textarea>
-                        </div>
-
-                        <!-- Botones de acción -->
-                        <div class="flex space-x-2 sm:space-x-3 pt-3 sm:pt-4">
-                            <button type="button" @click="cerrarModalEnvioGrupal"
-                                class="flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-colors text-xs sm:text-sm">
-                                Cancelar
-                            </button>
-                            <button type="submit" :disabled="!datosEnvioGrupalValidos"
-                                :class="{
-                                    'bg-green-600 hover:bg-green-700': datosEnvioGrupalValidos,
-                                    'bg-gray-400 cursor-not-allowed': !datosEnvioGrupalValidos
-                                }"
-                                class="flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-white rounded-lg sm:rounded-xl font-medium transition-colors text-xs sm:text-sm">
-                                <i class="fas fa-truck-loading mr-1"></i>
-                                <span class="hidden sm:inline">Confirmar</span>
-                                <span class="sm:hidden">OK</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -1052,7 +1151,8 @@
                     fecha_entrega_transporte: new Date().toISOString().slice(0, 16),
                     observaciones: ''
                 },
-                previsualizacionFotoGrupal: null,
+                fotosGrupal: [], // CAMBIO: Ahora es un array
+                previsualizacionFotoGrupal: null, // Mantener para compatibilidad
 
                 // Computadas
                 get datosEnvioValidos() {
@@ -1128,7 +1228,7 @@
                     document.getElementById('fotoComprobante').value = '';
                 },
 
-                // Métodos para modal grupal
+                // Métodos para modal grupal - ACTUALIZADOS PARA MÚLTIPLES FOTOS
                 abrirModalEnvioProvinciaGrupal(solicitudId) {
                     // Verificar si ya están todos procesados
                     if (@json($repuestos_procesados) == @json($total_repuestos)) {
@@ -1159,6 +1259,7 @@
                         fecha_entrega_transporte: new Date().toISOString().slice(0, 16),
                         observaciones: ''
                     };
+                    this.fotosGrupal = []; // LIMPIAR FOTOS ANTERIORES
                     this.previsualizacionFotoGrupal = null;
 
                     this.mostrarModalEnvioGrupal = true;
@@ -1166,22 +1267,134 @@
 
                 cerrarModalEnvioGrupal() {
                     this.mostrarModalEnvioGrupal = false;
+                    this.fotosGrupal = [];
                     this.previsualizacionFotoGrupal = null;
                 },
 
+                // MÉTODO NUEVO: Manejar subida múltiple de fotos
                 previsualizarFotoGrupal(event) {
-                    const file = event.target.files[0];
-                    if (file) {
+                    const files = Array.from(event.target.files);
+
+                    // Verificar límite de archivos
+                    if (this.fotosGrupal.length + files.length > 20) {
+                        toastr.warning('Máximo 20 fotos permitidas');
+                        return;
+                    }
+
+                    // Procesar cada archivo
+                    files.forEach(file => {
+                        // Validar tipo de archivo
+                        if (!file.type.startsWith('image/')) {
+                            toastr.error(`El archivo "${file.name}" no es una imagen válida`);
+                            return;
+                        }
+
+                        // Validar tamaño (max 5MB)
+                        if (file.size > 5 * 1024 * 1024) {
+                            toastr.error(`La imagen "${file.name}" excede los 5MB permitidos`);
+                            return;
+                        }
+
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            this.previsualizacionFotoGrupal = e.target.result;
+                            this.fotosGrupal.push({
+                                file: file,
+                                preview: e.target.result,
+                                name: file.name,
+                                size: file.size,
+                                type: file.type
+                            });
                         };
                         reader.readAsDataURL(file);
+                    });
+
+                    // Resetear input para permitir subir las mismas imágenes
+                    event.target.value = '';
+                },
+
+                // MÉTODO NUEVO: Eliminar foto específica
+                eliminarFotoGrupal(index) {
+                    this.fotosGrupal.splice(index, 1);
+                    toastr.info('Foto eliminada');
+                },
+
+                // MÉTODO NUEVO: Eliminar todas las fotos
+                eliminarTodasLasFotosGrupal() {
+                    if (this.fotosGrupal.length > 0) {
+                        if (confirm(`¿Eliminar todas las ${this.fotosGrupal.length} fotos?`)) {
+                            this.fotosGrupal = [];
+                            document.getElementById('fotoComprobanteGrupal').value = '';
+                            toastr.info('Todas las fotos han sido eliminadas');
+                        }
                     }
                 },
 
+                // MÉTODO NUEVO: Manejar arrastrar y soltar
+                handleDropGrupal(event) {
+                    event.preventDefault();
+
+                    // Remover clase de hover
+                    event.target.classList.remove('border-green-400', 'bg-green-50');
+
+                    const files = Array.from(event.dataTransfer.files);
+
+                    // Verificar límite de archivos
+                    if (this.fotosGrupal.length + files.length > 20) {
+                        toastr.warning('Máximo 20 fotos permitidas');
+                        return;
+                    }
+
+                    let archivosProcesados = 0;
+
+                    files.forEach(file => {
+                        // Validar tipo de archivo
+                        if (!file.type.startsWith('image/')) {
+                            return;
+                        }
+
+                        // Validar tamaño
+                        if (file.size > 5 * 1024 * 1024) {
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.fotosGrupal.push({
+                                file: file,
+                                preview: e.target.result,
+                                name: file.name,
+                                size: file.size,
+                                type: file.type
+                            });
+                            archivosProcesados++;
+
+                            // Mostrar mensaje final
+                            if (archivosProcesados === files.filter(f => f.type.startsWith(
+                                    'image/')).length) {
+                                toastr.success(
+                                    `${archivosProcesados} foto(s) cargada(s) correctamente`
+                                );
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                },
+
+                // MÉTODO NUEVO: Drag over effect
+                handleDragOverGrupal(event) {
+                    event.preventDefault();
+                    event.target.classList.add('border-green-400', 'bg-green-50');
+                },
+
+                // MÉTODO NUEVO: Drag leave effect
+                handleDragLeaveGrupal(event) {
+                    event.preventDefault();
+                    event.target.classList.remove('border-green-400', 'bg-green-50');
+                },
+
+                // MÉTODO COMPATIBILIDAD: Para mantener el antiguo
                 eliminarPrevisualizacionGrupal() {
-                    this.previsualizacionFotoGrupal = null;
+                    this.fotosGrupal = [];
                     document.getElementById('fotoComprobanteGrupal').value = '';
                 },
 
@@ -1253,18 +1466,20 @@
                     }
                 },
 
-                // Procesamiento grupal
+                // Procesamiento grupal - ACTUALIZADO PARA MÚLTIPLES FOTOS
                 async confirmarEnvioGrupal() {
                     if (!this.datosEnvioGrupalValidos) {
                         toastr.error('Complete todos los campos requeridos');
                         return;
                     }
 
-                    const fotoComprobante = document.getElementById('fotoComprobanteGrupal').files[
-                        0];
+                    if (this.fotosGrupal.length > 20) {
+                        toastr.error('Máximo 20 fotos permitidas');
+                        return;
+                    }
 
                     if (!confirm(
-                            `¿Confirmar envío grupal a provincia?\n\nTransportista: ${this.datosEnvioGrupal.transportista}\nVehículo: ${this.datosEnvioGrupal.placa_vehiculo}\n\nTodos los repuestos serán procesados.`
+                            `¿Confirmar envío grupal a provincia?\n\nTransportista: ${this.datosEnvioGrupal.transportista}\nVehículo: ${this.datosEnvioGrupal.placa_vehiculo}\n\n${this.fotosGrupal.length} foto(s) adjunta(s)\nTodos los repuestos serán procesados.`
                         )) {
                         return;
                     }
@@ -1280,9 +1495,19 @@
                             .fecha_entrega_transporte);
                         formData.append('observaciones', this.datosEnvioGrupal.observaciones);
 
-                        if (fotoComprobante) {
-                            formData.append('foto_comprobante', fotoComprobante);
-                        }
+                        // Agregar múltiples fotos
+                        this.fotosGrupal.forEach((foto, index) => {
+                            formData.append(`fotos_comprobante[]`, foto.file);
+                        });
+
+                        // Opcional: agregar nombres de archivos
+                        formData.append('fotos_info', JSON.stringify(
+                            this.fotosGrupal.map(foto => ({
+                                name: foto.name,
+                                size: foto.size,
+                                type: foto.type
+                            }))
+                        ));
 
                         const response = await fetch(
                             `/solicitudrepuestoprovincia/${this.solicitudIdSeleccionada}/aceptar-provincia`, {

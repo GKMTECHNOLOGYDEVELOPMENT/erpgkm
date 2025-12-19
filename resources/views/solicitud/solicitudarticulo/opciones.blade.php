@@ -1153,7 +1153,7 @@
                 </div>
 
                 <!-- Modal para Enviar a Abastecimiento - RESPONSIVE -->
-                <div x-show="mostrarModalEnviarAlmacen" x-cloak
+                <div x-show="mostrarModalEnviarAlmacen" x-cloak @click.self="cerrarModalEnviarAlmacen"
                     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100"
                         x-show="mostrarModalEnviarAlmacen" x-transition:enter="ease-out duration-300"
@@ -1182,197 +1182,391 @@
                             </div>
                         </div>
 
-                        <!-- Contenido del Modal -->
-                        <div class="p-4 sm:p-6 overflow-y-auto max-h-[70vh]">
-                            <!-- Información General -->
-                            <div class="mb-4 sm:mb-6">
-                                <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Información
-                                    de la Solicitud</h4>
+                        <!-- Contenido del Modal - Versión Mejorada -->
+                        <div class="p-4 sm:p-6 lg:p-8 overflow-y-auto max-h-[70vh] custom-scrollbar">
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                            <!-- Información General -->
+                            <div class="mb-8">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-1.5 h-5 bg-gradient-to-b from-orange-500 to-orange-600 rounded-full">
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-gray-900">Información de la Solicitud
+                                    </h4>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                                     <!-- Título -->
-                                    <div class="col-span-2">
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Título de la Solicitud *
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Título de la Solicitud
                                         </label>
-                                        <input type="text" x-model="formEnviarAlmacen.titulo"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            placeholder="Ej: Reabastecimiento de artículos con stock insuficiente"
-                                            required>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para título -->
+                                                <i class="fas fa-heading text-gray-400 text-sm"></i>
+                                            </div>
+                                            <input type="text" x-model="formEnviarAlmacen.titulo"
+                                                class="pl-10 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm"
+                                                placeholder="Ej: Reabastecimiento de artículos con stock insuficiente"
+                                                required>
+                                        </div>
+                                        <p class="mt-2 text-xs text-gray-500">Describa brevemente el propósito de la
+                                            solicitud</p>
                                     </div>
 
                                     <!-- Tipo de Solicitud -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Tipo de Solicitud *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Tipo de Solicitud
                                         </label>
-                                        <select x-model="formEnviarAlmacen.idTipoSolicitud"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            required>
-                                            <option value="" class="text-xs sm:text-sm">Seleccione tipo</option>
-                                            <template x-for="tipo in tiposSolicitud" :key="tipo.idTipoSolicitud">
-                                                <option :value="tipo.idTipoSolicitud" x-text="tipo.nombre"
-                                                    class="text-xs sm:text-sm"></option>
-                                            </template>
-                                        </select>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para tipo -->
+                                                <i class="fas fa-list-alt text-gray-400 text-sm"></i>
+                                            </div>
+                                            <select x-model="formEnviarAlmacen.idTipoSolicitud"
+                                                class="pl-10 appearance-none w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm bg-white"
+                                                required>
+                                                <option value="" class="text-sm text-gray-400">Seleccione tipo
+                                                    de solicitud</option>
+                                                <template x-for="tipo in tiposSolicitud" :key="tipo.idTipoSolicitud">
+                                                    <option :value="tipo.idTipoSolicitud" x-text="tipo.nombre"
+                                                        class="text-sm"></option>
+                                                </template>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <!-- Flecha del select con Font Awesome -->
+                                                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Prioridad -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Prioridad *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Prioridad
                                         </label>
-                                        <select x-model="formEnviarAlmacen.idPrioridad"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            required>
-                                            <option value="" class="text-xs sm:text-sm">Seleccione prioridad
-                                            </option>
-                                            <template x-for="prioridad in prioridades" :key="prioridad.idPrioridad">
-                                                <option :value="prioridad.idPrioridad" x-text="prioridad.nombre"
-                                                    class="text-xs sm:text-sm"></option>
-                                            </template>
-                                        </select>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para prioridad -->
+                                                <i class="fas fa-flag text-gray-400 text-sm"></i>
+                                            </div>
+                                            <select x-model="formEnviarAlmacen.idPrioridad"
+                                                class="pl-10 appearance-none w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm bg-white"
+                                                required>
+                                                <option value="" class="text-sm text-gray-400">Seleccione
+                                                    prioridad</option>
+                                                <template x-for="prioridad in prioridades"
+                                                    :key="prioridad.idPrioridad">
+                                                    <option :value="prioridad.idPrioridad" x-text="prioridad.nombre"
+                                                        class="text-sm"></option>
+                                                </template>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
+                                        <p class="mt-2 text-xs text-gray-500" x-text="getPrioridadDescripcion()"></p>
                                     </div>
 
                                     <!-- Fecha Requerida -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Fecha Requerida *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Fecha Requerida
                                         </label>
-                                        <input type="date" x-model="formEnviarAlmacen.fecha_requerida"
-                                            :min="new Date().toISOString().split('T')[0]"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            required>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para fecha -->
+                                                <i class="fas fa-calendar-alt text-gray-400 text-sm"></i>
+                                            </div>
+                                            <input type="date" x-model="formEnviarAlmacen.fecha_requerida"
+                                                :min="new Date().toISOString().split('T')[0]"
+                                                class="pl-10 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm"
+                                                required>
+                                        </div>
                                     </div>
 
                                     <!-- Centro de Costo -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Centro de Costo
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            Centro de Costo <span class="text-gray-500 text-xs">(Opcional)</span>
                                         </label>
-                                        <select x-model="formEnviarAlmacen.idCentroCosto"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm">
-                                            <option value="" class="text-xs sm:text-sm">Seleccione centro de
-                                                costo</option>
-                                            <template x-for="centro in centrosCosto" :key="centro.idCentroCosto">
-                                                <option :value="centro.idCentroCosto" x-text="centro.nombre"
-                                                    class="text-xs sm:text-sm"></option>
-                                            </template>
-                                        </select>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para costo -->
+                                                <i class="fas fa-money-bill-wave text-gray-400 text-sm"></i>
+                                            </div>
+                                            <select x-model="formEnviarAlmacen.idCentroCosto"
+                                                class="pl-10 appearance-none w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm bg-white">
+                                                <option value="" class="text-sm text-gray-400">Seleccione centro
+                                                    de costo</option>
+                                                <template x-for="centro in centrosCosto" :key="centro.idCentroCosto">
+                                                    <option :value="centro.idCentroCosto" x-text="centro.nombre"
+                                                        class="text-sm"></option>
+                                                </template>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Área -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Área *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Área
                                         </label>
-                                        <select x-model="formEnviarAlmacen.idTipoArea"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            required>
-                                            <option value="" class="text-xs sm:text-sm">Seleccione área</option>
-                                            <template x-for="area in areas" :key="area.idTipoArea">
-                                                <option :value="area.idTipoArea" x-text="area.nombre"
-                                                    class="text-xs sm:text-sm"></option>
-                                            </template>
-                                        </select>
+                                        <div class="relative">
+                                            <div
+                                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <!-- Icono Font Awesome para área -->
+                                                <i class="fas fa-building text-gray-400 text-sm"></i>
+                                            </div>
+                                            <select x-model="formEnviarAlmacen.idTipoArea"
+                                                class="pl-10 appearance-none w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm bg-white"
+                                                required>
+                                                <option value="" class="text-sm text-gray-400">Seleccione área
+                                                </option>
+                                                <template x-for="area in areas" :key="area.idTipoArea">
+                                                    <option :value="area.idTipoArea" x-text="area.nombre"
+                                                        class="text-sm"></option>
+                                                </template>
+                                            </select>
+                                            <div
+                                                class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <i class="fas fa-chevron-down text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Descripción y Justificación -->
-                            <div class="mb-4 sm:mb-6">
-                                <div class="grid grid-cols-1 gap-3 sm:gap-4">
+                            <div class="mb-8">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-1.5 h-5 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full">
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-gray-900">Detalles Adicionales</h4>
+                                </div>
+
+                                <div class="grid grid-cols-1 gap-5 sm:gap-6">
                                     <!-- Descripción -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Descripción *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Descripción
                                         </label>
-                                        <textarea x-model="formEnviarAlmacen.descripcion" rows="3"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            placeholder="Describa el propósito de esta solicitud de abastecimiento..." required></textarea>
+                                        <div class="relative">
+                                            <div class="absolute top-3 left-3">
+                                                <!-- Icono Font Awesome para descripción -->
+                                                <i class="fas fa-align-left text-gray-400 text-sm"></i>
+                                            </div>
+                                            <textarea x-model="formEnviarAlmacen.descripcion" rows="3"
+                                                class="pl-10 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm"
+                                                placeholder="Describa el propósito de esta solicitud de abastecimiento..." required></textarea>
+                                        </div>
+                                        <div class="flex justify-between items-center mt-2">
+                                            <p class="text-xs text-gray-500">Proporcione una descripción clara del
+                                                requerimiento</p>
+                                            <span class="text-xs text-gray-400"
+                                                x-text="formEnviarAlmacen.descripcion.length + '/500'"></span>
+                                        </div>
                                     </div>
 
                                     <!-- Justificación -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Justificación *
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            <span class="text-orange-600">*</span> Justificación
                                         </label>
-                                        <textarea x-model="formEnviarAlmacen.justificacion" rows="3"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            placeholder="Explique por qué es necesario este abastecimiento..." required></textarea>
+                                        <div class="relative">
+                                            <div class="absolute top-3 left-3">
+                                                <!-- Icono Font Awesome para justificación -->
+                                                <i class="fas fa-check-circle text-gray-400 text-sm"></i>
+                                            </div>
+                                            <textarea x-model="formEnviarAlmacen.justificacion" rows="3"
+                                                class="pl-10 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm"
+                                                placeholder="Explique por qué es necesario este abastecimiento..." required></textarea>
+                                        </div>
+                                        <div class="flex justify-between items-center mt-2">
+                                            <p class="text-xs text-gray-500">Explique la necesidad y urgencia de esta
+                                                solicitud</p>
+                                            <span class="text-xs text-gray-400"
+                                                x-text="formEnviarAlmacen.justificacion.length + '/500'"></span>
+                                        </div>
                                     </div>
 
                                     <!-- Observaciones -->
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
-                                            Observaciones
+                                        <label class="block text-sm font-semibold text-gray-800 mb-2.5">
+                                            Observaciones <span class="text-gray-500 text-xs">(Opcional)</span>
                                         </label>
-                                        <textarea x-model="formEnviarAlmacen.observaciones" rows="2"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2.5 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-xs sm:text-sm"
-                                            placeholder="Observaciones adicionales..."></textarea>
+                                        <div class="relative">
+                                            <div class="absolute top-3 left-3">
+                                                <!-- Icono Font Awesome para observaciones -->
+                                                <i class="fas fa-sticky-note text-gray-400 text-sm"></i>
+                                            </div>
+                                            <textarea x-model="formEnviarAlmacen.observaciones" rows="2"
+                                                class="pl-10 w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-3 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all duration-200 hover:border-gray-400 shadow-sm"
+                                                placeholder="Observaciones adicionales..."></textarea>
+                                        </div>
+                                        <p class="mt-2 text-xs text-gray-500">Información adicional que considere
+                                            relevante</p>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Resumen de Artículos -->
-                            <div class="mb-4 sm:mb-6">
-                                <h4 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Artículos a
-                                    Solicitar</h4>
-                                <div class="bg-gray-50 rounded-lg border border-gray-200 p-3 sm:p-4">
-                                    <div class="space-y-2 sm:space-y-3">
+                            <div class="mb-4">
+                                <div class="flex items-center gap-2 mb-4">
+                                    <div class="w-1.5 h-5 bg-success rounded-full">
+                                    </div>
+                                    <h4 class="text-lg sm:text-xl font-bold text-gray-900">Artículos a Solicitar</h4>
+                                    <span
+                                        class="ml-2 px-2.5 py-0.5 bg-orange-100 text-orange-800 text-xs font-medium rounded-full"
+                                        x-text="articulosSeleccionadosEnviar.length + ' artículos'"></span>
+                                </div>
+
+                                <div
+                                    class="bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 p-5 sm:p-6 shadow-sm">
+                                    <div class="space-y-4">
                                         <template x-for="articulo in articulosSeleccionadosEnviar"
                                             :key="articulo.idArticulos">
                                             <div
-                                                class="flex items-center justify-between p-2 sm:p-3 bg-white rounded-lg border border-gray-200">
-                                                <div class="flex-1">
-                                                    <div
-                                                        class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
-                                                        <span class="font-semibold text-gray-900 text-xs sm:text-sm"
-                                                            x-text="articulo.nombre"></span>
-                                                        <span class="text-xs sm:text-sm text-gray-600">
-                                                            Cantidad a solicitar:
-                                                            <span class="font-bold text-orange-600"
-                                                                x-text="calcularCantidadSolicitar(articulo)"></span>
-                                                        </span>
+                                                class="group relative panel rounded-xl border border-gray-200 p-4 hover:border-orange-300 hover:shadow-sm transition-all duration-200">
+                                                <div
+                                                    class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center gap-3 mb-2">
+                                                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                            <h5 class="font-bold text-gray-900 text-sm sm:text-base"
+                                                                x-text="articulo.nombre"></h5>
+                                                        </div>
+                                                        <div
+                                                            class="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+                                                            <div class="flex items-center gap-1.5">
+                                                                <span class="text-gray-600">Cantidad a
+                                                                    solicitar:</span>
+                                                                <span class="font-bold text-orange-600 text-sm"
+                                                                    x-text="calcularCantidadSolicitar(articulo)"></span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div
-                                                        class="flex flex-wrap items-center gap-1 sm:gap-4 text-xs text-gray-600 mt-1 sm:mt-2">
+
+                                                    <div class="flex flex-wrap gap-2">
+                                                        <!-- Stock Solicitado -->
+                                                        <div
+                                                            class="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg">
+                                                            <!-- Icono Font Awesome para solicitado -->
+                                                            <i class="fas fa-clock text-blue-600 text-xs"></i>
+                                                            <span class="font-semibold text-sm">
+                                                                Sol: <span
+                                                                    x-text="articulo.cantidad_solicitada"></span>
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Stock Disponible -->
+                                                        <div
+                                                            class="inline-flex items-center gap-1.5 bg-red-50 text-red-700 px-3 py-1.5 rounded-lg">
+                                                            <!-- Icono Font Awesome para disponible -->
+                                                            <i class="fas fa-boxes text-red-600 text-xs"></i>
+                                                            <span class="font-semibold text-sm">
+                                                                Disp: <span x-text="articulo.stock_disponible"></span>
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Faltante -->
+                                                        <div
+                                                            class="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg font-bold">
+                                                            <!-- Icono Font Awesome para faltante -->
+                                                            <i
+                                                                class="fas fa-exclamation-triangle text-orange-600 text-xs"></i>
+                                                            <span class="text-sm">
+                                                                Faltan: <span
+                                                                    x-text="articulo.cantidad_solicitada - articulo.stock_disponible"></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Barra de progreso visual -->
+                                                <div class="mt-3">
+                                                    <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                                        <span>Disponibilidad</span>
                                                         <span
-                                                            class="bg-blue-100 text-blue-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm">
-                                                            Sol: <span class="font-bold"
-                                                                x-text="articulo.cantidad_solicitada"></span>
-                                                        </span>
-                                                        <span
-                                                            class="bg-red-100 text-red-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm">
-                                                            Disp: <span class="font-bold"
-                                                                x-text="articulo.stock_disponible"></span>
-                                                        </span>
-                                                        <span
-                                                            class="bg-orange-100 text-orange-700 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded font-bold text-xs sm:text-sm">
-                                                            Faltan: <span
-                                                                x-text="articulo.cantidad_solicitada - articulo.stock_disponible"></span>
-                                                        </span>
+                                                            x-text="Math.round((articulo.stock_disponible / articulo.cantidad_solicitada) * 100) + '%'"></span>
+                                                    </div>
+                                                    <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                        <div class="h-full bg-gradient-to-r from-red-500 via-orange-500 to-green-500 rounded-full"
+                                                            :style="'width: ' + Math.min((articulo.stock_disponible / articulo
+                                                                .cantidad_solicitada) * 100, 100) + '%'">
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </template>
                                     </div>
 
-                                    <!-- Total -->
-                                    <div class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-gray-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="font-semibold text-gray-900 text-xs sm:text-sm">Total de
-                                                artículos:</span>
-                                            <span class="font-bold text-orange-600 text-xs sm:text-sm"
-                                                x-text="articulosSeleccionadosEnviar.length"></span>
-                                        </div>
-                                        <div class="flex justify-between items-center mt-1 sm:mt-2">
-                                            <span class="font-semibold text-gray-900 text-xs sm:text-sm">Total de
-                                                unidades a solicitar:</span>
-                                            <span class="font-bold text-orange-600 text-xs sm:text-sm"
-                                                x-text="calcularTotalUnidades()"></span>
+                                    <!-- Resumen Total Mejorado -->
+                                    <div class="mt-8 pt-6 border-t border-gray-200">
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                                            <!-- Total Artículos -->
+                                            <div
+                                                class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition">
+                                                <div class="absolute inset-0 bg-gradient-to-br from-gray-50 to-white">
+                                                </div>
+
+                                                <div class="relative p-5 flex items-center gap-4">
+                                                    <div
+                                                        class="w-12 h-12 flex items-center justify-center rounded-xl bg-warning text-white">
+                                                        <i class="fas fa-cubes text-xl"></i>
+                                                    </div>
+
+                                                    <div class="flex-1">
+                                                        <p class="text-sm font-medium text-gray-500">
+                                                            Total de artículos
+                                                        </p>
+                                                        <p class="text-3xl font-bold text-gray-900"
+                                                            x-text="articulosSeleccionadosEnviar.length">
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Total Unidades -->
+                                            <div
+                                                class="relative overflow-hidden rounded-2xl border border-orange-200 bg-white shadow-sm hover:shadow-md transition">
+                                                <div
+                                                    class="absolute inset-0 bg-gradient-to-br from-orange-50 to-orange-100/60">
+                                                </div>
+
+                                                <div class="relative p-5 flex items-center gap-4">
+                                                    <div
+                                                        class="w-12 h-12 flex items-center justify-center rounded-xl bg-warning text-white">
+                                                        <i class="fas fa-box-open text-xl"></i>
+                                                    </div>
+
+                                                    <div class="flex-1">
+                                                        <p class="text-sm font-medium text-orange-700">
+                                                            Total de unidades
+                                                        </p>
+                                                        <p class="text-3xl font-bold text-orange-900"
+                                                            x-text="calcularTotalUnidades()">
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
