@@ -68,7 +68,7 @@ class KardexController extends Controller
                 'ordenes.numeros_orden',
                 // Determinar región basado en CAS
               DB::raw("CASE 
-    WHEN kardex.cas IN ('CAS GKM', 'INGRESO POR MARCA ASOCIADA') THEN 'LIMA'
+    WHEN kardex.cas IN ('CAS GKM', 'INGRESO POR MARCA ASOCIADA TCL') THEN 'LIMA'
     WHEN kardex.cas IS NOT NULL AND kardex.cas != '' THEN 'PROVINCIA'
     ELSE 'SIN REGISTRO'
 END as region")
