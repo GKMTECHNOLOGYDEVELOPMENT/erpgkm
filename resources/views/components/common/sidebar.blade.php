@@ -1572,7 +1572,7 @@
             @endif
 
 
-            <!-- <li class="menu nav-item">
+            <li class="menu nav-item">
                     <button type="button" class="nav-link group"
                         :class="{ 'active': activeDropdown === 'kardex' }"
                         @click="activeDropdown === 'kardex' ? activeDropdown = null : activeDropdown = 'kardex'">
@@ -1602,7 +1602,7 @@
                             <a href="{{ route('kardex.index') }}">Kardex General</a>
                         </li>
                     </ul>
-                </li> -->
+                </li> 
 
 
 

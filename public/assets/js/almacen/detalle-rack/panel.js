@@ -1013,9 +1013,9 @@ function modalDetalleUbicacion() {
             return textos[estado] || textos['vacio'];
         },
 
-        // ========== CAMBIA ESTAS FUNCIONES ==========
-        downloadQR() {
-            console.log('downloadQR ejecutado');
+        // ========== FUNCIONES ACTUALIZADAS ==========
+        downloadQR(tipo = 'vista') {
+            console.log('downloadQR ejecutado', 'tipo:', tipo);
             console.log('this.ubicacion:', this.ubicacion);
 
             // Usa this.ubicacion del componente actual
@@ -1029,17 +1029,17 @@ function modalDetalleUbicacion() {
 
             console.log('Código para QR:', qrCode);
 
-            // Crear enlace de descarga
-            const downloadUrl = `/almacen/ubicaciones/qr/${encodeURIComponent(qrCode)}?download=true`;
+            // MODIFICADO: Agregar parámetro ruta=vista
+            const downloadUrl = `/almacen/ubicaciones/qr/${encodeURIComponent(qrCode)}?download=true&ruta=${tipo}`;
             console.log('URL de descarga:', downloadUrl);
 
             // Mostrar mensaje de carga
-            toastr.info('Preparando descarga...', 'Procesando');
+            toastr.info(`Preparando descarga QR ${tipo === 'spark' ? 'Spark' : 'Normal'}...`, 'Procesando');
 
             // Crear un enlace temporal para la descarga
             const link = document.createElement('a');
             link.href = downloadUrl;
-            link.download = `qr-ubicacion-${qrCode}.svg`; // Cambia a .svg
+            link.download = `qr-ubicacion-${qrCode}-${tipo}.svg`; // Incluye tipo en nombre
             document.body.appendChild(link);
 
             // Simular clic para iniciar descarga
@@ -1047,17 +1047,17 @@ function modalDetalleUbicacion() {
             document.body.removeChild(link);
 
             // Mostrar notificación de éxito
-            toastr.success('QR descargado correctamente', '¡Listo!', {
+            toastr.success(`QR ${tipo === 'spark' ? 'Spark' : 'Normal'} descargado`, '¡Listo!', {
                 timeOut: 3000,
                 progressBar: true,
                 closeButton: true,
             });
 
-            console.log('QR descargado:', qrCode);
+            console.log('QR descargado:', qrCode, 'tipo:', tipo);
         },
 
-        copyQRUrl() {
-            console.log('copyQRUrl ejecutado');
+        copyQRUrl(tipo = 'vista') {
+            console.log('copyQRUrl ejecutado', 'tipo:', tipo);
             console.log('this.ubicacion:', this.ubicacion);
 
             // Usa this.ubicacion del componente actual
@@ -1069,7 +1069,12 @@ function modalDetalleUbicacion() {
                 return;
             }
 
-            const qrUrl = `${window.location.origin}/almacen/ubicaciones/qr/${encodeURIComponent(qrCode)}`;
+            // MODIFICADO: Usar la ruta específica según el tipo
+            const qrUrl =
+                tipo === 'spark'
+                    ? `${window.location.origin}/almacen/ubicaciones/qr/spark/${encodeURIComponent(qrCode)}`
+                    : `${window.location.origin}/almacen/ubicaciones/qr/vista/${encodeURIComponent(qrCode)}`;
+
             console.log('URL para copiar:', qrUrl);
 
             // Mostrar mensaje de procesando
