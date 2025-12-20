@@ -754,129 +754,163 @@
             @endif
         </div>
 
-        <!-- Modal para registro de envío a provincia (individual) - Responsive -->
-        <div x-show="mostrarModalEnvio" x-cloak
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-            <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl w-full max-w-xs sm:max-w-sm lg:max-w-lg transform transition-all duration-300 scale-100"
-                x-show="mostrarModalEnvio" x-transition:enter="ease-out duration-300"
-                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <!-- Modal Envío a Provincia -->
+        <div x-show="mostrarModalEnvio" x-cloak x-transition
+            class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto">
+            <!-- Backdrop -->
+            <div class="flex items-start justify-center min-h-screen px-4 py-6 sm:p-6" @click.self="cerrarModalEnvio">
+                <!-- Modal -->
+                <div x-transition x-transition.duration.300
+                    class="bg-white rounded-xl shadow-2xl w-full max-w-md sm:max-w-lg my-auto overflow-hidden transform transition-all">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 px-5 sm:px-6 py-4 sm:py-5">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-truck text-white text-lg"></i>
+                                </div>
+                                <div class="max-w-[calc(100%-60px)]">
+                                    <h3 class="text-base sm:text-lg font-bold text-white">
+                                        Registrar Envío a Provincia
+                                    </h3>
+                                    <p class="text-indigo-100 text-xs sm:text-sm truncate mt-0.5"
+                                        x-text="repuestoSeleccionadoNombre"></p>
+                                </div>
+                            </div>
 
-                <!-- Header del Modal -->
-                <div
-                    class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl sm:rounded-t-2xl">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2 sm:space-x-3">
-                            <div
-                                class="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-truck text-white text-sm sm:text-base"></i>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3 class="text-sm sm:text-base lg:text-lg font-bold text-white truncate">
-                                    Registrar Envío a Provincia
-                                </h3>
-                                <p class="text-indigo-100 text-xs sm:text-sm truncate"
-                                    x-text="repuestoSeleccionadoNombre"></p>
-                            </div>
+                            <button type="button" @click="cerrarModalEnvio"
+                                class="text-white/80 hover:text-white hover:bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fas fa-times text-base"></i>
+                            </button>
                         </div>
-                        <button @click="cerrarModalEnvio"
-                            class="text-white hover:text-indigo-200 transition-colors ml-2">
-                            <i class="fas fa-times text-base sm:text-lg"></i>
-                        </button>
                     </div>
-                </div>
 
-                <!-- Contenido del Modal -->
-                <form id="formEnvioProvincia" @submit.prevent="confirmarEnvioIndividual">
-                    <div class="p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4">
-                        <p class="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-4">
-                            Complete los datos del envío a provincia:
-                        </p>
+                    <!-- Contenido -->
+                    <form @submit.prevent="confirmarEnvioIndividual">
+                        <div class="p-5 sm:p-6 space-y-5 sm:space-y-6">
+                            <!-- Transportista -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-user text-indigo-500 text-xs"></i>
+                                        Transportista
+                                    </span>
+                                    <span class="text-xs font-normal text-gray-500 block mt-0.5">Nombre del
+                                        transportista responsable</span>
+                                </label>
+                                <input type="text" x-model="datosEnvio.transportista" required
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all placeholder-gray-400"
+                                    placeholder="Ej: Transportes Lima SAC">
+                            </div>
 
-                        <!-- Transportista -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-user-tie mr-1 text-xs"></i>
-                                Transportista
-                            </label>
-                            <input type="text" x-model="datosEnvio.transportista"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Nombre del transportista">
-                        </div>
+                            <!-- Placa -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-car text-indigo-500 text-xs"></i>
+                                        Placa del Vehículo
+                                    </span>
+                                </label>
+                                <div class="relative">
+                                    <input type="text" x-model="datosEnvio.placa_vehiculo" required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm uppercase focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all placeholder-gray-400"
+                                        placeholder="Ej: ABC-123">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-key text-gray-400"></i>
+                                    </div>
+                                </div>
+                            </div>
 
-                        <!-- Placa del Vehículo -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-car mr-1 text-xs"></i>
-                                Placa del Vehículo
-                            </label>
-                            <input type="text" x-model="datosEnvio.placa_vehiculo"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Placa del vehículo">
-                        </div>
+                            <!-- Fecha -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-calendar-alt text-indigo-500 text-xs"></i>
+                                        Fecha de Entrega
+                                    </span>
+                                </label>
+                                <div class="relative">
+                                    <input type="datetime-local" x-model="datosEnvio.fecha_entrega_transporte"
+                                        required
+                                        class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all">
+                                </div>
+                            </div>
 
-                        <!-- Fecha de Entrega al Transporte -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-calendar-alt mr-1 text-xs"></i>
-                                Fecha de Entrega
-                            </label>
-                            <input type="datetime-local" x-model="datosEnvio.fecha_entrega_transporte"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        </div>
+                            <!-- Foto -->
+                            <div class="space-y-3">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-camera text-indigo-500 text-xs"></i>
+                                        Comprobante (opcional)
+                                    </span>
+                                    <span class="text-xs font-normal text-gray-500 block mt-0.5">Suba una foto del
+                                        comprobante</span>
+                                </label>
 
-                        <!-- Subir Foto -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-camera mr-1 text-xs"></i>
-                                Foto (opcional)
-                            </label>
-                            <input type="file" id="fotoComprobante" accept="image/*" @change="previsualizarFoto"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <!-- Input de archivo con mejor diseño -->
+                                <div class="relative">
+                                    <input type="file" id="fotoComprobante" accept="image/*"
+                                        @change="previsualizarFoto" class="hidden">
+                                    <label for="fotoComprobante"
+                                        class="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50/50 transition-all cursor-pointer">
+                                        <i class="fas fa-cloud-upload-alt text-gray-400 text-xl mb-2"></i>
+                                        <span class="text-sm font-medium text-gray-600">Subir imagen</span>
+                                        <span class="text-xs text-gray-500 mt-1">PNG, JPG o JPEG (Max. 5MB)</span>
+                                    </label>
+                                </div>
 
-                            <!-- Previsualización de la foto -->
-                            <div x-show="previsualizacionFoto" class="mt-2 sm:mt-3">
-                                <p class="text-xs text-gray-600 mb-1 sm:mb-2">Vista previa:</p>
-                                <img :src="previsualizacionFoto" alt="Previsualización"
-                                    class="max-w-full sm:max-w-xs rounded-lg border border-gray-300">
-                                <button type="button" @click="eliminarPrevisualizacion"
-                                    class="mt-1 sm:mt-2 text-xs text-red-600 hover:text-red-800">
-                                    <i class="fas fa-trash mr-0.5"></i> Eliminar foto
+                                <!-- Previsualización -->
+                                <div x-show="previsualizacionFoto" class="space-y-2 animate-fade-in">
+                                    <div class="relative inline-block">
+                                        <img :src="previsualizacionFoto"
+                                            class="max-w-full h-40 object-cover rounded-lg border-2 border-gray-200 shadow-sm">
+                                        <button type="button" @click="eliminarPrevisualizacion"
+                                            class="absolute -top-2 -right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm">
+                                            <i class="fas fa-times text-xs"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-edit text-indigo-500 text-xs"></i>
+                                        Observaciones
+                                    </span>
+                                    <span class="text-xs font-normal text-gray-500 block mt-0.5">Información adicional
+                                        del envío</span>
+                                </label>
+                                <textarea rows="3" x-model="datosEnvio.observaciones"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all placeholder-gray-400 resize-none"
+                                    placeholder="Ingrese observaciones importantes..."></textarea>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex gap-3 pt-4 border-t border-gray-100">
+                                <button type="button" @click="cerrarModalEnvio"
+                                    class="flex-1 border border-gray-300 rounded-lg py-3 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                                    Cancelar
+                                </button>
+
+                                <button type="submit" :disabled="!datosEnvioValidos"
+                                    :class="datosEnvioValidos
+                                        ?
+                                        'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-sm hover:shadow' :
+                                        'bg-gray-300 cursor-not-allowed'"
+                                    class="flex-1 text-white rounded-lg py-3 px-4 text-sm font-medium transition-all flex items-center justify-center gap-2">
+                                    <i class="fas fa-check"></i>
+                                    Confirmar
                                 </button>
                             </div>
                         </div>
-
-                        <!-- Observaciones -->
-                        <div>
-                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
-                                <i class="fas fa-comment-alt mr-1 text-xs"></i>
-                                Observaciones
-                            </label>
-                            <textarea x-model="datosEnvio.observaciones" rows="2"
-                                class="w-full border border-gray-300 rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-xs sm:text-sm focus:ring-1 sm:focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                placeholder="Observaciones adicionales..."></textarea>
-                        </div>
-
-                        <!-- Botones de acción -->
-                        <div class="flex space-x-2 sm:space-x-3 pt-3 sm:pt-4">
-                            <button type="button" @click="cerrarModalEnvio"
-                                class="flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 border border-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-medium hover:bg-gray-50 transition-colors text-xs sm:text-sm">
-                                Cancelar
-                            </button>
-                            <button type="submit" :disabled="!datosEnvioValidos"
-                                :class="{
-                                    'bg-indigo-600 hover:bg-indigo-700': datosEnvioValidos,
-                                    'bg-gray-400 cursor-not-allowed': !datosEnvioValidos
-                                }"
-                                class="flex-1 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 text-white rounded-lg sm:rounded-xl font-medium transition-colors text-xs sm:text-sm">
-                                <i class="fas fa-truck mr-1"></i>
-                                <span class="hidden sm:inline">Confirmar</span>
-                                <span class="sm:hidden">OK</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
+
 
         <!-- MODAL ENVÍO GRUPAL MEJORADO -->
         <div x-show="mostrarModalEnvioGrupal" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto">

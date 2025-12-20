@@ -275,7 +275,7 @@
                          <!-- Primera fila: Documento -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                
+
                                  Documento <span class="text-red-500">*</span>
                              </label>
                              <div class="relative">
@@ -301,7 +301,7 @@
                          <!-- Segunda fila: Serie - Número con guion en el centro -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                 
+
                                  Serie y Número <span class="text-red-500">*</span>
                              </label>
                              <div class="flex gap-2 items-center">
@@ -332,7 +332,7 @@
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                     
+
                                      Fecha Emisión <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -346,7 +346,7 @@
 
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                     
+
                                      Fecha Vencimiento <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -363,7 +363,7 @@
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                    
+
                                      Moneda <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -390,7 +390,7 @@
 
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                     
+
                                      Tipo Cambio
                                  </label>
                                  <div class="relative">
@@ -406,7 +406,7 @@
                          <div class="grid grid-cols-2 gap-4 items-end">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                    
+
                                      Impuesto <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -435,7 +435,7 @@
                                      class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
                                  <label for="dua"
                                      class="ms-2 text-sm font-medium text-gray-700 flex items-center gap-2">
-                                    
+
                                      DUA
                                  </label>
                              </div>
@@ -444,7 +444,7 @@
                          <!-- Sexta fila: Proveedor -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                 
+
                                  Proveedor <span class="text-red-500">*</span>
                              </label>
                              <div class="relative">
@@ -474,7 +474,7 @@
                          <div class="grid grid-cols-2 gap-4">
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                    
+
                                      Condición Compra <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -499,7 +499,7 @@
 
                              <div>
                                  <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                    
+
                                      Sujeto a <span class="text-red-500">*</span>
                                  </label>
                                  <div class="relative">
@@ -526,7 +526,7 @@
                          <!-- Octava fila: Tipo de Pago -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                 
+
                                  Tipo de Pago
                              </label>
                              <div class="relative">
@@ -704,12 +704,9 @@
          </div>
 
          <!-- MODAL -->
-         <div x-show="modalAbierto" x-cloak class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto" x-transition>
+         <div x-show="modalAbierto" x-cloak x-transition class="fixed inset-0 bg-black/60 z-[999] overflow-y-auto">
              <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModal">
-                 <div x-show="modalType !== null" x-transition x-transition.duration.300
-                     class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
-
-
+                 <div class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-3xl">
                      <!-- Header -->
                      <div
                          class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
@@ -725,23 +722,6 @@
 
                      <!-- Body -->
                      <div class="p-6 text-sm text-gray-700 dark:text-white">
-                         <!-- MODAL - Sección cuando producto existe -->
-                         <!-- Loader flotante mientras se carga el modal -->
-                         <div x-show="modalCargando" x-transition.opacity x-cloak
-                             class="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center">
-                             <div
-                                 class="bg-white dark:bg-gray-900 px-6 py-4 rounded-lg shadow-md flex items-center gap-2">
-                                 <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg"
-                                     fill="none" viewBox="0 0 24 24">
-                                     <circle class="opacity-25" cx="12" cy="12" r="10"
-                                         stroke="currentColor" stroke-width="4"></circle>
-                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                                 </svg>
-                                 <span class="text-sm text-gray-700 dark:text-white">Cargando información del
-                                     producto...</span>
-                             </div>
-                         </div>
-
                          <template x-if="modalType === 'existente' && !modalCargando">
                              <div class="space-y-8">
                                  <!-- Código y nombre -->
