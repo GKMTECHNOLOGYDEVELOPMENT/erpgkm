@@ -52,50 +52,55 @@ class SolicitudrepuestoController extends Controller
         return view("solicitud.solicitudrepuesto.index", compact('estadisticas', 'solicitudes'));
     }
 
-    public function create()
-    {
-        $userId = auth()->id();
+ public function create()
+{
+    $userId = auth()->id();
 
-        $tickets = DB::table('tickets as t')
-            ->select(
-                't.idTickets',
-                't.numero_ticket',
-                't.idModelo',
-                'm.nombre as modelo_nombre'
-            )
-            ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
-            ->where('t.idTipotickets', 1)
-            ->where(function ($query) use ($userId) {
-                if ($userId == 1) {
-                    return $query;
-                } else {
-                    return $query->whereExists(function ($subQuery) use ($userId) {
-                        $subQuery->select(DB::raw(1))
-                            ->from('visitas as v')
-                            ->whereColumn('v.idTickets', 't.idTickets')
-                            ->where('v.idUsuario', $userId)
-                            ->where('v.estado', 1)
-                            ->whereExists(function ($flujoQuery) {
-                                $flujoQuery->select(DB::raw(1))
-                                    ->from('ticketflujo as tf')
-                                    ->whereColumn('tf.idTicket', 't.idTickets')
-                                    ->where('tf.idestadflujo', 2);
-                            });
-                    });
-                }
-            })
-            ->orderBy('t.fecha_creacion', 'desc')
-            ->get();
+    $tickets = DB::table('tickets as t')
+        ->select(
+            't.idTickets',
+            't.numero_ticket',
+            't.idModelo',
+            'm.nombre as modelo_nombre',
+            DB::raw('COUNT(v.idVisitas) as total_visitas') // Opcional: para contar visitas
+        )
+        ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
+        ->leftJoin('visitas as v', 't.idTickets', '=', 'v.idTickets') // Join con visitas
+        ->where('t.idTipotickets', 1)
+        ->where(function ($query) use ($userId) {
+            if ($userId == 1) {
+                // Para admin: solo tickets con al menos una visita
+                return $query;
+            } else {
+                return $query->whereExists(function ($subQuery) use ($userId) {
+                    $subQuery->select(DB::raw(1))
+                        ->from('visitas as v')
+                        ->whereColumn('v.idTickets', 't.idTickets')
+                        ->where('v.idUsuario', $userId)
+                        ->where('v.estado', 1)
+                        ->whereExists(function ($flujoQuery) {
+                            $flujoQuery->select(DB::raw(1))
+                                ->from('ticketflujo as tf')
+                                ->whereColumn('tf.idTicket', 't.idTickets')
+                                ->where('tf.idestadflujo', 2);
+                        });
+                });
+            }
+        })
+        ->groupBy('t.idTickets', 't.numero_ticket', 't.idModelo', 'm.nombre') // Agrupar por ticket
+        ->having('total_visitas', '>', 0) // Solo tickets con visitas
+        ->orderBy('t.fecha_creacion', 'desc')
+        ->get();
 
-        // Obtener el último número de orden
-        $lastOrder = DB::table('solicitudesordenes')
-            ->orderBy('idsolicitudesordenes', 'desc')
-            ->first();
+    // Obtener el último número de orden
+    $lastOrder = DB::table('solicitudesordenes')
+        ->orderBy('idsolicitudesordenes', 'desc')
+        ->first();
 
-        $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+    $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
 
-        return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
-    }
+    return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
+}
     public function createProvincia()
     {
         $userId = auth()->id();
@@ -3166,6 +3171,7 @@ class SolicitudrepuestoController extends Controller
                     'inventario_inicial' => $inventarioInicial,
                     'inventario_actual' => $inventarioActual,
                     'costo_inventario' => $costoInventarioActual,
+                    'cas' => 'CAS GKM',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
