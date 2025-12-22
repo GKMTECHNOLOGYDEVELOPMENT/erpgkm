@@ -896,8 +896,7 @@
             </div>
         </div>
     </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
@@ -989,10 +988,80 @@
                     }
 
                     const ubicacionId = this.selecciones[this.articuloIdSeleccionado];
+                    const nombreDestinatario = this.obtenerNombreDestinatario();
 
-                    if (!confirm(
-                            `¿Está seguro de que desea procesar este repuesto?\n\nRepuesto: ${this.repuestoSeleccionadoNombre}\nDestinatario: ${this.obtenerNombreDestinatario()}\n\nEl stock será descontado de la ubicación seleccionada.`
-                        )) {
+                    // Reemplazar confirm nativo por SweetAlert2
+                    const result = await Swal.fire({
+                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                            '<div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">' +
+                            '<i class="fas fa-cogs text-blue-600 text-xl"></i>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-gray-800">Confirmar Procesamiento</h3>' +
+                            '</div>',
+                        html: `<div class="text-center px-4 py-2">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 mb-4 border border-blue-100 shadow-sm">
+                                <div class="flex flex-col space-y-3">         
+                                    <div class="flex items-center justify-center gap-3">
+                                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-user-check text-white"></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-sm font-medium text-gray-500">Destinatario</p>
+                                            <p class="text-lg font-bold text-gray-800">${nombreDestinatario}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="font-semibold text-amber-700 mb-1">Importante</p>
+                                        <p class="text-sm text-amber-600">El stock será descontado de la ubicación seleccionada. Esta acción no se puede deshacer.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-sm text-gray-500 italic mb-2">
+                                ¿Está seguro de continuar con el procesamiento?
+                            </div>
+                        </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3b82f6',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-check-circle"></i>' +
+                            '<span>Confirmar Procesamiento</span>' +
+                            '</div>',
+                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-times-circle"></i>' +
+                            '<span>Cancelar</span>' +
+                            '</div>',
+                        reverseButtons: false,
+                        focusConfirm: true,
+                        showCloseButton: true,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+                            title: '!mb-0 !pb-0',
+                            htmlContainer: '!mb-0',
+                            actions: 'flex gap-4', // 👈 separación entre botones
+                            confirmButton: 'btn btn-primary !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl transition-all duration-200',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base',
+                            closeButton: '!text-gray-400 hover:!text-gray-600 transition-colors'
+                        },
+                        buttonsStyling: false,
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        width: '500px',
+                        padding: '1.5rem',
+                        allowOutsideClick: false,
+                        allowEscapeKey: true
+                    });
+
+                    if (!result.isConfirmed) {
                         return;
                     }
 
@@ -1021,7 +1090,17 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            toastr.success(data.message);
+                            // Mostrar SweetAlert2 de éxito
+                            await Swal.fire({
+                                title: '¡Éxito!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK',
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+
                             if (data.todos_procesados) {
                                 setTimeout(() => {
                                     location.reload();
@@ -1032,11 +1111,24 @@
                                 }, 1000);
                             }
                         } else {
-                            toastr.error(data.message);
+                            // Mostrar SweetAlert2 de error
+                            await Swal.fire({
+                                title: 'Error',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        toastr.error('Error al procesar el repuesto');
+                        await Swal.fire({
+                            title: 'Error',
+                            text: 'Error al procesar el repuesto',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
                     } finally {
                         this.procesandoIndividual[this.articuloIdSeleccionado] = false;
                     }
@@ -1077,9 +1169,56 @@
                         return;
                     }
 
-                    if (!confirm(
-                            '¿Está seguro de que desea procesar TODOS los repuestos?\n\nEl stock será descontado de las ubicaciones seleccionadas para cada repuesto.'
-                        )) {
+                    // Reemplazar confirm nativo por SweetAlert2
+                    const result = await Swal.fire({
+                        title: '<h3 class="text-xl font-bold text-gray-800">¿Procesar TODOS los repuestos?</h3>',
+                        html: `
+        <div class="mt-3 space-y-4 text-center">
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <p class="text-gray-700 font-medium">
+                    Se procesarán <span class="font-bold">todos los repuestos</span> de la solicitud.
+                </p>
+            </div>
+
+            <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
+                <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                </div>
+                <p class="text-sm text-amber-700">
+                    El stock será descontado de las ubicaciones seleccionadas para cada repuesto.
+                    <span class="font-semibold">Esta acción no se puede deshacer.</span>
+                </p>
+            </div>
+        </div>
+    `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: `
+        <div class="flex items-center gap-2 px-2">
+            <i class="fas fa-check-circle"></i>
+            <span>Procesar todo</span>
+        </div>
+    `,
+                        cancelButtonText: `
+        <div class="flex items-center gap-2 px-2">
+            <i class="fas fa-times-circle"></i>
+            <span>Cancelar</span>
+        </div>
+    `,
+                        reverseButtons: true,
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl',
+                            actions: 'flex gap-4 mt-6',
+                            confirmButton: 'btn btn-primary !rounded-xl !px-6 !py-3 font-semibold',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !px-6 !py-3 font-semibold'
+                        },
+                        backdrop: 'rgba(0,0,0,0.5)',
+                        width: 480
+                    });
+
+
+                    if (!result.isConfirmed) {
                         return;
                     }
 
@@ -1101,16 +1240,38 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            toastr.success(data.message);
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2000);
+                            // Mostrar SweetAlert2 de éxito
+                            await Swal.fire({
+                                title: '¡Éxito!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonColor: '#3085d6',
+                                confirmButtonText: 'OK',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                willClose: () => {
+                                    location.reload();
+                                }
+                            });
                         } else {
-                            toastr.error(data.message);
+                            // Mostrar SweetAlert2 de error
+                            await Swal.fire({
+                                title: 'Error',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonColor: '#d33',
+                                confirmButtonText: 'OK'
+                            });
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        toastr.error('Error al procesar la solicitud');
+                        await Swal.fire({
+                            title: 'Error',
+                            text: 'Error al procesar la solicitud',
+                            icon: 'error',
+                            confirmButtonColor: '#d33',
+                            confirmButtonText: 'OK'
+                        });
                     } finally {
                         this.isLoadingGrupal = false;
                     }
