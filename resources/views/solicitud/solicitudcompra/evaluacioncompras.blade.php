@@ -1,5 +1,6 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <div class="mx-auto w-full px-4 py-6">
         <div class="mb-4">
@@ -51,7 +52,7 @@
                             @foreach ($estadisticas['estados_siguientes'] as $estado => $label)
                                 @if ($estado == 'cancelada')
                                     <button onclick="cancelarSolicitud({{ $solicitud->idSolicitudCompra }})"
-                                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                                        class="inline-flex items-center px-4 py-2 bg-danger hover:bg-red-700 text-white text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
                                             fill="currentColor" viewBox="0 0 16 16" class="mr-2">
                                             <path
@@ -926,13 +927,22 @@
                                         @if ($detalle->estado == 'pendiente' && in_array($solicitud->estado, ['pendiente', 'en_proceso']))
                                             <div class="flex flex-col gap-2">
                                                 <button
-                                                    onclick="aprobarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})"
+                                                    onclick="abrirModalAprobar(
+                                {{ $solicitud->idSolicitudCompra }}, 
+                                {{ $detalle->idSolicitudCompraDetalle }},
+                                '{{ $detalle->descripcion_producto }}',
+                                {{ $detalle->cantidad }}
+                            )"
                                                     class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition-colors">
                                                     <i class="fas fa-check mr-1"></i>
                                                     Aprobar
                                                 </button>
                                                 <button
-                                                    onclick="rechazarArticulo({{ $solicitud->idSolicitudCompra }}, {{ $detalle->idSolicitudCompraDetalle }})"
+                                                    onclick="abrirModalRechazar(
+                                {{ $solicitud->idSolicitudCompra }}, 
+                                {{ $detalle->idSolicitudCompraDetalle }},
+                                '{{ $detalle->descripcion_producto }}'
+                            )"
                                                     class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors">
                                                     <i class="fas fa-times mr-1"></i>
                                                     Rechazar
@@ -1094,10 +1104,388 @@
             </div>
         @endif
     </div>
+    <div x-data="modalAprobacion()" x-cloak>
+        <!-- Overlay -->
+        <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
 
+            <!-- Modal -->
+            <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95" @click.away="close"
+                class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+
+                <!-- Header -->
+                <div class="px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-check-circle text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Aprobar Producto</h3>
+                                <p class="text-sm text-white">Complete los detalles de aprobación</p>
+                            </div>
+                        </div>
+                        <button @click="close" class="text-white hover:text-green-100 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-6">
+                    <!-- Información del producto -->
+                    <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Producto seleccionado:</h4>
+                        <p class="text-gray-900 font-medium" x-text="productInfo"></p>
+                        <div class="mt-2 text-sm text-gray-600">
+                            <span class="font-medium">Cantidad solicitada:</span>
+                            <span x-text="cantidadSolicitada" class="ml-1"></span>
+                        </div>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form @submit.prevent="aprobarArticuloSubmit">
+                        <!-- Cantidad a aprobar -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-box text-gray-400 mr-1"></i>
+                                Cantidad a aprobar
+                            </label>
+                            <div class="relative">
+                                <input type="number" x-model="cantidadAprobada" :min="0"
+                                    :max="cantidadSolicitada" required
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                    placeholder="Ingrese la cantidad">
+                                <div class="absolute right-3 top-2.5 text-sm text-gray-500">
+                                    / <span x-text="cantidadSolicitada"></span>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-xs text-gray-500">
+                                <span x-text="porcentajeAprobacion" class="font-medium text-green-600"></span>% de la
+                                cantidad solicitada
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-sticky-note text-gray-400 mr-1"></i>
+                                Observaciones (opcional)
+                            </label>
+                            <textarea x-model="observaciones" rows="3"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors resize-none"
+                                placeholder="Agregue comentarios o detalles sobre esta aprobación"></textarea>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                            <button type="button" @click="close"
+                                class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" :disabled="isLoading"
+                                class="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                <template x-if="!isLoading">
+                                    <i class="fas fa-check"></i>
+                                </template>
+                                <template x-if="isLoading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </template>
+                                <span>Aprobar Producto</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal para Rechazar Artículo -->
+    <div x-data="modalRechazo()" x-cloak>
+        <!-- Overlay -->
+        <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+
+            <!-- Modal -->
+            <div x-show="isOpen" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95" @click.away="close"
+                class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+
+                <!-- Header -->
+                <div class="px-6 py-4 bg-gradient-to-r from-red-500 to-red-600">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-times-circle text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Rechazar Producto</h3>
+                                <p class="text-sm text-white">Especifique el motivo del rechazo</p>
+                            </div>
+                        </div>
+                        <button @click="close" class="text-white hover:text-red-100 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido -->
+                <div class="p-6">
+                    <!-- Información del producto -->
+                    <div class="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+                        <h4 class="text-sm font-semibold text-red-700 mb-2">Producto a rechazar:</h4>
+                        <p class="text-gray-900 font-medium" x-text="productInfo"></p>
+                        <div class="mt-2 text-sm text-red-600">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Esta acción no se puede deshacer
+                        </div>
+                    </div>
+
+                    <!-- Formulario -->
+                    <form @submit.prevent="rechazarArticuloSubmit">
+                        <!-- Motivo del rechazo -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-comment-alt text-gray-400 mr-1"></i>
+                                Motivo del rechazo *
+                            </label>
+                            <textarea x-model="motivo" required rows="4"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                                placeholder="Describa el motivo por el cual rechaza este producto..."></textarea>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                            <button type="button" @click="close"
+                                class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg border border-gray-300 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" :disabled="isLoading"
+                                class="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                                <template x-if="!isLoading">
+                                    <i class="fas fa-times"></i>
+                                </template>
+                                <template x-if="isLoading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </template>
+                                <span>Rechazar Producto</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
-        // Funciones existentes para aprobar/rechazar artículos
-        function aprobarArticulo(idSolicitud, idDetalle) {
+        // Almacenar las instancias de los modales
+        let modalAprobacionInstance = null;
+        let modalRechazoInstance = null;
+
+        // Funciones Alpine.js para los modales
+        function modalAprobacion() {
+            return {
+                isOpen: false,
+                isLoading: false,
+                idSolicitud: null,
+                idDetalle: null,
+                productInfo: '',
+                cantidadSolicitada: 0,
+                cantidadAprobada: 0,
+                observaciones: '',
+
+                get porcentajeAprobacion() {
+                    if (this.cantidadSolicitada === 0) return 0;
+                    return Math.round((this.cantidadAprobada / this.cantidadSolicitada) * 100);
+                },
+
+                init() {
+                    // Guardar referencia a esta instancia
+                    modalAprobacionInstance = this;
+                },
+
+                open(idSolicitud, idDetalle, productInfo, cantidadSolicitada) {
+                    this.idSolicitud = idSolicitud;
+                    this.idDetalle = idDetalle;
+                    this.productInfo = productInfo;
+                    this.cantidadSolicitada = parseInt(cantidadSolicitada);
+                    this.cantidadAprobada = this.cantidadSolicitada;
+                    this.observaciones = '';
+                    this.isOpen = true;
+                    document.body.classList.add('modal-open');
+                },
+
+                close() {
+                    this.isOpen = false;
+                    this.isLoading = false;
+                    document.body.classList.remove('modal-open');
+                },
+
+                async aprobarArticuloSubmit() {
+                    if (this.cantidadAprobada < 0 || this.cantidadAprobada > this.cantidadSolicitada) {
+                        toastr.error('La cantidad aprobada debe estar entre 0 y ' + this.cantidadSolicitada);
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    try {
+                        const response = await fetch(
+                            `/solicitudcompra/${this.idSolicitud}/articulo/${this.idDetalle}/aprobar`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    cantidad_aprobada: this.cantidadAprobada,
+                                    observaciones: this.observaciones
+                                })
+                            });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            toastr.success('Producto aprobado correctamente');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error('Error: ' + data.message);
+                            this.isLoading = false;
+                        }
+                    } catch (error) {
+                        toastr.error('Error de conexión: ' + error);
+                        this.isLoading = false;
+                    }
+                }
+            };
+        }
+
+        function modalRechazo() {
+            return {
+                isOpen: false,
+                isLoading: false,
+                idSolicitud: null,
+                idDetalle: null,
+                productInfo: '',
+                motivo: '',
+
+                init() {
+                    // Guardar referencia a esta instancia
+                    modalRechazoInstance = this;
+                },
+
+                open(idSolicitud, idDetalle, productInfo) {
+                    this.idSolicitud = idSolicitud;
+                    this.idDetalle = idDetalle;
+                    this.productInfo = productInfo;
+                    this.motivo = '';
+                    this.isOpen = true;
+                    document.body.classList.add('modal-open');
+                },
+
+                close() {
+                    this.isOpen = false;
+                    this.isLoading = false;
+                    document.body.classList.remove('modal-open');
+                },
+
+                async rechazarArticuloSubmit() {
+                    if (!this.motivo.trim()) {
+                        toastr.error('Por favor, ingrese el motivo del rechazo');
+                        return;
+                    }
+
+                    this.isLoading = true;
+
+                    try {
+                        const response = await fetch(
+                            `/solicitudcompra/${this.idSolicitud}/articulo/${this.idDetalle}/rechazar`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    observaciones: this.motivo
+                                })
+                            });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            toastr.success('Producto rechazado correctamente');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error('Error: ' + data.message);
+                            this.isLoading = false;
+                        }
+                    } catch (error) {
+                        toastr.error('Error de conexión: ' + error);
+                        this.isLoading = false;
+                    }
+                }
+            };
+        }
+
+        // Funciones globales para abrir los modales
+        function abrirModalAprobar(idSolicitud, idDetalle, productInfo, cantidadSolicitada) {
+            // Esperar a que Alpine.js esté listo
+            setTimeout(() => {
+                if (modalAprobacionInstance) {
+                    modalAprobacionInstance.open(idSolicitud, idDetalle, productInfo, cantidadSolicitada);
+                } else {
+                    // Si aún no está disponible, buscar en el DOM
+                    const alpineElement = document.querySelector('[x-data="modalAprobacion()"]');
+                    if (alpineElement && alpineElement.__x) {
+                        modalAprobacionInstance = alpineElement.__x.$data;
+                        modalAprobacionInstance.open(idSolicitud, idDetalle, productInfo, cantidadSolicitada);
+                    } else {
+                        console.error('No se encontró el modal de aprobación');
+                        // Fallback: usar el método antiguo
+                        aprobarArticuloAntiguo(idSolicitud, idDetalle);
+                    }
+                }
+            }, 100);
+        }
+
+        function abrirModalRechazar(idSolicitud, idDetalle, productInfo) {
+            // Esperar a que Alpine.js esté listo
+            setTimeout(() => {
+                if (modalRechazoInstance) {
+                    modalRechazoInstance.open(idSolicitud, idDetalle, productInfo);
+                } else {
+                    // Si aún no está disponible, buscar en el DOM
+                    const alpineElement = document.querySelector('[x-data="modalRechazo()"]');
+                    if (alpineElement && alpineElement.__x) {
+                        modalRechazoInstance = alpineElement.__x.$data;
+                        modalRechazoInstance.open(idSolicitud, idDetalle, productInfo);
+                    } else {
+                        console.error('No se encontró el modal de rechazo');
+                        // Fallback: usar el método antiguo
+                        rechazarArticuloAntiguo(idSolicitud, idDetalle);
+                    }
+                }
+            }, 100);
+        }
+
+        // Funciones de fallback (métodos antiguos)
+        function aprobarArticuloAntiguo(idSolicitud, idDetalle) {
             const cantidadSolicitada = obtenerCantidadSolicitada(idDetalle);
             const cantidad = prompt(`Cantidad a aprobar (solicitada: ${cantidadSolicitada}):`, cantidadSolicitada);
             const observaciones = prompt('Observaciones (opcional):');
@@ -1128,7 +1516,7 @@
             }
         }
 
-        function rechazarArticulo(idSolicitud, idDetalle) {
+        function rechazarArticuloAntiguo(idSolicitud, idDetalle) {
             const observaciones = prompt('Motivo del rechazo:');
 
             if (observaciones !== null && observaciones.trim() !== '') {
@@ -1156,7 +1544,7 @@
             }
         }
 
-        // Nuevas funciones para gestión de estados
+        // Funciones para gestión de estados
         function cambiarEstado(idSolicitud, nuevoEstado) {
             const estadosLabels = {
                 'completada': 'Completada',
@@ -1245,9 +1633,45 @@
             return 0;
         }
 
-        // Mostrar mensaje de carga durante las peticiones
+        // Configuración de toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+
+        // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Sistema de evaluación de compras cargado correctamente');
+
+            // Agregar estilos CSS para Alpine.js
+            if (!document.querySelector('[data-alpine-styles]')) {
+                const style = document.createElement('style');
+                style.setAttribute('data-alpine-styles', '');
+                style.textContent = `
+                [x-cloak] {
+                    display: none !important;
+                }
+                
+                /* Estilos para el input number */
+                input[type="number"]::-webkit-inner-spin-button,
+                input[type="number"]::-webkit-outer-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                
+                input[type="number"] {
+                    -moz-appearance: textfield;
+                }
+                
+                /* Estilos para cuando hay un modal abierto */
+                body.modal-open {
+                    overflow: hidden !important;
+                }
+            `;
+                document.head.appendChild(style);
+            }
         });
     </script>
 
