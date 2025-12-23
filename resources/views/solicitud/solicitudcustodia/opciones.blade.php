@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
 <x-layout.default>
     <div class="container mx-auto px-4 py-6 space-y-6">
         <!-- Notificación para AJAX -->
@@ -305,19 +307,21 @@
                                         <!-- Las opciones se cargarán via JavaScript -->
                                     </select>
                                     @if ($isDisabled)
-                                        <input type="hidden" name="rack_ubicacion_id" id="hidden_rack_ubicacion_id" value="{{ old('rack_ubicacion_id', $custodia->rack_ubicacion_id ?? '') }}">
+                                        <input type="hidden" name="rack_ubicacion_id" id="hidden_rack_ubicacion_id"
+                                            value="{{ old('rack_ubicacion_id', $custodia->rack_ubicacion_id ?? '') }}">
                                     @endif
                                 </div>
-                                @if(\App\Helpers\PermisoHelper::tienePermiso('CARGAR SUGERENCIAS CUSTODIA'))
-                                <!-- Botón con ID específico -->
-                                <button type="button" id="btn-cargar-sugerencias" 
-                                    class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Cargar sugerencias
-                                </button>
-
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('CARGAR SUGERENCIAS CUSTODIA'))
+                                    <!-- Botón con ID específico -->
+                                    <button type="button" id="btn-cargar-sugerencias"
+                                        class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Cargar sugerencias
+                                    </button>
                                 @endif
                             </div>
 
@@ -332,10 +336,10 @@
                                     </svg>
                                     Observaciones de Almacén
                                 </label>
-                               <textarea id="observacion_almacen" name="observacion_almacen" rows="3"
-    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-    placeholder="Detalles específicos sobre la ubicación en rack, condición del equipo, etc."
-    {{ $isDisabled ? 'readonly' : '' }}>{{ old('observacion_almacen', $custodia->observacion_almacen ?? '') }}</textarea>
+                                <textarea id="observacion_almacen" name="observacion_almacen" rows="3"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 {{ $isDisabled ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                                    placeholder="Detalles específicos sobre la ubicación en rack, condición del equipo, etc."
+                                    {{ $isDisabled ? 'readonly' : '' }}>{{ old('observacion_almacen', $custodia->observacion_almacen ?? '') }}</textarea>
                             </div>
                         </div>
 
@@ -466,16 +470,16 @@
                             <!-- Botón para subir fotos -->
                             @if ($custodia->estado !== 'Aprobado')
                                 <div class="mt-4 text-right">
-                                    @if(\App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTOS CUSTODIA'))
-                                    <button type="button" id="btn-subir-fotos" onclick="subirFotos()"
-                                        class="btn btn-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        Subir Fotos
-                                    </button>
+                                    @if (\App\Helpers\PermisoHelper::tienePermiso('SUBIR FOTOS CUSTODIA'))
+                                        <button type="button" id="btn-subir-fotos" onclick="subirFotos()"
+                                            class="btn btn-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            </svg>
+                                            Subir Fotos
+                                        </button>
                                     @endif
                                 </div>
                             @endif
@@ -507,15 +511,15 @@
                             Atras
                         </a>
                         @if (!$isDisabled)
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CAMBIOS CUSTODIA'))
-                            <button type="button" id="btn-guardar" class="btn btn-primary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                                Actualizar cambios
-                            </button>
+                            @if (\App\Helpers\PermisoHelper::tienePermiso('ACTUALIZAR CAMBIOS CUSTODIA'))
+                                <button type="button" id="btn-guardar" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Actualizar cambios
+                                </button>
                             @endif
                         @else
                             <button type="button" class="btn btn-secondary cursor-not-allowed opacity-70" disabled>
@@ -532,409 +536,390 @@
             </form>
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-    <script>
-        // ========== FUNCIONES DE NOTIFICACIÓN ==========
-        function hideNotification() {
-            document.getElementById('ajax-notification').classList.add('hidden');
-        }
+ <script>
+    // ========== FUNCIONES DE UBICACIÓN ==========
+    // Función para cargar sugerencias de ubicaciones
+    function cargarSugerenciasUbicaciones() {
+        const selectUbicacion = document.getElementById('rack_ubicacion_id');
 
-        function showNotification(message, isSuccess = true) {
-            const notification = document.getElementById('ajax-notification');
-            const messageElement = document.getElementById('ajax-message');
+        // Mostrar loading
+        selectUbicacion.innerHTML = '<option value="">Cargando sugerencias...</option>';
 
-            messageElement.textContent = message;
+        fetch(`/custodia/{{ $custodia->id }}/sugerencias-ubicacion`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Limpiar select
+                    selectUbicacion.innerHTML = '<option value="">Seleccionar ubicación en rack</option>';
 
-            if (isSuccess) {
-                notification.classList.remove('bg-red-50', 'border-red-200', 'text-red-800');
-                notification.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
-            } else {
-                notification.classList.remove('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
-                notification.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
-            }
+                    // Agregar opciones
+                    data.sugerencias.forEach(sugerencia => {
+                        const option = document.createElement('option');
+                        option.value = sugerencia.id;
+                        option.textContent =
+                            `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede})`;
+                        option.setAttribute('data-capacidad', sugerencia.espacio_disponible);
+                        selectUbicacion.appendChild(option);
+                    });
 
-            notification.classList.remove('hidden');
-            setTimeout(hideNotification, 5000);
-        }
-
-        // ========== FUNCIONES DE UBICACIÓN ==========
-        // Función para cargar sugerencias de ubicaciones
-        function cargarSugerenciasUbicaciones() {
-            const selectUbicacion = document.getElementById('rack_ubicacion_id');
-            
-            // Mostrar loading
-            selectUbicacion.innerHTML = '<option value="">Cargando sugerencias...</option>';
-            
-            fetch(`/custodia/{{ $custodia->id }}/sugerencias-ubicacion`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Limpiar select
-                        selectUbicacion.innerHTML = '<option value="">Seleccionar ubicación en rack</option>';
-                        
-                        // Agregar opciones
-                        data.sugerencias.forEach(sugerencia => {
-                            const option = document.createElement('option');
-                            option.value = sugerencia.id;
-                            option.textContent = `${sugerencia.codigo} - ${sugerencia.rack_nombre} (${sugerencia.sede})`;
-                            option.setAttribute('data-capacidad', sugerencia.espacio_disponible);
-                            selectUbicacion.appendChild(option);
-                        });
-                        
-                        if (data.sugerencias.length === 0) {
-                            selectUbicacion.innerHTML = '<option value="">No hay ubicaciones disponibles</option>';
-                        }
-                        
-                        // ✅ Después de cargar sugerencias, seleccionar la ubicación actual si existe
-                        cargarUbicacionActual();
-                        
-                    } else {
-                        selectUbicacion.innerHTML = '<option value="">Error cargando sugerencias</option>';
-                        console.error('Error:', data.message);
+                    if (data.sugerencias.length === 0) {
+                        selectUbicacion.innerHTML = '<option value="">No hay ubicaciones disponibles</option>';
                     }
-                })
-                .catch(error => {
-                    console.error('Error cargando sugerencias:', error);
-                    selectUbicacion.innerHTML = '<option value="">Error de conexión</option>';
-                });
-        }
 
-        // Función para cargar ubicación actual via AJAX
-        function cargarUbicacionActual() {
-            const custodiaId = '{{ $custodia->id }}';
-            
-            fetch(`/custodia/${custodiaId}/ubicacion-actual`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.ubicacion_actual) {
-                        mostrarUbicacionActual(data.ubicacion_actual);
-                        seleccionarUbicacionActual(data.ubicacion_actual);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error cargando ubicación actual:', error);
-                });
-        }
+                    // ✅ Después de cargar sugerencias, seleccionar la ubicación actual si existe
+                    cargarUbicacionActual();
 
-        // Función para mostrar la ubicación actual en la interfaz
-        function mostrarUbicacionActual(ubicacion) {
-            console.log('📍 Ubicación actual:', ubicacion);
-            
-            // Crear o actualizar elemento para mostrar ubicación
-            let ubicacionElement = document.getElementById('display-ubicacion-actual');
-            
-            if (!ubicacionElement) {
-                // Crear elemento si no existe
-                ubicacionElement = document.createElement('div');
-                ubicacionElement.id = 'display-ubicacion-actual';
-                ubicacionElement.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg';
-                
-                // Insertar después del select de ubicación
-                const ubicacionSelect = document.getElementById('rack_ubicacion_id');
-                ubicacionSelect.parentNode.appendChild(ubicacionElement);
-            }
-            
-            if (ubicacion) {
-                ubicacionElement.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <div>
-                            <h4 class="font-semibold text-green-800">Ubicación actual en almacén:</h4>
-                            <p class="text-sm text-green-700">
-                                <strong>Rack:</strong> ${ubicacion.rack_nombre} | 
-                                <strong>Código:</strong> ${ubicacion.codigo} | 
-                                <strong>Sede:</strong> ${ubicacion.sede} |
-                                <strong>Cantidad:</strong> ${ubicacion.cantidad}
-                            </p>
-                        </div>
-                    </div>
-                `;
-                ubicacionElement.classList.remove('hidden');
-            } else {
-                ubicacionElement.innerHTML = `
-                    <div class="text-center text-gray-500">
-                        <p>No hay ubicación asignada en almacén</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Función para actualizar el select con la ubicación actual
-        function seleccionarUbicacionActual(ubicacionActual) {
-            if (ubicacionActual && ubicacionActual.idRackUbicacion) {
-                const select = document.getElementById('rack_ubicacion_id');
-                const option = Array.from(select.options).find(opt => 
-                    parseInt(opt.value) === ubicacionActual.idRackUbicacion
-                );
-                
-                if (option) {
-                    select.value = ubicacionActual.idRackUbicacion;
                 } else {
-                    // Si la opción no está en el select, agregarla
-                    const newOption = new Option(
-                        `${ubicacionActual.codigo} - ${ubicacionActual.rack_nombre} (ACTUAL)`,
-                        ubicacionActual.idRackUbicacion,
-                        true,
-                        true
-                    );
-                    select.add(newOption);
+                    selectUbicacion.innerHTML = '<option value="">Error cargando sugerencias</option>';
+                    console.error('Error:', data.message);
                 }
-            }
-        }
-
-        // ========== FUNCIONES DE VALIDACIÓN Y ESTADO ==========
-        function validarFormulario() {
-            const estado = document.getElementById('estado').value;
-            const ubicacion = document.getElementById('ubicacion_actual').value;
-            const errorUbicacion = document.getElementById('error-ubicacion');
-            const errorUbicacionText = document.getElementById('error-ubicacion-text');
-
-            // Limpiar errores anteriores
-            errorUbicacion.classList.add('hidden');
-            errorUbicacionText.textContent = '';
-
-            // Validar que si el estado es Aprobado, la ubicación no esté vacía
-            if (estado === 'Aprobado' && !ubicacion.trim()) {
-                errorUbicacionText.textContent = 'La ubicación es requerida cuando el estado es Aprobado';
-                errorUbicacion.classList.remove('hidden');
-                return false;
-            }
-
-            return true;
-        }
-
-        function actualizarBadgeEstado(estado) {
-            const estadoBadge = document.getElementById('estado-badge');
-            let badgeClass = '';
-
-            switch (estado) {
-                case 'Pendiente':
-                    badgeClass = 'bg-warning text-white';
-                    break;
-                case 'En revisión':
-                    badgeClass = 'bg-secondary text-white';
-                    break;
-                case 'Aprobado':
-                    badgeClass = 'bg-success text-white';
-                    break;
-                default:
-                    badgeClass = 'bg-gray-100 text-white';
-            }
-
-            estadoBadge.className =
-                `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset ${badgeClass}`;
-            estadoBadge.textContent = estado;
-        }
-
-        function toggleCamposPorEstado() {
-            const estado = document.getElementById('estado').value;
-            const camposAprobado = document.getElementById('campos-aprobado');
-            const camposRevision = document.getElementById('campos-revision');
-            const camposFotos = document.getElementById('campos-fotos');
-            const ubicacionInput = document.getElementById('ubicacion_actual');
-            const fileInput = document.getElementById('fotos');
-            const btnSubirFotos = document.getElementById('btn-subir-fotos');
-
-            console.log('Estado actual:', estado);
-
-            // Mostrar/ocultar campos de ubicación
-            if (estado === 'Aprobado') {
-                camposAprobado.classList.remove('hidden');
-                camposRevision.classList.add('hidden');
-                if (ubicacionInput) {
-                    ubicacionInput.setAttribute('readonly', true);
-                    ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-                }
-                
-                // Cargar sugerencias automáticamente cuando el estado es Aprobado
-                setTimeout(() => {
-                    cargarSugerenciasUbicaciones();
-                }, 300);
-            } else if (estado === 'En revisión') {
-                camposRevision.classList.remove('hidden');
-                camposAprobado.classList.add('hidden');
-                if (ubicacionInput) {
-                    ubicacionInput.removeAttribute('readonly');
-                    ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                }
-            } else {
-                camposAprobado.classList.add('hidden');
-                camposRevision.classList.add('hidden');
-                if (ubicacionInput) {
-                    ubicacionInput.removeAttribute('readonly');
-                    ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                }
-            }
-
-            // MOSTRAR CAMPOS DE FOTOS PARA TODOS LOS ESTADOS
-            if (estado === 'Aprobado' || estado === 'En revisión' || estado === 'Pendiente') {
-                console.log('Mostrando sección de fotos para estado:', estado);
-                camposFotos.classList.remove('hidden');
-
-                // Configurar permisos según el estado
-                if (estado === 'Aprobado') {
-                    if (fileInput) {
-                        fileInput.setAttribute('disabled', true);
-                        fileInput.parentElement.classList.add('cursor-not-allowed', 'opacity-50');
-                    }
-                    if (btnSubirFotos) {
-                        btnSubirFotos.style.display = 'none';
-                    }
-                } else {
-                    if (fileInput) {
-                        fileInput.removeAttribute('disabled');
-                        fileInput.parentElement.classList.remove('cursor-not-allowed', 'opacity-50');
-                    }
-                    if (btnSubirFotos) {
-                        btnSubirFotos.style.display = 'block';
-                    }
-                }
-
-                // SIEMPRE cargar galería cuando se muestre la sección
-                console.log('Cargando galería de fotos para estado:', estado);
-                cargarGaleriaFotos();
-            } else {
-                console.log('Ocultando sección de fotos para estado:', estado);
-                camposFotos.classList.add('hidden');
-            }
-        }
-
-        // ========== FUNCIONES DE FOTOS ==========
-        function setupFilePreview() {
-            const fileInput = document.getElementById('fotos');
-            const previewContainer = document.getElementById('preview-fotos');
-
-            fileInput.addEventListener('change', function(e) {
-                renderPreviews();
+            })
+            .catch(error => {
+                console.error('Error cargando sugerencias:', error);
+                selectUbicacion.innerHTML = '<option value="">Error de conexión</option>';
             });
+    }
+
+    // Función para cargar ubicación actual via AJAX
+    function cargarUbicacionActual() {
+        const custodiaId = '{{ $custodia->id }}';
+
+        fetch(`/custodia/${custodiaId}/ubicacion-actual`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.ubicacion_actual) {
+                    mostrarUbicacionActual(data.ubicacion_actual);
+                    seleccionarUbicacionActual(data.ubicacion_actual);
+                }
+            })
+            .catch(error => {
+                console.error('Error cargando ubicación actual:', error);
+            });
+    }
+
+    // Función para mostrar la ubicación actual en la interfaz
+    function mostrarUbicacionActual(ubicacion) {
+        console.log('📍 Ubicación actual:', ubicacion);
+
+        // Crear o actualizar elemento para mostrar ubicación
+        let ubicacionElement = document.getElementById('display-ubicacion-actual');
+
+        if (!ubicacionElement) {
+            // Crear elemento si no existe
+            ubicacionElement = document.createElement('div');
+            ubicacionElement.id = 'display-ubicacion-actual';
+            ubicacionElement.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg';
+
+            // Insertar después del select de ubicación
+            const ubicacionSelect = document.getElementById('rack_ubicacion_id');
+            ubicacionSelect.parentNode.appendChild(ubicacionElement);
         }
 
-        function renderPreviews() {
-            const fileInput = document.getElementById('fotos');
-            const previewContainer = document.getElementById('preview-fotos');
-            const files = Array.from(fileInput.files);
-
-            previewContainer.innerHTML = '';
-
-            if (files.length === 0) {
-                previewContainer.innerHTML = `
-                    <div class="col-span-4 text-center text-gray-500 py-4">
-                        <p class="text-sm">No hay fotos seleccionadas</p>
+        if (ubicacion) {
+            ubicacionElement.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-green-800">Ubicación actual en almacén:</h4>
+                        <p class="text-sm text-green-700">
+                            <strong>Rack:</strong> ${ubicacion.rack_nombre} | 
+                            <strong>Código:</strong> ${ubicacion.codigo} | 
+                            <strong>Sede:</strong> ${ubicacion.sede} |
+                            <strong>Cantidad:</strong> ${ubicacion.cantidad}
+                        </p>
                     </div>
-                `;
-                return;
-            }
-
-            files.forEach((file, index) => {
-                if (!file.type.startsWith('image/')) return;
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.createElement('div');
-                    preview.className = 'relative group bg-white rounded-lg border border-gray-200 p-3';
-                    preview.innerHTML = `
-                        <div class="relative">
-                            <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
-                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                <button type="button" onclick="eliminarPreview(${index})" 
-                                        class="text-white bg-danger rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mt-2">
-                            <p class="text-xs text-gray-700 font-medium truncate" title="${file.name}">
-                                ${file.name}
-                            </p>
-                            <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
-                        </div>
-                    `;
-                    previewContainer.appendChild(preview);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function eliminarPreview(index) {
-            const fileInput = document.getElementById('fotos');
-            const files = Array.from(fileInput.files);
-
-            // Crear nueva lista de archivos excluyendo el índice a eliminar
-            const newFiles = files.filter((_, i) => i !== index);
-
-            // Crear nuevo DataTransfer y agregar los archivos restantes
-            const dt = new DataTransfer();
-            newFiles.forEach(file => dt.items.add(file));
-
-            // Actualizar el input de archivos
-            fileInput.files = dt.files;
-
-            // Volver a renderizar las previsualizaciones
-            renderPreviews();
-
-            // Disparar el evento change para notificar a otros listeners
-            fileInput.dispatchEvent(new Event('change'));
-        }
-
-        function cargarGaleriaFotos() {
-            const custodiaId = '{{ $custodia->id }}';
-            const galeria = document.getElementById('galeria-fotos');
-
-            console.log('🔍 Iniciando carga de galería de fotos...');
-            console.log('📁 Custodia ID:', custodiaId);
-            console.log('🔗 URL:', `/custodia/${custodiaId}/fotos`);
-
-            // Mostrar loading
-            galeria.innerHTML = `
-                <div class="text-center text-gray-500 py-8 col-span-4">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
-                    <p class="text-sm">Cargando fotos...</p>
                 </div>
             `;
+            ubicacionElement.classList.remove('hidden');
+        } else {
+            ubicacionElement.innerHTML = `
+                <div class="text-center text-gray-500">
+                    <p>No hay ubicación asignada en almacén</p>
+                </div>
+            `;
+        }
+    }
 
-            fetch(`/custodia/${custodiaId}/fotos`)
-                .then(response => {
-                    console.log('📡 Respuesta del servidor:', response.status, response.statusText);
-                    if (!response.ok) {
-                        throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('✅ Datos recibidos:', data);
+    // Función para actualizar el select con la ubicación actual
+    function seleccionarUbicacionActual(ubicacionActual) {
+        if (ubicacionActual && ubicacionActual.idRackUbicacion) {
+            const select = document.getElementById('rack_ubicacion_id');
+            const option = Array.from(select.options).find(opt =>
+                parseInt(opt.value) === ubicacionActual.idRackUbicacion
+            );
 
-                    if (data.fotos && data.fotos.length > 0) {
-                        console.log(`🖼️ Se encontraron ${data.fotos.length} fotos`);
+            if (option) {
+                select.value = ubicacionActual.idRackUbicacion;
+            } else {
+                // Si la opción no está en el select, agregarla
+                const newOption = new Option(
+                    `${ubicacionActual.codigo} - ${ubicacionActual.rack_nombre} (ACTUAL)`,
+                    ubicacionActual.idRackUbicacion,
+                    true,
+                    true
+                );
+                select.add(newOption);
+            }
+        }
+    }
 
-                        galeria.innerHTML = data.fotos.map((foto, index) => `
-                            <div class="relative group bg-white rounded-lg border border-gray-200 p-3">
-                                <div class="relative">
-                                    <img src="/custodia/fotos/${foto.id}/imagen?t=${new Date().getTime()}" 
-                                         class="w-full h-24 object-cover rounded-lg"
-                                         alt="${foto.nombre_archivo}"
-                                         loading="lazy"
-                                         onerror="console.error('❌ Error cargando imagen ${foto.id}'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5YzljOWMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5FcnJvciBjYXJnYW5kbyBpbWFnZW48L3RleHQ+PC9zdmc+'"
-                                         onload="console.log('✅ Imagen ${foto.id} cargada correctamente')">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <button type="button" onclick="verFoto(${foto.id})" 
-                                                class="text-white bg-blue-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Ver">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-                                        <button type="button" onclick="descargarFoto(${foto.id})" 
-                                                class="text-white bg-green-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Descargar">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
-                                        </button>
-                                        ${!{{ $isDisabled ? 'true' : 'false' }} ? `
+    // ========== FUNCIONES DE VALIDACIÓN Y ESTADO ==========
+    function validarFormulario() {
+        const estado = document.getElementById('estado').value;
+        const ubicacion = document.getElementById('ubicacion_actual').value;
+        const errorUbicacion = document.getElementById('error-ubicacion');
+        const errorUbicacionText = document.getElementById('error-ubicacion-text');
+
+        // Limpiar errores anteriores
+        errorUbicacion.classList.add('hidden');
+        errorUbicacionText.textContent = '';
+
+        // Validar que si el estado es Aprobado, la ubicación no esté vacía
+        if (estado === 'Aprobado' && !ubicacion.trim()) {
+            errorUbicacionText.textContent = 'La ubicación es requerida cuando el estado es Aprobado';
+            errorUbicacion.classList.remove('hidden');
+            toastr.error('La ubicación es requerida cuando el estado es Aprobado');
+            return false;
+        }
+
+        return true;
+    }
+
+    function actualizarBadgeEstado(estado) {
+        const estadoBadge = document.getElementById('estado-badge');
+        let badgeClass = '';
+
+        switch (estado) {
+            case 'Pendiente':
+                badgeClass = 'bg-warning text-white';
+                break;
+            case 'En revisión':
+                badgeClass = 'bg-secondary text-white';
+                break;
+            case 'Aprobado':
+                badgeClass = 'bg-success text-white';
+                break;
+            default:
+                badgeClass = 'bg-gray-100 text-white';
+        }
+
+        estadoBadge.className =
+            `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset ${badgeClass}`;
+        estadoBadge.textContent = estado;
+    }
+
+    function toggleCamposPorEstado() {
+        const estado = document.getElementById('estado').value;
+        const camposAprobado = document.getElementById('campos-aprobado');
+        const camposRevision = document.getElementById('campos-revision');
+        const camposFotos = document.getElementById('campos-fotos');
+        const ubicacionInput = document.getElementById('ubicacion_actual');
+        const fileInput = document.getElementById('fotos');
+        const btnSubirFotos = document.getElementById('btn-subir-fotos');
+
+        console.log('Estado actual:', estado);
+
+        // Mostrar/ocultar campos de ubicación
+        if (estado === 'Aprobado') {
+            camposAprobado.classList.remove('hidden');
+            camposRevision.classList.add('hidden');
+            if (ubicacionInput) {
+                ubicacionInput.setAttribute('readonly', true);
+                ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+
+            // Cargar sugerencias automáticamente cuando el estado es Aprobado
+            setTimeout(() => {
+                cargarSugerenciasUbicaciones();
+            }, 300);
+        } else if (estado === 'En revisión') {
+            camposRevision.classList.remove('hidden');
+            camposAprobado.classList.add('hidden');
+            if (ubicacionInput) {
+                ubicacionInput.removeAttribute('readonly');
+                ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        } else {
+            camposAprobado.classList.add('hidden');
+            camposRevision.classList.add('hidden');
+            if (ubicacionInput) {
+                ubicacionInput.removeAttribute('readonly');
+                ubicacionInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+
+        // MOSTRAR CAMPOS DE FOTOS PARA TODOS LOS ESTADOS
+        if (estado === 'Aprobado' || estado === 'En revisión' || estado === 'Pendiente') {
+            console.log('Mostrando sección de fotos para estado:', estado);
+            camposFotos.classList.remove('hidden');
+
+            // Configurar permisos según el estado
+            if (estado === 'Aprobado') {
+                if (fileInput) {
+                    fileInput.setAttribute('disabled', true);
+                    fileInput.parentElement.classList.add('cursor-not-allowed', 'opacity-50');
+                }
+                if (btnSubirFotos) {
+                    btnSubirFotos.style.display = 'none';
+                }
+            } else {
+                if (fileInput) {
+                    fileInput.removeAttribute('disabled');
+                    fileInput.parentElement.classList.remove('cursor-not-allowed', 'opacity-50');
+                }
+                if (btnSubirFotos) {
+                    btnSubirFotos.style.display = 'block';
+                }
+            }
+
+            // SIEMPRE cargar galería cuando se muestre la sección
+            console.log('Cargando galería de fotos para estado:', estado);
+            cargarGaleriaFotos();
+        } else {
+            console.log('Ocultando sección de fotos para estado:', estado);
+            camposFotos.classList.add('hidden');
+        }
+    }
+
+    // ========== FUNCIONES DE FOTOS ==========
+    function setupFilePreview() {
+        const fileInput = document.getElementById('fotos');
+        const previewContainer = document.getElementById('preview-fotos');
+
+        fileInput.addEventListener('change', function(e) {
+            renderPreviews();
+        });
+    }
+
+    function renderPreviews() {
+        const fileInput = document.getElementById('fotos');
+        const previewContainer = document.getElementById('preview-fotos');
+        const files = Array.from(fileInput.files);
+
+        previewContainer.innerHTML = '';
+
+        if (files.length === 0) {
+            previewContainer.innerHTML = `
+                <div class="col-span-4 text-center text-gray-500 py-4">
+                    <p class="text-sm">No hay fotos seleccionadas</p>
+                </div>
+            `;
+            return;
+        }
+
+        files.forEach((file, index) => {
+            if (!file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'relative group bg-white rounded-lg border border-gray-200 p-3';
+                preview.innerHTML = `
+                    <div class="relative">
+                        <img src="${e.target.result}" class="w-full h-24 object-cover rounded-lg">
+                        <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <button type="button" onclick="eliminarPreview(${index})" 
+                                    class="text-white bg-danger rounded-full p-2 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-xs text-gray-700 font-medium truncate" title="${file.name}">
+                            ${file.name}
+                        </p>
+                        <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                `;
+                previewContainer.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function eliminarPreview(index) {
+        const fileInput = document.getElementById('fotos');
+        const files = Array.from(fileInput.files);
+
+        // Crear nueva lista de archivos excluyendo el índice a eliminar
+        const newFiles = files.filter((_, i) => i !== index);
+
+        // Crear nuevo DataTransfer y agregar los archivos restantes
+        const dt = new DataTransfer();
+        newFiles.forEach(file => dt.items.add(file));
+
+        // Actualizar el input de archivos
+        fileInput.files = dt.files;
+
+        // Volver a renderizar las previsualizaciones
+        renderPreviews();
+
+        // Disparar el evento change para notificar a otros listeners
+        fileInput.dispatchEvent(new Event('change'));
+    }
+
+    function cargarGaleriaFotos() {
+        const custodiaId = '{{ $custodia->id }}';
+        const galeria = document.getElementById('galeria-fotos');
+
+        console.log('🔍 Iniciando carga de galería de fotos...');
+        console.log('📁 Custodia ID:', custodiaId);
+        console.log('🔗 URL:', `/custodia/${custodiaId}/fotos`);
+
+        // Mostrar loading
+        galeria.innerHTML = `
+            <div class="text-center text-gray-500 py-8 col-span-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+                <p class="text-sm">Cargando fotos...</p>
+            </div>
+        `;
+
+        fetch(`/custodia/${custodiaId}/fotos`)
+            .then(response => {
+                console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('✅ Datos recibidos:', data);
+
+                if (data.fotos && data.fotos.length > 0) {
+                    console.log(`🖼️ Se encontraron ${data.fotos.length} fotos`);
+
+                    galeria.innerHTML = data.fotos.map((foto, index) => `
+                        <div class="relative group bg-white rounded-lg border border-gray-200 p-3">
+                            <div class="relative">
+                                <img src="/custodia/fotos/${foto.id}/imagen?t=${new Date().getTime()}" 
+                                     class="w-full h-24 object-cover rounded-lg"
+                                     alt="${foto.nombre_archivo}"
+                                     loading="lazy"
+                                     onerror="console.error('❌ Error cargando imagen ${foto.id}'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5YzljOWMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5FcnJvciBjYXJnYW5kbyBpbWFnZW48L3RleHQ+PC9zdmc+'"
+                                     onload="console.log('✅ Imagen ${foto.id} cargada correctamente')">
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <button type="button" onclick="verFoto(${foto.id})" 
+                                            class="text-white bg-blue-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Ver">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
+                                    </button>
+                                    <button type="button" onclick="descargarFoto(${foto.id})" 
+                                            class="text-white bg-green-600 rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Descargar">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                    </button>
+                                    ${!{{ $isDisabled ? 'true' : 'false' }} ? `
                                             <button type="button" onclick="eliminarFoto(${foto.id})" 
                                                     class="text-white bg-danger rounded-full p-2 mx-1 transform scale-0 group-hover:scale-100 transition-transform" title="Eliminar">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -942,287 +927,288 @@
                                                 </svg>
                                             </button>
                                         ` : ''}
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <p class="text-xs text-gray-700 font-medium truncate" title="${foto.nombre_archivo}">
-                                        ${foto.nombre_archivo}
-                                    </p>
-                                    <p class="text-xs text-gray-500">${(foto.tamaño_archivo / 1024).toFixed(1)} KB</p>
                                 </div>
                             </div>
-                        `).join('');
-                    } else {
-                        console.log('📭 No se encontraron fotos para esta custodia');
-                        galeria.innerHTML = `
-                            <div class="text-center text-gray-500 py-8 col-span-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                <p class="text-sm font-medium text-gray-600">No hay fotos</p>
-                                <p class="text-xs text-gray-500 mt-1">No se han subido fotos para esta custodia</p>
+                            <div class="mt-2">
+                                <p class="text-xs text-gray-700 font-medium truncate" title="${foto.nombre_archivo}">
+                                    ${foto.nombre_archivo}
+                                </p>
+                                <p class="text-xs text-gray-500">${(foto.tamaño_archivo / 1024).toFixed(1)} KB</p>
                             </div>
-                        `;
-                    }
-                })
-                .catch(error => {
-                    console.error('❌ Error cargando galería:', error);
+                        </div>
+                    `).join('');
+                } else {
+                    console.log('📭 No se encontraron fotos para esta custodia');
                     galeria.innerHTML = `
-                        <div class="text-center text-red-500 py-8 col-span-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        <div class="text-center text-gray-500 py-8 col-span-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                             </svg>
-                            <p class="text-sm font-medium">Error cargando fotos</p>
-                            <p class="text-xs mt-1">${error.message}</p>
-                            <button onclick="cargarGaleriaFotos()" class="mt-2 text-xs bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition-colors">
-                                Reintentar
-                            </button>
+                            <p class="text-sm font-medium text-gray-600">No hay fotos</p>
+                            <p class="text-xs text-gray-500 mt-1">No se han subido fotos para esta custodia</p>
                         </div>
                     `;
-                });
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error cargando galería:', error);
+                galeria.innerHTML = `
+                    <div class="text-center text-red-500 py-8 col-span-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <p class="text-sm font-medium">Error cargando fotos</p>
+                        <p class="text-xs mt-1">${error.message}</p>
+                        <button onclick="cargarGaleriaFotos()" class="mt-2 text-xs bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition-colors">
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+            });
+    }
+
+    function subirFotos() {
+        const fileInput = document.getElementById('fotos');
+        const files = fileInput.files;
+        const btnSubir = document.getElementById('btn-subir-fotos');
+
+        if (files.length === 0) {
+            toastr.warning('Selecciona al menos una foto');
+            return;
         }
 
-        function subirFotos() {
-            const fileInput = document.getElementById('fotos');
-            const files = fileInput.files;
-            const btnSubir = document.getElementById('btn-subir-fotos');
+        const formData = new FormData();
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
 
-            if (files.length === 0) {
-                showNotification('Selecciona al menos una foto', false);
-                return;
-            }
+        for (let i = 0; i < files.length; i++) {
+            formData.append('fotos[]', files[i]);
+        }
 
-            const formData = new FormData();
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+        // Mostrar loader
+        const originalText = btnSubir.innerHTML;
+        btnSubir.innerHTML = '<span>Subiendo...</span>';
+        btnSubir.disabled = true;
 
-            for (let i = 0; i < files.length; i++) {
-                formData.append('fotos[]', files[i]);
-            }
+        fetch(`/custodia/{{ $custodia->id }}/fotos`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success('Fotos subidas correctamente');
+                    fileInput.value = ''; // Limpiar input
+                    document.getElementById('preview-fotos').innerHTML = ''; // Limpiar preview
+                    cargarGaleriaFotos(); // Recargar galería
+                } else {
+                    toastr.error(data.message || 'Error al subir fotos');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Error de conexión al subir fotos');
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnSubir.innerHTML = originalText;
+                btnSubir.disabled = false;
+            });
+    }
 
-            // Mostrar loader
-            const originalText = btnSubir.innerHTML;
-            btnSubir.innerHTML = '<span>Subiendo...</span>';
-            btnSubir.disabled = true;
+    function verFoto(idFoto) {
+        window.open(`/custodia/fotos/${idFoto}/imagen`, '_blank');
+    }
 
-            fetch(`/custodia/{{ $custodia->id }}/fotos`, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Fotos subidas correctamente', true);
-                        fileInput.value = ''; // Limpiar input
-                        document.getElementById('preview-fotos').innerHTML = ''; // Limpiar preview
-                        cargarGaleriaFotos(); // Recargar galería
+    function descargarFoto(idFoto) {
+        window.open(`/custodia/fotos/${idFoto}/descargar`, '_blank');
+    }
+
+    function verificarIntegridad(idFoto) {
+        fetch(`/custodia/fotos/${idFoto}/verificar`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.integro) {
+                        toastr.success('✅ La foto está íntegra y no ha sido modificada');
                     } else {
-                        showNotification(data.message || 'Error al subir fotos', false);
+                        toastr.error('❌ La foto ha sido modificada o está corrupta');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error de conexión al subir fotos', false);
-                })
-                .finally(() => {
-                    // Restaurar botón
-                    btnSubir.innerHTML = originalText;
-                    btnSubir.disabled = false;
-                });
+                } else {
+                    toastr.error(data.message || 'Error al verificar integridad');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Error de conexión al verificar integridad');
+            });
+    }
+
+    function eliminarFoto(idFoto) {
+        if (!confirm('¿Estás seguro de eliminar esta foto?')) return;
+
+        fetch(`/custodia/fotos/${idFoto}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    toastr.success('Foto eliminada correctamente');
+                    cargarGaleriaFotos();
+                } else {
+                    toastr.error(data.message || 'Error al eliminar foto');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                toastr.error('Error de conexión');
+            });
+    }
+
+    // ========== INICIALIZACIÓN ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Página cargada. Estado inicial:', '{{ $custodia->estado }}');
+
+        // ✅ CARGAR UBICACIÓN ACTUAL AL INICIAR SI EL ESTADO ES APROBADO
+        if (document.getElementById('estado').value === 'Aprobado') {
+            setTimeout(() => {
+                cargarUbicacionActual();
+            }, 500);
         }
 
-        function verFoto(idFoto) {
-            window.open(`/custodia/fotos/${idFoto}/imagen`, '_blank');
-        }
+        @if (!$isDisabled)
+            const btnGuardar = document.getElementById('btn-guardar');
+            const estadoSelect = document.getElementById('estado');
 
-        function descargarFoto(idFoto) {
-            window.open(`/custodia/fotos/${idFoto}/descargar`, '_blank');
-        }
+            // Inicializar visibilidad de campos según el estado actual
+            toggleCamposPorEstado();
 
-        function verificarIntegridad(idFoto) {
-            fetch(`/custodia/fotos/${idFoto}/verificar`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        if (data.integro) {
-                            showNotification('✅ La foto está íntegra y no ha sido modificada', true);
-                        } else {
-                            showNotification('❌ La foto ha sido modificada o está corrupta', false);
-                        }
-                    } else {
-                        showNotification(data.message || 'Error al verificar integridad', false);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error de conexión al verificar integridad', false);
-                });
-        }
-
-        function eliminarFoto(idFoto) {
-            if (!confirm('¿Estás seguro de eliminar esta foto?')) return;
-
-            fetch(`/custodia/fotos/${idFoto}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Foto eliminada correctamente', true);
-                        cargarGaleriaFotos();
-                    } else {
-                        showNotification(data.message || 'Error al eliminar foto', false);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error de conexión', false);
-                });
-        }
-
-        // ========== INICIALIZACIÓN ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Página cargada. Estado inicial:', '{{ $custodia->estado }}');
-
-            // ✅ CARGAR UBICACIÓN ACTUAL AL INICIAR SI EL ESTADO ES APROBADO
-            if (document.getElementById('estado').value === 'Aprobado') {
-                setTimeout(() => {
-                    cargarUbicacionActual();
-                }, 500);
-            }
-
-            @if (!$isDisabled)
-                const btnGuardar = document.getElementById('btn-guardar');
-                const estadoSelect = document.getElementById('estado');
-
-                // Inicializar visibilidad de campos según el estado actual
+            // En el evento change del estado
+            estadoSelect.addEventListener('change', function() {
                 toggleCamposPorEstado();
+            });
 
-                // En el evento change del estado
-                estadoSelect.addEventListener('change', function() {
-                    toggleCamposPorEstado();
-                });
+            // Inicializar preview de fotos
+            setupFilePreview();
 
-                // Inicializar preview de fotos
-                setupFilePreview();
-
-                // Cargar galería de fotos existentes
-                cargarGaleriaFotos();
-
-                // Manejar clic en guardar
-                btnGuardar.addEventListener('click', function() {
-                    if (!validarFormulario()) {
-                        return;
-                    }
-
-                    // Mostrar loader en el botón
-                    const originalText = btnGuardar.innerHTML;
-                    btnGuardar.innerHTML = '<span>Guardando...</span>';
-                    btnGuardar.disabled = true;
-
-                    // Recoger datos del formulario
-                    const formData = new FormData();
-                    formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-                    formData.append('_method', 'PUT');
-                    formData.append('estado', document.getElementById('estado').value);
-                    formData.append('ubicacion_actual', document.getElementById('ubicacion_actual').value);
-                    formData.append('observaciones', document.getElementById('observaciones').value);
-
-                    // Agregar campos adicionales si el estado es Aprobado
-                    if (document.getElementById('estado').value === 'Aprobado') {
-                        let rackUbicacionId;
-                        
-                        if ({{ $isDisabled ? 'true' : 'false' }}) {
-                            // Si está deshabilitado, usar el campo oculto
-                            rackUbicacionId = document.getElementById('hidden_rack_ubicacion_id').value;
-                        } else {
-                            // Si no está deshabilitado, usar el select normal
-                            rackUbicacionId = document.getElementById('rack_ubicacion_id').value;
-                        }
-                        
-                        formData.append('rack_ubicacion_id', rackUbicacionId);
-                        formData.append('observacion_almacen', document.getElementById('observacion_almacen').value);
-                        formData.append('cantidad', document.querySelector('input[name="cantidad"]').value);
-                    }
-
-                    // Enviar solicitud AJAX
-                    fetch("{{ route('solicitudcustodia.update', $custodia->id) }}", {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Error en la respuesta del servidor');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                showNotification(data.message || 'Cambios guardados correctamente', true);
-
-                                // Actualizar el badge de estado
-                                actualizarBadgeEstado(data.estado_actualizado);
-
-                                // Si el estado cambió a Aprobado, actualizar la interfaz y recargar
-                                if (data.estado_actualizado === 'Aprobado') {
-                                    const ubicacionInput = document.getElementById('ubicacion_actual');
-                                    ubicacionInput.setAttribute('readonly', true);
-                                    ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-
-                                    // Recargar la página después de un breve delay para mostrar la notificación
-                                    setTimeout(() => {
-                                        // ✅ Cargar ubicación actual si no venía en la respuesta
-                                        if (!data.ubicacion_actual) {
-                                            cargarUbicacionActual();
-                                        }
-                                        window.location.reload();
-                                    }, 1500);
-                                } else {
-                                    // Si no es Aprobado, solo mostrar el mensaje de éxito
-                                    console.log('Cambios guardados pero no es necesario recargar');
-                                }
-                            } else {
-                                let errorMessage = data.message || 'Error al guardar los cambios';
-
-                                // Mostrar errores de validación si existen
-                                if (data.errors) {
-                                    errorMessage = Object.values(data.errors).join(', ');
-                                }
-
-                                showNotification(errorMessage, false);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            showNotification('Error de conexión: ' + error.message, false);
-                        })
-                        .finally(() => {
-                            // Restaurar botón
-                            btnGuardar.innerHTML = originalText;
-                            btnGuardar.disabled = false;
-                        });
-                });
-            @endif
-        });
-
-        // Agregar evento al botón de cargar sugerencias
-        document.getElementById('btn-cargar-sugerencias').addEventListener('click', function() {
-            cargarSugerenciasUbicaciones();
-        });
-
-        // Cargar inmediatamente cuando el DOM esté listo
-        setTimeout(() => {
+            // Cargar galería de fotos existentes
             cargarGaleriaFotos();
-        }, 100);
-    </script>
+
+            // Manejar clic en guardar
+            btnGuardar.addEventListener('click', function() {
+                if (!validarFormulario()) {
+                    return;
+                }
+
+                // Mostrar loader en el botón
+                const originalText = btnGuardar.innerHTML;
+                btnGuardar.innerHTML = '<span>Guardando...</span>';
+                btnGuardar.disabled = true;
+
+                // Recoger datos del formulario
+                const formData = new FormData();
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+                formData.append('_method', 'PUT');
+                formData.append('estado', document.getElementById('estado').value);
+                formData.append('ubicacion_actual', document.getElementById('ubicacion_actual').value);
+                formData.append('observaciones', document.getElementById('observaciones').value);
+
+                // Agregar campos adicionales si el estado es Aprobado
+                if (document.getElementById('estado').value === 'Aprobado') {
+                    let rackUbicacionId;
+
+                    if ({{ $isDisabled ? 'true' : 'false' }}) {
+                        // Si está deshabilitado, usar el campo oculto
+                        rackUbicacionId = document.getElementById('hidden_rack_ubicacion_id').value;
+                    } else {
+                        // Si no está deshabilitado, usar el select normal
+                        rackUbicacionId = document.getElementById('rack_ubicacion_id').value;
+                    }
+
+                    formData.append('rack_ubicacion_id', rackUbicacionId);
+                    formData.append('observacion_almacen', document.getElementById(
+                        'observacion_almacen').value);
+                    formData.append('cantidad', document.querySelector('input[name="cantidad"]').value);
+                }
+
+                // Enviar solicitud AJAX
+                fetch("{{ route('solicitudcustodia.update', $custodia->id) }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success(data.message || 'Cambios guardados correctamente');
+
+                            // Actualizar el badge de estado
+                            actualizarBadgeEstado(data.estado_actualizado);
+
+                            // Si el estado cambió a Aprobado, actualizar la interfaz y recargar
+                            if (data.estado_actualizado === 'Aprobado') {
+                                const ubicacionInput = document.getElementById('ubicacion_actual');
+                                ubicacionInput.setAttribute('readonly', true);
+                                ubicacionInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+
+                                // Recargar la página después de un breve delay para mostrar la notificación
+                                setTimeout(() => {
+                                    // ✅ Cargar ubicación actual si no venía en la respuesta
+                                    if (!data.ubicacion_actual) {
+                                        cargarUbicacionActual();
+                                    }
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                // Si no es Aprobado, solo mostrar el mensaje de éxito
+                                console.log('Cambios guardados pero no es necesario recargar');
+                            }
+                        } else {
+                            let errorMessage = data.message || 'Error al guardar los cambios';
+
+                            // Mostrar errores de validación si existen
+                            if (data.errors) {
+                                errorMessage = Object.values(data.errors).join(', ');
+                            }
+
+                            toastr.error(errorMessage);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('Error de conexión: ' + error.message);
+                    })
+                    .finally(() => {
+                        // Restaurar botón
+                        btnGuardar.innerHTML = originalText;
+                        btnGuardar.disabled = false;
+                    });
+            });
+        @endif
+    });
+
+    // Agregar evento al botón de cargar sugerencias
+    document.getElementById('btn-cargar-sugerencias').addEventListener('click', function() {
+        cargarSugerenciasUbicaciones();
+    });
+
+    // Cargar inmediatamente cuando el DOM esté listo
+    setTimeout(() => {
+        cargarGaleriaFotos();
+    }, 100);
+</script>
 </x-layout.default>

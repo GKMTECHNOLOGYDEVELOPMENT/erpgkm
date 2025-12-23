@@ -1,9 +1,10 @@
 <x-layout.default>
     <!-- Incluir Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <!-- Incluir Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         /* Select2 Tailwind Integration */
         .select2-container--default .select2-selection--single {
@@ -13,46 +14,46 @@
             background-color: white !important;
             transition: all 0.2s ease !important;
         }
-        
+
         .select2-container--default .select2-selection--single:hover {
             border-color: #d1d5db !important;
         }
-        
+
         .select2-container--default.select2-container--focus .select2-selection--single,
         .select2-container--default.select2-container--open .select2-selection--single {
             border-color: #6366f1 !important;
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
         }
-        
+
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 42px !important;
             padding-left: 14px !important;
             color: #111827 !important;
         }
-        
+
         .select2-container--default .select2-selection--single .select2-selection__placeholder {
             color: #9ca3af !important;
         }
-        
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
             height: 42px !important;
             right: 10px !important;
         }
-        
+
         .select2-dropdown {
             border: 1px solid #e5e7eb !important;
             border-radius: 0.5rem !important;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
         }
-        
+
         .select2-results__option {
             padding: 10px 14px !important;
         }
-        
+
         .select2-container--default .select2-results__option--highlighted[aria-selected] {
             background-color: #6366f1 !important;
         }
-        
+
         /* Cliente Option Styles */
         .cliente-option {
             display: flex;
@@ -60,13 +61,13 @@
             align-items: center;
             gap: 12px;
         }
-        
+
         .cliente-nombre {
             flex: 1;
             font-weight: 500;
             color: #111827;
         }
-        
+
         .cliente-documento {
             background: #f3f4f6;
             padding: 2px 10px;
@@ -76,23 +77,24 @@
             font-weight: 500;
             white-space: nowrap;
         }
-        
+
         /* Animation */
         @keyframes slideInRight {
             from {
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
             }
         }
-        
+
         .alert-slide {
             animation: slideInRight 0.3s ease-out;
         }
-        
+
         /* Loading spinner */
         .spinner {
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -102,9 +104,11 @@
             height: 16px;
             animation: spin 0.8s linear infinite;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 
@@ -116,8 +120,8 @@
                     <h1 class="text-3xl font-bold text-gray-900">Nueva Custodia</h1>
                     <p class="mt-2 text-sm text-gray-600">Registrar nuevo equipo en custodia</p>
                 </div>
-                <a href="{{ route('solicitudcustodia.index') }}" 
-                   class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-warning focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
+                <a href="{{ route('solicitudcustodia.index') }}"
+                    class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white bg-warning focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Volver al Listado
                 </a>
@@ -132,12 +136,13 @@
                 <!-- Sección: Información del Cliente -->
                 <div class="mb-10">
                     <div class="flex items-center mb-6 pb-3 border-b-2 border-gray-100">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg bg-indigo-100 text-indigo-600 mr-3">
                             <i class="fas fa-user-circle text-lg"></i>
                         </div>
                         <h2 class="text-xl font-semibold text-gray-900">Información del Cliente</h2>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Cliente con Select2 -->
                         <div>
@@ -146,8 +151,7 @@
                                 Cliente
                                 <span class="text-red-500 ml-1">*</span>
                             </label>
-                            <select name="idcliente" id="idcliente" required
-                                    class="w-full select2-clientes">
+                            <select name="idcliente" id="idcliente" required class="w-full select2-clientes">
                                 <option value="">Seleccionar cliente...</option>
                             </select>
                             <p class="mt-1 text-xs text-gray-500">Busca por nombre o documento</p>
@@ -162,9 +166,8 @@
                                 <i class="fas fa-ticket-alt text-gray-400 mr-2 w-4"></i>
                                 Número de Ticket
                             </label>
-                            <input type="text" name="numero_ticket" id="numero_ticket" 
-                                value="{{ old('numero_ticket') }}"
-                                placeholder="Ej: TKT-001"
+                            <input type="text" name="numero_ticket" id="numero_ticket"
+                                value="{{ old('numero_ticket') }}" placeholder="Ej: TKT-001"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200">
                             @error('numero_ticket')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -176,12 +179,13 @@
                 <!-- Sección: Información del Equipo -->
                 <div class="mb-10">
                     <div class="flex items-center mb-6 pb-3 border-b-2 border-gray-100">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600 mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600 mr-3">
                             <i class="fas fa-laptop text-lg"></i>
                         </div>
                         <h2 class="text-xl font-semibold text-gray-900">Información del Equipo</h2>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Marca con Select2 -->
                         <div>
@@ -217,8 +221,7 @@
                                 <i class="fas fa-barcode text-gray-400 mr-2 w-4"></i>
                                 Número de Serie
                             </label>
-                            <input type="text" name="serie" id="serie" 
-                                value="{{ old('serie') }}"
+                            <input type="text" name="serie" id="serie" value="{{ old('serie') }}"
                                 placeholder="Ej: SN123456789"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200">
                             @error('serie')
@@ -231,16 +234,18 @@
                 <!-- Sección: Información de la Custodia -->
                 <div class="mb-10">
                     <div class="flex items-center mb-6 pb-3 border-b-2 border-gray-100">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100 text-green-600 mr-3">
+                        <div
+                            class="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100 text-green-600 mr-3">
                             <i class="fas fa-shield-alt text-lg"></i>
                         </div>
                         <h2 class="text-xl font-semibold text-gray-900">Información de la Custodia</h2>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Fecha de Ingreso -->
                         <div>
-                            <label for="fecha_ingreso_custodia" class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <label for="fecha_ingreso_custodia"
+                                class="flex items-center text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-calendar-alt text-gray-400 mr-2 w-4"></i>
                                 Fecha de Ingreso
                                 <span class="text-red-500 ml-1">*</span>
@@ -255,14 +260,14 @@
 
                         <!-- Ubicación Actual -->
                         <div>
-                            <label for="ubicacion_actual" class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <label for="ubicacion_actual"
+                                class="flex items-center text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-map-marker-alt text-gray-400 mr-2 w-4"></i>
                                 Ubicación de Recepción
                                 <span class="text-red-500 ml-1">*</span>
                             </label>
                             <input type="text" name="ubicacion_actual" id="ubicacion_actual" required
-                                value="{{ old('ubicacion_actual') }}"
-                                placeholder="Ej: Recepción Principal"
+                                value="{{ old('ubicacion_actual') }}" placeholder="Ej: Recepción Principal"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200">
                             @error('ubicacion_actual')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -278,9 +283,12 @@
                             </label>
                             <select name="estado" id="estado" required
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200">
-                                <option value="Pendiente" {{ old('estado') == 'Pendiente' ? 'selected' : '' }}>Pendiente</option>
-                                <option value="En revisión" {{ old('estado') == 'En revisión' ? 'selected' : '' }}>En revisión</option>
-                                <option value="Aprobado" {{ old('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado</option>
+                                <option value="Pendiente" {{ old('estado') == 'Pendiente' ? 'selected' : '' }}>
+                                    Pendiente</option>
+                                <option value="En revisión" {{ old('estado') == 'En revisión' ? 'selected' : '' }}>En
+                                    revisión</option>
+                                <option value="Aprobado" {{ old('estado') == 'Aprobado' ? 'selected' : '' }}>Aprobado
+                                </option>
                             </select>
                             @error('estado')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -305,18 +313,18 @@
 
                 <!-- Botones de Acción -->
                 <div class="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-gray-200">
-                    <a href="{{ route('solicitudcustodia.index') }}" 
-                       class="inline-flex justify-center items-center px-6 py-3 rounded-lg text-sm font-medium text-white bg-danger focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
+                    <a href="{{ route('solicitudcustodia.index') }}"
+                        class="inline-flex justify-center items-center px-6 py-3 rounded-lg text-sm font-medium text-white bg-danger focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200">
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </a>
-                    @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CUSTODIA'))
-                    <button type="submit" id="submitBtn"
+                    @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR CUSTODIA'))
+                        <button type="submit" id="submitBtn"
                             class="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 shadow-sm">
-                        <i id="submitIcon" class="fas fa-save mr-2"></i>
-                        <span id="submitText">Guardar Custodia</span>
-                        <div id="submitSpinner" class="hidden ml-2 spinner"></div>
-                    </button>
+                            <i id="submitIcon" class="fas fa-save mr-2"></i>
+                            <span id="submitText">Guardar Custodia</span>
+                            <div id="submitSpinner" class="hidden ml-2 spinner"></div>
+                        </button>
                     @endif
                 </div>
             </form>
@@ -335,15 +343,35 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
         $(document).ready(function() {
+            // Configurar Toastr
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
             // URLs para las peticiones AJAX
             const urls = {
-                clientes: '{{ route("api.clientescustodia") }}',
-                marcas: '{{ route("api.marcascustodia") }}',
-                modelos: '{{ route("api.modeloscustodia") }}',
-                store: '{{ route("solicitudcustodia.store") }}'
+                clientes: '{{ route('api.clientescustodia') }}',
+                marcas: '{{ route('api.marcascustodia') }}',
+                modelos: '{{ route('api.modeloscustodia') }}',
+                store: '{{ route('solicitudcustodia.store') }}'
             };
 
             // Configuración base para Select2
@@ -362,23 +390,23 @@
                     url: urls.clientes,
                     dataType: 'json',
                     delay: 300,
-                    data: function (params) {
+                    data: function(params) {
                         return {
                             search: params.term,
                             page: params.page || 1
                         };
                     },
-                    processResults: function (data, params) {
+                    processResults: function(data, params) {
                         console.log('Datos recibidos:', data); // Para debug
-                        
+
                         // Asegurar que estamos usando la estructura correcta
                         let results = data.results || data.data || data;
-                        
+
                         return {
                             results: results,
                             pagination: {
-                                more: (data.pagination && data.pagination.more) || 
-                                      (params.page * 30) < 1000
+                                more: (data.pagination && data.pagination.more) ||
+                                    (params.page * 30) < 1000
                             }
                         };
                     },
@@ -396,20 +424,20 @@
                     url: urls.marcas,
                     dataType: 'json',
                     delay: 300,
-                    data: function (params) {
+                    data: function(params) {
                         return {
                             search: params.term,
                             page: params.page || 1
                         };
                     },
-                    processResults: function (data, params) {
+                    processResults: function(data, params) {
                         let results = data.results || data.data || data;
-                        
+
                         return {
                             results: results,
                             pagination: {
-                                more: (data.pagination && data.pagination.more) || 
-                                      (params.page * 30) < 1000
+                                more: (data.pagination && data.pagination.more) ||
+                                    (params.page * 30) < 1000
                             }
                         };
                     },
@@ -425,20 +453,20 @@
                     url: urls.modelos,
                     dataType: 'json',
                     delay: 300,
-                    data: function (params) {
+                    data: function(params) {
                         return {
                             search: params.term,
                             page: params.page || 1
                         };
                     },
-                    processResults: function (data, params) {
+                    processResults: function(data, params) {
                         let results = data.results || data.data || data;
-                        
+
                         return {
                             results: results,
                             pagination: {
-                                more: (data.pagination && data.pagination.more) || 
-                                      (params.page * 30) < 1000
+                                more: (data.pagination && data.pagination.more) ||
+                                    (params.page * 30) < 1000
                             }
                         };
                     },
@@ -451,18 +479,18 @@
                 if (cliente.loading) {
                     return 'Buscando...';
                 }
-                
+
                 if (!cliente.id) {
                     return cliente.text;
                 }
-                
+
                 const nombre = cliente.nombre || cliente.text || '';
                 const documento = cliente.documento || '';
-                
+
                 return $(
                     '<div class="cliente-option">' +
-                        '<span class="cliente-nombre">' + nombre.trim() + '</span>' +
-                        (documento ? '<span class="cliente-documento">' + documento + '</span>' : '') +
+                    '<span class="cliente-nombre">' + nombre.trim() + '</span>' +
+                    (documento ? '<span class="cliente-documento">' + documento + '</span>' : '') +
                     '</div>'
                 );
             }
@@ -471,50 +499,9 @@
                 if (!cliente.id) {
                     return cliente.text;
                 }
-                
+
                 const nombre = cliente.nombre || cliente.text || '';
                 return nombre.trim();
-            }
-
-            // Función para mostrar alertas
-            function showAlert(message, type = 'success') {
-                const icons = {
-                    success: 'fa-check-circle',
-                    error: 'fa-exclamation-circle',
-                    warning: 'fa-exclamation-triangle',
-                    info: 'fa-info-circle'
-                };
-
-                const colors = {
-                    success: 'bg-green-500',
-                    error: 'bg-red-500',
-                    warning: 'bg-yellow-500',
-                    info: 'bg-blue-500'
-                };
-
-                const alert = $(`
-                    <div class="alert-slide ${colors[type]} text-white px-6 py-4 rounded-lg shadow-lg">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <i class="fas ${icons[type]} mr-3 text-xl"></i>
-                                <span class="font-medium">${message}</span>
-                            </div>
-                            <button class="ml-4 text-white hover:text-gray-200 transition-colors close-alert">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `);
-                
-                $('#alertContainer').append(alert);
-                
-                alert.find('.close-alert').on('click', function() {
-                    alert.fadeOut(300, function() { $(this).remove(); });
-                });
-                
-                setTimeout(() => {
-                    alert.fadeOut(300, function() { $(this).remove(); });
-                }, 5000);
             }
 
             // Manejar el envío del formulario
@@ -524,7 +511,7 @@
                 // Validar que se haya seleccionado un cliente
                 const clienteId = $('#idcliente').val();
                 if (!clienteId) {
-                    showAlert('Por favor seleccione un cliente', 'error');
+                    toastr.error('Por favor seleccione un cliente', 'Validación');
                     $('#idcliente').focus();
                     return;
                 }
@@ -532,7 +519,7 @@
                 // Validar ubicación
                 const ubicacion = $('#ubicacion_actual').val().trim();
                 if (!ubicacion) {
-                    showAlert('Por favor ingrese la ubicación de recepción', 'error');
+                    toastr.error('Por favor ingrese la ubicación de recepción', 'Validación');
                     $('#ubicacion_actual').focus();
                     return;
                 }
@@ -550,7 +537,7 @@
 
                 try {
                     const formData = new FormData(this);
-                    
+
                     const response = await fetch(urls.store, {
                         method: 'POST',
                         headers: {
@@ -563,21 +550,23 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        showAlert('¡Custodia creada exitosamente!', 'success');
+                        toastr.success('¡Custodia creada exitosamente!', 'Éxito');
                         this.reset();
                         $('#idcliente, #idMarca, #idModelo').val(null).trigger('change');
-                        
+
                         // Redirigir después de 2 segundos
                         setTimeout(() => {
-                            window.location.href = '{{ route("solicitudcustodia.index") }}';
+                            window.location.href = '{{ route('solicitudcustodia.index') }}';
                         }, 2000);
                     } else {
-                        throw new Error(data.message || 'Error al crear la custodia');
+                        const errorMsg = data.message || 'Error al crear la custodia';
+                        toastr.error(errorMsg, 'Error del Servidor');
                     }
 
                 } catch (error) {
                     console.error('Error:', error);
-                    showAlert(error.message || 'Error al guardar la custodia. Por favor intente nuevamente.', 'error');
+                    toastr.error('Error al guardar la custodia. Por favor intente nuevamente.',
+                        'Error de Conexión');
                 } finally {
                     // Restaurar botón
                     $submitBtn.prop('disabled', false).removeClass('opacity-75 cursor-not-allowed');

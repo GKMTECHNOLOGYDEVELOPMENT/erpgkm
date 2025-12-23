@@ -1,6 +1,7 @@
 <x-layout.default>
-    <!-- Agregar CDN de Select2 -->
+    <!-- Agregar CDN de Select2 y Toastr -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     <style>
         .custom-scrollbar {
             scrollbar-width: thin;
@@ -98,22 +99,6 @@
     </style>
 
     <div class="container mx-auto px-4 py-6">
-        <!-- Notificación AJAX -->
-        <div id="ajax-notification"
-            class="hidden rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-4 py-3 flex items-center gap-3 shadow-sm mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <span id="ajax-message" class="font-medium"></span>
-            <button class="ml-auto text-emerald-600 hover:text-emerald-800" onclick="hideNotification()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
         <!-- Header -->
         <div
             class="bg-gradient-to-r from-green-50 to-emerald-100 rounded-2xl border border-green-200 shadow-lg mb-8 overflow-hidden">
@@ -350,19 +335,19 @@
 
                     <!-- Botón de retiro -->
                     <div class="pt-2">
-                        @if(\App\Helpers\PermisoHelper::tienePermiso('RETIRAR REPUESTO HAVERST CUSTODIA'))
-                        <button type="submit"
-                            class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3 group">
-                            <div
-                                class="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <span class="text-lg">Retirar Repuesto</span>
-                        </button>
+                        @if (\App\Helpers\PermisoHelper::tienePermiso('RETIRAR REPUESTO HAVERST CUSTODIA'))
+                            <button type="submit"
+                                class="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3 group">
+                                <div
+                                    class="p-1 bg-white/20 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <span class="text-lg">Retirar Repuesto</span>
+                            </button>
                         @endif
                     </div>
                 </form>
@@ -501,17 +486,18 @@
 
                                     <!-- Botón de anular -->
                                     <div class="flex justify-end pt-4">
-                                   @if(\App\Helpers\PermisoHelper::tienePermiso('ANULAR RETIRO HAVERTS CUSTODIA'))
-                                    <button type="button" onclick="anularRetiro({{ $retiro->id }})"
-                                            class="btn bg-danger text-white font-medium py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 group">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 group-hover:scale-110 transition-transform"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                            Anular Retiro
-                                        </button>
+                                        @if (\App\Helpers\PermisoHelper::tienePermiso('ANULAR RETIRO HAVERTS CUSTODIA'))
+                                            <button type="button" onclick="anularRetiro({{ $retiro->id }})"
+                                                class="btn bg-danger text-white font-medium py-2.5 px-5 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2 group">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-4 w-4 group-hover:scale-110 transition-transform"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Anular Retiro
+                                            </button>
                                         @endif
                                     </div>
                                 </div>
@@ -538,10 +524,21 @@
         </div>
     </div>
 
-    <!-- Agregar jQuery y Select2 JS -->
+    <!-- Agregar jQuery, Select2 JS y Toastr -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        // Configuración de Toastr
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "5000"
+        };
+
         // Inicializar Select2
         $(document).ready(function() {
             $('#codigo_repuesto').select2({
@@ -578,65 +575,50 @@
             });
         });
 
-        // Ocultar notificación
-        function hideNotification() {
-            const notification = document.getElementById('ajax-notification');
-            if (notification) {
-                notification.classList.add('hidden');
-            }
-        }
-
-        // Mostrar notificación
-        function showNotification(message, isSuccess = true) {
-            const notification = document.getElementById('ajax-notification');
-            const messageElement = document.getElementById('ajax-message');
-
-            if (!notification || !messageElement) return;
-
-            messageElement.textContent = message;
-
-            if (isSuccess) {
-                notification.classList.remove('bg-red-50', 'border-red-200', 'text-red-800');
-                notification.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
-            } else {
-                notification.classList.remove('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
-                notification.classList.add('bg-red-50', 'border-red-200', 'text-red-800');
-            }
-
-            notification.classList.remove('hidden');
-
-            setTimeout(hideNotification, 5000);
-        }
-
         // Anular retiro
         function anularRetiro(idRetiro) {
-            if (!confirm('¿Estás seguro de anular este retiro?')) {
-                return;
-            }
-
-            fetch("{{ route('solicitudcustodia.anular-retiro', '') }}/" + idRetiro, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, true);
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        showNotification(data.message, false);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('Error de conexión', false);
-                });
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Esta acción anulará el retiro y no se puede deshacer",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, anular retiro',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'bg-danger hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-xl',
+                    cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-6 rounded-xl'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("{{ route('solicitudcustodia.anular-retiro', '') }}/" + idRetiro, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                toastr.success(data.message);
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                toastr.error(data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            toastr.error('Error de conexión');
+                        });
+                }
+            });
         }
 
         // Esperar a que el DOM esté completamente cargado
@@ -657,17 +639,17 @@
                     const idArticulo = document.getElementById('id_articulo').value;
 
                     if (!codigoRepuesto) {
-                        showNotification('Por favor selecciona un código de repuesto', false);
+                        toastr.warning('Por favor selecciona un código de repuesto');
                         return;
                     }
 
                     if (!idArticulo) {
-                        showNotification('Error: No se pudo obtener el ID del artículo', false);
+                        toastr.error('Error: No se pudo obtener el ID del artículo');
                         return;
                     }
 
                     if (!cantidad || cantidad < 1) {
-                        showNotification('Por favor ingresa una cantidad válida', false);
+                        toastr.warning('Por favor ingresa una cantidad válida');
                         return;
                     }
 
@@ -691,7 +673,7 @@
                         })
                         .then(data => {
                             if (data.success) {
-                                showNotification(data.message, true);
+                                toastr.success(data.message);
                                 this.reset();
                                 // Limpiar también el campo oculto
                                 document.getElementById('id_articulo').value = '';
@@ -703,12 +685,12 @@
                                     window.location.reload();
                                 }, 1500);
                             } else {
-                                showNotification(data.message, false);
+                                toastr.error(data.message);
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            showNotification('Error de conexión: ' + error.message, false);
+                            toastr.error('Error de conexión: ' + error.message);
                         })
                         .finally(() => {
                             btnSubmit.innerHTML = originalText;
