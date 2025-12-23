@@ -1,4 +1,5 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
@@ -1289,6 +1290,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Almacenar las instancias de los modales
         let modalAprobacionInstance = null;
@@ -1550,62 +1552,208 @@
                 'completada': 'Completada',
                 'presupuesto_aprobado': 'Presupuesto Aprobado',
                 'pagado': 'Pagado',
-                'finalizado': 'Finalizado'
+                'finalizado': 'Finalizado',
+                'en_proceso': 'En Proceso',
+                'pendiente': 'Pendiente',
+                'cancelada': 'Cancelada',
+                'rechazada': 'Rechazada'
             };
 
             const label = estadosLabels[nuevoEstado] || nuevoEstado;
 
-            if (confirm(`¿Está seguro de que desea cambiar el estado a "${label}"?`)) {
-                fetch(`/solicitudcompra/${idSolicitud}/cambiar-estado`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            estado: nuevoEstado
+            // Mapear iconos según el estado
+            const estadoIconos = {
+                'completada': 'fas fa-check-circle',
+                'presupuesto_aprobado': 'fas fa-file-invoice-dollar',
+                'pagado': 'fas fa-credit-card',
+                'finalizado': 'fas fa-flag-checkered',
+                'en_proceso': 'fas fa-sync-alt',
+                'pendiente': 'fas fa-clock',
+                'cancelada': 'fas fa-times-circle',
+                'rechazada': 'fas fa-ban'
+            };
+
+            const icono = estadoIconos[nuevoEstado] || 'fas fa-exchange-alt';
+
+            // Mapear colores según el estado
+            const estadoColores = {
+                'completada': '#10b981',
+                'presupuesto_aprobado': '#f59e0b',
+                'pagado': '#3b82f6',
+                'finalizado': '#6b7280',
+                'en_proceso': '#8b5cf6',
+                'pendiente': '#f97316',
+                'cancelada': '#ef4444',
+                'rechazada': '#dc2626'
+            };
+
+            const color = estadoColores[nuevoEstado] || '#3b82f6';
+
+            Swal.fire({
+                title: 'Cambiar Estado',
+                html: `
+            <div class="text-center">
+                <div class="mb-4">
+                    <i class="${icono} text-4xl" style="color: ${color};"></i>
+                </div>
+                <p class="text-gray-700 mb-2">¿Está seguro de que desea cambiar el estado a:</p>
+                <div class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium mb-4" 
+                     style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}50;">
+                    <i class="fas fa-circle text-xs mr-2" style="color: ${color};"></i>
+                    <strong>${label}</strong>
+                </div>
+                <p class="text-sm text-gray-500">Esta acción actualizará el estado de toda la solicitud.</p>
+            </div>
+        `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-exchange-alt mr-2"></i>Sí, cambiar estado',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancelar',
+                confirmButtonColor: '#3b82f6', // Color primario
+                cancelButtonColor: '#ef4444', // Color danger
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-xl',
+                    title: 'text-xl font-semibold text-gray-900',
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-danger',
+                    actions: 'gap-3'
+                },
+                buttonsStyling: false,
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return fetch(`/solicitudcompra/${idSolicitud}/cambiar-estado`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                estado: nuevoEstado
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error de conexión: ' + error);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error en la respuesta del servidor');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error(data.message || 'Error al cambiar el estado');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Error: ${error.message}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    toastr.success('Estado cambiado exitosamente', '¡Éxito!', {
+                        timeOut: 3000,
+                        progressBar: true,
+                        closeButton: true,
+                        positionClass: 'toast-top-right',
+                        showMethod: 'slideDown',
+                        hideMethod: 'slideUp'
                     });
-            }
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }
+            });
         }
 
         function cancelarSolicitud(idSolicitud) {
-            const motivo = prompt('Por favor, ingrese el motivo de la cancelación:');
+            Swal.fire({
+                title: 'Cancelar Solicitud',
+                html: `
+            <div class="text-center">
+                <p class="text-gray-700 mb-2">Por favor, ingrese el motivo de la cancelación:</p>
+                <textarea id="motivo-cancelacion" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                          rows="4"
+                          placeholder="Describa el motivo de la cancelación..."
+                          required></textarea>
+                <p class="text-xs text-gray-500 mt-2 text-left">Mínimo 10 caracteres</p>
+            </div>
+        `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-ban mr-2"></i>Sí, cancelar solicitud',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>No, mantener',
+                confirmButtonColor: '#ef4444', // Color danger
+                cancelButtonColor: '#6b7280', // Color secondary
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-xl',
+                    title: 'text-xl font-semibold text-red-600',
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary',
+                    actions: 'gap-3'
+                },
+                buttonsStyling: false,
+                focusConfirm: false,
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    const motivo = document.getElementById('motivo-cancelacion').value;
 
-            if (motivo !== null && motivo.trim() !== '') {
-                fetch(`/solicitudcompra/${idSolicitud}/cancelar`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            motivo: motivo
+                    if (!motivo.trim()) {
+                        Swal.showValidationMessage('Por favor, ingrese el motivo de la cancelación');
+                        return false;
+                    }
+
+                    if (motivo.length < 10) {
+                        Swal.showValidationMessage('El motivo debe tener al menos 10 caracteres');
+                        return false;
+                    }
+
+                    return fetch(`/solicitudcompra/${idSolicitud}/cancelar`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: JSON.stringify({
+                                motivo: motivo
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error de conexión: ' + error);
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error en la respuesta del servidor');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (!data.success) {
+                                throw new Error(data.message || 'Error al cancelar la solicitud');
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            Swal.showValidationMessage(`Error: ${error.message}`);
+                        });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    toastr.warning('Solicitud cancelada exitosamente', 'Cancelación', {
+                        timeOut: 3000,
+                        progressBar: true,
+                        closeButton: true,
+                        positionClass: 'toast-top-right',
+                        showMethod: 'slideDown',
+                        hideMethod: 'slideUp'
                     });
-            }
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }
+            });
         }
 
         function toggleDetalles(id) {
