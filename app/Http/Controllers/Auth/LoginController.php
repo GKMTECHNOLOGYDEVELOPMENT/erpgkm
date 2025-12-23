@@ -28,36 +28,7 @@ class LoginController extends Controller
 
 
 
-    // public function login(Request $request)
-    // {
-    //     // Validar las credenciales del usuario
-    //     $credentials = $request->validate([
-    //         'email' => 'required|email',
-    //         'password' => 'required',
-    //     ]);
-    
-    //     // Intentar obtener el usuario por correo
-    //     $usuario = Usuario::where('correo', $credentials['email'])->first();
-    
-    //     if (!$usuario) {
-    //         return back()->withErrors([
-    //             'email' => 'El correo electrónico no está registrado.',
-    //         ]);
-    //     }
-    
-    //     // Verificar si la clave es correcta
-    //     if (!Hash::check($credentials['password'], $usuario->clave)) {
-    //         return back()->withErrors([
-    //             'password' => 'La contraseña es incorrecta.',
-    //         ]);
-    //     }
-    
-    //     // Si las credenciales son correctas, intentar autenticar
-    //     Auth::login($usuario);
-    //     $request->session()->regenerate();
-    
-    //     return redirect()->route('index');
-    // }
+  
 
 
     public function login(Request $request)

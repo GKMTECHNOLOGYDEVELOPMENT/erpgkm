@@ -96,44 +96,46 @@
                         <th class="w-1/2 px-4 py-2 border text-center font-bold">Acción</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach ([
-                    'Tipo Operación' => ['table' => 'tipo_operacion', 'data' => $tipoOperacion],
-                    'Tipo Venta' => ['table' => 'tipo_venta', 'data' => $tipoVenta],
-                    'Tipo Visita' => ['table' => 'tipo_visita', 'data' => $tipoVisita],
-                    'Tipo Almacén' => ['table' => 'tipoalmacen', 'data' => $tipoAlmacen],
-                    'Tipo Área' => ['table' => 'tipoarea', 'data' => $tipoArea],
-                    'Tipo Artículos' => ['table' => 'tipoarticulos', 'data' => $tipoArticulos],
-                    'Tipo Documentos' => ['table' => 'tipodocumento', 'data' => $tipoDocumentos],
-                    'Tipo IGV' => ['table' => 'tipoigv', 'data' => $tipoIgv],
-                    'Tipo Mensaje' => ['table' => 'tipomensaje', 'data' => $tipoMensaje],
-                    'Tipo Movimiento' => ['table' => 'tipomovimiento', 'data' => $tipoMovimiento],
-                    'Tipo Pago' => ['table' => 'tipopago', 'data' => $tipoPago],
-                    'Tipo Prioridad' => ['table' => 'tipoprioridad', 'data' => $tipoPrioridad],
-                    'Tipo Servicio' => ['table' => 'tiposervicio', 'data' => $tipoServicio],
-                    'Tipo Solicitud' => ['table' => 'tiposolicitud', 'data' => $tipoSolicitud],
-                    'Tipo Tickets' => ['table' => 'tipotickets', 'data' => $tipoTickets],
-                    'Tipo Trabajo' => ['table' => 'tipotrabajo', 'data' => $tipoTrabajo],
-                    'Tipo Usuario' => ['table' => 'tipousuario', 'data' => $tipoUsuario],
-                    'Tipo Usuario Soporte' => ['table' => 'tipousuariosoporte', 'data' => $tipoUsuarioSoporte],
-                    'Unidad' => ['table' => 'unidad', 'data' => $unidad],
-                    'Moneda' => ['table' => 'monedas', 'data' => $moneda],
-                    'Rol' => ['table' => 'rol', 'data' => $rol],
-                    'Rol Software' => ['table' => 'rol_software', 'data' => $rolSoftware],
-                    'Sexo' => ['table' => 'sexo', 'data' => $sexo],
-                    'Importancia' => ['table' => 'importancia', 'data' => $importancia],
-                    ] as $tipo => $info)
-                    <tr>
-                        <td class="text-center align-middle">{{ $tipo }}</td>
-                        <td class="flex justify-center align-middle">
-                            <button type="button" class="btn btn-primary btn-sm m-1"
-                                @click="openModal('{{ $tipo }}', '{{ $info['table'] }}', {{ json_encode($info['data']) }})">
-                                Configurar
-                            </button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
+            <tbody>
+    @foreach ([
+    'Tipo Operación' => ['table' => 'tipo_operacion', 'data' => $tipoOperacion],
+    'Tipo Venta' => ['table' => 'tipo_venta', 'data' => $tipoVenta],
+    'Tipo Visita' => ['table' => 'tipo_visita', 'data' => $tipoVisita],
+    'Tipo Almacén' => ['table' => 'tipoalmacen', 'data' => $tipoAlmacen],
+    'Tipo Área' => ['table' => 'tipoarea', 'data' => $tipoArea],
+    'Tipo Artículos' => ['table' => 'tipoarticulos', 'data' => $tipoArticulos],
+    'Tipo Documentos' => ['table' => 'tipodocumento', 'data' => $tipoDocumentos],
+    'Tipo IGV' => ['table' => 'tipoigv', 'data' => $tipoIgv],
+    'Tipo Mensaje' => ['table' => 'tipomensaje', 'data' => $tipoMensaje],
+    'Tipo Movimiento' => ['table' => 'tipomovimiento', 'data' => $tipoMovimiento],
+    'Tipo Pago' => ['table' => 'tipopago', 'data' => $tipoPago],
+    'Tipo Prioridad' => ['table' => 'tipoprioridad', 'data' => $tipoPrioridad],
+    'Tipo Servicio' => ['table' => 'tiposervicio', 'data' => $tipoServicio],
+    'Tipo Solicitud' => ['table' => 'tiposolicitud', 'data' => $tipoSolicitud],
+    'Tipo Tickets' => ['table' => 'tipotickets', 'data' => $tipoTickets],
+    'Tipo Trabajo' => ['table' => 'tipotrabajo', 'data' => $tipoTrabajo],
+    'Tipo Usuario' => ['table' => 'tipousuario', 'data' => $tipoUsuario],
+    'Tipo Usuario Soporte' => ['table' => 'tipousuariosoporte', 'data' => $tipoUsuarioSoporte],
+    'Unidad' => ['table' => 'unidad', 'data' => $unidad],
+    'Moneda' => ['table' => 'monedas', 'data' => $moneda],
+    'Rol' => ['table' => 'rol', 'data' => $rol],
+    'Rol Software' => ['table' => 'rol_software', 'data' => $rolSoftware],
+    'Sexo' => ['table' => 'sexo', 'data' => $sexo],
+    'Importancia' => ['table' => 'importancia', 'data' => $importancia],
+    // Agregar fuente de captación aquí
+    'Fuente Captación' => ['table' => 'fuentes_captacion', 'data' => $fuenteCaptacion],
+    ] as $tipo => $info)
+    <tr>
+        <td class="text-center align-middle">{{ $tipo }}</td>
+        <td class="flex justify-center align-middle">
+            <button type="button" class="btn btn-primary btn-sm m-1"
+                @click="openModal('{{ $tipo }}', '{{ $info['table'] }}', {{ json_encode($info['data']) }})">
+                Configurar
+            </button>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
             </table>
         </div>
 

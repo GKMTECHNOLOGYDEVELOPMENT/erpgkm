@@ -78,33 +78,80 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="w-full max-w-[440px] lg:mt-16">
-                        <div class="mb-7">
-                            <h1 class="mb-3 text-2xl font-bold !leading-snug dark:text-white">Restablecer contraseña</h1>
-                            <p>Ingresa tu email para recuperar tu contraseña</p>
-                        </div>
-                        <form class="space-y-5" @submit.prevent="window.location = '/'">
-                            <div>
-                                <label for="Email">Correo Electronico</label>
-                                <div class="relative text-white-dark">
-                                    <input id="Email" type="email" placeholder="Ingresa tu correo electronico" class="form-input pl-10 placeholder:text-white-dark" />
-                                    <span class="absolute left-4 top-1/2 -translate-y-1/2">
-                                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                                            <path opacity="0.5"
-                                                d="M10.65 2.25H7.35C4.23873 2.25 2.6831 2.25 1.71655 3.23851C0.75 4.22703 0.75 5.81802 0.75 9C0.75 12.182 0.75 13.773 1.71655 14.7615C2.6831 15.75 4.23873 15.75 7.35 15.75H10.65C13.7613 15.75 15.3169 15.75 16.2835 14.7615C17.25 13.773 17.25 12.182 17.25 9C17.25 5.81802 17.25 4.22703 16.2835 3.23851C15.3169 2.25 13.7613 2.25 10.65 2.25Z"
-                                                fill="currentColor" />
-                                            <path
-                                                d="M14.3465 6.02574C14.609 5.80698 14.6445 5.41681 14.4257 5.15429C14.207 4.89177 13.8168 4.8563 13.5543 5.07507L11.7732 6.55931C11.0035 7.20072 10.4691 7.6446 10.018 7.93476C9.58125 8.21564 9.28509 8.30993 9.00041 8.30993C8.71572 8.30993 8.41956 8.21564 7.98284 7.93476C7.53168 7.6446 6.9973 7.20072 6.22761 6.55931L4.44652 5.07507C4.184 4.8563 3.79384 4.89177 3.57507 5.15429C3.3563 5.41681 3.39177 5.80698 3.65429 6.02574L5.4664 7.53583C6.19764 8.14522 6.79033 8.63914 7.31343 8.97558C7.85834 9.32604 8.38902 9.54743 9.00041 9.54743C9.6118 9.54743 10.1425 9.32604 10.6874 8.97558C11.2105 8.63914 11.8032 8.14522 12.5344 7.53582L14.3465 6.02574Z"
-                                                fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]">
-                                RECUPERAR
-                            </button>
-                        </form>
-                    </div>
+                      {{-- Actualiza el formulario --}}
+{{-- Asegúrate que el name del input sea 'correo' --}}
+<div class="w-full max-w-[440px] lg:mt-16">
+    @if(session('success'))
+        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+    
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    
+    <div class="mb-7">
+        <h1 class="mb-3 text-2xl font-bold !leading-snug dark:text-white">Restablecer contraseña</h1>
+        <p class="dark:text-white">Ingresa tu email para recuperar tu contraseña</p>
+    </div>
+    
+    {{-- IMPORTANTE: El action debe apuntar a la ruta correcta --}}
+    <form class="space-y-5" method="POST" action="{{ route('password.email') }}">
+        @csrf
+        
+        <div>
+            <label for="email" class="dark:text-white">Correo Electrónico</label>
+            <div class="relative text-white-dark">
+            {{-- IMPORTANTE: name="email" como en login --}}
+            <input id="email" name="email" type="email" 
+                   placeholder="Ingresa tu correo electronico" 
+                   class="form-input pl-10 placeholder:text-white-dark" 
+                   value="{{ old('email') }}" 
+                   required />
+                <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path opacity="0.5"
+                            d="M10.65 2.25H7.35C4.23873 2.25 2.6831 2.25 1.71655 3.23851C0.75 4.22703 0.75 5.81802 0.75 9C0.75 12.182 0.75 13.773 1.71655 14.7615C2.6831 15.75 4.23873 15.75 7.35 15.75H10.65C13.7613 15.75 15.3169 15.75 16.2835 14.7615C17.25 13.773 17.25 12.182 17.25 9C17.25 5.81802 17.25 4.22703 16.2835 3.23851C15.3169 2.25 13.7613 2.25 10.65 2.25Z"
+                            fill="currentColor" />
+                        <path
+                            d="M14.3465 6.02574C14.609 5.80698 14.6445 5.41681 14.4257 5.15429C14.207 4.89177 13.8168 4.8563 13.5543 5.07507L11.7732 6.55931C11.0035 7.20072 10.4691 7.6446 10.018 7.93476C9.58125 8.21564 9.28509 8.30993 9.00041 8.30993C8.71572 8.30993 8.41956 8.21564 7.98284 7.93476C7.53168 7.6446 6.9973 7.20072 6.22761 6.55931L4.44652 5.07507C4.184 4.8563 3.79384 4.89177 3.57507 5.15429C3.3563 5.41681 3.39177 5.80698 3.65429 6.02574L5.4664 7.53583C6.19764 8.14522 6.79033 8.63914 7.31343 8.97558C7.85834 9.32604 8.38902 9.54743 9.00041 9.54743C9.6118 9.54743 10.1425 9.32604 10.6874 8.97558C11.2105 8.63914 11.8032 8.14522 12.5344 7.53582L14.3465 6.02574Z"
+                            fill="currentColor" />
+                    </svg>
+                </span>
+            </div>
+            @error('correo')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        
+        <button type="submit"
+                style="background-color: #8B1E3F; color: white; transition: background-color 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#A6274C'"
+                onmouseout="this.style.backgroundColor='#8B1E3F'"
+                class="w-full rounded-md py-2.5 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FEC8D8]">
+            ENVIAR ENLACE DE RECUPERACIÓN
+        </button>
+    </form>
+    
+    <div class="mt-6 text-center">
+        <a href="{{ route('login') }}" class="text-sm text-[#8B1E3F] hover:underline">
+            ← Volver al inicio de sesión
+        </a>
+    </div>
+</div>
                     <p class="absolute bottom-6 w-full text-center dark:text-white">
                         © <span id="footer-year">2025</span>. Solutions Force. Todos los derechos reservado.
                     </p>

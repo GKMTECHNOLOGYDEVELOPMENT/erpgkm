@@ -26,7 +26,7 @@ use App\Http\Controllers\configuracion\ConfiguracionController;
 use App\Http\Controllers\permisos\PermisosController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\LockscreenController;
-use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Apps\ChatController;
 use App\Http\Controllers\Politicas\PoliticasController;
@@ -84,7 +84,7 @@ use App\Http\Controllers\areacomercial\ObservacionController;
 use App\Http\Controllers\areacomercial\ScrumboarddController;
 use App\Http\Controllers\areacomercial\SeleccionSeguimientoController;
 use App\Http\Controllers\areacomercial\TagController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
+
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\entradasproveedores\EntradasproveedoresController;
 use App\Http\Controllers\GuiaController;
@@ -158,8 +158,30 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::post('/check-email', [AuthController::class, 'checkEmail']);
 // Ruta para la pantalla de bloqueo
 Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->name('auth.lockscreen');
-// Ruta para la pantalla de restablecimiento de contraseña
-Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'show'])->name('auth.password-reset');
+
+
+// 1. RUTA para MOSTRAR el formulario de solicitud de reset (SIN token)
+Route::get('/password/reset', [PasswordResetController::class, 'showPasswordResetForm'])
+     ->name('password.request');
+
+// 2. RUTA para ENVIAR el enlace de reset (POST)
+Route::post('/password/email', [PasswordResetController::class, 'sendResetLink'])
+     ->name('password.email');
+
+// 3. RUTA para MOSTRAR formulario con token (CON token)
+Route::get('/password/reset/{token}', [PasswordResetController::class, 'showResetForm'])
+     ->name('password.reset');
+
+// 4. RUTA para ACTUALIZAR la contraseña (POST con token)
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword'])
+     ->name('password.update');
+
+// Opcional: Puedes mantener tu ruta personalizada si quieres
+Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'showPasswordResetForm'])
+     ->name('auth.password-reset');
+
+
+
 Route::middleware(['auth', 'permiso:VER DASHBOARD ADMINISTRACION'])->group(function () {
     Route::get('/', [AdministracionController::class, 'index'])->name('index');
 });
@@ -1196,8 +1218,7 @@ Route::get('/obtener-productos-retirados', [OrdenesHelpdeskController::class, 'o
 Route::delete('/eliminar-producto/{id}', [OrdenesHelpdeskController::class, 'eliminarProducto']);
 Route::get('/enviar-guia', [GuiaController::class, 'enviar']);
 // Ruta para mostrar el formulario de recuperación de contraseña
-// Route::get('forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-// Route::post('forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
 
 // Route::post('/password/recover', [PasswordRecoveryController::class, 'sendRecoveryLink'])->name('password.recover');
 // Obtener datos del cliente
@@ -1319,13 +1340,8 @@ Route::get('/get-all-marcas', function () {
             ->get()
     );
 });
-Route::get('/password/reset', function () {
-    return view('auth.boxed-password-reset');
-})->name('password.request');
-Route::post('/password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-// Otras rutas necesarias para el reset
-Route::get('/password/reset/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/password/reset', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
+
 Route::get('/emitir', function () {
     broadcast(new MensajeEnviado('Hola bro, WebSocket activo 🔥'))->toOthers();
     return 'Evento enviado X5!';

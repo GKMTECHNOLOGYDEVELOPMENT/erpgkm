@@ -451,10 +451,11 @@ Route::get('/reunion/{reunionId}/participantes', [ScrumboarddController::class, 
 // Ruta para obtener los documentos
 Route::get('/documentos', function() {
     try {
-        $documentos = DB::table('documento')
-            ->select('idDocumento', 'nombre')
+        $documentos = DB::table('tipodocumento')
+            ->select('idTipoDocumento', 'nombre')
             ->orderBy('nombre')
             ->get();
+
             
         return response()->json([
             'success' => true,

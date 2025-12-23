@@ -15,6 +15,7 @@ use App\Models\CentroCosto;
 use App\Models\Moneda;
 use App\Models\Proveedore;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SolicitudcompraController extends Controller
@@ -115,9 +116,29 @@ class SolicitudcompraController extends Controller
             'monedas'
         ));
     }
-    public function store(Request $request)
-    {
-        $request->validate([
+
+
+
+public function store(Request $request)
+{
+    // Log de entrada
+    Log::info('=== INICIANDO store() SOLICITUD COMPRA ===');
+    Log::info('IP del cliente: ' . $request->ip());
+    Log::info('User-Agent: ' . $request->header('User-Agent'));
+    Log::info('ID Usuario: ' . (auth()->check() ? auth()->id() : 'No autenticado'));
+
+    // DEBUG: Verificar datos recibidos ANTES de validar
+    Log::debug('📥 Datos recibidos ANTES de validar:', [
+        'todos_los_campos' => array_keys($request->all()),
+        'items_count' => count($request->items ?? []),
+        'idSolicitudAlmacen' => $request->idSolicitudAlmacen,
+        'solicitante_compra' => $request->solicitante_compra,
+        'solicitante_almacen' => $request->solicitante_almacen
+    ]);
+
+    // Validación
+    try {
+        $validated = $request->validate([
             'solicitante_compra' => 'required|string|max:255',
             'solicitante_almacen' => 'required|string|max:255',
             'idTipoArea' => 'required|exists:tipoarea,idTipoArea',
@@ -131,130 +152,327 @@ class SolicitudcompraController extends Controller
             'items.*.precio_unitario_estimado' => 'required|numeric|min:0',
             'idSolicitudAlmacen' => 'required|exists:solicitud_almacen,idSolicitudAlmacen',
         ]);
+        
+        Log::info('✅ Validación exitosa');
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('❌ ERROR DE VALIDACIÓN:', [
+            'errores' => $e->errors(),
+            'datos_recibidos' => $request->except(['items', 'archivos']),
+            'items_recibidos' => $request->items ? 'Sí (' . count($request->items) . ' items)' : 'No',
+            'campos_faltantes' => $this->getMissingFields($request)
+        ]);
+        
+        return back()
+            ->withErrors($e->validator)
+            ->withInput()
+            ->with('error', 'Por favor complete todos los campos requeridos.');
+    }
 
-        // Agrega logs para debug
-        \Log::info('Datos recibidos en store:', [
-            'items_count' => count($request->items),
-            'items_data' => $request->items,
+    // Log de datos recibidos después de validar
+    Log::debug('📋 Datos validados:', [
+        'except_items' => $request->except(['items', 'archivos']),
+        'items_count' => count($request->items ?? []),
+        'archivos_count' => $request->hasFile('archivos') ? count($request->file('archivos')) : 0,
+    ]);
+
+    // Log detallado de items
+    if ($request->has('items')) {
+        Log::info('📦 Detalles de items recibidos:');
+        foreach ($request->items as $index => $item) {
+            Log::debug("Item {$index}:", [
+                'descripcion' => $item['descripcion_producto'] ?? 'N/A',
+                'cantidad' => $item['cantidad'] ?? 0,
+                'precio_unitario' => $item['precio_unitario_estimado'] ?? 0,
+                'moneda' => $item['idMonedas'] ?? 'N/A',
+                'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? 'No especificado',
+                'todos_los_campos_item' => array_keys($item)
+            ]);
+        }
+    }
+
+    // Log de archivos
+    if ($request->hasFile('archivos')) {
+        Log::info('📎 Archivos adjuntos:');
+        foreach ($request->file('archivos') as $index => $archivo) {
+            Log::debug("Archivo {$index}:", [
+                'nombre' => $archivo->getClientOriginalName(),
+                'tamaño' => $archivo->getSize(),
+                'mime_type' => $archivo->getMimeType()
+            ]);
+        }
+    }
+
+    try {
+        Log::info('🔄 Iniciando transacción de base de datos');
+        DB::beginTransaction();
+        
+        $transactionId = uniqid('trans_', true);
+        Log::info("ID de transacción: {$transactionId}");
+
+        // **ACTUALIZAR ESTADO DE LA SOLICITUD DE ALMACÉN**
+        Log::info('🔍 Buscando solicitud de almacén:', [
             'idSolicitudAlmacen' => $request->idSolicitudAlmacen
         ]);
 
-        try {
-            \DB::beginTransaction();
+        $solicitudAlmacen = \App\Models\SolicitudAlmacen::with('detalles')->find($request->idSolicitudAlmacen);
 
-            // **ACTUALIZAR ESTADO DE LA SOLICITUD DE ALMACÉN**
-            $solicitudAlmacen = \App\Models\SolicitudAlmacen::find($request->idSolicitudAlmacen);
-
-            if (!$solicitudAlmacen) {
-                throw new \Exception('No se encontró la solicitud de almacén con ID: ' . $request->idSolicitudAlmacen);
-            }
-
-            // Actualizar estado de la solicitud de almacén
-            $solicitudAlmacen->update([
-                'estado' => 'Solicitud Enviada administración',
-                'updated_at' => now()
+        if (!$solicitudAlmacen) {
+            Log::error('❌ No se encontró la solicitud de almacén', [
+                'idSolicitudAlmacen' => $request->idSolicitudAlmacen,
+                'solicitudes_existentes' => \App\Models\SolicitudAlmacen::pluck('idSolicitudAlmacen')->toArray()
             ]);
+            throw new \Exception('No se encontró la solicitud de almacén con ID: ' . $request->idSolicitudAlmacen);
+        }
 
-            \Log::info('Estado de solicitud almacén actualizado:', [
-                'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
-                'nuevo_estado' => 'Solicitud Enviada administración'
-            ]);
+        Log::info('✅ Solicitud de almacén encontrada:', [
+            'id' => $solicitudAlmacen->idSolicitudAlmacen,
+            'estado_actual' => $solicitudAlmacen->estado,
+            'detalles_count' => $solicitudAlmacen->detalles->count()
+        ]);
 
-            // Generar código de solicitud
-            $codigoSolicitud = 'SC-' . date('Ymd') . '-' . str_pad(SolicitudCompra::count() + 1, 4, '0', STR_PAD_LEFT);
+        // Actualizar estado de la solicitud de almacén
+        $estadoAnterior = $solicitudAlmacen->estado;
+        $solicitudAlmacen->update([
+            'estado' => 'Solicitud Enviada administración',
+            'updated_at' => now()
+        ]);
 
-            // Calcular totales
-            $subtotal = 0;
-            $totalUnidades = 0;
+        Log::info('📝 Estado de solicitud almacén actualizado:', [
+            'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+            'estado_anterior' => $estadoAnterior,
+            'nuevo_estado' => 'Solicitud Enviada administración',
+            'updated_at' => $solicitudAlmacen->updated_at
+        ]);
 
-            foreach ($request->items as $item) {
-                $subtotal += $item['cantidad'] * $item['precio_unitario_estimado'];
-                $totalUnidades += $item['cantidad'];
-            }
+        // Generar código de solicitud
+        $countSolicitudes = SolicitudCompra::count();
+        $codigoSolicitud = 'SC-' . date('Ymd') . '-' . str_pad($countSolicitudes + 1, 4, '0', STR_PAD_LEFT);
+        
+        Log::info('🔢 Generando código de solicitud:', [
+            'base_count' => $countSolicitudes,
+            'codigo_generado' => $codigoSolicitud
+        ]);
 
-            $iva = $subtotal * 0.18; // 18% IGV
-            $total = $subtotal + $iva;
+        // Calcular totales
+        $subtotal = 0;
+        $totalUnidades = 0;
+        $itemsProcesados = [];
 
-            // **CREAR SOLICITUD DE COMPRA CON AMBOS SOLICITANTES Y RELACIÓN CON ALMACÉN**
-            $solicitudCompra = SolicitudCompra::create([
-                'codigo_solicitud' => $codigoSolicitud,
-                'idSolicitudAlmacen' => $request->idSolicitudAlmacen, // ✅ RELACIÓN CON SOLICITUD ALMACÉN
-                'solicitante_compra' => $request->solicitante_compra, // Usuario actual
-                'solicitante_almacen' => $request->solicitante_almacen, // De la solicitud almacén
-                'idTipoArea' => $request->idTipoArea,
-                'idPrioridad' => $request->idPrioridad,
-                'fecha_requerida' => $request->fecha_requerida,
-                'idCentroCosto' => $request->idCentroCosto,
-                'proyecto_asociado' => $request->proyecto_asociado,
-                'justificacion' => $request->justificacion,
-                'observaciones' => $request->observaciones,
-                'subtotal' => $subtotal,
-                'iva' => $iva,
-                'total' => $total,
-                'total_unidades' => $totalUnidades,
-                'estado' => 'pendiente'
-            ]);
+        Log::info('🧮 Calculando totales de items...');
+        foreach ($request->items as $index => $item) {
+            $itemSubtotal = $item['cantidad'] * $item['precio_unitario_estimado'];
+            $subtotal += $itemSubtotal;
+            $totalUnidades += $item['cantidad'];
+            
+            $itemsProcesados[$index] = [
+                'descripcion' => $item['descripcion_producto'],
+                'cantidad' => $item['cantidad'],
+                'precio_unitario' => $item['precio_unitario_estimado'],
+                'subtotal_item' => $itemSubtotal
+            ];
+        }
 
-            // Crear detalles manteniendo la relación con almacén
-            foreach ($request->items as $item) {
-                SolicitudCompraDetalle::create([
-                    'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
-                    'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null, // ✅ Relación con detalle de almacén
-                    'idArticulo' => $item['idArticulo'] ?? null,
-                    'descripcion_producto' => $item['descripcion_producto'],
-                    'categoria' => $item['categoria'] ?? '',
-                    'cantidad' => $item['cantidad'],
-                    'unidad' => $item['unidad'] ?? 'unidad',
-                    'idMonedas' => $item['idMonedas'],
-                    'precio_unitario_estimado' => $item['precio_unitario_estimado'],
-                    'total_producto' => $item['cantidad'] * $item['precio_unitario_estimado'],
-                    'codigo_producto' => $item['codigo_producto'] ?? '',
-                    'marca' => $item['marca'] ?? '',
-                    'especificaciones_tecnicas' => $item['especificaciones_tecnicas'] ?? '',
-                    'proveedor_sugerido' => $item['proveedor_sugerido'] ?? $this->getProveedorSugerido($item),
-                    'justificacion_producto' => $item['justificacion_producto'] ?? '',
-                    'observaciones_detalle' => $item['observaciones_detalle'] ?? '',
-                    'estado' => 'pendiente'
-                ]);
-            }
+        $iva = $subtotal * 0.18; // 18% IGV
+        $total = $subtotal + $iva;
 
-            // Guardar archivos si existen
-            if ($request->hasFile('archivos')) {
-                foreach ($request->file('archivos') as $archivo) {
-                    $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-                    $ruta = $archivo->storeAs('solicitudes_compra/' . $solicitudCompra->idSolicitudCompra, $nombreArchivo, 'public');
+        Log::info('💰 Totales calculados:', [
+            'subtotal' => number_format($subtotal, 2),
+            'iva_18%' => number_format($iva, 2),
+            'total' => number_format($total, 2),
+            'total_unidades' => $totalUnidades,
+            'items_procesados' => count($itemsProcesados)
+        ]);
 
-                    SolicitudCompraArchivo::create([
-                        'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
-                        'nombre_archivo' => $archivo->getClientOriginalName(),
-                        'ruta_archivo' => $ruta,
-                        'tipo_archivo' => $archivo->getClientMimeType(),
-                        'tamaño' => $archivo->getSize(),
-                    ]);
-                }
-            }
+        // **CREAR SOLICITUD DE COMPRA CON AMBOS SOLICITANTES Y RELACIÓN CON ALMACÉN**
+        Log::info('📄 Creando solicitud de compra principal...');
+        
+        // Verificar campos opcionales
+        $solicitudCompraData = [
+            'codigo_solicitud' => $codigoSolicitud,
+            'idSolicitudAlmacen' => $request->idSolicitudAlmacen,
+            'solicitante_compra' => $request->solicitante_compra,
+            'solicitante_almacen' => $request->solicitante_almacen,
+            'idTipoArea' => $request->idTipoArea,
+            'idPrioridad' => $request->idPrioridad,
+            'fecha_requerida' => $request->fecha_requerida,
+            'idCentroCosto' => $request->idCentroCosto ?? null,
+            'proyecto_asociado' => $request->proyecto_asociado ?? null,
+            'justificacion' => $request->justificacion,
+            'observaciones' => $request->observaciones ?? null,
+            'subtotal' => $subtotal,
+            'iva' => $iva,
+            'total' => $total,
+            'total_unidades' => $totalUnidades,
+            'estado' => 'pendiente',
+            'created_at' => now(),
+            'updated_at' => now()
+        ];
 
-            \DB::commit();
+        Log::debug('📝 Datos para crear solicitud compra:', $solicitudCompraData);
 
-            \Log::info('Solicitud de compra creada exitosamente:', [
+        $solicitudCompra = SolicitudCompra::create($solicitudCompraData);
+
+        Log::info('✅ Solicitud de compra principal creada:', [
+            'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
+            'codigo_solicitud' => $codigoSolicitud,
+            'estado' => 'pendiente'
+        ]);
+
+        // Crear detalles manteniendo la relación con almacén
+        Log::info('📝 Creando detalles de la solicitud de compra...');
+        $detallesCreados = 0;
+        
+        foreach ($request->items as $index => $item) {
+            $detalleData = [
                 'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
-                'codigo_solicitud' => $codigoSolicitud,
-                'idSolicitudAlmacen' => $request->idSolicitudAlmacen
+                'idSolicitudAlmacenDetalle' => $item['idSolicitudAlmacenDetalle'] ?? null,
+                'idArticulo' => $item['idArticulo'] ?? null,
+                'descripcion_producto' => $item['descripcion_producto'],
+                'categoria' => $item['categoria'] ?? '',
+                'cantidad' => $item['cantidad'],
+                'unidad' => $item['unidad'] ?? 'unidad',
+                'idMonedas' => $item['idMonedas'],
+                'precio_unitario_estimado' => $item['precio_unitario_estimado'],
+                'total_producto' => $item['cantidad'] * $item['precio_unitario_estimado'],
+                'codigo_producto' => $item['codigo_producto'] ?? '',
+                'marca' => $item['marca'] ?? '',
+                'especificaciones_tecnicas' => $item['especificaciones_tecnicas'] ?? '',
+                'proveedor_sugerido' => $item['proveedor_sugerido'] ?? $this->getProveedorSugerido($item),
+                'justificacion_producto' => $item['justificacion_producto'] ?? '',
+                'observaciones_detalle' => $item['observaciones_detalle'] ?? '',
+                'estado' => 'pendiente',
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+
+            $detalle = SolicitudCompraDetalle::create($detalleData);
+            $detallesCreados++;
+            
+            Log::debug("✅ Detalle {$index} creado:", [
+                'idDetalle' => $detalle->idSolicitudCompraDetalle,
+                'descripcion' => substr($item['descripcion_producto'], 0, 50) . '...',
+                'relacion_almacen' => $item['idSolicitudAlmacenDetalle'] ? 'Sí' : 'No'
             ]);
+        }
 
-            return redirect()->route('solicitudcompra.index')
-                ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente y solicitud de almacén enviada a administración.')
-                ->with('solicitud_id', $solicitudCompra->idSolicitudCompra);
-        } catch (\Exception $e) {
-            \DB::rollBack();
-            \Log::error('Error al crear solicitud de compra: ' . $e->getMessage());
-            \Log::error('Trace: ' . $e->getTraceAsString());
+        Log::info("✅ {$detallesCreados} detalles creados exitosamente");
 
-            return back()
-                ->with('error', 'Error al crear la solicitud: ' . $e->getMessage())
-                ->withInput();
+        // Guardar archivos si existen
+        if ($request->hasFile('archivos')) {
+            Log::info('💾 Procesando archivos adjuntos...');
+            $archivosGuardados = 0;
+            
+            foreach ($request->file('archivos') as $archivo) {
+                $nombreOriginal = $archivo->getClientOriginalName();
+                $nombreArchivo = time() . '_' . $nombreOriginal;
+                $ruta = $archivo->storeAs(
+                    'solicitudes_compra/' . $solicitudCompra->idSolicitudCompra, 
+                    $nombreArchivo, 
+                    'public'
+                );
+
+                SolicitudCompraArchivo::create([
+                    'idSolicitudCompra' => $solicitudCompra->idSolicitudCompra,
+                    'nombre_archivo' => $nombreOriginal,
+                    'ruta_archivo' => $ruta,
+                    'tipo_archivo' => $archivo->getMimeType(),
+                    'tamaño' => $archivo->getSize(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                $archivosGuardados++;
+                Log::debug("💾 Archivo guardado: {$nombreOriginal}");
+            }
+            
+            Log::info("✅ {$archivosGuardados} archivos guardados exitosamente");
+        }
+
+        DB::commit();
+        Log::info('🎉 Transacción completada exitosamente');
+
+        // Log de resumen
+        Log::info('📊 RESUMEN DE OPERACIÓN:', [
+            'solicitud_compra_id' => $solicitudCompra->idSolicitudCompra,
+            'codigo_solicitud' => $codigoSolicitud,
+            'solicitud_almacen_id' => $request->idSolicitudAlmacen,
+            'estado_almacen_actualizado' => 'Sí',
+            'items_procesados' => $detallesCreados,
+            'archivos_adjuntos' => $archivosGuardados ?? 0,
+            'subtotal' => number_format($subtotal, 2),
+            'total' => number_format($total, 2),
+            'duracion_transaccion' => microtime(true) - LARAVEL_START . ' segundos'
+        ]);
+
+        Log::info('=== FINALIZANDO store() SOLICITUD COMPRA ===');
+
+        return redirect()->route('solicitudcompra.index')
+            ->with('success', 'Solicitud de compra ' . $codigoSolicitud . ' creada exitosamente y solicitud de almacén enviada a administración.')
+            ->with('solicitud_id', $solicitudCompra->idSolicitudCompra)
+            ->with('solicitud_codigo', $codigoSolicitud);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        Log::error('❌ ERROR CRÍTICO en store():', [
+            'mensaje' => $e->getMessage(),
+            'archivo' => $e->getFile(),
+            'linea' => $e->getLine(),
+            'codigo_error' => $e->getCode(),
+            'trace_completo' => $e->getTraceAsString(),
+            'datos_request' => $request->except(['items', 'archivos', 'password', 'token']),
+            'transaction_id' => $transactionId ?? 'No iniciada'
+        ]);
+
+        // Crear notificación de error para administradores
+        if (class_exists(\App\Models\ErrorLog::class)) {
+            \App\Models\ErrorLog::create([
+                'usuario_id' => auth()->id(),
+                'modulo' => 'SolicitudCompraController',
+                'accion' => 'store',
+                'error' => $e->getMessage(),
+                'datos' => json_encode($request->except(['items', 'archivos', 'password', 'token'])),
+                'ip' => $request->ip()
+            ]);
+        }
+
+        return back()
+            ->with('error', 'Error al crear la solicitud: ' . $e->getMessage())
+            ->with('error_detalle', 'Contacte al administrador. Código de error: ' . ($transactionId ?? 'N/A'))
+            ->withInput();
+    }
+}
+
+/**
+ * Método auxiliar para identificar campos faltantes
+ */
+private function getMissingFields(Request $request)
+{
+    $requiredFields = [
+        'solicitante_compra',
+        'solicitante_almacen', 
+        'idTipoArea',
+        'idPrioridad',
+        'fecha_requerida',
+        'justificacion',
+        'items',
+        'idSolicitudAlmacen'
+    ];
+    
+    $missing = [];
+    
+    foreach ($requiredFields as $field) {
+        if (empty($request->$field)) {
+            $missing[] = $field;
         }
     }
+    
+    return $missing;
+}
+
+
+
 
     // Método auxiliar para obtener proveedor sugerido
     private function getProveedorSugerido($item)

@@ -283,9 +283,13 @@
                                      class="fas fa-file absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                                  <select class="clean-input w-full pl-10" x-model="documentoId" required>
                                      <option value="">Seleccione un documento</option>
-                                     <template x-for="documento in documentos" :key="documento.idDocumento">
-                                         <option :value="documento.idDocumento" x-text="documento.nombre"></option>
-                                     </template>
+                                    <template x-for="documento in documentos" :key="documento.idTipoDocumento">
+    <option 
+        :value="documento.idTipoDocumento"
+        x-text="documento.nombre">
+    </option>
+</template>
+
                                  </select>
                              </div>
 

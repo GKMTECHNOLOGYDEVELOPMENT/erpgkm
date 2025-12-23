@@ -73,11 +73,162 @@ class SolicitudarticuloController extends Controller
 
 
     
+// public function create()
+// {
+//     $usuario = auth()->user()->load('tipoArea');
+
+//     // Consulta principal para artículos (tipos 1, 3, 4)
+//     $articulos = DB::table('articulos as a')
+//         ->select(
+//             'a.idArticulos',
+//             'a.nombre',
+//             'a.codigo_barras',
+//             'a.codigo_repuesto',
+//             'a.precio_compra',
+//             'a.stock_total',
+//             'a.idTipoArticulo',
+//             'a.idModelo',
+//             'a.idsubcategoria',
+//             'ta.nombre as tipo_articulo_nombre',
+//             'm.nombre as nombre_modelo',
+//             'mar.nombre as nombre_marca',
+//             'sc.nombre as nombre_subcategoria'
+//         )
+//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+//         ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+//         ->where('a.estado', 1)
+//         ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
+//         ->get();
+
+//     // Para los repuestos (tipo 2)
+//     $repuestos = DB::table('articulos as a')
+//         ->select(
+//             'a.idArticulos',
+//             'a.nombre',
+//             'a.codigo_barras',
+//             'a.codigo_repuesto',
+//             'a.precio_compra',
+//             'a.stock_total',
+//             'a.idTipoArticulo',
+//             'a.idModelo',
+//             'a.idsubcategoria',
+//             'ta.nombre as tipo_articulo_nombre',
+//             'm.nombre as nombre_modelo',
+//             'mar.nombre as nombre_marca',
+//             'sc.nombre as nombre_subcategoria'
+//         )
+//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+//         ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+//         ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+//         ->where('a.estado', 1)
+//         ->where('a.idTipoArticulo', 2) // Solo repuestos
+//         ->get();
+
+
+//         // Obtener todas las áreas
+//     $areas = DB::table('tipoarea')
+//         ->orderBy('nombre')
+//         ->get();
+
+//          // Obtener todos los usuarios activos
+//     $usuarios = DB::table('usuarios')
+//         ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
+//         ->where('estado', 1)
+//         ->orderBy('Nombre')
+//         ->orderBy('apellidoPaterno')
+//         ->get();
+
+
+//     // Combinar ambos resultados
+//     $articulosCompletos = $articulos->merge($repuestos);
+
+//     // Formatear los datos de manera más simple
+//     $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+//         $infoAdicional = [];
+        
+//         // Información del tipo de artículo
+//         if ($articulo->tipo_articulo_nombre) {
+//             $infoAdicional[] = $articulo->tipo_articulo_nombre;
+//         }
+        
+//         // Información del modelo y marca (si existe)
+//         if ($articulo->nombre_modelo) {
+//             $infoAdicional[] = $articulo->nombre_modelo;
+//         }
+//         if ($articulo->nombre_marca) {
+//             $infoAdicional[] = $articulo->nombre_marca;
+//         }
+        
+//         // Información de subcategoría (especialmente para repuestos)
+//         if ($articulo->nombre_subcategoria) {
+//             $infoAdicional[] = $articulo->nombre_subcategoria;
+//         }
+        
+//         $infoTexto = $infoAdicional ? ' (' . implode(' - ', $infoAdicional) . ')' : '';
+//         $codigo = $articulo->codigo_barras ?: $articulo->codigo_repuesto;
+        
+//         return [
+//             'idArticulos' => $articulo->idArticulos,
+//             'nombre' => $articulo->nombre,
+//             'codigo_barras' => $articulo->codigo_barras,
+//             'codigo_repuesto' => $articulo->codigo_repuesto,
+//             'tipo_articulo' => $articulo->tipo_articulo_nombre,
+//             'modelo' => $articulo->nombre_modelo,
+//             'marca' => $articulo->nombre_marca,
+//             'subcategoria' => $articulo->nombre_subcategoria,
+//             'nombre_completo' => $articulo->nombre . $infoTexto . ' (' . $codigo . ')'
+//         ];
+//     });
+
+//     // Obtener solo cotizaciones aprobadas que NO tengan solicitudes
+//     $cotizacionesAprobadas = DB::table('cotizaciones as c')
+//         ->select(
+//             'c.idCotizaciones',
+//             'c.numero_cotizacion',
+//             'c.fecha_emision',
+//             'c.estado_cotizacion',
+//             'cl.nombre as cliente_nombre'
+//         )
+//         ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+//         ->where('c.estado_cotizacion', 'aprobada')
+//         ->whereNotExists(function ($query) {
+//             $query->select(DB::raw(1))
+//                   ->from('solicitudesordenes as so')
+//                   ->whereRaw('so.codigo_cotizacion = c.numero_cotizacion')
+//                   ->where('so.tipoorden', 'solicitud_articulo');
+//         })
+//         ->orderBy('c.fecha_emision', 'desc')
+//         ->get();
+
+//     // Obtener el próximo número de orden
+//     $lastOrder = DB::table('solicitudesordenes')
+//         ->where('tipoorden', 'solicitud_articulo')
+//         ->orderBy('idsolicitudesordenes', 'desc')
+//         ->first();
+
+//     $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+
+//     return view("solicitud.solicitudarticulo.create", [
+//         'usuario' => $usuario,
+//         'articulos' => $articulosFormateados,
+//         'cotizacionesAprobadas' => $cotizacionesAprobadas,
+//         'nextOrderNumber' => $nextOrderNumber,
+//         'areas' => $areas,           // Nuevo
+//         'usuarios' => $usuarios      // Nuevo
+//     ]);
+// }
+
+
+
 public function create()
 {
     $usuario = auth()->user()->load('tipoArea');
 
-    // Consulta principal para artículos (tipos 1, 3, 4)
+    // SOLO ARTÍCULOS (tipos 1, 3, 4) - SIN REPUESTOS
     $articulos = DB::table('articulos as a')
         ->select(
             'a.idArticulos',
@@ -99,42 +250,16 @@ public function create()
         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
         ->where('a.estado', 1)
-        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
+        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // SOLO: Productos, suministros, herramientas
+        ->orderBy('a.nombre')
         ->get();
 
-    // Para los repuestos (tipo 2)
-    $repuestos = DB::table('articulos as a')
-        ->select(
-            'a.idArticulos',
-            'a.nombre',
-            'a.codigo_barras',
-            'a.codigo_repuesto',
-            'a.precio_compra',
-            'a.stock_total',
-            'a.idTipoArticulo',
-            'a.idModelo',
-            'a.idsubcategoria',
-            'ta.nombre as tipo_articulo_nombre',
-            'm.nombre as nombre_modelo',
-            'mar.nombre as nombre_marca',
-            'sc.nombre as nombre_subcategoria'
-        )
-        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-        ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-        ->where('a.estado', 1)
-        ->where('a.idTipoArticulo', 2) // Solo repuestos
-        ->get();
-
-
-        // Obtener todas las áreas
+    // Obtener todas las áreas
     $areas = DB::table('tipoarea')
         ->orderBy('nombre')
         ->get();
 
-         // Obtener todos los usuarios activos
+    // Obtener todos los usuarios activos
     $usuarios = DB::table('usuarios')
         ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
         ->where('estado', 1)
@@ -142,12 +267,8 @@ public function create()
         ->orderBy('apellidoPaterno')
         ->get();
 
-
-    // Combinar ambos resultados
-    $articulosCompletos = $articulos->merge($repuestos);
-
     // Formatear los datos de manera más simple
-    $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+    $articulosFormateados = $articulos->map(function ($articulo) {
         $infoAdicional = [];
         
         // Información del tipo de artículo
@@ -163,7 +284,7 @@ public function create()
             $infoAdicional[] = $articulo->nombre_marca;
         }
         
-        // Información de subcategoría (especialmente para repuestos)
+        // Información de subcategoría
         if ($articulo->nombre_subcategoria) {
             $infoAdicional[] = $articulo->nombre_subcategoria;
         }
@@ -217,11 +338,10 @@ public function create()
         'articulos' => $articulosFormateados,
         'cotizacionesAprobadas' => $cotizacionesAprobadas,
         'nextOrderNumber' => $nextOrderNumber,
-        'areas' => $areas,           // Nuevo
-        'usuarios' => $usuarios      // Nuevo
+        'areas' => $areas,
+        'usuarios' => $usuarios
     ]);
 }
-
 
     public function store(Request $request)
 {
@@ -458,7 +578,260 @@ public function show($id)
 }
 
    
-  public function edit($id)
+//   public function edit($id)
+// {
+//     $usuario = auth()->user()->load('tipoArea');
+
+//     // Obtener la solicitud existente con información de cotización
+//     $solicitud = DB::table('solicitudesordenes as so')
+//         ->select(
+//             'so.idsolicitudesordenes',
+//             'so.codigo',
+//             'so.codigo_cotizacion', // Este campo guarda el numero_cotizacion
+//             'so.tiposervicio',
+//             'so.niveldeurgencia as urgencia',
+//             'so.fecharequerida',
+//             'so.observaciones',
+//             'so.estado',
+//             'so.id_area_destino',           // Nuevo campo
+//             'so.id_usuario_destino'         // Nuevo campo
+//         )
+//         ->where('so.idsolicitudesordenes', $id)
+//         ->where('so.tipoorden', 'solicitud_articulo')
+//         ->first();
+
+//     if (!$solicitud) {
+//         abort(404, 'Solicitud no encontrada');
+//     }
+
+//     // Obtener información de la cotización si existe
+//     $cotizacionActual = null;
+//     $productosCotizacion = [];
+    
+//     if ($solicitud->codigo_cotizacion) {
+//         $cotizacionActual = DB::table('cotizaciones as c')
+//             ->select(
+//                 'c.idCotizaciones',
+//                 'c.numero_cotizacion',
+//                 'c.fecha_emision',
+//                 'c.estado_cotizacion',
+//                 'cl.nombre as cliente_nombre'
+//             )
+//             ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+//             ->where('c.numero_cotizacion', $solicitud->codigo_cotizacion)
+//             ->first();
+
+//         // Obtener productos de la cotización actual
+//         if ($cotizacionActual) {
+//             $productosCotizacion = DB::table('cotizacion_productos as cp')
+//                 ->select(
+//                     'cp.id',
+//                     'cp.articulo_id',
+//                     'cp.cantidad',
+//                     'cp.descripcion',
+//                     'cp.precio_unitario',
+//                     'cp.subtotal'
+//                 )
+//                 ->where('cp.cotizacion_id', $cotizacionActual->idCotizaciones)
+//                 ->get();
+//         }
+//     }
+
+//     // Obtener los artículos actuales de la solicitud con información completa
+//     $productosActuales = DB::table('ordenesarticulos as oa')
+//         ->select(
+//             'oa.idordenesarticulos',
+//             'oa.cantidad',
+//             'oa.observacion as descripcion',
+//             'oa.idarticulos',
+//             'a.nombre',
+//             'a.codigo_barras',
+//             'a.codigo_repuesto',
+//             'a.idTipoArticulo',
+//             'a.idModelo',
+//             'a.idsubcategoria',
+//             'ta.nombre as tipo_articulo_nombre',
+//             'm.nombre as nombre_modelo',
+//             'mar.nombre as nombre_marca',
+//             'sc.nombre as nombre_subcategoria'
+//         )
+//         ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+//         ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+//         ->where('oa.idsolicitudesordenes', $id)
+//         ->where('oa.estado', 0) // Solo artículos pendientes
+//         ->get();
+
+//     // Para los repuestos (tipo 2), obtener información adicional
+//     $repuestosIds = $productosActuales->where('idTipoArticulo', 2)->pluck('idarticulos');
+    
+//     if ($repuestosIds->count() > 0) {
+//         $repuestosCompletos = DB::table('articulo_modelo as am')
+//             ->select(
+//                 'am.articulo_id',
+//                 'm.nombre as nombre_modelo_repuesto',
+//                 'mar.nombre as nombre_marca_repuesto'
+//             )
+//             ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+//             ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//             ->whereIn('am.articulo_id', $repuestosIds)
+//             ->get();
+
+//         // Actualizar la información de los repuestos
+//         foreach ($productosActuales as $producto) {
+//             if ($producto->idTipoArticulo == 2) {
+//                 $repuestoInfo = $repuestosCompletos->firstWhere('articulo_id', $producto->idarticulos);
+//                 if ($repuestoInfo) {
+//                     $producto->nombre_modelo = $repuestoInfo->nombre_modelo_repuesto;
+//                     $producto->nombre_marca = $repuestoInfo->nombre_marca_repuesto;
+//                 }
+//             }
+//         }
+//     }
+
+//     // Obtener todos los artículos disponibles (igual que en create)
+//     $articulos = DB::table('articulos as a')
+//         ->select(
+//             'a.idArticulos',
+//             'a.nombre',
+//             'a.codigo_barras',
+//             'a.codigo_repuesto',
+//             'a.precio_compra',
+//             'a.stock_total',
+//             'a.idTipoArticulo',
+//             'a.idModelo',
+//             'a.idsubcategoria',
+//             'ta.nombre as tipo_articulo_nombre',
+//             'm.nombre as nombre_modelo',
+//             'mar.nombre as nombre_marca',
+//             'sc.nombre as nombre_subcategoria'
+//         )
+//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+//         ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
+//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+//         ->where('a.estado', 1)
+//         ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
+//         ->get();
+
+//     // Para los repuestos (tipo 2)
+//     $repuestos = DB::table('articulos as a')
+//         ->select(
+//             'a.idArticulos',
+//             'a.nombre',
+//             'a.codigo_barras',
+//             'a.codigo_repuesto',
+//             'a.precio_compra',
+//             'a.stock_total',
+//             'a.idTipoArticulo',
+//             'a.idModelo',
+//             'a.idsubcategoria',
+//             'ta.nombre as tipo_articulo_nombre',
+//             'm.nombre as nombre_modelo',
+//             'mar.nombre as nombre_marca',
+//             'sc.nombre as nombre_subcategoria'
+//         )
+//         ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+//         ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
+//         ->where('a.estado', 1)
+//         ->where('a.idTipoArticulo', 2) // Solo repuestos
+//         ->get();
+
+//     // Combinar ambos resultados
+//     $articulosCompletos = $articulos->merge($repuestos);
+
+//     // Formatear los datos
+//     $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+//         $infoAdicional = [];
+        
+//         if ($articulo->tipo_articulo_nombre) {
+//             $infoAdicional[] = $articulo->tipo_articulo_nombre;
+//         }
+        
+//         if ($articulo->nombre_modelo) {
+//             $infoAdicional[] = $articulo->nombre_modelo;
+//         }
+//         if ($articulo->nombre_marca) {
+//             $infoAdicional[] = $articulo->nombre_marca;
+//         }
+        
+//         if ($articulo->nombre_subcategoria) {
+//             $infoAdicional[] = $articulo->nombre_subcategoria;
+//         }
+        
+//         $infoTexto = $infoAdicional ? ' (' . implode(' - ', $infoAdicional) . ')' : '';
+//         $codigo = $articulo->codigo_barras ?: $articulo->codigo_repuesto;
+        
+//         return [
+//             'idArticulos' => $articulo->idArticulos,
+//             'nombre' => $articulo->nombre,
+//             'codigo_barras' => $articulo->codigo_barras,
+//             'codigo_repuesto' => $articulo->codigo_repuesto,
+//             'tipo_articulo' => $articulo->tipo_articulo_nombre,
+//             'modelo' => $articulo->nombre_modelo,
+//             'marca' => $articulo->nombre_marca,
+//             'subcategoria' => $articulo->nombre_subcategoria,
+//             'nombre_completo' => $articulo->nombre . $infoTexto . ' (' . $codigo . ')'
+//         ];
+//     });
+
+//     // Obtener cotizaciones aprobadas que NO tengan solicitudes (excluyendo la actual)
+//     $cotizacionesAprobadas = DB::table('cotizaciones as c')
+//         ->select(
+//             'c.idCotizaciones',
+//             'c.numero_cotizacion',
+//             'c.fecha_emision',
+//             'c.estado_cotizacion',
+//             'cl.nombre as cliente_nombre'
+//         )
+//         ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
+//         ->where('c.estado_cotizacion', 'aprobada')
+//         ->whereNotExists(function ($query) use ($solicitud) {
+//             $query->select(DB::raw(1))
+//                   ->from('solicitudesordenes as so')
+//                   ->whereRaw('so.codigo_cotizacion = c.numero_cotizacion')
+//                   ->where('so.tipoorden', 'solicitud_articulo')
+//                   ->where('so.idsolicitudesordenes', '!=', $solicitud->idsolicitudesordenes); // Excluir la actual
+//         })
+//         ->orderBy('c.fecha_emision', 'desc')
+//         ->get();
+
+
+
+//          // Obtener todas las áreas
+//     $areas = DB::table('tipoarea')
+//         ->orderBy('nombre')
+//         ->get();
+        
+//     // Obtener todos los usuarios activos
+//     $usuarios = DB::table('usuarios')
+//         ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
+//         ->where('estado', 1)
+//         ->orderBy('Nombre')
+//         ->orderBy('apellidoPaterno')
+//         ->get();
+
+//     return view('solicitud.solicitudarticulo.edit', [
+//         'usuario' => $usuario,
+//         'solicitud' => $solicitud,
+//         'productosActuales' => $productosActuales,
+//         'articulos' => $articulosFormateados,
+//         'cotizacionesAprobadas' => $cotizacionesAprobadas,
+//         'cotizacionActual' => $cotizacionActual,
+//         'productosCotizacion' => $productosCotizacion,
+//         'areas' => $areas,           // Nuevo
+//         'usuarios' => $usuarios      // Nuevo
+//     ]);
+// }
+
+
+
+public function edit($id)
 {
     $usuario = auth()->user()->load('tipoArea');
 
@@ -544,34 +917,12 @@ public function show($id)
         ->where('oa.estado', 0) // Solo artículos pendientes
         ->get();
 
-    // Para los repuestos (tipo 2), obtener información adicional
-    $repuestosIds = $productosActuales->where('idTipoArticulo', 2)->pluck('idarticulos');
-    
-    if ($repuestosIds->count() > 0) {
-        $repuestosCompletos = DB::table('articulo_modelo as am')
-            ->select(
-                'am.articulo_id',
-                'm.nombre as nombre_modelo_repuesto',
-                'mar.nombre as nombre_marca_repuesto'
-            )
-            ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-            ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-            ->whereIn('am.articulo_id', $repuestosIds)
-            ->get();
+    // FILTRAR SOLO ARTÍCULOS (tipos 1, 3, 4) - EXCLUIR REPUESTOS (tipo 2)
+    $productosActuales = $productosActuales->filter(function ($producto) {
+        return in_array($producto->idTipoArticulo, [1, 3, 4]);
+    })->values(); // Resetear índices
 
-        // Actualizar la información de los repuestos
-        foreach ($productosActuales as $producto) {
-            if ($producto->idTipoArticulo == 2) {
-                $repuestoInfo = $repuestosCompletos->firstWhere('articulo_id', $producto->idarticulos);
-                if ($repuestoInfo) {
-                    $producto->nombre_modelo = $repuestoInfo->nombre_modelo_repuesto;
-                    $producto->nombre_marca = $repuestoInfo->nombre_marca_repuesto;
-                }
-            }
-        }
-    }
-
-    // Obtener todos los artículos disponibles (igual que en create)
+    // Obtener todos los artículos disponibles (SOLO tipos 1, 3, 4 - SIN REPUESTOS)
     $articulos = DB::table('articulos as a')
         ->select(
             'a.idArticulos',
@@ -593,40 +944,12 @@ public function show($id)
         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
         ->where('a.estado', 1)
-        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
+        ->whereIn('a.idTipoArticulo', [1, 3, 4]) // SOLO: Productos, suministros, herramientas
+        ->orderBy('a.nombre')
         ->get();
-
-    // Para los repuestos (tipo 2)
-    $repuestos = DB::table('articulos as a')
-        ->select(
-            'a.idArticulos',
-            'a.nombre',
-            'a.codigo_barras',
-            'a.codigo_repuesto',
-            'a.precio_compra',
-            'a.stock_total',
-            'a.idTipoArticulo',
-            'a.idModelo',
-            'a.idsubcategoria',
-            'ta.nombre as tipo_articulo_nombre',
-            'm.nombre as nombre_modelo',
-            'mar.nombre as nombre_marca',
-            'sc.nombre as nombre_subcategoria'
-        )
-        ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-        ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-        ->where('a.estado', 1)
-        ->where('a.idTipoArticulo', 2) // Solo repuestos
-        ->get();
-
-    // Combinar ambos resultados
-    $articulosCompletos = $articulos->merge($repuestos);
 
     // Formatear los datos
-    $articulosFormateados = $articulosCompletos->map(function ($articulo) {
+    $articulosFormateados = $articulos->map(function ($articulo) {
         $infoAdicional = [];
         
         if ($articulo->tipo_articulo_nombre) {
@@ -681,9 +1004,7 @@ public function show($id)
         ->orderBy('c.fecha_emision', 'desc')
         ->get();
 
-
-
-         // Obtener todas las áreas
+    // Obtener todas las áreas
     $areas = DB::table('tipoarea')
         ->orderBy('nombre')
         ->get();
@@ -704,10 +1025,13 @@ public function show($id)
         'cotizacionesAprobadas' => $cotizacionesAprobadas,
         'cotizacionActual' => $cotizacionActual,
         'productosCotizacion' => $productosCotizacion,
-        'areas' => $areas,           // Nuevo
-        'usuarios' => $usuarios      // Nuevo
+        'areas' => $areas,
+        'usuarios' => $usuarios
     ]);
 }
+
+
+
 
    public function update(Request $request, $id)
 {

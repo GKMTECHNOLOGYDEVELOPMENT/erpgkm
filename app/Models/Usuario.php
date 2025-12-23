@@ -91,6 +91,7 @@ class Usuario extends Authenticatable
 		'correo',
 		'usuario',
 		'clave',
+		'token',
 		'nacionalidad',
 		'departamento',
 		'provincia',

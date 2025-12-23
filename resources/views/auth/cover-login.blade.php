@@ -250,7 +250,7 @@
                         </div>
                         <div class="text-center dark:text-white">
                             Te olvidaste tu contraseña ?
-                            <a href="{{ route('auth.password-reset') }}"
+                            <a href="{{ route('password.request') }}"
                             class="uppercase text-sm font-bold text-black transition duration-300 ease-in-out hover:text-red-600 hover:underline px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700">
                              Resetear Contraseña
                          </a>
