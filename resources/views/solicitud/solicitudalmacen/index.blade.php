@@ -178,7 +178,7 @@
                                 <option value="finalizado">Finalizado</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                
+
                             </div>
                         </div>
                     </div>
@@ -314,11 +314,11 @@
                             <!-- Información clave -->
                             <div class="grid grid-cols-2 gap-4 mb-5">
                                 <div class="space-y-2">
-                                    <div class="flex items-center gap-2">
-                                        <i class="fas fa-user text-gray-400 text-sm"></i>
-                                        <div>
-                                            <div class="text-xs text-gray-500">Solicitante</div>
-                                            <div class="text-sm font-medium text-gray-800 truncate"
+                                    <div class="flex items-start gap-2">
+                                        <i class="fas fa-user text-gray-400 text-sm mt-1"></i>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-xs text-gray-500 mb-0.5">Solicitante</div>
+                                            <div class="text-xs sm:text-sm font-medium text-gray-800 break-words line-clamp-2 leading-tight"
                                                 x-text="request.requested_by"></div>
                                         </div>
                                     </div>

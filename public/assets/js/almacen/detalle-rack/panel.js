@@ -688,8 +688,8 @@ function rackDetalle() {
                 html: `
         <div class="text-center">
             
-            <p class="text-lg font-semibold text-gray-800 mb-2">¿Estás seguro de mover este artículo?</p>
-            <p class="text-gray-600 mb-6">No podrás deshacer esta acción.</p>
+            <p class="text-lg font-semibold text-gray-800 mb-2">¿Estas seguro de mover este articulo?</p>
+            <p class="text-gray-600 mb-6">No podras deshacer esta acción.</p>
             
             <!-- Detalles del movimiento -->
             <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
@@ -699,8 +699,8 @@ function rackDetalle() {
                             <i class="fas fa-box text-sm"></i>
                         </span>
                         <div class="flex-1">
-                            <div class="text-xs text-gray-500">Artículo</div>
-                            <div class="font-medium text-gray-800">${store.articuloSeleccionado?.codigo_repuesto || store.articuloSeleccionado?.codigo_barras || 'Artículo'}</div>
+                            <div class="text-xs text-gray-500">Articulo</div>
+                            <div class="font-medium text-gray-800">${store.articuloSeleccionado?.codigo_repuesto || store.articuloSeleccionado?.codigo_barras || 'Articulo'}</div>
                         </div>
                     </div>
                     
@@ -879,54 +879,56 @@ function rackDetalle() {
 
         // MODAL PARA MOVER CAJAS PARCIALMENTE
         abrirModalMoverParcialCaja(caja, ubicacion) {
-            // Crear modal para mover parcialmente
+            // Usar la función segura
+            const cajaSeguro = safeJsonStringify(caja);
+
             const modalHtml = `
-                <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
-                        <div class="p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold text-gray-800">Mover Artículos de la Caja</h3>
-                                <button onclick="this.closest('.fixed').remove()" 
-                                        class="text-gray-500 hover:text-gray-700">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <p class="text-sm text-gray-600 mb-2">Caja: <span class="font-semibold">${caja.nombre}</span></p>
-                                <p class="text-sm text-gray-600 mb-4">Artículo: <span class="font-semibold">${caja.articulo_en_caja?.nombre || caja.contenido}</span></p>
-                                
-                                <div class="flex items-center justify-between mb-4 p-3 bg-amber-50 rounded-lg">
-                                    <span class="text-sm text-gray-700">Cantidad disponible:</span>
-                                    <span class="font-bold text-lg text-amber-600">${caja.cantidad}</span>
-                                </div>
-                                
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Cantidad a mover
-                                </label>
-                                <input type="number" 
-                                       id="cantidad-mover-caja" 
-                                       min="1" 
-                                       max="${caja.cantidad}" 
-                                       value="${caja.cantidad}"
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <p class="text-xs text-gray-500 mt-1">Máximo: ${caja.cantidad} unidades</p>
-                            </div>
-                            
-                            <div class="flex justify-end space-x-3">
-                                <button onclick="this.closest('.fixed').remove()" 
-                                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
-                                    Cancelar
-                                </button>
-                                <button onclick="window.confirmarMovimientoParcialCaja(${JSON.stringify(caja).replace(/"/g, '&quot;')}, ${ubicacion.id}, ${caja.cantidad})"
-                                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
-                                    Continuar
-                                </button>
-                            </div>
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Mover Articulos de la Caja</h3>
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600 mb-2">Caja: <span class="font-semibold">${escapeHtml(caja.nombre)}</span></p>
+                        <p class="text-sm text-gray-600 mb-4">Articulo: <span class="font-semibold">${escapeHtml(caja.articulo_en_caja?.nombre || caja.contenido || '')}</span></p>
+                        
+                        <div class="flex items-center justify-between mb-4 p-3 bg-amber-50 rounded-lg">
+                            <span class="text-sm text-gray-700">Cantidad disponible:</span>
+                            <span class="font-bold text-lg text-amber-600">${caja.cantidad}</span>
                         </div>
+                        
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Cantidad a mover
+                        </label>
+                        <input type="number" 
+                               id="cantidad-mover-caja" 
+                               min="1" 
+                               max="${caja.cantidad}" 
+                               value="${caja.cantidad}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Maximo: ${caja.cantidad} unidades</p>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                            Cancelar
+                        </button>
+                        <button onclick="window.confirmarMovimientoParcialCaja(${cajaSeguro}, ${ubicacion.id}, ${caja.cantidad})"
+                                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
+                            Continuar
+                        </button>
                     </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
 
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         },
@@ -1096,6 +1098,7 @@ function modalDetalleUbicacion() {
                     toastr.error('Error al copiar URL', 'Error');
                 });
         },
+
         // FUNCIÓN SIMPLIFICADA - SOLUCIÓN
         iniciarMovimientoDesdeModalConArticulo(articulo, ubicacion = null) {
             console.log('=== INICIAR MOVIMIENTO DESDE MODAL ===');

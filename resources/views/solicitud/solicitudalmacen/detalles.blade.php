@@ -1,5 +1,6 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <div x-data="warehouseRequestDetail()" x-init="init()">
         <div class="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -561,7 +562,11 @@
                                                     <template
                                                         x-if="producto.estado === 'pendiente' || producto.estado === 'rechazado'">
                                                         <button
-                                                            @click="changeProductStatus(producto.idSolicitudAlmacenDetalle, 'aprobado', producto.descripcion_producto)"
+                                                            @click="$dispatch('open-product-modal', { 
+                                                                    id: producto.idSolicitudAlmacenDetalle, 
+                                                                    nombre: producto.descripcion_producto, 
+                                                                    accion: 'aprobado' 
+                                                                })"
                                                             class="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200">
                                                             <i class="fas fa-check text-xs"></i>
                                                             Aprobar
@@ -572,7 +577,11 @@
                                                     <template
                                                         x-if="producto.estado === 'pendiente' || producto.estado === 'aprobado'">
                                                         <button
-                                                            @click="changeProductStatus(producto.idSolicitudAlmacenDetalle, 'rechazado', producto.descripcion_producto)"
+                                                            @click="$dispatch('open-product-modal', { 
+                                                                    id: producto.idSolicitudAlmacenDetalle, 
+                                                                    nombre: producto.descripcion_producto, 
+                                                                    accion: 'rechazado' 
+                                                                })"
                                                             class="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200">
                                                             <i class="fas fa-times text-xs"></i>
                                                             Rechazar
@@ -603,14 +612,14 @@
 
                                 <div class="flex flex-col md:flex-row justify-center gap-4 mb-4">
                                     <!-- Botón Aprobar Solicitud Completa -->
-                                    <button @click="changeFinalStatus('aprobada')"
+                                    <button @click="$dispatch('open-final-modal', { accion: 'aprobada' })"
                                         class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                         <i class="fas fa-check-circle text-lg"></i>
                                         <span class="text-sm md:text-base">✅ Aprobar Solicitud Completa</span>
                                     </button>
 
                                     <!-- Botón Rechazar Solicitud Completa -->
-                                    <button @click="changeFinalStatus('rechazada')"
+                                    <button @click="$dispatch('open-final-modal', { accion: 'rechazada' })"
                                         x-show="canRejectCompleteRequest(solicitud.detalles)"
                                         class="inline-flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                                         <i class="fas fa-times-circle text-lg"></i>
@@ -723,15 +732,252 @@
             </div>
         </div>
     </div>
+    <!-- Modal para cambiar estado de producto -->
+    <div x-data="{ showProductModal: false, modalProductId: null, modalProductName: '', modalProductAction: '', modalObservaciones: '' }">
+        <!-- Modal Background -->
+        <div x-show="showProductModal"
+            class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto bg-black bg-opacity-50 transition-opacity duration-300"
+            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
 
+            <!-- Modal Container -->
+            <div x-show="showProductModal" @click.away="showProductModal = false"
+                class="relative w-full max-w-md bg-white rounded-xl shadow-2xl transform transition-all duration-300"
+                x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
+
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-lg"
+                                :class="modalProductAction === 'aprobado' ? 'bg-green-100 text-green-600' :
+                                    'bg-red-100 text-red-600'">
+                                <i class="fas text-lg"
+                                    :class="modalProductAction === 'aprobado' ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800"
+                                    x-text="modalProductAction === 'aprobado' ? 'Aprobar Producto' : 'Rechazar Producto'">
+                                </h3>
+                                <p class="text-sm text-gray-500">Acción sobre producto</p>
+                            </div>
+                        </div>
+                        <button @click="showProductModal = false"
+                            class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="px-6 py-4">
+                    <!-- Producto Info -->
+                    <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600 mb-1">Producto:</p>
+                        <p class="font-medium text-gray-800" x-text="modalProductName"></p>
+                    </div>
+
+                    <!-- Observaciones Input -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Observaciones (opcional)
+                            <span class="text-gray-400 text-xs ml-1">- Presiona Enter para enviar</span>
+                        </label>
+                        <textarea x-model="modalObservaciones"
+                            @keydown.enter.prevent="if (!$event.shiftKey) { 
+                                      const action = modalProductAction === 'aprobado' ? 'changeProductStatus' : 'changeProductStatus';
+                                      window.warehouseRequestDetailInstance.changeProductStatus(
+                                          modalProductId, 
+                                          modalProductAction,
+                                          modalProductName,
+                                          modalObservaciones
+                                      );
+                                      showProductModal = false;
+                                  }"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            rows="3" placeholder="Escribe tus observaciones aquí..."></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Máximo 255 caracteres</p>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 bg-gray-50 rounded-b-xl border-t border-gray-200">
+                    <div class="flex justify-end space-x-3">
+                        <button @click="showProductModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-200">
+                            Cancelar
+                        </button>
+                        <button
+                            @click="window.warehouseRequestDetailInstance.changeProductStatus(
+                                            modalProductId, 
+                                            modalProductAction,
+                                            modalProductName,
+                                            modalObservaciones
+                                        ); showProductModal = false;"
+                            class="px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors duration-200"
+                            :class="modalProductAction === 'aprobado' ?
+                                'bg-green-600 hover:bg-green-700' :
+                                'bg-red-600 hover:bg-red-700'">
+                            <span
+                                x-text="modalProductAction === 'aprobado' ? 'Aprobar Producto' : 'Rechazar Producto'"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para estado final de solicitud -->
+    <div x-data="{ showFinalModal: false, finalAction: '', finalObservaciones: '', finalMotivo: '' }">
+        <!-- Modal Background -->
+        <div x-show="showFinalModal"
+            class="fixed inset-0 z-50 flex items-center justify-center px-4 py-6 overflow-y-auto bg-black bg-opacity-50 transition-opacity duration-300"
+            x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+            <!-- Modal Container -->
+            <div x-show="showFinalModal" @click.away="showFinalModal = false"
+                class="relative w-full max-w-lg bg-white rounded-xl shadow-2xl transform transition-all duration-300"
+                x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200"
+                x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
+
+                <!-- Modal Header -->
+                <div class="px-6 py-4 border-b border-gray-200"
+                    :class="finalAction === 'aprobada' ? 'bg-green-50' : 'bg-red-50'">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex items-center justify-center w-12 h-12 rounded-lg"
+                                :class="finalAction === 'aprobada' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'">
+                                <i class="fas text-2xl"
+                                    :class="finalAction === 'aprobada' ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800"
+                                    x-text="finalAction === 'aprobada' ? 'Aprobar Solicitud Completa' : 'Rechazar Solicitud Completa'">
+                                </h3>
+                                <p class="text-sm text-gray-600">Estado final de toda la solicitud</p>
+                            </div>
+                        </div>
+                        <button @click="showFinalModal = false"
+                            class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="px-6 py-4">
+                    <!-- Advertencia -->
+                    <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 text-lg mt-0.5"></i>
+                            <div>
+                                <p class="font-medium text-yellow-800 mb-1">¡Acción importante!</p>
+                                <p class="text-sm text-yellow-700">
+                                    Estás a punto de <span x-text="finalAction === 'aprobada' ? 'APROBAR' : 'RECHAZAR'"
+                                        class="font-bold"></span>
+                                    toda la solicitud. Esta acción definirá el estado final y no se podrá revertir
+                                    fácilmente.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de productos -->
+                    <div class="mb-6">
+                        <h4 class="font-medium text-gray-700 mb-3">Resumen actual de productos:</h4>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-green-50 p-3 rounded-lg text-center">
+                                <p class="text-2xl font-bold text-green-600" x-text="getAprobadosCount()"></p>
+                                <p class="text-xs text-green-700">Aprobados</p>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg text-center">
+                                <p class="text-2xl font-bold text-red-600" x-text="getRechazadosCount()"></p>
+                                <p class="text-xs text-red-700">Rechazados</p>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg text-center">
+                                <p class="text-2xl font-bold text-yellow-600" x-text="getPendientesCount()"></p>
+                                <p class="text-xs text-yellow-700">Pendientes</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motivo del rechazo (solo si es rechazo) -->
+                    <div x-show="finalAction === 'rechazada'" class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Motivo del rechazo <span class="text-red-500">*</span>
+                        </label>
+                        <textarea x-model="finalMotivo"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                            rows="3" placeholder="Describe el motivo por el cual rechazas la solicitud completa..." required></textarea>
+                    </div>
+
+                    <!-- Observaciones generales -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Observaciones generales (opcional)
+                        </label>
+                        <textarea x-model="finalObservaciones"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            rows="3" placeholder="Observaciones adicionales..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 bg-gray-50 rounded-b-xl border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <div class="text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Esta acción se registrará en el historial
+                        </div>
+                        <div class="flex space-x-3">
+                            <button @click="showFinalModal = false"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors duration-200">
+                                Cancelar
+                            </button>
+                            <button
+                                @click="if(finalAction === 'rechazada' && !finalMotivo) {
+                                            alert('Debe ingresar un motivo para rechazar la solicitud');
+                                            return;
+                                        } 
+                                        window.warehouseRequestDetailInstance.changeFinalStatus(
+                                            finalAction,
+                                            finalMotivo,
+                                            finalObservaciones
+                                        ); 
+                                        showFinalModal = false;"
+                                class="px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                                :class="finalAction === 'aprobada' ?
+                                    'bg-green-600 hover:bg-green-700' :
+                                    'bg-red-600 hover:bg-red-700'">
+                                <span
+                                    x-text="finalAction === 'aprobada' ? 'Confirmar Aprobación' : 'Confirmar Rechazo'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
+        window.warehouseRequestDetailInstance = null;
+
         function warehouseRequestDetail() {
             return {
                 solicitud: {},
-                expandedProductIndex: null, // Nueva variable para controlar qué producto está expandido
+                expandedProductIndex: null,
 
                 async init() {
+                    window.warehouseRequestDetailInstance = this;
                     await this.loadRequestDetail();
+                    this.setupModalListeners();
                 },
 
                 async loadRequestDetail() {
@@ -741,18 +987,69 @@
 
                         if (data.success) {
                             this.solicitud = data.solicitud;
-                            this.expandedProductIndex = null; // Resetear índice al cargar nuevos datos
+                            this.expandedProductIndex = null;
+                            toastr.success('Datos cargados correctamente');
                         } else {
-                            alert('Error al cargar los detalles de la solicitud');
-                            window.location.href = '/solicitudalmacen';
+                            toastr.error('Error al cargar los detalles de la solicitud');
+                            setTimeout(() => {
+                                window.location.href = '/solicitudalmacen';
+                            }, 2000);
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Error al cargar los detalles');
+                        toastr.error('Error al cargar los detalles');
                     }
                 },
 
-                // Nueva función para alternar la expansión de detalles del producto
+                setupModalListeners() {
+                    // Listener para abrir modal de producto
+                    this.$el.addEventListener('open-product-modal', (e) => {
+                        const {
+                            id,
+                            nombre,
+                            accion
+                        } = e.detail;
+                        const modal = document.querySelector('[x-data*="showProductModal"]');
+                        if (modal) {
+                            const ctx = Alpine.$data(modal);
+                            ctx.modalProductId = id;
+                            ctx.modalProductName = nombre;
+                            ctx.modalProductAction = accion;
+                            ctx.modalObservaciones = '';
+                            ctx.showProductModal = true;
+
+                            // Focus en el textarea después de que el modal se muestre
+                            setTimeout(() => {
+                                const textarea = modal.querySelector('textarea');
+                                if (textarea) textarea.focus();
+                            }, 100);
+                        }
+                    });
+
+                    // Listener para abrir modal final
+                    this.$el.addEventListener('open-final-modal', (e) => {
+                        const {
+                            accion
+                        } = e.detail;
+                        const modal = document.querySelector('[x-data*="showFinalModal"]');
+                        if (modal) {
+                            const ctx = Alpine.$data(modal);
+                            ctx.finalAction = accion;
+                            ctx.finalObservaciones = '';
+                            ctx.finalMotivo = '';
+                            ctx.showFinalModal = true;
+
+                            // Focus en el campo apropiado
+                            setTimeout(() => {
+                                if (accion === 'rechazada') {
+                                    const textarea = modal.querySelector('textarea');
+                                    if (textarea) textarea.focus();
+                                }
+                            }, 100);
+                        }
+                    });
+                },
+
                 toggleProductDetails(index) {
                     this.expandedProductIndex = this.expandedProductIndex === index ? null : index;
                 },
@@ -850,26 +1147,19 @@
                     if (!detalles) return false;
                     const aprobados = detalles.filter(d => d.estado === 'aprobado').length;
                     const rechazados = detalles.filter(d => d.estado === 'rechazado').length;
-
-                    // Solo se puede rechazar completamente si TODOS los productos están rechazados
                     return rechazados === detalles.length && aprobados === 0;
                 },
 
-                async changeProductStatus(productoId, nuevoEstado, productoNombre) {
+                // Función MODIFICADA para usar con modales
+                async changeProductStatus(productoId, nuevoEstado, productoNombre, observaciones = '') {
                     console.log('Cambiando estado del producto:', {
                         productoId: productoId,
                         nuevoEstado: nuevoEstado,
-                        productoNombre: productoNombre
+                        productoNombre: productoNombre,
+                        observaciones: observaciones
                     });
 
-                    const accion = nuevoEstado === 'aprobado' ? 'APROBAR' : 'RECHAZAR';
-                    if (!confirm(`¿Está seguro de ${accion} el producto:\n"${productoNombre}"?`)) {
-                        return;
-                    }
-
                     try {
-                        const observaciones = prompt('Ingrese observaciones (opcional):') || '';
-
                         const response = await fetch(`/solicitudalmacen/detalle/${productoId}/cambiar-estado`, {
                             method: 'POST',
                             headers: {
@@ -887,46 +1177,32 @@
                         console.log('Respuesta completa del servidor:', data);
 
                         if (data.success) {
-                            let mensaje = '✅ Estado del producto actualizado exitosamente';
+                            // Notificación de éxito con Toastr
+                            const accionTexto = nuevoEstado === 'aprobado' ? 'aprobado' : 'rechazado';
+                            toastr.success(`Producto "${productoNombre}" ${accionTexto} correctamente`);
+
+                            // Mostrar información adicional si existe
                             if (data.solicitud_estado) {
-                                mensaje += `\n📋 Estado de la solicitud: ${this.getStatusText(data.solicitud_estado)}`;
-                            }
-                            if (data.detalles_estado) {
-                                mensaje +=
-                                    `\n📊 Resumen: ${data.detalles_estado.aprobados} aprobados, ${data.detalles_estado.rechazados} rechazados, ${data.detalles_estado.pendientes} pendientes`;
+                                setTimeout(() => {
+                                    const estadoTexto = this.getStatusText(data.solicitud_estado);
+                                    toastr.info(`Estado de la solicitud: ${estadoTexto}`);
+                                }, 500);
                             }
 
-                            alert(mensaje);
+                            // Recargar los datos
                             await this.loadRequestDetail();
                         } else {
-                            alert('❌ Error: ' + data.message);
+                            toastr.error(data.message || 'Error al cambiar el estado');
                         }
                     } catch (error) {
                         console.error('Error completo:', error);
-                        alert('❌ Error al cambiar el estado del producto: ' + error.message);
+                        toastr.error('Error al conectar con el servidor');
                     }
                 },
 
-                async changeFinalStatus(estadoFinal) {
-                    const accion = estadoFinal === 'aprobada' ? 'APROBAR' : 'RECHAZAR';
-                    if (!confirm(
-                            `¿Está seguro de ${accion} la solicitud completa?\n\nEsta acción definirá el estado final de toda la solicitud.`
-                        )) {
-                        return;
-                    }
-
+                // Función MODIFICADA para usar con modales
+                async changeFinalStatus(estadoFinal, motivo_rechazo = null, observaciones = '') {
                     try {
-                        let motivo_rechazo = null;
-                        let observaciones = prompt('Ingrese observaciones (opcional):') || '';
-
-                        if (estadoFinal === 'rechazada') {
-                            motivo_rechazo = prompt('Ingrese el motivo del rechazo de la solicitud completa:');
-                            if (!motivo_rechazo) {
-                                alert('Debe ingresar un motivo para rechazar la solicitud completa.');
-                                return;
-                            }
-                        }
-
                         const response = await fetch(
                             `/solicitudalmacen/${@json($id)}/cambiar-estado-final`, {
                                 method: 'POST',
@@ -946,21 +1222,71 @@
                         console.log('Respuesta del servidor (estado final):', data);
 
                         if (data.success) {
-                            alert('✅ Estado final actualizado exitosamente');
+                            const accionTexto = estadoFinal === 'aprobada' ? 'aprobada' : 'rechazada';
+                            toastr.success(`Solicitud ${accionTexto} correctamente`);
+
                             await this.loadRequestDetail();
                         } else {
-                            alert('❌ Error: ' + data.message);
+                            toastr.error(data.message || 'Error al cambiar el estado final');
                         }
                     } catch (error) {
                         console.error('Error completo:', error);
-                        alert('❌ Error al cambiar el estado final');
+                        toastr.error('Error al conectar con el servidor');
+                    }
+                },
+
+                // Función para mostrar notificaciones bonitas (ya no se usa, pero la mantengo por si acaso)
+                showNotification(type, title, message) {
+                    // Si Toastr está disponible, lo usamos
+                    if (typeof toastr !== 'undefined') {
+                        switch (type) {
+                            case 'success':
+                                toastr.success(message, title);
+                                break;
+                            case 'error':
+                                toastr.error(message, title);
+                                break;
+                            case 'info':
+                                toastr.info(message, title);
+                                break;
+                            case 'warning':
+                                toastr.warning(message, title);
+                                break;
+                        }
+                    } else {
+                        // Fallback a notificaciones nativas
+                        alert(message);
                     }
                 },
 
                 printDetail() {
                     window.print();
+                    toastr.info('Preparando impresión...');
                 }
             }
         }
+
+        // Configurar Toastr si está disponible
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof toastr !== 'undefined') {
+                toastr.options = {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": true,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+            }
+        });
     </script>
 </x-layout.default>

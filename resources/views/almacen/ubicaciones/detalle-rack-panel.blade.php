@@ -306,7 +306,7 @@
                                         <!-- Actions -->
                                         <div class="flex space-x-3 mt-auto">
                                             <!-- Download Button -->
-                                            <button type="button" @click="downloadQR('vista')"
+                                            <button type="button" @click="downloadQR()"
                                                 class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -319,7 +319,7 @@
                                             </button>
 
                                             <!-- Copy Link Button -->
-                                            <button type="button" @click="copyQRUrl('vista')"
+                                            <button type="button" @click="copyQRUrl()"
                                                 class="flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
                                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -470,7 +470,7 @@
                                                                                                     <span
                                                                                                         class="text-xs font-medium text-gray-700"
                                                                                                         x-text="modelo.nombre || 'Sin nombre'"></span>
-                                                                                                
+
                                                                                                 </div>
                                                                                             </div>
                                                                                         </template>

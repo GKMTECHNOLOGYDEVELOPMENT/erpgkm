@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
 <x-layout.default title="Permisos - ERP Solutions Force">
     <div>
         <ul class="flex space-x-2 rtl:space-x-reverse mb-4">
@@ -1040,10 +1042,10 @@
 
                 <!-- === Asignar Permisos a Combinación === -->
                 <div x-show="selectedCombinacion"
-                    class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col">
+                    class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col h-[90vh] max-h-[90vh]">
 
                     <!-- Header Mejorado -->
-                    <div class="bg-primary px-8 py-6">
+                    <div class="bg-primary px-8 py-6 flex-shrink-0">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <button @click="closeCombinacion()"
@@ -1068,132 +1070,135 @@
                     </div>
 
                     <!-- === CONTENIDO PRINCIPAL === -->
-                    <main class="flex-1 p-8 space-y-8 overflow-y-auto">
+                    <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+                        <!-- Contenedor del contenido que SÍ tiene scroll -->
+                        <div class="flex-1 overflow-y-auto px-8 py-6 space-y-8">
+                            <!-- === BARRA DE HERRAMIENTAS === -->
+                            <section
+                                class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6 border-b border-gray-100 pb-6">
+                                <!-- Buscador -->
+                                <div class="flex-1 max-w-md">
+                                    <div class="relative">
+                                        <div
+                                            class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <input type="text" x-model="searchTerm" placeholder="Buscar permisos..."
+                                            class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm hover:border-gray-400 transition-all duration-200" />
+                                    </div>
+                                </div>
+                                <!-- Filtros y Acciones -->
+                                <div class="flex flex-wrap items-center gap-6 mt-2">
+                                    <select x-model="filterModule"
+                                        class="min-w-[300px] px-6 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm hover:shadow-md font-medium transition-all duration-200">
+                                        <option value="">Todos los módulos</option>
+                                        <template x-for="module in [...new Set(permisos.map(p => p.modulo))]"
+                                            :key="module">
+                                            <option x-text="module"></option>
+                                        </template>
+                                    </select>
 
-                        <!-- === BARRA DE HERRAMIENTAS === -->
-                        <section
-                            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6 border-b border-gray-100 pb-6">
-                            <!-- Buscador -->
-                            <div class="flex-1 max-w-md">
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                    <button @click="selectAllPermisos()"
+                                        class="px-7 py-3.5 text-base font-semibold text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 border-2 border-blue-200 transition-all duration-300 hover:scale-105 shadow-sm flex items-center space-x-2">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                d="M5 13l4 4L19 7"></path>
                                         </svg>
-                                    </div>
-                                    <input type="text" x-model="searchTerm" placeholder="Buscar permisos..."
-                                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm hover:border-gray-400 transition-all duration-200" />
+                                        <span>Seleccionar Todos</span>
+                                    </button>
                                 </div>
-                            </div>
-                            <!-- Filtros y Acciones -->
-                            <div class="flex flex-wrap items-center gap-6 mt-2">
-                                <select x-model="filterModule"
-                                    class="min-w-[300px] px-6 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm hover:shadow-md font-medium transition-all duration-200">
-                                    <option value="">Todos los módulos</option>
-                                    <template x-for="module in [...new Set(permisos.map(p => p.modulo))]"
-                                        :key="module">
-                                        <option x-text="module"></option>
-                                    </template>
-                                </select>
+                            </section>
 
-
-                                <button @click="selectAllPermisos()"
-                                    class="px-7 py-3.5 text-base font-semibold text-blue-700 bg-blue-50 rounded-xl hover:bg-blue-100 border-2 border-blue-200 transition-all duration-300 hover:scale-105 shadow-sm flex items-center space-x-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <!-- === INDICADOR DE FILTROS === -->
+                            <section x-show="searchTerm || filterModule"
+                                class="p-4 bg-blue-50 rounded-xl border border-blue-200 flex items-center justify-between">
+                                <div class="text-blue-700 font-medium">
+                                    <span x-text="filteredPermisos.length"></span> permisos encontrados
+                                    <span x-show="searchTerm">para "<span x-text="searchTerm"></span>"</span>
+                                    <span x-show="filterModule">en <span x-text="filterModule"></span></span>
+                                </div>
+                                <button @click="searchTerm = ''; filterModule = ''"
+                                    class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7"></path>
+                                            d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
-                                    <span>Seleccionar Todos</span>
+                                    <span>Limpiar filtros</span>
                                 </button>
-                            </div>
+                            </section>
 
-                        </section>
+                            <!-- === GRID DE PERMISOS === -->
+                            <section>
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    <template x-for="permiso in filteredPermisos" :key="permiso.idPermiso">
+                                        <label
+                                            :class="selectedPermisos.includes(permiso.idPermiso) ?
+                                                'border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg transform scale-[1.02]' :
+                                                'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md'"
+                                            class="border-2 rounded-2xl p-6 cursor-pointer transition-all duration-300 group relative overflow-hidden">
 
-                        <!-- === INDICADOR DE FILTROS === -->
-                        <section x-show="searchTerm || filterModule"
-                            class="p-4 bg-blue-50 rounded-xl border border-blue-200 flex items-center justify-between">
-                            <div class="text-blue-700 font-medium">
-                                <span x-text="filteredPermisos.length"></span> permisos encontrados
-                                <span x-show="searchTerm">para "<span x-text="searchTerm"></span>"</span>
-                                <span x-show="filterModule">en <span x-text="filterModule"></span></span>
-                            </div>
-                            <button @click="searchTerm = ''; filterModule = ''"
-                                class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center space-x-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                                <span>Limpiar filtros</span>
-                            </button>
-                        </section>
+                                            <div class="flex items-start space-x-4">
+                                                <!-- Checkbox -->
+                                                <input type="checkbox" :value="permiso.idPermiso"
+                                                    x-model="selectedPermisos"
+                                                    class="w-6 h-6 text-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
 
-                        <!-- === GRID DE PERMISOS === -->
-                        <section>
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                <template x-for="permiso in filteredPermisos" :key="permiso.idPermiso">
-                                    <label
-                                        :class="selectedPermisos.includes(permiso.idPermiso) ?
-                                            'border-blue-400 bg-gradient-to-br from-blue-50 to-indigo-50 shadow-lg transform scale-[1.02]' :
-                                            'border-gray-200 hover:border-blue-300 hover:bg-gray-50 hover:shadow-md'"
-                                        class="border-2 rounded-2xl p-6 cursor-pointer transition-all duration-300 group relative overflow-hidden">
+                                                <!-- Información -->
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center justify-between mb-4">
+                                                        <h3 class="font-bold text-gray-900 text-lg leading-tight group-hover:text-blue-700 transition-colors"
+                                                            x-text="permiso.nombre"></h3>
+                                                        <span
+                                                            class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-sm"
+                                                            x-text="permiso.modulo"></span>
+                                                    </div>
+                                                    <p class="text-sm text-gray-600 mb-4 leading-relaxed"
+                                                        x-text="permiso.descripcion || 'Sin descripción disponible'"
+                                                        :class="{ 'text-gray-400 italic': !permiso.descripcion }"></p>
 
-                                        <div class="flex items-start space-x-4">
-                                            <!-- Checkbox -->
-                                            <input type="checkbox" :value="permiso.idPermiso"
-                                                x-model="selectedPermisos"
-                                                class="w-6 h-6 text-blue-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
-
-                                            <!-- Información -->
-                                            <div class="flex-1 min-w-0">
-                                                <div class="flex items-center justify-between mb-4">
-                                                    <h3 class="font-bold text-gray-900 text-lg leading-tight group-hover:text-blue-700 transition-colors"
-                                                        x-text="permiso.nombre"></h3>
-                                                    <span
-                                                        class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-sm"
-                                                        x-text="permiso.modulo"></span>
-                                                </div>
-                                                <p class="text-sm text-gray-600 mb-4 leading-relaxed"
-                                                    x-text="permiso.descripcion || 'Sin descripción disponible'"
-                                                    :class="{ 'text-gray-400 italic': !permiso.descripcion }"></p>
-
-                                                <div class="flex items-center justify-between text-xs font-medium">
-                                                    <span x-show="selectedPermisos.includes(permiso.idPermiso)"
-                                                        class="text-green-600 font-semibold flex items-center bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
-                                                        <svg class="w-4 h-4 mr-1" fill="currentColor"
-                                                            viewBox="0 0 20 20">
-                                                            <path fill-rule="evenodd"
-                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                clip-rule="evenodd"></path>
-                                                        </svg>
-                                                        Activado
-                                                    </span>
+                                                    <div class="flex items-center justify-between text-xs font-medium">
+                                                        <span x-show="selectedPermisos.includes(permiso.idPermiso)"
+                                                            class="text-green-600 font-semibold flex items-center bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
+                                                            <svg class="w-4 h-4 mr-1" fill="currentColor"
+                                                                viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                    clip-rule="evenodd"></path>
+                                                            </svg>
+                                                            Activado
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </label>
-                                </template>
-                            </div>
-
-                            <!-- Vacío -->
-                            <div x-show="filteredPermisos.length === 0" class="text-center py-12">
-                                <div class="w-24 h-24 mx-auto mb-4 text-gray-300">
-                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                            d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                        </path>
-                                    </svg>
+                                        </label>
+                                    </template>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-500 mb-2">No se encontraron permisos</h3>
-                                <p class="text-gray-400">Intenta ajustar los filtros de búsqueda</p>
-                            </div>
-                        </section>
-                    </main>
 
-                    <!-- === PIE DE ACCIONES === -->
+                                <!-- Vacío -->
+                                <div x-show="filteredPermisos.length === 0" class="text-center py-12">
+                                    <div class="w-24 h-24 mx-auto mb-4 text-gray-300">
+                                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-gray-500 mb-2">No se encontraron permisos
+                                    </h3>
+                                    <p class="text-gray-400">Intenta ajustar los filtros de búsqueda</p>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- === PIE DE ACCIONES - SIEMPRE VISIBLE === -->
                     <footer
-                        class="bg-gray-50 border-t border-gray-200 px-8 py-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                        class="bg-gray-50 border-t border-gray-200 px-8 py-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between flex-shrink-0">
 
                         <!-- Contador de permisos -->
                         <div class="text-center md:text-left text-gray-700">
@@ -1206,14 +1211,13 @@
                         <div class="flex flex-col sm:flex-row justify-center md:justify-end gap-4 w-full md:w-auto">
                             <!-- Botón Cancelar -->
                             <button @click="closeCombinacion()"
-                                class="btn btn-danger w-full sm:w-auto px-8 py-3 text-base font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
+                                class="w-full sm:w-auto px-8 py-3 text-base font-semibold text-red-700 bg-red-50 rounded-xl hover:bg-red-100 border-2 border-red-200 transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center space-x-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                                 <span>Cancelar</span>
                             </button>
-
 
                             <button @click="guardarPermisos()"
                                 class="w-full sm:w-auto px-8 py-3 text-base font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:from-green-600 hover:to-emerald-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center space-x-2">
@@ -1231,7 +1235,8 @@
             </div>
         </div>
     </div>
-
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
         function sistemaPermisos() {
             return {
@@ -1258,12 +1263,6 @@
                     idTipoUsuario: '',
                     idTipoArea: '',
                     nombre_combinacion: ''
-                },
-
-                alert: {
-                    show: false,
-                    type: 'success',
-                    message: ''
                 },
 
                 // Propiedad computada para permisos filtrados
@@ -1306,7 +1305,7 @@
                         this.tiposUsuario = data.tiposUsuario;
                         this.tiposArea = data.tiposArea;
                     } catch (error) {
-                        this.showAlert('Error al cargar datos', 'error');
+                        this.showToast('Error al cargar datos', 'error');
                     }
                 },
 
@@ -1330,12 +1329,12 @@
                                 modulo: '',
                                 descripcion: ''
                             };
-                            this.showAlert('Permiso creado exitosamente', 'success');
+                            this.showToast('Permiso creado exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al crear permiso: ' + error.message, 'error');
+                        this.showToast('Error al crear permiso: ' + error.message, 'error');
                     }
                 },
 
@@ -1363,12 +1362,12 @@
                             const index = this.permisos.findIndex(p => p.idPermiso === this.editingPermiso.idPermiso);
                             this.permisos[index] = result.permiso;
                             this.cancelEditPermiso();
-                            this.showAlert('Permiso actualizado exitosamente', 'success');
+                            this.showToast('Permiso actualizado exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al actualizar permiso: ' + error.message, 'error');
+                        this.showToast('Error al actualizar permiso: ' + error.message, 'error');
                     }
                 },
 
@@ -1396,12 +1395,12 @@
 
                         if (result.success) {
                             this.permisos = this.permisos.filter(p => p.idPermiso !== id);
-                            this.showAlert('Permiso eliminado exitosamente', 'success');
+                            this.showToast('Permiso eliminado exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al eliminar permiso: ' + error.message, 'error');
+                        this.showToast('Error al eliminar permiso: ' + error.message, 'error');
                     }
                 },
 
@@ -1409,7 +1408,7 @@
                     try {
                         if (!this.combinacionForm.idRol || !this.combinacionForm.idTipoUsuario || !this.combinacionForm
                             .idTipoArea) {
-                            this.showAlert('Debe seleccionar Rol, Tipo de Usuario y Tipo de Área', 'error');
+                            this.showToast('Debe seleccionar Rol, Tipo de Usuario y Tipo de Área', 'error');
                             return;
                         }
 
@@ -1432,12 +1431,12 @@
                                 idTipoArea: '',
                                 nombre_combinacion: ''
                             };
-                            this.showAlert('Combinación creada exitosamente', 'success');
+                            this.showToast('Combinación creada exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al crear combinación: ' + error.message, 'error');
+                        this.showToast('Error al crear combinación: ' + error.message, 'error');
                     }
                 },
 
@@ -1456,12 +1455,12 @@
 
                         if (result.success) {
                             this.combinaciones = this.combinaciones.filter(c => c.idCombinacion !== id);
-                            this.showAlert('Combinación eliminada exitosamente', 'success');
+                            this.showToast('Combinación eliminada exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al eliminar combinación: ' + error.message, 'error');
+                        this.showToast('Error al eliminar combinación: ' + error.message, 'error');
                     }
                 },
 
@@ -1479,7 +1478,7 @@
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al cargar permisos de la combinación', 'error');
+                        this.showToast('Error al cargar permisos de la combinación', 'error');
                     }
                 },
 
@@ -1494,7 +1493,7 @@
                     try {
                         // Validar que hay una combinación seleccionada
                         if (!this.selectedCombinacion) {
-                            this.showAlert('No hay ninguna combinación seleccionada', 'error');
+                            this.showToast('No hay ninguna combinación seleccionada', 'error');
                             return;
                         }
 
@@ -1518,12 +1517,12 @@
                             this.combinaciones[index].permisos_count = this.selectedPermisos.length;
                             this.combinaciones[index].permisos = this.selectedPermisos;
 
-                            this.showAlert('Permisos guardados exitosamente', 'success');
+                            this.showToast('Permisos guardados exitosamente', 'success');
                         } else {
                             throw new Error(result.error);
                         }
                     } catch (error) {
-                        this.showAlert('Error al guardar permisos: ' + error.message, 'error');
+                        this.showToast('Error al guardar permisos: ' + error.message, 'error');
                     }
                 },
 
@@ -1534,23 +1533,54 @@
                         this.selectedPermisos = this.selectedPermisos.filter(id =>
                             !this.filteredPermisos.some(p => p.idPermiso === id)
                         );
+                        this.showToast('Todos los permisos deseleccionados', 'info');
                     } else {
                         // Seleccionar todos los permisos filtrados
                         const filteredIds = this.filteredPermisos.map(p => p.idPermiso);
                         const newSelection = [...new Set([...this.selectedPermisos, ...filteredIds])];
                         this.selectedPermisos = newSelection;
+                        this.showToast('Todos los permisos seleccionados', 'info');
                     }
                 },
 
-                showAlert(message, type = 'success') {
-                    this.alert = {
-                        show: true,
-                        message,
-                        type
+                // Método para mostrar notificaciones con Toastr
+                showToast(message, type = 'success') {
+                    // Configuración de Toastr
+                    toastr.options = {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": true,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": true,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "5000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
                     };
-                    setTimeout(() => {
-                        this.alert.show = false;
-                    }, 5000);
+
+                    // Mostrar toast según el tipo
+                    switch (type) {
+                        case 'success':
+                            toastr.success(message, 'Éxito');
+                            break;
+                        case 'error':
+                            toastr.error(message, 'Error');
+                            break;
+                        case 'warning':
+                            toastr.warning(message, 'Advertencia');
+                            break;
+                        case 'info':
+                            toastr.info(message, 'Información');
+                            break;
+                        default:
+                            toastr.success(message, 'Éxito');
+                    }
                 }
             }
         }
