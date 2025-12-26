@@ -58,7 +58,7 @@
 
                     <button type="button"
                         class="inline-flex items-center px-4 py-3 bg-primary text-white rounded-lg text-base font-semibold hover:from-green-600 hover:to-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 shadow-md hover:shadow-lg min-w-[140px] justify-center"
-                        @click="submitForm()">
+                        @click="openConfirmModal()">
                         <i class="fas fa-paper-plane mr-2 text-sm"></i>
                         Crear Solicitud
                     </button>
@@ -93,15 +93,6 @@
                                         <h2 class="text-lg font-bold text-gray-800">Información General</h2>
                                         <p class="text-sm text-gray-600">Datos básicos de la solicitud</p>
                                     </div>
-                                </div>
-                                <div class="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg border shadow-sm">
-                                    <i class="fas fa-hashtag text-gray-400 text-sm"></i>
-                                    <span class="text-sm text-gray-600">Código:</span>
-                                    <span class="text-sm font-bold text-blue-600" x-text="requestCode"></span>
-                                    <button type="button" class="text-gray-400 hover:text-blue-500 transition-colors"
-                                        @click="copyCode()" title="Copiar código">
-                                        <i class="fas fa-copy text-sm"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -243,7 +234,8 @@
                                         <input type="text"
                                             class="w-full pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all flatpickr-date bg-white cursor-pointer"
                                             x-model="form.fecha_requerida" x-ref="fechaRequeridaInput"
-                                            name="fecha_requerida" placeholder="Seleccione una fecha" readonly required>
+                                            name="fecha_requerida" placeholder="Seleccione una fecha" readonly
+                                            required>
 
                                     </div>
                                     <p class="text-xs text-gray-500 flex items-center gap-1"
@@ -303,8 +295,8 @@
                                     <div class="relative">
                                         <textarea
                                             class="w-full pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                                            rows="5" placeholder="Explique por qué es necesaria esta compra"
-                                            x-model="form.justificacion" name="justificacion" required></textarea>
+                                            rows="5" placeholder="Explique por qué es necesaria esta compra" x-model="form.justificacion"
+                                            name="justificacion" required></textarea>
 
                                     </div>
                                     <p class="text-xs text-gray-500 flex items-center gap-1"
@@ -419,7 +411,8 @@
                                         <span class="text-sm font-bold text-green-600"
                                             x-text="currentItemIndex + 1"></span>
                                         <span class="text-sm text-gray-500">de</span>
-                                        <span class="text-sm font-bold text-gray-700" x-text="form.items.length"></span>
+                                        <span class="text-sm font-bold text-gray-700"
+                                            x-text="form.items.length"></span>
                                     </div>
 
                                     <button type="button"
@@ -433,7 +426,8 @@
                                 <!-- Indicadores de puntos -->
                                 <div class="flex space-x-1" x-show="form.items.length > 1">
                                     <template x-for="(item, index) in form.items" :key="index">
-                                        <button type="button" class="w-2 h-2 rounded-full transition-all duration-300"
+                                        <button type="button"
+                                            class="w-2 h-2 rounded-full transition-all duration-300"
                                             :class="index === currentItemIndex ? 'bg-green-500' : 'bg-gray-300'"
                                             @click="currentItemIndex = index"></button>
                                     </template>
@@ -488,7 +482,8 @@
                                                             class="block text-sm font-semibold text-gray-800 flex items-center gap-2 mb-2">
                                                             <div
                                                                 class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
-                                                                <i class="fas fa-align-left text-green-600 text-xs"></i>
+                                                                <i
+                                                                    class="fas fa-align-left text-green-600 text-xs"></i>
                                                             </div>
                                                             Descripción del Artículo *
                                                         </label>
@@ -536,7 +531,8 @@
                                                                 :name="`items[${index}][cantidad]`"
                                                                 @change="updateItemTotal(index)" required>
                                                         </div>
-                                                        <p class="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+                                                        <p
+                                                            class="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
                                                             <i class="fas fa-info-circle text-gray-400"></i>
                                                             Cantidad original: <span x-text="item.cantidad"
                                                                 class="font-medium"></span>
@@ -592,7 +588,8 @@
                                                         </div>
                                                         <input type="hidden" :name="`items[${index}][idMonedas]`"
                                                             x-model="item.idMonedas">
-                                                        <p class="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
+                                                        <p
+                                                            class="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
                                                             <i class="fas fa-info-circle text-gray-400"></i>
                                                             <span x-text="getMonedaNombre(item.idMonedas)"
                                                                 class="font-medium"></span> - Precio estimado para
@@ -606,7 +603,8 @@
                                                             class="block text-sm font-semibold text-gray-800 flex items-center gap-2 mb-2">
                                                             <div
                                                                 class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
-                                                                <i class="fas fa-calculator text-green-600 text-xs"></i>
+                                                                <i
+                                                                    class="fas fa-calculator text-green-600 text-xs"></i>
                                                             </div>
                                                             Total
                                                         </label>
@@ -615,7 +613,8 @@
                                                             <span class="text-base font-bold text-emerald-700"
                                                                 x-text="getMonedaSimbolo(item.idMonedas) + (item.total_producto || '0.00')"></span>
                                                         </div>
-                                                        <input type="hidden" :name="`items[${index}][total_producto]`"
+                                                        <input type="hidden"
+                                                            :name="`items[${index}][total_producto]`"
                                                             x-model="item.total_producto">
                                                     </div>
 
@@ -715,8 +714,7 @@
                                                         <div class="relative">
                                                             <textarea
                                                                 class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 focus:bg-white transition-colors"
-                                                                rows="3" x-model="item.especificaciones_tecnicas"
-                                                                :name="`items[${index}][especificaciones_tecnicas]`"
+                                                                rows="3" x-model="item.especificaciones_tecnicas" :name="`items[${index}][especificaciones_tecnicas]`"
                                                                 readonly></textarea>
                                                         </div>
                                                     </div>
@@ -735,10 +733,8 @@
                                                         <div class="relative">
                                                             <textarea
                                                                 class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white"
-                                                                rows="3"
-                                                                placeholder="Justifique por qué necesita este producto específico..."
-                                                                x-model="item.justificacion_producto"
-                                                                :name="`items[${index}][justificacion_producto]`"></textarea>
+                                                                rows="3" placeholder="Justifique por qué necesita este producto específico..."
+                                                                x-model="item.justificacion_producto" :name="`items[${index}][justificacion_producto]`"></textarea>
                                                         </div>
                                                     </div>
 
@@ -756,9 +752,7 @@
                                                         <div class="relative">
                                                             <textarea
                                                                 class="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white"
-                                                                rows="3"
-                                                                placeholder="Observaciones adicionales para este producto..."
-                                                                x-model="item.observaciones_detalle"
+                                                                rows="3" placeholder="Observaciones adicionales para este producto..." x-model="item.observaciones_detalle"
                                                                 :name="`items[${index}][observaciones_detalle]`"></textarea>
                                                         </div>
                                                     </div>
@@ -823,7 +817,8 @@
                                         <div class="flex items-center justify-between">
                                             <div>
                                                 <p class="text-sm font-medium text-gray-600 mb-1">Total Artículos</p>
-                                                <p class="text-2xl font-bold text-gray-900" x-text="form.items.length">
+                                                <p class="text-2xl font-bold text-gray-900"
+                                                    x-text="form.items.length">
                                                 </p>
                                             </div>
                                             <div
@@ -953,9 +948,8 @@
                                     <div class="relative">
                                         <textarea
                                             class="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-                                            rows="3"
-                                            placeholder="Observaciones adicionales, condiciones especiales, etc."
-                                            x-model="form.observaciones" name="observaciones"></textarea>
+                                            rows="3" placeholder="Observaciones adicionales, condiciones especiales, etc." x-model="form.observaciones"
+                                            name="observaciones"></textarea>
                                         <i class="fas fa-comment-dots absolute left-3 top-3 text-gray-400"></i>
                                     </div>
                                     <p class="text-xs text-gray-500 flex items-center gap-1"
@@ -973,8 +967,8 @@
                                     </label>
                                     <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-purple-400 transition-all duration-300"
                                         @click="$refs.fileInput.click()">
-                                        <input type="file" x-ref="fileInput" multiple class="hidden" name="archivos[]"
-                                            @change="handleFileSelect">
+                                        <input type="file" x-ref="fileInput" multiple class="hidden"
+                                            name="archivos[]" @change="handleFileSelect">
                                         <i class="fas fa-cloud-upload-alt text-purple-400 text-4xl mb-3"></i>
                                         <h4 class="text-sm font-medium text-gray-900 mb-1">Arrastre archivos o haga
                                             clic para seleccionar</h4>
@@ -1075,14 +1069,16 @@
                                             :class="{ 'text-blue-600 font-medium': updatingPreview }"></span>
 
                                         <span class="text-gray-600">Prioridad:</span>
-                                        <span class="font-medium" :class="{
-                                                'text-red-500': form.idPrioridad == 1,
-                                                'text-orange-500': form.idPrioridad == 2,
-                                                'text-yellow-500': form.idPrioridad == 3,
-                                                'text-green-500': form.idPrioridad == 4,
+                                        <span class="font-medium"
+                                            :class="{
+                                                'text-success': form.idPrioridad == 1,
+                                                'text-warning': form.idPrioridad == 2,
+                                                'text-red-500': form.idPrioridad == 3,
+                                                'text-orange-600': form.idPrioridad == 4,
                                                 'text-gray-500': !form.idPrioridad,
                                                 'text-blue-600': updatingPreview
-                                            }" x-text="getPriorityText(form.idPrioridad) || 'No especificada'"></span>
+                                            }"
+                                            x-text="getPriorityText(form.idPrioridad) || 'No especificada'"></span>
 
                                         <span class="text-gray-600">Fecha Requerida:</span>
                                         <span
@@ -1091,7 +1087,8 @@
 
                                         <span class="text-gray-600" x-show="form.idCentroCosto">Centro de
                                             Costo:</span>
-                                        <span x-show="form.idCentroCosto" x-text="getCostCenterText(form.idCentroCosto)"
+                                        <span x-show="form.idCentroCosto"
+                                            x-text="getCostCenterText(form.idCentroCosto)"
                                             :class="{ 'text-blue-600 font-medium': updatingPreview }"></span>
 
                                         <span class="text-gray-600" x-show="form.proyecto_asociado">Proyecto:</span>
@@ -1374,6 +1371,492 @@
                 </div>
             </div>
         </form>
+        <!-- Modal de Confirmación CORREGIDO -->
+        <div class="fixed inset-0 bg-black/60 z-[999] hidden" :class="showConfirmModal && '!block'">
+
+            <div class="flex items-start justify-center min-h-screen px-4 py-8"
+                @click.self="showConfirmModal = false">
+
+                <div x-show="showConfirmModal" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-6xl flex flex-col max-h-[90vh]">
+
+                    <!-- Header del Modal -->
+                    <div
+                        class="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 flex-shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-check-circle text-white text-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-2xl font-bold text-gray-900">Confirmar Solicitud de Compra</h2>
+                                    <p class="text-gray-600 mt-1">Revise los detalles antes de crear la solicitud</p>
+                                </div>
+                            </div>
+                            <button @click="showConfirmModal = false"
+                                class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors">
+                                <i class="fas fa-times text-gray-500 text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Contenido del Modal (scrollable) -->
+                    <div class="flex-1 overflow-y-auto p-6">
+                        <!-- Información General -->
+                        <div class="mb-8">
+                            <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                                <!-- Grid de 3 columnas -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <!-- Columna 1 -->
+                                    <div class="space-y-4">
+                                        <!-- Solicitud de Almacén -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-warehouse text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Solicitud Almacén:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-gray-900"
+                                                x-text="getSolicitudAlmacenText(form.idSolicitudAlmacen) || 'No seleccionada'"></span>
+                                        </div>
+
+                                        <!-- Solicitante Almacén -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-user-tag text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Solicitante Almacén:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-blue-600"
+                                                x-text="form.solicitante_almacen || 'No especificado'"></span>
+                                        </div>
+
+                                        <!-- Solicitante Compra -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-user-check text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Solicitante Compra:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-green-600"
+                                                x-text="form.solicitante_compra || 'No especificado'"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Columna 2 -->
+                                    <div class="space-y-4">
+                                        <!-- Departamento -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-building text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Departamento:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-purple-600"
+                                                x-text="getDepartmentText(form.idTipoArea) || 'No especificado'"></span>
+                                        </div>
+
+                                        <!-- Prioridad -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-flag text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Prioridad:</span>
+                                            </div>
+                                            <span class="text-sm font-medium"
+                                                :class="{
+                                                    'text-success': form.idPrioridad == 1,
+                                                    'text-warning': form.idPrioridad == 2,
+                                                    'text-red-500': form.idPrioridad == 3,
+                                                    'text-orange-600': form.idPrioridad == 4,
+                                                    'text-gray-500': !form.idPrioridad
+                                                }"
+                                                x-text="getPriorityText(form.idPrioridad) || 'No especificada'"></span>
+                                        </div>
+
+                                        <!-- Centro de Costo -->
+                                        <div x-show="form.idCentroCosto">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-money-bill-wave text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Centro de Costo:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-indigo-600"
+                                                x-text="getCostCenterText(form.idCentroCosto)"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Columna 3 -->
+                                    <div class="space-y-4">
+                                        <!-- Fecha Requerida -->
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="far fa-calendar-alt text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Fecha Requerida:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-gray-900"
+                                                x-text="form.fecha_requerida ? formatPreviewDate(form.fecha_requerida) : 'No especificada'"></span>
+                                        </div>
+
+                                        <!-- Proyecto Asociado -->
+                                        <div x-show="form.proyecto_asociado">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-project-diagram text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Proyecto Asociado:</span>
+                                            </div>
+                                            <span class="text-sm font-medium text-teal-600"
+                                                x-text="form.proyecto_asociado"></span>
+                                        </div>
+
+                                        <!-- Justificación (resumen) -->
+                                        <div x-show="form.justificacion">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-comment-alt text-gray-400 text-sm"></i>
+                                                <span class="text-xs text-gray-600">Justificación:</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600 line-clamp-2" x-text="form.justificacion">
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Artículos Solicitados -->
+                        <div
+                            class="panel rounded-xl shadow-md border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg">
+                            <div class="px-5 py-4 border-b border-gray-100 bg-green-50">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
+                                            <i class="fas fa-box-open text-white text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h2 class="text-lg font-bold text-gray-800">Artículos Solicitados</h2>
+                                            <p class="text-sm text-gray-600"
+                                                x-text="form.items.length + ' producto(s) cargado(s)'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-5">
+                                <!-- Controles del slider -->
+                                <div class="flex items-center justify-between mb-4" x-show="form.items.length > 1">
+                                    <div class="flex items-center space-x-2">
+                                        <button type="button"
+                                            class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            @click="currentItemIndex = (currentItemIndex - 1 + form.items.length) % form.items.length"
+                                            :disabled="form.items.length <= 1">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+
+                                        <div class="flex items-center space-x-1">
+                                            <span class="text-sm font-medium text-gray-700">Artículo</span>
+                                            <span class="text-sm font-bold text-green-600"
+                                                x-text="currentItemIndex + 1"></span>
+                                            <span class="text-sm text-gray-500">de</span>
+                                            <span class="text-sm font-bold text-gray-700"
+                                                x-text="form.items.length"></span>
+                                        </div>
+
+                                        <button type="button"
+                                            class="p-2 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            @click="currentItemIndex = (currentItemIndex + 1) % form.items.length"
+                                            :disabled="form.items.length <= 1">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Indicadores de puntos -->
+                                    <div class="flex space-x-1" x-show="form.items.length > 1">
+                                        <template x-for="(item, index) in form.items" :key="index">
+                                            <button type="button"
+                                                class="w-2 h-2 rounded-full transition-all duration-300"
+                                                :class="index === currentItemIndex ? 'bg-green-500' : 'bg-gray-300'"
+                                                @click="currentItemIndex = index"></button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Contenedor del slider -->
+                                <div
+                                    class="relative overflow-hidden bg-white rounded-xl shadow-sm border border-gray-200">
+                                    <div class="flex transition-transform duration-500 ease-in-out"
+                                        :style="`transform: translateX(-${currentItemIndex * 100}%)`">
+                                        <template x-for="(item, index) in form.items" :key="index">
+                                            <div class="w-full flex-shrink-0 px-4 py-6">
+                                                <div
+                                                    class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-all duration-300 hover:shadow-md">
+                                                    <!-- Header del artículo -->
+                                                    <div
+                                                        class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+                                                        <div class="flex items-center space-x-4">
+                                                            <div
+                                                                class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                                                                <i class="fas fa-box text-white text-sm"></i>
+                                                            </div>
+                                                            <div class="flex flex-col">
+                                                                <span class="text-base font-semibold text-gray-800"
+                                                                    x-text="`Artículo ${index + 1}`"></span>
+                                                                <div class="flex items-center space-x-2 mt-1">
+                                                                    <span
+                                                                        class="text-xs bg-gray-100 px-2.5 py-1 rounded-md border border-gray-200 text-gray-700 font-medium"
+                                                                        x-text="item.codigo_producto || `${requestCode}-${String(index + 1).padStart(2, '0')}`"></span>
+                                                                    <span
+                                                                        class="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-md border border-green-200 flex items-center gap-1.5"
+                                                                        x-show="item.fromAlmacen">
+                                                                        <i class="fas fa-check-circle text-xs"></i>
+                                                                        Desde Almacén
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            class="text-sm text-gray-500 flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg">
+                                                            <i class="fas fa-layer-group text-gray-400"></i>
+                                                            <span x-text="index + 1" class="font-medium"></span> de
+                                                            <span x-text="form.items.length"
+                                                                class="font-medium"></span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Detalles del artículo -->
+                                                    <div class="space-y-4" x-show="form.items.length > 0">
+                                                        <div class="flex items-center justify-between">
+                                                            <h3
+                                                                class="text-sm font-bold text-gray-800 flex items-center space-x-2">
+                                                                <span>Artículos Solicitados</span>
+                                                            </h3>
+                                                            <span
+                                                                class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium"
+                                                                x-text="form.items.length + ' artículo(s)'"></span>
+                                                        </div>
+
+                                                        <div class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                                                            <template x-for="(item, index) in form.items"
+                                                                :key="index">
+                                                                <div
+                                                                    class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-200">
+                                                                    <!-- Header con número y total -->
+                                                                    <div class="flex justify-between items-start mb-3">
+                                                                        <div class="flex items-start space-x-3 flex-1">
+                                                                            <!-- Número del artículo -->
+                                                                            <div
+                                                                                class="flex-shrink-0 w-6 h-6 bg-success rounded-full flex items-center justify-center">
+                                                                                <span
+                                                                                    class="text-xs font-bold text-white"
+                                                                                    x-text="index + 1"></span>
+                                                                            </div>
+
+                                                                            <!-- Información principal -->
+                                                                            <div class="flex-1 min-w-0">
+                                                                                <h4 class="text-sm font-semibold text-gray-800 leading-tight mb-1"
+                                                                                    x-text="item.descripcion_producto || 'Sin descripción'">
+                                                                                </h4>
+                                                                                <div
+                                                                                    class="flex items-center space-x-2 text-xs text-gray-500">
+                                                                                    <span
+                                                                                        class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200"
+                                                                                        x-text="item.codigo_producto || `${requestCode}-${String(index + 1).padStart(2, '0')}`"></span>
+                                                                                    <span x-show="item.fromAlmacen"
+                                                                                        class="bg-green-50 text-green-700 px-2 py-0.5 rounded-full border border-green-200 flex items-center space-x-1">
+                                                                                        <i
+                                                                                            class="fas fa-check text-xs"></i>
+                                                                                        <span>Desde Almacén</span>
+                                                                                    </span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Total del artículo -->
+                                                                        <div class="text-right ml-3">
+                                                                            <span
+                                                                                class="text-sm font-bold text-blue-600 whitespace-nowrap"
+                                                                                x-text="getMonedaSimbolo(item.idMonedas) + (parseFloat(item.total_producto) || 0).toLocaleString('es-PE', {minimumFractionDigits: 2})"></span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Detalles del artículo -->
+                                                                    <div
+                                                                        class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                                                        <!-- Columna izquierda -->
+                                                                        <div class="space-y-2">
+                                                                            <!-- Cantidad y unidad -->
+                                                                            <div class="flex items-center space-x-2">
+                                                                                <i
+                                                                                    class="fas fa-cube text-primary text-xs w-4"></i>
+                                                                                <span class="text-gray-700 font-medium"
+                                                                                    x-text="item.cantidad_aprobada + ' ' + (item.unidad || 'unidad')"></span>
+                                                                            </div>
+
+                                                                            <!-- Precio unitario -->
+                                                                            <div class="flex items-center space-x-2">
+                                                                                <i
+                                                                                    class="fas fa-tag text-primary text-xs w-4"></i>
+                                                                                <span class="text-gray-700"
+                                                                                    x-text="getMonedaSimbolo(item.idMonedas) + (parseFloat(item.precio_unitario_estimado) || 0).toLocaleString('es-PE', {minimumFractionDigits: 2}) + ' c/u'"></span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Columna derecha -->
+                                                                        <div class="space-y-2">
+                                                                            <!-- Categoría -->
+                                                                            <div x-show="item.categoria"
+                                                                                class="flex items-center space-x-2">
+                                                                                <i
+                                                                                    class="fas fa-tags text-primary text-xs w-4"></i>
+                                                                                <span
+                                                                                    class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs border border-blue-200"
+                                                                                    x-text="item.categoria"></span>
+                                                                            </div>
+
+                                                                            <!-- Moneda -->
+                                                                            <div class="flex items-center space-x-2">
+                                                                                <i
+                                                                                    class="fas fa-globe text-primary text-xs w-4"></i>
+                                                                                <span
+                                                                                    class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full text-xs border border-blue-200"
+                                                                                    x-text="getMonedaNombre(item.idMonedas)"></span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Estado vacío -->
+                                <div x-show="form.items.length === 0"
+                                    class="text-center py-12 rounded-xl border-2 border-dashed border-gray-300 transition-all duration-300 hover:border-green-400">
+                                    <i class="fas fa-boxes text-gray-300 text-5xl mb-4"></i>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No hay artículos cargados</h3>
+                                    <p class="text-gray-500 max-w-md mx-auto">Seleccione una solicitud de almacén
+                                        aprobada para cargar los productos</p>
+                                </div>
+
+                                <!-- Resumen de Artículos -->
+                                <div class="mt-8 bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 shadow-lg"
+                                    x-show="form.items.length > 0">
+                                    <!-- Header del Resumen -->
+                                    <div class="flex items-center justify-between mb-6">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
+                                                <i class="fas fa-chart-pie text-white text-lg"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-xl font-bold text-gray-900">Resumen de la Solicitud
+                                                </h3>
+                                                <p class="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                                    <i class="fas fa-info-circle text-green-500"></i>
+                                                    <span x-text="form.items.length + ' artículo(s) en total'"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tarjetas de Métricas Principales -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                                        <!-- Total Artículos -->
+                                        <div
+                                            class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-600 mb-1">Total Artículos
+                                                    </p>
+                                                    <p class="text-2xl font-bold text-gray-900"
+                                                        x-text="form.items.length"></p>
+                                                </div>
+                                                <div
+                                                    class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-boxes text-blue-500 text-lg"></i>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3 pt-3 border-t border-gray-100">
+                                                <div class="flex items-center gap-2 text-xs text-gray-500">
+                                                    <i class="fas fa-cube"></i>
+                                                    <span x-text="totalUnidades + ' unidades totales'"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Subtotal -->
+                                        <div
+                                            class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-600 mb-1">Subtotal</p>
+                                                    <p class="text-2xl font-bold text-gray-900"
+                                                        x-text="getResumenMoneda() + subtotal.toLocaleString('es-PE', {minimumFractionDigits: 2})">
+                                                    </p>
+                                                </div>
+                                                <div
+                                                    class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-receipt text-green-500 text-lg"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- IGV -->
+                                        <div
+                                            class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-600 mb-1">IGV (18%)</p>
+                                                    <p class="text-2xl font-bold text-gray-900"
+                                                        x-text="getResumenMoneda() + igv.toLocaleString('es-PE', {minimumFractionDigits: 2})">
+                                                    </p>
+                                                </div>
+                                                <div
+                                                    class="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
+                                                    <i class="fas fa-percentage text-orange-500 text-lg"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Total General -->
+                                        <div
+                                            class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-5 shadow-lg text-white hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-green-100 mb-1">Total General
+                                                    </p>
+                                                    <p class="text-2xl font-bold"
+                                                        x-text="getResumenMoneda() + total.toLocaleString('es-PE', {minimumFractionDigits: 2})">
+                                                    </p>
+                                                </div>
+                                                <div
+                                                    class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                                                    <i class="fas fa-file-invoice-dollar text-white text-lg"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer del Modal (fijo abajo) -->
+                    <div class="px-8 py-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                        <div class="flex justify-end gap-4">
+                            <button @click="showConfirmModal = false"
+                                class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-semibold flex items-center gap-2">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </button>
+                            <button @click="finalSubmit()"
+                                class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl font-semibold flex items-center gap-2">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmar y Crear Solicitud
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1394,10 +1877,10 @@
                     monthSelectorType: 'static',
                     prevArrow: '<svg class="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M5.4 10.8l1.4-1.4-4-4 4-4L5.4 0 0 5.4z" /></svg>',
                     nextArrow: '<svg class="fill-current" width="7" height="11" viewBox="0 0 7 11"><path d="M1.4 10.8L0 9.4l4-4-4-4L1.4 0l5.4 5.4z" /></svg>',
-                    onReady: function (selectedDates, dateStr, instance) {
+                    onReady: function(selectedDates, dateStr, instance) {
                         instance.element.value = dateStr;
                     },
-                    onChange: function (selectedDates, dateStr, instance) {
+                    onChange: function(selectedDates, dateStr, instance) {
                         // SOLUCIÓN: Usar Alpine directamente en lugar de acceder a __x
                         const alpineElement = document.querySelector('[x-data]');
                         if (alpineElement && alpineElement.__x) {
@@ -1410,14 +1893,14 @@
         }
 
         // Inicializar cuando Alpine.js esté listo
-        document.addEventListener('alpine:init', function () {
+        document.addEventListener('alpine:init', function() {
             initializeFlatpickr();
         });
 
 
         function createPurchaseRequest() {
             return {
-
+                showConfirmModal: false,
                 showTableView: true, // true para vista tabla, false para vista detallada
                 expandedItem: null, // índice del item expandido
                 allExpanded: false,
@@ -1688,7 +2171,7 @@
             <strong>Debug Info:</strong><br>
             Items: ${this.form.items.length}<br>
             Monedas: ${this.form.items.map(item => `Item ${item.idMonedas}`).join(', ')}
-        `;
+            `;
                     }
                 },
 
@@ -1749,123 +2232,214 @@
                             '{{ $area->idTipoArea }}': '{{ $area->nombre }}',
                         @endforeach
                     };
-                return departments[idTipoArea] || idTipoArea;
-            },
-
-                getCostCenterText(idCentroCosto) {
-                const costCenters = {
-                    @foreach ($centrosCosto as $centro)
-                        '{{ $centro->idCentroCosto }}': '{{ $centro->codigo }} - {{ $centro->nombre }}',
-                    @endforeach
-                    };
-            return costCenters[idCentroCosto] || idCentroCosto;
-        },
-
-        getPriorityText(idPrioridad) {
-            const priorities = {
-                @foreach ($prioridades as $prioridad)
-                    '{{ $prioridad->idPrioridad }}': '{{ $prioridad->nombre }}',
-                @endforeach
-                    };
-        return priorities[idPrioridad] || idPrioridad;
+                    return departments[idTipoArea] || idTipoArea;
                 },
 
-        formatPreviewDate(dateString) {
-            const options = {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        },
+                getCostCenterText(idCentroCosto) {
+                    const costCenters = {
+                        @foreach ($centrosCosto as $centro)
+                            '{{ $centro->idCentroCosto }}': '{{ $centro->codigo }} - {{ $centro->nombre }}',
+                        @endforeach
+                    };
+                    return costCenters[idCentroCosto] || idCentroCosto;
+                },
 
-        copyCode() {
-            navigator.clipboard.writeText(this.requestCode).then(() => {
-                const btn = event.target.closest('.btn-copy');
-                const originalHTML = btn.innerHTML;
-                btn.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
-                        </svg>
-                    `;
-                btn.style.color = '#10b981';
+                getPriorityText(idPrioridad) {
+                    const priorities = {
+                        @foreach ($prioridades as $prioridad)
+                            '{{ $prioridad->idPrioridad }}': '{{ $prioridad->nombre }}',
+                        @endforeach
+                    };
+                    return priorities[idPrioridad] || idPrioridad;
+                },
 
-                setTimeout(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.style.color = '';
-                }, 2000);
-            });
-        },
+                formatPreviewDate(dateString) {
+                    const options = {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    };
+                    return new Date(dateString).toLocaleDateString('es-ES', options);
+                },
 
-        handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            files.forEach(file => {
-                this.form.files.push(file);
-            });
-        },
+                openConfirmModal() {
+                    console.log('=== DEBUG openConfirmModal ===');
+                    console.log('1. Método ejecutado');
+                    console.log('2. this.showConfirmModal antes:', this.showConfirmModal);
+                    console.log('3. Items en formulario:', this.form.items.length);
+                    console.log('4. Campos obligatorios:', {
+                        idSolicitudAlmacen: this.form.idSolicitudAlmacen,
+                        solicitante_compra: this.form.solicitante_compra,
+                        idTipoArea: this.form.idTipoArea,
+                        idPrioridad: this.form.idPrioridad,
+                        fecha_requerida: this.form.fecha_requerida,
+                        justificacion: this.form.justificacion
+                    });
 
-        removeFile(index) {
-            this.form.files.splice(index, 1);
-        },
+                    // Primero validar campos obligatorios básicos
+                    if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea ||
+                        !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
 
-        resetForm() {
-            // Crear modal personalizado
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-95 animate-scaleIn" id="modalContent">
-            <!-- Header -->
-            <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-2xl">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                        console.log('5. Validación falló - Campos incompletos');
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error('Por favor complete todos los campos obligatorios (*)', 'Campos incompletos', {
+                                closeButton: true,
+                                timeOut: 5000,
+                                progressBar: true
+                            });
+                        } else {
+                            alert('Por favor complete todos los campos obligatorios (*)');
+                        }
+                        return;
+                    }
+
+                    if (this.form.items.length === 0) {
+                        console.log('6. Validación falló - Sin items');
+
+                        if (typeof toastr !== 'undefined') {
+                            toastr.warning('Debe seleccionar una solicitud de almacén con productos aprobados',
+                                'Sin productos', {
+                                    closeButton: true,
+                                    timeOut: 5000,
+                                    progressBar: true
+                                });
+                        } else {
+                            alert('Debe seleccionar una solicitud de almacén con productos aprobados');
+                        }
+                        return;
+                    }
+
+                    // Validar cada artículo
+                    let hasErrors = false;
+                    for (let i = 0; i < this.form.items.length; i++) {
+                        const item = this.form.items[i];
+                        if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item
+                            .idMonedas) {
+                            console.log('7. Validación falló - Artículo incompleto:', i + 1);
+
+                            this.currentItemIndex = i; // Navegar al artículo con error
+
+                            setTimeout(() => {
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.error(`Complete los campos del artículo ${i + 1}`,
+                                        'Artículo incompleto', {
+                                            closeButton: true,
+                                            timeOut: 6000,
+                                            progressBar: true
+                                        });
+                                } else {
+                                    alert(`Por favor complete todos los campos del artículo ${i + 1}`);
+                                }
+                            }, 300);
+
+                            hasErrors = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasErrors) {
+                        console.log('8. Todas las validaciones pasaron - Abriendo modal');
+                        console.log('9. this.showConfirmModal después:', true);
+
+                        this.showConfirmModal = true;
+
+                        // Depuración adicional
+                        setTimeout(() => {
+                            console.log('10. Modal debería estar visible');
+                            console.log('11. Estado actual showConfirmModal:', this.showConfirmModal);
+                        }, 100);
+                    }
+                },
+
+                // Método final para enviar el formulario
+                finalSubmit() {
+                    // Cerrar el modal
+                    this.showConfirmModal = false;
+
+                    // Mostrar notificación de envío
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success('Creando solicitud de compra...', 'Procesando', {
+                            timeOut: 2000,
+                            progressBar: true
+                        });
+                    }
+
+                    // Enviar el formulario después de un breve retraso
+                    setTimeout(() => {
+                        document.getElementById('purchaseRequestForm').submit();
+                    }, 500);
+                },
+
+                handleFileSelect(event) {
+                    const files = Array.from(event.target.files);
+                    files.forEach(file => {
+                        this.form.files.push(file);
+                    });
+                },
+
+                removeFile(index) {
+                    this.form.files.splice(index, 1);
+                },
+
+                resetForm() {
+                    // Crear modal personalizado
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+                    modal.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all duration-300 scale-95 animate-scaleIn" id="modalContent">
+                <!-- Header -->
+                <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-2xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Confirmar Limpieza</h3>
+                            <p class="text-sm text-gray-600">Esta acción no se puede deshacer</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900">Confirmar Limpieza</h3>
-                        <p class="text-sm text-gray-600">Esta acción no se puede deshacer</p>
+                </div>
+
+                <!-- Body -->
+                <div class="px-6 py-4">
+                    <div class="flex items-start gap-3 mb-4">
+                        <i class="fas fa-eraser text-amber-500 text-xl mt-0.5"></i>
+                        <div>
+                            <p class="text-gray-700 font-medium mb-1">¿Está seguro de que desea limpiar todos los campos?</p>
+                            <p class="text-sm text-gray-500">Se perderán todos los datos ingresados en el formulario.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-shield-exclamation text-red-500"></i>
+                            <span class="text-sm text-red-700 font-medium">Advertencia: Esta acción no se puede deshacer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" id="cancelReset" 
+                            class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 font-medium">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </button>
+                        <button type="button" id="confirmReset" 
+                            class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 font-medium shadow-md hover:shadow-lg">
+                            <i class="fas fa-eraser mr-2"></i>
+                            Sí, Limpiar Todo
+                        </button>
                     </div>
                 </div>
             </div>
+        `;
 
-            <!-- Body -->
-            <div class="px-6 py-4">
-                <div class="flex items-start gap-3 mb-4">
-                    <i class="fas fa-eraser text-amber-500 text-xl mt-0.5"></i>
-                    <div>
-                        <p class="text-gray-700 font-medium mb-1">¿Está seguro de que desea limpiar todos los campos?</p>
-                        <p class="text-sm text-gray-500">Se perderán todos los datos ingresados en el formulario.</p>
-                    </div>
-                </div>
-
-                <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <i class="fas fa-shield-exclamation text-red-500"></i>
-                        <span class="text-sm text-red-700 font-medium">Advertencia: Esta acción no se puede deshacer</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-                <div class="flex gap-3 justify-end">
-                    <button type="button" id="cancelReset" 
-                        class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 font-medium">
-                        <i class="fas fa-times mr-2"></i>
-                        Cancelar
-                    </button>
-                    <button type="button" id="confirmReset" 
-                        class="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 font-medium shadow-md hover:shadow-lg">
-                        <i class="fas fa-eraser mr-2"></i>
-                        Sí, Limpiar Todo
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-
-            // Agregar estilos de animación
-            const style = document.createElement('style');
-            style.textContent = `
+                    // Agregar estilos de animación
+                    const style = document.createElement('style');
+                    style.textContent = `
         @keyframes scaleIn {
             from {
                 opacity: 0;
@@ -1880,227 +2454,227 @@
             animation: scaleIn 0.3s ease-out forwards;
         }
     `;
-            document.head.appendChild(style);
+                    document.head.appendChild(style);
 
-            document.body.appendChild(modal);
+                    document.body.appendChild(modal);
 
-            // Event listeners
-            const confirmReset = document.getElementById('confirmReset');
-            const cancelReset = document.getElementById('cancelReset');
-            const modalContent = document.getElementById('modalContent');
+                    // Event listeners
+                    const confirmReset = document.getElementById('confirmReset');
+                    const cancelReset = document.getElementById('cancelReset');
+                    const modalContent = document.getElementById('modalContent');
 
-            const cleanup = () => {
-                modal.remove();
-                style.remove();
-            };
-
-            const closeModal = () => {
-                if (modalContent) {
-                    modalContent.style.transform = 'scale(0.95)';
-                    modalContent.style.opacity = '0';
-                }
-                setTimeout(cleanup, 300);
-            };
-
-            confirmReset.onclick = () => {
-                // Cerrar el modal inmediatamente
-                closeModal();
-
-                // Ejecutar la limpieza del formulario después de cerrar el modal
-                setTimeout(() => {
-                    this.form = {
-                        idSolicitudAlmacen: '',
-                        solicitante_almacen: '',
-                        solicitante_compra: '{{ $solicitanteCompra }}',
-                        idTipoArea: '',
-                        idPrioridad: '',
-                        fecha_requerida: new Date().toISOString().split('T')[0],
-                        idCentroCosto: '',
-                        proyecto_asociado: '',
-                        justificacion: '',
-                        observaciones: '',
-                        items: [],
-                        files: [],
-                        departamento_auto: '',
-                        prioridad_auto: '',
-                        fecha_requerida_auto: '',
-                        centro_costo_auto: '',
-                        justificacion_auto: '',
-                        observaciones_auto: ''
+                    const cleanup = () => {
+                        modal.remove();
+                        style.remove();
                     };
 
-                    // Resetear Flatpickr
-                    const flatpickrInstance = document.querySelector('.flatpickr-date')._flatpickr;
-                    if (flatpickrInstance) {
-                        flatpickrInstance.setDate(this.form.fecha_requerida);
-                    }
+                    const closeModal = () => {
+                        if (modalContent) {
+                            modalContent.style.transform = 'scale(0.95)';
+                            modalContent.style.opacity = '0';
+                        }
+                        setTimeout(cleanup, 300);
+                    };
 
-                    // Mostrar notificación de éxito con Toastr
-                    if (typeof toastr !== 'undefined') {
-                        toastr.success('Formulario limpiado correctamente', '¡Éxito!', {
-                            closeButton: true,
-                            progressBar: true,
-                            positionClass: "toast-top-right",
-                            timeOut: 4000,
-                            extendedTimeOut: 2000,
-                            showMethod: "fadeIn",
-                            hideMethod: "fadeOut"
-                        });
-                    } else {
-                        // Fallback si Toastr no está disponible
-                        console.log('Toastr no disponible, usando fallback');
-                        this.showNotification('Formulario limpiado correctamente', 'success');
-                    }
-                }, 350); // Un poco después de que el modal se cierre
-            };
+                    confirmReset.onclick = () => {
+                        // Cerrar el modal inmediatamente
+                        closeModal();
 
-            cancelReset.onclick = () => {
-                // Mostrar notificación de cancelación con Toastr
-                if (typeof toastr !== 'undefined') {
-                    toastr.info('La operación fue cancelada', 'Acción cancelada', {
-                        timeOut: 3000,
-                        progressBar: true
-                    });
-                }
-                closeModal();
-            };
+                        // Ejecutar la limpieza del formulario después de cerrar el modal
+                        setTimeout(() => {
+                            this.form = {
+                                idSolicitudAlmacen: '',
+                                solicitante_almacen: '',
+                                solicitante_compra: '{{ $solicitanteCompra }}',
+                                idTipoArea: '',
+                                idPrioridad: '',
+                                fecha_requerida: new Date().toISOString().split('T')[0],
+                                idCentroCosto: '',
+                                proyecto_asociado: '',
+                                justificacion: '',
+                                observaciones: '',
+                                items: [],
+                                files: [],
+                                departamento_auto: '',
+                                prioridad_auto: '',
+                                fecha_requerida_auto: '',
+                                centro_costo_auto: '',
+                                justificacion_auto: '',
+                                observaciones_auto: ''
+                            };
 
-            // Cerrar al hacer clic fuera del modal
-            modal.onclick = (e) => {
-                if (e.target === modal) {
-                    // Mostrar notificación de cancelación con Toastr
-                    if (typeof toastr !== 'undefined') {
-                        toastr.info('La operación fue cancelada', 'Acción cancelada', {
-                            timeOut: 3000,
-                            progressBar: true
-                        });
-                    }
-                    closeModal();
-                }
-            };
+                            // Resetear Flatpickr
+                            const flatpickrInstance = document.querySelector('.flatpickr-date')._flatpickr;
+                            if (flatpickrInstance) {
+                                flatpickrInstance.setDate(this.form.fecha_requerida);
+                            }
 
-            // Cerrar con tecla Escape
-            const handleEscape = (e) => {
-                if (e.key === 'Escape') {
-                    // Mostrar notificación de cancelación con Toastr
-                    if (typeof toastr !== 'undefined') {
-                        toastr.info('La operación fue cancelada', 'Acción cancelada', {
-                            timeOut: 3000,
-                            progressBar: true
-                        });
-                    }
-                    closeModal();
-                    document.removeEventListener('keydown', handleEscape);
-                }
-            };
-            document.addEventListener('keydown', handleEscape);
-        },
+                            // Mostrar notificación de éxito con Toastr
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success('Formulario limpiado correctamente', '¡Éxito!', {
+                                    closeButton: true,
+                                    progressBar: true,
+                                    positionClass: "toast-top-right",
+                                    timeOut: 4000,
+                                    extendedTimeOut: 2000,
+                                    showMethod: "fadeIn",
+                                    hideMethod: "fadeOut"
+                                });
+                            } else {
+                                // Fallback si Toastr no está disponible
+                                console.log('Toastr no disponible, usando fallback');
+                                this.showNotification('Formulario limpiado correctamente', 'success');
+                            }
+                        }, 350); // Un poco después de que el modal se cierre
+                    };
 
-        // Función auxiliar para notificaciones (fallback si Toastr no está disponible)
-        showNotification(message, type = 'info') {
-            // Crear notificación toast
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-blue-500';
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+                    cancelReset.onclick = () => {
+                        // Mostrar notificación de cancelación con Toastr
+                        if (typeof toastr !== 'undefined') {
+                            toastr.info('La operación fue cancelada', 'Acción cancelada', {
+                                timeOut: 3000,
+                                progressBar: true
+                            });
+                        }
+                        closeModal();
+                    };
 
-            toast.className =
-                `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full z-50`;
-            toast.innerHTML = `
+                    // Cerrar al hacer clic fuera del modal
+                    modal.onclick = (e) => {
+                        if (e.target === modal) {
+                            // Mostrar notificación de cancelación con Toastr
+                            if (typeof toastr !== 'undefined') {
+                                toastr.info('La operación fue cancelada', 'Acción cancelada', {
+                                    timeOut: 3000,
+                                    progressBar: true
+                                });
+                            }
+                            closeModal();
+                        }
+                    };
+
+                    // Cerrar con tecla Escape
+                    const handleEscape = (e) => {
+                        if (e.key === 'Escape') {
+                            // Mostrar notificación de cancelación con Toastr
+                            if (typeof toastr !== 'undefined') {
+                                toastr.info('La operación fue cancelada', 'Acción cancelada', {
+                                    timeOut: 3000,
+                                    progressBar: true
+                                });
+                            }
+                            closeModal();
+                            document.removeEventListener('keydown', handleEscape);
+                        }
+                    };
+                    document.addEventListener('keydown', handleEscape);
+                },
+
+                // Función auxiliar para notificaciones (fallback si Toastr no está disponible)
+                showNotification(message, type = 'info') {
+                    // Crear notificación toast
+                    const toast = document.createElement('div');
+                    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+                    const icon = type === 'success' ? 'fa-check-circle' : 'fa-info-circle';
+
+                    toast.className =
+                        `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full z-50`;
+                    toast.innerHTML = `
         <div class="flex items-center gap-3">
             <i class="fas ${icon} text-lg"></i>
             <span class="font-medium">${message}</span>
         </div>
     `;
 
-            document.body.appendChild(toast);
+                    document.body.appendChild(toast);
 
-            // Animación de entrada
-            setTimeout(() => {
-                toast.classList.remove('translate-x-full');
-                toast.classList.add('translate-x-0');
-            }, 100);
+                    // Animación de entrada
+                    setTimeout(() => {
+                        toast.classList.remove('translate-x-full');
+                        toast.classList.add('translate-x-0');
+                    }, 100);
 
-            // Auto-remover después de 3 segundos
-            setTimeout(() => {
-                toast.classList.remove('translate-x-0');
-                toast.classList.add('translate-x-full');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 3000);
-        },
+                    // Auto-remover después de 3 segundos
+                    setTimeout(() => {
+                        toast.classList.remove('translate-x-0');
+                        toast.classList.add('translate-x-full');
+                        setTimeout(() => {
+                            toast.remove();
+                        }, 300);
+                    }, 3000);
+                },
 
-        // Modifica el método submitForm para usar Toastr en las validaciones
-        submitForm() {
-            // Debug antes de enviar
-            console.log('Datos a enviar:', JSON.stringify(this.form.items, null, 2));
+                // Modifica el método submitForm para usar Toastr en las validaciones
+                submitForm() {
+                    // Debug antes de enviar
+                    console.log('Datos a enviar:', JSON.stringify(this.form.items, null, 2));
 
-            if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea ||
-                !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
+                    if (!this.form.idSolicitudAlmacen || !this.form.solicitante_compra || !this.form.idTipoArea ||
+                        !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.justificacion) {
 
-                if (typeof toastr !== 'undefined') {
-                    toastr.error('Por favor complete todos los campos obligatorios (*)', 'Campos incompletos', {
-                        closeButton: true,
-                        timeOut: 5000,
-                        progressBar: true
+                        if (typeof toastr !== 'undefined') {
+                            toastr.error('Por favor complete todos los campos obligatorios (*)', 'Campos incompletos', {
+                                closeButton: true,
+                                timeOut: 5000,
+                                progressBar: true
+                            });
+                        } else {
+                            alert('Por favor complete todos los campos obligatorios (*)');
+                        }
+                        return;
+                    }
+
+                    if (this.form.items.length === 0) {
+                        if (typeof toastr !== 'undefined') {
+                            toastr.warning('Debe seleccionar una solicitud de almacén con productos aprobados',
+                                'Sin productos', {
+                                    closeButton: true,
+                                    timeOut: 5000,
+                                    progressBar: true
+                                });
+                        } else {
+                            alert('Debe seleccionar una solicitud de almacén con productos aprobados');
+                        }
+                        return;
+                    }
+
+                    // Validar que todos los items tengan moneda
+                    for (let i = 0; i < this.form.items.length; i++) {
+                        const item = this.form.items[i];
+                        if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item
+                            .idMonedas) {
+                            const errorMessage =
+                                `Por favor complete todos los campos obligatorios del artículo ${i + 1}\n\nFaltante: ${!item.descripcion_producto ? 'Descripción' : !item.cantidad_aprobada ? 'Cantidad' : !item.precio_unitario_estimado ? 'Precio' : 'Moneda'}`;
+
+                            if (typeof toastr !== 'undefined') {
+                                toastr.error(errorMessage, 'Error en artículo ' + (i + 1), {
+                                    closeButton: true,
+                                    timeOut: 6000,
+                                    progressBar: true
+                                });
+                            } else {
+                                alert(errorMessage);
+                            }
+                            return;
+                        }
+                    }
+
+                    // Mostrar datos finales en consola
+                    console.log('Enviando formulario con datos:', {
+                        items: this.form.items,
+                        formData: this.form
                     });
-                } else {
-                    alert('Por favor complete todos los campos obligatorios (*)');
-                }
-                return;
-            }
 
-            if (this.form.items.length === 0) {
-                if (typeof toastr !== 'undefined') {
-                    toastr.warning('Debe seleccionar una solicitud de almacén con productos aprobados',
-                        'Sin productos', {
-                        closeButton: true,
-                        timeOut: 5000,
-                        progressBar: true
-                    });
-                } else {
-                    alert('Debe seleccionar una solicitud de almacén con productos aprobados');
-                }
-                return;
-            }
-
-            // Validar que todos los items tengan moneda
-            for (let i = 0; i < this.form.items.length; i++) {
-                const item = this.form.items[i];
-                if (!item.descripcion_producto || !item.cantidad_aprobada || !item.precio_unitario_estimado || !item
-                    .idMonedas) {
-                    const errorMessage =
-                        `Por favor complete todos los campos obligatorios del artículo ${i + 1}\n\nFaltante: ${!item.descripcion_producto ? 'Descripción' : !item.cantidad_aprobada ? 'Cantidad' : !item.precio_unitario_estimado ? 'Precio' : 'Moneda'}`;
-
+                    // Mostrar notificación de envío exitoso
                     if (typeof toastr !== 'undefined') {
-                        toastr.error(errorMessage, 'Error en artículo ' + (i + 1), {
-                            closeButton: true,
-                            timeOut: 6000,
+                        toastr.success('Enviando solicitud de compra...', 'Procesando', {
+                            timeOut: 2000,
                             progressBar: true
                         });
-                    } else {
-                        alert(errorMessage);
                     }
-                    return;
+
+                    document.getElementById('purchaseRequestForm').submit();
                 }
-            }
-
-            // Mostrar datos finales en consola
-            console.log('Enviando formulario con datos:', {
-                items: this.form.items,
-                formData: this.form
-            });
-
-            // Mostrar notificación de envío exitoso
-            if (typeof toastr !== 'undefined') {
-                toastr.success('Enviando solicitud de compra...', 'Procesando', {
-                    timeOut: 2000,
-                    progressBar: true
-                });
-            }
-
-            document.getElementById('purchaseRequestForm').submit();
-        }
             }
         }
     </script>
