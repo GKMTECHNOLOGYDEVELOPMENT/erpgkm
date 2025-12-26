@@ -199,8 +199,8 @@
                                 <option value="" class="text-gray-400">Todas las prioridades</option>
                                 <option value="low" class="text-green-600">🟢 Baja</option>
                                 <option value="medium" class="text-yellow-600">🟡 Media</option>
-                                <option value="high" class="text-orange-600">🟠 Alta</option>
-                                <option value="urgent" class="text-red-600">🔴 Urgente</option>
+                                <option value="high" class="text-red-600">🔴 Alta</option>
+                                <option value="urgent" class="text-orange-600">🟠 Urgente</option>
                             </select>
                         </div>
                     </div>
@@ -330,8 +330,8 @@
                                                 :class="{
                                                     'text-success': request.priority === 'low',
                                                     'text-warning': request.priority === 'medium',
-                                                    'text-orange-600': request.priority === 'high',
-                                                    'text-danger': request.priority === 'urgent'
+                                                    'text-danger': request.priority === 'high',
+                                                    'text-orange-600': request.priority === 'urgent'
                                                 }">
                                                 <span x-text="getPriorityText(request.priority)"></span>
                                             </div>

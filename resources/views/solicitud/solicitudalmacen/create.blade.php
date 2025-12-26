@@ -2,8 +2,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-
+    <style>
+        /* Asegurar que la altura coincida con otros inputs */
+        .select2-selection {
+            min-height: 48px !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+    </style>
     <div x-data="warehouseCreate()" x-init="init()" class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         <!-- Breadcrumb -->
@@ -59,9 +67,10 @@
                         Limpiar
                     </button>
 
+                    <!-- Reemplaza tu botón actual por este: -->
                     <button type="button"
                         class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-base font-semibold hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg min-w-[140px] justify-center"
-                        @click="submitForm()">
+                        @click="validateAndShowModal()">
                         <i class="fas fa-paper-plane mr-2 text-sm"></i>
                         Crear Solicitud
                     </button>
@@ -86,15 +95,6 @@
                                     <h2 class="text-lg font-bold text-gray-800">Información General</h2>
                                     <p class="text-sm text-gray-600">Datos básicos de la solicitud de abastecimiento</p>
                                 </div>
-                            </div>
-                            <div class="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg border shadow-sm">
-                                <i class="fas fa-hashtag text-gray-400 text-sm"></i>
-                                <span class="text-sm text-gray-600">Código:</span>
-                                <span class="text-sm font-bold text-blue-600" x-text="requestCode"></span>
-                                <button type="button" class="text-gray-400 hover:text-blue-500 transition-colors"
-                                    @click="copyCode()" title="Copiar código">
-                                    <i class="fas fa-copy text-sm"></i>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -365,7 +365,7 @@
 
                                             <!-- Grid de información del producto -->
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <!-- Buscar Artículo -->
+                                                <!-- Buscar Artículo con Select2 -->
                                                 <div class="md:col-span-2 space-y-2">
                                                     <label
                                                         class="block text-sm font-semibold text-gray-800 flex items-center gap-2 mb-2">
@@ -373,21 +373,16 @@
                                                             class="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
                                                             <i class="fas fa-search text-green-600 text-xs"></i>
                                                         </div>
-                                                        Buscar Artículo por Código
+                                                        Buscar Artículo
                                                     </label>
                                                     <div class="relative">
-                                                        <input type="text"
-                                                            class="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white"
-                                                            placeholder="Ingrese código de barras, SKU o código repuesto..."
+                                                        <select
+                                                            class="w-full select2-article-search py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                                                             x-model="product.searchCode"
-                                                            @input.debounce.500="searchArticle(index)">
-                                                        <i
-                                                            class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                                                        <button
-                                                            class="absolute right-3 top-3 text-green-600 hover:text-green-700"
-                                                            @click="searchArticle(index)">
-                                                            <i class="fas fa-search-plus"></i>
-                                                        </button>
+                                                            data-placeholder="Busque por código, nombre o descripción..."
+                                                            style="width: 100%;">
+                                                            <option value=""></option>
+                                                        </select>
                                                     </div>
                                                 </div>
 
@@ -713,8 +708,8 @@
                                         :class="{
                                             'text-green-500': getPrioridadNivel(form.idPrioridad) === 'low',
                                             'text-yellow-500': getPrioridadNivel(form.idPrioridad) === 'medium',
-                                            'text-orange-500': getPrioridadNivel(form.idPrioridad) === 'high',
-                                            'text-red-500': getPrioridadNivel(form.idPrioridad) === 'urgent',
+                                            'text-red-500': getPrioridadNivel(form.idPrioridad) === 'high',
+                                            'text-orange-600': getPrioridadNivel(form.idPrioridad) === 'urgent',
                                             'text-gray-500': !form.idPrioridad
                                         }"
                                         x-text="getPrioridadText(form.idPrioridad) || 'No especificada'"></span>
@@ -953,15 +948,339 @@
                 </div>
             </div>
         </div>
+        <!-- Modal de Confirmación -->
+        <div x-show="showConfirmationModal" x-cloak class="fixed inset-0 bg-[black]/60 z-[9999] overflow-y-auto"
+            aria-labelledby="modal-title" role="dialog" aria-modal="true"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+            <!-- Overlay negro semi-transparente -->
+            <div class="fixed inset-0 bg-[black]/60 transition-opacity" @click="showConfirmationModal = false"></div>
+
+            <div class="flex items-start justify-center min-h-screen px-4 py-8"
+                @click.self="showConfirmationModal = false">
+                <!-- Modal Content -->
+                <div class="relative transform rounded-lg bg-white shadow-xl transition-all w-full max-w-4xl my-8"
+                    @click.stop x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+
+                    <!-- Modal Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clipboard-check text-primary text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-white" id="modal-title">Confirmar Solicitud</h3>
+                                    <p class="text-blue-100 text-sm mt-1">Revise todos los datos antes de crear la
+                                        solicitud</p>
+                                </div>
+                            </div>
+                            <button type="button" class="text-white hover:text-blue-200 transition-colors"
+                                @click="showConfirmationModal = false">
+                                <i class="fas fa-times text-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="bg-gray-50 px-6 py-5 max-h-[70vh] overflow-y-auto">
+                        <!-- Resumen de la Solicitud -->
+                        <div class="space-y-6">
+                            <!-- Información General - EN 3 COLUMNAS -->
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                <div
+                                    class="px-5 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
+                                    <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        Información General
+                                    </h4>
+                                </div>
+                                <div class="p-5">
+                                    <!-- GRID DE 3 COLUMNAS -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <!-- Columna 1 -->
+                                        <div class="space-y-4">
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Título:</span>
+                                                <p class="text-sm text-gray-900 font-semibold truncate"
+                                                    x-text="form.titulo || 'Sin título'"
+                                                    :title="form.titulo || 'Sin título'"></p>
+                                            </div>
+
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Área:</span>
+                                                <p class="text-sm text-gray-900"
+                                                    x-text="getAreaText(form.idTipoArea) || 'No especificada'"></p>
+                                            </div>
+
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Fecha Requerida:</span>
+                                                <p class="text-sm text-gray-900"
+                                                    x-text="form.fecha_requerida ? formatPreviewDate(form.fecha_requerida) : 'No especificada'">
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Columna 2 -->
+                                        <div class="space-y-4">
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Tipo de
+                                                    Solicitud:</span>
+                                                <p class="text-sm text-gray-900"
+                                                    x-text="getTipoSolicitudText(form.idTipoSolicitud) || 'No especificado'">
+                                                </p>
+                                            </div>
+
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Solicitante:</span>
+                                                <p class="text-sm text-gray-900 font-semibold truncate"
+                                                    x-text="form.solicitante || 'No especificado'"
+                                                    :title="form.solicitante || 'No especificado'"></p>
+                                            </div>
+
+                                            <div class="space-y-1" x-show="form.idCentroCosto">
+                                                <span class="text-sm font-medium text-gray-600">Centro de Costo:</span>
+                                                <p class="text-sm text-gray-900 truncate"
+                                                    x-text="getCentroCostoText(form.idCentroCosto)"
+                                                    :title="getCentroCostoText(form.idCentroCosto)"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Columna 3 -->
+                                        <div class="space-y-4">
+                                            <div class="space-y-1">
+                                                <span class="text-sm font-medium text-gray-600">Prioridad:</span>
+                                                <p class="text-sm font-medium"
+                                                    :class="{
+                                                        'text-green-500': getPrioridadNivel(form
+                                                            .idPrioridad) === 'low',
+                                                        'text-yellow-500': getPrioridadNivel(form
+                                                            .idPrioridad) === 'medium',
+                                                        'text-red-500': getPrioridadNivel(form
+                                                            .idPrioridad) === 'high',
+                                                        'text-orange-600': getPrioridadNivel(form
+                                                            .idPrioridad) === 'urgent',
+                                                        'text-gray-500': !form.idPrioridad
+                                                    }"
+                                                    x-text="getPrioridadText(form.idPrioridad) || 'No especificada'">
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de Productos -->
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                                x-show="form.productos.length > 0">
+                                <div
+                                    class="px-5 py-3 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                            <i class="fas fa-boxes text-green-500"></i>
+                                            Productos Solicitados
+                                        </h4>
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-bold">
+                                            <span x-text="form.productos.length"></span> producto(s)
+                                            <span class="ml-2" x-text="totalUnits"></span> unidades
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="p-5">
+                                    <div class="space-y-4 max-h-80 overflow-y-auto">
+                                        <template x-for="(product, index) in form.productos" :key="index">
+                                            <div
+                                                class="border border-gray-200 rounded-lg p-4 hover:border-green-300 transition-colors">
+                                                <div class="flex items-start justify-between mb-3">
+                                                    <div class="flex items-start space-x-3">
+                                                        <div
+                                                            class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <span class="text-sm font-bold text-green-700"
+                                                                x-text="index + 1"></span>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="text-sm font-bold text-gray-800 mb-1 truncate"
+                                                                x-text="product.descripcion || 'Sin descripción'"
+                                                                :title="product.descripcion || 'Sin descripción'"></h5>
+                                                            <div class="flex items-center space-x-2">
+                                                                <span
+                                                                    class="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-200"
+                                                                    x-text="product.codigo_barras || 'Sin código'"></span>
+                                                                <span
+                                                                    class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded border border-purple-200"
+                                                                    x-show="product.categoria_nombre"
+                                                                    x-text="product.categoria_nombre"></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <p class="text-sm font-bold text-gray-900">
+                                                            <span x-text="product.cantidad"></span>
+                                                            <span x-text="product.unidad_nombre || 'unidad'"></span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                                    <div class="space-y-1">
+                                                        <template x-if="product.marca_nombre">
+                                                            <div class="flex items-center space-x-2">
+                                                                <i class="fas fa-tag text-gray-400 text-xs"></i>
+                                                                <span class="text-gray-600">Marca:</span>
+                                                                <span class="font-medium text-gray-800"
+                                                                    x-text="product.marca_nombre"></span>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        <template x-if="product.justificacion_producto">
+                                                            <div class="flex items-start space-x-2">
+                                                                <i
+                                                                    class="fas fa-comment text-gray-400 text-xs mt-0.5"></i>
+                                                                <div>
+                                                                    <span
+                                                                        class="text-gray-600 block">Justificación:</span>
+                                                                    <span class="text-gray-700"
+                                                                        x-text="product.justificacion_producto"></span>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <template x-if="product.especificaciones">
+                                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                                        <div class="flex items-start space-x-2">
+                                                            <i class="fas fa-tools text-gray-400 text-xs mt-0.5"></i>
+                                                            <div class="flex-1">
+                                                                <span
+                                                                    class="text-xs font-medium text-gray-600 block mb-1">Especificaciones
+                                                                    Técnicas:</span>
+                                                                <p class="text-xs text-gray-700"
+                                                                    x-text="product.especificaciones"></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Justificación y Observaciones -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Justificación -->
+                                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                    <div
+                                        class="px-5 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-gray-200">
+                                        <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                            <i class="fas fa-comment-alt text-amber-500"></i>
+                                            Justificación
+                                        </h4>
+                                    </div>
+                                    <div class="p-5">
+                                        <p class="text-sm text-gray-700"
+                                            x-text="form.justificacion || 'Sin justificación proporcionada'"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Observaciones -->
+                                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                                    x-show="form.observaciones">
+                                    <div
+                                        class="px-5 py-3 bg-gradient-to-r from-gray-50 to-blue-50 border-b border-gray-200">
+                                        <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                            <i class="fas fa-sticky-note text-gray-500"></i>
+                                            Observaciones
+                                        </h4>
+                                    </div>
+                                    <div class="p-5">
+                                        <p class="text-sm text-gray-700" x-text="form.observaciones"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Archivos Adjuntos -->
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                                x-show="form.files.length > 0">
+                                <div
+                                    class="px-5 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-gray-200">
+                                    <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                        <i class="fas fa-paperclip text-purple-500"></i>
+                                        Archivos Adjuntos
+                                        <span class="ml-2 text-sm font-normal text-purple-600"
+                                            x-text="form.files.length + ' archivo(s)'"></span>
+                                    </h4>
+                                </div>
+                                <div class="p-5">
+                                    <div class="space-y-2">
+                                        <template x-for="(file, index) in form.files" :key="index">
+                                            <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                                                <div class="flex items-center space-x-3">
+                                                    <i class="fas fa-file text-purple-500"></i>
+                                                    <div>
+                                                        <span class="text-sm text-gray-700 block"
+                                                            x-text="file.name"></span>
+                                                        <span class="text-xs text-gray-500"
+                                                            x-text="formatFileSize(file.size)"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div class="text-sm text-gray-500">
+                                <p>Revise cuidadosamente todos los datos antes de confirmar.</p>
+                                <p class="mt-1">La solicitud será creada con estado: <span
+                                        class="font-bold text-blue-600">Pendiente</span></p>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button type="button"
+                                    class="inline-flex items-center px-4 py-2.5 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-200 font-medium"
+                                    @click="showConfirmationModal = false">
+                                    <i class="fas fa-edit mr-2"></i>
+                                    Volver a editar
+                                </button>
+                                <button type="button"
+                                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-200 shadow-sm hover:shadow-md font-bold"
+                                    @click="submitFormFromModal()">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    Confirmar y Crear Solicitud
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         function warehouseCreate() {
             return {
                 // Datos cargados desde la base de datos
+                showConfirmationModal: false,
                 tiposSolicitud: @json($tiposSolicitud),
                 prioridades: @json($prioridades),
                 centrosCosto: @json($centrosCosto),
@@ -998,7 +1317,7 @@
                     const today = new Date().toISOString().split('T')[0];
                     this.form.fecha_requerida = today;
 
-                    // Configurar toastr (opcional, si quieres personalizar)
+                    // Configurar toastr
                     toastr.options = {
                         "closeButton": true,
                         "progressBar": true,
@@ -1006,7 +1325,7 @@
                         "timeOut": "5000"
                     };
 
-                    // Inicializar Flatpickr después de que Alpine esté listo
+                    // Inicializar Flatpickr
                     this.$nextTick(() => {
                         this.initializeFlatpickr();
                     });
@@ -1050,38 +1369,40 @@
                     }
                 },
 
-                // Resto de tus métodos mantienen igual...
                 getAreaText(idTipoArea) {
                     const area = this.areas.find(a => a.idTipoArea == idTipoArea);
                     return area ? area.nombre : '';
                 },
 
-                async searchArticle(index) {
+                async searchArticle(index, selectedData = null) {
                     const product = this.form.productos[index];
-                    if (!product.searchCode) return;
+
+                    if (!selectedData) return;
 
                     try {
-                        const response = await fetch(`/solicitudalmacen/buscar-articulo/${product.searchCode}`);
-                        const data = await response.json();
+                        // Llenar automáticamente los campos del producto
+                        product.idArticulo = selectedData.idArticulos;
+                        product.descripcion = selectedData.nombre;
+                        product.codigo_barras = selectedData.codigo_barras || '';
+                        product.codigo_repuesto = selectedData.codigo_repuesto || '';
+                        product.categoria_nombre = selectedData.categoria || '';
+                        product.unidad_nombre = selectedData.unidad || '';
+                        product.marca_nombre = selectedData.marca || '';
+                        product.modelo_nombre = ''; // Si no lo tienes en los datos
+                        product.precio_compra = selectedData.precio_compra || '';
 
-                        if (data.success && data.articulo) {
-                            const articulo = data.articulo;
+                        // Limpiar el campo de búsqueda
+                        setTimeout(() => {
+                            const selectElement = $(`[data-product-index="${index}"] .select2-article-search`);
+                            if (selectElement.length) {
+                                selectElement.val(null).trigger('change');
+                            }
+                            product.searchCode = '';
+                        }, 100);
 
-                            // Llenar automáticamente los campos del producto
-                            product.idArticulo = articulo.idArticulos;
-                            product.descripcion = articulo.nombre;
-                            product.codigo_barras = articulo.codigo_barras;
-                            product.categoria_nombre = articulo.categoria_nombre || '';
-                            product.unidad_nombre = articulo.unidad_nombre || '';
-                            product.marca_nombre = articulo.marca_nombre || '';
-                            product.modelo_nombre = articulo.modelo_nombre || '';
-
-                        } else {
-                            toastr.error('Artículo no encontrado');
-                        }
                     } catch (error) {
-                        console.error('Error buscando artículo:', error);
-                        toastr.error('Error al buscar el artículo');
+                        console.error('Error procesando artículo:', error);
+                        toastr.error('Error al procesar el artículo');
                     }
                 },
 
@@ -1105,7 +1426,70 @@
                         especificaciones: '',
                         justificacion_producto: ''
                     });
+
                     this.currentProductIndex = this.form.productos.length - 1;
+
+                    // Inicializar Select2 en el nuevo producto
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const lastSelect = $('.select2-article-search').last();
+                            if (lastSelect.length && !lastSelect.hasClass('select2-hidden-accessible')) {
+                                const self = this;
+                                const currentIndex = this.currentProductIndex;
+
+                                lastSelect.select2({
+                                    placeholder: "Busque por código, nombre o descripción...",
+                                    allowClear: true,
+                                    width: '100%',
+                                    language: {
+                                        noResults: function() {
+                                            return "No se encontraron resultados";
+                                        },
+                                        searching: function() {
+                                            return "Buscando...";
+                                        }
+                                    },
+                                    ajax: {
+                                        url: '/solicitudalmacen/buscar-articulos',
+                                        type: 'GET',
+                                        dataType: 'json',
+                                        delay: 250,
+                                        data: function(params) {
+                                            console.log('Buscando:', params.term);
+                                            return {
+                                                search: params.term,
+                                                page: params.page || 1
+                                            };
+                                        },
+                                        processResults: function(data) {
+                                            console.log('Resultados:', data);
+                                            return {
+                                                results: data.data || [],
+                                                pagination: {
+                                                    more: data.next_page_url ? true : false
+                                                }
+                                            };
+                                        },
+                                        cache: true
+                                    },
+                                    minimumInputLength: 2,
+                                    templateResult: formatArticle,
+                                    templateSelection: formatArticleSelection
+                                });
+
+                                // Agregar evento change
+                                lastSelect.on('select2:select', function(event) {
+                                    const selectedData = event.params.data;
+                                    console.log('Seleccionado:', selectedData);
+
+                                    // Llenar los campos directamente con los datos
+                                    if (selectedData) {
+                                        self.searchArticle(currentIndex, selectedData);
+                                    }
+                                });
+                            }
+                        }, 100);
+                    });
                 },
 
                 removeProduct(index) {
@@ -1144,26 +1528,19 @@
                 },
 
                 formatPreviewDate(dateString) {
+                    if (!dateString) return 'No especificada';
+
+                    // Añadir la hora a medianoche para evitar problemas de zona horaria
+                    const date = new Date(dateString + 'T00:00:00');
+
                     const options = {
                         year: 'numeric',
                         month: 'long',
-                        day: 'numeric'
+                        day: 'numeric',
+                        timeZone: 'America/Lima' // Cambia esto por tu zona horaria
                     };
-                    return new Date(dateString).toLocaleDateString('es-ES', options);
-                },
 
-                copyCode() {
-                    navigator.clipboard.writeText(this.requestCode).then(() => {
-                        // Mostrar notificación temporal
-                        const originalText = event.target.innerHTML;
-                        event.target.innerHTML = '<i class="fas fa-check"></i>';
-                        event.target.classList.add('text-green-500');
-
-                        setTimeout(() => {
-                            event.target.innerHTML = originalText;
-                            event.target.classList.remove('text-green-500');
-                        }, 2000);
-                    });
+                    return date.toLocaleDateString('es-ES', options);
                 },
 
                 formatFileSize(bytes) {
@@ -1210,8 +1587,8 @@
                     }
                 },
 
-                async submitForm() {
-                    // Validación básica
+                validateAndShowModal() {
+                    // Validación básica antes de mostrar el modal
                     if (!this.form.titulo || !this.form.idTipoSolicitud || !this.form.solicitante ||
                         !this.form.idPrioridad || !this.form.fecha_requerida || !this.form.descripcion ||
                         !this.form.justificacion || !this.form.idTipoArea) {
@@ -1232,6 +1609,14 @@
                             return;
                         }
                     }
+
+                    // Si pasa todas las validaciones, mostrar el modal
+                    this.showConfirmationModal = true;
+                },
+
+                async submitFormFromModal() {
+                    // Cerrar el modal primero
+                    this.showConfirmationModal = false;
 
                     try {
                         const formData = {
@@ -1262,8 +1647,64 @@
                         console.error('Error:', error);
                         toastr.error('Error al enviar la solicitud');
                     }
+                },
+
+                // Método original para mantener compatibilidad
+                async submitForm() {
+                    this.validateAndShowModal();
                 }
             }
+        }
+
+        function formatArticle(article) {
+            if (article.loading) return article.text;
+
+            // Si no tiene nombre, mostrar el código
+            const displayName = article.nombre && article.nombre.trim() !== '' ?
+                article.nombre :
+                (article.codigo_repuesto || article.codigo_barras || article.sku || 'Sin nombre');
+
+            var $container = $(
+                '<div class="flex flex-col p-2">' +
+                '<div class="flex justify-between items-start mb-1">' +
+                '<span class="font-semibold text-gray-800 text-sm">' +
+                displayName +
+                '</span>' +
+                '</div>' +
+                '<div class="flex flex-wrap gap-1 text-xs">' +
+                (article.codigo_repuesto ?
+                    '<span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-medium">' +
+                    'Rep: ' + article.codigo_repuesto +
+                    '</span>' : '') +
+                (article.codigo_barras ?
+                    '<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">' +
+                    'Barras: ' + article.codigo_barras +
+                    '</span>' : '') +
+                (article.marca ?
+                    '<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded">' +
+                    article.marca +
+                    '</span>' : '') +
+                '</div>' +
+                '</div>'
+            );
+            return $container;
+        }
+
+        function formatArticleSelection(article) {
+            if (!article.id) return article.text;
+
+            // Mostrar el código repuesto si no hay nombre
+            if (!article.nombre || article.nombre.trim() === '') {
+                return article.codigo_repuesto || article.codigo_barras || article.sku || 'Sin nombre';
+            }
+
+            // Si tiene nombre y código, mostrar ambos
+            const codigo = article.codigo_repuesto || article.codigo_barras || article.sku;
+            if (codigo) {
+                return article.nombre + ' [' + codigo + ']';
+            }
+
+            return article.nombre;
         }
     </script>
 </x-layout.default>
