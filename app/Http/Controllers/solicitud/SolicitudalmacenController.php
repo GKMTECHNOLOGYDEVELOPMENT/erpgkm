@@ -199,65 +199,74 @@ class SolicitudalmacenController extends Controller
             'articulos' => $articulos
         ]);
     }
-    // En el método buscarArticulo
-    public function buscarArticulo($codigo)
+
+    // En tu controlador, agrega este método
+    public function buscarArticulos(Request $request)
     {
         try {
-            // Buscar artículo por código de barras
-            $articulo = Articulo::where('codigo_barras', $codigo)
-                ->orWhere('sku', $codigo)
-                ->orWhere('codigo_repuesto', $codigo)
-                ->whereIn('idTipoArticulo', [1, 3, 4])
-                ->where('estado', 1)
-                ->first();
+            $searchTerm = $request->get('search', '');
 
-            if (!$articulo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Artículo no encontrado'
-                ], 404);
+            Log::info('Buscando con término: ' . $searchTerm);
+
+            $articulos = Articulo::where(function ($query) use ($searchTerm) {
+                $query->where('nombre', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('codigo_repuesto', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('codigo_barras', 'LIKE', "%{$searchTerm}%")
+                    ->orWhere('sku', 'LIKE', "%{$searchTerm}%");
+            })
+                ->with(['unidad', 'modelo.marca', 'modelo.categoria'])
+                ->orderByRaw("
+                CASE 
+                    WHEN nombre IS NOT NULL AND nombre != '' THEN 1
+                    ELSE 2
+                END
+            ")
+                ->orderBy('codigo_repuesto')
+                ->paginate(10);
+
+            $formattedArticles = $articulos->map(function ($articulo) {
+                // Si no tiene nombre, usar el código repuesto como texto
+                $texto = !empty($articulo->nombre) ? $articulo->nombre : (!empty($articulo->codigo_repuesto) ? $articulo->codigo_repuesto : (!empty($articulo->codigo_barras) ? $articulo->codigo_barras : (!empty($articulo->sku) ? $articulo->sku : 'Sin nombre')));
+
+                return [
+                    'id' => $articulo->idArticulos,
+                    'text' => $texto,
+                    'nombre' => $articulo->nombre,
+                    'codigo_barras' => $articulo->codigo_barras,
+                    'codigo_repuesto' => $articulo->codigo_repuesto,
+                    'sku' => $articulo->sku,
+                    'idArticulos' => $articulo->idArticulos,
+                    'marca' => $articulo->modelo && $articulo->modelo->marca ? $articulo->modelo->marca->nombre : null,
+                    'categoria' => $articulo->modelo && $articulo->modelo->categoria ? $articulo->modelo->categoria->nombre : null,
+                    'unidad' => $articulo->unidad ? $articulo->unidad->nombre : null,
+                    'precio_compra' => $articulo->precio_compra,
+                    'stock_total' => $articulo->stock_total
+                ];
+            });
+
+            Log::info('Resultados formateados: ' . count($formattedArticles));
+            if (count($formattedArticles) > 0) {
+                Log::info('Primer resultado: ' . json_encode($formattedArticles[0]));
             }
-
-            // Cargar relaciones
-            $articulo->load([
-                'unidad',
-                'modelo.marca',
-                'modelo.categoria',
-                'proveedor',
-                'monedaCompra'
-            ]);
-
-            // Preparar datos del artículo
-            $articuloData = [
-                'idArticulos' => $articulo->idArticulos,
-                'nombre' => $articulo->nombre,
-                'codigo_barras' => $articulo->codigo_barras,
-                'sku' => $articulo->sku,
-                'codigo_repuesto' => $articulo->codigo_repuesto,
-                'precio_compra' => $articulo->precio_compra,
-                'precio_venta' => $articulo->precio_venta,
-                'stock_total' => $articulo->stock_total,
-                'stock_minimo' => $articulo->stock_minimo,
-                'unidad_nombre' => $articulo->unidad ? $articulo->unidad->nombre : null,
-                'marca_nombre' => $articulo->modelo && $articulo->modelo->marca ? $articulo->modelo->marca->nombre : null,
-                'modelo_nombre' => $articulo->modelo ? $articulo->modelo->nombre : null,
-                'categoria_nombre' => $articulo->modelo && $articulo->modelo->categoria ? $articulo->modelo->categoria->nombre : null,
-                'moneda_simbolo' => $articulo->monedaCompra ? $articulo->monedaCompra->simbolo : '$',
-                'proveedor_nombre' => $articulo->proveedor ? $articulo->proveedor->nombre : null,
-                'ficha_tecnica' => $articulo->ficha_tecnica,
-                'peso' => $articulo->peso,
-                'pulgadas' => $articulo->pulgadas
-            ];
 
             return response()->json([
                 'success' => true,
-                'articulo' => $articuloData
+                'data' => $formattedArticles,
+                'next_page_url' => $articulos->nextPageUrl(),
+                'debug' => [
+                    'search' => $searchTerm,
+                    'found' => count($formattedArticles)
+                ]
             ]);
         } catch (\Exception $e) {
+            Log::error('Error en buscarArticulos: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Error al buscar el artículo: ' . $e->getMessage()
-            ], 500);
+                'data' => [],
+                'next_page_url' => null,
+                'message' => 'Error en la búsqueda'
+            ]);
         }
     }
 

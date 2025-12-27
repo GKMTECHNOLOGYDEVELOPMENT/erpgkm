@@ -3,7 +3,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet">
     <div x-data="editPurchaseRequest()" class="space-y-6">
-                <div class="mb-4">
+        <div class="mb-4">
             <ul class="flex space-x-2 rtl:space-x-reverse">
                 <li>
                     <a href="{{ route('solicitudcompra.index') }}" class="text-primary hover:underline">
@@ -1719,33 +1719,42 @@
                         Swal.fire({
                             title: '¿Actualizar solicitud?',
                             html: `
-                <div class="text-left">
-                    <div class="flex items-center gap-3 mb-3">
-                        <i class="fas fa-save text-blue-500 text-2xl"></i>
-                        <div>
-                            <p class="font-semibold text-gray-800">¿Está seguro de actualizar la solicitud?</p>
-                            <p class="text-sm text-gray-600 mt-1">Los cambios serán guardados permanentemente</p>
-                        </div>
-                    </div>
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-info-circle text-blue-500"></i>
-                            <span class="text-sm text-blue-700">Se actualizarán ${this.form.items.length} artículo(s)</span>
-                        </div>
+            <div class="text-center">
+                <div class="mb-2">
+                    <br>
+                    <p class="text-sm text-gray-600">Los cambios serán guardados permanentemente</p>
+                </div>
+                
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+                    <div class="flex items-center justify-center gap-2 text-sm text-amber-700">
+                        <i class="fas fa-exclamation-circle text-amber-500"></i>
+                        <span>Esta acción no se puede deshacer</span>
                     </div>
                 </div>
-            `,
+            </div>
+        `,
                             icon: 'question',
                             showCancelButton: true,
-                            confirmButtonColor: '#10b981',
-                            cancelButtonColor: '#6b7280',
-                            confirmButtonText: 'Sí, actualizar',
-                            cancelButtonText: 'Cancelar',
+                            confirmButtonColor: '#3b82f6', // AZUL
+                            cancelButtonColor: '#ef4444', // ROJO
+                            confirmButtonText: '<i class="fas fa-save mr-2"></i>Sí, actualizar',
+                            cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancelar',
                             background: '#ffffff',
                             backdrop: 'rgba(0,0,0,0.4)',
                             customClass: {
-                                confirmButton: 'px-5 py-2.5 rounded-lg font-medium shadow-sm',
-                                cancelButton: 'px-5 py-2.5 rounded-lg font-medium'
+                                container: 'text-center',
+                                popup: 'rounded-xl shadow-2xl',
+                                confirmButton: 'px-6 py-2.5 rounded-lg font-medium shadow-sm flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white transition-all duration-200',
+                                cancelButton: 'px-6 py-2.5 rounded-lg font-medium flex items-center justify-center bg-red-500 hover:bg-red-600 text-white transition-all duration-200',
+                                htmlContainer: 'text-center',
+                                actions: 'gap-4 !mt-8' // ESPACIO ENTRE BOTONES
+                            },
+                            buttonsStyling: false,
+                            showClass: {
+                                popup: 'animate__animated animate__fadeInDown animate__faster'
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOutUp animate__faster'
                             }
                         }).then((result) => {
                             if (result.isConfirmed) {

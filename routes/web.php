@@ -915,7 +915,8 @@ Route::prefix('solicitudalmacen')->name('solicitudalmacen.')->group(function () 
     Route::get('/create', [SolicitudalmacenController::class, 'create'])->name('create');
     Route::post('/', [SolicitudalmacenController::class, 'store'])->name('store');
     Route::get('/select-data', [SolicitudalmacenController::class, 'getSelectData'])->name('select-data');
-    Route::get('/buscar-articulo/{codigo}', [SolicitudalmacenController::class, 'buscarArticulo'])->name('buscar-articulo');
+        // SOLO UNA RUTA para búsqueda
+    Route::get('/buscar-articulos', [SolicitudalmacenController::class, 'buscarArticulos'])->name('buscar-articulos');
 
     // Rutas para detalles
     Route::get('/{id}/detalles', [SolicitudalmacenController::class, 'show'])->name('show');

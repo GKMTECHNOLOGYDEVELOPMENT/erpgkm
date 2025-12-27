@@ -199,8 +199,8 @@
                                 <option value="" class="text-gray-400">Todas las prioridades</option>
                                 <option value="low" class="text-green-600">🟢 Baja</option>
                                 <option value="medium" class="text-yellow-600">🟡 Media</option>
-                                <option value="high" class="text-orange-600">🟠 Alta</option>
-                                <option value="urgent" class="text-red-600">🔴 Urgente</option>
+                                <option value="high" class="text-red-600">🔴 Alta</option>
+                                <option value="urgent" class="text-orange-600">🟠 Urgente</option>
                             </select>
                         </div>
                     </div>
@@ -330,8 +330,8 @@
                                                 :class="{
                                                     'text-success': request.priority === 'low',
                                                     'text-warning': request.priority === 'medium',
-                                                    'text-orange-600': request.priority === 'high',
-                                                    'text-danger': request.priority === 'urgent'
+                                                    'text-danger': request.priority === 'high',
+                                                    'text-orange-600': request.priority === 'urgent'
                                                 }">
                                                 <span x-text="getPriorityText(request.priority)"></span>
                                             </div>
@@ -392,27 +392,35 @@
                                                             4 === 3
                                                     }">
                                                     <div class="flex-1 min-w-0">
+                                                        <!-- Nombre -->
                                                         <div
-                                                            class="font-medium text-gray-800 truncate flex items-center gap-2">
-                                                            <i class="fas fa-box text-xs text-gray-500"></i>
-                                                            <span x-text="product.name || 'Producto'"></span>
+                                                            class="font-medium text-gray-800 truncate flex items-center gap-2 min-w-0">
+                                                            <i
+                                                                class="fas fa-box text-xs text-gray-500 flex-shrink-0"></i>
+                                                            <span class="truncate"
+                                                                x-text="product.name || 'Producto'"></span>
                                                         </div>
+
+                                                        <!-- Código + cantidad/precio -->
                                                         <div
-                                                            class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                                            <i class="fas fa-barcode text-xs"></i>
-                                                            <span x-text="product.code || 'Sin código'"></span>
+                                                            class="mt-1 flex items-center justify-between gap-2 text-xs text-gray-500">
+                                                            <div class="flex items-center gap-1 min-w-0">
+                                                                <i class="fas fa-barcode text-xs flex-shrink-0"></i>
+                                                                <span class="truncate"
+                                                                    x-text="product.code || 'Sin código'"></span>
+                                                            </div>
+
+                                                            <div class="text-right whitespace-nowrap">
+                                                                <div class="font-bold text-gray-900 text-sm"
+                                                                    x-text="product.quantity + ' ' + (product.unit || 'ud')">
+                                                                </div>
+                                                                <div class="text-xs text-gray-500"
+                                                                    x-text="product.price ? '$' + product.price : ''">
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="flex items-center gap-3 ml-3">
-                                                        <div class="text-right whitespace-nowrap">
-                                                            <div class="font-bold text-gray-900 text-sm"
-                                                                x-text="product.quantity + ' ' + (product.unit || 'ud')">
-                                                            </div>
-                                                            <div class="text-xs text-gray-500"
-                                                                x-text="product.price ? '$' + product.price : ''">
-                                                            </div>
-                                                        </div>
-                                                    </div>
+
                                                 </div>
                                             </template>
                                         </div>

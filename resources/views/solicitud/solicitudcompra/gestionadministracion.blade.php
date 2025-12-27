@@ -427,19 +427,21 @@
                             </div>
 
 
-                            <!-- Productos Solicitados - CON SCROLL (Mostrando 2) -->
+                            <!-- Productos Solicitados - CON SCROLL (Mejorado) -->
                             <div class="mt-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <div class="flex items-center">
-                                        <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <svg class="w-4 h-4 text-gray-500 mr-2 flex-shrink-0" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24"
+                                            xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                                         </svg>
                                         <span class="text-sm font-medium text-gray-700">Productos solicitados</span>
                                     </div>
                                     @if (isset($solicitud->detalles) && count($solicitud->detalles) > 0)
-                                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                        <span
+                                            class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full flex-shrink-0">
                                             {{ count($solicitud->detalles) }} items
                                         </span>
                                     @endif
@@ -452,13 +454,18 @@
                                             class="space-y-2 {{ count($solicitud->detalles) > 2 ? 'max-h-40 overflow-y-auto pr-2' : '' }}">
                                             @foreach ($solicitud->detalles as $detalle)
                                                 <div
-                                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-100">
-                                                    <div class="flex items-center flex-1 min-w-0 mr-3">
+                                                    class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 
+                                transition-colors border border-gray-100 gap-3">
+                                                    <!-- Contenedor del producto (flex-1 para que ocupe espacio disponible) -->
+                                                    <div class="flex items-center flex-1 min-w-0 overflow-hidden">
+                                                        <!-- Ícono -->
                                                         <div class="flex-shrink-0">
                                                             <div
-                                                                class="w-8 h-8 flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-50 rounded-md border border-blue-200">
-                                                                <svg class="w-4 h-4 text-blue-600" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                class="w-8 h-8 flex items-center justify-center bg-gradient-to-br 
+                                            from-blue-100 to-blue-50 rounded-md border border-blue-200">
+                                                                <svg class="w-4 h-4 text-blue-600 flex-shrink-0"
+                                                                    fill="none" stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
                                                                     xmlns="http://www.w3.org/2000/svg">
                                                                     <path stroke-linecap="round"
                                                                         stroke-linejoin="round" stroke-width="2"
@@ -467,22 +474,38 @@
                                                                 </svg>
                                                             </div>
                                                         </div>
-                                                        <div class="ml-3 min-w-0">
-                                                            <p class="text-sm font-medium text-gray-900 truncate">
-                                                                {{ $detalle->descripcion_producto }}</p>
+
+                                                        <!-- Información del producto -->
+                                                        <div class="ml-3 min-w-0 flex-1 overflow-hidden">
+                                                            <!-- Nombre del producto con truncado responsivo -->
+                                                            <p
+                                                                class="text-sm font-medium text-gray-900 truncate 
+                                          {{ strlen($detalle->descripcion_producto) > 50 ? 'max-w-[200px] sm:max-w-[300px] md:max-w-[400px]' : '' }}">
+                                                                {{ $detalle->descripcion_producto }}
+                                                            </p>
+
+                                                            <!-- Observaciones (si existen) -->
                                                             @if ($detalle->observaciones)
-                                                                <p class="text-xs text-gray-500 truncate mt-1">
-                                                                    {{ $detalle->observaciones }}</p>
+                                                                <p
+                                                                    class="text-xs text-gray-500 truncate mt-1 
+                                              {{ strlen($detalle->observaciones) > 40 ? 'max-w-[180px] sm:max-w-[280px] md:max-w-[380px]' : '' }}">
+                                                                    {{ $detalle->observaciones }}
+                                                                </p>
                                                             @endif
                                                         </div>
                                                     </div>
+
+                                                    <!-- Cantidad y Unidad -->
                                                     <div class="flex-shrink-0">
                                                         <div
-                                                            class="inline-flex flex-col items-end bg-white px-3 py-2 rounded-md border border-gray-200">
-                                                            <span
-                                                                class="text-sm font-bold text-gray-900">{{ $detalle->cantidad }}</span>
-                                                            <span
-                                                                class="text-xs text-gray-500">{{ $detalle->unidad }}</span>
+                                                            class="inline-flex flex-col items-end bg-white px-3 py-2 rounded-md border border-gray-200
+                                        min-w-[70px]">
+                                                            <span class="text-sm font-bold text-gray-900 leading-none">
+                                                                {{ $detalle->cantidad }}
+                                                            </span>
+                                                            <span class="text-xs text-gray-500 mt-1 leading-none">
+                                                                {{ $detalle->unidad }}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -492,12 +515,13 @@
                                         <!-- Indicador de scroll (solo se muestra si hay más de 2 productos) -->
                                         @if (count($solicitud->detalles) > 2)
                                             <div
-                                                class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none rounded-b-lg">
+                                                class="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t 
+                            from-white to-transparent pointer-events-none rounded-b-lg">
                                             </div>
                                             <div class="text-center pt-2 mt-2 border-t border-gray-100">
                                                 <span class="inline-flex items-center text-xs text-gray-500">
-                                                    <svg class="w-3 h-3 mr-1 animate-bounce" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                    <svg class="w-3 h-3 mr-1 animate-bounce flex-shrink-0"
+                                                        fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         xmlns="http://www.w3.org/2000/svg">
                                                         <path stroke-linecap="round" stroke-linejoin="round"
                                                             stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
@@ -549,20 +573,29 @@
                                         <span class="text-xs text-gray-500 mb-1">Prioridad</span>
                                         <div class="flex items-center">
                                             @if ($solicitud->idPrioridad == 1)
-                                                <div class="flex items-center">
-                                                    <div class="w-3 h-3 bg-danger rounded-full mr-1 animate-pulse">
-                                                    </div>
-                                                    <span class="text-xs font-bold text-red-600">Alta</span>
-                                                </div>
-                                            @elseif($solicitud->idPrioridad == 2)
-                                                <div class="flex items-center">
-                                                    <div class="w-3 h-3 bg-warning rounded-full mr-1"></div>
-                                                    <span class="text-xs font-bold text-orange-600">Media</span>
-                                                </div>
-                                            @else
+                                                <!-- BAJA - Verde -->
                                                 <div class="flex items-center">
                                                     <div class="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
                                                     <span class="text-xs font-bold text-green-600">Baja</span>
+                                                </div>
+                                            @elseif($solicitud->idPrioridad == 2)
+                                                <!-- MEDIA - Amarillo -->
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-warning rounded-full mr-1"></div>
+                                                    <span class="text-xs font-bold text-yellow-600">Media</span>
+                                                </div>
+                                            @elseif($solicitud->idPrioridad == 3)
+                                                <!-- ALTA - Rojo con animación -->
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-red-500 rounded-full mr-1 animate-pulse">
+                                                    </div>
+                                                    <span class="text-xs font-bold text-red-600">Alta</span>
+                                                </div>
+                                            @else
+                                                <!-- VALOR NO ESPERADO - Gris -->
+                                                <div class="flex items-center">
+                                                    <div class="w-3 h-3 bg-gray-400 rounded-full mr-1"></div>
+                                                    <span class="text-xs font-bold text-gray-600">N/A</span>
                                                 </div>
                                             @endif
                                         </div>
@@ -848,8 +881,8 @@
                 <div class="animate-pulse">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${Array(6).fill().map(() => `
-                                                                            <div class="bg-gray-200 rounded-xl h-96"></div>
-                                                                        `).join('')}
+                                                                                    <div class="bg-gray-200 rounded-xl h-96"></div>
+                                                                                `).join('')}
                     </div>
                 </div>
             </div>
