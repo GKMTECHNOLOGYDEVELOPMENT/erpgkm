@@ -981,25 +981,17 @@
                 },
 
                 async loadRequestDetail() {
-                    try {
-                        const response = await fetch(`/solicitudalmacen/${@json($id)}/detalles-data`);
-                        const data = await response.json();
+                    const response = await fetch(`/solicitudalmacen/${@json($id)}/detalles-data`);
+                    const data = await response.json();
 
-                        if (data.success) {
-                            this.solicitud = data.solicitud;
-                            this.expandedProductIndex = null;
-                            toastr.success('Datos cargados correctamente');
-                        } else {
-                            toastr.error('Error al cargar los detalles de la solicitud');
-                            setTimeout(() => {
-                                window.location.href = '/solicitudalmacen';
-                            }, 2000);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        toastr.error('Error al cargar los detalles');
+                    if (data.success) {
+                        this.solicitud = data.solicitud;
+                        this.expandedProductIndex = null;
+                    } else {
+                        window.location.href = '/solicitudalmacen';
                     }
                 },
+
 
                 setupModalListeners() {
                     // Listener para abrir modal de producto

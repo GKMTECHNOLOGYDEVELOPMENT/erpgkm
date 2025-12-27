@@ -253,7 +253,8 @@
                         }">
 
                         <!-- Header con color según ESTADO -->
-                        <div class="px-6 py-4 text-white relative overflow-hidden" :class="{
+                        <div class="px-6 py-4 text-white relative overflow-hidden"
+                            :class="{
                                 'bg-warning': request.estado === 'pendiente',
                                 'bg-success': request.estado === 'aprobada',
                                 'bg-danger': request.estado === 'rechazada',
@@ -286,12 +287,14 @@
 
                             <!-- Indicador de prioridad en esquina superior derecha -->
                             <div class="absolute top-3 right-3">
-                                <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm" :class="{
+                                <div class="w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                                    :class="{
                                         'bg-danger': request.prioridad?.nivel === 'high',
                                         'bg-warning': request.prioridad?.nivel === 'medium',
                                         'bg-success': request.prioridad?.nivel === 'low',
                                         'bg-dark': !request.prioridad?.nivel
-                                    }" :title="'Prioridad: ' + (request.prioridad?.nombre || 'No definida')">
+                                    }"
+                                    :title="'Prioridad: ' + (request.prioridad?.nombre || 'No definida')">
                                 </div>
                             </div>
                         </div>
@@ -328,14 +331,45 @@
 
                                 <!-- Prioridad -->
                                 <div class="space-y-1">
-                                    <div
-                                        class="flex items-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                        <i class="fas fa-flag text-warning mr-2 text-xs"></i>
+                                    <div class="flex items-center text-xs font-semibold uppercase tracking-wide"
+                                        :class="{
+                                            'text-green-600': request.idPrioridad == 1,
+                                            'text-yellow-600': request.idPrioridad == 2,
+                                            'text-red-600': request.idPrioridad == 3,
+                                            'text-gray-500': !request.idPrioridad
+                                        }">
+                                        <i class="fas fa-flag mr-2 text-xs"
+                                            :class="{
+                                                'text-green-500': request.idPrioridad == 1,
+                                                'text-warning': request.idPrioridad == 2,
+                                                'text-red-500': request.idPrioridad == 3,
+                                                'text-gray-400': !request.idPrioridad
+                                            }"></i>
                                         Prioridad
                                     </div>
-                                    <div class="text-sm font-medium text-gray-900"
-                                        x-text="request.prioridad?.nombre || 'N/A'"></div>
+
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 rounded-full mr-2"
+                                            :class="{
+                                                'bg-green-500': request.idPrioridad == 1,
+                                                'bg-warning': request.idPrioridad == 2,
+                                                'bg-red-500 animate-pulse': request.idPrioridad == 3,
+                                                'bg-gray-400': !request.idPrioridad
+                                            }">
+                                        </div>
+
+                                        <span class="text-sm font-bold"
+                                            :class="{
+                                                'text-green-600': request.idPrioridad == 1,
+                                                'text-yellow-600': request.idPrioridad == 2,
+                                                'text-red-600': request.idPrioridad == 3,
+                                                'text-gray-600': !request.idPrioridad
+                                            }"
+                                            x-text="request.prioridad?.nombre || 'N/A'">
+                                        </span>
+                                    </div>
                                 </div>
+
 
                                 <!-- Total -->
                                 <div class="space-y-1">

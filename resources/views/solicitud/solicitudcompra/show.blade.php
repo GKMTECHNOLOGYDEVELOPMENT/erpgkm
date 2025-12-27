@@ -196,19 +196,43 @@
                             <!-- Fila 3 -->
                             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div class="flex items-center space-x-2 mb-2">
-                                    <i class="fas fa-flag text-danger text-sm"></i>
-                                    <label
-                                        class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Prioridad</label>
+                                    <i
+                                        class="fas fa-flag text-sm
+            @if ($solicitud->idPrioridad == 1) text-green-500
+            @elseif ($solicitud->idPrioridad == 2) text-warning
+            @elseif ($solicitud->idPrioridad == 3) text-red-500
+            @else text-gray-400 @endif">
+                                    </i>
+
+                                    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                        Prioridad
+                                    </label>
                                 </div>
-                                <span
-                                    class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-bold 
-        @if (($solicitud->prioridad->nivel ?? 'medium') == 'high') bg-success text-white
-        @elseif(($solicitud->prioridad->nivel ?? 'medium') == 'medium') bg-warning text-white
-        @else bg-danger text-white @endif">
-                                    <i class="fas fa-flag mr-1.5 text-xs"></i>
-                                    {{ $solicitud->prioridad->nombre ?? 'N/A' }}
-                                </span>
+
+                                @if ($solicitud->idPrioridad == 1)
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                        <span class="text-sm font-bold text-green-600">Baja</span>
+                                    </div>
+                                @elseif ($solicitud->idPrioridad == 2)
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-warning rounded-full mr-2"></div>
+                                        <span class="text-sm font-bold text-yellow-600">Media</span>
+                                    </div>
+                                @elseif ($solicitud->idPrioridad == 3)
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-red-500 rounded-full mr-2 animate-pulse"></div>
+                                        <span class="text-sm font-bold text-red-600">Alta</span>
+                                    </div>
+                                @else
+                                    <div class="flex items-center">
+                                        <div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
+                                        <span class="text-sm font-bold text-gray-600">N/A</span>
+                                    </div>
+                                @endif
                             </div>
+
+
 
                             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div class="flex items-center space-x-2 mb-2">
