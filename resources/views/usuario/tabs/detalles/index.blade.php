@@ -1,95 +1,445 @@
 <template x-if="tab === 'danger-zone'">
-    <div class="switch">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-
-            <!-- Limpiar caché -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Limpiar caché</h5>
-                <p>Elimina la caché activa sin esperar el tiempo de expiración.</p>
-                <button class="btn btn-secondary">Clear</button>
-            </div>
-
-            <!-- Desactivar cuenta -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Desactivar cuenta</h5>
-                <p>No recibirás mensajes ni notificaciones durante 24 horas.</p>
-                <label class="w-12 h-6 relative">
-                    <input type="checkbox" class="custom_switch absolute w-full h-full opacity-0 z-10 cursor-pointer peer" />
-                    <span class="bg-[#ebedf2] dark:bg-dark block h-full rounded-full before:absolute before:left-1 before:bg-white dark:before:bg-white-dark peer-checked:before:left-7 peer-checked:bg-primary before:transition-all before:duration-300"></span>
-                </label>
-            </div>
-
-            <!-- Eliminar cuenta -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Eliminar cuenta</h5>
-                <p>Una vez eliminada, no podrás recuperar tu cuenta.</p>
-                <button class="btn btn-danger btn-delete-account">Eliminar cuenta</button>
-            </div>
-
-            <!-- Reenviar enlace de contraseña -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Reenviar enlace de contraseña</h5>
-                <p>Te enviaremos un correo para restablecer tu contraseña.</p>
-                <button class="btn btn-warning">Enviar enlace</button>
-            </div>
-
-            <!-- Cambiar contraseña mejorado -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4 text-red-600 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 11c.657 0 1.26.267 1.707.707M17 16v1a3 3 0 01-3 3H10a3 3 0 01-3-3v-1m5-11a4 4 0 00-4 4v4h8v-4a4 4 0 00-4-4z" />
-                    </svg>
-                    Cambiar contraseña
-                </h5>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Actualiza tu contraseña actual por una nueva más segura. Asegúrate de no compartirla con nadie.
-                </p>
-                <form @submit.prevent="handlePasswordChange" class="space-y-4">
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contraseña actual</label>
-                        <input type="password" placeholder="••••••••"
-                            class="input input-bordered w-full focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            required>
+    <div x-data="dangerZone()" class="switch">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+            
+            <!-- Cambiar contraseña -->
+            <div class="panel space-y-6 border border-red-200 dark:border-red-900 bg-gradient-to-br from-white to-red-50 dark:from-gray-800 dark:to-gray-900">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h5 class="font-bold text-xl mb-2 text-red-700 dark:text-red-400 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            </svg>
+                            Cambiar Contraseña
+                        </h5>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            Protege tu cuenta con una nueva contraseña segura.
+                        </p>
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva contraseña</label>
-                        <input type="password" placeholder="••••••••"
-                            class="input input-bordered w-full focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            required>
+                </div>
+                
+                <form @submit.prevent="changePassword" class="space-y-4">
+                    <div class="relative">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Contraseña Actual
+                        </label>
+                        <div class="relative">
+                            <input x-model="passwordData.current" :type="showCurrent ? 'text' : 'password'" 
+                                   placeholder="••••••••"
+                                   class="input input-bordered w-full pl-10 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                   required>
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </span>
+                            <button type="button" @click="showCurrent = !showCurrent" 
+                                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <template x-if="!showCurrent">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </template>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="space-y-2">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar nueva contraseña</label>
-                        <input type="password" placeholder="••••••••"
-                            class="input input-bordered w-full focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            required>
+                    
+                    <div class="relative">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Nueva Contraseña
+                        </label>
+                        <div class="relative">
+                            <input x-model="passwordData.new" :type="showNew ? 'text' : 'password'" 
+                                   placeholder="••••••••"
+                                   class="input input-bordered w-full pl-10 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                   required>
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </span>
+                            <button type="button" @click="showNew = !showNew" 
+                                    class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <template x-if="!showNew">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </template>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit"
-                        class="btn btn-danger w-full mt-4 transition duration-200 hover:bg-red-600">
-                        <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    
+                    <div class="relative">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Confirmar Nueva Contraseña
+                        </label>
+                        <div class="relative">
+                            <input x-model="passwordData.confirm" :type="showConfirm ? 'text' : 'password'" 
+                                   placeholder="••••••••"
+                                   class="input input-bordered w-full pl-10 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                                   required>
+                            <span class="absolute left-3 top-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" :disabled="!passwordsMatch || loading"
+                            class="btn btn-danger w-full mt-6 py-3 font-semibold transition duration-200 hover:scale-[1.02]"
+                            :class="{'opacity-50 cursor-not-allowed': !passwordsMatch || loading}">
+                        <svg class="w-5 h-5 mr-2 animate-spin" x-show="loading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
-                        Actualizar contraseña
+                        <span x-show="!loading">Actualizar Contraseña</span>
+                        <span x-show="loading">Procesando...</span>
                     </button>
                 </form>
             </div>
 
-            <!-- Cerrar sesiones -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Cerrar todas las sesiones</h5>
-                <p>Cierra tu sesión en todos los dispositivos conectados.</p>
-                <button class="btn btn-warning">Cerrar sesiones</button>
+            <!-- Desactivar cuenta -->
+            <div class="panel space-y-6 border border-purple-200 dark:border-purple-900">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-lg text-purple-700 dark:text-purple-400">
+                                Desactivar Cuenta
+                            </h5>
+                            <p class="text-xs text-gray-500 mt-1">Estado actual: 
+                                <span x-text="accountStatus" :class="accountStatusClass"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Desactiva tu cuenta temporalmente. No podrás acceder hasta que sea reactivada por un administrador.
+                </p>
+                
+                <div class="flex gap-2">
+                    <button @click="desactivarCuenta" 
+                            x-show="!deactivateAccount"
+                            :disabled="loadingAccount"
+                            class="btn btn-warning flex-1 flex items-center justify-center gap-2 py-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+                        </svg>
+                        <span x-show="!loadingAccount">Desactivar Cuenta</span>
+                        <span x-show="loadingAccount">Procesando...</span>
+                    </button>
+                    
+                    <button @click="activarCuenta" 
+                            x-show="deactivateAccount"
+                            :disabled="loadingAccount"
+                            class="btn btn-success flex-1 flex items-center justify-center gap-2 py-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span x-show="!loadingAccount">Activar Cuenta</span>
+                        <span x-show="loadingAccount">Procesando...</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Descargar datos -->
-            <div class="panel space-y-5">
-                <h5 class="font-semibold text-lg mb-4">Descargar mis datos</h5>
-                <p>Solicita una copia de tus datos personales.</p>
-                <button class="btn btn-primary">Solicitar descarga</button>
+            <!-- Descargar información en PDF -->
+            <div class="panel space-y-6 border border-blue-200 dark:border-blue-900">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h5 class="font-bold text-lg text-blue-700 dark:text-blue-400">
+                        Descargar Información
+                    </h5>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Genera un PDF con toda tu información personal, datos laborales y documentos.
+                </p>
+                <button @click="descargarPDF" 
+                        :disabled="loadingPDF"
+                        class="btn btn-primary w-full flex items-center justify-center gap-2 py-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span x-show="!loadingPDF">Descargar PDF</span>
+                    <span x-show="loadingPDF">Generando...</span>
+                </button>
+            </div>
+
+            <!-- Descargar documentos en ZIP -->
+            <div class="panel space-y-6 border border-green-200 dark:border-green-900">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                        <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                        </svg>
+                    </div>
+                    <h5 class="font-bold text-lg text-green-700 dark:text-green-400">
+                        Descargar Documentos
+                    </h5>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Descarga todos tus documentos adjuntos (CV, DNI, etc.) en un archivo ZIP comprimido.
+                </p>
+                <button @click="descargarDocumentosZIP" 
+                        :disabled="loadingZIP"
+                        class="btn btn-success w-full flex items-center justify-center gap-2 py-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
+                    </svg>
+                    <span x-show="!loadingZIP">Descargar ZIP</span>
+                    <span x-show="loadingZIP">Preparando...</span>
+                </button>
+            </div>
+
+            <!-- Enviar enlace de recuperación -->
+            <div class="panel space-y-6 border border-orange-200 dark:border-orange-900 lg:col-span-2">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                        <svg class="w-6 h-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <h5 class="font-bold text-lg text-orange-700 dark:text-orange-400">
+                        Enlace de Recuperación
+                    </h5>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Te enviaremos un enlace seguro para restablecer tu contraseña a tu correo electrónico registrado.
+                </p>
+                <button @click="enviarEnlaceRecuperacion" 
+                        :disabled="loadingEnlace"
+                        class="btn btn-warning w-full flex items-center justify-center gap-2 py-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    <span x-show="!loadingEnlace">Enviar Enlace</span>
+                    <span x-show="loadingEnlace">Enviando...</span>
+                </button>
             </div>
 
         </div>
     </div>
 </template>
+
+<script>
+function dangerZone() {
+    return {
+        // Datos iniciales
+        passwordData: {
+            current: '',
+            new: '',
+            confirm: ''
+        },
+        showCurrent: false,
+        showNew: false,
+        showConfirm: false,
+        loading: false,
+        loadingPDF: false,
+        loadingZIP: false,
+        loadingEnlace: false,
+        loadingAccount: false,
+        deactivateAccount: {{ $usuario->estado == 0 ? 'true' : 'false' }},
+        userId: {{ $usuario->idUsuario ?? 0 }},
+        
+        // Computados
+        get passwordsMatch() {
+            return this.passwordData.new === this.passwordData.confirm && this.passwordData.new.length >= 6;
+        },
+        
+        get accountStatus() {
+            return this.deactivateAccount ? 'Inactivo' : 'Activo';
+        },
+        
+        get accountStatusClass() {
+            return this.deactivateAccount ? 'text-red-600 font-bold' : 'text-green-600 font-bold';
+        },
+        
+        // Métodos
+        async changePassword() {
+            if (!this.passwordsMatch) {
+                toastr.error('Las contraseñas no coinciden o son muy cortas');
+                return;
+            }
+            
+            this.loading = true;
+            try {
+                const response = await fetch(`/usuario/${this.userId}/cambiar-password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        current_password: this.passwordData.current,
+                        new_password: this.passwordData.new,
+                        new_password_confirmation: this.passwordData.confirm
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    toastr.success('Contraseña cambiada exitosamente');
+                    this.passwordData = { current: '', new: '', confirm: '' };
+                } else {
+                    if (data.errors) {
+                        Object.values(data.errors).forEach(error => {
+                            toastr.error(error[0]);
+                        });
+                    } else {
+                        toastr.error(data.message || 'Error al cambiar contraseña');
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al cambiar contraseña');
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async desactivarCuenta() {
+            if (!confirm('¿Seguro que quieres desactivar tu cuenta? No podrás acceder hasta que un administrador la reactive.')) {
+                return;
+            }
+            
+            this.loadingAccount = true;
+            try {
+                const response = await fetch(`/usuario/${this.userId}/desactivar-cuenta`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.deactivateAccount = true;
+                    toastr.success('Cuenta desactivada exitosamente');
+                } else {
+                    toastr.error(data.message || 'Error al desactivar cuenta');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al desactivar cuenta');
+            } finally {
+                this.loadingAccount = false;
+            }
+        },
+        
+        async activarCuenta() {
+            if (!confirm('¿Seguro que quieres activar tu cuenta?')) {
+                return;
+            }
+            
+            this.loadingAccount = true;
+            try {
+                const response = await fetch(`/usuario/${this.userId}/activar-cuenta`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.deactivateAccount = false;
+                    toastr.success('Cuenta activada exitosamente');
+                } else {
+                    toastr.error(data.message || 'Error al activar cuenta');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al activar cuenta');
+            } finally {
+                this.loadingAccount = false;
+            }
+        },
+        
+        async descargarPDF() {
+            this.loadingPDF = true;
+            try {
+                window.open(`/usuario/${this.userId}/generar-pdf`, '_blank');
+                toastr.success('PDF generado. Se descargará automáticamente.');
+            } catch (error) {
+                toastr.error('Error al generar PDF');
+            } finally {
+                this.loadingPDF = false;
+            }
+        },
+        
+        async descargarDocumentosZIP() {
+            this.loadingZIP = true;
+            try {
+                window.open(`/usuario/${this.userId}/descargar-documentos`, '_blank');
+                toastr.success('Descarga de documentos iniciada.');
+            } catch (error) {
+                toastr.error('Error al descargar documentos');
+            } finally {
+                this.loadingZIP = false;
+            }
+        },
+        
+        async enviarEnlaceRecuperacion() {
+            if (!confirm('¿Deseas enviar un enlace de recuperación de contraseña a tu correo?')) {
+                return;
+            }
+            
+            this.loadingEnlace = true;
+            try {
+                const response = await fetch(`/usuario/${this.userId}/enviar-recuperacion`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    toastr.success(data.message || 'Enlace de recuperación enviado a tu correo');
+                } else {
+                    toastr.error(data.message || 'Error al enviar enlace de recuperación');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al enviar enlace de recuperación');
+            } finally {
+                this.loadingEnlace = false;
+            }
+        }
+    };
+}
+</script>

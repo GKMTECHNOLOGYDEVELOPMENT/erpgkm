@@ -29,6 +29,35 @@
         .dataTables_length {
             margin-bottom: 15px;
         }
+
+        /* Estilos para Select2 */
+        .select2-container--default .select2-selection--single,
+        .select2-container--default .select2-selection--multiple {
+            min-height: 42px;
+            border: 1px solid #e0e6ed;
+            border-radius: 4px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            line-height: 42px;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            padding: 0 10px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: white;
+            margin-right: 5px;
+        }
     </style>
 
     <div x-data="contactoFinalTable">
@@ -94,6 +123,7 @@
                         <th>Nombre Completo</th>
                         <th>Correo</th>
                         <th>Teléfono</th>
+                        <th>Cliente General</th>
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
@@ -124,6 +154,18 @@
 
                     <form class="p-5 space-y-4" id="contactoFinalForm" method="post">
                         @csrf
+
+                        <!-- Cliente General (Ocupa todo el ancho) -->
+                        <div>
+                            <label for="idClienteGeneral" class="block text-sm font-medium">Cliente General</label>
+                            <select id="idClienteGeneral" name="idClienteGeneral[]" class="select2 form-input w-full" multiple>
+                                @foreach ($clientesGenerales as $clienteGeneral)
+                                    <option value="{{ $clienteGeneral->idClienteGeneral }}">
+                                        {{ $clienteGeneral->descripcion }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Tipo Documento -->
@@ -240,6 +282,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.tailwindcss.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
@@ -261,6 +304,16 @@
             "showMethod": "fadeIn",
             "hideMethod": "fadeOut"
         };
+
+        // Inicializar Select2
+        $(document).ready(function() {
+            // Inicializar Select2 para Cliente General
+            $('#idClienteGeneral').select2({
+                placeholder: "Seleccionar Cliente General",
+                allowClear: true,
+                width: '100%'
+            });
+        });
 
         document.addEventListener("alpine:init", () => {
             // Modal de confirmación
@@ -345,43 +398,58 @@
                             type: "GET"
                         },
                         columns: [{
-                            data: 'tipo_documento',
-                            className: 'text-center'
-                        },
-                        {
-                            data: 'numero_documento',
-                            className: 'text-center'
-                        },
-                        {
-                            data: 'nombre_completo',
-                            className: 'text-center'
-                        },
-                        {
-                            data: 'correo',
-                            className: 'text-center',
-                            render: email => email ||
-                                '<span class="text-gray-400">N/A</span>'
-                        },
-                        {
-                            data: 'telefono',
-                            className: 'text-center',
-                            render: telefono => telefono ||
-                                '<span class="text-gray-400">N/A</span>'
-                        },
-                        {
-                            data: 'estado',
-                            className: 'text-center',
-                            render: estado => estado === 'Activo' ?
-                                '<span class="badge badge-outline-success">Activo</span>' :
-                                '<span class="badge badge-outline-danger">Inactivo</span>'
-                        },
-                        {
-                            data: null,
-                            orderable: false,
-                            searchable: false,
-                            className: 'text-center',
-                            render: (_, __, row) => {
-                                return `
+                                data: 'tipo_documento',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'numero_documento',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'nombre_completo',
+                                className: 'text-center'
+                            },
+                            {
+                                data: 'correo',
+                                className: 'text-center',
+                                render: email => email ||
+                                    '<span class="text-gray-400">N/A</span>'
+                            },
+                            {
+                                data: 'telefono',
+                                className: 'text-center',
+                                render: telefono => telefono ||
+                                    '<span class="text-gray-400">N/A</span>'
+                            },
+                            {
+                                data: 'clientes_generales',
+                                className: 'text-center',
+                                render: function(data, type, row) {
+                                    if (data && data.length > 0) {
+                                        let html = '<div class="flex flex-wrap gap-1 justify-center">';
+                                        data.forEach(function(cliente) {
+                                            html += `<span class="badge badge-outline-primary">${cliente.descripcion}</span>`;
+                                        });
+                                        html += '</div>';
+                                        return html;
+                                    }
+                                    return '<span class="text-gray-400">N/A</span>';
+                                }
+                            },
+                            {
+                                data: 'estado',
+                                className: 'text-center',
+                                render: estado => estado === 'Activo' ?
+                                    '<span class="badge badge-outline-success">Activo</span>' :
+                                    '<span class="badge badge-outline-danger">Inactivo</span>'
+                            },
+                            {
+                                data: null,
+                                orderable: false,
+                                searchable: false,
+                                className: 'text-center',
+                                render: (_, __, row) => {
+                                    return `
                                     <div class="flex justify-center items-center gap-2">
                                         <a href="/contactofinal/${row.idContactoFinal}/edit" 
                                            class="text-gray-600 hover:text-gray-800"
@@ -405,8 +473,8 @@
                                         </button>
                                     </div>
                                 `;
+                                }
                             }
-                        }
                         ],
                         responsive: true,
                         autoWidth: false,
@@ -416,7 +484,8 @@
                         pageLength: 10,
                         lengthMenu: [5, 10, 25, 50],
                         // CONFIGURACIÓN MODIFICADA - TODO DEBAJO DE LA TABLA
-                        dom: 't<"flex flex-col md:flex-row justify-between items-center mt-4 space-y-4 md:space-y-0"<"flex items-center justify-start w-full md:w-auto order-1"l><"flex items-center justify-center w-full md:w-auto order-2"i><"flex items-center justify-end w-full md:w-auto order-3"p>>', language: {
+                        dom: 't<"flex flex-col md:flex-row justify-between items-center mt-4 space-y-4 md:space-y-0"<"flex items-center justify-start w-full md:w-auto order-1"l><"flex items-center justify-center w-full md:w-auto order-2"i><"flex items-center justify-end w-full md:w-auto order-3"p>>',
+                        language: {
                             search: '', // Vacío para que no muestre el label de búsqueda
                             searchPlaceholder: '', // Vacío también
                             zeroRecords: 'No se encontraron registros',
@@ -432,7 +501,7 @@
                                 previous: 'Anterior'
                             }
                         },
-                        drawCallback: function () {
+                        drawCallback: function() {
                             // Actualizar información de paginación
                             const info = this.api().page.info();
                             $('.dataTables_info').text(
@@ -443,7 +512,7 @@
                             $('.dataTables_length').addClass('text-center');
                             $('.dataTables_info').addClass('text-center');
                         },
-                        initComplete: function () {
+                        initComplete: function() {
                             // Agregar clases después de la inicialización
                             $('.dataTables_length').addClass('text-center');
                             $('.dataTables_info').addClass('text-center');
@@ -508,7 +577,7 @@
         });
 
         // Función global para abrir el modal de confirmación
-        window.deleteContactoFinal = function (idContactoFinal, nombreCompleto) {
+        window.deleteContactoFinal = function(idContactoFinal, nombreCompleto) {
             const confirmModal = Alpine.$data(document.querySelector('[x-data="confirmModal"]'));
             if (confirmModal) {
                 confirmModal.openModal(idContactoFinal, nombreCompleto);
@@ -516,20 +585,32 @@
         };
 
         // Form submission para contacto final
-        document.getElementById('contactoFinalForm').addEventListener('submit', function (event) {
+        document.getElementById('contactoFinalForm').addEventListener('submit', function(event) {
             event.preventDefault();
 
             let formData = new FormData(this);
 
+            // También puedes usar JSON si prefieres
+            let data = {
+                nombre_completo: document.getElementById('nombre_completo').value,
+                idTipoDocumento: document.getElementById('idTipoDocumento').value,
+                numero_documento: document.getElementById('numero_documento').value,
+                correo: document.getElementById('correo').value,
+                telefono: document.getElementById('telefono').value,
+                estado: document.getElementById('estado').value,
+                idClienteGeneral: Array.from(document.getElementById('idClienteGeneral').selectedOptions).map(option => option.value)
+            };
+
             fetch('/contactofinal/store', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                        'content'),
-                    'Accept': 'application/json',
-                },
-                body: formData,
-            })
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Error en la respuesta del servidor');
@@ -543,6 +624,9 @@
 
                         // Limpiar formulario
                         document.getElementById('contactoFinalForm').reset();
+                        
+                        // Resetear Select2
+                        $('#idClienteGeneral').val(null).trigger('change');
 
                         // Recargar tabla
                         if ($.fn.DataTable.isDataTable('#myTableContactoFinal')) {

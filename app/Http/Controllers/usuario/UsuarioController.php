@@ -5,6 +5,7 @@ namespace App\Http\Controllers\usuario;
 use App\Http\Controllers\Controller;
 use App\Mail\UsuarioCreado;
 use App\Models\CuentasBancarias;
+use App\Models\DocumentoUsuario;
 use App\Models\Rol;
 use App\Models\Sexo;
 use App\Models\Sucursal;
@@ -12,11 +13,14 @@ use App\Models\Tipoarea;
 use App\Models\Tipodocumento;
 use App\Models\Tipousuario;
 use App\Models\Usuario;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 
@@ -723,6 +727,396 @@ public function getUsuarios(Request $request)
             return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente.']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error al cambiar el estado.'], 500);
+        }
+    }
+
+
+
+
+    public function getDocumentos($idUsuario)
+    {
+        try {
+            $documentos = DocumentoUsuario::where('idUsuario', $idUsuario)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'documentos' => $documentos
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener documentos:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al obtener documentos'], 500);
+        }
+    }
+
+    /**
+     * Subir documento para usuario
+     */
+    public function uploadDocumento(Request $request, $idUsuario)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'tipo_documento' => 'required|in:CV,DNI,PENALES,JUDICIALES,OTROS',
+                'archivo' => 'required|file|max:5120', // 5MB máximo
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Verificar que el usuario existe
+            $usuario = Usuario::find($idUsuario);
+            if (!$usuario) {
+                return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
+            }
+
+            $archivo = $request->file('archivo');
+            $tipoDocumento = $request->tipo_documento;
+
+            // Definir extensiones permitidas según tipo
+            $extensionesPermitidas = [
+                'CV' => ['pdf', 'doc', 'docx'],
+                'DNI' => ['jpg', 'jpeg', 'png', 'pdf'],
+                'PENALES' => ['pdf'],
+                'JUDICIALES' => ['pdf'],
+                'OTROS' => ['pdf', 'jpg', 'jpeg', 'png']
+            ];
+
+            $extension = $archivo->getClientOriginalExtension();
+            if (!in_array(strtolower($extension), $extensionesPermitidas[$tipoDocumento])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de archivo no permitido para este documento'
+                ], 422);
+            }
+
+            // Generar nombre único para el archivo
+            $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
+            
+            // Guardar en storage (público)
+            $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
+
+            // Crear registro en la base de datos
+            $documento = DocumentoUsuario::create([
+                'idUsuario' => $idUsuario,
+                'tipo_documento' => $tipoDocumento,
+                'nombre_archivo' => $archivo->getClientOriginalName(),
+                'ruta_archivo' => $ruta,
+                'mime_type' => $archivo->getMimeType(),
+                'tamano' => $archivo->getSize()
+            ]);
+
+            Log::info('Documento subido exitosamente:', [
+                'usuario' => $idUsuario,
+                'tipo' => $tipoDocumento,
+                'documento_id' => $documento->idDocumento
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Documento subido exitosamente',
+                'documento' => $documento
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al subir documento'], 500);
+        }
+    }
+
+    /**
+     * Descargar documento
+     */
+    public function downloadDocumento($idDocumento)
+    {
+        try {
+            $documento = DocumentoUsuario::findOrFail($idDocumento);
+
+            $rutaCompleta = storage_path('app/public/' . $documento->ruta_archivo);
+
+            if (!file_exists($rutaCompleta)) {
+                return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
+            }
+
+            return response()->download($rutaCompleta, $documento->nombre_archivo);
+
+        } catch (\Exception $e) {
+            Log::error('Error al descargar documento:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al descargar documento'], 500);
+        }
+    }
+
+    /**
+     * Eliminar documento
+     */
+    public function deleteDocumento($idDocumento)
+    {
+        try {
+            $documento = DocumentoUsuario::findOrFail($idDocumento);
+            $rutaCompleta = storage_path('app/public/' . $documento->ruta_archivo);
+
+            // Eliminar archivo físico
+            if (file_exists($rutaCompleta)) {
+                unlink($rutaCompleta);
+            }
+
+            // Eliminar registro
+            $documento->delete();
+
+            Log::info('Documento eliminado:', ['documento_id' => $idDocumento]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Documento eliminado exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar documento:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al eliminar documento'], 500);
+        }
+    }
+
+
+
+
+    /**
+ * Cambiar contraseña del usuario
+ */
+public function cambiarPassword(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed',
+            'new_password_confirmation' => 'required'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+
+        // Verificar contraseña actual usando bcrypt
+        if (!Hash::check($request->current_password, $usuario->clave)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La contraseña actual es incorrecta'
+            ], 422);
+        }
+
+        // Verificar que la nueva contraseña no sea igual a la actual
+        if (Hash::check($request->new_password, $usuario->clave)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'La nueva contraseña no puede ser igual a la actual'
+            ], 422);
+        }
+
+        // Actualizar contraseña con bcrypt (por defecto en Laravel)
+        $usuario->clave = Hash::make($request->new_password);
+        $usuario->save();
+
+        Log::info('Contraseña cambiada exitosamente para usuario:', [
+            'usuario_id' => $id,
+            'email' => $usuario->correo
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseña cambiada exitosamente'
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al cambiar contraseña:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cambiar contraseña'
+        ], 500);
+    }
+}
+
+    /**
+     * Desactivar cuenta de usuario
+     */
+    public function desactivarCuenta($id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+            $usuario->estado = 0; // 0 = inactivo
+            $usuario->save();
+
+            Log::info('Cuenta desactivada:', ['usuario_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuenta desactivada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al desactivar cuenta:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al desactivar cuenta'
+            ], 500);
+        }
+    }
+
+    /**
+     * Activar cuenta de usuario
+     */
+    public function activarCuenta($id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+            $usuario->estado = 1; // 1 = activo
+            $usuario->save();
+
+            Log::info('Cuenta activada:', ['usuario_id' => $id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuenta activada exitosamente'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al activar cuenta:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al activar cuenta'
+            ], 500);
+        }
+    }
+
+    /**
+     * Enviar enlace de recuperación de contraseña
+     */
+    public function enviarRecuperacion($id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+
+            // Generar token de recuperación
+            $token = Str::random(60);
+            $usuario->token = $token;
+            $usuario->save();
+
+            // Crear URL de recuperación
+            $resetUrl = url('/reset-password/' . $token);
+
+            // Enviar correo
+            Mail::to($usuario->correo)->send(new \App\Mail\PasswordResetLinkrecuperar($resetUrl, $usuario));
+
+            Log::info('Enlace de recuperación enviado:', [
+                'usuario_id' => $id,
+                'email' => $usuario->correo
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Enlace de recuperación enviado a tu correo'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al enviar enlace de recuperación:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar enlace de recuperación'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generar PDF con información del usuario
+     */
+    public function generarPDF($id)
+    {
+        try {
+            $usuario = Usuario::with([
+                'tipoDocumento', 
+                'tipoUsuario', 
+                'sexo', 
+                'rol', 
+                'tipoArea',
+                'sucursal'
+            ])->findOrFail($id);
+
+            // Obtener documentos del usuario
+            $documentos = DocumentoUsuario::where('idUsuario', $id)->get();
+
+            // Obtener cuentas bancarias
+            $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get();
+
+            $data = [
+                'usuario' => $usuario,
+                'documentos' => $documentos,
+                'cuentasBancarias' => $cuentasBancarias,
+                'fecha' => now()->format('d/m/Y H:i:s')
+            ];
+
+            $pdf = Pdf::loadView('pdf.usuario-info', $data);
+            
+            $nombreArchivo = 'informacion_usuario_' . $usuario->documento . '_' . date('Ymd_His') . '.pdf';
+            
+            return $pdf->download($nombreArchivo);
+
+        } catch (\Exception $e) {
+            Log::error('Error al generar PDF:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar el PDF'
+            ], 500);
+        }
+    }
+
+    /**
+     * Descargar todos los documentos del usuario en ZIP
+     */
+    public function descargarDocumentos($id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+            $documentos = DocumentoUsuario::where('idUsuario', $id)->get();
+
+            if ($documentos->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No hay documentos para descargar'
+                ], 404);
+            }
+
+            // Crear archivo ZIP
+            $zip = new \ZipArchive();
+            $zipFileName = 'documentos_usuario_' . $usuario->documento . '_' . time() . '.zip';
+            $zipPath = storage_path('app/public/temp/' . $zipFileName);
+
+            if (!file_exists(dirname($zipPath))) {
+                mkdir(dirname($zipPath), 0777, true);
+            }
+
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+                foreach ($documentos as $documento) {
+                    $filePath = storage_path('app/public/' . $documento->ruta_archivo);
+                    if (file_exists($filePath)) {
+                        $zip->addFile($filePath, $documento->tipo_documento . '/' . $documento->nombre_archivo);
+                    }
+                }
+                $zip->close();
+            }
+
+            return response()->download($zipPath)->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('Error al descargar documentos:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al descargar documentos'
+            ], 500);
         }
     }
 }

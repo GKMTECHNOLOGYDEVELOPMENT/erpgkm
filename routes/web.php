@@ -1152,8 +1152,30 @@ Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name(
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
 Route::put('config/{id}', [UsuarioController::class, 'config'])->name('usuario.config');
 Route::put('/usuario/direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');
+
+
+Route::get('/usuario/{id}/documentos', [UsuarioController::class, 'getDocumentos'])->name('usuario.documentos');
+    Route::post('/usuario/{id}/documentos/upload', [UsuarioController::class, 'uploadDocumento'])->name('usuario.documentos.upload');
+    Route::get('/usuario/documentos/{id}/download', [UsuarioController::class, 'downloadDocumento'])->name('usuario.documentos.download');
+    Route::delete('/usuario/documentos/{id}', [UsuarioController::class, 'deleteDocumento'])->name('usuario.documentos.delete');
+
+
+  Route::post('/usuario/{id}/cambiar-password', [UsuarioController::class, 'cambiarPassword'])->name('usuario.cambiar.password');
+    Route::post('/usuario/{id}/desactivar-cuenta', [UsuarioController::class, 'desactivarCuenta'])->name('usuario.desactivar');
+    Route::post('/usuario/{id}/activar-cuenta', [UsuarioController::class, 'activarCuenta'])->name('usuario.activar');
+    Route::post('/usuario/{id}/enviar-recuperacion', [UsuarioController::class, 'enviarRecuperacion'])->name('usuario.enviar.recuperacion');
+    Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF'])->name('usuario.generar.pdf');
+    Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
+
+
 // Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
+
+
+
+
+
+
 Route::get('/ver-informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verInforme']);
 Route::get('/ver-hoja-entrega-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verHojaEntrega']);
 //Validaciones de tienda

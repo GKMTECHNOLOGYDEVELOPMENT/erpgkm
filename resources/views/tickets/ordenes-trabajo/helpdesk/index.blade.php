@@ -134,7 +134,6 @@
             "
                     :disabled="!clienteGeneralFilter || contactoFinalLoading">
                     <option value="">Todos los contactos</option>
-                    <option value="sin_contacto">Sin contacto asignado</option>
                     <template x-if="contactoFinalLoading">
                         <option disabled>Cargando contactos...</option>
                     </template>

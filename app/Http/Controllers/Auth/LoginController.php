@@ -31,7 +31,8 @@ class LoginController extends Controller
   
 
 
-    public function login(Request $request)
+ // app/Http\Controllers\Auth\LoginController.php
+public function login(Request $request)
 {
     // Validar las credenciales del usuario
     Log::info('Intentando iniciar sesión con el correo: ' . $request->email);
@@ -63,11 +64,74 @@ class LoginController extends Controller
     Auth::login($usuario);
     $request->session()->regenerate();
     
-    Log::info('Usuario autenticado: ' . $usuario->idUsuario);
-
-    return redirect()->route('index');
+    Log::info('Usuario autenticado: ' . $usuario->idUsuario . 
+        ' - Rol: ' . $usuario->idRol . 
+        ' - TipoUsuario: ' . $usuario->idTipoUsuario . 
+        ' - TipoArea: ' . $usuario->idTipoArea);
+    
+    // Redirigir al dashboard correspondiente
+    return $this->redirigirSegunDashboard($usuario);
+}
+// app/Http\Controllers\Auth\LoginController.php
+private function redirigirSegunDashboard($usuario)
+{
+    // Obtener el dashboard principal del usuario
+    $dashboard = $usuario->getDashboardPrincipal();
+    
+    if (!$dashboard) {
+        Log::warning('Usuario ' . $usuario->idUsuario . ' no tiene acceso a ningún dashboard');
+        
+        // Si no tiene dashboards, mostrar error y logout
+        Auth::logout();
+        return redirect()->route('login')->withErrors([
+            'acceso' => 'No tiene permisos para acceder al sistema. Contacte al administrador.'
+        ]);
+    }
+    
+    Log::info('Redirigiendo usuario ' . $usuario->idUsuario . 
+        ' a dashboard: ' . $dashboard['nombre']);
+    
+    // Redirigir según lo disponible
+    if (isset($dashboard['route']) && $dashboard['route'] == 'index') {
+        // Dashboard principal/administración
+        return redirect()->route('index');
+    } elseif (isset($dashboard['url'])) {
+        // Usar URL directa
+        return redirect($dashboard['url']);
+    } elseif (isset($dashboard['route'])) {
+        // Usar ruta con nombre
+        return redirect()->route($dashboard['route']);
+    } else {
+        // Fallback al dashboard principal
+        return redirect()->route('index');
+    }
 }
 
+// O una versión más simple:
+private function redirigirSegunDashboardSimple($usuario)
+{
+    $dashboard = $usuario->getDashboardPrincipal();
+    
+    if (!$dashboard) {
+        Log::warning('Usuario ' . $usuario->idUsuario . ' no tiene acceso a ningún dashboard');
+        Auth::logout();
+        return redirect()->route('login')->withErrors([
+            'acceso' => 'No tiene permisos para acceder al sistema.'
+        ]);
+    }
+    
+    Log::info('Redirigiendo a: ' . $dashboard['nombre']);
+    
+    // Priorizar URL directa, luego ruta con nombre
+    if (isset($dashboard['url'])) {
+        return redirect($dashboard['url']);
+    } elseif (isset($dashboard['route'])) {
+        return redirect()->route($dashboard['route']);
+    }
+    
+    // Default
+    return redirect()->route('index');
+}
 
     public function logout(Request $request)
     {

@@ -254,4 +254,160 @@ class Usuario extends Authenticatable
     {
         return $this->Nombre . ' ' . $this->apellidoPaterno . ' ' . $this->apellidoMaterno;
     }
+
+
+
+
+
+	// app/Models/Usuario.php
+// Agrega estos métodos a tu clase Usuario existente
+
+public function combinacionPermisos()
+{
+    return $this->hasOne(CombinacionPermiso::class, 'idCombinacion', 'idCombinacion')
+        ->where('estado', 1);
+}
+
+public function obtenerCombinacionPermisos()
+{
+    // Buscar la combinación que coincide con rol, tipoUsuario y tipoArea del usuario
+    return CombinacionPermiso::where('idRol', $this->idRol)
+        ->where('idTipoUsuario', $this->idTipoUsuario)
+        ->where('idTipoArea', $this->idTipoArea)
+        ->where('estado', 1)
+        ->first();
+}
+
+public function obtenerPermisos()
+{
+    $combinacion = $this->obtenerCombinacionPermisos();
+    
+    if ($combinacion) {
+        // Obtener permisos activos a través de la tabla pivote
+        return $combinacion->permisos()
+            ->where('permisos.estado', 1)
+            ->wherePivot('estado', 1)
+            ->get();
+    }
+    
+    return collect();
+}
+
+public function tienePermiso($nombrePermiso)
+{
+    $combinacion = $this->obtenerCombinacionPermisos();
+    
+    if (!$combinacion) {
+        return false;
+    }
+    
+    // Consulta directa para mejor performance
+    return Permiso::where('nombre', $nombrePermiso)
+        ->where('estado', 1)
+        ->whereHas('combinaciones', function($query) use ($combinacion) {
+            $query->where('combinaciones_permisos.idCombinacion', $combinacion->idCombinacion)
+                ->where('combinacion_permisos.estado', 1);
+        })
+        ->exists();
+}
+// app/Models/Usuario.php
+// Actualiza el método getDashboardsDisponibles()
+
+public function getDashboardsDisponibles()
+{
+    $dashboards = [];
+    
+    // Mapeo de permisos a dashboards usando tus rutas reales
+    $mapDashboards = [
+        'VER DASHBOARD' => [
+            'route' => 'index',
+            'url' => '/', // URL directa
+            'nombre' => 'Dashboard Principal',
+            'prioridad' => 1,
+            'icon' => 'fas fa-home'
+        ],
+        'VER DASHBOARD ADMINISTRACION' => [
+            'route' => 'index',
+            'url' => '/', // Misma URL que principal
+            'nombre' => 'Dashboard Administración',
+            'prioridad' => 2,
+            'icon' => 'fas fa-cogs'
+        ],
+        'VER DASHBOARD ALMACEN' => [
+            'route' => 'almacen',
+            'url' => '/almacen',
+            'nombre' => 'Dashboard Almacén',
+            'prioridad' => 3,
+            'icon' => 'fas fa-warehouse'
+        ],
+        'VER DASHBOARD TICKETS' => [
+            'route' => 'tickets',
+            'url' => '/tickets',
+            'nombre' => 'Dashboard Tickets',
+            'prioridad' => 4,
+            'icon' => 'fas fa-ticket-alt'
+        ],
+        'VER DASHBOARD COMERCIAL' => [
+            'route' => 'commercial', // Nota: tu ruta se llama 'commercial', no 'comercial'
+            'url' => '/comercial',
+            'nombre' => 'Dashboard Comercial',
+            'prioridad' => 5,
+            'icon' => 'fas fa-chart-line'
+        ]
+    ];
+    
+    // Verificar cada dashboard
+    foreach ($mapDashboards as $permiso => $dashboardInfo) {
+        if ($this->tienePermiso($permiso)) {
+            $dashboards[] = $dashboardInfo;
+        }
+    }
+    
+    // Ordenar por prioridad
+    usort($dashboards, function($a, $b) {
+        return $a['prioridad'] <=> $b['prioridad'];
+    });
+    
+    return $dashboards;
+}
+public function getDashboardPrincipal()
+{
+    $dashboards = $this->getDashboardsDisponibles();
+    
+    if (empty($dashboards)) {
+        return null;
+    }
+    
+    // Siempre retornar el primero (tiene mayor prioridad)
+    return $dashboards[0];
+}
+
+
+// app/Models/Usuario.php
+public function getMenuDashboards()
+{
+    $dashboards = $this->getDashboardsDisponibles();
+    $menuItems = [];
+    $yaIncluidoIndex = false;
+    
+    foreach ($dashboards as $dashboard) {
+        // Evitar duplicar el dashboard principal
+        if (($dashboard['route'] == 'index' || $dashboard['url'] == '/') && $yaIncluidoIndex) {
+            continue;
+        }
+        
+        if ($dashboard['route'] == 'index' || $dashboard['url'] == '/') {
+            $yaIncluidoIndex = true;
+        }
+        
+        $menuItems[] = [
+            'nombre' => $dashboard['nombre'],
+            'route' => $dashboard['route'],
+            'url' => $dashboard['url'],
+            'icon' => $dashboard['icon'] ?? 'fas fa-chart-bar'
+        ];
+    }
+    
+    return $menuItems;
+}
 }

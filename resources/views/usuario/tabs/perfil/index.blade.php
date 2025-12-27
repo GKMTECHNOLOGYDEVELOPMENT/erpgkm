@@ -129,25 +129,6 @@ $(document).ready(function() {
 
 
 </script>
-
-        
-
-
-       
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
 <div class="panel">
                 <div class="mb-5">
                     <h5 class="font-semibold text-lg mb-4">Agregar dirección </h5>
@@ -306,9 +287,6 @@ $(document).ready(function() {
                     </script>
 
                     <!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
-
-
-
                     <script>
                         document.getElementById('direccion-form').addEventListener('submit', function(event) {
                             event.preventDefault(); // Evita el envío normal del formulario
@@ -361,16 +339,5 @@ $(document).ready(function() {
 
                 </div>
             </div>
-
-
-
-
-
-
-
-
-
-
-
     </div>
 </template>

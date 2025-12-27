@@ -53,4 +53,8 @@ class CombinacionPermiso extends Model
         
         return $rol . ' - ' . $tipoUsuario . ' - ' . $tipoArea;
     }
+    
+
+
+     
 }

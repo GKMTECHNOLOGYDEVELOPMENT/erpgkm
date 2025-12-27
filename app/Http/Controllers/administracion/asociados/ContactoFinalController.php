@@ -15,45 +15,54 @@ class ContactoFinalController extends Controller
     public function index()
     {
         $tiposDocumento = Tipodocumento::all();
-        return view('administracion.asociados.contactofinal.index', compact('tiposDocumento'));
+        $clientesGenerales = ClienteGeneral::all();
+
+        return view('administracion.asociados.contactofinal.index', compact('tiposDocumento','clientesGenerales'));
     }
+public function store(Request $request)
+{
+    try {
+        $validatedData = $request->validate([
+            'nombre_completo' => 'required|string|max:255',
+            'idTipoDocumento' => 'required|integer|exists:tipodocumento,idTipoDocumento',
+            'numero_documento' => 'required|string|max:20|unique:contactofinal,numero_documento',
+            'correo' => 'nullable|email|max:255',
+            'telefono' => 'nullable|string|max:15',
+            'idClienteGeneral' => 'required|array', // Añadir esta validación
+            'idClienteGeneral.*' => 'integer|exists:clientegeneral,idClienteGeneral',
+        ]);
 
-    public function store(Request $request)
-    {
-        try {
-            $validatedData = $request->validate([
-                'nombre_completo' => 'required|string|max:255',
-                'idTipoDocumento' => 'required|integer|exists:tipodocumento,idTipoDocumento',
-                'numero_documento' => 'required|string|max:20|unique:contactofinal,numero_documento',
-                'correo' => 'nullable|email|max:255',
-                'telefono' => 'nullable|string|max:15',
-            ]);
+        $validatedData['estado'] = true;
 
-            $validatedData['estado'] = true;
+        // Crear el contacto final
+        $contactoFinal = ContactoFinal::create($validatedData);
 
-            $contactoFinal = ContactoFinal::create($validatedData);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Contacto final agregado correctamente',
-                'data' => $contactoFinal,
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Errores de validación.',
-                'errors' => $e->errors(),
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error al guardar el contacto final: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocurrió un error al guardar el contacto final.',
-                'error' => $e->getMessage(),
-            ], 500);
+        // Asociar los clientes generales
+        if (!empty($validatedData['idClienteGeneral'])) {
+            $contactoFinal->clientesGenerales()->sync($validatedData['idClienteGeneral']);
         }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Contacto final agregado correctamente',
+            'data' => $contactoFinal,
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Errores de validación.',
+            'errors' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al guardar el contacto final: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Ocurrió un error al guardar el contacto final.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
 
 
     public function getAll(Request $request)
