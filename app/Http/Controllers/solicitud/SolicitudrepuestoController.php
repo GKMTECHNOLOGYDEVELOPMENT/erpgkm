@@ -52,7 +52,7 @@ class SolicitudrepuestoController extends Controller
         return view("solicitud.solicitudrepuesto.index", compact('estadisticas', 'solicitudes'));
     }
 
- public function create()
+    public function create()
 {
     $userId = auth()->id();
 
@@ -101,6 +101,7 @@ class SolicitudrepuestoController extends Controller
 
     return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
 }
+
     public function createProvincia()
     {
         $userId = auth()->id();
@@ -662,199 +663,221 @@ class SolicitudrepuestoController extends Controller
     }
 
 
+public function store(Request $request)
+{
+    $startTime = microtime(true);
+    Log::info('Iniciando creación de orden', [
+        'user_id' => auth()->id(),
+        'ticket_id' => $request->input('ticketId'),
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent()
+    ]);
 
-    public function store(Request $request)
-    {
-        $startTime = microtime(true);
-        Log::info('Iniciando creación de orden', [
-            'user_id' => auth()->id(),
-            'ticket_id' => $request->input('ticketId'),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
+    try {
+        DB::beginTransaction();
+        Log::info('Transacción de base de datos iniciada');
+
+        // Validar los datos requeridos
+        Log::debug('Iniciando validación de datos');
+        $validated = $request->validate([
+            'ticketId' => 'required|exists:tickets,idTickets',
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.ticketId' => 'required|exists:tickets,idTickets',
+            'products.*.modeloId' => 'required|exists:modelo,idModelo',
+            'products.*.tipoId' => 'required|exists:subcategorias,id',
+            'products.*.codigoId' => 'required',
+            'products.*.cantidad' => 'required|integer|min:1|max:100'
+        ]);
+        Log::info('Validación exitosa', ['campos_validados' => array_keys($validated)]);
+
+        // Obtener información del ticket
+        Log::debug('Buscando ticket en base de datos', ['ticket_id' => $validated['ticketId']]);
+        $ticket = DB::table('tickets')
+            ->where('idTickets', $validated['ticketId'])
+            ->first();
+
+        if (!$ticket) {
+            Log::error('Ticket no encontrado', ['ticket_id' => $validated['ticketId']]);
+            throw new \Exception('Ticket no encontrado');
+        }
+        Log::info('Ticket encontrado', ['ticket_numero' => $ticket->numero_ticket]);
+
+        // Calcular estadísticas de productos
+        Log::debug('Calculando estadísticas de productos');
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
+            return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
+        })->count();
+
+        Log::info('Estadísticas calculadas', [
+            'total_cantidad' => $totalCantidad,
+            'productos_unicos' => $totalProductosUnicos,
+            'total_productos' => count($validated['products'])
         ]);
 
-        try {
-            DB::beginTransaction();
-            Log::info('Transacción de base de datos iniciada');
+        // Generar código de orden
+        $nextOrderNumber = DB::table('solicitudesordenes')->count() + 1;
+        $codigoOrden = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
+        Log::info('Código de orden generado', ['codigo_orden' => $codigoOrden]);
 
-            // Validar los datos requeridos
-            Log::debug('Iniciando validación de datos');
-            $validated = $request->validate([
-                'ticketId' => 'required|exists:tickets,idTickets',
-                'orderInfo.tipoServicio' => 'required|string',
-                'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
-                'orderInfo.fechaRequerida' => 'required|date',
-                'orderInfo.observaciones' => 'nullable|string',
-                'products' => 'required|array|min:1',
-                'products.*.ticketId' => 'required|exists:tickets,idTickets',
-                'products.*.modeloId' => 'required|exists:modelo,idModelo',
-                'products.*.tipoId' => 'required|exists:subcategorias,id',
-                'products.*.codigoId' => 'required',
-                'products.*.cantidad' => 'required|integer|min:1|max:100'
+        // 1. Insertar en solicitudesordenes con TODOS los campos
+        Log::debug('Preparando inserción en solicitudesordenes');
+        $solicitudData = [
+            'fechacreacion' => now(),
+            'estado' => 'pendiente',
+            'tipoorden' => 'solicitud_repuesto',
+            'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+            'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+            'codigo' => $codigoOrden,
+            'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+            'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+            'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+            'cantidad' => $totalProductosUnicos,
+            'canproduuni' => $totalProductosUnicos,
+            'totalcantidadproductos' => $totalCantidad,
+            'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+            'idtecnico' => auth()->id(),
+            'idusuario' => auth()->id(),
+            'urgencia' => $validated['orderInfo']['urgencia']
+        ];
+
+        Log::debug('Datos para solicitudesordenes', $solicitudData);
+
+        $solicitudId = DB::table('solicitudesordenes')->insertGetId($solicitudData);
+        Log::info('Solicitud de orden creada exitosamente', ['solicitud_id' => $solicitudId]);
+
+        // 2. Insertar los artículos en ordenesarticulos CON EL IDTICKET
+        Log::debug('Iniciando procesamiento de productos', ['total_productos' => count($validated['products'])]);
+
+        $productosProcesados = 0;
+        $productosConError = 0;
+
+        foreach ($validated['products'] as $index => $product) {
+            Log::debug("Procesando producto {$index}", [
+                'producto_index' => $index,
+                'codigo' => $product['codigoId'],
+                'cantidad' => $product['cantidad']
             ]);
-            Log::info('Validación exitosa', ['campos_validados' => array_keys($validated)]);
 
-            // Obtener información del ticket
-            Log::debug('Buscando ticket en base de datos', ['ticket_id' => $validated['ticketId']]);
-            $ticket = DB::table('tickets')
-                ->where('idTickets', $validated['ticketId'])
+            // Buscar el idArticulos basado en el código
+            $articulo = DB::table('articulos')
+                ->where('codigo_repuesto', $product['codigoId'])
                 ->first();
 
-            if (!$ticket) {
-                Log::error('Ticket no encontrado', ['ticket_id' => $validated['ticketId']]);
-                throw new \Exception('Ticket no encontrado');
-            }
-            Log::info('Ticket encontrado', ['ticket_numero' => $ticket->numero_ticket]);
-
-            // Calcular estadísticas de productos
-            Log::debug('Calculando estadísticas de productos');
-            $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
-                return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
-            })->count();
-
-            Log::info('Estadísticas calculadas', [
-                'total_cantidad' => $totalCantidad,
-                'productos_unicos' => $totalProductosUnicos,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            // Generar código de orden
-            $nextOrderNumber = DB::table('solicitudesordenes')->count() + 1;
-            $codigoOrden = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
-            Log::info('Código de orden generado', ['codigo_orden' => $codigoOrden]);
-
-            // 1. Insertar en solicitudesordenes con TODOS los campos
-            Log::debug('Preparando inserción en solicitudesordenes');
-            $solicitudData = [
-                'fechacreacion' => now(),
-                'estado' => 'pendiente',
-                'tipoorden' => 'solicitud_repuesto',
-                'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
-                'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
-                'codigo' => $codigoOrden,
-                'niveldeurgencia' => $validated['orderInfo']['urgencia'],
-                'tiposervicio' => $validated['orderInfo']['tipoServicio'],
-                'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                'cantidad' => $totalProductosUnicos,
-                'canproduuni' => $totalProductosUnicos,
-                'totalcantidadproductos' => $totalCantidad,
-                'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
-                'idtecnico' => auth()->id(),
-                'idusuario' => auth()->id(),
-                'urgencia' => $validated['orderInfo']['urgencia']
-            ];
-
-            Log::debug('Datos para solicitudesordenes', $solicitudData);
-
-            $solicitudId = DB::table('solicitudesordenes')->insertGetId($solicitudData);
-            Log::info('Solicitud de orden creada exitosamente', ['solicitud_id' => $solicitudId]);
-
-            // 2. Insertar los artículos en ordenesarticulos CON EL IDTICKET
-            Log::debug('Iniciando procesamiento de productos', ['total_productos' => count($validated['products'])]);
-
-            $productosProcesados = 0;
-            $productosConError = 0;
-
-            foreach ($validated['products'] as $index => $product) {
-                Log::debug("Procesando producto {$index}", [
+            if ($articulo) {
+                DB::table('ordenesarticulos')->insert([
+                    'cantidad' => $product['cantidad'],
+                    'estado' => 0, // 0 = pendiente
+                    'observacion' => null,
+                    'fotorepuesto' => null,
+                    'fechausado' => null,
+                    'fechasinusar' => null,
+                    'idsolicitudesordenes' => $solicitudId,
+                    'idticket' => $product['ticketId'], // Guardar el idticket en cada artículo
+                    'idarticulos' => $articulo->idArticulos,
+                    'idubicacion' => null
+                ]);
+                $productosProcesados++;
+                Log::debug("Producto {$index} insertado exitosamente", [
+                    'articulo_id' => $articulo->idArticulos,
+                    'codigo' => $product['codigoId']
+                ]);
+            } else {
+                $productosConError++;
+                Log::warning("Artículo no encontrado", [
                     'producto_index' => $index,
                     'codigo' => $product['codigoId'],
-                    'cantidad' => $product['cantidad']
+                    'ticket_id' => $product['ticketId']
                 ]);
-
-                // Buscar el idArticulos basado en el código
-                $articulo = DB::table('articulos')
-                    ->where('codigo_repuesto', $product['codigoId'])
-                    ->first();
-
-                if ($articulo) {
-                    DB::table('ordenesarticulos')->insert([
-                        'cantidad' => $product['cantidad'],
-                        'estado' => 0, // 0 = pendiente
-                        'observacion' => null,
-                        'fotorepuesto' => null,
-                        'fechausado' => null,
-                        'fechasinusar' => null,
-                        'idsolicitudesordenes' => $solicitudId,
-                        'idticket' => $product['ticketId'], // Guardar el idticket en cada artículo
-                        'idarticulos' => $articulo->idArticulos,
-                        'idubicacion' => null
-                    ]);
-                    $productosProcesados++;
-                    Log::debug("Producto {$index} insertado exitosamente", [
-                        'articulo_id' => $articulo->idArticulos,
-                        'codigo' => $product['codigoId']
-                    ]);
-                } else {
-                    $productosConError++;
-                    Log::warning("Artículo no encontrado", [
-                        'producto_index' => $index,
-                        'codigo' => $product['codigoId'],
-                        'ticket_id' => $product['ticketId']
-                    ]);
-                }
             }
-
-            Log::info('Procesamiento de productos completado', [
-                'productos_procesados' => $productosProcesados,
-                'productos_con_error' => $productosConError,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            DB::commit();
-            Log::info('Transacción confirmada exitosamente');
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
-            Log::info('Orden creada exitosamente', [
-                'solicitud_id' => $solicitudId,
-                'codigo_orden' => $codigoOrden,
-                'tiempo_ejecucion_ms' => $executionTime,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Orden creada exitosamente',
-                'solicitud_id' => $solicitudId,
-                'codigo_orden' => $codigoOrden,
-                'numeroticket' => $ticket->numero_ticket,
-                'idticket' => $validated['ticketId'],
-                'estadisticas' => [
-                    'productos_unicos' => $totalProductosUnicos,
-                    'total_cantidad' => $totalCantidad
-                ]
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            Log::error('Error de validación al crear orden', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación: ' . implode(', ', array_merge(...array_values($e->errors()))),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
-            Log::error('Error al crear orden', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $request->input('ticketId'),
-                'user_id' => auth()->id(),
-                'tiempo_ejecucion_ms' => $executionTime
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear la orden: ' . $e->getMessage()
-            ], 500);
         }
+
+        Log::info('Procesamiento de productos completado', [
+            'productos_procesados' => $productosProcesados,
+            'productos_con_error' => $productosConError,
+            'total_productos' => count($validated['products'])
+        ]);
+
+        // 3. Insertar en la tabla solicitudentrega para notificaciones
+        Log::debug('Insertando registro en tabla solicitudentrega');
+        
+        $comentario = "Solicitud de repuestos para Lima. Orden: {$codigoOrden}. ";
+        $comentario .= "Total productos: {$totalProductosUnicos}, Cantidad total: {$totalCantidad}. ";
+        $comentario .= $validated['orderInfo']['observaciones'] ? "Observaciones: " . $validated['orderInfo']['observaciones'] : "";
+        
+        DB::table('solicitudentrega')->insert([
+            'idTickets' => $validated['ticketId'],
+            'idVisitas' => null, // Se deja como null según lo solicitado
+            'idUsuario' => auth()->id(), // Usuario que solicita
+            'comentario' => trim($comentario), // Detalles de la solicitud + para Lima
+            'estado' => 1, // Estado 1 según lo solicitado
+            'fechaHora' => now(), // Fecha y hora actual
+            'idTipoServicio' => 5 // idTipoServicio 5 según lo solicitado
+        ]);
+        
+        Log::info('Registro en solicitudentrega creado exitosamente', [
+            'ticket_id' => $validated['ticketId'],
+            'usuario_id' => auth()->id(),
+            'idTipoServicio' => 5
+        ]);
+
+        DB::commit();
+        Log::info('Transacción confirmada exitosamente');
+
+        $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+        Log::info('Orden creada exitosamente', [
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'tiempo_ejecucion_ms' => $executionTime,
+            'total_productos' => count($validated['products'])
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Orden creada exitosamente',
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'numeroticket' => $ticket->numero_ticket,
+            'idticket' => $validated['ticketId'],
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        Log::error('Error de validación al crear orden', [
+            'errors' => $e->errors(),
+            'request_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación: ' . implode(', ', array_merge(...array_values($e->errors()))),
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+        Log::error('Error al crear orden', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'ticket_id' => $request->input('ticketId'),
+            'user_id' => auth()->id(),
+            'tiempo_ejecucion_ms' => $executionTime
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear la orden: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function storeProvincia(Request $request)
     {
@@ -1018,6 +1041,34 @@ class SolicitudrepuestoController extends Controller
                 'total_productos' => count($validated['products'])
             ]);
 
+
+
+            // 3. Insertar en la tabla solicitudentrega para notificaciones (PROVINCIA)
+Log::debug('Insertando registro en tabla solicitudentrega para provincia');
+
+$comentarioProvincia = "Solicitud de repuestos para Provincia - CAST: {$cast->nombre}. ";
+$comentarioProvincia .= "Orden: {$codigoOrden}. Ticket: {$validated['ticketNumber']}. ";
+$comentarioProvincia .= "Total productos: {$totalProductosUnicos}, Cantidad total: {$totalCantidad}. ";
+$comentarioProvincia .= $validated['orderInfo']['observaciones'] ? "Observaciones: " . $validated['orderInfo']['observaciones'] : "";
+
+DB::table('solicitudentrega')->insert([
+    'idTickets' => null, // Para provincia no tenemos idTickets
+    'numero_ticket' => $validated['ticketNumber'], // Aquí guardamos el número de ticket
+    'idVisitas' => null,
+    'idUsuario' => auth()->id(),
+    'comentario' => trim($comentarioProvincia),
+    'estado' => 1,
+    'fechaHora' => now(),
+    'idTipoServicio' => 5
+]);
+
+Log::info('Registro en solicitudentrega para provincia creado exitosamente', [
+    'numero_ticket' => $validated['ticketNumber'],
+    'cast_nombre' => $cast->nombre,
+    'usuario_id' => auth()->id(),
+    'idTipoServicio' => 5
+]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Orden de provincia creada exitosamente',
@@ -1091,7 +1142,7 @@ class SolicitudrepuestoController extends Controller
                 'so.niveldeurgencia as urgencia',
                 'so.fecharequerida',
                 'so.observaciones',
-                'so.idticket', // ← ESTE ES IMPORTANTE
+                'so.idticket', // ? ESTE ES IMPORTANTE
                 't.numero_ticket',
                 't.serie',
                 't.idModelo',
@@ -1518,8 +1569,8 @@ class SolicitudrepuestoController extends Controller
                     'idordenesarticulos' => $articulo->idordenesarticulos,
                     'idArticulos' => $articulo->idArticulos,
                     'codigo_repuesto' => $articulo->codigo_repuesto,
-                    'modelo_id' => $articulo->modelo_id, // ← ESTE ES EL IMPORTANTE
-                    'modelo_nombre' => $articulo->modelo_nombre, // ← ESTE ES EL IMPORTANTE
+                    'modelo_id' => $articulo->modelo_id, // ? ESTE ES EL IMPORTANTE
+                    'modelo_nombre' => $articulo->modelo_nombre, // ? ESTE ES EL IMPORTANTE
                     'subcategoria_id' => $articulo->subcategoria_id,
                     'tipo_articulo' => $articulo->tipo_articulo,
                     'cantidad' => $articulo->cantidad,
@@ -1944,6 +1995,7 @@ class SolicitudrepuestoController extends Controller
         try {
             DB::beginTransaction();
 
+            // Obtener la solicitud con todos los campos necesarios
             $solicitud = DB::table('solicitudesordenes')
                 ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
                 ->where('idsolicitudesordenes', $id)
@@ -1957,6 +2009,7 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
+            // Verificar si la solicitud ya está aprobada
             if ($solicitud->estado == 'aprobada') {
                 return response()->json([
                     'success' => false,
@@ -1964,7 +2017,9 @@ class SolicitudrepuestoController extends Controller
                 ], 400);
             }
 
+            // Obtener las ubicaciones seleccionadas del request
             $ubicacionesSeleccionadas = $request->input('ubicaciones', []);
+
             if (empty($ubicacionesSeleccionadas)) {
                 return response()->json([
                     'success' => false,
@@ -1972,6 +2027,7 @@ class SolicitudrepuestoController extends Controller
                 ], 400);
             }
 
+            // Obtener repuestos de la solicitud CON EL IDTICKET
             $repuestosSolicitud = DB::table('ordenesarticulos as oa')
                 ->select(
                     'oa.idordenesarticulos',
@@ -1986,6 +2042,7 @@ class SolicitudrepuestoController extends Controller
                 ->where('oa.idsolicitudesordenes', $id)
                 ->get();
 
+            // Verificar que todos los repuestos tengan stock suficiente
             foreach ($repuestosSolicitud as $repuesto) {
                 $stockDisponible = DB::table('rack_ubicacion_articulos')
                     ->where('articulo_id', $repuesto->idArticulos)
@@ -1999,8 +2056,9 @@ class SolicitudrepuestoController extends Controller
                 }
             }
 
+            // Procesar cada repuesto
             foreach ($repuestosSolicitud as $repuesto) {
-                $cantidadSolicitada = (int)$repuesto->cantidad;
+                $cantidadSolicitada = $repuesto->cantidad;
                 $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
 
                 if (!$ubicacionId) {
@@ -2010,6 +2068,7 @@ class SolicitudrepuestoController extends Controller
                     ], 400);
                 }
 
+                // Obtener el número de ticket desde la tabla tickets
                 $ticketInfo = DB::table('tickets')
                     ->select('numero_ticket')
                     ->where('idTickets', $repuesto->idticket)
@@ -2024,6 +2083,7 @@ class SolicitudrepuestoController extends Controller
 
                 $numeroTicket = $ticketInfo->numero_ticket;
 
+                // Verificar stock en la ubicación seleccionada
                 $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
                     ->select(
                         'rua.cantidad',
@@ -2047,13 +2107,14 @@ class SolicitudrepuestoController extends Controller
                     ], 404);
                 }
 
-                if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                if ($stockUbicacion->cantidad < $cantidadSolicitada) {
                     return response()->json([
                         'success' => false,
                         'message' => "Stock insuficiente en la ubicación seleccionada para: {$repuesto->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
                     ], 400);
                 }
 
+                // Verificar si ya fue procesado
                 $yaProcesado = DB::table('ordenesarticulos')
                     ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                     ->where('estado', 1)
@@ -2066,25 +2127,17 @@ class SolicitudrepuestoController extends Controller
                     ], 400);
                 }
 
-                // 1) Descontar stock por PK
+                // ? 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
                 DB::table('rack_ubicacion_articulos')
                     ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
                     ->decrement('cantidad', $cantidadSolicitada);
 
-                // ✅ Descontar de CAJAS si existen
-                $this->descontarDeCajasSiExisten(
-                    (int)$repuesto->idArticulos,
-                    (int)$ubicacionId,
-                    (int)$cantidadSolicitada,
-                    null
-                );
-
-                // 2) Stock total
+                // ? 2. DESCONTAR stock total en tabla articulos
                 DB::table('articulos')
                     ->where('idArticulos', $repuesto->idArticulos)
                     ->decrement('stock_total', $cantidadSolicitada);
 
-                // 3) Movimiento
+                // ? 3. Registrar movimiento en rack_movimientos
                 DB::table('rack_movimientos')->insert([
                     'articulo_id' => $repuesto->idArticulos,
                     'custodia_id' => null,
@@ -2104,7 +2157,7 @@ class SolicitudrepuestoController extends Controller
                     'updated_at' => now()
                 ]);
 
-                // 4) inventario_ingresos_clientes
+                // ? 4. Registrar en inventario_ingresos_clientes CON CODIGO_SOLICITUD
                 DB::table('inventario_ingresos_clientes')->insert([
                     'compra_id' => null,
                     'articulo_id' => $repuesto->idArticulos,
@@ -2118,11 +2171,12 @@ class SolicitudrepuestoController extends Controller
                     'updated_at' => now()
                 ]);
 
-                // 5) repuestos_entregas (grupal -> solicitante)
+                // ? 5. Registrar en repuestos_entregas para tracking grupal
+                // En procesamiento grupal, por defecto se entrega al solicitante
                 DB::table('repuestos_entregas')->insert([
                     'solicitud_id' => $solicitud->idsolicitudesordenes,
                     'articulo_id' => $repuesto->idArticulos,
-                    'usuario_destino_id' => $solicitud->idUsuario,
+                    'usuario_destino_id' => $solicitud->idUsuario, // Por defecto al solicitante
                     'tipo_entrega' => 'solicitante',
                     'cantidad' => $cantidadSolicitada,
                     'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
@@ -2132,15 +2186,10 @@ class SolicitudrepuestoController extends Controller
                     'updated_at' => now()
                 ]);
 
-                // 6) Kardex
-                $this->actualizarKardexSalida(
-                    (int)$repuesto->idArticulos,
-                    (int)$stockUbicacion->cliente_general_id,
-                    (int)$cantidadSolicitada,
-                    (float)$repuesto->precio_compra
-                );
+                // ? 6. Actualizar kardex
+                $this->actualizarKardexSalida($repuesto->idArticulos, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $repuesto->precio_compra);
 
-                // 7) Marcar procesado
+                // ? 7. Marcar como procesado
                 DB::table('ordenesarticulos')
                     ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                     ->update([
@@ -2148,9 +2197,10 @@ class SolicitudrepuestoController extends Controller
                         'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente - Ticket: {$numeroTicket} - Entregado al solicitante"
                     ]);
 
-                Log::info("✅ Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}, Ticket: {$numeroTicket}, Código Solicitud: {$solicitud->codigo}");
+                Log::info("? Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}, Ticket: {$numeroTicket}, Código Solicitud: {$solicitud->codigo}");
             }
 
+            // Actualizar estado de la solicitud
             DB::table('solicitudesordenes')
                 ->where('idsolicitudesordenes', $id)
                 ->update([
@@ -2163,7 +2213,7 @@ class SolicitudrepuestoController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Solicitud de repuestos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas (y de cajas si existían).'
+                'message' => 'Solicitud de repuestos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -2179,294 +2229,341 @@ class SolicitudrepuestoController extends Controller
         }
     }
 
-    public function aceptarIndividual(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
+   public function aceptarIndividual(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
 
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_repuesto')
-                ->first();
+        // Obtener la solicitud con todos los campos necesarios
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_repuesto')
+            ->first();
 
-            if (!$solicitud) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
-
-            $articuloId = (int)$request->input('articulo_id');
-            $ubicacionId = (int)$request->input('ubicacion_id');
-            $tipoDestinatario = $request->input('tipo_destinatario');
-            $usuarioDestinoId = $request->input('usuario_destino_id');
-
-            if (!$articuloId || !$ubicacionId || !$tipoDestinatario) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Datos incompletos para procesar el repuesto'
-                ], 400);
-            }
-
-            $usuarioFinalId = null;
-            $tipoEntrega = '';
-            $nombreDestinatario = '';
-
-            switch ($tipoDestinatario) {
-                case 'solicitante':
-                    $usuarioFinalId = $solicitud->idUsuario;
-                    $tipoEntrega = 'solicitante';
-                    break;
-                case 'tecnico':
-                    $usuarioFinalId = $solicitud->idTecnico;
-                    $tipoEntrega = 'tecnico';
-                    break;
-                case 'otro':
-                    $usuarioFinalId = $usuarioDestinoId;
-                    $tipoEntrega = 'otro_usuario';
-                    break;
-                default:
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Tipo de destinatario no válido'
-                    ], 400);
-            }
-
-            if (!$usuarioFinalId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se pudo determinar el usuario destino'
-                ], 400);
-            }
-
-            $destinatarioInfo = DB::table('usuarios')
-                ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
-                ->where('idUsuario', $usuarioFinalId)
-                ->first();
-
-            $nombreDestinatario = $destinatarioInfo
-                ? "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}"
-                : 'Usuario no encontrado';
-
-            $repuesto = DB::table('ordenesarticulos as oa')
-                ->select(
-                    'oa.idordenesarticulos',
-                    'oa.cantidad',
-                    'oa.idticket',
-                    'a.idArticulos',
-                    'a.nombre',
-                    'a.stock_total'
-                )
-                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-                ->where('oa.idsolicitudesordenes', $id)
-                ->where('a.idArticulos', $articuloId)
-                ->first();
-
-            if (!$repuesto) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Repuesto no encontrado en la solicitud'
-                ], 404);
-            }
-
-            $ticketInfo = DB::table('tickets')
-                ->select('numero_ticket')
-                ->where('idTickets', $repuesto->idticket)
-                ->first();
-
-            if (!$ticketInfo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ticket no encontrado'
-                ], 404);
-            }
-
-            $numeroTicket = $ticketInfo->numero_ticket;
-
-            $yaProcesado = DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-                ->where('estado', 1)
-                ->exists();
-
-            if ($yaProcesado) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este repuesto ya fue procesado anteriormente'
-                ], 400);
-            }
-
-            $cantidadSolicitada = (int)$repuesto->cantidad;
-
-            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-                ->select(
-                    'rua.cantidad',
-                    'rua.idRackUbicacionArticulo', // ✅ NUEVO
-                    'ru.codigo as ubicacion_codigo',
-                    'ru.idRackUbicacion',
-                    'r.idRack as rack_id',
-                    'r.nombre as rack_nombre',
-                    'rua.cliente_general_id'
-                )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $articuloId)
-                ->where('rua.rack_ubicacion_id', $ubicacionId)
-                ->first();
-
-            if (!$stockUbicacion) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Ubicación no encontrada para este repuesto'
-                ], 404);
-            }
-
-            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-                ], 400);
-            }
-
-            $articuloInfo = DB::table('articulos')
-                ->select('precio_compra', 'precio_venta')
-                ->where('idArticulos', $articuloId)
-                ->first();
-
-            if (!$articuloInfo) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Información del artículo no encontrada'
-                ], 404);
-            }
-
-            // 1) Descontar stock por PK
-            DB::table('rack_ubicacion_articulos')
-                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-                ->decrement('cantidad', $cantidadSolicitada);
-
-            // ✅ Descontar de CAJAS si existen
-            $this->descontarDeCajasSiExisten(
-                (int)$articuloId,
-                (int)$ubicacionId,
-                (int)$cantidadSolicitada,
-                null
-            );
-
-            // 2) Movimiento
-            DB::table('rack_movimientos')->insert([
-                'articulo_id' => $articuloId,
-                'custodia_id' => null,
-                'ubicacion_origen_id' => $ubicacionId,
-                'ubicacion_destino_id' => null,
-                'rack_origen_id' => $stockUbicacion->rack_id,
-                'rack_destino_id' => null,
-                'cantidad' => $cantidadSolicitada,
-                'tipo_movimiento' => 'salida',
-                'usuario_id' => auth()->id(),
-                'observaciones' => "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
-                'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-                'codigo_ubicacion_destino' => null,
-                'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-                'nombre_rack_destino' => null,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // 3) inventario_ingresos_clientes
-            DB::table('inventario_ingresos_clientes')->insert([
-                'compra_id' => null,
-                'articulo_id' => $articuloId,
-                'tipo_ingreso' => 'salida',
-                'ingreso_id' => $solicitud->idsolicitudesordenes,
-                'cliente_general_id' => $stockUbicacion->cliente_general_id,
-                'numero_orden' => $numeroTicket,
-                'codigo_solicitud' => $solicitud->codigo,
-                'cantidad' => -$cantidadSolicitada,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // 4) repuestos_entregas
-            DB::table('repuestos_entregas')->insert([
-                'solicitud_id' => $solicitud->idsolicitudesordenes,
-                'articulo_id' => $articuloId,
-                'usuario_destino_id' => $usuarioFinalId,
-                'tipo_entrega' => $tipoEntrega,
-                'cantidad' => $cantidadSolicitada,
-                'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
-                'usuario_entrego_id' => auth()->id(),
-                'observaciones' => "Repuesto entregado individualmente - Ticket: {$numeroTicket}",
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // 5) stock total
-            DB::table('articulos')
-                ->where('idArticulos', $articuloId)
-                ->decrement('stock_total', $cantidadSolicitada);
-
-            // 6) Kardex
-            $this->actualizarKardexSalida(
-                (int)$articuloId,
-                (int)$stockUbicacion->cliente_general_id,
-                (int)$cantidadSolicitada,
-                (float)$articuloInfo->precio_compra
-            );
-
-            // 7) marcar procesado
-            DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-                ->update([
-                    'estado' => 1,
-                    'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})"
-                ]);
-
-            $repuestosPendientes = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('estado', 0)
-                ->count();
-
-            $todosProcesados = ($repuestosPendientes == 0);
-
-            if ($todosProcesados) {
-                DB::table('solicitudesordenes')
-                    ->where('idsolicitudesordenes', $id)
-                    ->update([
-                        'estado' => 'aprobada',
-                        'fechaaprobacion' => now(),
-                        'idaprobador' => auth()->id()
-                    ]);
-            }
-
-            DB::commit();
-
-            Log::info("Repuesto procesado individualmente - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Código Solicitud: {$solicitud->codigo}, Destinatario: {$nombreDestinatario} ({$tipoEntrega})");
-
-            return response()->json([
-                'success' => true,
-                'message' => "Repuesto procesado correctamente. Entregado a: {$nombreDestinatario}",
-                'todos_procesados' => $todosProcesados,
-                'numero_ticket' => $numeroTicket,
-                'codigo_solicitud' => $solicitud->codigo,
-                'destinatario' => $nombreDestinatario,
-                'tipo_entrega' => $tipoEntrega
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al procesar repuesto individual: ' . $e->getMessage());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            Log::error('Trace: ' . $e->getTraceAsString());
-
+        if (!$solicitud) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al procesar el repuesto: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Solicitud no encontrada'
+            ], 404);
         }
+
+        $articuloId = (int)$request->input('articulo_id');
+        $ubicacionId = (int)$request->input('ubicacion_id');
+        $tipoDestinatario = $request->input('tipo_destinatario');
+        $usuarioDestinoId = $request->input('usuario_destino_id');
+
+        if (!$articuloId || !$ubicacionId || !$tipoDestinatario) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos incompletos para procesar el repuesto'
+            ], 400);
+        }
+
+        // Determinar el usuario destino final
+        $usuarioFinalId = null;
+        $tipoEntrega = '';
+        $nombreDestinatario = '';
+
+        switch ($tipoDestinatario) {
+            case 'solicitante':
+                $usuarioFinalId = $solicitud->idUsuario;
+                $tipoEntrega = 'solicitante';
+                break;
+
+            case 'tecnico':
+                $usuarioFinalId = $solicitud->idTecnico;
+                $tipoEntrega = 'tecnico';
+                break;
+
+            case 'otro':
+                $usuarioFinalId = $usuarioDestinoId;
+                $tipoEntrega = 'otro_usuario';
+                break;
+
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de destinatario no válido'
+                ], 400);
+        }
+
+        if (!$usuarioFinalId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo determinar el usuario destino'
+            ], 400);
+        }
+
+        // Obtener nombre del destinatario
+        $destinatarioInfo = DB::table('usuarios')
+            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+            ->where('idUsuario', $usuarioFinalId)
+            ->first();
+
+        $nombreDestinatario = $destinatarioInfo ?
+            "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}" :
+            'Usuario no encontrado';
+
+        // Obtener información del repuesto CON EL IDTICKET - MODIFICADO
+        $repuesto = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.idordenesarticulos',
+                'oa.cantidad',
+                'oa.idticket',
+                'a.idArticulos',
+                'a.nombre',
+                'a.stock_total',
+                'a.codigo_repuesto', // Agregado
+                'a.sku' // Agregado
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->where('a.idArticulos', $articuloId)
+            ->first();
+
+        if (!$repuesto) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Repuesto no encontrado en la solicitud'
+            ], 404);
+        }
+
+        // Obtener el número de ticket desde la tabla tickets
+        $ticketInfo = DB::table('tickets')
+            ->select('numero_ticket')
+            ->where('idTickets', $repuesto->idticket)
+            ->first();
+
+        if (!$ticketInfo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ticket no encontrado'
+            ], 404);
+        }
+
+        $numeroTicket = $ticketInfo->numero_ticket;
+
+        // Verificar si ya fue procesado
+        $yaProcesado = DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+            ->where('estado', 1)
+            ->exists();
+
+        if ($yaProcesado) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este repuesto ya fue procesado anteriormente'
+            ], 400);
+        }
+
+        $cantidadSolicitada = (int)$repuesto->cantidad;
+
+        // Verificar stock en la ubicación seleccionada - MODIFICADO
+        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+            ->select(
+                'rua.cantidad',
+                'rua.idRackUbicacionArticulo', // Agregado
+                'ru.codigo as ubicacion_codigo',
+                'ru.idRackUbicacion',
+                'r.idRack as rack_id',
+                'r.nombre as rack_nombre',
+                'rua.cliente_general_id'
+            )
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $articuloId)
+            ->where('rua.rack_ubicacion_id', $ubicacionId)
+            ->first();
+
+        if (!$stockUbicacion) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ubicación no encontrada para este repuesto'
+            ], 404);
+        }
+
+        if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+            return response()->json([
+                'success' => false,
+                'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+            ], 400);
+        }
+
+        // Obtener información del artículo para el kardex - MODIFICADO
+        $articuloInfo = DB::table('articulos')
+            ->select(
+                'precio_compra',
+                'precio_venta',
+                'nombre',
+                'codigo_repuesto',
+                'sku'
+                // Excluidos: foto, foto_codigobarras, fotosku, br-codigo-repuesto (campos BLOB)
+            )
+            ->where('idArticulos', $articuloId)
+            ->first();
+
+        if (!$articuloInfo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Información del artículo no encontrada'
+            ], 404);
+        }
+
+        // 1. Descontar del stock en la ubicación específica seleccionada - MODIFICADO
+        DB::table('rack_ubicacion_articulos')
+            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo) // Usar PK
+            ->decrement('cantidad', $cantidadSolicitada);
+
+        // ✅ Descontar de CAJAS si existen
+        $this->descontarDeCajasSiExisten(
+            (int)$articuloId,
+            (int)$ubicacionId,
+            (int)$cantidadSolicitada,
+            null
+        );
+
+        // 2. Registrar el movimiento en rack_movimientos (SALIDA) con información del destinatario
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $articuloId,
+            'custodia_id' => null,
+            'ubicacion_origen_id' => $ubicacionId,
+            'ubicacion_destino_id' => null,
+            'rack_origen_id' => $stockUbicacion->rack_id,
+            'rack_destino_id' => null,
+            'cantidad' => $cantidadSolicitada,
+            'tipo_movimiento' => 'salida',
+            'usuario_id' => auth()->id(),
+            'observaciones' => "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
+            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+            'codigo_ubicacion_destino' => null,
+            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+            'nombre_rack_destino' => null,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // 3. Registrar en inventario_ingresos_clientes SOLO con código_solicitud
+        DB::table('inventario_ingresos_clientes')->insert([
+            'compra_id' => null,
+            'articulo_id' => $articuloId,
+            'tipo_ingreso' => 'salida',
+            'ingreso_id' => $solicitud->idsolicitudesordenes,
+            'cliente_general_id' => $stockUbicacion->cliente_general_id,
+            'numero_orden' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'cantidad' => -$cantidadSolicitada,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // 4. Registrar en la tabla de entregas (nueva tabla)
+        DB::table('repuestos_entregas')->insert([
+            'solicitud_id' => $solicitud->idsolicitudesordenes,
+            'articulo_id' => $articuloId,
+            'usuario_destino_id' => $usuarioFinalId,
+            'tipo_entrega' => $tipoEntrega,
+            'cantidad' => $cantidadSolicitada,
+            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+            'usuario_entrego_id' => auth()->id(),
+            'observaciones' => "Repuesto entregado individualmente - Ticket: {$numeroTicket}",
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // 5. Actualizar stock total del artículo
+        DB::table('articulos')
+            ->where('idArticulos', $articuloId)
+            ->decrement('stock_total', $cantidadSolicitada);
+
+        // 6. Actualizar KARDEX para la SALIDA
+        $this->actualizarKardexSalida(
+            (int)$articuloId,
+            (int)$stockUbicacion->cliente_general_id,
+            (int)$cantidadSolicitada,
+            (float)$articuloInfo->precio_compra
+        );
+
+        // 7. Marcar el repuesto como procesado con información del destinatario
+        DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+            ->update([
+                'estado' => 1,
+                'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})"
+            ]);
+
+        // Verificar si todos los repuestos han sido procesados
+        $repuestosPendientes = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 0)
+            ->count();
+
+        $todosProcesados = $repuestosPendientes == 0;
+
+        // Si todos los repuestos han sido procesados, marcar la solicitud como aprobada
+        if ($todosProcesados) {
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => 'aprobada',
+                    'fechaaprobacion' => now(),
+                    'idaprobador' => auth()->id()
+                ]);
+        }
+
+        DB::commit();
+
+        // MODIFICADO: Log seguro sin concatenaciones
+        Log::info("Repuesto procesado individualmente", [
+            'articulo_id' => $articuloId,
+            'articulo_nombre' => $articuloInfo->nombre,
+            'articulo_codigo' => $articuloInfo->codigo_repuesto ?? 'N/A',
+            'articulo_sku' => $articuloInfo->sku ?? 'N/A',
+            'cantidad' => $cantidadSolicitada,
+            'ticket' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'destinatario' => $nombreDestinatario,
+            'tipo_entrega' => $tipoEntrega,
+            'ubicacion' => $stockUbicacion->ubicacion_codigo,
+            'usuario_entrego' => auth()->id()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Repuesto procesado correctamente. Entregado a: {$nombreDestinatario}",
+            'todos_procesados' => $todosProcesados,
+            'numero_ticket' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'destinatario' => $nombreDestinatario,
+            'tipo_entrega' => $tipoEntrega,
+            'articulo' => [
+                'id' => $articuloId,
+                'nombre' => $articuloInfo->nombre,
+                'codigo_repuesto' => $articuloInfo->codigo_repuesto ?? '',
+                'sku' => $articuloInfo->sku ?? '',
+                'cantidad' => $cantidadSolicitada
+            ]
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        
+        // MODIFICADO: Log seguro
+        Log::error('Error al procesar repuesto individual', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'solicitud_id' => $id,
+            'articulo_id' => $articuloId ?? 'N/A',
+            'usuario_id' => auth()->id(),
+            'trace' => substr($e->getTraceAsString(), 0, 500) // Limitar tamaño del trace
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar el repuesto: ' . $e->getMessage()
+        ], 500);
     }
-
-
+}
 
 
 
@@ -2605,6 +2702,7 @@ class SolicitudrepuestoController extends Controller
         try {
             DB::beginTransaction();
 
+            // Obtener la solicitud CON EL NÚMERO DE TICKET DIRECTAMENTE
             $solicitud = DB::table('solicitudesordenes')
                 ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'numeroTicket')
                 ->where('idsolicitudesordenes', $id)
@@ -2618,13 +2716,14 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
-            $articuloId = (int)$request->input('articulo_id');
-            $ubicacionId = (int)$request->input('ubicacion_id');
+            $articuloId = $request->input('articulo_id');
+            $ubicacionId = $request->input('ubicacion_id');
             $transportista = $request->input('transportista');
             $placaVehiculo = $request->input('placa_vehiculo');
             $fechaEntregaTransporte = $request->input('fecha_entrega_transporte');
             $observaciones = $request->input('observaciones');
 
+            // Validaciones
             if (!$articuloId || !$ubicacionId || !$transportista || !$placaVehiculo || !$fechaEntregaTransporte) {
                 return response()->json([
                     'success' => false,
@@ -2632,6 +2731,7 @@ class SolicitudrepuestoController extends Controller
                 ], 400);
             }
 
+            // Obtener información del repuesto - YA NO NECESITAMOS JOIN CON TICKETS
             $repuesto = DB::table('ordenesarticulos as oa')
                 ->select(
                     'oa.idordenesarticulos',
@@ -2652,8 +2752,10 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
+            // USAR EL NÚMERO DE TICKET DIRECTAMENTE DE LA SOLICITUD
             $numeroTicket = $solicitud->numeroTicket ?? 'N/A';
 
+            // Verificar si ya fue procesado
             $yaProcesado = DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->where('estado', 1)
@@ -2666,12 +2768,12 @@ class SolicitudrepuestoController extends Controller
                 ], 400);
             }
 
-            $cantidadSolicitada = (int)$repuesto->cantidad;
+            $cantidadSolicitada = $repuesto->cantidad;
 
+            // Verificar stock en la ubicación seleccionada
             $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
                 ->select(
                     'rua.cantidad',
-                    'rua.idRackUbicacionArticulo', // ✅ NUEVO (para descontar por PK)
                     'ru.codigo as ubicacion_codigo',
                     'ru.idRackUbicacion',
                     'r.idRack as rack_id',
@@ -2691,18 +2793,20 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
-            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+            if ($stockUbicacion->cantidad < $cantidadSolicitada) {
                 return response()->json([
                     'success' => false,
                     'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
                 ], 400);
             }
 
+            // Obtener información del artículo para el kardex
             $articuloInfo = DB::table('articulos')
                 ->select('precio_compra', 'precio_venta')
                 ->where('idArticulos', $articuloId)
                 ->first();
 
+            // Manejar la foto del comprobante
             $fotoComprobantePath = null;
             if ($request->hasFile('foto_comprobante')) {
                 $file = $request->file('foto_comprobante');
@@ -2710,20 +2814,13 @@ class SolicitudrepuestoController extends Controller
                 $fotoComprobantePath = $file->storeAs('comprobantes_envios', $fileName, 'public');
             }
 
-            // 1) Descontar stock por PK
+            // 1. Descontar del stock en la ubicación específica
             DB::table('rack_ubicacion_articulos')
-                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+                ->where('articulo_id', $articuloId)
+                ->where('rack_ubicacion_id', $ubicacionId)
                 ->decrement('cantidad', $cantidadSolicitada);
 
-            // ✅ Descontar de CAJAS si existen
-            $this->descontarDeCajasSiExisten(
-                (int)$articuloId,
-                (int)$ubicacionId,
-                (int)$cantidadSolicitada,
-                null
-            );
-
-            // 2) Movimiento
+            // 2. Registrar movimiento en rack_movimientos (SALIDA para provincia)
             DB::table('rack_movimientos')->insert([
                 'articulo_id' => $articuloId,
                 'custodia_id' => null,
@@ -2743,7 +2840,7 @@ class SolicitudrepuestoController extends Controller
                 'updated_at' => now()
             ]);
 
-            // 3) inventario_ingresos_clientes
+            // 3. Registrar en inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
                 'compra_id' => null,
                 'articulo_id' => $articuloId,
@@ -2757,7 +2854,7 @@ class SolicitudrepuestoController extends Controller
                 'updated_at' => now()
             ]);
 
-            // 4) repuestos_envios_provincia
+            // 4. Registrar en la tabla de envíos a provincia
             DB::table('repuestos_envios_provincia')->insert([
                 'solicitud_id' => $solicitud->idsolicitudesordenes,
                 'articulo_id' => $articuloId,
@@ -2771,20 +2868,15 @@ class SolicitudrepuestoController extends Controller
                 'updated_at' => now()
             ]);
 
-            // 5) stock total
+            // 5. Actualizar stock total del artículo
             DB::table('articulos')
                 ->where('idArticulos', $articuloId)
                 ->decrement('stock_total', $cantidadSolicitada);
 
-            // 6) Kardex
-            $this->actualizarKardexSalida(
-                (int)$articuloId,
-                (int)$stockUbicacion->cliente_general_id,
-                (int)$cantidadSolicitada,
-                (float)$articuloInfo->precio_compra
-            );
+            // 6. Actualizar KARDEX
+            $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
 
-            // 7) marcar procesado
+            // 7. Marcar el repuesto como procesado
             DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->update([
@@ -2792,13 +2884,15 @@ class SolicitudrepuestoController extends Controller
                     'observacion' => "Envío a provincia - Ubicación: {$stockUbicacion->ubicacion_codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo} - Fecha entrega: {$fechaEntregaTransporte}"
                 ]);
 
+            // Verificar si todos los repuestos han sido procesados
             $repuestosPendientes = DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $id)
                 ->where('estado', 0)
                 ->count();
 
-            $todosProcesados = ($repuestosPendientes == 0);
+            $todosProcesados = $repuestosPendientes == 0;
 
+            // Si todos los repuestos han sido procesados, marcar la solicitud como aprobada
             if ($todosProcesados) {
                 DB::table('solicitudesordenes')
                     ->where('idsolicitudesordenes', $id)
@@ -2833,8 +2927,6 @@ class SolicitudrepuestoController extends Controller
             ], 500);
         }
     }
-
-
     public function aceptarProvincia(Request $request, $id)
     {
         try {
@@ -2916,7 +3008,7 @@ class SolicitudrepuestoController extends Controller
 
             // Procesar cada repuesto
             foreach ($repuestosSolicitud as $repuesto) {
-                $cantidadSolicitada = (int)$repuesto->cantidad;
+                $cantidadSolicitada = $repuesto->cantidad;
                 $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
 
                 if (!$ubicacionId) {
@@ -2950,7 +3042,7 @@ class SolicitudrepuestoController extends Controller
                     ], 404);
                 }
 
-                if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                if ($stockUbicacion->cantidad < $cantidadSolicitada) {
                     return response()->json([
                         'success' => false,
                         'message' => "Stock insuficiente en la ubicación seleccionada para: {$repuesto->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
@@ -2976,18 +3068,10 @@ class SolicitudrepuestoController extends Controller
                     ->where('idArticulos', $repuesto->idArticulos)
                     ->first();
 
-                // 1. Descontar del stock (por PK)
+                // 1. Descontar del stock
                 DB::table('rack_ubicacion_articulos')
                     ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
                     ->decrement('cantidad', $cantidadSolicitada);
-
-                // ✅ Descontar de CAJAS si existen (articulo + ubicacion)
-                $this->descontarDeCajasSiExisten(
-                    (int)$repuesto->idArticulos,
-                    (int)$ubicacionId,
-                    (int)$cantidadSolicitada,
-                    null
-                );
 
                 // 2. Descontar stock total
                 DB::table('articulos')
@@ -3035,7 +3119,7 @@ class SolicitudrepuestoController extends Controller
                     'transportista' => $transportista,
                     'placa_vehiculo' => $placaVehiculo,
                     'fecha_entrega_transporte' => $fechaEntregaTransporte,
-                    'foto_comprobante' => $fotoComprobantePath,
+                    'foto_comprobante' => $fotoComprobantePath, // Misma foto para todos
                     'observaciones' => $observaciones,
                     'usuario_entrego_id' => auth()->id(),
                     'created_at' => now(),
@@ -3043,12 +3127,7 @@ class SolicitudrepuestoController extends Controller
                 ]);
 
                 // 6. Actualizar kardex
-                $this->actualizarKardexSalida(
-                    (int)$repuesto->idArticulos,
-                    (int)$stockUbicacion->cliente_general_id,
-                    (int)$cantidadSolicitada,
-                    (float)$articuloInfo->precio_compra
-                );
+                $this->actualizarKardexSalida($repuesto->idArticulos, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
 
                 // 7. Marcar como procesado
                 DB::table('ordenesarticulos')
@@ -3058,7 +3137,7 @@ class SolicitudrepuestoController extends Controller
                         'observacion' => "Envío a provincia (grupal) - Ubicación: {$stockUbicacion->ubicacion_codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo}"
                     ]);
 
-                Log::info("✅ Repuesto procesado para envío grupal a provincia - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Transportista: {$transportista}, Ticket: {$numeroTicket}");
+                Log::info("? Repuesto procesado para envío grupal a provincia - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Transportista: {$transportista}, Ticket: {$numeroTicket}");
             }
 
             // Actualizar estado de la solicitud
@@ -3108,7 +3187,7 @@ class SolicitudrepuestoController extends Controller
             $mesActual = $fechaActual->format('m');
             $anioActual = $fechaActual->format('Y');
 
-            Log::info("📅 Procesando kardex para mes: {$mesActual}, año: {$anioActual}");
+            Log::info("?? Procesando kardex para mes: {$mesActual}, año: {$anioActual}");
 
             // Buscar si existe un registro de kardex para este artículo, cliente y mes actual
             $kardexMesActual = DB::table('kardex')
@@ -3119,7 +3198,7 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if ($kardexMesActual) {
-                Log::info("✅ Kardex del mes actual encontrado - ID: {$kardexMesActual->id}, actualizando...");
+                Log::info("? Kardex del mes actual encontrado - ID: {$kardexMesActual->id}, actualizando...");
 
                 // ACTUALIZAR registro existente del mes
                 $nuevoInventarioActual = $kardexMesActual->inventario_actual - $cantidadSalida;
@@ -3135,10 +3214,10 @@ class SolicitudrepuestoController extends Controller
                         'updated_at' => now()
                     ]);
 
-                Log::info("✅ Kardex actualizado - Salidas: " . ($kardexMesActual->unidades_salida + $cantidadSalida) .
+                Log::info("? Kardex actualizado - Salidas: " . ($kardexMesActual->unidades_salida + $cantidadSalida) .
                     ", Inventario: {$nuevoInventarioActual}, Costo: {$nuevoCostoInventario}");
             } else {
-                Log::info("📝 No hay kardex para este mes, creando nuevo registro...");
+                Log::info("?? No hay kardex para este mes, creando nuevo registro...");
 
                 // Obtener el último registro de kardex (de cualquier mes) para calcular inventario inicial
                 $ultimoKardex = DB::table('kardex')
@@ -3156,7 +3235,7 @@ class SolicitudrepuestoController extends Controller
                 $costoInventarioAnterior = $ultimoKardex ? $ultimoKardex->costo_inventario : 0;
                 $costoInventarioActual = max(0, $costoInventarioAnterior - ($cantidadSalida * $costoUnitario));
 
-                Log::info("📊 Valores calculados - Inicial: {$inventarioInicial}, Actual: {$inventarioActual}, " .
+                Log::info("?? Valores calculados - Inicial: {$inventarioInicial}, Actual: {$inventarioActual}, " .
                     "Costo anterior: {$costoInventarioAnterior}, Costo actual: {$costoInventarioActual}");
 
                 // CREAR nuevo registro de kardex para el nuevo mes
@@ -3171,86 +3250,19 @@ class SolicitudrepuestoController extends Controller
                     'inventario_inicial' => $inventarioInicial,
                     'inventario_actual' => $inventarioActual,
                     'costo_inventario' => $costoInventarioActual,
-                    'cas' => 'CAS GKM',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
 
-                Log::info("✅ Nuevo kardex creado para el mes - Artículo: {$articuloId}, Cliente: {$clienteGeneralId}");
+                Log::info("? Nuevo kardex creado para el mes - Artículo: {$articuloId}, Cliente: {$clienteGeneralId}");
             }
 
-            Log::info("✅ Kardex procesado correctamente - Artículo: {$articuloId}, Salida: {$cantidadSalida}");
+            Log::info("? Kardex procesado correctamente - Artículo: {$articuloId}, Salida: {$cantidadSalida}");
         } catch (\Exception $e) {
-            Log::error('❌ Error al actualizar kardex para salida: ' . $e->getMessage());
+            Log::error('? Error al actualizar kardex para salida: ' . $e->getMessage());
             Log::error('File: ' . $e->getFile());
             Log::error('Line: ' . $e->getLine());
             throw $e;
-        }
-    }
-
-
-    private function descontarDeCajasSiExisten(int $articuloId, int $ubicacionRackId, int $cantidad, ?int $tipoArticuloId = null): void
-    {
-        if ($cantidad <= 0) return;
-
-        $q = DB::table('cajas')
-            ->where('idArticulo', $articuloId)
-            ->where('idubicaciones_rack', $ubicacionRackId);
-
-        if (!is_null($tipoArticuloId)) {
-            $q->where('idTipoArticulo', $tipoArticuloId);
-        }
-
-        // ✅ No todos los artículos tienen caja
-        if (!(clone $q)->exists()) {
-            return;
-        }
-
-        $totalEnCajas = (int)(clone $q)->sum('cantidad_actual');
-
-        // Si hay cajas pero no alcanza: inconsistencia (mejor fallar)
-        if ($totalEnCajas < $cantidad) {
-            throw new \Exception(
-                "Inconsistencia: cajas insuficientes para artículo {$articuloId} en ubicación {$ubicacionRackId}. " .
-                    "En cajas: {$totalEnCajas}, requerido: {$cantidad}"
-            );
-        }
-
-        $cajas = (clone $q)
-            ->select('idCaja', 'cantidad_actual', 'estado', 'fecha_entrada')
-            ->orderByRaw("CASE WHEN estado='abierta' THEN 0 ELSE 1 END")
-            ->orderBy('fecha_entrada', 'asc')
-            ->orderBy('idCaja', 'asc')
-            ->lockForUpdate()
-            ->get();
-
-        $restante = $cantidad;
-
-        foreach ($cajas as $caja) {
-            if ($restante <= 0) break;
-
-            $disp = (int)$caja->cantidad_actual;
-            if ($disp <= 0) continue;
-
-            $quita = min($disp, $restante);
-            $nuevo = $disp - $quita;
-
-            $upd = ['cantidad_actual' => $nuevo];
-
-            // opcional: cerrar si queda en 0
-            if ($nuevo <= 0) $upd['estado'] = 'cerrada';
-
-            DB::table('cajas')
-                ->where('idCaja', $caja->idCaja)
-                ->update($upd);
-
-            $restante -= $quita;
-        }
-
-        if ($restante > 0) {
-            throw new \Exception(
-                "No se pudo descontar completamente de cajas (faltan {$restante}) para artículo {$articuloId} en ubicación {$ubicacionRackId}."
-            );
         }
     }
 

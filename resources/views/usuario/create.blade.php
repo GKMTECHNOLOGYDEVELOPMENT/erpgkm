@@ -106,12 +106,28 @@
                                         <input id="telefono" type="text" name="telefono" placeholder="962 952 239" class="form-input" />
                                     </div>
 
-                                    <!-- Email -->
-                                    <div>
-                                        <label for="correo">Correo Electronico</label>
-                                        <input id="correo" name="correo" type="email" placeholder="darlin@gmail.com" class="form-input" />
-                                    </div>
+                                    <!-- Agrega este campo después del correo corporativo -->
 
+<!-- Correo Corporativo -->
+<div>
+    <label for="correo" class="flex items-center gap-1">
+        Correo Corporativo
+        <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">Obligatorio</span>
+    </label>
+    <input id="correo" name="correo" type="email" placeholder="correo@empresa.com" class="form-input border-blue-300" />
+    <p class="text-xs text-blue-500 mt-1">Correo oficial para comunicaciones de la empresa</p>
+</div>
+
+<!-- Correo Personal -->
+<div>
+    <label for="correo_personal" class="flex items-center gap-1">
+        Correo Personal
+        <span class="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">Opcional</span>
+    </label>
+    <input id="correo_personal" name="correo_personal" type="email" placeholder="correo@gmail.com" 
+           class="form-input border-green-300" />
+    <p class="text-xs text-green-500 mt-1">Correo personal para comunicaciones personales</p>
+</div>
                                     <!-- Estado Civil -->
                                     <div>
                                         <label for="estadocivil">Estado Civil</label>
@@ -134,74 +150,88 @@
                         </form>
 
 
-                        <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Cuando se envía el formulario
-        document.getElementById('usuario-form').addEventListener('submit', function (e) {
-            e.preventDefault(); // Evita que el formulario se envíe de manera tradicional
+                     <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Cuando se envía el formulario
+    document.getElementById('usuario-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        
+        // Validar correos antes de enviar
+        const correo = document.getElementById('correo').value;
+        const correoPersonal = document.getElementById('correo_personal').value;
+        
+        // Validar formato de correo corporativo
+        if (!isValidEmail(correo)) {
+            toastr.error('El correo corporativo no tiene un formato válido');
+            return;
+        }
+        
+        // Validar formato de correo personal si se ingresó
+        if (correoPersonal && !isValidEmail(correoPersonal)) {
+            toastr.error('El correo personal no tiene un formato válido');
+            return;
+        }
+        
+        // Validar que no sean el mismo correo
+        if (correoPersonal && correo.toLowerCase() === correoPersonal.toLowerCase()) {
+            toastr.error('El correo personal no puede ser igual al correo corporativo');
+            return;
+        }
 
-            // Creamos un objeto FormData para capturar todos los datos del formulario
-            var formData = new FormData(this);
-            console.log("Formulario enviado con los siguientes datos:");
-            console.log(formData); // Log de los datos del formulario
-
-            // Usamos fetch para enviar los datos de forma asíncrona
-            fetch(`/usuario/store`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                console.log("Respuesta del servidor:");
-                console.log(response); // Log de la respuesta del servidor
-                return response.json();
-            })
-            .then(data => {
-                console.log("Datos recibidos del servidor:");
-                console.log(data); // Log de los datos del servidor
-
-                // Si la respuesta contiene éxito, muestra un mensaje de éxito con toastr
-                if (data.success) {
-                    toastr.success(data.message, "Éxito", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 1000,
-                        onHidden: function () {
-                            // Redirige a la página de edición del usuario después de que el toastr desaparezca
-                            window.location.href = '/usuario/' + data.usuarioId + '/edit'; // Redirección usando el ID del usuario
-                        }
-                    });
-                } else if (data.errors) {
-                    // Si el servidor envía errores, mostramos cada error en un toastr de error
-                    let errorMessages = '';
-                    for (let key in data.errors) {
-                        if (data.errors.hasOwnProperty(key)) {
-                            errorMessages += data.errors[key].join('<br>') + '<br>'; // Concatenamos los errores
-                        }
+        // Continuar con el envío...
+        var formData = new FormData(this);
+        
+        fetch(`/usuario/store`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                toastr.success(data.message, "Éxito", {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-right",
+                    timeOut: 1000,
+                    onHidden: function () {
+                        window.location.href = '/usuario/' + data.usuarioId + '/edit';
                     }
-                    toastr.error(errorMessages, "Errores en el formulario", {
-                        closeButton: true,
-                        progressBar: true,
-                        positionClass: "toast-top-right",
-                        timeOut: 5000
-                    });
+                });
+            } else if (data.errors) {
+                let errorMessages = '';
+                for (let key in data.errors) {
+                    if (data.errors.hasOwnProperty(key)) {
+                        errorMessages += data.errors[key].join('<br>') + '<br>';
+                    }
                 }
-            })
-            .catch(error => {
-                console.error("Error durante la petición:");
-                console.error(error); // Log de errores en la solicitud
-                toastr.error("Ocurrió un error inesperado.", "Error", {
+                toastr.error(errorMessages, "Errores en el formulario", {
                     closeButton: true,
                     progressBar: true,
                     positionClass: "toast-top-right",
                     timeOut: 5000
                 });
+            }
+        })
+        .catch(error => {
+            console.error("Error durante la petición:", error);
+            toastr.error("Ocurrió un error inesperado.", "Error", {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 5000
             });
         });
     });
+    
+    // Función para validar formato de email
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+});
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {

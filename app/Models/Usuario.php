@@ -90,6 +90,7 @@ class Usuario extends Authenticatable
 		'telefono',
 		'correo',
 		'usuario',
+	    'correo_personal', // Nuevo campo
 		'clave',
 		'token',
 		'nacionalidad',

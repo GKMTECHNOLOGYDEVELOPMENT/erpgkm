@@ -695,67 +695,136 @@ private function obtenerSugerenciasUbicaciones($cantidad)
     }
 
     public function store(Request $request)
-    {
-        // Validación
-        $validated = $request->validate([
-            'idcliente' => 'required|exists:cliente,idCliente',
-            'numero_ticket' => 'nullable|string|max:100',
-            'idMarca' => 'nullable|exists:marca,idMarca',
-            'idModelo' => 'nullable|exists:modelo,idModelo',
-            'serie' => 'nullable|string|max:100',
-            'fecha_ingreso_custodia' => 'required|date',
-            'ubicacion_actual' => 'required|string|max:100',
-            'estado' => 'required|in:Pendiente,En revisión,Aprobado',
-            'observaciones' => 'nullable|string',
+{
+    // Validación
+    $validated = $request->validate([
+        'idcliente' => 'required|exists:cliente,idCliente',
+        'numero_ticket' => 'nullable|string|max:100',
+        'idMarca' => 'nullable|exists:marca,idMarca',
+        'idModelo' => 'nullable|exists:modelo,idModelo',
+        'serie' => 'nullable|string|max:100',
+        'fecha_ingreso_custodia' => 'required|date',
+        'ubicacion_actual' => 'required|string|max:100',
+        'estado' => 'required|in:Pendiente,En revisión,Aprobado',
+        'observaciones' => 'nullable|string',
+    ]);
+
+    try {
+        // Iniciar transacción
+        DB::beginTransaction();
+
+        // Generar código de custodia
+        $codigoCustodia = 'CUST-' . date('YmdHis') . '-' . rand(100, 999);
+
+        // Obtener información del cliente
+        $cliente = DB::table('cliente')
+            ->where('idCliente', $validated['idcliente'])
+            ->first();
+        
+        // Obtener información de marca si existe
+        $marcaNombre = null;
+        if ($validated['idMarca']) {
+            $marca = DB::table('marca')
+                ->where('idMarca', $validated['idMarca'])
+                ->first();
+            $marcaNombre = $marca ? $marca->nombre : null;
+        }
+        
+        // Obtener información de modelo si existe
+        $modeloNombre = null;
+        if ($validated['idModelo']) {
+            $modelo = DB::table('modelo')
+                ->where('idModelo', $validated['idModelo'])
+                ->first();
+            $modeloNombre = $modelo ? $modelo->nombre : null;
+        }
+
+        // Crear la custodia
+        $custodia = Custodia::create([
+            'codigocustodias' => $codigoCustodia,
+            'id_ticket' => null,
+            'idcliente' => $validated['idcliente'],
+            'numero_ticket' => $validated['numero_ticket'],
+            'idMarca' => $validated['idMarca'],
+            'idModelo' => $validated['idModelo'],
+            'serie' => $validated['serie'],
+            'estado' => $validated['estado'],
+            'fecha_ingreso_custodia' => $validated['fecha_ingreso_custodia'],
+            'ubicacion_actual' => $validated['ubicacion_actual'],
+            'id_responsable_recepcion' => auth()->id(),
+            'observaciones' => $validated['observaciones'],
         ]);
 
-        try {
-            // Generar código de custodia
-            $codigoCustodia = 'CUST-' . date('YmdHis') . '-' . rand(100, 999);
-
-            // Crear la custodia
-            $custodia = Custodia::create([
-                'codigocustodias' => $codigoCustodia,
-                'id_ticket' => null,
-                'idcliente' => $validated['idcliente'],
-                'numero_ticket' => $validated['numero_ticket'],
-                'idMarca' => $validated['idMarca'],
-                'idModelo' => $validated['idModelo'],
-                'serie' => $validated['serie'],
-                'estado' => $validated['estado'],
-                'fecha_ingreso_custodia' => $validated['fecha_ingreso_custodia'],
-                'ubicacion_actual' => $validated['ubicacion_actual'],
-                'id_responsable_recepcion' => auth()->id(),
-                'observaciones' => $validated['observaciones'],
-            ]);
-
-            // Si es una petición AJAX, retornar JSON
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Custodia creada exitosamente.',
-                    'data' => $custodia
-                ]);
-            }
-
-            return redirect()->route('solicitudcustodia.index')
-                ->with('success', 'Custodia creada exitosamente.');
-
-        } catch (\Exception $e) {
-            // Si es una petición AJAX, retornar error en JSON
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al crear la custodia: ' . $e->getMessage()
-                ], 500);
-            }
-
-            return redirect()->back()
-                ->with('error', 'Error al crear la custodia: ' . $e->getMessage())
-                ->withInput();
+        // Insertar en la tabla solicitudentrega para notificaciones de custodia
+        $comentarioCustodia = "Equipo ingresado a custodia. ";
+        $comentarioCustodia .= "Código: {$codigoCustodia}. ";
+        $comentarioCustodia .= "Cliente: " . ($cliente ? $cliente->nombre : 'N/A') . ". ";
+        
+        if ($marcaNombre) {
+            $comentarioCustodia .= "Marca: {$marcaNombre}. ";
         }
-    }
+        
+        if ($modeloNombre) {
+            $comentarioCustodia .= "Modelo: {$modeloNombre}. ";
+        }
+        
+        if ($validated['serie']) {
+            $comentarioCustodia .= "Serie: {$validated['serie']}. ";
+        }
+        
+        $comentarioCustodia .= "Ubicación: {$validated['ubicacion_actual']}. ";
+        $comentarioCustodia .= $validated['observaciones'] ? "Observaciones: " . $validated['observaciones'] : "";
 
+        DB::table('solicitudentrega')->insert([
+            'idTickets' => null, // No hay ticket en custodia
+            'numero_ticket' => $validated['numero_ticket'], // Número de ticket si existe
+            'idVisitas' => null, // No hay visita
+            'idUsuario' => auth()->id(), // Usuario autenticado
+            'comentario' => trim($comentarioCustodia),
+            'estado' => 1, // Estado 1
+            'fechaHora' => now(), // Fecha y hora actual del registro
+            'idTipoServicio' => 7 // idTipoServicio 7 para custodia (usa un número diferente)
+        ]);
+
+        Log::info('Registro en solicitudentrega para custodia creado', [
+            'custodia_id' => $custodia->id,
+            'codigo_custodia' => $codigoCustodia,
+            'usuario_id' => auth()->id(),
+            'idTipoServicio' => 7
+        ]);
+
+        // Confirmar transacción
+        DB::commit();
+
+        // Si es una petición AJAX, retornar JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Custodia creada exitosamente.',
+                'data' => $custodia
+            ]);
+        }
+
+        return redirect()->route('solicitudcustodia.index')
+            ->with('success', 'Custodia creada exitosamente.');
+
+    } catch (\Exception $e) {
+        // Revertir transacción en caso de error
+        DB::rollBack();
+        
+        // Si es una petición AJAX, retornar error en JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la custodia: ' . $e->getMessage()
+            ], 500);
+        }
+
+        return redirect()->back()
+            ->with('error', 'Error al crear la custodia: ' . $e->getMessage())
+            ->withInput();
+    }
+}
 
     
 

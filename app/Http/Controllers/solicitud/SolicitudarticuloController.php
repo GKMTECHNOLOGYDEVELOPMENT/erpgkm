@@ -343,7 +343,7 @@ public function create()
     ]);
 }
 
-    public function store(Request $request)
+ public function store(Request $request)
 {
     try {
         DB::beginTransaction();
@@ -420,7 +420,7 @@ public function create()
             'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
             'idtecnico' => null,
             'idusuario' => Auth::id(),
-             'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
+            'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
             'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],  // Nuevo
             'urgencia' => $validated['orderInfo']['urgencia']
         ]);
@@ -442,7 +442,33 @@ public function create()
             ]);
         }
 
-        // 3. Actualizar estado de la cotización a "solicitado"
+        // 3. Insertar en la tabla solicitudentrega para notificaciones
+        $comentarioArticulos = "Solicitud de artículos. Orden: {$codigoOrden}. ";
+        $comentarioArticulos .= "Total productos: {$totalProductosUnicos}, Cantidad total: {$totalCantidad}. ";
+        $comentarioArticulos .= $validated['orderInfo']['observaciones'] ? "Observaciones: " . $validated['orderInfo']['observaciones'] : "";
+        
+        if ($codigoCotizacion) {
+            $comentarioArticulos .= " | Cotización: {$codigoCotizacion}";
+        }
+
+        DB::table('solicitudentrega')->insert([
+            'idTickets' => null, // No hay ticket
+            'numero_ticket' => null, // No hay número de ticket
+            'idVisitas' => null,
+            'idUsuario' => Auth::id(), // Usuario autenticado que solicita
+            'comentario' => trim($comentarioArticulos), // "una solicitud de articulo bro"
+            'estado' => 1, // Estado 1
+            'fechaHora' => now(), // Fecha y hora actual
+            'idTipoServicio' => 6 // idTipoServicio 6 para solicitud de artículos
+        ]);
+
+        Log::info('Registro en solicitudentrega para solicitud de artículos creado', [
+            'solicitud_id' => $solicitudId,
+            'usuario_id' => Auth::id(),
+            'idTipoServicio' => 6
+        ]);
+
+        // 4. Actualizar estado de la cotización a "solicitado"
         if (!empty($validated['selectedCotizacion'])) {
             DB::table('cotizaciones')
                 ->where('idCotizaciones', $validated['selectedCotizacion'])
