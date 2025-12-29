@@ -665,11 +665,12 @@
                             alert(`El artículo "${selectedOption.text}" requiere número de serie`);
                         }
                         
-                        articulosData.push({
-                            id: select.value,
-                            cantidad: cantidad,
-                            numero_serie: serieInput ? serieInput.value.trim() : null
-                        });
+                        // En la función del botón "Crear Asignación", actualiza:
+articulosData.push({
+    articulo_id: select.value, // Cambiado a 'articulo_id'
+    cantidad: cantidad,
+    numero_serie: serieInput ? serieInput.value.trim() : null
+});
                     }
                 });
                 
