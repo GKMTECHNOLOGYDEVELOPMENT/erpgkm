@@ -4062,34 +4062,95 @@ class OrdenesTrabajoController extends Controller
     // }
 
 
+public function obtenerSolicitudes()
+{
+    Log::info('Obteniendo solicitudes con estado 0');
 
-    public function obtenerSolicitudes()
-    {
-        // Paso 2: Obtener solicitudes con estado = 0
-        Log::info('Obteniendo solicitudes con estado 0');
+    // Obtener solicitudes con idTipoServicio 1, 2, 3, 4 (las actuales)
+    $solicitudesBase = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->whereIn('solicitudentrega.idTipoServicio', [1, 2, 3, 4])
+        ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+        ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTickets',
+            'solicitudentrega.idVisitas',
+            'solicitudentrega.idTipoServicio',
+            'tickets.numero_ticket',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get();
 
-        $solicitudes = Solicitudentrega::where('solicitudentrega.estado', 0)
-            ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
-            ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
-            ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-            ->select(
-                'solicitudentrega.idSolicitudentrega',
-                'solicitudentrega.comentario',
-                'solicitudentrega.idTickets',
-                'solicitudentrega.idVisitas',
-                'solicitudentrega.idTipoServicio', // 👈 AÑADE ESTA LÍNEA
-                'tickets.numero_ticket',
-                'usuarios.Nombre as nombre_usuario',
-                'solicitudentrega.fechaHora'
-            )
-            ->get();
+    // Obtener solicitudes tipo 5 (Solicitud de repuestos)
+    $solicitudesTipo5 = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->where('solicitudentrega.idTipoServicio', 5)
+        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTipoServicio',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get()
+        ->map(function ($item) {
+            $item->numero_ticket = null; // No tiene ticket
+            $item->idTickets = null;
+            $item->idVisitas = null;
+            return $item;
+        });
 
+    // Obtener solicitudes tipo 6 (Solicitud de artículo)
+    $solicitudesTipo6 = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->where('solicitudentrega.idTipoServicio', 6)
+        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTipoServicio',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get()
+        ->map(function ($item) {
+            $item->numero_ticket = null; // No tiene ticket
+            $item->idTickets = null;
+            $item->idVisitas = null;
+            return $item;
+        });
 
-        Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
+    // Obtener solicitudes tipo 7 (Solicitud de custodia)
+    $solicitudesTipo7 = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->where('solicitudentrega.idTipoServicio', 7)
+        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTipoServicio',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get()
+        ->map(function ($item) {
+            $item->numero_ticket = null; // No tiene ticket
+            $item->idTickets = null;
+            $item->idVisitas = null;
+            return $item;
+        });
 
-        return response()->json($solicitudes);
-    }
+    // Combinar todas las solicitudes
+    $solicitudes = $solicitudesBase
+        ->concat($solicitudesTipo5)
+        ->concat($solicitudesTipo6)
+        ->concat($solicitudesTipo7);
 
+    Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
+
+    return response()->json($solicitudes);
+}
 
 
 

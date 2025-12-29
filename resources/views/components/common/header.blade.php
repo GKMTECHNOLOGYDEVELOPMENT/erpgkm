@@ -1267,43 +1267,55 @@
             notifications: [],
 
 
-
-// Método para obtener las solicitudes desde la API de Laravel
 obtenerSolicitudes() {
-    fetch('/api/solicitudentrega')  // La URL de la API de Laravel
+    fetch('/api/solicitudentrega')
         .then(response => response.json())
         .then(data => {
             this.notifications = data.map(solicitud => {
-                // Determinar el tipo de servicio basado en idTipoServicio
-                let tipoServicio = solicitud.idTipoServicio === 1
-                    ? 'Solicitud de entrega'
-                    : solicitud.idTipoServicio === 2
-                    ? 'Pendiente por programación'
-                    : solicitud.idTipoServicio === 3
-                    ? 'Ingreso a laboratorio'
-                    : solicitud.idTipoServicio === 4
-                    ? 'Observación de asistencia'  // Agregar este caso para idTipoServicio == 4
-                    : 'Tipo desconocido';
-
-                // Mensaje para el chofer si idTipoServicio es 1
-                let choferMensaje = solicitud.idTipoServicio === 1
-                    ? `El Chofer ${solicitud.nombre_usuario ?? 'Desconocido'} envió una solicitud.<br><br>`
-                    : '';
-
-                // Construir el mensaje base
-                let mensaje = `<strong class="text-sm mr-1">${tipoServicio}</strong><br>
-                    ${choferMensaje}`;
-
-                // Si el idTipoServicio es 4, agregar el comentario
-                if (solicitud.idTipoServicio === 4) {
-                    mensaje += `<strong class="text-sm mr-1">Comentario</strong><br>
-                        ${solicitud.comentario}`;
+                // Determinar el tipo de servicio
+                let tipoServicio;
+                switch(solicitud.idTipoServicio) {
+                    case 1:
+                        tipoServicio = 'Solicitud de entrega';
+                        break;
+                    case 2:
+                        tipoServicio = 'Pendiente por programación';
+                        break;
+                    case 3:
+                        tipoServicio = 'Ingreso a laboratorio';
+                        break;
+                    case 4:
+                        tipoServicio = 'Observación de asistencia';
+                        break;
+                    case 5:
+                        tipoServicio = 'Solicitud de repuestos';
+                        break;
+                    case 6:
+                        tipoServicio = 'Solicitud de artículo';
+                        break;
+                    case 7:
+                        tipoServicio = 'Solicitud de custodia';
+                        break;
+                    default:
+                        tipoServicio = 'Tipo desconocido';
                 }
 
-                // Si el idTipoServicio no es 4, añadir el número de ticket
-                if (solicitud.idTipoServicio !== 4) {
-                    mensaje += `<strong class="text-sm mr-1">Numero Ticket</strong><br>
-                        ${solicitud.numero_ticket}`;
+                // Construir el mensaje
+                let mensaje = `<strong class="text-sm mr-1">${tipoServicio}</strong><br>`;
+
+                // Agregar nombre de usuario si existe
+                if (solicitud.nombre_usuario) {
+                    mensaje += `Usuario: ${solicitud.nombre_usuario}<br>`;
+                }
+
+                // Agregar comentario si existe
+                if (solicitud.comentario) {
+                    mensaje += `<strong class="text-sm mr-1">Comentario:</strong> ${solicitud.comentario}<br>`;
+                }
+
+                // Agregar número de ticket solo si existe
+                if (solicitud.numero_ticket) {
+                    mensaje += `<strong class="text-sm mr-1">Numero Ticket:</strong> ${solicitud.numero_ticket}`;
                 }
 
                 return {

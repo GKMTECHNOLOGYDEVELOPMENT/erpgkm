@@ -235,6 +235,8 @@ public function store(Request $request)
             'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
             'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
+            'correo_personal' => 'required|email|max:255|unique:usuarios,correo_personal',
+
             'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
             'profile-image' => 'nullable|image|max:1024',
         ]);
@@ -265,6 +267,7 @@ public function store(Request $request)
         $usuarioNuevo->documento = $request->documento;
         $usuarioNuevo->telefono = $request->telefono;
         $usuarioNuevo->correo = $request->correo;
+        $usuarioNuevo->correo_personal = $request->correo_personal;
         $usuarioNuevo->avatar = $imageData;
         $usuarioNuevo->usuario = $usuario;
         $usuarioNuevo->estadocivil = $request->estadocivil; // Aquí asignamos el estado civil
@@ -435,7 +438,6 @@ public function guardarCuenta(Request $request)
     // Devolver una respuesta JSON indicando que todo salió bien
     return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
 }
-
 public function update(Request $request, $id)
 {
     // Validación de los datos
@@ -446,9 +448,10 @@ public function update(Request $request, $id)
         'idTipoDocumento' => 'required|integer',
         'documento' => 'required|string|max:255',
         'telefono' => 'required|string|max:255',
-        'correo' => 'required|email|max:255',
-        'estadocivil' => 'required|integer|in:1,2,3,4',  // Aseguramos que el estado civil esté en los valores correctos
-        'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validación de la imagen
+        'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario', // Excluye al usuario actual
+        'correo_personal' => 'nullable|email|max:255|unique:usuarios,correo_personal,' . $id . ',idUsuario', // Validación para correo personal
+        'estadocivil' => 'required|integer|in:1,2,3,4',
+        'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
     ]);
 
     // Obtener el usuario por su id
@@ -462,27 +465,21 @@ public function update(Request $request, $id)
     $usuario->documento = $request->input('documento');
     $usuario->telefono = $request->input('telefono');
     $usuario->correo = $request->input('correo');
-    $usuario->estadocivil = $request->input('estadocivil');  // Actualizamos el estado civil
+    $usuario->correo_personal = $request->input('correo_personal'); // Nuevo campo
+    $usuario->estadocivil = $request->input('estadocivil');
 
     // Verificar si se subió una nueva imagen
     if ($request->hasFile('profile-image')) {
-        // Obtener la imagen
         $image = $request->file('profile-image');
-
-        // Convertir la imagen a binario
         $imageData = file_get_contents($image->getRealPath());
-
-        // Guardar la imagen en el campo 'avatar' como binario
         $usuario->avatar = $imageData;
     }
 
-    // Guardar los cambios en la base de datos
+    // Guardar los cambios
     $usuario->save();
 
-    // Devolver una respuesta JSON con éxito
     return response()->json(['success' => 'Datos actualizados correctamente']);
 }
-
 
 public function config(Request $request, $id)
 {
@@ -882,9 +879,8 @@ public function getUsuarios(Request $request)
 
 
 
-
-    /**
- * Cambiar contraseña del usuario
+/**
+ * Cambiar contraseña del usuario usando bcrypt
  */
 public function cambiarPassword(Request $request, $id)
 {
@@ -898,7 +894,7 @@ public function cambiarPassword(Request $request, $id)
         $usuario = Usuario::findOrFail($id);
 
         // Verificar contraseña actual usando bcrypt
-        if (!Hash::check($request->current_password, $usuario->clave)) {
+        if (!password_verify($request->current_password, $usuario->clave)) {
             return response()->json([
                 'success' => false,
                 'message' => 'La contraseña actual es incorrecta'
@@ -906,15 +902,15 @@ public function cambiarPassword(Request $request, $id)
         }
 
         // Verificar que la nueva contraseña no sea igual a la actual
-        if (Hash::check($request->new_password, $usuario->clave)) {
+        if (password_verify($request->new_password, $usuario->clave)) {
             return response()->json([
                 'success' => false,
                 'message' => 'La nueva contraseña no puede ser igual a la actual'
             ], 422);
         }
 
-        // Actualizar contraseña con bcrypt (por defecto en Laravel)
-        $usuario->clave = Hash::make($request->new_password);
+        // Actualizar contraseña con bcrypt (igual que en el store)
+        $usuario->clave = bcrypt($request->new_password);
         $usuario->save();
 
         Log::info('Contraseña cambiada exitosamente para usuario:', [
