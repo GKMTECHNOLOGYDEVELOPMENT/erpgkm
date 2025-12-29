@@ -930,7 +930,31 @@
                     </svg>
                     <span>ALMACEN</span>
                 </h2>
+                <li class="menu nav-item">
+                    <a href="{{ route('asignar-articulos.index') }}" class="nav-link group">
+                        <div class="flex items-center">
 
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                                width="20" height="20" viewBox="0 0 24 24" fill="none">
+
+                                <!-- Caja / Artículo -->
+                                <path d="M3 7.5L12 3l9 4.5-9 4.5L3 7.5z" fill="currentColor" />
+
+                                <path opacity="0.7" d="M3 7.5V16.5L12 21l9-4.5V7.5L12 12z" fill="currentColor" />
+
+                                <!-- Check / Asignación -->
+                                <path d="M9.2 13.6l1.6 1.6 3.8-3.8" stroke="#fff" stroke-width="1.8"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+
+
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Asignar Articulos
+                            </span>
+                        </div>
+                    </a>
+                </li>
                 {{--
                 <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">

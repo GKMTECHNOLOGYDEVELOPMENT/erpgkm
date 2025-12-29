@@ -32,6 +32,7 @@ use App\Http\Controllers\Apps\ChatController;
 use App\Http\Controllers\Politicas\PoliticasController;
 use App\Http\Controllers\Apps\MailboxController;
 use App\Http\Controllers\Apps\TodolistController;
+use App\Http\Controllers\almacen\asignarArticulo\AsignarArticuloController;
 use App\Http\Controllers\Apps\NotesController;
 use App\Http\Controllers\Apps\ScrumboardController;
 use App\Http\Controllers\Apps\ContactsController;
@@ -66,6 +67,7 @@ use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
 use App\Http\Controllers\almacen\repuestos\RepuestosController;
+
 use App\Http\Controllers\almacen\subcategoria\SubcategoriaController;
 use App\Http\Controllers\almacen\suministros\SuministrosController;
 use App\Http\Controllers\almacen\ubicaciones\UbicacionesArticuloController;
@@ -162,23 +164,23 @@ Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->nam
 
 // 1. RUTA para MOSTRAR el formulario de solicitud de reset (SIN token)
 Route::get('/password/reset', [PasswordResetController::class, 'showPasswordResetForm'])
-     ->name('password.request');
+    ->name('password.request');
 
 // 2. RUTA para ENVIAR el enlace de reset (POST)
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink'])
-     ->name('password.email');
+    ->name('password.email');
 
 // 3. RUTA para MOSTRAR formulario con token (CON token)
 Route::get('/password/reset/{token}', [PasswordResetController::class, 'showResetForm'])
-     ->name('password.reset');
+    ->name('password.reset');
 
 // 4. RUTA para ACTUALIZAR la contraseña (POST con token)
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword'])
-     ->name('password.update');
+    ->name('password.update');
 
 // Opcional: Puedes mantener tu ruta personalizada si quieres
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'showPasswordResetForm'])
-     ->name('auth.password-reset');
+    ->name('auth.password-reset');
 
 
 
@@ -915,7 +917,7 @@ Route::prefix('solicitudalmacen')->name('solicitudalmacen.')->group(function () 
     Route::get('/create', [SolicitudalmacenController::class, 'create'])->name('create');
     Route::post('/', [SolicitudalmacenController::class, 'store'])->name('store');
     Route::get('/select-data', [SolicitudalmacenController::class, 'getSelectData'])->name('select-data');
-        // SOLO UNA RUTA para búsqueda
+    // SOLO UNA RUTA para búsqueda
     Route::get('/buscar-articulos', [SolicitudalmacenController::class, 'buscarArticulos'])->name('buscar-articulos');
 
     // Rutas para detalles
@@ -1156,26 +1158,28 @@ Route::put('/usuario/direccion/{id}', [UsuarioController::class, 'direccion'])->
 
 
 Route::get('/usuario/{id}/documentos', [UsuarioController::class, 'getDocumentos'])->name('usuario.documentos');
-    Route::post('/usuario/{id}/documentos/upload', [UsuarioController::class, 'uploadDocumento'])->name('usuario.documentos.upload');
-    Route::get('/usuario/documentos/{id}/download', [UsuarioController::class, 'downloadDocumento'])->name('usuario.documentos.download');
-    Route::delete('/usuario/documentos/{id}', [UsuarioController::class, 'deleteDocumento'])->name('usuario.documentos.delete');
+Route::post('/usuario/{id}/documentos/upload', [UsuarioController::class, 'uploadDocumento'])->name('usuario.documentos.upload');
+Route::get('/usuario/documentos/{id}/download', [UsuarioController::class, 'downloadDocumento'])->name('usuario.documentos.download');
+Route::delete('/usuario/documentos/{id}', [UsuarioController::class, 'deleteDocumento'])->name('usuario.documentos.delete');
 
 
-  Route::post('/usuario/{id}/cambiar-password', [UsuarioController::class, 'cambiarPassword'])->name('usuario.cambiar.password');
-    Route::post('/usuario/{id}/desactivar-cuenta', [UsuarioController::class, 'desactivarCuenta'])->name('usuario.desactivar');
-    Route::post('/usuario/{id}/activar-cuenta', [UsuarioController::class, 'activarCuenta'])->name('usuario.activar');
-    Route::post('/usuario/{id}/enviar-recuperacion', [UsuarioController::class, 'enviarRecuperacion'])->name('usuario.enviar.recuperacion');
-    Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF'])->name('usuario.generar.pdf');
-    Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
+Route::post('/usuario/{id}/cambiar-password', [UsuarioController::class, 'cambiarPassword'])->name('usuario.cambiar.password');
+Route::post('/usuario/{id}/desactivar-cuenta', [UsuarioController::class, 'desactivarCuenta'])->name('usuario.desactivar');
+Route::post('/usuario/{id}/activar-cuenta', [UsuarioController::class, 'activarCuenta'])->name('usuario.activar');
+Route::post('/usuario/{id}/enviar-recuperacion', [UsuarioController::class, 'enviarRecuperacion'])->name('usuario.enviar.recuperacion');
+Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF'])->name('usuario.generar.pdf');
+Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
 
 
 // Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
 
 
+Route::get('almacen/asignar-articulo', [AsignarArticuloController::class, 'index'])
+    ->name('asignar-articulos.index');
 
-
-
+Route::get('asignar-articulos/create', [AsignarArticuloController::class, 'create'])
+    ->name('asignar-articulos.create');
 
 Route::get('/ver-informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verInforme']);
 Route::get('/ver-hoja-entrega-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verHojaEntrega']);
