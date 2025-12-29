@@ -645,6 +645,278 @@
             </div>
         </div>
 
+        <!-- Modal Historial CORREGIDO -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" x-show="modalHistorial.open" x-cloak
+            :class="{ '!block': modalHistorial.open }" @click.self="cerrarModalHistorial()">
+            <template x-if="modalHistorial.ubi">
+                <div class="flex items-start justify-center min-h-screen px-4">
+                    <div x-show="modalHistorial.open" x-transition x-transition.duration.300
+                        class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-4xl relative">
+
+                        <!-- Header Mejorado -->
+                        <div class="flex bg-primary items-center justify-between px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-history text-white text-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-lg text-white">Historial Completo de Ubicación</div>
+                                    <div class="text-blue-100 text-sm">Código:
+                                        <!-- AHORA ES SEGURO porque está dentro de x-if -->
+                                        <span x-text="modalHistorial.ubi.codigo"
+                                            class="font-semibold text-white"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="text-white hover:text-blue-200 transition-colors"
+                                @click="cerrarModalHistorial()">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-6 bg-gray-50">
+                            <!-- Resumen Estadístico CON FUNCIONES SEGURAS -->
+                            <div class="grid grid-cols-4 gap-4 mb-6">
+                                <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                    <div class="text-2xl font-bold text-blue-600"
+                                        x-text="modalHistorial.ubi.historial ? modalHistorial.ubi.historial.length : 0">
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">Total Movimientos</div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                    <div class="text-2xl font-bold text-green-600"
+                                        x-text="getMovimientosPorTipo('ingreso')"></div>
+                                    <div class="text-xs text-gray-600 mt-1">Ingresos</div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                    <div class="text-2xl font-bold text-orange-600"
+                                        x-text="getMovimientosPorTipo('reubicacion')"></div>
+                                    <div class="text-xs text-gray-600 mt-1">Reubicaciones</div>
+                                </div>
+                                <div class="bg-white rounded-xl p-4 text-center border border-gray-200 shadow-sm">
+                                    <div class="text-2xl font-bold text-red-600"
+                                        x-text="getMovimientosPorTipo('salida')">
+                                    </div>
+                                    <div class="text-xs text-gray-600 mt-1">Salidas</div>
+                                </div>
+                            </div>
+
+                            <!-- Filtros -->
+                            <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm mb-6">
+                                <div class="flex flex-wrap gap-4 items-center">
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por
+                                            tipo:</label>
+                                        <select x-model="modalHistorial.filtroTipo" @change="filtrarHistorial()"
+                                            class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="todos">Todos los movimientos</option>
+                                            <option value="ingreso">Ingresos</option>
+                                            <option value="salida">Salidas</option>
+                                            <option value="reubicacion">Reubicaciones Normales</option>
+                                            <option value="reubicacion_custodia">Reubicaciones Custodia</option>
+                                            <option value="ajuste">Ajustes</option>
+                                            <option value="custodia">Todas las Custodias</option>
+                                        </select>
+                                    </div>
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Buscar
+                                            producto:</label>
+                                        <div class="relative">
+                                            <input type="text" x-model="modalHistorial.busqueda"
+                                                @input.debounce.300ms="filtrarHistorial()"
+                                                placeholder="Buscar por producto, serie o código..."
+                                                class="w-full p-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <i
+                                                class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lista de Movimientos -->
+                            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div class="bg-gray-50 px-6 py-4 border-b">
+                                    <h3 class="font-semibold text-gray-800 flex items-center gap-2">
+                                        <i class="fas fa-list-ul text-blue-500"></i>
+                                        Registro de Movimientos
+                                        <span class="text-sm text-gray-500 font-normal ml-2"
+                                            x-text="modalHistorial.historialFiltrado ? '(' + modalHistorial.historialFiltrado.length + ' resultados)' : '(0 resultados)'"></span>
+                                    </h3>
+                                </div>
+
+                                <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
+                                    <template
+                                        x-if="modalHistorial.historialFiltrado && modalHistorial.historialFiltrado.length > 0">
+                                        <div class="divide-y divide-gray-100">
+                                            <template x-for="(mov, idx) in modalHistorial.historialFiltrado"
+                                                :key="idx">
+                                                <div class="p-4 hover:bg-gray-50 transition-colors">
+                                                    <!-- Header del Movimiento -->
+                                                    <div class="flex justify-between items-start mb-3">
+                                                        <div class="flex items-center gap-3">
+                                                            <!-- Icono según tipo - TODOS LOS 6 ESTADOS -->
+                                                            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm"
+                                                                :class="{
+                                                                                'bg-green-500': mov.tipo === 'ingreso',
+                                                                                'bg-red-500': mov.tipo === 'salida',
+                                                                                'bg-blue-500': mov.tipo === 'reubicacion',
+                                                                                'bg-purple-500': mov.tipo === 'reubicacion_custodia',
+                                                                                'bg-yellow-500': mov.tipo === 'ajuste',
+                                                                                'bg-dark': mov.tipo === 'salida_provincia', <!-- NUEVO -->
+                                                                                'bg-gray-500': !mov.tipo
+                                                                            }">
+                                                                <i
+                                                                    :class="{
+                                                                                    'fas fa-sign-in-alt': mov.tipo === 'ingreso',
+                                                                                    'fas fa-sign-out-alt': mov.tipo === 'salida',
+                                                                                    'fas fa-arrows-alt': mov.tipo === 'reubicacion',
+                                                                                    'fas fa-shield-alt': mov.tipo === 'reubicacion_custodia',
+                                                                                    'fas fa-cog': mov.tipo === 'ajuste',
+                                                                                    'fas fa-truck': mov.tipo === 'salida_provincia', <!-- NUEVO: icono de camión -->
+                                                                                    'fas fa-exchange-alt': !mov.tipo
+                                                                                }"></i>
+                                                            </div>
+                                                            <div>
+                                                                <p class="font-semibold text-gray-800 text-sm"
+                                                                    x-text="mov.producto || 'Movimiento de inventario'">
+                                                                </p>
+                                                                <div class="flex items-center gap-2 mt-1">
+                                                                    <span
+                                                                        class="text-xs font-medium px-2 py-1 rounded capitalize"
+                                                                        :class="{
+                                                                                                'bg-green-100 text-green-800': mov.tipo === 'ingreso',
+                                                                                                'bg-red-100 text-red-800': mov.tipo === 'salida',
+                                                                                                'bg-blue-100 text-blue-800': mov.tipo === 'reubicacion',
+                                                                                                'bg-purple-100 text-purple-800': mov.tipo === 'reubicacion_custodia',
+                                                                                                'bg-yellow-100 text-yellow-800': mov.tipo === 'ajuste',
+                                                                                                'bg-dark text-white': mov.tipo === 'salida_provincia', <!-- NUEVO -->
+                                                                                                'bg-gray-100 text-gray-800': !mov.tipo
+                                                                                            }"
+                                                                        x-text="mov.tipo === 'reubicacion_custodia' ? 'reubicación custodia' : 
+                            mov.tipo === 'salida_provincia' ? 'salida provincia' : 
+                            (mov.tipo || 'movimiento')"></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <span class="font-bold text-lg"
+                                                                :class="{
+                                                                                'text-green-600': mov.tipo === 'ingreso',
+                                                                                'text-red-600': mov.tipo === 'salida',
+                                                                                'text-blue-600': mov.tipo === 'reubicacion',
+                                                                                'text-purple-600': mov.tipo === 'reubicacion_custodia',
+                                                                                'text-yellow-600': mov.tipo === 'ajuste',
+                                                                                'text-dark': mov.tipo === 'salida_provincia', <!-- NUEVO -->
+                                                                                'text-gray-600': !mov.tipo
+                                                                            }"
+                                                                x-text="mov.cantidad + ' und.'"></span>
+                                                            <div class="text-xs text-gray-500 mt-1"
+                                                                x-text="formatFechaHora(mov.fecha)"></div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Detalles del Movimiento -->
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                        <!-- Información de Origen/Destino -->
+                                                        <template x-if="mov.desde || mov.hacia">
+                                                            <div class="space-y-2">
+                                                                <template x-if="mov.desde">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <i
+                                                                            class="fas fa-arrow-right text-red-500 text-xs"></i>
+                                                                        <span
+                                                                            class="text-gray-600 font-medium">Desde:</span>
+                                                                        <span class="font-semibold text-gray-800"
+                                                                            x-text="mov.desde"></span>
+                                                                        <template x-if="mov.rack_origen">
+                                                                            <span class="text-xs text-gray-500">(Rack
+                                                                                <span x-text="mov.rack_origen"></span>)
+                                                                            </span>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+                                                                <template x-if="mov.hacia">
+                                                                    <div class="flex items-center gap-2">
+                                                                        <i
+                                                                            class="fas fa-arrow-right text-green-500 text-xs"></i>
+                                                                        <span
+                                                                            class="text-gray-600 font-medium">Hacia:</span>
+                                                                        <span class="font-semibold text-gray-800"
+                                                                            x-text="mov.hacia"></span>
+                                                                        <template x-if="mov.rack_destino">
+                                                                            <span class="text-xs text-gray-500">(Rack
+                                                                                <span
+                                                                                    x-text="mov.rack_destino"></span>)
+                                                                            </span>
+                                                                        </template>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+
+                                                        <!-- Información Adicional -->
+                                                        <div class="space-y-2">
+                                                            <template x-if="mov.usuario">
+                                                                <div class="flex items-center gap-2">
+                                                                    <i class="fas fa-user text-gray-400 text-xs"></i>
+                                                                    <span
+                                                                        class="text-gray-600 font-medium">Usuario:</span>
+                                                                    <span class="font-semibold text-gray-800"
+                                                                        x-text="mov.usuario"></span>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="mov.observaciones">
+                                                                <div class="flex items-start gap-2">
+                                                                    <i
+                                                                        class="fas fa-sticky-note text-gray-400 text-xs mt-1"></i>
+                                                                    <div>
+                                                                        <span
+                                                                            class="text-gray-600 font-medium">Observaciones:</span>
+                                                                        <p class="text-gray-800"
+                                                                            x-text="mov.observaciones"></p>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Estado vacío -->
+                                    <template
+                                        x-if="!modalHistorial.historialFiltrado || modalHistorial.historialFiltrado.length === 0">
+                                        <div class="text-center py-12">
+                                            <div
+                                                class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                <i class="fas fa-history text-3xl text-gray-400"></i>
+                                            </div>
+                                            <h3 class="text-lg font-medium text-gray-800 mb-2">No hay movimientos
+                                                registrados</h3>
+                                            <p class="text-gray-600 max-w-md mx-auto">Esta ubicación no tiene historial
+                                                de movimientos aún.</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Mensaje de carga (cuando el modal está abierto pero aún no hay ubicación) -->
+            <template x-if="modalHistorial.open && !modalHistorial.ubi">
+                <div class="flex items-center justify-center min-h-screen">
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <i class="fas fa-spinner fa-spin text-3xl text-blue-500 mb-4 block text-center"></i>
+                        <p class="text-gray-600">Cargando historial...</p>
+                    </div>
+                </div>
+            </template>
+        </div>
+
         <div x-data x-show="$store.rackDetalle.modoMovimiento.activo"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
             x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"

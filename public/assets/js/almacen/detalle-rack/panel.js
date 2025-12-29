@@ -950,11 +950,16 @@ function rackDetalle() {
         modalAgregarProducto: {
             open: false,
         },
-        modalHistorial: {
-            open: false,
-        },
         modalReubicacion: {
             open: false,
+        },
+        // ========== MODAL HISTORIAL ==========
+        modalHistorial: {
+            open: false,
+            ubi: null,
+            historialFiltrado: [],
+            filtroTipo: 'todos',
+            busqueda: '',
         },
 
         // FUNCIONES DE LOS MODALES
@@ -967,8 +972,112 @@ function rackDetalle() {
             alert('Modal agregar producto - En desarrollo');
         },
 
+        
+
+        // ========== FUNCIONES DE HISTORIAL ==========
         abrirHistorial(ubi) {
-            alert('Modal historial - En desarrollo');
+            console.log('📋 Abriendo historial de:', ubi.codigo);
+
+            // Copiar la ubicación completa (incluyendo historial)
+            this.modalHistorial.ubi = { ...ubi };
+
+            // Inicializar historial filtrado
+            this.modalHistorial.historialFiltrado = ubi.historial ? [...ubi.historial] : [];
+
+            // Resetear filtros
+            this.modalHistorial.filtroTipo = 'todos';
+            this.modalHistorial.busqueda = '';
+
+            // Ordenar por fecha (más reciente primero)
+            if (this.modalHistorial.historialFiltrado.length > 0) {
+                this.modalHistorial.historialFiltrado.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            }
+
+            // Abrir modal
+            this.modalHistorial.open = true;
+
+            // Forzar actualización
+            this.$nextTick(() => {
+                console.log('📊 Historial cargado:', this.modalHistorial.historialFiltrado.length, 'movimientos');
+            });
+        },
+
+        cerrarModalHistorial() {
+            this.modalHistorial.open = false;
+            this.modalHistorial.ubi = null;
+            this.modalHistorial.historialFiltrado = [];
+        },
+
+        filtrarHistorial() {
+            if (!this.modalHistorial.ubi || !this.modalHistorial.ubi.historial) {
+                this.modalHistorial.historialFiltrado = [];
+                return;
+            }
+
+            let historial = [...this.modalHistorial.ubi.historial];
+
+            // Filtrar por tipo
+            if (this.modalHistorial.filtroTipo !== 'todos') {
+                if (this.modalHistorial.filtroTipo === 'custodia') {
+                    historial = historial.filter((mov) => mov.tipo === 'reubicacion_custodia');
+                } else {
+                    historial = historial.filter((mov) => mov.tipo === this.modalHistorial.filtroTipo);
+                }
+            }
+
+            // Filtrar por búsqueda
+            if (this.modalHistorial.busqueda.trim() !== '') {
+                const busqueda = this.modalHistorial.busqueda.toLowerCase().trim();
+                historial = historial.filter((mov) => {
+                    const textoBusqueda = [
+                        mov.producto || '',
+                        mov.observaciones || '',
+                        mov.desde || '',
+                        mov.hacia || '',
+                        mov.serie || '',
+                        mov.codigocustodias || '',
+                        mov.numero_ticket || '',
+                    ]
+                        .join(' ')
+                        .toLowerCase();
+
+                    return textoBusqueda.includes(busqueda);
+                });
+            }
+
+            // Ordenar por fecha
+            historial.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            this.modalHistorial.historialFiltrado = historial;
+        },
+
+        getMovimientosPorTipo(tipo) {
+            if (!this.modalHistorial.ubi || !this.modalHistorial.ubi.historial) return 0;
+
+            if (tipo === 'custodia') {
+                return this.modalHistorial.ubi.historial.filter((mov) => mov.tipo === 'reubicacion_custodia').length;
+            }
+
+            return this.modalHistorial.ubi.historial.filter((mov) => mov.tipo === tipo).length;
+        },
+
+        formatFechaHora(fechaString) {
+            if (!fechaString) return 'Sin fecha';
+
+            try {
+                const fecha = new Date(fechaString);
+                if (isNaN(fecha.getTime())) return fechaString;
+
+                return fecha.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                });
+            } catch (e) {
+                return fechaString;
+            }
         },
     };
 }
@@ -1147,9 +1256,6 @@ function modalDetalleUbicacion() {
             return null;
         },
 
-        abrirHistorial(ubicacion) {
-            alert('Modal historial - En desarrollo');
-        },
     };
 }
 // ======================== FUNCIONES GLOBALES ========================
