@@ -607,15 +607,14 @@ private function getMissingFields(Request $request)
         return view('solicitud.solicitudcompra.show', compact('solicitud', 'estadisticas'));
     }
 
-
-    public function evaluacion($id)
+public function evaluacion($id)
     {
         // Cargar la solicitud con todas las relaciones necesarias incluyendo monedas
         $solicitud = SolicitudCompra::with([
             'tipoArea',
             'prioridad',
             'centroCosto',
-            'detalles.moneda', // Agregar relación con moneda
+            'detalles.moneda',
             'archivos',
             'solicitudAlmacen',
             'solicitudAlmacen.detalles' => function ($query) {
@@ -660,20 +659,26 @@ private function getMissingFields(Request $request)
         $rechazados = $detalles->where('estado', 'Rechazado por administración')->count();
         $pendientes = $detalles->where('estado', 'pendiente')->count();
 
-        if ($pendientes > 0) {
-            return 'en_proceso'; // Todavía hay artículos pendientes
+        if ($solicitud->estado == 'observador') {
+            return 'observador';
+        } elseif ($pendientes > 0) {
+            return 'en_proceso';
         } elseif ($aprobados == $total) {
-            return 'completada'; // Todos los artículos aprobados por administración
+            return 'completada';
         } elseif ($rechazados == $total) {
-            return 'rechazada'; // Todos los artículos rechazados por administración
+            return 'rechazada';
         } else {
-            return 'en_proceso'; // Mezcla de aprobados y rechazados por administración
+            return 'en_proceso';
         }
     }
 
-
     private function puedeAvanzarEstado($solicitud)
     {
+        // No se puede avanzar si está en estado observador
+        if ($solicitud->estado == 'observador') {
+            return false;
+        }
+        
         // Solo se puede avanzar estado cuando todos los artículos están evaluados
         $detallesPendientes = $solicitud->detalles->where('estado', 'pendiente')->count();
         return $detallesPendientes === 0;
@@ -684,9 +689,25 @@ private function getMissingFields(Request $request)
         $estadosSiguientes = [];
 
         switch ($solicitud->estado) {
+            case 'en_proceso':
+                if ($this->puedeAvanzarEstado($solicitud)) {
+                    $estadosSiguientes = [
+                        'cancelada' => 'Cancelar Solicitud',
+                        'observador' => 'Marcar como Observador',
+                        'completada' => 'Completar Evaluación'
+                    ];
+                } else {
+                    $estadosSiguientes = [
+                        'cancelada' => 'Cancelar Solicitud',
+                        'observador' => 'Marcar como Observador'
+                    ];
+                }
+                break;
+
             case 'completada':
                 $estadosSiguientes = [
                     'cancelada' => 'Cancelar Solicitud',
+                    'observador' => 'Marcar como Observador',
                     'presupuesto_aprobado' => 'Aprobar Presupuesto'
                 ];
                 break;
@@ -694,6 +715,7 @@ private function getMissingFields(Request $request)
             case 'presupuesto_aprobado':
                 $estadosSiguientes = [
                     'cancelada' => 'Cancelar Solicitud',
+                    'observador' => 'Marcar como Observador',
                     'pagado' => 'Marcar como Pagado'
                 ];
                 break;
@@ -701,32 +723,36 @@ private function getMissingFields(Request $request)
             case 'pagado':
                 $estadosSiguientes = [
                     'cancelada' => 'Cancelar Solicitud',
+                    'observador' => 'Marcar como Observador',
                     'finalizado' => 'Finalizar Proceso'
                 ];
                 break;
 
-            case 'en_proceso':
-                if ($this->puedeAvanzarEstado($solicitud)) {
-                    $estadosSiguientes = [
-                        'cancelada' => 'Cancelar Solicitud',
-                        'completada' => 'Completar Evaluación'
-                    ];
-                } else {
-                    $estadosSiguientes = [
-                        'cancelada' => 'Cancelar Solicitud'
-                    ];
-                }
+            case 'observador':
+                $estadosSiguientes = [
+                    'en_proceso' => 'Volver a En Proceso',
+                    'cancelada' => 'Cancelar Solicitud'
+                ];
                 break;
 
             case 'pendiente':
                 $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud'
+                    'cancelada' => 'Cancelar Solicitud',
+                    'observador' => 'Marcar como Observador'
+                ];
+                break;
+
+            default:
+                $estadosSiguientes = [
+                    'cancelada' => 'Cancelar Solicitud',
+                    'observador' => 'Marcar como Observador'
                 ];
                 break;
         }
 
         return $estadosSiguientes;
     }
+
     // Método para cambiar el estado de la solicitud
     public function cambiarEstado(Request $request, $id)
     {
@@ -744,32 +770,76 @@ private function getMissingFields(Request $request)
                 ], 400);
             }
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
-            // Actualizar estado de solicitud compra
-            $solicitud->update([
-                'estado' => $nuevoEstado,
-                'fecha_aprobacion' => in_array($nuevoEstado, ['completada', 'presupuesto_aprobado', 'pagado', 'finalizado']) ? now() : $solicitud->fecha_aprobacion
-            ]);
+            // Si el nuevo estado es "observador", guardar datos adicionales
+            if ($nuevoEstado === 'observador') {
+                $validated = $request->validate([
+                    'observador_comentario' => 'required|string|min:10',
+                    'observador_fecha_aprobacion' => 'required|date|after:today',
+                    'observador_motivo' => 'required|string|min:10'
+                ]);
 
-            // Si el estado es 'finalizado', actualizar también la solicitud de almacén
-            if ($nuevoEstado === 'finalizado' && $solicitud->idSolicitudAlmacen) {
-                $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
-                if ($solicitudAlmacen) {
-                    $solicitudAlmacen->update([
-                        'estado' => 'finalizado',
-                        'fecha_aprobacion' => now(),
-                        'updated_at' => now()
-                    ]);
+                $solicitud->update([
+                    'estado' => $nuevoEstado,
+                    'observador_comentario' => $validated['observador_comentario'],
+                    'observador_fecha_aprobacion' => $validated['observador_fecha_aprobacion'],
+                    'observador_motivo' => $validated['observador_motivo'],
+                    'observador_fecha' => now(),
+                    'fecha_aprobacion' => null // Resetear fecha de aprobación
+                ]);
 
-                    \Log::info('Estado de solicitud almacén actualizado a finalizado:', [
-                        'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
-                        'idSolicitudCompra' => $solicitud->idSolicitudCompra
-                    ]);
+                // Si tiene solicitud de almacén asociada, también marcarla como observador
+                if ($solicitud->idSolicitudAlmacen) {
+                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+                    if ($solicitudAlmacen) {
+                        $solicitudAlmacen->update([
+                            'estado' => 'observador',
+                            'updated_at' => now()
+                        ]);
+                    }
+                }
+            } 
+            // Si se está volviendo de "observador" a "en_proceso"
+            elseif ($solicitud->estado === 'observador' && $nuevoEstado === 'en_proceso') {
+                $solicitud->update([
+                    'estado' => $nuevoEstado,
+                    'observador_fecha_aprobacion' => null, // Limpiar fecha programada
+                    'observador_fecha' => null
+                ]);
+
+                // Si tiene solicitud de almacén asociada, volver a en_proceso
+                if ($solicitud->idSolicitudAlmacen) {
+                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+                    if ($solicitudAlmacen) {
+                        $solicitudAlmacen->update([
+                            'estado' => 'en_proceso',
+                            'updated_at' => now()
+                        ]);
+                    }
+                }
+            }
+            // Para otros estados
+            else {
+                $solicitud->update([
+                    'estado' => $nuevoEstado,
+                    'fecha_aprobacion' => in_array($nuevoEstado, ['completada', 'presupuesto_aprobado', 'pagado', 'finalizado']) ? now() : $solicitud->fecha_aprobacion
+                ]);
+
+                // Si el estado es 'finalizado', actualizar también la solicitud de almacén
+                if ($nuevoEstado === 'finalizado' && $solicitud->idSolicitudAlmacen) {
+                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+                    if ($solicitudAlmacen) {
+                        $solicitudAlmacen->update([
+                            'estado' => 'finalizado',
+                            'fecha_aprobacion' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
                 }
             }
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -777,10 +847,59 @@ private function getMissingFields(Request $request)
                 'nuevo_estado' => $nuevoEstado
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cambiar el estado: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Nuevo método específico para marcar como observador
+    public function marcarObservador(Request $request, $id)
+    {
+        try {
+            $solicitud = SolicitudCompra::findOrFail($id);
+
+            $validated = $request->validate([
+                'observador_comentario' => 'required|string|min:10',
+                'observador_fecha_aprobacion' => 'required|date|after:today',
+                'observador_motivo' => 'required|string|min:10'
+            ]);
+
+            DB::beginTransaction();
+
+            $solicitud->update([
+                'estado' => 'observador',
+                'observador_comentario' => $validated['observador_comentario'],
+                'observador_fecha_aprobacion' => $validated['observador_fecha_aprobacion'],
+                'observador_motivo' => $validated['observador_motivo'],
+                'observador_fecha' => now(),
+                'fecha_aprobacion' => null
+            ]);
+
+            // Si tiene solicitud de almacén asociada
+            if ($solicitud->idSolicitudAlmacen) {
+                $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+                if ($solicitudAlmacen) {
+                    $solicitudAlmacen->update([
+                        'estado' => 'observador',
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud marcada como observador correctamente'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al marcar como observador: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -799,7 +918,7 @@ private function getMissingFields(Request $request)
                 ], 400);
             }
 
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $solicitud->update([
                 'estado' => 'cancelada',
@@ -817,23 +936,17 @@ private function getMissingFields(Request $request)
                         'fecha_aprobacion' => now(),
                         'updated_at' => now()
                     ]);
-
-                    \Log::info('Estado de solicitud almacén actualizado a cancelada:', [
-                        'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
-                        'idSolicitudCompra' => $solicitud->idSolicitudCompra,
-                        'motivo' => $motivo
-                    ]);
                 }
             }
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Solicitud cancelada correctamente'
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cancelar la solicitud: ' . $e->getMessage()
@@ -841,30 +954,34 @@ private function getMissingFields(Request $request)
         }
     }
 
-
-
     public function aprobarArticulo(Request $request, $idSolicitud, $idDetalle)
     {
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
                 ->where('idSolicitudCompraDetalle', $idDetalle)
                 ->firstOrFail();
 
-            // Actualizar detalle de compra (REEMPLAZA estado)
+            // Verificar que la solicitud no esté en estado observador
+            $solicitud = SolicitudCompra::find($idSolicitud);
+            if ($solicitud->estado == 'observador') {
+                throw new \Exception('No se pueden aprobar artículos mientras la solicitud está en estado observador');
+            }
+
+            // Actualizar detalle de compra
             $detalle->update([
                 'estado' => 'Aprobado por administración',
                 'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalle->cantidad,
                 'observaciones_detalle' => $request->observaciones
             ]);
 
-            // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
+            // Si tiene relación con almacén, actualizar también el detalle de almacén
             if ($detalle->idSolicitudAlmacenDetalle) {
                 $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
                 if ($detalleAlmacen) {
                     $detalleAlmacen->update([
-                        'estado' => 'Aprobado por administración', // NUEVO ESTADO
+                        'estado' => 'Aprobado por administración',
                         'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalleAlmacen->cantidad,
                         'observaciones_detalle' => $request->observaciones
                     ]);
@@ -874,14 +991,14 @@ private function getMissingFields(Request $request)
             // Recalcular el estado general de la solicitud
             $this->actualizarEstadoSolicitud($idSolicitud);
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo aprobado por administración correctamente'
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al aprobar el artículo: ' . $e->getMessage()
@@ -892,25 +1009,31 @@ private function getMissingFields(Request $request)
     public function rechazarArticulo(Request $request, $idSolicitud, $idDetalle)
     {
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
                 ->where('idSolicitudCompraDetalle', $idDetalle)
                 ->firstOrFail();
 
-            // Actualizar detalle de compra (REEMPLAZA estado)
+            // Verificar que la solicitud no esté en estado observador
+            $solicitud = SolicitudCompra::find($idSolicitud);
+            if ($solicitud->estado == 'observador') {
+                throw new \Exception('No se pueden rechazar artículos mientras la solicitud está en estado observador');
+            }
+
+            // Actualizar detalle de compra
             $detalle->update([
                 'estado' => 'Rechazado por administración',
                 'cantidad_aprobada' => 0,
                 'observaciones_detalle' => $request->observaciones
             ]);
 
-            // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
+            // Si tiene relación con almacén, actualizar también el detalle de almacén
             if ($detalle->idSolicitudAlmacenDetalle) {
                 $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
                 if ($detalleAlmacen) {
                     $detalleAlmacen->update([
-                        'estado' => 'Rechazado por administración', // NUEVO ESTADO
+                        'estado' => 'Rechazado por administración',
                         'cantidad_aprobada' => 0,
                         'observaciones_detalle' => $request->observaciones
                     ]);
@@ -920,25 +1043,32 @@ private function getMissingFields(Request $request)
             // Recalcular el estado general de la solicitud
             $this->actualizarEstadoSolicitud($idSolicitud);
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo rechazado por administración correctamente'
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al rechazar el artículo: ' . $e->getMessage()
             ], 500);
         }
     }
+
     private function actualizarEstadoSolicitud($idSolicitud)
     {
         $solicitud = SolicitudCompra::with('detalles')->find($idSolicitud);
+        
+        // No actualizar estado si está en observador
+        if ($solicitud->estado == 'observador') {
+            return 'observador';
+        }
+        
         $estadoGeneral = $this->determinarEstadoGeneral($solicitud);
-
+        
         $solicitud->update([
             'estado' => $estadoGeneral
         ]);
@@ -946,7 +1076,7 @@ private function getMissingFields(Request $request)
         return $estadoGeneral;
     }
 
-
+    
 
 
     public function edit($id)

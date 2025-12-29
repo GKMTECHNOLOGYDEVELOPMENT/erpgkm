@@ -146,6 +146,18 @@ class SolicitudalmacenController extends Controller
                 'estado' => 'pendiente'
             ]);
 
+              // Guardar en solicitudentrega
+        DB::table('solicitudentrega')->insert([
+            'idUsuario' => auth()->id(), // O el ID del usuario que registra
+            'comentario' => 'Solicitud de Almacén: ' . $request->descripcion . ' - ' . $request->justificacion,
+            'estado' => 0,
+            'fechaHora' => now(), // Fecha y hora actual
+            'idTipoServicio' => 8, // Ajustar si es necesario
+            'numero_ticket' => $codigo, // Usar el código de la solicitud como número de ticket
+            'idTickets' => null, // Ajustar si es necesario
+            'idVisitas' => null, // Ajustar si es necesario
+        ]);
+
             // ... el resto del código permanece igual
             foreach ($request->productos as $producto) {
                 SolicitudAlmacenDetalle::create([

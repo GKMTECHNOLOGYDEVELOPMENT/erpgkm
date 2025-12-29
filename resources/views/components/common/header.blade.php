@@ -1294,7 +1294,10 @@ obtenerSolicitudes() {
                         tipoServicio = 'Solicitud de artículo';
                         break;
                     case 7:
-                        tipoServicio = 'Solicitud de custodia';
+                    tipoServicio = 'Solicitud de custodia';
+                        break;
+                    case 8:
+                        tipoServicio = 'Solicitud de Abastecimiento';
                         break;
                     default:
                         tipoServicio = 'Tipo desconocido';

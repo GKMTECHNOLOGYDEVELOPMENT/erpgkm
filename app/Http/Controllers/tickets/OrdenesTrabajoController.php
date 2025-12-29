@@ -4141,11 +4141,32 @@ public function obtenerSolicitudes()
             return $item;
         });
 
+        
+    // Obtener solicitudes tipo 7 (Solicitud de custodia)
+    $solicitudesTipo8 = Solicitudentrega::where('solicitudentrega.estado', 0)
+        ->where('solicitudentrega.idTipoServicio', 8)
+        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+        ->select(
+            'solicitudentrega.idSolicitudentrega',
+            'solicitudentrega.comentario',
+            'solicitudentrega.idTipoServicio',
+            'usuarios.Nombre as nombre_usuario',
+            'solicitudentrega.fechaHora'
+        )
+        ->get()
+        ->map(function ($item) {
+            $item->numero_ticket = null; // No tiene ticket
+            $item->idTickets = null;
+            $item->idVisitas = null;
+            return $item;
+        });
+
     // Combinar todas las solicitudes
     $solicitudes = $solicitudesBase
         ->concat($solicitudesTipo5)
         ->concat($solicitudesTipo6)
-        ->concat($solicitudesTipo7);
+        ->concat($solicitudesTipo7)
+        ->concat($solicitudesTipo8);
 
     Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
 
