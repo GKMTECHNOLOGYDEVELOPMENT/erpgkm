@@ -814,7 +814,7 @@ public function store(Request $request)
             'idVisitas' => null, // Se deja como null según lo solicitado
             'idUsuario' => auth()->id(), // Usuario que solicita
             'comentario' => trim($comentario), // Detalles de la solicitud + para Lima
-            'estado' => 1, // Estado 1 según lo solicitado
+            'estado' => 0, // Estado 1 según lo solicitado
             'fechaHora' => now(), // Fecha y hora actual
             'idTipoServicio' => 5 // idTipoServicio 5 según lo solicitado
         ]);
@@ -1057,7 +1057,7 @@ DB::table('solicitudentrega')->insert([
     'idVisitas' => null,
     'idUsuario' => auth()->id(),
     'comentario' => trim($comentarioProvincia),
-    'estado' => 1,
+    'estado' => 0,
     'fechaHora' => now(),
     'idTipoServicio' => 5
 ]);

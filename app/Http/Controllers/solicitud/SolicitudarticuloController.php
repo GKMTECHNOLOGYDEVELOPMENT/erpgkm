@@ -457,7 +457,7 @@ public function create()
             'idVisitas' => null,
             'idUsuario' => Auth::id(), // Usuario autenticado que solicita
             'comentario' => trim($comentarioArticulos), // "una solicitud de articulo bro"
-            'estado' => 1, // Estado 1
+            'estado' => 0, // Estado 1
             'fechaHora' => now(), // Fecha y hora actual
             'idTipoServicio' => 6 // idTipoServicio 6 para solicitud de artículos
         ]);

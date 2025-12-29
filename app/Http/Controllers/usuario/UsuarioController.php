@@ -235,6 +235,8 @@ public function store(Request $request)
             'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
             'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
             'correo' => 'required|email|max:255|unique:usuarios,correo',
+            'correo_personal' => 'required|email|max:255|unique:usuarios,correo_personal',
+
             'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
             'profile-image' => 'nullable|image|max:1024',
         ]);
@@ -265,6 +267,7 @@ public function store(Request $request)
         $usuarioNuevo->documento = $request->documento;
         $usuarioNuevo->telefono = $request->telefono;
         $usuarioNuevo->correo = $request->correo;
+        $usuarioNuevo->correo_personal = $request->correo_personal;
         $usuarioNuevo->avatar = $imageData;
         $usuarioNuevo->usuario = $usuario;
         $usuarioNuevo->estadocivil = $request->estadocivil; // Aquí asignamos el estado civil

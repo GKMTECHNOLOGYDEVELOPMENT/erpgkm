@@ -781,7 +781,7 @@ private function obtenerSugerenciasUbicaciones($cantidad)
             'idVisitas' => null, // No hay visita
             'idUsuario' => auth()->id(), // Usuario autenticado
             'comentario' => trim($comentarioCustodia),
-            'estado' => 1, // Estado 1
+            'estado' => 0, // Estado 1
             'fechaHora' => now(), // Fecha y hora actual del registro
             'idTipoServicio' => 7 // idTipoServicio 7 para custodia (usa un número diferente)
         ]);
