@@ -13,6 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Usuario
@@ -207,6 +208,15 @@ class Usuario extends Authenticatable
 		return $this->hasMany(Ticket::class, 'idUsuario');
 	}
 
+
+	
+
+public function asignaciones(): HasMany
+    {
+        return $this->hasMany(Asignacion::class, 'idUsuario', 'idUsuario');
+    }
+
+
 	public function ticketsoportes()
 	{
 		return $this->hasMany(Ticketsoporte::class, 'idUsuario');
@@ -384,6 +394,8 @@ public function getDashboardPrincipal()
 }
 
 
+
+
 // app/Models/Usuario.php
 public function getMenuDashboards()
 {
@@ -411,4 +423,6 @@ public function getMenuDashboards()
     
     return $menuItems;
 }
+
+  
 }

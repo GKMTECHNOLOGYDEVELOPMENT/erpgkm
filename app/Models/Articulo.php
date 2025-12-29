@@ -8,6 +8,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Articulo
@@ -178,6 +179,34 @@ class Articulo extends Model
         return $this->belongsTo(Moneda::class, 'idMonedaCompra', 'idMoneda');
     }
 
+protected $appends = ['stock_disponible', 'tiene_serie'];
 
+    public function detalleAsignaciones(): HasMany
+    {
+        return $this->hasMany(DetalleAsignacion::class, 'articulo_id', 'idArticulos');
+    }
+
+    public function getStockDisponibleAttribute()
+    {
+        // Obtener la suma de cantidad de artículos asignados activos
+        $asignado = $this->detalleAsignaciones()
+            ->whereHas('asignacion', function ($query) {
+                $query->whereIn('estado', ['activo', 'vencido']);
+            })
+            ->sum('cantidad');
+        
+        return max(0, $this->stock_total - $asignado);
+    }
+
+    public function getTieneSerieAttribute()
+    {
+        return $this->maneja_serie == 1;
+    }
+
+    // Método para verificar si hay stock disponible
+    public function tieneStockDisponible($cantidad)
+    {
+        return $this->stock_disponible >= $cantidad;
+    }
 
 }

@@ -1175,11 +1175,15 @@ Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'des
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
 
 
-Route::get('almacen/asignar-articulo', [AsignarArticuloController::class, 'index'])
-    ->name('asignar-articulos.index');
-
-Route::get('asignar-articulos/create', [AsignarArticuloController::class, 'create'])
-    ->name('asignar-articulos.create');
+Route::prefix('almacen/asignar-articulo')->name('asignar-articulos.')->group(function () {
+    Route::get('/', [AsignarArticuloController::class, 'index'])->name('index');
+    Route::get('/create', [AsignarArticuloController::class, 'create'])->name('create');
+    Route::post('/', [AsignarArticuloController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [AsignarArticuloController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [AsignarArticuloController::class, 'update'])->name('update'); // <-- Agregar esta línea
+    Route::post('/{id}/devolver', [AsignarArticuloController::class, 'devolver'])->name('devolver');
+    Route::post('/detalle/{id}/reportar-danado', [AsignarArticuloController::class, 'reportarDanado'])->name('reportar-danado');
+});
 
 Route::get('/ver-informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verInforme']);
 Route::get('/ver-hoja-entrega-pdf/{idTickets}', [OrdenesTrabajoController::class, 'verHojaEntrega']);

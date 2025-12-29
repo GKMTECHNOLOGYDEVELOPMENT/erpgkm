@@ -54,19 +54,22 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row gap-4 items-end">
+                <form method="GET" action="{{ route('asignar-articulos.index') }}" class="flex flex-col md:flex-row gap-4 items-end">
                     <!-- Usuario -->
                     <div class="flex-1 space-y-2">
                         <label class="block text-sm font-semibold text-gray-700">
                             <i class="fas fa-user mr-2 text-primary"></i> Usuario
                         </label>
                         <div class="relative">
-                            <select
+                            <select name="idUsuario"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-primary/30 transition-all duration-200 appearance-none">
                                 <option value="">Todos los usuarios</option>
-                                <option>Juan Pérez</option>
-                                <option>María García</option>
-                                <option>Carlos López</option>
+                                @foreach($usuarios as $usuario)
+                                <option value="{{ $usuario->idUsuario }}" 
+                                    {{ request('idUsuario') == $usuario->idUsuario ? 'selected' : '' }}>
+                                    {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}
+                                </option>
+                                @endforeach
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <i class="fas fa-chevron-down text-gray-400"></i>
@@ -80,12 +83,15 @@
                             <i class="fas fa-box mr-2 text-success"></i> Artículo
                         </label>
                         <div class="relative">
-                            <select
+                            <select name="articulo_id"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-success focus:ring-2 focus:ring-success/30 transition-all duration-200 appearance-none">
                                 <option value="">Todos los artículos</option>
-                                <option>Laptop HP EliteBook</option>
-                                <option>Mouse Logitech</option>
-                                <option>Monitor Dell 24"</option>
+                                @foreach($articulos as $articulo)
+                                <option value="{{ $articulo->idArticulos }}" 
+                                    {{ request('articulo_id') == $articulo->idArticulos ? 'selected' : '' }}>
+                                    {{ $articulo->nombre }}
+                                </option>
+                                @endforeach
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <i class="fas fa-chevron-down text-gray-400"></i>
@@ -99,12 +105,12 @@
                             <i class="fas fa-tag mr-2 text-warning"></i> Estado
                         </label>
                         <div class="relative">
-                            <select
+                            <select name="estado"
                                 class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-warning focus:ring-2 focus:ring-warning/30 transition-all duration-200 appearance-none">
                                 <option value="">Todos</option>
-                                <option value="activo" class="text-success">● Activo</option>
-                                <option value="devuelto" class="text-secondary">● Devuelto</option>
-                                <option value="vencido" class="text-danger">● Vencido</option>
+                                <option value="activo" {{ request('estado') == 'activo' ? 'selected' : '' }} class="text-success">● Activo</option>
+                                <option value="devuelto" {{ request('estado') == 'devuelto' ? 'selected' : '' }} class="text-secondary">● Devuelto</option>
+                                <option value="vencido" {{ request('estado') == 'vencido' ? 'selected' : '' }} class="text-danger">● Vencido</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <i class="fas fa-chevron-down text-gray-400"></i>
@@ -119,7 +125,7 @@
                             <label class="block text-sm font-semibold text-gray-700">
                                 <i class="fas fa-search mr-2 text-info"></i> Buscar
                             </label>
-                            <button
+                            <button type="submit"
                                 class="w-full px-4 py-3 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
                                 <i class="fas fa-search mr-2"></i> Aplicar Filtros
                             </button>
@@ -130,42 +136,50 @@
                             <label class="block text-sm font-semibold text-gray-700 opacity-0 md:opacity-100">
                                 <i class="fas fa-redo mr-2 text-danger"></i> Limpiar
                             </label>
-                            <button
-                                class="w-full px-4 py-3 bg-danger/10 hover:bg-danger/20 text-danger font-medium rounded-lg border border-danger/20 transition-all duration-200 flex items-center justify-center">
+                            <a href="{{ route('asignar-articulos.index') }}"
+                                class="w-full px-4 py-3 bg-danger/10 hover:bg-danger/20 text-danger font-medium rounded-lg border border-danger/20 transition-all duration-200 flex items-center justify-center no-underline">
                                 <i class="fas fa-redo mr-2"></i> Limpiar
-                            </button>
+                            </a>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
 
-        <!-- Cards de Usuarios - TODAS CON EL MISMO COLOR -->
+        <!-- Cards de Usuarios -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <!-- Card 2 - Usuario -->
-            <div
-                class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
+            @forelse($asignaciones as $asignacion)
+            @php
+                $usuario = $asignacion->usuario;
+                $detalles = $asignacion->detalles;
+                $activos = $detalles->where('estado_articulo', 'activo')->count();
+                $danados = $detalles->where('estado_articulo', 'dañado')->count();
+                $perdidos = $detalles->where('estado_articulo', 'perdido')->count();
+                $totalValor = $detalles->sum(function($detalle) {
+                    return $detalle->cantidad * ($detalle->articulo->precio_venta ?? 0);
+                });
+            @endphp
+            
+            <div class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 overflow-hidden">
                 <div class="bg-primary p-5">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="relative">
-                                <div
-                                    class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border-2 border-white/30">
-                                    <span class="text-white text-xl font-bold">MG</span>
+                                <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border-2 border-white/30">
+                                    @php
+                                        $iniciales = substr($usuario->Nombre, 0, 1) . substr($usuario->apellidoPaterno, 0, 1);
+                                    @endphp
+                                    <span class="text-white text-xl font-bold">{{ $iniciales }}</span>
                                 </div>
-                                <div
-                                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-white">
-                                </div>
+                                <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-{{ $asignacion->estado == 'activo' ? 'success' : ($asignacion->estado == 'devuelto' ? 'secondary' : 'danger') }} rounded-full border-2 border-white"></div>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-white">María García</h3>
-                                <p class="text-blue-100 text-sm">Marketing - Gerente</p>
+                                <h3 class="text-lg font-bold text-white">{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}</h3>
+                                <p class="text-blue-100 text-sm">{{ $usuario->correo }}</p>
                             </div>
                         </div>
-                        <span
-                            class="bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
-                            <i class="fas fa-box mr-1"></i> 2 artículos
+                        <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm">
+                            <i class="fas fa-box mr-1"></i> {{ $detalles->count() }} artículos
                         </span>
                     </div>
                 </div>
@@ -173,116 +187,216 @@
                 <div class="p-5">
                     <div class="grid grid-cols-3 gap-3 mb-4">
                         <div class="bg-primary/10 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-primary">1</p>
+                            <p class="text-2xl font-bold text-primary">{{ $activos }}</p>
                             <p class="text-xs text-primary">Activo</p>
                         </div>
                         <div class="bg-danger/10 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-danger">1</p>
+                            <p class="text-2xl font-bold text-danger">{{ $danados }}</p>
                             <p class="text-xs text-danger">Dañado</p>
                         </div>
                         <div class="bg-warning/10 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-warning">S/6.200</p>
+                            <p class="text-2xl font-bold text-warning">S/{{ number_format($totalValor, 2) }}</p>
                             <p class="text-xs text-warning">Valor</p>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <!-- Artículo 1 con serie -->
-                        <div
-                            class="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10 hover:border-primary/20 transition-colors">
+                        @foreach($detalles as $detalle)
+                        @php
+                            $articulo = $detalle->articulo;
+                        @endphp
+                        <div class="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10 hover:border-primary/20 transition-colors">
                             <div class="flex items-center space-x-3 flex-1">
-                                <div
-                                    class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-tablet-alt text-primary"></i>
+                                <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-box text-primary"></i>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between">
                                         <div class="min-w-0">
-                                            <p class="font-medium text-gray-900 truncate">iPad Pro 12.9"</p>
-                                            <div class="flex items-center space-x-3 mt-1">
-                                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                                                    <i class="fas fa-barcode mr-1 text-xs"></i>
-                                                    SN: APP789123
-                                                </span>
-                                                <span class="text-xs text-gray-500">
-                                                    <i class="fas fa-calendar-alt mr-1"></i>
-                                                    10/01/2024
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="ml-3 flex-shrink-0">
-                                <span
-                                    class="bg-success/10 text-success text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap">
-                                    Activo
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Artículo 2 con serie -->
-                        <div
-                            class="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10 hover:border-primary/20 transition-colors">
-                            <div class="flex items-center space-x-3 flex-1">
-                                <div
-                                    class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i class="fas fa-mobile-alt text-primary"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-start justify-between">
-                                        <div class="min-w-0">
-                                            <p class="font-medium text-gray-900 truncate">iPhone 14 Pro</p>
+                                            <p class="font-medium text-gray-900 truncate">{{ $articulo->nombre }}</p>
                                             <div class="flex flex-col space-y-1 mt-1">
                                                 <div class="flex items-center space-x-3">
-                                                    <span
-                                                        class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                                    @if($detalle->numero_serie)
+                                                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
                                                         <i class="fas fa-barcode mr-1 text-xs"></i>
-                                                        SN: APP456789
+                                                        SN: {{ $detalle->numero_serie }}
+                                                    </span>
+                                                    @endif
+                                                    <span class="text-xs text-gray-500">
+                                                        <i class="fas fa-hashtag mr-1"></i>
+                                                        Cant: {{ $detalle->cantidad }}
                                                     </span>
                                                     <span class="text-xs text-gray-500">
                                                         <i class="fas fa-calendar-alt mr-1"></i>
-                                                        05/01/2024
+                                                        {{ $asignacion->fecha_asignacion->format('d/m/Y') }}
                                                     </span>
                                                 </div>
-                                                <div
-                                                    class="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded inline-flex items-center">
+                                                @if($detalle->estado_articulo == 'dañado')
+                                                <div class="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded inline-flex items-center">
                                                     <i class="fas fa-exclamation-circle mr-1"></i>
-                                                    Reportado: 05/01/2024
+                                                    Reportado: {{ $detalle->updated_at->format('d/m/Y') }}
                                                 </div>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="ml-3 flex-shrink-0">
-                                <span
-                                    class="bg-danger/10 text-danger text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap">
-                                    Dañado
+                                <span class="bg-{{ $detalle->estado_articulo == 'activo' ? 'success' : ($detalle->estado_articulo == 'dañado' ? 'danger' : 'warning') }}/10 text-{{ $detalle->estado_articulo == 'activo' ? 'success' : ($detalle->estado_articulo == 'dañado' ? 'danger' : 'warning') }} text-xs font-semibold px-2 py-1 rounded-full whitespace-nowrap">
+                                    {{ ucfirst($detalle->estado_articulo) }}
                                 </span>
                             </div>
                         </div>
+                        @endforeach
                     </div>
 
-                    <!-- Mensaje especial -->
+                    @if($danados > 0)
                     <div class="mt-4 p-3 bg-warning/5 rounded-xl border border-warning/10">
                         <div class="flex items-center space-x-2">
                             <i class="fas fa-exclamation-triangle text-warning"></i>
-                            <p class="text-sm text-warning">Requiere reemplazo del iPhone</p>
+                            <p class="text-sm text-warning">Requiere atención por artículos dañados</p>
                         </div>
                     </div>
+                    @endif
                 </div>
 
                 <div class="px-5 pb-5">
                     <div class="flex space-x-3">
-                        <button
-                            class="flex-1 px-4 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
-                            <i class="fas fa-plus mr-2"></i> Editar
-                        </button>
+                        @if($asignacion->estado == 'activo')
+                        <form action="{{ route('asignar-articulos.devolver', $asignacion->id) }}" method="POST" class="flex-1">
+                            @csrf
+                            <button type="submit" class="w-full px-4 py-2.5 bg-success text-white font-semibold rounded-xl hover:bg-success-dark transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                                <i class="fas fa-undo mr-2"></i> Devolver
+                            </button>
+                        </form>
+                        @endif
+                        <a href="{{ route('asignar-articulos.edit', $asignacion->id) }}" class="flex-1">
+                            <button class="w-full px-4 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-primary-dark transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center">
+                                <i class="fas fa-edit mr-2"></i> Editar
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>
-
+            @empty
+            <div class="col-span-full">
+                <div class="panel bg-white rounded-xl shadow-lg border-0 p-8 text-center">
+                    <div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-boxes text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">No hay asignaciones</h3>
+                    <p class="text-gray-600 mb-6">No se encontraron asignaciones de artículos. Crea una nueva asignación para empezar.</p>
+                    <a href="{{ route('asignar-articulos.create') }}" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-all duration-200 shadow-md hover:shadow-lg inline-flex items-center no-underline">
+                        <i class="fas fa-plus mr-2"></i> Crear Primera Asignación
+                    </a>
+                </div>
+            </div>
+            @endforelse
         </div>
+<!-- Paginación -->
+@if($asignaciones->hasPages())
+<div class="mt-6">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-gray-600">
+            Mostrando {{ $asignaciones->firstItem() }} - {{ $asignaciones->lastItem() }} de {{ $asignaciones->total() }} asignaciones
+        </div>
+        
+        <nav class="flex items-center space-x-1">
+            <!-- Primera página -->
+            @if($asignaciones->onFirstPage())
+            <span class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                <i class="fas fa-chevron-left"></i>
+            </span>
+            @else
+            <a href="{{ $asignaciones->url(1) }}" class="px-3 py-1.5 bg-white text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-all duration-200 border border-gray-200 no-underline">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            @endif
+
+            <!-- Página anterior -->
+            @if($asignaciones->onFirstPage())
+            <span class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                <i class="fas fa-chevron-left"></i>
+            </span>
+            @else
+            <a href="{{ $asignaciones->previousPageUrl() }}" class="px-3 py-1.5 bg-white text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-all duration-200 border border-gray-200 no-underline">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            @endif
+
+            <!-- Números de página -->
+            @foreach($asignaciones->links()->elements[0] as $page => $url)
+                @if($page == $asignaciones->currentPage())
+                <span class="px-3 py-1.5 bg-primary text-white rounded-lg font-semibold">
+                    {{ $page }}
+                </span>
+                @else
+                <a href="{{ $url }}" class="px-3 py-1.5 bg-white text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-all duration-200 border border-gray-200 no-underline">
+                    {{ $page }}
+                </a>
+                @endif
+            @endforeach
+
+            <!-- Página siguiente -->
+            @if($asignaciones->hasMorePages())
+            <a href="{{ $asignaciones->nextPageUrl() }}" class="px-3 py-1.5 bg-white text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-all duration-200 border border-gray-200 no-underline">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            @else
+            <span class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+            @endif
+
+            <!-- Última página -->
+            @if($asignaciones->hasMorePages())
+            <a href="{{ $asignaciones->url($asignaciones->lastPage()) }}" class="px-3 py-1.5 bg-white text-gray-700 rounded-lg hover:bg-primary hover:text-white transition-all duration-200 border border-gray-200 no-underline">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            @else
+            <span class="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
+                <i class="fas fa-chevron-right"></i>
+            </span>
+            @endif
+        </nav>
     </div>
+</div>
+@endif
+    </div>
+
+    <!-- Script para reportar dañado -->
+    <script>
+        function reportarDanado(detalleId) {
+            if (confirm('¿Reportar este artículo como dañado?')) {
+                const observaciones = prompt('Ingrese observaciones:', 'Artículo dañado');
+                
+                if (observaciones !== null) {
+                    fetch(`/almacen/asignar-articulos/detalle/${detalleId}/reportar-danado`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            observaciones: observaciones
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al reportar el artículo');
+                    });
+                }
+            }
+        }
+    </script>
 </x-layout.default>
