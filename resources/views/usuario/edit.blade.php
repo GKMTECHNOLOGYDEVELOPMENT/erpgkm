@@ -4,7 +4,6 @@
     <!-- Cargar jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 
@@ -75,8 +74,27 @@
                             Informacion
                         </a>
                     </li>
-                       <!-- Tab 4: informacion -->
-                       <li class="inline-block">
+                    
+                    <!-- NUEVO TAB: Asignado -->
+                    <li class="inline-block">
+                        <a href="javascript:;"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
+                            :class="{ '!border-primary text-primary': tab == 'asignado' }"
+                            @click="tab='asignado'">
+                            <!-- Puedes cambiar el ícono por uno más apropiado para "Asignado" -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                <path d="M15 5L18 8L21 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path opacity="0.5" d="M20 12H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                <path opacity="0.5" d="M20 17H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                <path d="M3 10C3 6.22876 3 4.34315 4.17157 3.17157C5.34315 2 7.22876 2 11 2H13C16.7712 2 18.6569 2 19.8284 3.17157C21 4.34315 21 6.22876 21 10V14C21 17.7712 21 19.6569 19.8284 20.8284C18.6569 22 16.7712 22 13 22H11C7.22876 22 5.34315 22 4.17157 20.8284C3 19.6569 3 17.7712 3 14V10Z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                            Asignado
+                        </a>
+                    </li>
+                    
+                    <!-- Tab 4: Preferencias -->
+                    <li class="inline-block">
                         <a href="javascript:;"
                             class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary"
                             :class="{ '!border-primary text-primary': tab == 'preferences' }"
@@ -90,7 +108,6 @@
                             Preferencias
                         </a>
                     </li>
-
 
                     <!-- Tab 5: Danger Zone -->
                     <li class="inline-block">
@@ -112,19 +129,23 @@
                 <!-- Tab Content -->
                 <div class="panel mt-6 p-5 max-w-4x2 mx-auto">
                     <div x-show="tab === 'perfil'">
-                        @include('usuario.tabs.perfil.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.perfil.index')
                     </div>
                     <div x-show="tab === 'payment-details'">
-                        @include('usuario.tabs.detalles-pago.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.detalles-pago.index')
                     </div>
                     <div x-show="tab === 'preferences'">
-                        @include('usuario.tabs.configuracion.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.configuracion.index')
                     </div>
                     <div x-show="tab === 'informacion'">
-                        @include('usuario.tabs.informacion.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.informacion.index')
+                    </div>
+                    <!-- NUEVO CONTENIDO: Asignado -->
+                    <div x-show="tab === 'asignado'">
+                        @include('usuario.tabs.asignado.index')
                     </div>
                     <div x-show="tab === 'danger-zone'">
-                        @include('usuario.tabs.detalles.index') <!-- Ajusta el path -->
+                        @include('usuario.tabs.detalles.index')
                     </div>
                 </div>
             </div>

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\usuario;
 
 use App\Http\Controllers\Controller;
 use App\Mail\UsuarioCreado;
+use App\Models\Articulo;
+use App\Models\Asignacion;
 use App\Models\CuentasBancarias;
+use App\Models\DetalleAsignacion;
 use App\Models\DocumentoUsuario;
 use App\Models\Rol;
 use App\Models\Sexo;
@@ -1115,4 +1118,99 @@ public function cambiarPassword(Request $request, $id)
             ], 500);
         }
     }
+/**
+ * Obtener artículos activos asignados al usuario
+ */
+public function getArticulosActivos($idUsuario)
+{
+    try {
+        Log::info('Obteniendo artículos activos para usuario:', ['usuario_id' => $idUsuario]);
+        
+        // Obtener todos los detalles de asignaciones activas para este usuario
+        $detalles = DetalleAsignacion::join('asignaciones', 'detalle_asignaciones.asignacion_id', '=', 'asignaciones.id')
+            ->leftJoin('articulos', 'detalle_asignaciones.articulo_id', '=', 'articulos.idArticulos')
+            ->where('asignaciones.idUsuario', $idUsuario)
+            ->where('asignaciones.estado', 'activo') // Solo asignaciones activas
+            ->where('detalle_asignaciones.estado_articulo', '!=', 'devuelto') // Excluir devueltos
+            ->select(
+                'detalle_asignaciones.*',
+                'articulos.nombre',
+                'articulos.codigo_barras',
+                'articulos.sku',
+                'articulos.idTipoArticulo',
+                'articulos.codigo_repuesto',
+                'asignaciones.fecha_asignacion',
+                'asignaciones.fecha_devolucion',
+                'asignaciones.observaciones',
+                'asignaciones.estado as estado_asignacion'
+            )
+            ->orderBy('asignaciones.fecha_asignacion', 'desc')
+            ->get()
+            ->map(function ($detalle) {
+                // Limpiar datos para UTF-8
+                $nombre = $this->cleanString($detalle->nombre);
+                $codigoRepuesto = $this->cleanString($detalle->codigo_repuesto);
+                
+                return [
+                    'id' => $detalle->id,
+                    'articulo_id' => $detalle->articulo_id,
+                    'cantidad' => $detalle->cantidad,
+                    'numero_serie' => $this->cleanString($detalle->numero_serie),
+                    'estado_articulo' => $detalle->estado_articulo,
+                    'nombre' => $nombre,
+                    'codigo_barras' => $this->cleanString($detalle->codigo_barras),
+                    'sku' => $this->cleanString($detalle->sku),
+                    'idTipoArticulo' => $detalle->idTipoArticulo,
+                    'codigo_repuesto' => $codigoRepuesto,
+                    'fecha_asignacion' => $detalle->fecha_asignacion,
+                    'fecha_devolucion' => $detalle->fecha_devolucion,
+                    'observaciones' => $this->cleanString($detalle->observaciones),
+                    'estado_asignacion' => $detalle->estado_asignacion
+                ];
+            });
+
+        Log::info('Artículos activos encontrados:', ['count' => $detalles->count()]);
+
+        return response()->json([
+            'success' => true,
+            'articulos' => $detalles
+        ]);
+    } catch (\Exception $e) {
+        Log::error('Error al obtener artículos activos:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'usuario_id' => $idUsuario
+        ]);
+        return response()->json([
+            'success' => false, 
+            'message' => 'Error al cargar artículos asignados'
+        ], 500);
+    }
+}
+
+/**
+ * Limpiar string de caracteres no UTF-8
+ */
+private function cleanString($string)
+{
+    if (is_null($string)) {
+        return '';
+    }
+    
+    // Convertir a string si no lo es
+    $string = (string) $string;
+    
+    // Primero intentar con mb_convert_encoding
+    $cleaned = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+    
+    // Si aún hay problemas, usar iconv
+    $cleaned = @iconv('UTF-8', 'UTF-8//IGNORE', $cleaned);
+    
+    if ($cleaned === false) {
+        // Si falla, usar una aproximación más agresiva
+        $cleaned = preg_replace('/[^\x{0000}-\x{007F}]/u', '', $string);
+    }
+    
+    return $cleaned ?: '';
+}
 }
