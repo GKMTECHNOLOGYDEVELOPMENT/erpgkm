@@ -1171,7 +1171,7 @@ Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF']
 Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
 
 
-Route::get('/usuario/{idUsuario}/articulos-activos', [UsuarioController::class, 'getArticulosActivos']);
+Route::get('/usuario/{idUsuario}/articulos-activos', [UsuarioController::class, 'getArticulosAsignados']);
 
 // Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');

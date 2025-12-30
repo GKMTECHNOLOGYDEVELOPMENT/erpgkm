@@ -19,6 +19,7 @@ use App\Models\Usuario;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -1121,69 +1122,152 @@ public function cambiarPassword(Request $request, $id)
 /**
  * Obtener artículos activos asignados al usuario
  */
-public function getArticulosActivos($idUsuario)
+/**
+ * Obtener TODOS los artículos asignados al usuario (sin filtrar por estado)
+ */
+public function getArticulosAsignados($idUsuario)
 {
     try {
-        Log::info('Obteniendo artículos activos para usuario:', ['usuario_id' => $idUsuario]);
+        Log::info('=== INICIANDO CONSULTA DE ARTÍCULOS ASIGNADOS ===');
+        Log::info('Usuario ID:', ['id' => $idUsuario]);
         
-        // Obtener todos los detalles de asignaciones activas para este usuario
-        $detalles = DetalleAsignacion::join('asignaciones', 'detalle_asignaciones.asignacion_id', '=', 'asignaciones.id')
-            ->leftJoin('articulos', 'detalle_asignaciones.articulo_id', '=', 'articulos.idArticulos')
-            ->where('asignaciones.idUsuario', $idUsuario)
-            ->where('asignaciones.estado', 'activo') // Solo asignaciones activas
-            ->where('detalle_asignaciones.estado_articulo', '!=', 'devuelto') // Excluir devueltos
-            ->select(
-                'detalle_asignaciones.*',
-                'articulos.nombre',
-                'articulos.codigo_barras',
-                'articulos.sku',
-                'articulos.idTipoArticulo',
-                'articulos.codigo_repuesto',
-                'asignaciones.fecha_asignacion',
-                'asignaciones.fecha_devolucion',
-                'asignaciones.observaciones',
-                'asignaciones.estado as estado_asignacion'
-            )
-            ->orderBy('asignaciones.fecha_asignacion', 'desc')
-            ->get()
-            ->map(function ($detalle) {
-                // Limpiar datos para UTF-8
-                $nombre = $this->cleanString($detalle->nombre);
-                $codigoRepuesto = $this->cleanString($detalle->codigo_repuesto);
-                
-                return [
-                    'id' => $detalle->id,
-                    'articulo_id' => $detalle->articulo_id,
-                    'cantidad' => $detalle->cantidad,
-                    'numero_serie' => $this->cleanString($detalle->numero_serie),
-                    'estado_articulo' => $detalle->estado_articulo,
-                    'nombre' => $nombre,
-                    'codigo_barras' => $this->cleanString($detalle->codigo_barras),
-                    'sku' => $this->cleanString($detalle->sku),
-                    'idTipoArticulo' => $detalle->idTipoArticulo,
-                    'codigo_repuesto' => $codigoRepuesto,
-                    'fecha_asignacion' => $detalle->fecha_asignacion,
-                    'fecha_devolucion' => $detalle->fecha_devolucion,
-                    'observaciones' => $this->cleanString($detalle->observaciones),
-                    'estado_asignacion' => $detalle->estado_asignacion
-                ];
-            });
-
-        Log::info('Artículos activos encontrados:', ['count' => $detalles->count()]);
-
+        // 1. Verificar si el usuario existe
+        $usuarioExiste = DB::table('usuarios')
+            ->where('idUsuario', $idUsuario)
+            ->exists();
+            
+        if (!$usuarioExiste) {
+            Log::warning('Usuario no existe en la base de datos');
+            return response()->json([
+                'success' => true,
+                'articulos' => [],
+                'message' => 'Usuario no encontrado'
+            ]);
+        }
+        
+        Log::info('Usuario existe en la base de datos');
+        
+        // 2. Verificar asignaciones del usuario
+        $asignaciones = DB::table('asignaciones')
+            ->where('idUsuario', $idUsuario)
+            ->get();
+            
+        Log::info('Asignaciones encontradas:', [
+            'count' => $asignaciones->count(),
+            'ids' => $asignaciones->pluck('id')->toArray()
+        ]);
+        
+        if ($asignaciones->isEmpty()) {
+            Log::info('El usuario no tiene asignaciones registradas');
+            return response()->json([
+                'success' => true,
+                'articulos' => [],
+                'message' => 'El usuario no tiene asignaciones registradas'
+            ]);
+        }
+        
+        // 3. Obtener IDs de asignaciones
+        $asignacionIds = $asignaciones->pluck('id')->toArray();
+        
+        // 4. Verificar detalles de asignaciones
+        $detalles = DB::table('detalle_asignaciones')
+            ->whereIn('asignacion_id', $asignacionIds)
+            ->get();
+            
+        Log::info('Detalles de asignaciones encontrados:', [
+            'count' => $detalles->count(),
+            'detalles_ids' => $detalles->pluck('id')->toArray()
+        ]);
+        
+        if ($detalles->isEmpty()) {
+            Log::info('Las asignaciones no tienen detalles/artículos');
+            return response()->json([
+                'success' => true,
+                'articulos' => [],
+                'message' => 'Las asignaciones no tienen artículos detallados'
+            ]);
+        }
+        
+        // 5. Obtener IDs de artículos
+        $articuloIds = $detalles->pluck('articulo_id')->filter()->unique()->values()->toArray();
+        
+        Log::info('IDs de artículos a buscar:', ['articulo_ids' => $articuloIds]);
+        
+        // 6. Buscar artículos
+        $articulos = DB::table('articulos')
+            ->whereIn('idArticulos', $articuloIds)
+            ->get();
+            
+        Log::info('Artículos encontrados en BD:', [
+            'count' => $articulos->count(),
+            'articulos' => $articulos->toArray()
+        ]);
+        
+        // 7. Combinar toda la información
+        $resultado = [];
+        
+        foreach ($detalles as $detalle) {
+            // Buscar el artículo correspondiente
+            $articulo = $articulos->firstWhere('idArticulos', $detalle->articulo_id);
+            
+            // Buscar la asignación correspondiente
+            $asignacion = $asignaciones->firstWhere('id', $detalle->asignacion_id);
+            
+            // Determinar nombre a mostrar
+            $nombreMostrar = 'Artículo ID ' . $detalle->articulo_id;
+            
+            if ($articulo) {
+                if ($articulo->idTipoArticulo == 2 && !empty($articulo->codigo_repuesto)) {
+                    $nombreMostrar = $articulo->codigo_repuesto;
+                } elseif (!empty($articulo->nombre)) {
+                    $nombreMostrar = $articulo->nombre;
+                }
+            }
+            
+            $resultado[] = [
+                'id' => $detalle->id,
+                'articulo_id' => $detalle->articulo_id,
+                'cantidad' => (int)$detalle->cantidad,
+                'numero_serie' => $detalle->numero_serie ?: 'N/A',
+                'estado_articulo' => $detalle->estado_articulo,
+                'nombre' => $articulo->nombre ?? 'No encontrado',
+                'codigo_barras' => $articulo->codigo_barras ?? null,
+                'sku' => $articulo->sku ?? null,
+                'idTipoArticulo' => $articulo->idTipoArticulo ?? 0,
+                'codigo_repuesto' => $articulo->codigo_repuesto ?? null,
+                'fecha_asignacion' => $asignacion->fecha_asignacion ?? null,
+                'fecha_devolucion' => $asignacion->fecha_devolucion ?? null,
+                'observaciones' => $asignacion->observaciones ?? null,
+                'estado_asignacion' => $asignacion->estado ?? null,
+                'nombre_mostrar' => $nombreMostrar
+            ];
+        }
+        
+        Log::info('=== RESULTADO FINAL ===');
+        Log::info('Total artículos procesados:', ['count' => count($resultado)]);
+        Log::info('Estados encontrados:', array_count_values(array_column($resultado, 'estado_articulo')));
+        
         return response()->json([
             'success' => true,
-            'articulos' => $detalles
+            'articulos' => $resultado,
+            'total' => count($resultado),
+            'debug_info' => [
+                'usuario_existe' => $usuarioExiste,
+                'asignaciones_count' => $asignaciones->count(),
+                'detalles_count' => $detalles->count(),
+                'articulos_count' => $articulos->count()
+            ]
         ]);
+        
     } catch (\Exception $e) {
-        Log::error('Error al obtener artículos activos:', [
+        Log::error('ERROR EN CONSULTA:', [
             'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-            'usuario_id' => $idUsuario
+            'trace' => $e->getTraceAsString()
         ]);
         return response()->json([
             'success' => false, 
-            'message' => 'Error al cargar artículos asignados'
+            'message' => 'Error en el servidor',
+            'error' => $e->getMessage()
         ], 500);
     }
 }
