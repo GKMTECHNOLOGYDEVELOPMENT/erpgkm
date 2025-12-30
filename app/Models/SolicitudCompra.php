@@ -32,6 +32,10 @@ class SolicitudCompra extends Model
         'estado',
         'motivo_rechazo',
         'fecha_aprobacion',
+        'fecha_observacion',
+        'comentario_observacion',
+        'fecha_reprogramacion',
+        'observado_por',
         'aprobado_por'
     ];
 

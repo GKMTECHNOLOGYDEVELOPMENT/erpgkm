@@ -607,14 +607,15 @@ private function getMissingFields(Request $request)
         return view('solicitud.solicitudcompra.show', compact('solicitud', 'estadisticas'));
     }
 
-public function evaluacion($id)
+
+    public function evaluacion($id)
     {
         // Cargar la solicitud con todas las relaciones necesarias incluyendo monedas
         $solicitud = SolicitudCompra::with([
             'tipoArea',
             'prioridad',
             'centroCosto',
-            'detalles.moneda',
+            'detalles.moneda', // Agregar relación con moneda
             'archivos',
             'solicitudAlmacen',
             'solicitudAlmacen.detalles' => function ($query) {
@@ -651,259 +652,154 @@ public function evaluacion($id)
         return view('solicitud.solicitudcompra.evaluacioncompras', compact('solicitud', 'estadisticas'));
     }
 
-    private function determinarEstadoGeneral($solicitud)
-    {
-        $detalles = $solicitud->detalles;
-        $total = $detalles->count();
-        $aprobados = $detalles->where('estado', 'Aprobado por administración')->count();
-        $rechazados = $detalles->where('estado', 'Rechazado por administración')->count();
-        $pendientes = $detalles->where('estado', 'pendiente')->count();
+   private function determinarEstadoGeneral($solicitud)
+{
+    $detalles = $solicitud->detalles;
+    $total = $detalles->count();
+    $aprobados = $detalles->where('estado', 'Aprobado por administración')->count();
+    $rechazados = $detalles->where('estado', 'Rechazado por administración')->count();
+    $pendientes = $detalles->where('estado', 'pendiente')->count();
 
-        if ($solicitud->estado == 'observador') {
-            return 'observador';
-        } elseif ($pendientes > 0) {
-            return 'en_proceso';
-        } elseif ($aprobados == $total) {
-            return 'completada';
-        } elseif ($rechazados == $total) {
-            return 'rechazada';
-        } else {
-            return 'en_proceso';
-        }
+    if ($pendientes > 0) {
+        return 'en_proceso'; // Todavía hay artículos pendientes
+    } elseif ($aprobados == $total) {
+        return 'completada'; // Todos los artículos aprobados por administración
+    } elseif ($rechazados == $total) {
+        return 'rechazada'; // Todos los artículos rechazados por administración
+    } else {
+        return 'en_proceso'; // Mezcla de aprobados y rechazados por administración
     }
+}
+
 
     private function puedeAvanzarEstado($solicitud)
     {
-        // No se puede avanzar si está en estado observador
-        if ($solicitud->estado == 'observador') {
-            return false;
-        }
-        
         // Solo se puede avanzar estado cuando todos los artículos están evaluados
         $detallesPendientes = $solicitud->detalles->where('estado', 'pendiente')->count();
         return $detallesPendientes === 0;
     }
 
-    private function obtenerEstadosSiguientes($solicitud)
-    {
-        $estadosSiguientes = [];
-
-        switch ($solicitud->estado) {
-            case 'en_proceso':
-                if ($this->puedeAvanzarEstado($solicitud)) {
-                    $estadosSiguientes = [
-                        'cancelada' => 'Cancelar Solicitud',
-                        'observador' => 'Marcar como Observador',
-                        'completada' => 'Completar Evaluación'
-                    ];
-                } else {
-                    $estadosSiguientes = [
-                        'cancelada' => 'Cancelar Solicitud',
-                        'observador' => 'Marcar como Observador'
-                    ];
-                }
-                break;
-
-            case 'completada':
-                $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud',
-                    'observador' => 'Marcar como Observador',
-                    'presupuesto_aprobado' => 'Aprobar Presupuesto'
-                ];
-                break;
-
-            case 'presupuesto_aprobado':
-                $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud',
-                    'observador' => 'Marcar como Observador',
-                    'pagado' => 'Marcar como Pagado'
-                ];
-                break;
-
-            case 'pagado':
-                $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud',
-                    'observador' => 'Marcar como Observador',
-                    'finalizado' => 'Finalizar Proceso'
-                ];
-                break;
-
-            case 'observador':
-                $estadosSiguientes = [
-                    'en_proceso' => 'Volver a En Proceso',
-                    'cancelada' => 'Cancelar Solicitud'
-                ];
-                break;
-
-            case 'pendiente':
-                $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud',
-                    'observador' => 'Marcar como Observador'
-                ];
-                break;
-
-            default:
-                $estadosSiguientes = [
-                    'cancelada' => 'Cancelar Solicitud',
-                    'observador' => 'Marcar como Observador'
-                ];
-                break;
-        }
-
-        return $estadosSiguientes;
+  private function obtenerEstadosSiguientes($solicitud)
+{
+    $estadosSiguientes = [];
+    
+    switch ($solicitud->estado) {
+        case 'pendiente':
+            $estadosSiguientes = [
+                'completada' => 'Completar Evaluación',
+                'observado' => 'Marcar como Observado',
+                'cancelada' => 'Cancelar Solicitud'
+            ];
+            break;
+            
+        case 'completada':
+            $estadosSiguientes = [
+                'observado' => 'Marcar como Observado',
+                'cancelada' => 'Cancelar Solicitud',
+                'presupuesto_aprobado' => 'Aprobar Presupuesto'
+            ];
+            break;
+            
+        case 'observado':
+            $estadosSiguientes = [
+                'presupuesto_aprobado' => 'Aprobar Presupuesto',
+                'cancelada' => 'Cancelar Solicitud',
+                'completada' => 'Volver a Completada'
+            ];
+            break;
+            
+        case 'presupuesto_aprobado':
+            $estadosSiguientes = [
+                'observado' => 'Marcar como Observado',
+                'cancelada' => 'Cancelar Solicitud',
+                'pagado' => 'Marcar como Pagado'
+            ];
+            break;
+            
+        case 'pagado':
+            $estadosSiguientes = [
+                'observado' => 'Marcar como Observado',
+                'cancelada' => 'Cancelar Solicitud',
+                'finalizado' => 'Finalizar Proceso'
+            ];
+            break;
+            
+        // Eliminamos el caso 'en_proceso' ya que no existe más
     }
-
-    // Método para cambiar el estado de la solicitud
-    public function cambiarEstado(Request $request, $id)
-    {
-        try {
-            $solicitud = SolicitudCompra::findOrFail($id);
-            $nuevoEstado = $request->estado;
-
-            // Validar transición de estado
-            $estadosPermitidos = $this->obtenerEstadosSiguientes($solicitud);
-
-            if (!array_key_exists($nuevoEstado, $estadosPermitidos)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Transición de estado no permitida'
-                ], 400);
-            }
-
-            DB::beginTransaction();
-
-            // Si el nuevo estado es "observador", guardar datos adicionales
-            if ($nuevoEstado === 'observador') {
-                $validated = $request->validate([
-                    'observador_comentario' => 'required|string|min:10',
-                    'observador_fecha_aprobacion' => 'required|date|after:today',
-                    'observador_motivo' => 'required|string|min:10'
-                ]);
-
-                $solicitud->update([
-                    'estado' => $nuevoEstado,
-                    'observador_comentario' => $validated['observador_comentario'],
-                    'observador_fecha_aprobacion' => $validated['observador_fecha_aprobacion'],
-                    'observador_motivo' => $validated['observador_motivo'],
-                    'observador_fecha' => now(),
-                    'fecha_aprobacion' => null // Resetear fecha de aprobación
-                ]);
-
-                // Si tiene solicitud de almacén asociada, también marcarla como observador
-                if ($solicitud->idSolicitudAlmacen) {
-                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
-                    if ($solicitudAlmacen) {
-                        $solicitudAlmacen->update([
-                            'estado' => 'observador',
-                            'updated_at' => now()
-                        ]);
-                    }
-                }
-            } 
-            // Si se está volviendo de "observador" a "en_proceso"
-            elseif ($solicitud->estado === 'observador' && $nuevoEstado === 'en_proceso') {
-                $solicitud->update([
-                    'estado' => $nuevoEstado,
-                    'observador_fecha_aprobacion' => null, // Limpiar fecha programada
-                    'observador_fecha' => null
-                ]);
-
-                // Si tiene solicitud de almacén asociada, volver a en_proceso
-                if ($solicitud->idSolicitudAlmacen) {
-                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
-                    if ($solicitudAlmacen) {
-                        $solicitudAlmacen->update([
-                            'estado' => 'en_proceso',
-                            'updated_at' => now()
-                        ]);
-                    }
-                }
-            }
-            // Para otros estados
-            else {
-                $solicitud->update([
-                    'estado' => $nuevoEstado,
-                    'fecha_aprobacion' => in_array($nuevoEstado, ['completada', 'presupuesto_aprobado', 'pagado', 'finalizado']) ? now() : $solicitud->fecha_aprobacion
-                ]);
-
-                // Si el estado es 'finalizado', actualizar también la solicitud de almacén
-                if ($nuevoEstado === 'finalizado' && $solicitud->idSolicitudAlmacen) {
-                    $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
-                    if ($solicitudAlmacen) {
-                        $solicitudAlmacen->update([
-                            'estado' => 'finalizado',
-                            'fecha_aprobacion' => now(),
-                            'updated_at' => now()
-                        ]);
-                    }
-                }
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Estado actualizado correctamente',
-                'nuevo_estado' => $nuevoEstado
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
+    
+    return $estadosSiguientes;
+}
+public function cambiarEstado(Request $request, $id)
+{
+    try {
+        $solicitud = SolicitudCompra::findOrFail($id);
+        $nuevoEstado = $request->estado;
+        
+        // Validar transición de estado
+        $estadosPermitidos = $this->obtenerEstadosSiguientes($solicitud);
+        
+        if (!array_key_exists($nuevoEstado, $estadosPermitidos)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cambiar el estado: ' . $e->getMessage()
-            ], 500);
+                'message' => 'Transición de estado no permitida'
+            ], 400);
         }
-    }
-
-    // Nuevo método específico para marcar como observador
-    public function marcarObservador(Request $request, $id)
-    {
-        try {
-            $solicitud = SolicitudCompra::findOrFail($id);
-
-            $validated = $request->validate([
-                'observador_comentario' => 'required|string|min:10',
-                'observador_fecha_aprobacion' => 'required|date|after:today',
-                'observador_motivo' => 'required|string|min:10'
-            ]);
-
-            DB::beginTransaction();
-
-            $solicitud->update([
-                'estado' => 'observador',
-                'observador_comentario' => $validated['observador_comentario'],
-                'observador_fecha_aprobacion' => $validated['observador_fecha_aprobacion'],
-                'observador_motivo' => $validated['observador_motivo'],
-                'observador_fecha' => now(),
-                'fecha_aprobacion' => null
-            ]);
-
-            // Si tiene solicitud de almacén asociada
-            if ($solicitud->idSolicitudAlmacen) {
-                $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
-                if ($solicitudAlmacen) {
-                    $solicitudAlmacen->update([
-                        'estado' => 'observador',
-                        'updated_at' => now()
-                    ]);
-                }
+        
+        DB::beginTransaction();
+        
+        // Si se está cambiando DESDE "observado" a otro estado, limpiar campos de observación
+        if ($solicitud->estado == 'observado' && $nuevoEstado != 'observado') {
+            $updateData = [
+                'estado' => $nuevoEstado,
+                'motivo_rechazo' => null,
+                'fecha_observacion' => null,
+                'comentario_observacion' => null,
+                'fecha_reprogramacion' => null,
+                'observado_por' => null,
+                'observaciones' => str_replace('OBSERVADO - ', '', $solicitud->observaciones)
+            ];
+        } else {
+            $updateData = [
+                'estado' => $nuevoEstado,
+                'fecha_aprobacion' => in_array($nuevoEstado, ['completada', 'presupuesto_aprobado', 'pagado', 'finalizado']) ? now() : $solicitud->fecha_aprobacion
+            ];
+        }
+        
+        // Actualizar estado de solicitud compra
+        $solicitud->update($updateData);
+        
+        // Si el estado es 'finalizado', actualizar también la solicitud de almacén
+        if ($nuevoEstado === 'finalizado' && $solicitud->idSolicitudAlmacen) {
+            $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+            if ($solicitudAlmacen) {
+                $solicitudAlmacen->update([
+                    'estado' => 'finalizado',
+                    'fecha_aprobacion' => now(),
+                    'updated_at' => now()
+                ]);
+                
+                Log::info('Estado de solicitud almacén actualizado a finalizado:', [
+                    'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+                    'idSolicitudCompra' => $solicitud->idSolicitudCompra
+                ]);
             }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Solicitud marcada como observador correctamente'
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al marcar como observador: ' . $e->getMessage()
-            ], 500);
         }
+        
+        DB::commit();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Estado actualizado correctamente',
+            'nuevo_estado' => $nuevoEstado
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cambiar el estado: ' . $e->getMessage()
+        ], 500);
     }
-
+}
     // Método para cancelar la solicitud
     public function cancelarSolicitud(Request $request, $id)
     {
@@ -918,7 +814,7 @@ public function evaluacion($id)
                 ], 400);
             }
 
-            DB::beginTransaction();
+            \DB::beginTransaction();
 
             $solicitud->update([
                 'estado' => 'cancelada',
@@ -936,17 +832,23 @@ public function evaluacion($id)
                         'fecha_aprobacion' => now(),
                         'updated_at' => now()
                     ]);
+
+                    \Log::info('Estado de solicitud almacén actualizado a cancelada:', [
+                        'idSolicitudAlmacen' => $solicitudAlmacen->idSolicitudAlmacen,
+                        'idSolicitudCompra' => $solicitud->idSolicitudCompra,
+                        'motivo' => $motivo
+                    ]);
                 }
             }
 
-            DB::commit();
+            \DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Solicitud cancelada correctamente'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
+            \DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al cancelar la solicitud: ' . $e->getMessage()
@@ -954,34 +856,30 @@ public function evaluacion($id)
         }
     }
 
+
+
     public function aprobarArticulo(Request $request, $idSolicitud, $idDetalle)
     {
         try {
-            DB::beginTransaction();
+            \DB::beginTransaction();
 
             $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
                 ->where('idSolicitudCompraDetalle', $idDetalle)
                 ->firstOrFail();
 
-            // Verificar que la solicitud no esté en estado observador
-            $solicitud = SolicitudCompra::find($idSolicitud);
-            if ($solicitud->estado == 'observador') {
-                throw new \Exception('No se pueden aprobar artículos mientras la solicitud está en estado observador');
-            }
-
-            // Actualizar detalle de compra
+            // Actualizar detalle de compra (REEMPLAZA estado)
             $detalle->update([
                 'estado' => 'Aprobado por administración',
                 'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalle->cantidad,
                 'observaciones_detalle' => $request->observaciones
             ]);
 
-            // Si tiene relación con almacén, actualizar también el detalle de almacén
+            // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
             if ($detalle->idSolicitudAlmacenDetalle) {
                 $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
                 if ($detalleAlmacen) {
                     $detalleAlmacen->update([
-                        'estado' => 'Aprobado por administración',
+                        'estado' => 'Aprobado por administración', // NUEVO ESTADO
                         'cantidad_aprobada' => $request->cantidad_aprobada ?? $detalleAlmacen->cantidad,
                         'observaciones_detalle' => $request->observaciones
                     ]);
@@ -991,14 +889,14 @@ public function evaluacion($id)
             // Recalcular el estado general de la solicitud
             $this->actualizarEstadoSolicitud($idSolicitud);
 
-            DB::commit();
+            \DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo aprobado por administración correctamente'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
+            \DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al aprobar el artículo: ' . $e->getMessage()
@@ -1009,31 +907,25 @@ public function evaluacion($id)
     public function rechazarArticulo(Request $request, $idSolicitud, $idDetalle)
     {
         try {
-            DB::beginTransaction();
+            \DB::beginTransaction();
 
             $detalle = SolicitudCompraDetalle::where('idSolicitudCompra', $idSolicitud)
                 ->where('idSolicitudCompraDetalle', $idDetalle)
                 ->firstOrFail();
 
-            // Verificar que la solicitud no esté en estado observador
-            $solicitud = SolicitudCompra::find($idSolicitud);
-            if ($solicitud->estado == 'observador') {
-                throw new \Exception('No se pueden rechazar artículos mientras la solicitud está en estado observador');
-            }
-
-            // Actualizar detalle de compra
+            // Actualizar detalle de compra (REEMPLAZA estado)
             $detalle->update([
                 'estado' => 'Rechazado por administración',
                 'cantidad_aprobada' => 0,
                 'observaciones_detalle' => $request->observaciones
             ]);
 
-            // Si tiene relación con almacén, actualizar también el detalle de almacén
+            // Si tiene relación con almacén, actualizar también el detalle de almacén (AGREGA estado)
             if ($detalle->idSolicitudAlmacenDetalle) {
                 $detalleAlmacen = SolicitudAlmacenDetalle::find($detalle->idSolicitudAlmacenDetalle);
                 if ($detalleAlmacen) {
                     $detalleAlmacen->update([
-                        'estado' => 'Rechazado por administración',
+                        'estado' => 'Rechazado por administración', // NUEVO ESTADO
                         'cantidad_aprobada' => 0,
                         'observaciones_detalle' => $request->observaciones
                     ]);
@@ -1043,32 +935,25 @@ public function evaluacion($id)
             // Recalcular el estado general de la solicitud
             $this->actualizarEstadoSolicitud($idSolicitud);
 
-            DB::commit();
+            \DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Artículo rechazado por administración correctamente'
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
+            \DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al rechazar el artículo: ' . $e->getMessage()
             ], 500);
         }
     }
-
     private function actualizarEstadoSolicitud($idSolicitud)
     {
         $solicitud = SolicitudCompra::with('detalles')->find($idSolicitud);
-        
-        // No actualizar estado si está en observador
-        if ($solicitud->estado == 'observador') {
-            return 'observador';
-        }
-        
         $estadoGeneral = $this->determinarEstadoGeneral($solicitud);
-        
+
         $solicitud->update([
             'estado' => $estadoGeneral
         ]);
@@ -1076,7 +961,7 @@ public function evaluacion($id)
         return $estadoGeneral;
     }
 
-    
+
 
 
     public function edit($id)
@@ -1477,4 +1362,147 @@ public function evaluacion($id)
         }
         return implode(', ', $currencies);
     }
+
+public function observarSolicitud(Request $request, $id)
+{
+    try {
+        Log::info('=== OBSERVAR SOLICITUD ===');
+        Log::info('ID recibido:', ['id' => $id]);
+        Log::info('Request completo:', $request->all());
+        
+        // Verificar si el ID es válido
+        if (!$id || !is_numeric($id)) {
+            Log::error('ID inválido recibido:', ['id' => $id]);
+            return response()->json([
+                'success' => false,
+                'message' => 'ID de solicitud no válido: ' . $id
+            ], 400);
+        }
+        
+        // Buscar solicitud
+        $solicitud = SolicitudCompra::find($id);
+        
+        if (!$solicitud) {
+            Log::warning('Solicitud no encontrada para ID:', ['id' => $id]);
+            
+            // Verificar si existe en la tabla
+            $exists = DB::table('solicitud_compra')->where('idSolicitudCompra', $id)->exists();
+            Log::info('¿Existe en tabla?', ['exists' => $exists]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró la solicitud con ID: ' . $id
+            ], 404);
+        }
+        
+        Log::info('Solicitud encontrada:', [
+            'id' => $solicitud->idSolicitudCompra,
+            'codigo' => $solicitud->codigo_solicitud,
+            'estado_actual' => $solicitud->estado,
+            'idSolicitudAlmacen' => $solicitud->idSolicitudAlmacen
+        ]);
+        
+        $user = Auth::user();
+        
+        // Validar datos
+        $validated = $request->validate([
+            'fecha_observacion' => 'required|date',
+            'comentario' => 'required|string|min:10',
+            'fecha_reprogramacion' => 'required|date|after_or_equal:today'
+        ]);
+        
+        Log::info('Datos validados:', $validated);
+        
+        DB::beginTransaction();
+        
+        // Actualizar SOLO la tabla solicitud_compra
+        $updateData = [
+            'estado' => 'observado',
+            'fecha_observacion' => $request->fecha_observacion,
+            'comentario_observacion' => $request->comentario,
+            'fecha_reprogramacion' => $request->fecha_reprogramacion,
+            'observado_por' => $user ? ($user->idUsuario ?? $user->id ?? null) : null,
+            'fecha_aprobacion' => now(),
+            'observaciones' => ($solicitud->observaciones ? $solicitud->observaciones . "\n" : '') . 
+                             'OBSERVADO - Fecha: ' . $request->fecha_observacion . 
+                             ' | Reprogramación: ' . $request->fecha_reprogramacion . 
+                             ' | Comentario: ' . $request->comentario,
+            'updated_at' => now()
+        ];
+        
+        Log::info('Datos a actualizar en solicitud_compra:', $updateData);
+        
+        $solicitud->update($updateData);
+        
+        Log::info('Solicitud compra actualizada exitosamente');
+        
+        // *** COMENTADO: NO actualizar solicitud_almacen ***
+        // if ($solicitud->idSolicitudAlmacen) {
+        //     $solicitudAlmacen = SolicitudAlmacen::find($solicitud->idSolicitudAlmacen);
+        //     if ($solicitudAlmacen) {
+        //         Log::info('Solicitud almacén encontrada:', [
+        //             'id' => $solicitudAlmacen->idSolicitudAlmacen,
+        //             'estado_actual' => $solicitudAlmacen->estado
+        //         ]);
+                
+        //         // Verificar si la tabla tiene el estado 'observado'
+        //         $columnInfo = DB::select("SHOW COLUMNS FROM solicitud_almacen WHERE Field = 'estado'");
+        //         Log::info('Información columna estado:', $columnInfo);
+                
+        //         // Solo actualizar si no causa error
+        //         try {
+        //             $solicitudAlmacen->update([
+        //                 'estado' => 'observado',
+        //                 'motivo_rechazo' => $request->comentario,
+        //                 'updated_at' => now()
+        //             ]);
+                    
+        //             Log::info('Solicitud almacén actualizada exitosamente');
+        //         } catch (\Exception $e) {
+        //             Log::warning('No se pudo actualizar solicitud almacén:', [
+        //                 'error' => $e->getMessage(),
+        //                 'suggestion' => 'El estado "observado" no existe en la tabla solicitud_almacen'
+        //             ]);
+        //             // No hacemos rollback, continuamos con la transacción
+        //         }
+        //     }
+        // }
+        
+        DB::commit();
+        
+        Log::info('Transacción completada exitosamente');
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Solicitud marcada como observada correctamente'
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Error de validación:', [
+            'errors' => $e->errors(),
+            'request' => $request->all()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación: ' . implode(', ', array_flatten($e->errors()))
+        ], 422);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al marcar como observado:', [
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'solicitud_id' => $id ?? 'No proporcionado',
+            'request_data' => $request->except(['_token'])
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al marcar como observado: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 }

@@ -1171,6 +1171,8 @@ Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF']
 Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
 
 
+Route::get('/usuario/{idUsuario}/articulos-activos', [UsuarioController::class, 'getArticulosActivos']);
+
 // Route::put('/usuario/firma/{idUsuario}', [UsuarioController::class, 'actualizarFirma'])->name('usuario.firma');
 // Route::get('/informe-pdf/{idTickets}', [OrdenesTrabajoController::class, 'generarInformePdf'])->name('informe.pdf');
 
@@ -1968,3 +1970,7 @@ Route::get('/cliente-general/{id}/contactos', [OrdenesHelpdeskController::class,
 
 
 // Route::get('/cotizacion-productos/{cotizacionId}', [SolicitudarticuloController::class, 'getCotizacionProductos']);
+
+
+
+Route::post('/solicitudcompra/{id}/observar', [SolicitudcompraController::class, 'observarSolicitud'])->name('solicitudcompra.observar');
