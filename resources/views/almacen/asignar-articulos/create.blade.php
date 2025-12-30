@@ -1,5 +1,8 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slim-select/2.8.2/slimselect.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <!-- Breadcrumb -->
     <div class="mx-auto w-full px-4 py-6">
@@ -19,7 +22,8 @@
         <!-- Header -->
         <div class="panel mb-8 p-6 rounded-2xl shadow-lg border-0 bg-gradient-to-r from-gray-50 to-white">
             <div class="flex items-center space-x-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg flex items-center justify-center">
+                <div
+                    class="w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-xl shadow-lg flex items-center justify-center">
                     <i class="fas fa-plus text-white text-xl"></i>
                 </div>
                 <div>
@@ -50,17 +54,15 @@
                             </label>
                             <div class="relative">
                                 <select id="usuarioSelect"
-                                    class="w-full px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 appearance-none shadow-sm focus:shadow-md cursor-pointer">
+                                    class="w-full px-4 py-4 bg-white border-2 border-gray-200 rounded-xl hover:border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 appearance-none shadow-sm focus:shadow-md cursor-pointer text-base">
                                     <option value="" class="text-gray-400">Seleccionar usuario...</option>
-                                    @foreach($usuarios as $usuario)
-                                    <option value="{{ $usuario->idUsuario }}" class="text-gray-700">
-                                        {{ $usuario->nombre_completo }} - {{ $usuario->correo }}
-                                    </option>
+                                    @foreach ($usuarios as $usuario)
+                                        <option value="{{ $usuario->idUsuario }}" data-correo="{{ $usuario->correo }}"
+                                            data-info="{{ $usuario->nombre_completo }} - {{ $usuario->correo }}">
+                                            {{ $usuario->nombre_completo }} - {{ $usuario->correo }}
+                                        </option>
                                     @endforeach
                                 </select>
-                                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                    <i class="fas fa-chevron-down text-gray-400"></i>
-                                </div>
                             </div>
                         </div>
 
@@ -84,22 +86,36 @@
                                 <!-- Artículo inicial -->
                                 <div class="articulo-item bg-gray-50 rounded-xl p-4 border border-gray-200">
                                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                                        <!-- Artículo -->
+                                        <!-- Artículo - Select más grande con Slim Select -->
                                         <div class="md:col-span-6">
                                             <label class="block text-xs font-medium text-gray-600 mb-1">
                                                 Artículo
                                             </label>
-                                            <select class="articulo-select w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:border-success focus:ring-2 focus:ring-success/20 transition-all duration-200">
-                                                <option value="" class="text-gray-400">Buscar artículo...</option>
-                                                @foreach($articulos as $articulo)
-                                                @if($articulo->stock_disponible > 0)
-                                                <option value="{{ $articulo->idArticulos }}" 
-                                                    data-stock="{{ $articulo->stock_disponible }}"
-                                                    data-maneja-serie="{{ $articulo->maneja_serie }}"
-                                                    data-precio="{{ $articulo->precio_venta ?? 0 }}">
-                                                    {{ $articulo->nombre }} (Stock: {{ $articulo->stock_disponible }})
-                                                </option>
-                                                @endif
+                                            <select
+                                                class="articulo-select w-full px-4 py-3.5 bg-white border border-gray-300 rounded-lg focus:border-success focus:ring-2 focus:ring-success/20 transition-all duration-200 text-base">
+                                                <option value="">Buscar artículo...</option>
+                                                @foreach ($articulos as $articulo)
+                                                    @if ($articulo->stock_disponible > 0)
+                                                        <option value="{{ $articulo->idArticulos }}"
+                                                            data-stock="{{ $articulo->stock_disponible }}"
+                                                            data-maneja-serie="{{ $articulo->maneja_serie }}"
+                                                            data-precio="{{ $articulo->precio_venta ?? 0 }}"
+                                                            data-nombre="{{ $articulo->nombre }}"
+                                                            data-codigo="{{ $articulo->codigo_repuesto }}"
+                                                            data-search="{{ strtolower($articulo->nombre ?: $articulo->codigo_repuesto) .
+                                                                ' ' .
+                                                                strtolower($articulo->codigo_repuesto ?: '') }}">
+                                                            <!-- Primero mostrar nombre, si no tiene mostrar código -->
+                                                            {{ $articulo->texto_mostrar }}
+
+                                                            <!-- Mostrar el código entre corchetes si existe y es diferente al nombre -->
+                                                            @if ($articulo->codigo_repuesto && $articulo->nombre && $articulo->codigo_repuesto != $articulo->nombre)
+                                                                [{{ $articulo->codigo_repuesto }}]
+                                                            @endif
+
+                                                            (Stock: {{ $articulo->stock_disponible }})
+                                                        </option>
+                                                    @endif
                                                 @endforeach
                                             </select>
                                         </div>
@@ -120,7 +136,9 @@
 
                                         <!-- Botón eliminar -->
                                         <div class="md:col-span-2 flex items-end">
-                                            <button type="button" class="eliminar-articulo-btn w-full px-3 py-2.5 bg-danger text-white rounded-lg hover:bg-danger-dark transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                            <button type="button"
+                                                class="eliminar-articulo-btn w-full px-3 py-2.5 bg-danger text-white rounded-lg hover:bg-danger-dark transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                                disabled>
                                                 <i class="fas fa-trash mr-1"></i> Quitar
                                             </button>
                                         </div>
@@ -131,7 +149,8 @@
                                         <label class="block text-xs font-medium text-gray-600 mb-1">
                                             Número de serie
                                         </label>
-                                        <input type="text" class="articulo-serie-input w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:border-info focus:ring-2 focus:ring-info/20 transition-all duration-200"
+                                        <input type="text"
+                                            class="articulo-serie-input w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:border-info focus:ring-2 focus:ring-info/20 transition-all duration-200"
                                             placeholder="Número de serie del artículo...">
                                         <p class="text-xs text-gray-500 mt-1">Este artículo requiere número de serie</p>
                                     </div>
@@ -167,7 +186,7 @@
                                     Fecha de Devolución (Opcional)
                                 </label>
                                 <div class="relative">
-                                    <input type="date" id="fechaDevolucion"
+                                    <input type="date" id="fechaDevolucion" placeholder="Seleccione la fecha"
                                         class="w-full px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:border-warning/40 focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200 shadow-sm focus:shadow-md">
                                     <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                         <i class="fas fa-calendar text-gray-400"></i>
@@ -284,21 +303,21 @@
         .articulos-scroll-container::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .articulos-scroll-container::-webkit-scrollbar-track {
             background: #f1f1f1;
             border-radius: 10px;
         }
-        
+
         .articulos-scroll-container::-webkit-scrollbar-thumb {
             background: #c1c1c1;
             border-radius: 10px;
         }
-        
+
         .articulos-scroll-container::-webkit-scrollbar-thumb:hover {
             background: #a1a1a1;
         }
-        
+
         .articulos-scroll-container {
             scrollbar-width: thin;
             scrollbar-color: #c1c1c1 #f1f1f1;
@@ -314,27 +333,106 @@
             overflow-y: visible;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slim-select/2.8.2/slimselect.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Configurar Toastr globalmente
+            toastr.options = {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": true,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "5000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            };
+
+            // Inicializar Flatpickr para las fechas
+            const fechaAsignacionInput = document.getElementById('fechaAsignacion');
+            const fechaDevolucionInput = document.getElementById('fechaDevolucion');
+
+            // Configuración de Flatpickr
+            const flatpickrConfig = {
+                locale: "es",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                allowInput: false,
+                disableMobile: true,
+                theme: "material_blue"
+            };
+
+            // Inicializar Flatpickr para fecha de asignación
+            const fechaAsignacion = flatpickr("#fechaAsignacion", {
+                ...flatpickrConfig,
+                defaultDate: "today",
+                minDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    actualizarResumen();
+
+                    if (fechaDevolucion.selectedDates.length > 0) {
+                        const fechaDev = fechaDevolucion.selectedDates[0];
+                        if (selectedDates[0] > fechaDev) {
+                            fechaDevolucion.clear();
+                            toastr.info(
+                                'La fecha de devolución se ha limpiado porque era anterior a la nueva fecha de asignación'
+                                );
+                        }
+                    }
+                }
+            });
+
+            // Inicializar Flatpickr para fecha de devolución
+            const fechaDevolucion = flatpickr("#fechaDevolucion", {
+                ...flatpickrConfig,
+                minDate: "today",
+                onChange: function(selectedDates, dateStr, instance) {
+                    actualizarResumen();
+                }
+            });
+
+            // Inicializar Slim Select para el usuario
+            const usuarioSlimSelect = new SlimSelect({
+                select: '#usuarioSelect',
+                settings: {
+                    placeholderText: 'Seleccionar usuario...',
+                    searchText: 'Buscar usuario...',
+                    searchPlaceholder: 'Escribe para buscar...',
+                    searchHighlight: true,
+                    hideSelected: true,
+                    closeOnSelect: true,
+                    allowDeselect: true,
+                    showSearch: true,
+                    searchFocus: true,
+                }
+            });
+
             // Elementos principales
             const usuarioSelect = document.getElementById('usuarioSelect');
             const articulosContainer = document.getElementById('articulosContainer');
             const agregarArticuloBtn = document.getElementById('agregarArticuloBtn');
-            const fechaAsignacion = document.getElementById('fechaAsignacion');
-            const fechaDevolucion = document.getElementById('fechaDevolucion');
             const totalArticulosSpan = document.getElementById('totalArticulos');
-            
+
             // Elementos del resumen
             const resumenUsuario = document.getElementById('resumenUsuario');
             const resumenArticulos = document.getElementById('resumenArticulos');
             const resumenTotal = document.getElementById('resumenTotal');
             const resumenValor = document.getElementById('resumenValor');
             const resumenFecha = document.getElementById('resumenFecha');
-
-            // Establecer fecha por defecto
-            const today = new Date().toISOString().split('T')[0];
-            fechaAsignacion.value = today;
 
             // Contador de artículos
             let contadorArticulos = 1;
@@ -343,12 +441,12 @@
             function actualizarScroll() {
                 const articulosItems = document.querySelectorAll('.articulo-item');
                 const container = document.getElementById('articulosContainer');
-                
+
                 let alturaTotal = 0;
                 articulosItems.forEach(item => {
                     alturaTotal += item.offsetHeight + 16;
                 });
-                
+
                 if (alturaTotal > 400) {
                     container.classList.remove('scroll-inactivo');
                     container.classList.add('scroll-activo');
@@ -358,21 +456,78 @@
                 }
             }
 
+            // Función para inicializar Slim Select en los selects de artículos
+            function inicializarSlimSelectArticulos() {
+                document.querySelectorAll('.articulo-select:not([data-slimselect-initialized])').forEach(select => {
+                    new SlimSelect({
+                        select: select,
+                        settings: {
+                            placeholderText: 'Buscar artículo...',
+                            searchText: 'Buscar artículo...',
+                            searchPlaceholder: 'Escribe para buscar...',
+                            searchHighlight: true,
+                            hideSelected: true,
+                            closeOnSelect: true,
+                            showSearch: true,
+                            searchFocus: true,
+                            allowDeselect: true,
+                        },
+                        events: {
+                            afterChange: () => {
+                                const selectElement = select;
+                                actualizarArticulo(selectElement);
+                                actualizarResumen();
+                            }
+                        }
+                    });
+                    select.setAttribute('data-slimselect-initialized', 'true');
+                });
+            }
+
+            // Función para inicializar Slim Select en un select específico
+            function inicializarSlimSelectArticulo(selectElement) {
+                if (selectElement && !selectElement.hasAttribute('data-slimselect-initialized')) {
+                    new SlimSelect({
+                        select: selectElement,
+                        settings: {
+                            placeholderText: 'Buscar artículo...',
+                            searchText: 'Buscar artículo...',
+                            searchPlaceholder: 'Escribe para buscar...',
+                            searchHighlight: true,
+                            hideSelected: true,
+                            closeOnSelect: true,
+                            showSearch: true,
+                            searchFocus: true,
+                            allowDeselect: true,
+                        },
+                        events: {
+                            afterChange: () => {
+                                actualizarArticulo(selectElement);
+                                actualizarResumen();
+                            }
+                        }
+                    });
+                    selectElement.setAttribute('data-slimselect-initialized', 'true');
+                }
+            }
+
             // Función para actualizar el stock y número de serie
             function actualizarArticulo(selectElement) {
                 const cantidadInput = selectElement.closest('.articulo-item').querySelector('.articulo-cantidad');
                 const stockSpan = selectElement.closest('.articulo-item').querySelector('.stock-info span');
                 const serieContainer = selectElement.closest('.articulo-item').querySelector('.articulo-serie');
-                
-                if (selectElement.value) {
+
+                if (selectElement.value && selectElement.value !== '') {
                     const selectedOption = selectElement.options[selectElement.selectedIndex];
                     const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
                     const manejaSerie = selectedOption.getAttribute('data-maneja-serie') == 1;
-                    
+
                     stockSpan.textContent = stock;
                     cantidadInput.max = stock;
-                    
-                    // Mostrar campo de número de serie si el artículo lo requiere
+
+                    const currentValue = parseInt(cantidadInput.value) || 1;
+                    cantidadInput.value = Math.min(currentValue, stock);
+
                     if (manejaSerie) {
                         serieContainer.classList.remove('hidden');
                     } else {
@@ -381,6 +536,7 @@
                 } else {
                     stockSpan.textContent = '0';
                     cantidadInput.max = 1;
+                    cantidadInput.value = 1;
                     serieContainer.classList.add('hidden');
                 }
             }
@@ -403,68 +559,73 @@
                 const articulosItems = document.querySelectorAll('.articulo-item');
                 let totalItems = 0;
                 let totalValor = 0;
-                
+
                 if (articulosItems.length > 0) {
                     resumenArticulos.innerHTML = '';
-                    
+
                     articulosItems.forEach((item, index) => {
                         const select = item.querySelector('.articulo-select');
                         const cantidadInput = item.querySelector('.articulo-cantidad');
                         const serieInput = item.querySelector('.articulo-serie-input');
-                        
+
                         if (select.value && cantidadInput.value) {
-                            const articuloNombre = select.options[select.selectedIndex].text;
+                            let articuloNombre = '';
+                            if (select.options[select.selectedIndex]) {
+                                articuloNombre = select.options[select.selectedIndex].text;
+                                articuloNombre = articuloNombre.replace(/\s*\(Stock: \d+\)/g, '');
+                            }
+
                             const cantidad = parseInt(cantidadInput.value) || 0;
                             const serie = serieInput ? serieInput.value : '';
-                            const precio = parseFloat(select.options[select.selectedIndex].getAttribute('data-precio')) || 0;
-                            
+                            const precio = parseFloat(select.options[select.selectedIndex].getAttribute(
+                                'data-precio')) || 0;
+
                             totalItems += cantidad;
                             totalValor += cantidad * precio;
-                            
+
                             const li = document.createElement('li');
                             li.className = 'space-y-1';
-                            
-                            // Información del artículo
+
                             const articuloInfo = document.createElement('div');
                             articuloInfo.className = 'flex items-start justify-between';
-                            
+
                             const nombreSpan = document.createElement('span');
                             nombreSpan.className = 'text-sm text-gray-700 truncate';
                             nombreSpan.textContent = articuloNombre;
-                            
+
                             const cantidadSpan = document.createElement('span');
                             cantidadSpan.className = 'font-medium text-success ml-2 whitespace-nowrap';
                             cantidadSpan.textContent = `x${cantidad}`;
-                            
+
                             articuloInfo.appendChild(nombreSpan);
                             articuloInfo.appendChild(cantidadSpan);
-                            
-                            // Número de serie (si existe)
+
                             if (serie) {
                                 const serieDiv = document.createElement('div');
-                                serieDiv.className = 'text-xs text-info bg-info/10 rounded-lg px-2 py-1 mt-1';
-                                
+                                serieDiv.className =
+                                    'text-xs text-info bg-info/10 rounded-lg px-2 py-1 mt-1';
+
                                 const serieLabel = document.createElement('span');
                                 serieLabel.className = 'font-medium mr-1';
                                 serieLabel.textContent = 'Serie:';
-                                
+
                                 const serieValue = document.createElement('span');
                                 serieValue.className = 'font-mono';
                                 serieValue.textContent = serie;
-                                
+
                                 serieDiv.appendChild(serieLabel);
                                 serieDiv.appendChild(serieValue);
-                                
+
                                 li.appendChild(articuloInfo);
                                 li.appendChild(serieDiv);
                             } else {
                                 li.appendChild(articuloInfo);
                             }
-                            
+
                             resumenArticulos.appendChild(li);
                         }
                     });
-                    
+
                     if (totalItems === 0) {
                         const li = document.createElement('li');
                         li.className = 'text-sm text-gray-500 italic';
@@ -472,7 +633,8 @@
                         resumenArticulos.appendChild(li);
                     }
                 } else {
-                    resumenArticulos.innerHTML = '<li class="text-sm text-gray-500 italic">Ningún artículo seleccionado</li>';
+                    resumenArticulos.innerHTML =
+                        '<li class="text-sm text-gray-500 italic">Ningún artículo seleccionado</li>';
                 }
 
                 // Actualizar totales
@@ -481,14 +643,18 @@
                 totalArticulosSpan.textContent = totalItems;
 
                 // Actualizar fecha
-                if (fechaAsignacion.value) {
-                    const fecha = new Date(fechaAsignacion.value);
+                if (fechaAsignacion.selectedDates.length > 0) {
+                    const fecha = fechaAsignacion.selectedDates[0];
                     const hoy = new Date();
-                    
-                    if (fecha.toDateString() === hoy.toDateString()) {
+                    hoy.setHours(0, 0, 0, 0);
+
+                    if (fecha.getTime() === hoy.getTime()) {
                         resumenFecha.textContent = 'Hoy';
                     } else {
-                        resumenFecha.textContent = fechaAsignacion.value;
+                        const dia = fecha.getDate().toString().padStart(2, '0');
+                        const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                        const año = fecha.getFullYear();
+                        resumenFecha.textContent = `${dia}/${mes}/${año}`;
                     }
                     resumenFecha.classList.remove('text-gray-500');
                     resumenFecha.classList.add('text-info', 'font-semibold');
@@ -502,70 +668,58 @@
             // Función para agregar nuevo artículo
             function agregarArticulo() {
                 contadorArticulos++;
-                
+
                 const nuevoArticulo = document.createElement('div');
                 nuevoArticulo.className = 'articulo-item bg-gray-50 rounded-xl p-4 border border-gray-200';
                 nuevoArticulo.innerHTML = `
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <!-- Artículo -->
-                        <div class="md:col-span-6">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">
-                                Artículo
-                            </label>
-                            <select class="articulo-select w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:border-success focus:ring-2 focus:ring-success/20 transition-all duration-200">
-                                <option value="" class="text-gray-400">Buscar artículo...</option>
-                                @foreach($articulos as $articulo)
-                                @if($articulo->stock_disponible > 0)
-                                <option value="{{ $articulo->idArticulos }}" 
-                                    data-stock="{{ $articulo->stock_disponible }}"
-                                    data-maneja-serie="{{ $articulo->maneja_serie }}"
-                                    data-precio="{{ $articulo->precio_venta ?? 0 }}">
-                                    {{ $articulo->nombre }} (Stock: {{ $articulo->stock_disponible }})
-                                </option>
-                                @endif
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Cantidad -->
-                        <div class="md:col-span-4">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">
-                                Cantidad
-                            </label>
-                            <div class="flex items-center">
-                                <input type="number" min="1" value="1" max="1"
-                                    class="articulo-cantidad w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200">
-                                <div class="ml-2 text-xs text-gray-500 stock-info">
-                                    Stock: <span class="font-medium">0</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Botón eliminar -->
-                        <div class="md:col-span-2 flex items-end">
-                            <button type="button" class="eliminar-articulo-btn w-full px-3 py-2.5 bg-danger text-white rounded-lg hover:bg-danger-dark transition-all duration-200 flex items-center justify-center">
-                                <i class="fas fa-trash mr-1"></i> Quitar
-                            </button>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    <div class="md:col-span-6">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Artículo</label>
+                        <select class="articulo-select w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:border-success focus:ring-2 focus:ring-success/20 transition-all duration-200">
+                            <option value="" class="text-gray-400">Buscar artículo...</option>
+                            @foreach ($articulos as $articulo)
+                            @if ($articulo->stock_disponible > 0)
+                            <option value="{{ $articulo->idArticulos }}" 
+                                data-stock="{{ $articulo->stock_disponible }}"
+                                data-maneja-serie="{{ $articulo->maneja_serie }}"
+                                data-precio="{{ $articulo->precio_venta ?? 0 }}">
+                                {{ $articulo->nombre }} (Stock: {{ $articulo->stock_disponible }})
+                            </option>
+                            @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Cantidad</label>
+                        <div class="flex items-center">
+                            <input type="number" min="1" value="1" max="1" class="articulo-cantidad w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg focus:border-warning focus:ring-2 focus:ring-warning/20 transition-all duration-200">
+                            <div class="ml-2 text-xs text-gray-500 stock-info">Stock: <span class="font-medium">0</span></div>
                         </div>
                     </div>
-
-                    <!-- Número de serie -->
-                    <div class="mt-3 articulo-serie hidden">
-                        <label class="block text-xs font-medium text-gray-600 mb-1">
-                            Número de serie
-                        </label>
-                        <input type="text" class="articulo-serie-input w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:border-info focus:ring-2 focus:ring-info/20 transition-all duration-200"
-                            placeholder="Número de serie del artículo...">
-                        <p class="text-xs text-gray-500 mt-1">Este artículo requiere número de serie</p>
+                    <div class="md:col-span-2 flex items-end">
+                        <button type="button" class="eliminar-articulo-btn w-full px-3 py-2.5 bg-danger text-white rounded-lg hover:bg-danger-dark transition-all duration-200 flex items-center justify-center">
+                            <i class="fas fa-trash mr-1"></i> Quitar
+                        </button>
                     </div>
-                `;
+                </div>
+                <div class="mt-3 articulo-serie hidden">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Número de serie</label>
+                    <input type="text" class="articulo-serie-input w-full px-3 py-2 bg-white border border-gray-300 rounded-lg focus:border-info focus:ring-2 focus:ring-info/20 transition-all duration-200" placeholder="Número de serie del artículo...">
+                    <p class="text-xs text-gray-500 mt-1">Este artículo requiere número de serie</p>
+                </div>
+            `;
 
                 articulosContainer.appendChild(nuevoArticulo);
-                
-                // Actualizar botones eliminar
+
+                // Inicializar Slim Select para el nuevo select
+                const nuevoSelect = nuevoArticulo.querySelector('.articulo-select');
+                inicializarSlimSelectArticulo(nuevoSelect);
+
                 actualizarBotonesEliminar();
                 actualizarResumen();
                 actualizarScroll();
+
+                toastr.success('Nuevo artículo agregado');
             }
 
             // Función para actualizar botones eliminar
@@ -579,17 +733,20 @@
                         btn.disabled = false;
                         btn.classList.remove('disabled:opacity-50', 'disabled:cursor-not-allowed');
                     }
-                    
-                    // Remover evento anterior si existe
+
                     btn.onclick = null;
-                    
-                    // Agregar nuevo evento
                     btn.onclick = function() {
                         if (botonesEliminar.length > 1) {
-                            this.closest('.articulo-item').remove();
+                            const articuloItem = this.closest('.articulo-item');
+                            const selectElement = articuloItem.querySelector('select');
+                            if (selectElement) {
+                                selectElement.removeAttribute('data-slimselect-initialized');
+                            }
+                            articuloItem.remove();
                             actualizarBotonesEliminar();
                             actualizarResumen();
                             actualizarScroll();
+                            toastr.info('Artículo eliminado del formulario');
                         }
                     };
                 });
@@ -598,125 +755,125 @@
             // Event Listeners
             agregarArticuloBtn.addEventListener('click', agregarArticulo);
             usuarioSelect.addEventListener('change', actualizarResumen);
-            fechaAsignacion.addEventListener('change', actualizarResumen);
-            fechaDevolucion.addEventListener('change', actualizarResumen);
 
-            // Event delegation para artículos dinámicos
-            articulosContainer.addEventListener('change', function(e) {
-                if (e.target.classList.contains('articulo-select')) {
-                    actualizarArticulo(e.target);
-                    actualizarResumen();
-                }
-                if (e.target.classList.contains('articulo-cantidad')) {
-                    actualizarResumen();
-                }
-            });
-
+            // Event delegation para inputs dinámicos
             articulosContainer.addEventListener('input', function(e) {
-                if (e.target.classList.contains('articulo-serie-input')) {
+                if (e.target.classList.contains('articulo-cantidad') ||
+                    e.target.classList.contains('articulo-serie-input')) {
                     actualizarResumen();
                 }
             });
+
+            // Inicializar Slim Select para artículos existentes
+            inicializarSlimSelectArticulos();
 
             // Inicializar
             actualizarBotonesEliminar();
             actualizarResumen();
             actualizarScroll();
-            
-            // Inicializar el primer artículo
-            const primerSelect = document.querySelector('.articulo-select');
-            if (primerSelect) {
-                actualizarArticulo(primerSelect);
-            }
 
             // Validar y crear la asignación
             document.getElementById('crearAsignacionBtn').addEventListener('click', function() {
                 if (!usuarioSelect.value) {
-                    alert('Por favor, selecciona un usuario.');
+                    toastr.error('Por favor, selecciona un usuario.');
                     usuarioSelect.focus();
                     return;
                 }
-                
-                // Recolectar datos
+
                 const articulosData = [];
                 let error = false;
-                
+                let mensajeError = '';
+
                 document.querySelectorAll('.articulo-item').forEach(item => {
                     const select = item.querySelector('.articulo-select');
                     const cantidadInput = item.querySelector('.articulo-cantidad');
                     const serieInput = item.querySelector('.articulo-serie-input');
-                    
+
                     if (select.value) {
                         const selectedOption = select.options[select.selectedIndex];
                         const stock = parseInt(selectedOption.getAttribute('data-stock')) || 0;
                         const cantidad = parseInt(cantidadInput.value) || 1;
                         const manejaSerie = selectedOption.getAttribute('data-maneja-serie') == 1;
-                        
+                        const nombreArticulo = selectedOption.text.replace(/\s*\(Stock: \d+\)/g,
+                        '');
+
                         if (cantidad > stock) {
                             error = true;
                             cantidadInput.classList.add('border-danger');
-                            alert(`La cantidad para "${selectedOption.text}" excede el stock disponible (${stock})`);
+                            mensajeError =
+                                `La cantidad para "${nombreArticulo}" excede el stock disponible (${stock})`;
+                            toastr.error(mensajeError);
                         } else {
                             cantidadInput.classList.remove('border-danger');
                         }
-                        
+
                         if (manejaSerie && (!serieInput || !serieInput.value.trim())) {
                             error = true;
-                            alert(`El artículo "${selectedOption.text}" requiere número de serie`);
+                            mensajeError =
+                                `El artículo "${nombreArticulo}" requiere número de serie`;
+                            toastr.error(mensajeError);
                         }
-                        
-                        // En la función del botón "Crear Asignación", actualiza:
-articulosData.push({
-    articulo_id: select.value, // Cambiado a 'articulo_id'
-    cantidad: cantidad,
-    numero_serie: serieInput ? serieInput.value.trim() : null
-});
+
+                        articulosData.push({
+                            articulo_id: select.value,
+                            cantidad: cantidad,
+                            numero_serie: serieInput ? serieInput.value.trim() : null
+                        });
                     }
                 });
-                
+
                 if (error) return;
-                
                 if (articulosData.length === 0) {
-                    alert('Por favor, agrega al menos un artículo.');
+                    toastr.error('Por favor, agrega al menos un artículo.');
                     return;
                 }
-                
-                // Enviar datos
+
                 const btn = this;
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creando...';
-                
-                fetch('{{ route("asignar-articulos.store") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        idUsuario: usuarioSelect.value,
-                        fecha_asignacion: fechaAsignacion.value,
-                        fecha_devolucion: fechaDevolucion.value || null,
-                        observaciones: document.getElementById('observaciones').value,
-                        articulos: articulosData
+
+                fetch('{{ route('asignar-articulos.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            idUsuario: usuarioSelect.value,
+                            fecha_asignacion: fechaAsignacionInput.value,
+                            fecha_devolucion: fechaDevolucionInput.value || null,
+                            observaciones: document.getElementById('observaciones').value,
+                            articulos: articulosData
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(data.message);
-                        window.location.href = data.redirect;
-                    } else {
-                        alert(data.message);
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            toastr.success(data.message);
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 1500);
+                        } else {
+                            if (data.errors) {
+                                // Mostrar errores de validación
+                                Object.values(data.errors).forEach(errorMessages => {
+                                    errorMessages.forEach(message => {
+                                        toastr.error(message);
+                                    });
+                                });
+                            } else {
+                                toastr.error(data.message || 'Error al crear la asignación');
+                            }
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-check mr-2"></i> Crear Asignación';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr.error('Error de conexión al crear la asignación');
                         btn.disabled = false;
                         btn.innerHTML = '<i class="fas fa-check mr-2"></i> Crear Asignación';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al crear la asignación');
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> Crear Asignación';
-                });
+                    });
             });
         });
     </script>
