@@ -52,29 +52,7 @@
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
-                <div class="flex justify-end space-x-3">
-                    <a href="{{ route('solicitudalmacen.index') }}"
-                        class="inline-flex items-center px-4 py-3 bg-gray-500 text-white rounded-lg text-base font-semibold hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 shadow-sm hover:shadow-md min-w-[120px] justify-center">
-                        <i class="fas fa-arrow-left mr-2 text-sm"></i>
-                        Volver
-                    </a>
 
-                    <button type="button"
-                        class="inline-flex items-center px-4 py-3 bg-amber-500 text-white rounded-lg text-base font-semibold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 shadow-sm hover:shadow-md min-w-[120px] justify-center"
-                        @click="resetForm()">
-                        <i class="fas fa-redo mr-2 text-sm"></i>
-                        Limpiar
-                    </button>
-
-                    <!-- Reemplaza tu botón actual por este: -->
-                    <button type="button"
-                        class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-base font-semibold hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg min-w-[140px] justify-center"
-                        @click="validateAndShowModal()">
-                        <i class="fas fa-paper-plane mr-2 text-sm"></i>
-                        Crear Solicitud
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -849,101 +827,129 @@
                 </div>
 
                 <!-- Información de ayuda -->
+                <!-- Contenedor principal -->
                 <div
                     class="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl border border-blue-200 p-6 shadow-md">
-                    <!-- Header compacto -->
-                    <div class="flex items-center gap-3 mb-4">
-                        <div
-                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
-                            <i class="fas fa-lightbulb text-white text-lg"></i>
+
+                    <!-- Información de ayuda -->
+                    <div>
+                        <!-- Header compacto -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div
+                                class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+                                <i class="fas fa-lightbulb text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Consejos para una buena solicitud</h3>
+                                <p class="text-sm text-blue-700">Siga estas recomendaciones clave</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-lg font-bold text-gray-900">Consejos para una buena solicitud</h3>
-                            <p class="text-sm text-blue-700">Siga estas recomendaciones clave</p>
+
+                        <!-- Grid de consejos compacto -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Consejo 1 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-check-circle text-green-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Describa claramente cada producto</p>
+                                </div>
+                            </div>
+
+                            <!-- Consejo 2 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-calculator text-yellow-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Incluya cantidades realistas</p>
+                                </div>
+                            </div>
+
+                            <!-- Consejo 3 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-file-alt text-purple-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Justifique la necesidad</p>
+                                </div>
+                            </div>
+
+                            <!-- Consejo 4 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-barcode text-red-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Verifique códigos correctos</p>
+                                </div>
+                            </div>
+
+                            <!-- Consejo 5 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-cogs text-indigo-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Incluya especificaciones técnicas</p>
+                                </div>
+                            </div>
+
+                            <!-- Consejo 6 -->
+                            <div
+                                class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
+                                <div
+                                    class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <i class="fas fa-search text-orange-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-700 font-medium">Busque artículos por código</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer compacto -->
+                        <div class="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-info-circle text-blue-600 text-sm"></i>
+                                <p class="text-xs text-blue-800">Contacte al almacén para ayuda adicional</p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Grid de consejos compacto -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <!-- Consejo 1 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-check-circle text-green-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Describa claramente cada producto</p>
-                            </div>
-                        </div>
+                    <!-- Botones de Acción en columna -->
+                    <div class="flex flex-col space-y-3 mt-6">
+                        <a href="{{ route('solicitudalmacen.index') }}"
+                            class="inline-flex items-center px-4 py-3 bg-gray-500 text-white rounded-lg text-base font-semibold hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 shadow-sm hover:shadow-md min-w-[120px] justify-center">
+                            <i class="fas fa-arrow-left mr-2 text-sm"></i>
+                            Volver
+                        </a>
 
-                        <!-- Consejo 2 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-calculator text-yellow-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Incluya cantidades realistas</p>
-                            </div>
-                        </div>
+                        <button type="button"
+                            class="inline-flex items-center px-4 py-3 bg-amber-500 text-white rounded-lg text-base font-semibold hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200 shadow-sm hover:shadow-md min-w-[120px] justify-center"
+                            @click="resetForm()">
+                            <i class="fas fa-redo mr-2 text-sm"></i>
+                            Limpiar
+                        </button>
 
-                        <!-- Consejo 3 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-file-alt text-purple-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Justifique la necesidad</p>
-                            </div>
-                        </div>
-
-                        <!-- Consejo 4 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-barcode text-red-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Verifique códigos correctos</p>
-                            </div>
-                        </div>
-
-                        <!-- Consejo 5 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-cogs text-indigo-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Incluya especificaciones técnicas</p>
-                            </div>
-                        </div>
-
-                        <!-- Consejo 6 -->
-                        <div
-                            class="flex items-start gap-3 p-3 bg-white rounded-lg border border-blue-100 hover:shadow-sm transition-all duration-200">
-                            <div
-                                class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <i class="fas fa-search text-orange-600 text-sm"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-700 font-medium">Busque artículos por código</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer compacto -->
-                    <div class="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-info-circle text-blue-600 text-sm"></i>
-                            <p class="text-xs text-blue-800">Contacte al almacén para ayuda adicional</p>
-                        </div>
+                        <button type="button"
+                            class="inline-flex items-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-base font-semibold hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg min-w-[140px] justify-center"
+                            @click="validateAndShowModal()">
+                            <i class="fas fa-paper-plane mr-2 text-sm"></i>
+                            Crear Solicitud
+                        </button>
                     </div>
                 </div>
             </div>
