@@ -8,7 +8,7 @@
         /* Estilo general del select */
         .select2-container--default .select2-selection--single {
             border-radius: 0.5rem;
-            height: 2.5rem;
+            height: 2.5rem !important;
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
             display: flex;
