@@ -1297,4 +1297,56 @@ private function cleanString($string)
     
     return $cleaned ?: '';
 }
+
+
+
+
+
+/**
+ * Mostrar formulario para restablecer contraseña
+ */
+public function showResetForm($token)
+{
+    $usuario = Usuario::where('token', $token)->first();
+    
+    if (!$usuario) {
+        return redirect('/')->with('error', 'El enlace de recuperación es inválido o ha expirado');
+    }
+
+    return view('auth.reset-password', compact('token'));
+}
+
+/**
+ * Procesar restablecimiento de contraseña usando bcrypt
+ */
+public function resetPassword(Request $request)
+{
+    $request->validate([
+        'token' => 'required',
+        'password' => 'required|min:8|confirmed',
+        'password_confirmation' => 'required'
+    ]);
+
+    $usuario = Usuario::where('token', $request->token)->first();
+
+    if (!$usuario) {
+        return back()->with('error', 'El enlace de recuperación es inválido o ha expirado');
+    }
+
+    // Actualizar contraseña con bcrypt
+    $usuario->clave = bcrypt($request->password);
+    $usuario->token = null; // Limpiar token
+    $usuario->save();
+
+    Log::info('Contraseña restablecida exitosamente:', [
+        'usuario_id' => $usuario->idUsuario,
+        'email' => $usuario->correo
+    ]);
+
+    return redirect('/login')->with('success', 'Contraseña restablecida exitosamente');
+}
+
+
+
+
 }
