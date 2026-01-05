@@ -1,4 +1,5 @@
 <x-layout.auth>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <div x-data="auth">
         <div class="absolute inset-0">
@@ -117,12 +118,11 @@
                                 Ingrese su correo electrónico y contraseña para iniciar sesión
                             </p>
                         </div>
-                        
+
                         <form class="space-y-5 dark:text-white" method="POST" action="/login">
                             @csrf
                             <div>
-                                <label
-                                    style="display: block; font-size: 0.875rem; margin-bottom: 0.25rem;">Correo
+                                <label style="display: block; font-size: 0.875rem; margin-bottom: 0.25rem;">Correo
                                     Electrónico</label>
                                 <div class="relative text-white-dark">
                                     <input id="Email" name="email" type="email"
@@ -176,13 +176,13 @@
                                 </label>
                             </div>
                             <button type="submit"
-                            style="background-color: #8B1E3F; color: white; transition: background-color 0.3s ease;"
-                            onmouseover="this.style.backgroundColor='#A6274C'"
-                            onmouseout="this.style.backgroundColor='#8B1E3F'"
-                            class="w-full rounded-md py-2.5 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FEC8D8]">
-                            INICIAR SESIÓN
-                        </button>
-                        
+                                style="background-color: #8B1E3F; color: white; transition: background-color 0.3s ease;"
+                                onmouseover="this.style.backgroundColor='#A6274C'"
+                                onmouseout="this.style.backgroundColor='#8B1E3F'"
+                                class="w-full rounded-md py-2.5 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FEC8D8]">
+                                INICIAR SESIÓN
+                            </button>
+
                         </form>
 
                         <div class="relative my-7 text-center md:mb-9">
@@ -273,9 +273,41 @@
         </div>
     </div>
 
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
+        // Configuración de Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        // Mostrar notificaciones de sesión
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (session('toastr_type') && session('toastr_message'))
+                toastr.{{ session('toastr_type') }}("{{ session('toastr_message') }}");
+            @endif
+
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    toastr.error("{{ $error }}");
+                @endforeach
+            @endif
+        });
         document.addEventListener('alpine:init', () => {
             Alpine.data('auth', () => ({
                 languages: [{
@@ -362,11 +394,4 @@
             }));
         });
     </script>
-
-
-
-
-
-
-
 </x-layout.auth>
