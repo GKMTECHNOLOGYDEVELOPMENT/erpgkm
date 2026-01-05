@@ -1,5 +1,7 @@
 <x-layout.default>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
     <div class="mb-6">
         <ul class="flex space-x-2 rtl:space-x-reverse">
             <li>
@@ -32,9 +34,12 @@
                         </svg>
                         Fecha Inicio
                     </label>
-                    <input type="date" x-model="filters.fecha_inicio" @change="handleDateChange('fecha_inicio')" class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
-               focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
-               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
+                    <input type="text" x-ref="fechaInicioInput" x-model="filters.fecha_inicio"
+                        class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
+                      focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
+                      bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 
+                      flatpickr-input cursor-pointer"
+                        placeholder="Seleccionar fecha inicio" readonly>
                 </div>
 
                 <!-- Fecha Fin -->
@@ -46,9 +51,12 @@
                         </svg>
                         Fecha Fin
                     </label>
-                    <input type="date" x-model="filters.fecha_fin" @change="handleDateChange('fecha_fin')" class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
-               focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
-               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11">
+                    <input type="text" x-ref="fechaFinInput" x-model="filters.fecha_fin"
+                        class="form-input w-full rounded-xl border border-gray-200 focus:border-blue-500 
+                      focus:ring-2 focus:ring-blue-100 transition-all duration-300 hover:border-blue-400
+                      bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 
+                      flatpickr-input cursor-pointer"
+                        placeholder="Seleccionar fecha fin" readonly>
                 </div>
 
                 <!-- Estado -->
@@ -60,66 +68,26 @@
                         </svg>
                         Estado
                     </label>
-                    <select x-model="filters.estado" @change="loadCompras()" class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
-           focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
-           bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
-                        <option value="">✨ Todos los estados</option>
-                        <option value="pendiente">🟡 Pendiente</option>
-                        <option value="recibido">🟢 Recibido</option>
-                        <option value="enviado_almacen">🔵 Enviado a Almacén</option>
-                        <option value="aprobado">🟢 Aprobado</option>
-                        <option value="anulado">🔴 Anulado</option>
+                    <select x-model="filters.estado" @change="loadCompras()"
+                        class="form-select w-full rounded-xl border border-gray-200 focus:border-purple-500 
+                focus:ring-2 focus:ring-purple-100 transition-all duration-300 hover:border-purple-400
+                bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 cursor-pointer">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="recibido">Recibido</option>
+                        <option value="enviado_almacen">Enviado a Almacén</option>
+                        <option value="aprobado">Aprobado</option>
+                        <option value="anulado">Anulado</option>
                     </select>
                 </div>
-
-                <!-- Botón Buscar -->
-                <div class="flex items-end">
-                    <button @click="buscar()" class="btn btn-info gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 116.15 13.65z" />
-                        </svg>
-                        Buscar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Buscador Avanzado -->
-            <div class="group">
-                <label class="flex items-center gap-2 text-sm font-semibold text-gray-700 mb-2">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 116.15 13.65z" />
-                    </svg>
-                    Buscar por texto
-                </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400 group-hover:text-green-500 transition-colors animate-pulse"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 116.15 13.65z" />
-                        </svg>
-                    </span>
-                    <input type="text" x-model="filters.q" @keyup.enter="buscar()"
-                        placeholder="Serie, N° o Proveedor... ✨" class="form-input w-full pl-12 pr-4 rounded-xl border border-gray-200 focus:border-green-500 
-               focus:ring-2 focus:ring-green-100 transition-all duration-300 hover:border-green-400
-               bg-white/70 backdrop-blur-sm shadow-sm text-gray-700 font-medium h-11 placeholder-gray-400">
-                </div>
-                <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
-                    <svg class="w-3 h-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Ingresa al menos 3 caracteres
-                </p>
             </div>
         </div>
 
         <!-- Botón Nueva Compra - CON ESPACIOS -->
         <div class="flex justify-end mt-6">
-            @if(\App\Helpers\PermisoHelper::tienePermiso('NUEVA COMPRA'))
-                <a href="{{ route('compras.create') }}" class="inline-flex items-center gap-2 px-6 py-3 
+            @if (\App\Helpers\PermisoHelper::tienePermiso('NUEVA COMPRA'))
+                <a href="{{ route('compras.create') }}"
+                    class="inline-flex items-center gap-2 px-6 py-3 
                                btn btn-primary space-x-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor" stroke-width="2">
@@ -131,7 +99,7 @@
         </div>
 
         <!-- Tabla de Compras - Agregar columna Estado -->
-        <div x-show="!loading && !error && compras.length > 0"
+        <div x-show="!loading && !error"
             class="panel rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 mt-4">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -157,115 +125,131 @@
                             </th>
                         </tr>
                     </thead>
+
                     <tbody class="divide-y divide-gray-200">
-                        <template x-for="(compra, index) in compras" :key="compra.idCompra">
+                        <!-- Cuando HAY compras -->
+                        <template x-if="compras.length > 0">
+                            <template x-for="(compra, index) in compras" :key="compra.idCompra">
+                                <tr>
+                                    <!-- Serie/Nro -->
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div
+                                                class="h-9 w-9 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </div>
+                                            <div class="text-left">
+                                                <span x-text="compra.serie + '-' + compra.nro"
+                                                    class="text-sm font-medium text-gray-900"></span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Fecha Emisión -->
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex justify-center">
+                                            <span x-text="formatDate(compra.fechaEmision)"
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"></span>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4 text-center">
+                                        <span x-text="compra?.proveedor?.nombre ?? 'N/A'"
+                                            class="text-sm text-gray-700 font-medium"></span>
+                                    </td>
+
+                                    <!-- Estado -->
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex justify-center">
+                                            <span x-text="getEstadoText(compra.estado)"
+                                                :class="getEstadoBadgeClass(compra.estado)"
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer"
+                                                @click="openEstadoModal(compra)">
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Total -->
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex justify-center">
+                                            <span x-text="formatCurrency(compra.total)"
+                                                class="text-sm font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full"></span>
+                                        </div>
+                                    </td>
+
+                                    <!-- Acciones -->
+                                    <td class="px-6 py-4 text-center">
+                                        <div class="flex space-x-2 justify-center">
+                                            @if (\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO COMPRA'))
+                                                <button @click="openEstadoModal(compra)" class="btn btn-secondary">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                                        </path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
+                                                        </path>
+                                                    </svg>
+                                                    Estado
+                                                </button>
+                                            @endif
+                                            @if (\App\Helpers\PermisoHelper::tienePermiso('VER DETALLES COMPRA'))
+                                                <button @click="detallesCompra(compra.idCompra)"
+                                                    class="btn btn-warning">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                        </path>
+                                                    </svg>
+                                                    Detalles
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
+
+                        <!-- Cuando NO HAY compras -->
+                        <template x-if="compras.length === 0">
                             <tr>
-                                <!-- Serie/Nro -->
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center">
-                                        <!-- Icono con ancho fijo -->
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <!-- Icono -->
                                         <div
-                                            class="h-9 w-9 flex-shrink-0 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600"
+                                            class="mx-auto h-14 w-14 flex items-center justify-center rounded-full bg-gray-100 mb-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="1.5"
                                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
                                         </div>
 
-                                        <!-- Texto alineado -->
-                                        <div class="text-left">
-                                            <span x-text="compra.serie + '-' + compra.nro"
-                                                class="text-sm font-medium text-gray-900"></span>
-                                        </div>
-                                    </div>
-                                </td>
+                                        <!-- Mensaje -->
+                                        <h3 class="text-lg font-semibold text-gray-700 mb-2">
+                                            No hay compras registradas
+                                        </h3>
 
-
-                                <!-- Fecha Emisión -->
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center">
-                                        <span x-text="formatDate(compra.fechaEmision)"
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"></span>
-                                    </div>
-                                </td>
-
-                                <td class="px-6 py-4 text-center">
-                                    <span x-text="compra?.proveedor?.nombre ?? 'N/A'"
-                                        class="text-sm text-gray-700 font-medium"></span>
-                                </td>
-
-                                <!-- Estado -->
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center">
-                                        <span x-text="getEstadoText(compra.estado)"
-                                            :class="getEstadoBadgeClass(compra.estado)"
-                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer"
-                                            @click="openEstadoModal(compra)">
-                                        </span>
-                                    </div>
-                                </td>
-
-                                <!-- Total -->
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex justify-center">
-                                        <span x-text="formatCurrency(compra.total)"
-                                            class="text-sm font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full"></span>
-                                    </div>
-                                </td>
-
-                                <!-- Acciones -->
-                                <td class="px-6 py-4 text-center">
-                                    <div class="flex space-x-2 justify-center">
-                                        @if(\App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO COMPRA'))
-                                            <!-- Botón Cambiar Estado -->
-                                            <button @click="openEstadoModal(compra)" class="btn btn-secondary">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                                    </path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-                                                    </path>
-                                                </svg>
-                                                Estado
-                                            </button>
-                                        @endif
-                                        @if(\App\Helpers\PermisoHelper::tienePermiso('VER DETALLES COMPRA'))
-                                            <!-- Botón Detalles de Compra -->
-                                            <button @click="detallesCompra(compra.idCompra)" class="btn btn-warning">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                    </path>
-                                                </svg>
-                                                Detalles
-                                            </button>
-                                        @endif
-
-                                        <!-- Botón Imprimir Factura -->
-                                        {{-- <button @click="imprimirFactura(compra.idCompra)" class="btn btn-warning">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                                </path>
-                                            </svg>
-                                            Factura
-                                        </button> --}}
-
-                                        <!-- Botón Imprimir Ticket -->
-                                        {{-- <button @click="imprimirTicket(compra.idCompra)" class="btn btn-success">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                                </path>
-                                            </svg>
-                                            Ticket
-                                        </button> --}}
+                                        <!-- Submensaje -->
+                                        <p class="text-gray-500 max-w-md mx-auto">
+                                            <span x-show="filters.fecha_inicio || filters.fecha_fin || filters.estado">
+                                                No se encontraron compras con los filtros aplicados.
+                                            </span>
+                                            <span
+                                                x-show="!(filters.fecha_inicio || filters.fecha_fin || filters.estado)">
+                                                No hay compras en el sistema.
+                                            </span>
+                                        </p>
                                     </div>
                                 </td>
                             </tr>
@@ -275,7 +259,6 @@
             </div>
         </div>
 
-        <!-- Modal para cambiar estado -->
         <!-- Modal Cambiar Estado -->
         <div x-show="estadoModalOpen" class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="estadoModalOpen && '!block'">
@@ -287,8 +270,8 @@
                     <div class="flex bg-[#fbfbfb] items-center justify-between px-5 py-3 border-b">
                         <h5 class="font-bold text-lg text-gray-800">Cambiar Estado de Compra</h5>
                         <button type="button" class="text-gray-500 hover:text-gray-700" @click="closeEstadoModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -347,13 +330,14 @@
                         <button type="button" class="btn btn-outline-danger" @click="closeEstadoModal">
                             Cancelar
                         </button>
-                        <button type="button" class="btn btn-primary" :disabled="updatingEstado" @click="updateEstado">
+                        <button type="button" class="btn btn-primary" :disabled="updatingEstado"
+                            @click="updateEstado">
                             <span x-show="!updatingEstado">Actualizar</span>
                             <span x-show="updatingEstado" class="flex items-center">
                                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4"></circle>
+                                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                                        stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor"
                                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                                     </path>
@@ -369,6 +353,8 @@
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -381,11 +367,15 @@
                 nuevoEstado: 'pendiente',
                 updatingEstado: false,
 
+                // Instancias de Flatpickr
+                flatpickrInicio: null,
+                flatpickrFin: null,
+
                 filters: {
                     fecha_inicio: '',
                     fecha_fin: '',
                     q: '',
-                    estado: '', // Nuevo filtro
+                    estado: '',
                 },
                 pagination: {
                     current_page: 1,
@@ -397,7 +387,98 @@
                 },
 
                 init() {
+                    // Inicializar Flatpickr después de que Alpine haya montado el componente
+                    this.$nextTick(() => {
+                        this.initFlatpickr();
+                    });
+
                     this.loadCompras();
+                },
+
+                initFlatpickr() {
+                    // Configuración común para ambos datepickers
+                    const commonConfig = {
+                        dateFormat: 'Y-m-d',
+                        locale: 'es',
+                        altInput: true,
+                        altFormat: 'd/m/Y',
+                        allowInput: false,
+                        clickOpens: true,
+                        static: false,
+                        monthSelectorType: 'static',
+                        prevArrow: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>',
+                        nextArrow: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>',
+                        onChange: (selectedDates, dateStr, instance) => {
+                            this.handleDatePickerChange(instance.input.id);
+                        },
+                        onOpen: (selectedDates, dateStr, instance) => {
+                            // Agregar clases personalizadas al calendar container
+                            const calendar = document.querySelector('.flatpickr-calendar');
+                            if (calendar) {
+                                calendar.classList.add('shadow-lg', 'rounded-lg', 'border',
+                                    'border-gray-200');
+                            }
+                        },
+                        onClose: (selectedDates, dateStr, instance) => {
+                            // Si es fecha fin y no hay fecha inicio, sugerir usar hoy como inicio
+                            if (instance.input.id === 'fechaFin' && !this.filters
+                                .fecha_inicio && dateStr) {
+                                const today = new Date().toISOString().split('T')[0];
+                                this.filters.fecha_inicio = today;
+                                this.flatpickrInicio.setDate(today, false);
+                                setTimeout(() => this.loadCompras(), 100);
+                            }
+                        }
+                    };
+
+                    // Configuración específica para fecha inicio
+                    const configInicio = {
+                        ...commonConfig,
+                        id: 'fechaInicio',
+                        placeholder: 'Seleccionar fecha inicio',
+                        maxDate: this.filters.fecha_fin || null,
+                        defaultDate: this.filters.fecha_inicio || null,
+                    };
+
+                    // Configuración específica para fecha fin
+                    const configFin = {
+                        ...commonConfig,
+                        id: 'fechaFin',
+                        placeholder: 'Seleccionar fecha fin',
+                        minDate: this.filters.fecha_inicio || null,
+                        defaultDate: this.filters.fecha_fin || null,
+                    };
+
+                    // Inicializar Flatpickr
+                    this.flatpickrInicio = flatpickr(this.$refs.fechaInicioInput, configInicio);
+                    this.flatpickrFin = flatpickr(this.$refs.fechaFinInput, configFin);
+
+                    // Establecer fechas si ya existen valores en los filtros
+                    if (this.filters.fecha_inicio) {
+                        this.flatpickrInicio.setDate(this.filters.fecha_inicio, false);
+                    }
+                    if (this.filters.fecha_fin) {
+                        this.flatpickrFin.setDate(this.filters.fecha_fin, false);
+                    }
+                },
+
+                handleDatePickerChange(inputId) {
+                    // Actualizar las fechas mínimas/máximas dependiendo de la selección
+                    if (inputId === 'fechaInicio') {
+                        this.flatpickrFin.set('minDate', this.filters.fecha_inicio || null);
+                        if (this.filters.fecha_fin && this.filters.fecha_inicio > this.filters
+                            .fecha_fin) {
+                            this.filters.fecha_fin = '';
+                            this.flatpickrFin.clear();
+                        }
+                    } else if (inputId === 'fechaFin') {
+                        this.flatpickrInicio.set('maxDate', this.filters.fecha_fin || null);
+                    }
+
+                    // Cargar compras después de un breve delay
+                    setTimeout(() => {
+                        this.loadCompras();
+                    }, 300);
                 },
 
                 async loadCompras() {
@@ -411,7 +492,7 @@
                         if (this.filters.fecha_fin) clean.fecha_fin = this.filters.fecha_fin;
                         if (this.filters.q && this.filters.q.trim().length >= 3) clean.q = this
                             .filters.q.trim();
-                        if (this.filters.estado) clean.estado = this.filters.estado; // Nuevo filtro
+                        if (this.filters.estado) clean.estado = this.filters.estado;
 
                         const params = new URLSearchParams({
                             page: this.pagination.current_page,
@@ -441,12 +522,17 @@
                     }
                 },
 
-                buscar() {
-                    this.pagination.current_page = 1;
+
+                // Método para limpiar fechas
+                limpiarFechas() {
+                    this.filters.fecha_inicio = '';
+                    this.filters.fecha_fin = '';
+                    this.flatpickrInicio.clear();
+                    this.flatpickrFin.clear();
                     this.loadCompras();
                 },
 
-                // Métodos para los estados
+                // ... resto de tus métodos existentes (getEstadoText, getEstadoBadgeClass, etc.)
                 getEstadoText(estado) {
                     const estados = {
                         'pendiente': 'Pendiente',
@@ -490,20 +576,19 @@
                     try {
                         const response = await fetch(
                             `/compras/${this.selectedCompra.idCompra}/estado`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({
-                                estado: this.nuevoEstado
-                            })
-                        });
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    estado: this.nuevoEstado
+                                })
+                            });
 
                         const data = await response.json();
 
                         if (data.success) {
-                            // Actualizar el estado en la lista local
                             const compraIndex = this.compras.findIndex(c => c.idCompra === this
                                 .selectedCompra.idCompra);
                             if (compraIndex !== -1) {
@@ -511,8 +596,6 @@
                             }
 
                             this.closeEstadoModal();
-
-                            // Mostrar mensaje de éxito
                             this.showNotification('Estado actualizado correctamente', 'success');
                         } else {
                             throw new Error(data.message || 'Error al actualizar el estado');
@@ -542,7 +625,6 @@
                     }
                 },
 
-                // ... resto de tus métodos existentes
                 detallesCompra(idCompra) {
                     window.location.href = `/compras/${idCompra}/detalles`;
                 },
@@ -553,19 +635,6 @@
 
                 imprimirTicket(idCompra) {
                     window.location.href = `/compras/${idCompra}/ticket`;
-                },
-
-                handleDateChange(field) {
-                    if (this.filters[field]) {
-                        const date = new Date(this.filters[field]);
-                        if (isNaN(date.getTime())) {
-                            this.error = 'Fecha inválida';
-                            this.filters[field] = '';
-                            return;
-                        }
-                    }
-                    this.error = null;
-                    this.loadCompras();
                 },
 
                 formatDate(dateString) {
