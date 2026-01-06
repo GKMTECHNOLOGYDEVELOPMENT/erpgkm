@@ -1499,7 +1499,7 @@ public function gestionar($id)
     ));
 }
 
-// Agregar estos métodos al controlador para manejar las acciones
+
 
 public function marcarUsado(Request $request, $solicitudId)
 {
@@ -1539,13 +1539,19 @@ public function marcarUsado(Request $request, $solicitudId)
                 throw new \Exception('Artículo no encontrado en la solicitud');
             }
 
-            // Procesar fotos si existen
-            $rutaFotos = [];
+            // Procesar fotos en BINARIO para ARTÍCULO USADO
+            $fotosBinarioUsado = [];
             if ($request->hasFile('fotos')) {
                 foreach ($request->file('fotos') as $foto) {
-                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
-                    $ruta = $foto->storeAs('evidencias_articulos', $nombreArchivo, 'public');
-                    $rutaFotos[] = $ruta;
+                    // Convertir la imagen a binario
+                    $contenidoBinario = file_get_contents($foto->getRealPath());
+                    
+                    // Comprimir la imagen si es posible (opcional)
+                    if (function_exists('imagecreatefromstring')) {
+                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                    }
+                    
+                    $fotosBinarioUsado[] = $contenidoBinario;
                 }
             }
 
@@ -1557,11 +1563,16 @@ public function marcarUsado(Request $request, $solicitudId)
                     'fechaUsado' => $request->fecha_uso,
                     'fechaSinUsar' => null,
                     'observacion' => $request->observacion,
-                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
+                    // Guardar fotos en binario para USADO
+                    'foto_articulo_usado' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null,
+                    // Limpiar fotos de no usado si existen
+                    'foto_articulo_no_usado' => null,
+                    // Mantener compatibilidad con campo antiguo
+                    'fotos_evidencia' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null
                 ]);
 
             // Registrar en logs
-            Log::info("Artículo marcado como usado - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Fecha: {$request->fecha_uso}");
+            Log::info("Artículo marcado como usado - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Fecha: {$request->fecha_uso}, Fotos en binario: " . count($fotosBinarioUsado));
         });
 
         return response()->json([
@@ -1621,13 +1632,19 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 throw new \Exception('Artículo no encontrado en la solicitud');
             }
 
-            // Procesar fotos si existen
-            $rutaFotos = [];
+            // Procesar fotos en BINARIO para ARTÍCULO NO USADO
+            $fotosBinarioNoUsado = [];
             if ($request->hasFile('fotos')) {
                 foreach ($request->file('fotos') as $foto) {
-                    $nombreArchivo = time() . '_' . uniqid() . '.' . $foto->getClientOriginalExtension();
-                    $ruta = $foto->storeAs('evidencias_devoluciones_articulos', $nombreArchivo, 'public');
-                    $rutaFotos[] = $ruta;
+                    // Convertir la imagen a binario
+                    $contenidoBinario = file_get_contents($foto->getRealPath());
+                    
+                    // Comprimir la imagen si es posible (opcional)
+                    if (function_exists('imagecreatefromstring')) {
+                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                    }
+                    
+                    $fotosBinarioNoUsado[] = $contenidoBinario;
                 }
             }
 
@@ -1638,7 +1655,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 ->first();
 
             if (!$ubicacionOriginal) {
-                throw new \Exception('No se pudo encontrar la ubicación original del artículo');
+                throw new \Exception('No se pudo encontrar la ubicación original del artículo. Ubicación: ' . ($articuloInfo->ubicacion_utilizada ?? 'NULL'));
             }
 
             // Obtener información del rack
@@ -1709,11 +1726,16 @@ public function marcarNoUsado(Request $request, $solicitudId)
                     'fechaSinUsar' => $request->fecha_devolucion,
                     'fechaUsado' => null,
                     'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
-                    'fotos_evidencia' => !empty($rutaFotos) ? json_encode($rutaFotos) : null
+                    // Guardar fotos en binario para NO USADO
+                    'foto_articulo_no_usado' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null,
+                    // Limpiar fotos de usado si existen
+                    'foto_articulo_usado' => null,
+                    // Mantener compatibilidad con campo antiguo
+                    'fotos_evidencia' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null
                 ]);
 
             // 6. Registrar en logs
-            Log::info("Artículo devuelto al inventario - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Cantidad: {$articuloInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Registros eliminados: {$registrosEliminados}");
+            Log::info("Artículo devuelto al inventario - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Cantidad: {$articuloInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Fotos en binario: " . count($fotosBinarioNoUsado));
         });
 
         return response()->json([
@@ -1729,7 +1751,6 @@ public function marcarNoUsado(Request $request, $solicitudId)
         ], 500);
     }
 }
-
  public function aceptarIndividual(Request $request, $id)
 {
     try {

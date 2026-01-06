@@ -91,6 +91,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\entradasproveedores\EntradasproveedoresController;
 use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\repuestotransito\RepuestoTransitoController;
 use App\Http\Controllers\solicitud\SolicitudalmacenController;
 use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\solicitud\SolicitudcompraController;
@@ -1978,3 +1979,18 @@ Route::get('/cliente-general/{id}/contactos', [OrdenesHelpdeskController::class,
 
 
 Route::post('/solicitudcompra/{id}/observar', [SolicitudcompraController::class, 'observarSolicitud'])->name('solicitudcompra.observar');
+
+
+
+// Repuestos en Tránsito
+Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function () {
+    Route::get('/', [RepuestoTransitoController::class, 'index'])->name('index');
+    Route::get('/dashboard', [RepuestoTransitoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/reporte', [RepuestoTransitoController::class, 'reporte'])->name('reporte');
+    Route::get('/{id}', [RepuestoTransitoController::class, 'show'])->name('show');
+    Route::put('/{id}', [RepuestoTransitoController::class, 'update'])->name('update');
+
+    Route::get('/{id}/detalles', [RepuestoTransitoController::class, 'obtenerDetalles'])->name('detalles');
+    Route::get('/{id}/evidencias', [RepuestoTransitoController::class, 'obtenerEvidencias'])->name('evidencias');
+    Route::get('/{id}/imagen/{tipo}', [RepuestoTransitoController::class, 'mostrarImagen'])->name('imagen');
+});

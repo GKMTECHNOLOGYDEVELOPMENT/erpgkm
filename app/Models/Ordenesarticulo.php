@@ -54,6 +54,8 @@ class Ordenesarticulo extends Model
 		'fechaUsado',
 		'fechaSinUsar',
 		'idSolicitudesOrdenes',
+		'foto_articulo_usado',
+		'foto_articulo_no_usado',
 		'idArticulos',
 		'idUbicacion',
 		'id_area_destino',
