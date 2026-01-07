@@ -211,7 +211,8 @@
                                                 </tr>
                                             </thead>
                                             <tbody class="bg-white divide-y divide-green-100">
-                                                <template x-for="(product, index) in cotizacionProducts" :key="index">
+                                                <template x-for="(product, index) in cotizacionProducts"
+                                                    :key="index">
                                                     <tr class="hover:bg-green-50 transition-colors">
                                                         <td class="px-4 py-3">
                                                             <div class="space-y-1">
@@ -249,10 +250,11 @@
                                                         <td class="px-4 py-3 text-sm">
                                                             <button @click="addProductFromCotizacion(product)"
                                                                 class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors font-medium text-sm flex items-center space-x-2">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M12 4v16m8-8H4"></path>
                                                                 </svg>
                                                                 <span>Agregar</span>
                                                             </button>
@@ -267,7 +269,8 @@
                                     <div class="mt-4 flex justify-end">
                                         <button @click="addAllCotizacionProducts()"
                                             class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-bold flex items-center space-x-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
                                                 </path>
@@ -279,10 +282,23 @@
                             </div>
                             <!-- Tabla de Artículos -->
                             <div class="mb-8">
-                                <!-- Header responsive -->
+                                <!-- Header responsive con el checkbox -->
                                 <div
                                     class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
-                                    <h3 class="text-xl font-semibold text-gray-900">Artículos Seleccionados</h3>
+                                    <div class="flex items-center space-x-4">
+                                        <h3 class="text-xl font-semibold text-gray-900">Artículos Seleccionados</h3>
+                                        <!-- Checkbox de Uso Diario -->
+                                        <div
+                                            class="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+                                            <input type="checkbox" x-model="orderInfo.esUsoDiario"
+                                                id="usoDiarioCheckbox"
+                                                class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                            <label for="usoDiarioCheckbox"
+                                                class="text-sm font-medium text-gray-700 cursor-pointer whitespace-nowrap">
+                                                ¿Va para uso diario del usuario?
+                                            </label>
+                                        </div>
+                                    </div>
                                     <div class="flex items-center space-x-4">
                                         <span class="text-sm text-gray-600"
                                             x-text="`${totalUniqueProducts} artículo${totalUniqueProducts !== 1 ? 's' : ''}`"></span>
@@ -294,535 +310,467 @@
                                 <!-- Para pantallas grandes: tabla normal -->
                                 <div class="hidden lg:block overflow-hidden rounded-xl border border-blue-100">
                                     <div class="overflow-x-auto">
-                                        <table class="w-full">
-                                            <thead class="bg-blue-50">
-                                                <tr>
-                                                    <th
-                                                        class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                        Artículo
-                                                    </th>
-                                                    <th
-                                                        class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                        Código
-                                                    </th>
-                                                    <th
-                                                        class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                        Cantidad
-                                                    </th>
-                                                    <th
-                                                        class="px-6 py-4 text-left text-sm font-semibold text-blue-600 uppercase tracking-wider">
-                                                        Acciones
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="bg-white divide-y divide-blue-100">
-                                                <template x-if="products.length === 0">
+                                        <!-- Contenedor con altura máxima y scroll vertical -->
+                                        <div class="max-h-[500px] overflow-y-auto">
+                                            <table class="w-full">
+                                                <thead class="bg-blue-50 sticky top-0 z-10">
                                                     <tr>
-                                                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                                            <i class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
-                                                            <p class="mt-2 text-lg font-medium text-gray-900">No hay
-                                                                artículos agregados</p>
-                                                            <p class="text-sm mt-1 text-gray-600">Agregue artículos
-                                                                usando el formulario inferior</p>
-                                                        </td>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Artículo
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Código
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Cantidad
+                                                        </th>
+                                                        <!-- Columna para checkbox individual (solo cuando NO es uso diario) -->
+                                                        <th x-show="!orderInfo.esUsoDiario"
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Requiere Devolución
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Acciones
+                                                        </th>
                                                     </tr>
-                                                </template>
-                                                <template x-for="(product, index) in products" :key="product.uniqueId">
-                                                    <tr class="hover:bg-blue-50 transition-all duration-200">
-                                                        <!-- Columna Artículo -->
-                                                        <td class="px-6 py-4">
-                                                            <div class="space-y-1">
-                                                                <div class="text-base font-semibold text-gray-900"
-                                                                    x-text="product.nombre"></div>
-                                                                <div class="text-xs text-gray-500 space-y-0.5">
-                                                                    <div class="flex items-center space-x-1"
-                                                                        x-show="product.tipo_articulo">
-                                                                        <i class="fas fa-tag text-xs text-blue-500"></i>
-                                                                        <span class="font-medium">Tipo:</span>
-                                                                        <span x-text="product.tipo_articulo"></span>
-                                                                    </div>
-                                                                    <div class="flex items-center space-x-1"
-                                                                        x-show="product.modelo">
-                                                                        <i
-                                                                            class="fas fa-cogs text-xs text-blue-500"></i>
-                                                                        <span class="font-medium">Modelo:</span>
-                                                                        <span x-text="product.modelo"></span>
-                                                                    </div>
-                                                                    <div class="flex items-center space-x-1"
-                                                                        x-show="product.marca">
-                                                                        <i
-                                                                            class="fas fa-industry text-xs text-blue-500"></i>
-                                                                        <span class="font-medium">Marca:</span>
-                                                                        <span x-text="product.marca"></span>
-                                                                    </div>
-                                                                    <div class="flex items-center space-x-1"
-                                                                        x-show="product.subcategoria">
-                                                                        <i
-                                                                            class="fas fa-layer-group text-xs text-blue-500"></i>
-                                                                        <span class="font-medium">Categoría:</span>
-                                                                        <span x-text="product.subcategoria"></span>
+                                                </thead>
+                                                <tbody class="bg-white divide-y divide-blue-100">
+                                                    <template x-if="products.length === 0">
+                                                        <tr>
+                                                            <td :colspan="orderInfo.esUsoDiario ? 4 : 5"
+                                                                class="px-6 py-12 text-center text-gray-500">
+                                                                <i
+                                                                    class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
+                                                                <p class="mt-2 text-lg font-medium text-gray-900">No
+                                                                    hay
+                                                                    artículos agregados</p>
+                                                                <p class="text-sm mt-1 text-gray-600">Agregue artículos
+                                                                    usando el formulario inferior</p>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                    <template x-for="(product, index) in products"
+                                                        :key="product.uniqueId">
+                                                        <tr class="hover:bg-blue-50 transition-all duration-200">
+                                                            <!-- Columna Artículo -->
+                                                            <td class="px-6 py-4">
+                                                                <div class="space-y-1">
+                                                                    <div class="text-base font-semibold text-gray-900"
+                                                                        x-text="product.nombre"></div>
+                                                                    <div class="text-xs text-gray-500 space-y-0.5">
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.tipo_articulo">
+                                                                            <i
+                                                                                class="fas fa-tag text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Tipo:</span>
+                                                                            <span
+                                                                                x-text="product.tipo_articulo"></span>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.modelo">
+                                                                            <i
+                                                                                class="fas fa-cogs text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Modelo:</span>
+                                                                            <span x-text="product.modelo"></span>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.marca">
+                                                                            <i
+                                                                                class="fas fa-industry text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Marca:</span>
+                                                                            <span x-text="product.marca"></span>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.subcategoria">
+                                                                            <i
+                                                                                class="fas fa-layer-group text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Categoría:</span>
+                                                                            <span x-text="product.subcategoria"></span>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </td>
+                                                            </td>
 
-                                                        <!-- Columna Código -->
-                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                            <div class="text-base text-blue-600 font-mono font-bold"
-                                                                x-text="product.codigo"></div>
-                                                        </td>
+                                                            <!-- Columna Código -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="text-base text-blue-600 font-mono font-bold"
+                                                                    x-text="product.codigo"></div>
+                                                            </td>
 
-                                                        <!-- Columna Cantidad -->
-                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                            <div class="flex items-center space-x-3 justify-center">
-                                                                <span class="font-bold text-lg"
-                                                                    x-text="product.cantidad"></span>
-                                                                <div class="flex space-x-2">
-                                                                    <button @click="updateQuantity(index, -1)"
-                                                                        class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad <= 1" :class="{
-                                                                            'opacity-50 cursor-not-allowed': product
-                                                                                .cantidad <= 1
-                                                                        }">
-                                                                        <i class="fas fa-minus"></i>
+                                                            <!-- Columna Cantidad -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div
+                                                                    class="flex items-center space-x-3 justify-center">
+                                                                    <span class="font-bold text-lg"
+                                                                        x-text="product.cantidad"></span>
+                                                                    <div class="flex space-x-2">
+                                                                        <button @click="updateQuantity(index, -1)"
+                                                                            class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
+                                                                            :disabled="product.cantidad <= 1"
+                                                                            :class="{
+                                                                                'opacity-50 cursor-not-allowed': product
+                                                                                    .cantidad <= 1
+                                                                            }">
+                                                                            <i class="fas fa-minus"></i>
+                                                                        </button>
+                                                                        <button @click="updateQuantity(index, 1)"
+                                                                            class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
+                                                                            :disabled="product.cantidad >= 1000"
+                                                                            :class="{
+                                                                                'opacity-50 cursor-not-allowed': product
+                                                                                    .cantidad >= 1000
+                                                                            }">
+                                                                            <i class="fas fa-plus"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Columna Checkbox individual (solo cuando NO es uso diario) -->
+                                                            <td x-show="!orderInfo.esUsoDiario"
+                                                                class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="flex items-center">
+                                                                    <input type="checkbox"
+                                                                        x-model="product.requiereDevolucion"
+                                                                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                                                    <span class="ml-2 text-sm text-gray-600"
+                                                                        x-text="product.requiereDevolucion ? 'Sí' : 'No'"></span>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Columna Acciones -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="flex items-center space-x-3">
+                                                                    <!-- Botón Devolución (solo cuando requiere devolución y NO es uso diario) -->
+                                                                    <button
+                                                                        x-show="product.requiereDevolucion && !orderInfo.esUsoDiario"
+                                                                        @click="iniciarDevolucion(index)"
+                                                                        class="text-purple-600 hover:text-purple-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-purple-50">
+                                                                        <i class="fas fa-undo-alt"></i>
+                                                                        <span>Devolución</span>
                                                                     </button>
-                                                                    <button @click="updateQuantity(index, 1)"
-                                                                        class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad >= 1000" :class="{
-                                                                            'opacity-50 cursor-not-allowed': product
-                                                                                .cantidad >= 1000
-                                                                        }">
-                                                                        <i class="fas fa-plus"></i>
+
+                                                                    <!-- Botón Eliminar -->
+                                                                    <button @click="removeProduct(index)"
+                                                                        class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-red-50">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                        <span>Eliminar</span>
                                                                     </button>
                                                                 </div>
-                                                            </div>
-                                                        </td>
-
-                                                        <!-- Columna Acciones -->
-                                                        <td class="px-6 py-4 whitespace-nowrap">
-                                                            <button @click="removeProduct(index)"
-                                                                class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-red-50">
-                                                                <i class="fas fa-trash-alt"></i>
-                                                                <span>Eliminar</span>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                </template>
-                                            </tbody>
-                                        </table>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Para pantallas medianas y pequeñas: tarjetas -->
-                                <div class="lg:hidden space-y-4">
-                                    <template x-if="products.length === 0">
-                                        <div class="panel rounded-xl border border-blue-100 p-6 text-center">
-                                            <i class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
-                                            <p class="text-lg font-medium text-gray-900">No hay artículos agregados</p>
-                                            <p class="text-sm mt-2 text-gray-600">Agregue artículos usando el
-                                                formulario inferior</p>
-                                        </div>
-                                    </template>
+                                <!-- Formulario para Agregar Artículo -->
+                                <div class="bg-blue-50 rounded-2xl p-4 sm:p-6 border border-blue-200 mt-4">
+                                    <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Agregar
+                                        Nuevo
+                                        Artículo Manualmente</h3>
 
-                                    <template x-for="(product, index) in products" :key="product.uniqueId">
-                                        <div
-                                            class="panel rounded-xl border border-blue-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
-                                            <!-- Header de la tarjeta -->
-                                            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
-                                                <div class="flex justify-between items-center">
-                                                    <div class="flex-1 min-w-0">
-                                                        <h4 class="font-semibold text-gray-900 truncate"
-                                                            x-text="product.nombre"></h4>
-                                                        <div class="text-xs text-blue-600 font-mono font-bold mt-1"
-                                                            x-text="product.codigo"></div>
-                                                    </div>
-                                                    <button @click="removeProduct(index)"
-                                                        class="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 ml-2">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Contenido de la tarjeta -->
-                                            <div class="p-4">
-                                                <!-- Información del artículo -->
-                                                <div class="space-y-3">
-                                                    <!-- Código -->
-                                                    <div class="flex items-center justify-between">
-                                                        <span class="text-sm text-gray-500 font-medium">
-                                                            <i class="fas fa-barcode mr-2 text-blue-500"></i>
-                                                            <span
-                                                                x-text="product.codigo_barras ? 'Código Barras' : 'Código Repuesto'"></span>
-                                                        </span>
-                                                        <span class="text-sm text-blue-600 font-mono font-medium"
-                                                            x-text="product.codigo"></span>
-                                                    </div>
-
-                                                    <!-- Tipo de artículo -->
-                                                    <div class="flex items-center justify-between"
-                                                        x-show="product.tipo_articulo">
-                                                        <span class="text-sm text-gray-500 font-medium">
-                                                            <i class="fas fa-tag mr-2 text-blue-500"></i>
-                                                            Tipo
-                                                        </span>
-                                                        <span class="text-sm text-gray-700"
-                                                            x-text="product.tipo_articulo"></span>
-                                                    </div>
-
-                                                    <!-- Modelo -->
-                                                    <div class="flex items-center justify-between"
-                                                        x-show="product.modelo">
-                                                        <span class="text-sm text-gray-500 font-medium">
-                                                            <i class="fas fa-cogs mr-2 text-blue-500"></i>
-                                                            Modelo
-                                                        </span>
-                                                        <span class="text-sm text-gray-700"
-                                                            x-text="product.modelo"></span>
-                                                    </div>
-
-                                                    <!-- Marca -->
-                                                    <div class="flex items-center justify-between"
-                                                        x-show="product.marca">
-                                                        <span class="text-sm text-gray-500 font-medium">
-                                                            <i class="fas fa-industry mr-2 text-blue-500"></i>
-                                                            Marca
-                                                        </span>
-                                                        <span class="text-sm text-gray-700"
-                                                            x-text="product.marca"></span>
-                                                    </div>
-
-                                                    <!-- Subcategoría -->
-                                                    <div class="flex items-center justify-between"
-                                                        x-show="product.subcategoria">
-                                                        <span class="text-sm text-gray-500 font-medium">
-                                                            <i class="fas fa-layer-group mr-2 text-blue-500"></i>
-                                                            Categoría
-                                                        </span>
-                                                        <span class="text-sm text-gray-700"
-                                                            x-text="product.subcategoria"></span>
-                                                    </div>
-
-                                                    <!-- Contador de cantidad -->
-                                                    <div class="pt-3 border-t border-gray-100">
-                                                        <div class="flex items-center justify-between">
-                                                            <span class="text-sm text-gray-500 font-medium">
-                                                                <i class="fas fa-boxes mr-2 text-blue-500"></i>
-                                                                Cantidad
-                                                            </span>
-                                                            <div class="flex items-center space-x-4">
-                                                                <span class="font-bold text-lg text-gray-900"
-                                                                    x-text="product.cantidad"></span>
-                                                                <div class="flex space-x-2">
-                                                                    <button @click="updateQuantity(index, -1)"
-                                                                        class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad <= 1" :class="{
-                                                                            'opacity-50 cursor-not-allowed': product
-                                                                                .cantidad <= 1
-                                                                        }">
-                                                                        <i class="fas fa-minus"></i>
-                                                                    </button>
-                                                                    <button @click="updateQuantity(index, 1)"
-                                                                        class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
-                                                                        :disabled="product.cantidad >= 1000" :class="{
-                                                                            'opacity-50 cursor-not-allowed': product
-                                                                                .cantidad >= 1000
-                                                                        }">
-                                                                        <i class="fas fa-plus"></i>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    <div
+                                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                                        <!-- Artículo -->
+                                        <div class="lg:col-span-2">
+                                            <label
+                                                class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Artículo</label>
+                                            <select x-model="newProduct.articuloId" x-ref="articuloSelect"
+                                                class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Seleccione un artículo...</option>
+                                                <template x-if="articulos && articulos.length > 0">
+                                                    <template x-for="articulo in articulos"
+                                                        :key="articulo.idArticulos">
+                                                        <option :value="articulo.idArticulos"
+                                                            :data-codigo="articulo.codigo_barras || articulo.codigo_repuesto"
+                                                            :data-tipo="articulo.tipo_articulo"
+                                                            x-text="articulo.nombre_completo">
+                                                        </option>
+                                                    </template>
+                                                </template>
+                                            </select>
+                                            <div x-show="!articulos || articulos.length === 0"
+                                                class="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">
+                                                No hay artículos disponibles
                                             </div>
                                         </div>
-                                    </template>
+
+                                        <!-- Cantidad -->
+                                        <div>
+                                            <label
+                                                class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Cantidad</label>
+                                            <div class="flex w-full">
+                                                <button @click="decreaseQuantity()"
+                                                    class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-3 sm:px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M20 12H4"></path>
+                                                    </svg>
+                                                </button>
+                                                <input type="number" x-model="newProduct.cantidad" min="1"
+                                                    max="1000"
+                                                    class="w-12 sm:w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold text-sm sm:text-base"
+                                                    readonly />
+                                                <button @click="increaseQuantity()"
+                                                    class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-3 sm:px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
+                                                    <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none"
+                                                        stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-1 sm:mt-2 text-center">Mín: 1 - Máx:
+                                                1000
+                                            </div>
+                                        </div>
+
+                                        <!-- Descripción -->
+                                        <div>
+                                            <label
+                                                class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Descripción</label>
+                                            <input type="text" x-model="newProduct.descripcion"
+                                                class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+                                                placeholder="Descripción adicional...">
+                                        </div>
+                                    </div>
+
+                                    <button @click="addProduct()" :disabled="!canAddProduct"
+                                        :class="{
+                                            'opacity-50 cursor-not-allowed': !canAddProduct,
+                                            'hover:scale-[1.02]': canAddProduct
+                                        }"
+                                        class="w-full bg-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-2 sm:space-x-3 shadow-lg">
+                                        <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        <span class="text-sm sm:text-lg">Agregar Artículo a la Solicitud</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información Adicional -->
+                        <div
+                            class="panel rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
+                            <div
+                                class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-lg shadow-xl border border-white/10 relative overflow-hidden">
+                                <!-- Efecto sutil de brillo -->
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                </div>
+
+                                <div class="flex items-center space-x-3 relative z-10">
+                                    <div
+                                        class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
+                                        <i class="fas fa-info-circle text-white text-lg"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center gap-2">
+                                            <h2 class="text-xl font-bold text-white drop-shadow-sm">Información
+                                                Adicional
+                                            </h2>
+                                            <span
+                                                class="px-2 py-1 bg-white/20 rounded-full text-white text-xs font-medium border border-white/30">
+                                                Requerido
+                                            </span>
+                                        </div>
+                                        <p class="text-white/80 text-sm mt-1">Complete los detalles de la solicitud</p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Formulario para Agregar Artículo -->
-                            <div class="bg-blue-50 rounded-2xl p-4 sm:p-6 border border-blue-200">
-                                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Agregar Nuevo
-                                    Artículo Manualmente</h3>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                                    <!-- Artículo -->
-                                    <div class="lg:col-span-2">
+                            <div class="p-4 sm:p-6">
+                                <!-- Sección de Información Adicional -->
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                                    <!-- Área Destino -->
+                                    <div>
                                         <label
-                                            class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Artículo</label>
-                                        <select x-model="newProduct.articuloId" x-ref="articuloSelect"
-                                            class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                            <option value="">Seleccione un artículo...</option>
-                                            <template x-if="articulos && articulos.length > 0">
-                                                <template x-for="articulo in articulos" :key="articulo.idArticulos">
-                                                    <option :value="articulo.idArticulos"
-                                                        :data-codigo="articulo.codigo_barras || articulo.codigo_repuesto"
-                                                        :data-tipo="articulo.tipo_articulo"
-                                                        x-text="articulo.nombre_completo">
-                                                    </option>
-                                                </template>
+                                            class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                            <i class="fas fa-building text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                            Área Destino
+                                        </label>
+                                        <select x-model="orderInfo.areaDestino"
+                                            class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+                                            <option value="">Seleccione un área...</option>
+                                            @foreach ($areas as $area)
+                                                <option value="{{ $area->idTipoArea }}">{{ $area->nombre }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <!-- Usuario Destino -->
+                                    <div>
+                                        <label
+                                            class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                            <i class="fas fa-user text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                            Usuario Destino
+                                        </label>
+                                        <select x-model="orderInfo.usuarioDestino"
+                                            class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
+                                            <option value="">Seleccione un usuario...</option>
+                                            <template x-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
+                                                <option :value="usuario.idUsuario"
+                                                    x-text="`${usuario.Nombre} ${usuario.apellidoPaterno}`"></option>
                                             </template>
                                         </select>
-                                        <div x-show="!articulos || articulos.length === 0"
-                                            class="text-red-500 text-xs sm:text-sm mt-1 sm:mt-2">
-                                            No hay artículos disponibles
+                                        <div x-show="orderInfo.areaDestino && usuariosFiltrados.length === 0"
+                                            class="text-yellow-600 text-xs sm:text-sm mt-1 sm:mt-2">
+                                            No hay usuarios disponibles en esta área
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Cantidad -->
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6 sm:mt-8">
+                                    <!-- Tipo de Servicio -->
                                     <div>
                                         <label
-                                            class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Cantidad</label>
-                                        <div class="flex w-full">
-                                            <button @click="decreaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-l-lg px-3 sm:px-4 font-semibold border border-r-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M20 12H4"></path>
-                                                </svg>
-                                            </button>
-                                            <input type="number" x-model="newProduct.cantidad" min="1" max="1000"
-                                                class="w-12 sm:w-16 text-center border-y border-blue-600 focus:ring-0 bg-white text-gray-900 font-semibold text-sm sm:text-base"
-                                                readonly />
-                                            <button @click="increaseQuantity()"
-                                                class="bg-blue-600 text-white flex justify-center items-center rounded-r-lg px-3 sm:px-4 font-semibold border border-l-0 border-blue-600 hover:bg-blue-700 transition-colors">
-                                                <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1 sm:mt-2 text-center">Mín: 1 - Máx: 1000
+                                            class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                            <i class="fas fa-tools text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                            Tipo de Servicio
+                                        </label>
+                                        <div class="relative">
+                                            <select x-model="orderInfo.tipoServicio"
+                                                class="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white cursor-pointer shadow-sm hover:shadow-md text-sm sm:text-base">
+                                                <option value="solicitud_articulo">Solicitud de Artículo</option>
+                                                <option value="mantenimiento">Mantenimiento</option>
+                                                <option value="reparacion">Reparación</option>
+                                                <option value="instalacion">Instalación</option>
+                                                <option value="garantia">Garantía</option>
+                                            </select>
                                         </div>
                                     </div>
 
-                                    <!-- Descripción -->
+                                    <!-- Fecha Requerida -->
                                     <div>
                                         <label
-                                            class="block text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Descripción</label>
-                                        <input type="text" x-model="newProduct.descripcion"
-                                            class="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
-                                            placeholder="Descripción adicional...">
-                                    </div>
-                                </div>
-
-                                <button @click="addProduct()" :disabled="!canAddProduct" :class="{
-                                        'opacity-50 cursor-not-allowed': !canAddProduct,
-                                        'hover:scale-[1.02]': canAddProduct
-                                    }"
-                                    class="w-full bg-blue-600 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-2 sm:space-x-3 shadow-lg">
-                                    <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    <span class="text-sm sm:text-lg">Agregar Artículo a la Solicitud</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Información Adicional -->
-                    <div
-                        class="panel rounded-2xl shadow-lg overflow-hidden border border-blue-100 transition-all duration-300">
-                        <div
-                            class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 rounded-lg shadow-xl border border-white/10 relative overflow-hidden">
-                            <!-- Efecto sutil de brillo -->
-                            <div
-                                class="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
-                            </div>
-
-                            <div class="flex items-center space-x-3 relative z-10">
-                                <div
-                                    class="flex items-center justify-center w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full font-bold shadow-lg border border-white/30">
-                                    <i class="fas fa-info-circle text-white text-lg"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <h2 class="text-xl font-bold text-white drop-shadow-sm">Información Adicional
-                                        </h2>
-                                        <span
-                                            class="px-2 py-1 bg-white/20 rounded-full text-white text-xs font-medium border border-white/30">
-                                            Requerido
-                                        </span>
-                                    </div>
-                                    <p class="text-white/80 text-sm mt-1">Complete los detalles de la solicitud</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="p-4 sm:p-6">
-                            <!-- Sección de Información Adicional -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-                                <!-- Área Destino -->
-                                <div>
-                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
-                                        <i class="fas fa-building text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                        Área Destino
-                                    </label>
-                                    <select x-model="orderInfo.areaDestino"
-                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
-                                        <option value="">Seleccione un área...</option>
-                                        @foreach ($areas as $area)
-                                            <option value="{{ $area->idTipoArea }}">{{ $area->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <!-- Usuario Destino -->
-                                <div>
-                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
-                                        <i class="fas fa-user text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                        Usuario Destino
-                                    </label>
-                                    <select x-model="orderInfo.usuarioDestino"
-                                        class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base">
-                                        <option value="">Seleccione un usuario...</option>
-                                        <template x-for="usuario in usuariosFiltrados" :key="usuario.idUsuario">
-                                            <option :value="usuario.idUsuario"
-                                                x-text="`${usuario.Nombre} ${usuario.apellidoPaterno}`"></option>
-                                        </template>
-                                    </select>
-                                    <div x-show="orderInfo.areaDestino && usuariosFiltrados.length === 0"
-                                        class="text-yellow-600 text-xs sm:text-sm mt-1 sm:mt-2">
-                                        No hay usuarios disponibles en esta área
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mt-6 sm:mt-8">
-                                <!-- Tipo de Servicio -->
-                                <div>
-                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
-                                        <i class="fas fa-tools text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                        Tipo de Servicio
-                                    </label>
-                                    <div class="relative">
-                                        <select x-model="orderInfo.tipoServicio"
-                                            class="w-full pl-9 sm:pl-11 pr-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 appearance-none bg-white cursor-pointer shadow-sm hover:shadow-md text-sm sm:text-base">
-                                            <option value="solicitud_articulo">Solicitud de Artículo</option>
-                                            <option value="mantenimiento">Mantenimiento</option>
-                                            <option value="reparacion">Reparación</option>
-                                            <option value="instalacion">Instalación</option>
-                                            <option value="garantia">Garantía</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <!-- Fecha Requerida -->
-                                <div>
-                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
-                                        <i class="fas fa-calendar-day text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                        Fecha Requerida
-                                    </label>
-                                    <div class="relative">
-                                        <input type="text" x-ref="fechaRequeridaInput"
-                                            x-model="orderInfo.fechaRequerida"
-                                            class="w-full pr-9 sm:pr-11 pl-3 sm:pl-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base"
-                                            placeholder="Seleccione una fecha">
-                                        <div
-                                            class="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center pointer-events-none">
-                                            <i class="fas fa-calendar-alt text-gray-400 text-sm sm:text-base"></i>
-                                        </div>
-                                    </div>
-                                    <div class="text-xs text-gray-500 mt-1 sm:mt-2 flex items-center">
-                                        <i class="fas fa-info-circle text-blue-400 mr-1 text-xs sm:text-sm"></i>
-                                        Fecha límite para tener todos los artículos
-                                    </div>
-                                    <div class="mt-2 sm:mt-3 bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 transition-all duration-300"
-                                        x-show="orderInfo.fechaRequerida"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-start="opacity-0 transform scale-95"
-                                        x-transition:enter-end="opacity-100 transform scale-100">
-                                        <div class="flex items-center space-x-2 sm:space-x-3">
+                                            class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                            <i class="fas fa-calendar-day text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                            Fecha Requerida
+                                        </label>
+                                        <div class="relative">
+                                            <input type="text" x-ref="fechaRequeridaInput"
+                                                x-model="orderInfo.fechaRequerida"
+                                                class="w-full pr-9 sm:pr-11 pl-3 sm:pl-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base"
+                                                placeholder="Seleccione una fecha">
                                             <div
-                                                class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-check-circle text-blue-600 text-base sm:text-lg"></i>
+                                                class="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center pointer-events-none">
+                                                <i class="fas fa-calendar-alt text-gray-400 text-sm sm:text-base"></i>
                                             </div>
-                                            <div class="min-w-0">
-                                                <p class="text-xs sm:text-sm font-semibold text-blue-800 truncate">
-                                                    Fecha establecida</p>
-                                                <p class="text-xs sm:text-sm text-blue-700 font-medium truncate">
-                                                    <span
-                                                        x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
-                                                </p>
+                                        </div>
+                                        <div class="text-xs text-gray-500 mt-1 sm:mt-2 flex items-center">
+                                            <i class="fas fa-info-circle text-blue-400 mr-1 text-xs sm:text-sm"></i>
+                                            Fecha límite para tener todos los artículos
+                                        </div>
+                                        <div class="mt-2 sm:mt-3 bg-blue-50 border border-blue-200 rounded-lg p-2 sm:p-3 transition-all duration-300"
+                                            x-show="orderInfo.fechaRequerida"
+                                            x-transition:enter="transition ease-out duration-300"
+                                            x-transition:enter-start="opacity-0 transform scale-95"
+                                            x-transition:enter-end="opacity-100 transform scale-100">
+                                            <div class="flex items-center space-x-2 sm:space-x-3">
+                                                <div
+                                                    class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    <i
+                                                        class="fas fa-check-circle text-blue-600 text-base sm:text-lg"></i>
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <p class="text-xs sm:text-sm font-semibold text-blue-800 truncate">
+                                                        Fecha establecida</p>
+                                                    <p class="text-xs sm:text-sm text-blue-700 font-medium truncate">
+                                                        <span
+                                                            x-text="formatDateForDisplay(orderInfo.fechaRequerida)"></span>
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <!-- Nivel de Urgencia -->
-                            <div class="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
-                                <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-                                    <i class="fas fa-gauge-high text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                    Nivel de Urgencia
-                                </label>
+                                <!-- Nivel de Urgencia -->
+                                <div class="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
+                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+                                        <i class="fas fa-gauge-high text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                        Nivel de Urgencia
+                                    </label>
 
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-                                    <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
-                                        <button type="button" @click="orderInfo.urgencia = urgencia.value"
-                                            class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
-                                            <div class="p-3 sm:p-4 md:p-5 rounded-xl border-2 transition-all duration-300 h-full shadow-sm hover:shadow-md"
-                                                :class="{
-                                                    [urgencia.borderColor + ' ' + urgencia.bgColor]: orderInfo
-                                                        .urgencia === urgencia.value,
-                                                        'border-gray-200 bg-gray-50 hover:border-gray-300': orderInfo
-                                                        .urgencia !== urgencia.value
-                                                }">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                                        <template x-for="(urgencia, index) in nivelesUrgencia" :key="index">
+                                            <button type="button" @click="orderInfo.urgencia = urgencia.value"
+                                                class="group relative text-left transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                                                <div class="p-3 sm:p-4 md:p-5 rounded-xl border-2 transition-all duration-300 h-full shadow-sm hover:shadow-md"
+                                                    :class="{
+                                                        [urgencia.borderColor + ' ' + urgencia.bgColor]: orderInfo
+                                                            .urgencia === urgencia.value,
+                                                            'border-gray-200 bg-gray-50 hover:border-gray-300':
+                                                            orderInfo
+                                                            .urgencia !== urgencia.value
+                                                    }">
 
-                                                <!-- Header con icono y título -->
-                                                <div class="flex items-center justify-between mb-2 sm:mb-3">
-                                                    <div class="flex items-center space-x-1 sm:space-x-2">
-                                                        <i class="fas" :class="urgencia.icon + ' ' + urgencia.iconColor +
-                                                                ' text-lg sm:text-xl'"></i>
-                                                        <h3 class="font-bold text-gray-900 text-sm sm:text-base md:text-lg"
-                                                            x-text="urgencia.text"></h3>
+                                                    <!-- Header con icono y título -->
+                                                    <div class="flex items-center justify-between mb-2 sm:mb-3">
+                                                        <div class="flex items-center space-x-1 sm:space-x-2">
+                                                            <i class="fas"
+                                                                :class="urgencia.icon + ' ' + urgencia.iconColor +
+                                                                    ' text-lg sm:text-xl'"></i>
+                                                            <h3 class="font-bold text-gray-900 text-sm sm:text-base md:text-lg"
+                                                                x-text="urgencia.text"></h3>
+                                                        </div>
+                                                        <div class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center transition-all duration-300"
+                                                            :class="{
+                                                                [urgencia.iconColor]: orderInfo.urgencia === urgencia
+                                                                    .value,
+                                                                    'text-gray-400': orderInfo.urgencia !== urgencia
+                                                                    .value
+                                                            }">
+                                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor"
+                                                                viewBox="0 0 20 20">
+                                                                <path x-show="orderInfo.urgencia === urgencia.value"
+                                                                    fill-rule="evenodd"
+                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                    clip-rule="evenodd" />
+                                                                <path x-show="orderInfo.urgencia !== urgencia.value"
+                                                                    fill-rule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                        </div>
                                                     </div>
-                                                    <div class="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center transition-all duration-300"
-                                                        :class="{
-                                                            [urgencia.iconColor]: orderInfo.urgencia === urgencia.value,
-                                                                'text-gray-400': orderInfo.urgencia !== urgencia.value
-                                                        }">
-                                                        <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor"
-                                                            viewBox="0 0 20 20">
-                                                            <path x-show="orderInfo.urgencia === urgencia.value"
-                                                                fill-rule="evenodd"
-                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                clip-rule="evenodd" />
-                                                            <path x-show="orderInfo.urgencia !== urgencia.value"
-                                                                fill-rule="evenodd"
-                                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    </div>
+
+                                                    <!-- Descripción -->
+                                                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed"
+                                                        x-text="urgencia.description"></p>
+
                                                 </div>
-
-                                                <!-- Descripción -->
-                                                <p class="text-xs sm:text-sm text-gray-600 leading-relaxed"
-                                                    x-text="urgencia.description"></p>
-
-                                            </div>
-                                        </button>
-                                    </template>
+                                            </button>
+                                        </template>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Observaciones -->
-                            <div class="mt-6 sm:mt-8">
-                                <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
-                                    <i class="fas fa-comment-dots text-blue-500 mr-2 text-sm sm:text-base"></i>
-                                    Observaciones y Comentarios
-                                </label>
-                                <textarea x-model="orderInfo.observaciones" rows="4"
-                                    class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 resize-none transition-all duration-200 text-sm sm:text-base"
-                                    placeholder="Describa cualquier observación, comentario adicional o instrucción especial para esta solicitud..."></textarea>
+                                <!-- Observaciones -->
+                                <div class="mt-6 sm:mt-8">
+                                    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                        <i class="fas fa-comment-dots text-blue-500 mr-2 text-sm sm:text-base"></i>
+                                        Observaciones y Comentarios
+                                    </label>
+                                    <textarea x-model="orderInfo.observaciones" rows="4"
+                                        class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 resize-none transition-all duration-200 text-sm sm:text-base"
+                                        placeholder="Describa cualquier observación, comentario adicional o instrucción especial para esta solicitud..."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Sidebar -->
                 <div class="xl:col-span-1 space-y-8">
@@ -948,7 +896,8 @@
                                             class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
                                             <i class="fas fa-calendar-alt text-orange-600 text-sm"></i>
                                         </div>
-                                        <span class="text-sm text-gray-700 font-medium truncate">Fecha Requerida</span>
+                                        <span class="text-sm text-gray-700 font-medium truncate">Fecha
+                                            Requerida</span>
                                     </div>
                                     <span class="text-base font-bold text-orange-600 ml-2 truncate max-w-[120px]"
                                         x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"
@@ -993,7 +942,8 @@
 
                         <div class="space-y-3 sm:space-y-4">
                             <!-- Botón Limpiar Todo -->
-                            <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder" :class="{
+                            <button @click="clearAll()" :disabled="products.length === 0 || isCreatingOrder"
+                                :class="{
                                     'opacity-50 cursor-not-allowed': products.length === 0 || isCreatingOrder,
                                     'hover:bg-yellow-600': products.length > 0 && !isCreatingOrder
                                 }"
@@ -1006,11 +956,12 @@
                                 <!-- Botón Guardar Solicitud -->
                                 <button @click="createSolicitud()" :disabled="!canCreateSolicitud || isCreatingOrder"
                                     :class="{
-                                                                                    'opacity-50 cursor-not-allowed': !canCreateSolicitud || isCreatingOrder,
-                                                                                    'hover:bg-green-600 active:scale-95': canCreateSolicitud && !isCreatingOrder,
-                                                                                    'hover:scale-[1.02] sm:hover:scale-[1.02]': canCreateSolicitud && !
-                                                                                        isCreatingOrder
-                                                                                }"
+                                        'opacity-50 cursor-not-allowed': !canCreateSolicitud || isCreatingOrder,
+                                        'hover:bg-green-600 active:scale-95': canCreateSolicitud && !
+                                            isCreatingOrder,
+                                        'hover:scale-[1.02] sm:hover:scale-[1.02]': canCreateSolicitud && !
+                                            isCreatingOrder
+                                    }"
                                     class="w-full px-4 py-3 sm:px-6 sm:py-4 bg-green-500 text-white rounded-lg font-bold transition-all duration-200 flex items-center justify-center space-x-2 sm:space-x-3 shadow-lg">
                                     <!-- Icono o spinner -->
                                     <template x-if="!isCreatingOrder">
@@ -1076,15 +1027,16 @@
                                 class="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs sm:text-sm font-medium text-gray-600">Soporte Técnico</p>
-                                    <p class="text-base sm:text-lg font-bold text-gray-900 truncate">+1 (555) 123-4567
+                                    <p class="text-base sm:text-lg font-bold text-gray-900 truncate">+1 (555)
+                                        123-4567
                                     </p>
                                 </div>
                             </div>
@@ -1094,8 +1046,8 @@
                                 class="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-white/80 rounded-xl border border-blue-100 backdrop-blur-sm">
                                 <div
                                     class="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-xl flex items-center justify-center shadow-md">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
@@ -1156,6 +1108,111 @@
                 </div>
             </div>
         </div>
+        <!-- Modal para Devolución -->
+        <div x-show="showDevolucionModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div x-show="showDevolucionModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95"
+                class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 mx-auto">
+
+                <!-- Icono de devolución -->
+                <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-undo-alt text-purple-600 text-2xl"></i>
+                </div>
+
+                <!-- Contenido -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        <!-- Mostrar título diferente según si ya tiene fecha -->
+                        <span
+                            x-text="productoParaDevolucion?.fechaDevolucion ? 'Editar Devolución' : 'Programar Devolución'"></span>
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        <!-- Mostrar mensaje diferente según si ya tiene fecha -->
+                        <template x-if="productoParaDevolucion?.fechaDevolucion">
+                            <span>Editar fecha de devolución para:</span>
+                        </template>
+                        <template x-if="!productoParaDevolucion?.fechaDevolucion">
+                            <span>Programar devolución para el artículo:</span>
+                        </template>
+                        <span class="font-semibold text-purple-600" x-text="productoParaDevolucion?.nombre"></span>
+                    </p>
+
+                    <!-- Mostrar fecha actual si ya tiene -->
+                    <div x-show="productoParaDevolucion?.fechaDevolucion" class="mb-4">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-check text-green-500 mr-2"></i>
+                                <span class="text-sm font-medium text-green-700">
+                                    Fecha actual: <span
+                                        x-text="formatDateForDisplay(productoParaDevolucion?.fechaDevolucion)"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fecha de devolución -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <!-- Mostrar etiqueta diferente según si ya tiene fecha -->
+                            <span
+                                x-text="productoParaDevolucion?.fechaDevolucion ? 'Nueva Fecha de Devolución' : 'Fecha de Devolución'"></span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" x-ref="fechaDevolucionInput" x-model="fechaDevolucion"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-900"
+                                placeholder="Seleccione una fecha">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="fas fa-calendar-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Seleccione la fecha en la que se realizará la devolución
+                        </p>
+                    </div>
+
+                    <!-- Información del artículo -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="font-medium text-gray-600">Código:</div>
+                            <div class="text-gray-900 font-mono" x-text="productoParaDevolucion?.codigo"></div>
+
+                            <div class="font-medium text-gray-600">Cantidad:</div>
+                            <div class="text-gray-900 font-bold" x-text="productoParaDevolucion?.cantidad"></div>
+
+                            <div class="font-medium text-gray-600" x-show="productoParaDevolucion?.tipo_articulo">
+                                Tipo:</div>
+                            <div class="text-gray-900" x-show="productoParaDevolucion?.tipo_articulo"
+                                x-text="productoParaDevolucion?.tipo_articulo"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3">
+                    <button @click="cancelarDevolucion()"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button @click="confirmarDevolucion()" :disabled="!fechaDevolucion"
+                        :class="{ 'opacity-50 cursor-not-allowed': !fechaDevolucion }"
+                        class="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas"
+                            :class="productoParaDevolucion?.fechaDevolucion ? 'fa-edit' : 'fa-check'"></i>
+                        <!-- Mostrar texto diferente según si ya tiene fecha -->
+                        <span
+                            x-text="productoParaDevolucion?.fechaDevolucion ? 'Editar Devolución' : 'Confirmar Devolución'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Incluir jQuery y Select2 JS -->
@@ -1210,7 +1267,9 @@
                     observaciones: '',
                     fechaRequerida: '',
                     areaDestino: '', // Nuevo campo
-                    usuarioDestino: '' // Nuevo campo
+                    usuarioDestino: '', // Nuevo campo
+                    esUsoDiario: false // Nuevo campo para el checkbox
+
                 },
                 minDate: '',
                 isCreatingOrder: false,
@@ -1221,37 +1280,46 @@
                 selectedCotizacionInfo: null,
                 cotizacionProducts: [],
 
+                // Variables para la devolución
+                showDevolucionModal: false,
+                productoParaDevolucion: null,
+                fechaDevolucion: '',
+
+                // Para flatpickr del modal
+                fechaDevolucionInput: null,
+
+
                 // Artículos desde Laravel - Asegurar que sea un array
                 articulos: @json($articulos ?? []),
 
                 // Niveles de urgencia
                 nivelesUrgencia: [{
-                    value: 'baja',
-                    text: 'Baja',
-                    icon: 'fa-circle-check',
-                    iconColor: 'text-green-500',
-                    bgColor: 'bg-green-50',
-                    borderColor: 'border-green-200',
-                    description: 'Sin urgencia específica'
-                },
-                {
-                    value: 'media',
-                    text: 'Media',
-                    icon: 'fa-clock',
-                    iconColor: 'text-yellow-500',
-                    bgColor: 'bg-yellow-50',
-                    borderColor: 'border-yellow-200',
-                    description: 'Necesario en los próximos días'
-                },
-                {
-                    value: 'alta',
-                    text: 'Alta',
-                    icon: 'fa-triangle-exclamation',
-                    iconColor: 'text-red-500',
-                    bgColor: 'bg-red-50',
-                    borderColor: 'border-red-200',
-                    description: 'Urgente - necesario inmediatamente'
-                }
+                        value: 'baja',
+                        text: 'Baja',
+                        icon: 'fa-circle-check',
+                        iconColor: 'text-green-500',
+                        bgColor: 'bg-green-50',
+                        borderColor: 'border-green-200',
+                        description: 'Sin urgencia específica'
+                    },
+                    {
+                        value: 'media',
+                        text: 'Media',
+                        icon: 'fa-clock',
+                        iconColor: 'text-yellow-500',
+                        bgColor: 'bg-yellow-50',
+                        borderColor: 'border-yellow-200',
+                        description: 'Necesario en los próximos días'
+                    },
+                    {
+                        value: 'alta',
+                        text: 'Alta',
+                        icon: 'fa-triangle-exclamation',
+                        iconColor: 'text-red-500',
+                        bgColor: 'bg-red-50',
+                        borderColor: 'border-red-200',
+                        description: 'Urgente - necesario inmediatamente'
+                    }
                 ],
 
                 // Computed properties
@@ -1294,14 +1362,135 @@
                         }
                     });
 
+                    // Observador para cuando cambie el estado de "esUsoDiario"
+                    this.$watch('orderInfo.esUsoDiario', (newValue) => {
+                        this.resetearDevoluciones(newValue);
+                    });
+
                     this.minDate = new Date().toISOString().split('T')[0];
 
                     this.$nextTick(() => {
                         this.initSelect2();
                         this.initFlatpickr();
+                        this.initFlatpickrDevolucion();
                     });
                 },
 
+                resetearDevoluciones(esUsoDiario) {
+                    if (this.products.length === 0) return;
+
+                    if (esUsoDiario) {
+                        // Si se marca como uso diario, quitar todos los checkboxes y fechas de devolución
+                        let resetCount = 0;
+
+                        this.products.forEach(product => {
+                            if (product.requiereDevolucion || product.fechaDevolucion) {
+                                product.requiereDevolucion = false;
+                                product.fechaDevolucion = null; // También limpiar la fecha
+                                resetCount++;
+                            }
+                        });
+
+                        if (resetCount > 0) {
+                            toastr.info(
+                                `Se han quitado ${resetCount} marca(s) de devolución porque ahora es para uso diario`
+                            );
+                        }
+                    } else {
+                        // Si se desmarca (NO es uso diario), todos los productos empiezan sin requerir devolución
+                        // PERO mantenemos las fechas si ya estaban asignadas
+                        this.products.forEach(product => {
+                            if (!product.fechaDevolucion) {
+                                product.requiereDevolucion = false;
+                            }
+                        });
+
+                        // Mostrar mensaje informativo
+                        toastr.info(
+                            'Modo: NO es para uso diario. Puede marcar artículos para devolución');
+                    }
+                },
+                initFlatpickrDevolucion() {
+                    // Inicializaremos flatpickr cuando se abra el modal
+                },
+
+                // Métodos para la devolución
+                iniciarDevolucion(index) {
+                    this.productoParaDevolucion = this.products[index];
+                    this.productoParaDevolucionIndex = index; // Guardar el índice para poder actualizar
+
+                    // Cargar la fecha guardada si existe, de lo contrario vacío
+                    this.fechaDevolucion = this.productoParaDevolucion.fechaDevolucion || '';
+                    this.showDevolucionModal = true;
+
+                    // Inicializar flatpickr después de que el modal se muestre
+                    this.$nextTick(() => {
+                        if (this.$refs.fechaDevolucionInput) {
+                            this.fechaDevolucionInput = flatpickr(this.$refs
+                                .fechaDevolucionInput, {
+                                    locale: 'es',
+                                    dateFormat: 'Y-m-d',
+                                    minDate: 'today',
+                                    disableMobile: false,
+                                    allowInput: true,
+                                    clickOpens: true,
+                                    onChange: (selectedDates, dateStr) => {
+                                        this.fechaDevolucion = dateStr;
+                                    },
+                                    onReady: (selectedDates, dateStr, instance) => {
+                                        // Establecer la fecha guardada si existe
+                                        if (this.productoParaDevolucion
+                                            .fechaDevolucion) {
+                                            instance.setDate(this.productoParaDevolucion
+                                                .fechaDevolucion);
+                                        }
+                                    }
+                                });
+                        }
+                    });
+                },
+
+                confirmarDevolucion() {
+                    if (!this.fechaDevolucion) {
+                        toastr.error('Por favor seleccione una fecha de devolución');
+                        return;
+                    }
+
+                    // Guardar la fecha en el producto
+                    this.products[this.productoParaDevolucionIndex].fechaDevolucion = this
+                        .fechaDevolucion;
+
+                    // Si no estaba marcado como requiere devolución, marcarlo
+                    if (!this.products[this.productoParaDevolucionIndex].requiereDevolucion) {
+                        this.products[this.productoParaDevolucionIndex].requiereDevolucion = true;
+                    }
+
+                    console.log('Datos de devolución guardados:', {
+                        producto: this.productoParaDevolucion.nombre,
+                        fechaDevolucion: this.fechaDevolucion,
+                        indice: this.productoParaDevolucionIndex
+                    });
+
+                    toastr.success(
+                        `Devolución programada para el ${this.formatDateForDisplay(this.fechaDevolucion)} - Artículo: ${this.productoParaDevolucion.nombre}`
+                    );
+
+                    // Cerrar modal
+                    this.cancelarDevolucion();
+                },
+
+                cancelarDevolucion() {
+                    this.showDevolucionModal = false;
+                    this.productoParaDevolucion = null;
+                    this.productoParaDevolucionIndex = null; // Resetear el índice
+                    this.fechaDevolucion = '';
+
+                    // Destruir flatpickr si existe
+                    if (this.fechaDevolucionInput) {
+                        this.fechaDevolucionInput.destroy();
+                        this.fechaDevolucionInput = null;
+                    }
+                },
                 filtrarUsuariosPorArea(areaId) {
                     if (!areaId) {
                         this.usuariosFiltrados = [];
@@ -1455,7 +1644,8 @@
                                     `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
                                     'Desde cotización'),
                             cantidadCotizacion: cotizacionProduct.cantidad,
-                            esDeCotizacion: true
+                            esDeCotizacion: true,
+                            requiereDevolucion: false // Asegurar que se inicialice
                         };
 
                         this.products.push(product);
@@ -1482,7 +1672,7 @@
                         if (articuloCompleto) {
                             const existingProductIndex = this.products.findIndex(
                                 product => product.articuloId == cotizacionProduct
-                                    .articulo_id
+                                .articulo_id
                             );
 
                             if (existingProductIndex !== -1) {
@@ -1512,7 +1702,8 @@
                                             `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
                                             'Desde cotización'),
                                     cantidadCotizacion: cotizacionProduct.cantidad,
-                                    esDeCotizacion: true
+                                    esDeCotizacion: true,
+                                    requiereDevolucion: false // Agregar este campo
                                 };
 
                                 this.products.push(product);
@@ -1597,7 +1788,9 @@
                             marca: articuloData.marca,
                             subcategoria: articuloData.subcategoria,
                             cantidad: this.newProduct.cantidad,
-                            descripcion: this.newProduct.descripcion
+                            descripcion: this.newProduct.descripcion,
+                            requiereDevolucion: false,
+                            fechaDevolucion: null // Nuevo campo para guardar la fecha
                         };
 
                         this.products.push(product);
