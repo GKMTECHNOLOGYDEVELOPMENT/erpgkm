@@ -247,104 +247,124 @@ class SolicitudrepuestoController extends Controller
     }
 
 
+ public function marcarUsado(Request $request, $solicitudId)
+    {
+        try {
+            $request->validate([
+                'articulo_id' => 'required|integer',
+                'fecha_uso' => 'required|date',
+                'observacion' => 'nullable|string|max:500',
+                'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            ]);
 
-/**
- * Marcar un repuesto como usado
- */
-public function marcarUsado(Request $request, $solicitudId)
-{
-    try {
-        $request->validate([
-            'articulo_id' => 'required|integer',
-            'fecha_uso' => 'required|date',
-            'observacion' => 'nullable|string|max:500',
-            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' // 5MB máximo por foto
-        ]);
+            DB::transaction(function () use ($request, $solicitudId) {
+                // Obtener información de la solicitud
+                $solicitud = DB::table('solicitudesordenes')
+                    ->select('codigo')
+                    ->where('idsolicitudesordenes', $solicitudId)
+                    ->first();
 
-        DB::transaction(function () use ($request, $solicitudId) {
-            // Obtener información de la solicitud
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('codigo')
-                ->where('idsolicitudesordenes', $solicitudId)
-                ->first();
-
-            if (!$solicitud) {
-                throw new \Exception('Solicitud no encontrada');
-            }
-
-            // Obtener información del repuesto
-            $repuestoInfo = DB::table('ordenesarticulos as oa')
-                ->select(
-                    'oa.idordenesarticulos',
-                    'oa.cantidad',
-                    'oa.idticket',
-                    'a.idArticulos',
-                    'a.nombre',
-                    't.numero_ticket',
-                    't.idClienteGeneral'
-                )
-                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
-                ->where('oa.idsolicitudesordenes', $solicitudId)
-                ->where('oa.idarticulos', $request->articulo_id)
-                ->first();
-
-            if (!$repuestoInfo) {
-                throw new \Exception('Repuesto no encontrado en la solicitud');
-            }
-
-            // Procesar fotos en BINARIO para REPUESTO USADO
-            $fotosBinarioUsado = [];
-            if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $foto) {
-                    // Convertir la imagen a binario
-                    $contenidoBinario = file_get_contents($foto->getRealPath());
-                    
-                    // Comprimir la imagen si es posible (opcional)
-                    if (function_exists('imagecreatefromstring')) {
-                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
-                    }
-                    
-                    $fotosBinarioUsado[] = $contenidoBinario;
+                if (!$solicitud) {
+                    throw new \Exception('Solicitud no encontrada');
                 }
-            }
 
-            // NO ACTUALIZAR KARDEX - ya se actualizó cuando se entregó el repuesto
+                // Obtener información del repuesto
+                $repuestoInfo = DB::table('ordenesarticulos as oa')
+                    ->select(
+                        'oa.idordenesarticulos',
+                        'oa.cantidad',
+                        'oa.idticket',
+                        'a.idArticulos',
+                        'a.nombre',
+                        't.numero_ticket',
+                        't.idClienteGeneral'
+                    )
+                    ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                    ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                    ->where('oa.idsolicitudesordenes', $solicitudId)
+                    ->where('oa.idarticulos', $request->articulo_id)
+                    ->first();
 
-            // Actualizar en la tabla ordenesarticulos
-            DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $solicitudId)
-                ->where('idarticulos', $request->articulo_id)
-                ->update([
-                    'fechaUsado' => $request->fecha_uso,
-                    'fechaSinUsar' => null,
-                    'observacion' => $request->observacion,
-                    // Guardar fotos en binario para USADO
-                    'foto_articulo_usado' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null,
-                    // Limpiar fotos de no usado si existen
-                    'foto_articulo_no_usado' => null,
-                    // Mantener compatibilidad con campos antiguos
-                    'fotos_evidencia' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null,
-                    'fotoRepuesto' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null
-                ]);
+                if (!$repuestoInfo) {
+                    throw new \Exception('Repuesto no encontrado en la solicitud');
+                }
 
-            // Registrar en logs
-            Log::info("Repuesto marcado como usado - Solicitud: {$solicitudId}, Repuesto: {$repuestoInfo->nombre}, Fecha: {$request->fecha_uso}, Fotos en binario: " . count($fotosBinarioUsado));
-        });
+                // 1. Primero, limpiar fotos anteriores de "usado" para este artículo
+                DB::table('ordenes_articulos_fotos')
+                    ->where('orden_articulo_id', $repuestoInfo->idordenesarticulos)
+                    ->where('tipo_foto', 'usado')
+                    ->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Repuesto marcado como usado correctamente'
-        ]);
-    } catch (\Exception $e) {
-        Log::error('Error al marcar repuesto como usado: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
-        ], 500);
+                // 2. Procesar y guardar cada foto en la tabla separada
+                if ($request->hasFile('fotos')) {
+                    foreach ($request->file('fotos') as $index => $foto) {
+                        try {
+                            if (!$foto->isValid()) {
+                                Log::warning("Foto no válida: " . $foto->getClientOriginalName());
+                                continue;
+                            }
+
+                            // Leer como binario
+                            $contenidoBinario = file_get_contents($foto->getRealPath());
+                            
+                            // Comprimir si es posible
+                            if (function_exists('imagecreatefromstring')) {
+                                $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                            }
+
+                            // Insertar en la tabla de fotos
+                            DB::table('ordenes_articulos_fotos')->insert([
+                                'orden_articulo_id' => $repuestoInfo->idordenesarticulos,
+                                'tipo_foto' => 'usado',
+                                'nombre_archivo' => $foto->getClientOriginalName(),
+                                'mime_type' => $foto->getMimeType(),
+                                'datos' => $contenidoBinario,
+                                'fecha_subida' => now()
+                            ]);
+
+                            Log::debug("Foto guardada en tabla separada: {$foto->getClientOriginalName()}, " .
+                                     "Tamaño: " . strlen($contenidoBinario) . " bytes");
+                            
+                        } catch (\Exception $e) {
+                            Log::error("Error procesando foto {$index}: " . $e->getMessage());
+                            continue;
+                        }
+                    }
+                }
+
+                // 3. Actualizar el artículo con la fecha y observación
+                // LIMPIAR el campo de "no usado" para evitar conflictos
+                DB::table('ordenesarticulos')
+                    ->where('idsolicitudesordenes', $solicitudId)
+                    ->where('idarticulos', $request->articulo_id)
+                    ->update([
+                        'fechaUsado' => $request->fecha_uso,
+                        'fechaSinUsar' => null, // Limpiar fecha de no usado
+                        'observacion' => $request->observacion,
+                        'foto_articulo_usado' => null, // Ya no guardamos aquí
+                        'foto_articulo_no_usado' => null, // Limpiar
+                        'updated_at' => now()
+                    ]);
+
+                Log::info("Repuesto marcado como usado - Solicitud: {$solicitudId}, " .
+                         "Repuesto: {$repuestoInfo->nombre}, " .
+                         "Fotos procesadas: " . ($request->hasFile('fotos') ? count($request->file('fotos')) : 0));
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Repuesto marcado como usado correctamente',
+                'fotos_guardadas' => $request->hasFile('fotos') ? count($request->file('fotos')) : 0
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al marcar repuesto como usado: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al marcar el repuesto: ' . $e->getMessage(),
+                'fotos_guardadas' => 0
+            ], 500);
+        }
     }
-}
-
 /**
  * Comprimir imagen simple sin Intervention Image
  */
@@ -399,9 +419,8 @@ private function comprimirImagenSimple($contenidoBinario)
         Log::warning('Error al comprimir imagen: ' . $e->getMessage());
         return $contenidoBinario;
     }
-}
-/**
- * Marcar un repuesto como no usado (devolución al inventario)
+}/**
+ * Marcar un repuesto como no usado (devolución al inventario) - VERSIÓN CORREGIDA
  */
 public function marcarNoUsado(Request $request, $solicitudId)
 {
@@ -410,10 +429,14 @@ public function marcarNoUsado(Request $request, $solicitudId)
             'articulo_id' => 'required|integer',
             'fecha_devolucion' => 'required|date',
             'observacion' => 'nullable|string|max:500',
-            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120' // 5MB máximo por foto
+            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
-        DB::transaction(function () use ($request, $solicitudId) {
+        // Declarar variables fuera del transaction
+        $totalFotos = $request->hasFile('fotos') ? count($request->file('fotos')) : 0;
+        $fotosGuardadas = 0;
+
+        DB::transaction(function () use ($request, $solicitudId, $totalFotos, &$fotosGuardadas) {
             // Obtener información de la solicitud
             $solicitud = DB::table('solicitudesordenes')
                 ->select('codigo')
@@ -452,21 +475,67 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 throw new \Exception('Repuesto no encontrado en la solicitud');
             }
 
-            // Procesar fotos en BINARIO para REPUESTO NO USADO
-            $fotosBinarioNoUsado = [];
+            // ========================
+            // 🆕 CORRECCIÓN: GUARDAR FOTOS EN TABLA SEPARADA
+            // ========================
+            
+            // 1. Primero eliminar fotos anteriores de "no_usado" para este artículo
+            DB::table('ordenes_articulos_fotos')
+                ->where('orden_articulo_id', $repuestoInfo->idordenesarticulos)
+                ->where('tipo_foto', 'no_usado')
+                ->delete();
+
+            Log::info("Fotos anteriores eliminadas para artículo (no usado): " . $repuestoInfo->idordenesarticulos);
+
+            // 2. Procesar y guardar NUEVAS fotos en tabla separada
             if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $foto) {
-                    // Convertir la imagen a binario
-                    $contenidoBinario = file_get_contents($foto->getRealPath());
-                    
-                    // Comprimir la imagen si es posible (opcional)
-                    if (function_exists('imagecreatefromstring')) {
-                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                foreach ($request->file('fotos') as $index => $foto) {
+                    try {
+                        if (!$foto->isValid()) {
+                            Log::warning("Foto no válida (no usado): " . $foto->getClientOriginalName());
+                            continue;
+                        }
+
+                        // Verificar límite de 5 fotos
+                        if ($fotosGuardadas >= 5) {
+                            Log::warning("Se alcanzó el límite de 5 fotos para la devolución: " . $repuestoInfo->nombre);
+                            break;
+                        }
+
+                        // Leer como binario
+                        $contenidoBinario = file_get_contents($foto->getRealPath());
+                        
+                        // Comprimir si es posible
+                        if (function_exists('imagecreatefromstring')) {
+                            $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                        }
+
+                        // 🆕 Insertar en la tabla de fotos SEPARADA
+                        DB::table('ordenes_articulos_fotos')->insert([
+                            'orden_articulo_id' => $repuestoInfo->idordenesarticulos,
+                            'tipo_foto' => 'no_usado',
+                            'nombre_archivo' => $foto->getClientOriginalName(),
+                            'mime_type' => $foto->getMimeType(),
+                            'datos' => $contenidoBinario,
+                            'fecha_subida' => now()
+                        ]);
+
+                        $fotosGuardadas++;
+                        
+                        Log::debug("✅ Foto guardada en tabla separada (no usado): {$foto->getClientOriginalName()}, " .
+                                 "Tamaño: " . strlen($contenidoBinario) . " bytes, " .
+                                 "ID Artículo: {$repuestoInfo->idordenesarticulos}");
+                        
+                    } catch (\Exception $e) {
+                        Log::error("Error procesando foto {$index} (no usado): " . $e->getMessage());
+                        continue;
                     }
-                    
-                    $fotosBinarioNoUsado[] = $contenidoBinario;
                 }
             }
+
+            // ========================
+            // RESTO DEL CÓDIGO (se mantiene igual)
+            // ========================
 
             // Buscar la ubicación original donde estaba el repuesto
             $ubicacionOriginal = DB::table('rack_ubicaciones')
@@ -542,46 +611,65 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 ->where('tipo_ingreso', 'salida')
                 ->delete();
 
-            // 5. Actualizar KARDEX para la ENTRADA (devolución) - CORREGIR KARDEX
+            // 5. Actualizar KARDEX para la ENTRADA (devolución)
             $articuloInfo = DB::table('articulos')
                 ->select('precio_compra')
                 ->where('idArticulos', $request->articulo_id)
                 ->first();
 
             if ($articuloInfo) {
-                $this->actualizarKardexEntrada($request->articulo_id, $clienteGeneralId, $repuestoInfo->cantidad, $articuloInfo->precio_compra, "Devolución repuesto no usado - Solicitud: {$solicitud->codigo}");
+                $this->actualizarKardexEntrada(
+                    $request->articulo_id, 
+                    $clienteGeneralId, 
+                    $repuestoInfo->cantidad, 
+                    $articuloInfo->precio_compra, 
+                    "Devolución repuesto no usado - Solicitud: {$solicitud->codigo}"
+                );
             }
 
-            // 6. Actualizar en la tabla ordenesarticulos
+            // 6. Crear array de datos para actualizar
+            // 🆕 AHORA LIMPIAMOS los campos de fotos en ordenesarticulos
+            $datosActualizar = [
+                'fechaSinUsar' => $request->fecha_devolucion,
+                'fechaUsado' => null,
+                'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
+                'foto_articulo_no_usado' => null, // 🆕 Limpiamos, ya no guardamos aquí
+                'foto_articulo_usado' => null, // 🆕 Limpiamos por seguridad
+                'fotos_evidencia' => null, // 🆕 Limpiamos campo antiguo
+                'updated_at' => now()
+            ];
+
+            // Actualizar en la tabla ordenesarticulos
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $solicitudId)
                 ->where('idarticulos', $request->articulo_id)
-                ->update([
-                    'fechaSinUsar' => $request->fecha_devolucion,
-                    'fechaUsado' => null,
-                    'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
-                    // Guardar fotos en binario para NO USADO
-                    'foto_articulo_no_usado' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null,
-                    // Limpiar fotos de usado si existen
-                    'foto_articulo_usado' => null,
-                    // Mantener compatibilidad con campos antiguos
-                    'fotos_evidencia' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null,
-                    'fotoRepuesto' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null
-                ]);
+                ->update($datosActualizar);
 
             // 7. Registrar en logs
-            Log::info("Repuesto devuelto al inventario - Solicitud: {$solicitudId}, Repuesto: {$repuestoInfo->nombre}, Cantidad: {$repuestoInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Fotos en binario: " . count($fotosBinarioNoUsado));
+            Log::info("✅ Repuesto devuelto al inventario - Solicitud: {$solicitudId}, " .
+                     "Repuesto: {$repuestoInfo->nombre}, Cantidad: {$repuestoInfo->cantidad}, " .
+                     "Ubicación: {$ubicacionOriginal->codigo}, " .
+                     "Fotos subidas: {$totalFotos}, " .
+                     "Fotos guardadas en tabla separada: {$fotosGuardadas}");
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Repuesto marcado como no usado y devuelto al inventario correctamente'
+            'message' => 'Repuesto marcado como no usado y devuelto al inventario correctamente',
+            'fotos_subidas' => $totalFotos,
+            'fotos_guardadas' => $fotosGuardadas,
+            'limite_fotos' => 5
         ]);
     } catch (\Exception $e) {
-        Log::error('Error al marcar repuesto como no usado: ' . $e->getMessage());
+        Log::error('❌ Error al marcar repuesto como no usado: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        
         return response()->json([
             'success' => false,
-            'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
+            'message' => 'Error al marcar el repuesto: ' . $e->getMessage(),
+            'fotos_subidas' => 0,
+            'fotos_guardadas' => 0
         ], 500);
     }
 }

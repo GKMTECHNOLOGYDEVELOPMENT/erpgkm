@@ -407,7 +407,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALLES SIMPLIFICADO -->
+    <!-- MODAL DE DETALLES CON GALERÍA DE MÚLTIPLES FOTOS -->
     <div x-data="modalDetails" x-cloak>
         <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto" x-show="open"
             x-transition:enter="transition ease-out duration-300"
@@ -416,9 +416,11 @@
             x-transition:leave="transition ease-in duration-300"
             x-transition:leave-start="opacity-100"
             x-transition:leave-end="opacity-0">
+            
             <div class="flex items-start justify-center min-h-screen px-4 py-8" @click.self="open = false">
                 <div x-show="open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-3xl bg-white dark:bg-[#1b2e4b]">
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-6xl bg-white dark:bg-[#1b2e4b]">
+                    
                     <!-- Header -->
                     <div class="flex items-center justify-between px-5 py-3 bg-[#fbfbfb] dark:bg-[#121c2c]">
                         <div>
@@ -434,7 +436,7 @@
                     </div>
 
                     <!-- Contenido -->
-                    <div class="p-5">
+                    <div class="p-5 max-h-[80vh] overflow-y-auto">
                         <!-- Loading -->
                         <div x-show="loading" class="text-center py-8">
                             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -443,6 +445,144 @@
 
                         <!-- Contenido principal -->
                         <div x-show="!loading && dataLoaded" class="space-y-6">
+                            <!-- SECCIÓN DE FOTOS CON GALERÍA COMPLETA -->
+                            <div x-show="!fotos.cargandoFotos && tieneFotos" class="border-b border-gray-200 dark:border-gray-700 pb-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">📸 Galería de Fotos</h3>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            Total: <span x-text="totalFotos"></span> fotos
+                                        </p>
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Haz clic para ampliar
+                                    </div>
+                                </div>
+
+                                <!-- Fotos por categoría -->
+                                <div class="space-y-8">
+                                    <!-- Fotos No Usadas -->
+                                    <div x-show="fotos.foto_articulo_no_usado && fotos.foto_articulo_no_usado.tiene && fotos.foto_articulo_no_usado.fotos.length > 0">
+                                        <div class="mb-4">
+                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
+                                                <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                                <span x-text="fotos.foto_articulo_no_usado.titulo || 'Repuesto Devuelto'"></span>
+                                                <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full"
+                                                      x-text="fotos.foto_articulo_no_usado.fotos.length + ' foto(s)'"></span>
+                                            </h4>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
+                                               x-text="fotos.foto_articulo_no_usado.descripcion || 'Fotos del repuesto devuelto'"></p>
+                                        </div>
+                                        
+                                        <!-- Galería de fotos no usadas -->
+                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            <template x-for="(foto, index) in fotos.foto_articulo_no_usado.fotos" :key="foto.id || index">
+                                                <div class="relative group">
+                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                                                        <img :src="foto.base64" 
+                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                             @click="abrirLightbox('foto_articulo_no_usado', index)">
+                                                        
+                                                        <!-- Indicador de múltiples fotos -->
+                                                        <div x-show="fotos.foto_articulo_no_usado.fotos.length > 1" 
+                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                                                            <i class="fas fa-layer-group mr-1"></i>
+                                                            <span x-text="index + 1"></span>/<span x-text="fotos.foto_articulo_no_usado.fotos.length"></span>
+                                                        </div>
+                                                        
+                                                        <!-- Información de la foto -->
+                                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <p class="text-white text-xs truncate" x-text="foto.nombre || 'Foto ' + (index + 1)"></p>
+                                                            <p class="text-gray-300 text-xs" x-text="formatearFecha(foto.fecha)"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fotos Usadas -->
+                                    <div x-show="fotos.foto_articulo_usado && fotos.foto_articulo_usado.tiene && fotos.foto_articulo_usado.fotos.length > 0" 
+                                         class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="mb-4">
+                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
+                                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                                <span x-text="fotos.foto_articulo_usado.titulo || 'Repuesto Usado'"></span>
+                                                <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full"
+                                                      x-text="fotos.foto_articulo_usado.fotos.length + ' foto(s)'"></span>
+                                            </h4>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
+                                               x-text="fotos.foto_articulo_usado.descripcion || 'Fotos del repuesto utilizado'"></p>
+                                        </div>
+                                        
+                                        <!-- Galería de fotos usadas -->
+                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            <template x-for="(foto, index) in fotos.foto_articulo_usado.fotos" :key="foto.id || index">
+                                                <div class="relative group">
+                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                                                        <img :src="foto.base64" 
+                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                             @click="abrirLightbox('foto_articulo_usado', index)">
+                                                        
+                                                        <div x-show="fotos.foto_articulo_usado.fotos.length > 1" 
+                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                                                            <i class="fas fa-layer-group mr-1"></i>
+                                                            <span x-text="index + 1"></span>/<span x-text="fotos.foto_articulo_usado.fotos.length"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Fotos Originales -->
+                                    <div x-show="fotos.fotoRepuesto && fotos.fotoRepuesto.tiene && fotos.fotoRepuesto.fotos.length > 0" 
+                                         class="pt-6 border-t border-gray-200 dark:border-gray-700">
+                                        <div class="mb-4">
+                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
+                                                <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                                                <span x-text="fotos.fotoRepuesto.titulo || 'Fotos del Repuesto'"></span>
+                                                <span class="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full"
+                                                      x-text="fotos.fotoRepuesto.fotos.length + ' foto(s)'"></span>
+                                            </h4>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
+                                               x-text="fotos.fotoRepuesto.descripcion || 'Fotos originales del repuesto'"></p>
+                                        </div>
+                                        
+                                        <!-- Galería de fotos originales -->
+                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            <template x-for="(foto, index) in fotos.fotoRepuesto.fotos" :key="foto.id || index">
+                                                <div class="relative group">
+                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                                                        <img :src="foto.base64" 
+                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                                             @click="abrirLightbox('fotoRepuesto', index)">
+                                                        
+                                                        <div x-show="fotos.fotoRepuesto.fotos.length > 1" 
+                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                                                            <i class="fas fa-layer-group mr-1"></i>
+                                                            <span x-text="index + 1"></span>/<span x-text="fotos.fotoRepuesto.fotos.length"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mensaje cuando no hay fotos -->
+                                    <div x-show="!tieneFotos && !fotos.cargandoFotos" class="text-center py-8">
+                                        <svg class="w-16 h-16 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="text-gray-600 dark:text-gray-400 mt-4">No hay fotos disponibles para este repuesto</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Información básica -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Columna izquierda -->
@@ -579,7 +719,75 @@
         </div>
     </div>
 
-    <!-- JavaScript Simplificado -->
+    <!-- MODAL LIGHTBOX PARA FOTOS -->
+    <div x-data="lightboxModal" x-cloak>
+        <div class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4" 
+             x-show="open && photos.length > 0"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            
+            <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10" @click="close">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <button type="button" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10" 
+                    @click="prevPhoto" x-show="hasPrev && photos.length > 0">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10" 
+                    @click="nextPhoto" x-show="hasNext && photos.length > 0">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <div class="relative w-full max-w-6xl max-h-[90vh] flex items-center justify-center">
+                <div class="relative">
+                    <div class="flex items-center justify-center" x-show="photos.length > 0">
+                        <img x-show="!loading && photos.length > 0 && currentPhoto.base64" 
+                             :src="currentPhoto.base64" 
+                             :alt="currentPhoto.nombre || 'Foto'"
+                             class="max-w-full max-h-[80vh] object-contain animate-fade-in">
+                        
+                        <div x-show="loading" class="text-center">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                            <p class="text-white mt-4">Cargando imagen...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4"
+                         x-show="photos.length > 0 && currentPhoto">
+                        <h3 class="text-lg font-semibold text-white" x-text="currentPhoto.nombre || 'Foto sin título'"></h3>
+                        <p class="text-sm text-gray-300" x-text="formatearFechaLightbox(currentPhoto.fecha)"></p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="text-sm text-gray-400" 
+                                 x-text="photos.length > 0 ? (currentIndex + 1) + ' / ' + photos.length : '0 / 0'"></div>
+                            <div class="flex space-x-2">
+                                <button type="button" class="btn btn-sm btn-outline-light" 
+                                        @click="downloadPhoto" 
+                                        x-show="currentPhoto && currentPhoto.base64">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Descargar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Función global para abrir modal
         window.openDetailsModal = function(id) {
@@ -594,16 +802,128 @@
 
         // Inicializar Alpine cuando esté listo
         document.addEventListener('alpine:init', () => {
-            // Modal de detalles
+            // Lightbox Modal - CORREGIDO
+            Alpine.data('lightboxModal', () => ({
+                open: false,
+                currentIndex: 0,
+                loading: false,
+                photos: [],
+
+                get currentPhoto() {
+                    return this.photos[this.currentIndex] || {};
+                },
+
+                get totalPhotos() {
+                    return this.photos?.length || 0;
+                },
+
+                get hasPrev() {
+                    return this.currentIndex > 0 && this.photos.length > 0;
+                },
+
+                get hasNext() {
+                    return this.currentIndex < this.totalPhotos - 1 && this.photos.length > 0;
+                },
+
+                openLightbox(photos, startIndex = 0) {
+                    if (!photos || photos.length === 0) {
+                        console.error('No hay fotos para mostrar');
+                        return;
+                    }
+                    
+                    this.photos = photos;
+                    this.currentIndex = startIndex;
+                    this.loading = false;
+                    this.open = true;
+                    document.body.style.overflow = 'hidden';
+                    
+                    console.log('Lightbox abierto con', photos.length, 'fotos');
+                },
+
+                close() {
+                    this.open = false;
+                    this.photos = [];
+                    this.currentIndex = 0;
+                    this.loading = false;
+                    document.body.style.overflow = '';
+                },
+
+                nextPhoto() {
+                    if (this.hasNext) {
+                        this.currentIndex++;
+                    }
+                },
+
+                prevPhoto() {
+                    if (this.hasPrev) {
+                        this.currentIndex--;
+                    }
+                },
+
+                async downloadPhoto() {
+                    try {
+                        if (!this.currentPhoto || !this.currentPhoto.base64) {
+                            throw new Error('No hay foto para descargar');
+                        }
+                        
+                        const photo = this.currentPhoto;
+                        const response = await fetch(photo.base64);
+                        if (!response.ok) throw new Error('Error al obtener la foto');
+                        
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `${photo.nombre || 'foto'}_${Date.now()}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    } catch (error) {
+                        console.error('Error al descargar:', error);
+                        alert('Error al descargar la foto: ' + error.message);
+                    }
+                },
+
+                formatearFechaLightbox(fechaString) {
+                    if (!fechaString) return '';
+                    try {
+                        const fecha = new Date(fechaString);
+                        return fecha.toLocaleDateString('es-PE') + ' ' + fecha.toLocaleTimeString('es-PE');
+                    } catch (error) {
+                        return fechaString;
+                    }
+                }
+            }));
+
+            // Modal de detalles - VERSIÓN COMPLETA CON GALERÍA
             Alpine.data('modalDetails', () => ({
                 open: false,
                 loading: false,
                 dataLoaded: false,
-                error: false,
                 modalTitle: 'Detalles del Repuesto',
                 modalSubtitle: '',
                 details: {},
                 currentId: null,
+                fotos: {
+                    cargandoFotos: false,
+                    tieneFotos: false,
+                    fotoRepuesto: { tiene: false, fotos: [], titulo: 'Fotos del Repuesto', descripcion: 'Fotos originales del repuesto' },
+                    foto_articulo_usado: { tiene: false, fotos: [], titulo: 'Repuesto Usado', descripcion: 'Fotos del repuesto utilizado' },
+                    foto_articulo_no_usado: { tiene: false, fotos: [], titulo: 'Repuesto Devuelto', descripcion: 'Fotos del repuesto devuelto' }
+                },
+
+                get tieneFotos() {
+                    return this.fotos.tieneFotos;
+                },
+
+                get totalFotos() {
+                    let total = 0;
+                    total += this.fotos.fotoRepuesto.fotos?.length || 0;
+                    total += this.fotos.foto_articulo_usado.fotos?.length || 0;
+                    total += this.fotos.foto_articulo_no_usado.fotos?.length || 0;
+                    return total;
+                },
 
                 toggle() {
                     this.open = !this.open;
@@ -615,35 +935,163 @@
                 reset() {
                     this.loading = false;
                     this.dataLoaded = false;
-                    this.error = false;
                     this.details = {};
                     this.currentId = null;
+                    this.resetFotos();
+                },
+
+                resetFotos() {
+                    this.fotos = {
+                        cargandoFotos: false,
+                        tieneFotos: false,
+                        fotoRepuesto: { tiene: false, fotos: [], titulo: 'Fotos del Repuesto', descripcion: 'Fotos originales del repuesto' },
+                        foto_articulo_usado: { tiene: false, fotos: [], titulo: 'Repuesto Usado', descripcion: 'Fotos del repuesto utilizado' },
+                        foto_articulo_no_usado: { tiene: false, fotos: [], titulo: 'Repuesto Devuelto', descripcion: 'Fotos del repuesto devuelto' }
+                    };
                 },
 
                 async loadDetails(id) {
+                    console.group('🔍 Cargando detalles para ID:', id);
                     this.currentId = id;
                     this.loading = true;
                     this.dataLoaded = false;
+                    this.resetFotos();
 
                     try {
+                        // 1. Cargar detalles básicos
+                        console.log('📋 Cargando detalles básicos...');
                         const response = await fetch(`/repuestos-transito/${id}/detalles`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
                         const data = await response.json();
+                        console.log('✅ Detalles cargados:', data);
 
-                        if (data.success) {
+                        if (data.success && data.data) {
                             this.details = data.data;
                             this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
                             this.modalSubtitle = `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
+                            
+                            // 2. Verificar si hay fotos disponibles
+                            console.log('🔄 Verificando fotos disponibles...');
+                            console.log('¿Tiene fotos?:', data.data.tiene_fotos);
+                            console.log('Fotos disponibles:', data.data.fotos_disponibles);
+                            
+                            if (data.data.tiene_fotos) {
+                                console.log('📸 Hay fotos disponibles, cargando...');
+                                await this.loadFotos(id);
+                            } else {
+                                console.log('❌ No hay fotos disponibles');
+                            }
+                            
                             this.dataLoaded = true;
+                            console.log('✅ Todo cargado correctamente');
                         } else {
-                            this.error = true;
+                            console.error('❌ Error en respuesta:', data.message);
                             alert(data.message || 'Error al cargar detalles');
                         }
                     } catch (error) {
-                        console.error('Error:', error);
-                        this.error = true;
-                        alert('Error de conexión');
+                        console.error('💥 Error al cargar detalles:', error);
+                        alert('Error de conexión: ' + error.message);
                     } finally {
                         this.loading = false;
+                        console.groupEnd();
+                    }
+                },
+
+                async loadFotos(id) {
+                    console.log('🔄 Iniciando carga de fotos para ID:', id);
+                    this.fotos.cargandoFotos = true;
+                    
+                    try {
+                        // Usar el endpoint que obtiene todas las fotos
+                        const response = await fetch(`/repuestos-transito/${id}/fotos`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        console.log('✅ Respuesta de fotos recibida:', data);
+
+                        if (data.success && data.fotos) {
+                            console.log('📸 Procesando fotos recibidas:', data.fotos);
+                            
+                            // Procesar cada tipo de foto
+                            const tipos = ['fotoRepuesto', 'foto_articulo_usado', 'foto_articulo_no_usado'];
+                            
+                            tipos.forEach(tipo => {
+                                const fotoData = data.fotos[tipo];
+                                console.log(`Procesando ${tipo}:`, fotoData);
+                                
+                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData.fotos.length > 0) {
+                                    console.log(`✅ ${tipo} tiene ${fotoData.fotos.length} fotos`);
+                                    this.fotos[tipo].tiene = true;
+                                    this.fotos[tipo].fotos = fotoData.fotos;
+                                    this.fotos[tipo].titulo = fotoData.titulo || this.fotos[tipo].titulo;
+                                    this.fotos[tipo].descripcion = fotoData.descripcion || this.fotos[tipo].descripcion;
+                                    this.fotos.tieneFotos = true;
+                                } else {
+                                    console.log(`❌ ${tipo} no tiene fotos`);
+                                    this.fotos[tipo].tiene = false;
+                                    this.fotos[tipo].fotos = [];
+                                }
+                            });
+                            
+                            console.log('Estado final de fotos:', this.fotos);
+                            console.log('Total de fotos cargadas:', this.totalFotos);
+                        } else {
+                            console.warn('❌ No se pudieron cargar las fotos:', data.message);
+                        }
+                    } catch (error) {
+                        console.error('💥 Error al cargar fotos:', error);
+                    } finally {
+                        this.fotos.cargandoFotos = false;
+                        console.log('🔄 Carga de fotos finalizada');
+                    }
+                },
+
+                abrirLightbox(tipo, index) {
+                    console.log('🔍 Abriendo lightbox para:', tipo, 'índice:', index);
+                    
+                    if (!this.fotos[tipo]?.fotos || this.fotos[tipo].fotos.length === 0) {
+                        console.error(`❌ No se puede abrir lightbox: ${tipo} no tiene fotos`);
+                        return;
+                    }
+                    
+                    const lightbox = document.querySelector('[x-data="lightboxModal"]');
+                    if (!lightbox) {
+                        console.error('❌ Lightbox no encontrado en el DOM');
+                        return;
+                    }
+                    
+                    const instance = Alpine.$data(lightbox);
+                    
+                    // Obtener todas las fotos del tipo seleccionado
+                    const fotosParaLightbox = this.fotos[tipo].fotos.map(foto => ({
+                        ...foto,
+                        nombre: foto.nombre || `Foto de ${this.fotos[tipo].titulo}`,
+                        tipo: tipo
+                    }));
+                    
+                    console.log('Fotos para lightbox:', fotosParaLightbox);
+                    
+                    if (fotosParaLightbox.length > 0) {
+                        instance.openLightbox(fotosParaLightbox, index);
+                    } else {
+                        console.warn('⚠️ No hay fotos disponibles para mostrar en el lightbox');
+                    }
+                },
+
+                formatearFecha(fechaString) {
+                    if (!fechaString) return '';
+                    try {
+                        const fecha = new Date(fechaString);
+                        return fecha.toLocaleDateString('es-PE');
+                    } catch (error) {
+                        return fechaString;
                     }
                 },
 
@@ -676,22 +1124,37 @@
 
                 formatDate(dateString) {
                     if (!dateString) return 'No disponible';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('es-PE');
+                    try {
+                        const date = new Date(dateString);
+                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString('es-PE');
+                    } catch (error) {
+                        return 'Fecha inválida';
+                    }
                 },
 
                 formatDateTime(dateString) {
                     if (!dateString) return 'No disponible';
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
+                    try {
+                        const date = new Date(dateString);
+                        if (isNaN(date.getTime())) return 'Fecha inválida';
+                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
+                    } catch (error) {
+                        return 'Fecha inválida';
+                    }
                 }
             }));
         });
 
         // Verificar que AlpineJS esté cargado
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Página de repuestos en tránsito cargada');
-            console.log('openDetailsModal disponible:', typeof window.openDetailsModal === 'function');
+            console.log('✅ Página de repuestos en tránsito cargada');
+            console.log('🔧 openDetailsModal disponible:', typeof window.openDetailsModal === 'function');
+            
+            if (typeof Alpine === 'undefined') {
+                console.error('❌ AlpineJS no está cargado');
+            } else {
+                console.log('✅ AlpineJS cargado correctamente');
+            }
         });
     </script>
 
@@ -714,6 +1177,90 @@
 
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Estilos para imágenes */
+        .foto-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .foto-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .foto-container.dark {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .foto-container:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Estilos para el scrollbar */
+        .overflow-y-auto::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .dark .overflow-y-auto::-webkit-scrollbar-track {
+            background: #374151;
+        }
+
+        .dark .overflow-y-auto::-webkit-scrollbar-thumb {
+            background: #6b7280;
+        }
+
+        .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Estilos para grupos de fotos */
+        .foto-group {
+            transition: all 0.3s ease;
+        }
+
+        .foto-group:hover {
+            transform: translateX(5px);
+        }
+
+        /* Indicador de foto activa */
+        .foto-indicador {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            z-index: 10;
         }
     </style>
 </x-layout.default>
