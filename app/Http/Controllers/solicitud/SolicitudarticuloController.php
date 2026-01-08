@@ -343,25 +343,60 @@ public function create()
     ]);
 }
 
- public function store(Request $request)
+
+
+
+public function store(Request $request)
 {
     try {
         DB::beginTransaction();
 
-        // Validar los datos del formulario
+        // Validación corregida
         $validated = $request->validate([
             'orderInfo.tipoServicio' => 'required|string',
             'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
             'orderInfo.fechaRequerida' => 'required|date',
             'orderInfo.observaciones' => 'nullable|string',
-            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',      // Nuevo
-            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',    // Nuevo
+            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',
+            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',
+            'orderInfo.esUsoDiario' => 'nullable',
+            'orderInfo.observacionDevolucion' => 'nullable|string',
             'products' => 'required|array|min:1',
             'products.*.articuloId' => 'required|exists:articulos,idArticulos',
             'products.*.cantidad' => 'required|integer|min:1|max:1000',
             'products.*.descripcion' => 'nullable|string',
+            'products.*.requiereDevolucion' => 'nullable',
+            'products.*.fechaDevolucion' => 'nullable|date',
             'selectedCotizacion' => 'nullable|exists:cotizaciones,idCotizaciones'
         ]);
+
+        // VALIDACIÓN CRÍTICA: Fecha de devolución no puede ser menor que fecha de requerimiento
+        $fechaRequerida = $validated['orderInfo']['fechaRequerida'];
+        
+        foreach ($validated['products'] as $index => $product) {
+            if (isset($product['fechaDevolucion']) && $product['fechaDevolucion'] && 
+                $product['fechaDevolucion'] < $fechaRequerida) {
+                
+                $articuloNombre = DB::table('articulos')
+                    ->where('idArticulos', $product['articuloId'])
+                    ->value('nombre') ?? 'Artículo #' . $product['articuloId'];
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "La fecha de devolución del artículo '{$articuloNombre}' " .
+                                "({$product['fechaDevolucion']}) no puede ser anterior a la " .
+                                "fecha de requerimiento ({$fechaRequerida})."
+                ], 422);
+            }
+        }
+
+        // Convertir esUsoDiario a booleano
+        $esUsoDiario = filter_var($validated['orderInfo']['esUsoDiario'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        
+        // Convertir requiereDevolucion a booleano en cada producto
+        foreach ($validated['products'] as &$product) {
+            $product['requiereDevolucion'] = filter_var($product['requiereDevolucion'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        }
 
         // Verificar si ya existe una solicitud para esta cotización
         if (!empty($validated['selectedCotizacion'])) {
@@ -382,7 +417,7 @@ public function create()
         $totalCantidad = collect($validated['products'])->sum('cantidad');
         $totalProductosUnicos = count($validated['products']);
 
-        // Generar código de orden para solicitud de artículo
+        // Generar código de orden
         $lastOrder = DB::table('solicitudesordenes')
             ->where('tipoorden', 'solicitud_articulo')
             ->orderBy('idsolicitudesordenes', 'desc')
@@ -391,7 +426,7 @@ public function create()
         $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
         $codigoOrden = 'SOL-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
 
-        // Obtener información de la cotización si existe
+        // Obtener información de la cotización
         $codigoCotizacion = null;
         if (!empty($validated['selectedCotizacion'])) {
             $cotizacion = DB::table('cotizaciones')
@@ -400,7 +435,24 @@ public function create()
             $codigoCotizacion = $cotizacion->numero_cotizacion;
         }
 
-        // 1. Insertar en solicitudesordenes
+        // Obtener nombre completo del usuario destino
+        $usuarioDestino = DB::table('usuarios')
+            ->where('idUsuario', $validated['orderInfo']['usuarioDestino'])
+            ->first();
+        
+        $nombreUsuarioDestino = 'Usuario #' . $validated['orderInfo']['usuarioDestino'];
+        if ($usuarioDestino) {
+            $nombreCompleto = trim($usuarioDestino->Nombre ?? '');
+            $nombreCompleto .= ' ' . trim($usuarioDestino->apellidoPaterno ?? '');
+            $nombreCompleto .= ' ' . trim($usuarioDestino->apellidoMaterno ?? '');
+            $nombreCompleto = trim($nombreCompleto);
+            
+            if (!empty($nombreCompleto)) {
+                $nombreUsuarioDestino = $nombreCompleto;
+            }
+        }
+
+        // Insertar en solicitudesordenes
         $solicitudId = DB::table('solicitudesordenes')->insertGetId([
             'fechacreacion' => now(),
             'estado' => 'pendiente',
@@ -410,7 +462,7 @@ public function create()
             'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
             'numeroticket' => null,
             'codigo' => $codigoOrden,
-            'codigo_cotizacion' => $codigoCotizacion, // Nuevo campo
+            'codigo_cotizacion' => $codigoCotizacion,
             'niveldeurgencia' => $validated['orderInfo']['urgencia'],
             'tiposervicio' => $validated['orderInfo']['tipoServicio'],
             'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
@@ -420,13 +472,151 @@ public function create()
             'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
             'idtecnico' => null,
             'idusuario' => Auth::id(),
-            'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
-            'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],  // Nuevo
-            'urgencia' => $validated['orderInfo']['urgencia']
+            'id_area_destino' => $validated['orderInfo']['areaDestino'],
+            'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],
+            'urgencia' => $validated['orderInfo']['urgencia'],
+            'es_uso_diario' => $esUsoDiario ? 1 : 0,
+            'observacion_devolucion' => $validated['orderInfo']['observacionDevolucion'] ?? null
         ]);
+// ============================================
+// CREAR ASIGNACIÓN PRINCIPAL
+// ============================================
 
-        // 2. Insertar los artículos en ordenesarticulos
+// Generar código de asignación
+$lastAsignacion = DB::table('asignaciones')->orderBy('id', 'desc')->first();
+$nextAsignacionNumber = $lastAsignacion ? ($lastAsignacion->id + 1) : 1;
+$codigoAsignacion = 'ASG-' . str_pad($nextAsignacionNumber, 3, '0', STR_PAD_LEFT);
+
+// Calcular estadísticas para la asignación
+$productosConDevolucion = array_filter($validated['products'], function($p) {
+    return filter_var($p['requiereDevolucion'] ?? false, FILTER_VALIDATE_BOOLEAN);
+});
+
+$productosSinDevolucion = array_filter($validated['products'], function($p) {
+    return !filter_var($p['requiereDevolucion'] ?? false, FILTER_VALIDATE_BOOLEAN);
+});
+
+// ============================================
+// DETERMINAR TIPO DE ASIGNACIÓN (CON 4 TIPOS)
+// ============================================
+$tipoAsignacion = 'trabajo_a_realizar'; // Por defecto: para trabajos/servicios
+
+if ($esUsoDiario) {
+    $tipoAsignacion = 'uso_diario';
+} else {
+    $hayArticulosConDevolucion = count($productosConDevolucion) > 0;
+    
+    if ($hayArticulosConDevolucion) {
+        $tipoAsignacion = 'prestamo';
+    }
+    // Si no hay artículos con devolución, se mantiene 'trabajo_a_realizar'
+}
+
+// Crear asignación principal
+$asignacionId = DB::table('asignaciones')->insertGetId([
+    'codigo_asignacion' => $codigoAsignacion,
+    'idUsuario' => $validated['orderInfo']['usuarioDestino'],
+    'idSolicitud' => $solicitudId,
+    'codigo_solicitud' => $codigoOrden,
+    'id_area_destino' => $validated['orderInfo']['areaDestino'],
+    'fecha_asignacion' => $validated['orderInfo']['fechaRequerida'],
+    'fecha_devolucion' => null,
+    'fecha_entrega_real' => null,
+    'observaciones' => "Asignación creada desde solicitud: {$codigoOrden}. " .
+                     "Usuario destino: {$nombreUsuarioDestino}. " .
+                     "Área destino: " . $this->getNombreArea($validated['orderInfo']['areaDestino']) . ". " .
+                     ($validated['orderInfo']['observaciones'] ?? 'Sin observaciones adicionales') .
+                     ($codigoCotizacion ? " | Cotización: {$codigoCotizacion}" : '') .
+                     " | Tipo: {$tipoAsignacion}" .
+                     ($tipoAsignacion === 'trabajo_a_realizar' ? ' (Trabajos/Servicios)' : 
+                      ($tipoAsignacion === 'prestamo' ? ' (Préstamo con devolución)' : ' (Uso diario)')),
+    'estado' => 'pendiente',
+    'tipo_asignacion' => $tipoAsignacion,
+    'total_articulos' => $totalProductosUnicos,
+    'total_cantidad' => $totalCantidad,
+    'con_devolucion' => count($productosConDevolucion),
+    'sin_devolucion' => count($productosSinDevolucion),
+    'id_usuario_creador' => Auth::id(),
+    'created_at' => now(),
+    'updated_at' => now()
+]);
+
+// ============================================
+// INSERTAR ARTÍCULOS EN DETALLE_ASIGNACIONES
+// ============================================
+$detallesAsignacion = [];
+
+foreach ($validated['products'] as $index => $product) {
+    // Obtener información del artículo
+    $articulo = DB::table('articulos')
+        ->where('idArticulos', $product['articuloId'])
+        ->first();
+    
+    // ============================================
+    // DETERMINAR TIPO DE ARTÍCULO (CON 4 TIPOS)
+    // ============================================
+    $tipoArticulo = $tipoAsignacion; // Por defecto usa el mismo tipo que la asignación
+    
+    // Solo override si el artículo individual requiere devolución
+    // pero la asignación general es de trabajo
+    if ($tipoAsignacion === 'trabajo_a_realizar' && $product['requiereDevolucion']) {
+        $tipoArticulo = 'prestamo'; // Artículo individual con devolución en asignación de trabajo
+    }
+    
+    // Calcular fecha de devolución esperada (solo para préstamos)
+    $fechaDevolucionEsperada = null;
+    if ($product['requiereDevolucion'] && !empty($product['fechaDevolucion'])) {
+        try {
+            $fechaDevolucionEsperada = Carbon::parse($product['fechaDevolucion'])->format('Y-m-d');
+        } catch (\Exception $e) {
+            Log::warning('Error parsing fecha_devolucion para detalle', [
+                'fecha' => $product['fechaDevolucion'],
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
+    $detallesAsignacion[] = [
+        'asignacion_id' => $asignacionId,
+        'articulo_id' => $product['articuloId'],
+        'codigo_articulo' => $articulo->codigo ?? null,
+        'nombre_articulo' => $articulo->nombre ?? null,
+        'cantidad' => $product['cantidad'],
+        'numero_serie' => null,
+        'tipo' => $tipoArticulo,
+        'estado_articulo' => 'pendiente',
+        'fecha_entrega_esperada' => $validated['orderInfo']['fechaRequerida'],
+        'fecha_entrega_real' => null,
+        'fecha_devolucion_esperada' => $fechaDevolucionEsperada,
+        'fecha_devolucion_real' => null,
+        'requiere_devolucion' => $product['requiereDevolucion'] ? 1 : 0,
+        'observaciones' => $product['descripcion'] ?? null,
+        'id_solicitud_detalle' => null,
+        'created_at' => now(),
+        'updated_at' => now()
+    ];
+}
+        // Insertar todos los detalles de una vez
+        if (!empty($detallesAsignacion)) {
+            DB::table('detalle_asignaciones')->insert($detallesAsignacion);
+        }
+
+        // ============================================
+        // INSERTAR ARTÍCULOS EN ORDENESARTICULOS
+        // ============================================
         foreach ($validated['products'] as $product) {
+            $fechaDevolucion = null;
+            if (!empty($product['fechaDevolucion'])) {
+                try {
+                    $fechaDevolucion = Carbon::parse($product['fechaDevolucion'])->format('Y-m-d H:i:s');
+                } catch (\Exception $e) {
+                    Log::warning('Error parsing fecha_devolucion', [
+                        'fecha' => $product['fechaDevolucion'],
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
             DB::table('ordenesarticulos')->insert([
                 'cantidad' => $product['cantidad'],
                 'estado' => 0,
@@ -438,37 +628,48 @@ public function create()
                 'idticket' => null,
                 'idarticulos' => $product['articuloId'],
                 'idubicacion' => null,
-                'codigo_cotizacion' => $codigoCotizacion // Nuevo campo
+                'codigo_cotizacion' => $codigoCotizacion,
+                'requiere_devolucion' => $product['requiereDevolucion'] ? 1 : 0,
+                'fecha_devolucion_programada' => $fechaDevolucion,
+                'id_asignacion' => $asignacionId
             ]);
         }
 
-        // 3. Insertar en la tabla solicitudentrega para notificaciones
+        // ============================================
+        // INSERTAR EN SOLICITUDENTREGA PARA NOTIFICACIONES
+        // ============================================
         $comentarioArticulos = "Solicitud de artículos. Orden: {$codigoOrden}. ";
+        $comentarioArticulos .= "Usuario destino: {$nombreUsuarioDestino}. ";
         $comentarioArticulos .= "Total productos: {$totalProductosUnicos}, Cantidad total: {$totalCantidad}. ";
-        $comentarioArticulos .= $validated['orderInfo']['observaciones'] ? "Observaciones: " . $validated['orderInfo']['observaciones'] : "";
+        $comentarioArticulos .= "Asignación creada: {$codigoAsignacion}. ";
+        
+        if ($validated['orderInfo']['observaciones'] ?? false) {
+            $comentarioArticulos .= "Observaciones: " . $validated['orderInfo']['observaciones'];
+        }
         
         if ($codigoCotizacion) {
             $comentarioArticulos .= " | Cotización: {$codigoCotizacion}";
         }
+        
+        if (count($productosConDevolucion) > 0) {
+            $comentarioArticulos .= " | Artículos con devolución: " . count($productosConDevolucion);
+        }
 
         DB::table('solicitudentrega')->insert([
-            'idTickets' => null, // No hay ticket
-            'numero_ticket' => null, // No hay número de ticket
+            'idTickets' => null,
+            'numero_ticket' => null,
             'idVisitas' => null,
-            'idUsuario' => Auth::id(), // Usuario autenticado que solicita
-            'comentario' => trim($comentarioArticulos), // "una solicitud de articulo bro"
-            'estado' => 0, // Estado 1
-            'fechaHora' => now(), // Fecha y hora actual
-            'idTipoServicio' => 6 // idTipoServicio 6 para solicitud de artículos
+            'idUsuario' => Auth::id(),
+            'comentario' => trim($comentarioArticulos),
+            'estado' => 0,
+            'fechaHora' => now(),
+            'idTipoServicio' => 6,
+            'id_asignacion' => $asignacionId
         ]);
 
-        Log::info('Registro en solicitudentrega para solicitud de artículos creado', [
-            'solicitud_id' => $solicitudId,
-            'usuario_id' => Auth::id(),
-            'idTipoServicio' => 6
-        ]);
-
-        // 4. Actualizar estado de la cotización a "solicitado"
+        // ============================================
+        // ACTUALIZAR ESTADO DE LA COTIZACIÓN
+        // ============================================
         if (!empty($validated['selectedCotizacion'])) {
             DB::table('cotizaciones')
                 ->where('idCotizaciones', $validated['selectedCotizacion'])
@@ -486,11 +687,32 @@ public function create()
             'solicitud_id' => $solicitudId,
             'codigo_orden' => $codigoOrden,
             'codigo_cotizacion' => $codigoCotizacion,
+            'es_uso_diario' => $esUsoDiario,
+            'usuario_destino' => [
+                'id' => $validated['orderInfo']['usuarioDestino'],
+                'nombre_completo' => $nombreUsuarioDestino
+            ],
+            'asignacion' => [
+                'id' => $asignacionId,
+                'codigo_asignacion' => $codigoAsignacion,
+                'estado' => 'pendiente',
+                'total_articulos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ],
             'estadisticas' => [
                 'productos_unicos' => $totalProductosUnicos,
-                'total_cantidad' => $totalCantidad
+                'total_cantidad' => $totalCantidad,
+                'con_devolucion' => count($productosConDevolucion),
+                'sin_devolucion' => count($productosSinDevolucion)
             ]
         ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación',
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error al crear solicitud de artículos: ' . $e->getMessage());
@@ -500,6 +722,26 @@ public function create()
         ], 500);
     }
 }
+
+// Método auxiliar para obtener nombre del área
+private function getNombreArea($idArea)
+{
+    try {
+        $area = DB::table('tipoarea')
+            ->where('idTipoArea', $idArea)
+            ->first();
+        
+        return $area ? $area->descripcion : 'Área #' . $idArea;
+    } catch (\Exception $e) {
+        Log::warning('Error al obtener nombre de área: ' . $e->getMessage());
+        return 'Área #' . $idArea;
+    }
+}
+
+
+
+
+
 public function show($id)
 {
     $usuario = auth()->user()->load('tipoArea');
@@ -856,7 +1098,6 @@ public function show($id)
 // }
 
 
-
 public function edit($id)
 {
     $usuario = auth()->user()->load('tipoArea');
@@ -873,7 +1114,9 @@ public function edit($id)
             'so.observaciones',
             'so.estado',
             'so.id_area_destino',           // Nuevo campo
-            'so.id_usuario_destino'         // Nuevo campo
+            'so.id_usuario_destino',        // Nuevo campo
+            'so.es_uso_diario',             // NUEVO: campo para uso diario
+            'so.observacion_devolucion'     // NUEVO: campo para observación de devolución
         )
         ->where('so.idsolicitudesordenes', $id)
         ->where('so.tipoorden', 'solicitud_articulo')
@@ -923,6 +1166,8 @@ public function edit($id)
             'oa.cantidad',
             'oa.observacion as descripcion',
             'oa.idarticulos',
+            'oa.requiere_devolucion',       // NUEVO
+            'oa.fecha_devolucion_programada', // NUEVO
             'a.nombre',
             'a.codigo_barras',
             'a.codigo_repuesto',
@@ -1056,10 +1301,7 @@ public function edit($id)
     ]);
 }
 
-
-
-
-   public function update(Request $request, $id)
+public function update(Request $request, $id)
 {
     try {
         DB::beginTransaction();
@@ -1083,12 +1325,16 @@ public function edit($id)
             'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
             'orderInfo.fechaRequerida' => 'required|date',
             'orderInfo.observaciones' => 'nullable|string',
-            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',      // Nuevo
-            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',    // Nuevo
+            'orderInfo.areaDestino' => 'required|exists:tipoarea,idTipoArea',
+            'orderInfo.usuarioDestino' => 'required|exists:usuarios,idUsuario',
+            'orderInfo.esUsoDiario' => 'nullable|boolean',           // NUEVO
+            'orderInfo.observacionDevolucion' => 'nullable|string',  // NUEVO
             'products' => 'required|array|min:1',
             'products.*.articuloId' => 'required|exists:articulos,idArticulos',
             'products.*.cantidad' => 'required|integer|min:1|max:1000',
             'products.*.descripcion' => 'nullable|string',
+            'products.*.requiereDevolucion' => 'nullable|boolean',   // NUEVO
+            'products.*.fechaDevolucion' => 'nullable|date',         // NUEVO
             'selectedCotizacion' => 'nullable|exists:cotizaciones,idCotizaciones'
         ]);
 
@@ -1132,14 +1378,17 @@ public function edit($id)
                 'niveldeurgencia' => $validated['orderInfo']['urgencia'],
                 'tiposervicio' => $validated['orderInfo']['tipoServicio'],
                 'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                'id_area_destino' => $validated['orderInfo']['areaDestino'],        // Nuevo
-                'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],  // Nuevo
+                'id_area_destino' => $validated['orderInfo']['areaDestino'],
+                'id_usuario_destino' => $validated['orderInfo']['usuarioDestino'],
                 'cantidad' => $totalProductosUnicos,
                 'canproduuni' => $totalProductosUnicos,
                 'totalcantidadproductos' => $totalCantidad,
                 'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
                 'urgencia' => $validated['orderInfo']['urgencia'],
-                'fechaactualizacion' => now()
+                'fechaactualizacion' => now(),
+                // NUEVOS CAMPOS
+                'es_uso_diario' => $validated['orderInfo']['esUsoDiario'] ?? 0,
+                'observacion_devolucion' => $validated['orderInfo']['observacionDevolucion'] ?? null
             ]);
 
         // 2. Eliminar los artículos actuales (solo los pendientes)
@@ -1161,7 +1410,11 @@ public function edit($id)
                 'idticket' => null,
                 'idarticulos' => $product['articuloId'],
                 'idubicacion' => null,
-                'codigo_cotizacion' => $solicitud->codigo_cotizacion // Mantener el código de cotización si existe
+                'codigo_cotizacion' => $solicitud->codigo_cotizacion,
+                // NUEVOS CAMPOS
+                'requiere_devolucion' => $product['requiereDevolucion'] ?? 0,
+                'fecha_devolucion_programada' => isset($product['fechaDevolucion']) ? 
+                    Carbon::parse($product['fechaDevolucion'])->format('Y-m-d H:i:s') : null
             ]);
         }
 
@@ -1188,7 +1441,6 @@ public function edit($id)
         ], 500);
     }
 }
-
     public function destroy($id)
     {
         try {
@@ -1276,6 +1528,8 @@ public function edit($id)
             'so.observaciones',
             'so.cantidad',
             'so.totalcantidadproductos',
+            'so.es_uso_diario',  // NUEVO
+            'so.observacion_devolucion',  // NUEVO
             'so.idticket',
             'so.idusuario',
             'so.id_area_destino',           // Nuevo campo
@@ -1501,6 +1755,14 @@ public function gestionar($id)
 
 
 
+
+
+
+
+
+
+
+
 public function marcarUsado(Request $request, $solicitudId)
 {
     try {
@@ -1539,55 +1801,97 @@ public function marcarUsado(Request $request, $solicitudId)
                 throw new \Exception('Artículo no encontrado en la solicitud');
             }
 
-            // Procesar fotos en BINARIO para ARTÍCULO USADO
-            $fotosBinarioUsado = [];
+            // 1. Primero, limpiar fotos anteriores de "usado" para este artículo
+            DB::table('ordenes_articulos_fotos')
+                ->where('orden_articulo_id', $articuloInfo->idordenesarticulos)
+                ->where('tipo_foto', 'usado')
+                ->delete();
+
+            // 2. Procesar y guardar cada foto en la tabla separada
             if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $foto) {
-                    // Convertir la imagen a binario
-                    $contenidoBinario = file_get_contents($foto->getRealPath());
-                    
-                    // Comprimir la imagen si es posible (opcional)
-                    if (function_exists('imagecreatefromstring')) {
-                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                foreach ($request->file('fotos') as $index => $foto) {
+                    try {
+                        if (!$foto->isValid()) {
+                            Log::warning("Foto no válida: " . $foto->getClientOriginalName());
+                            continue;
+                        }
+
+                        // Leer como binario
+                        $contenidoBinario = file_get_contents($foto->getRealPath());
+                        
+                        // Comprimir si es posible
+                        if (function_exists('imagecreatefromstring')) {
+                            $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                        }
+
+                        // Insertar en la tabla de fotos
+                        DB::table('ordenes_articulos_fotos')->insert([
+                            'orden_articulo_id' => $articuloInfo->idordenesarticulos,
+                            'tipo_foto' => 'usado',
+                            'nombre_archivo' => $foto->getClientOriginalName(),
+                            'mime_type' => $foto->getMimeType(),
+                            'datos' => $contenidoBinario,
+                            'fecha_subida' => now()
+                        ]);
+
+                        Log::debug("Foto guardada en tabla separada: {$foto->getClientOriginalName()}, " .
+                                 "Tamaño: " . strlen($contenidoBinario) . " bytes");
+                        
+                    } catch (\Exception $e) {
+                        Log::error("Error procesando foto {$index}: " . $e->getMessage());
+                        continue;
                     }
-                    
-                    $fotosBinarioUsado[] = $contenidoBinario;
                 }
             }
 
-            // Actualizar en la tabla ordenesarticulos
+            // 3. Actualizar el artículo con la fecha y observación
+            // LIMPIAR el campo de "no usado" para evitar conflictos
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $solicitudId)
                 ->where('idarticulos', $request->articulo_id)
                 ->update([
                     'fechaUsado' => $request->fecha_uso,
-                    'fechaSinUsar' => null,
+                    'fechaSinUsar' => null, // Limpiar fecha de no usado
                     'observacion' => $request->observacion,
-                    // Guardar fotos en binario para USADO
-                    'foto_articulo_usado' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null,
-                    // Limpiar fotos de no usado si existen
-                    'foto_articulo_no_usado' => null,
-                    // Mantener compatibilidad con campo antiguo
-                    'fotos_evidencia' => !empty($fotosBinarioUsado) ? json_encode($fotosBinarioUsado) : null
+                    'foto_articulo_usado' => null, // Ya no guardamos aquí
+                    'foto_articulo_no_usado' => null, // Limpiar
+                    // Mantener compatibilidad si necesitas
+                    'fotos_evidencia' => null,
+                    'updated_at' => now()
                 ]);
 
-            // Registrar en logs
-            Log::info("Artículo marcado como usado - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Fecha: {$request->fecha_uso}, Fotos en binario: " . count($fotosBinarioUsado));
+            Log::info("Artículo marcado como usado - Solicitud: {$solicitudId}, " .
+                     "Artículo: {$articuloInfo->nombre}, " .
+                     "Fotos procesadas: " . ($request->hasFile('fotos') ? count($request->file('fotos')) : 0));
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Artículo marcado como usado correctamente'
+            'message' => 'Artículo marcado como usado correctamente',
+            'fotos_guardadas' => $request->hasFile('fotos') ? count($request->file('fotos')) : 0
         ]);
-
     } catch (\Exception $e) {
         Log::error('Error al marcar artículo como usado: ' . $e->getMessage());
         return response()->json([
             'success' => false,
-            'message' => 'Error al marcar el artículo: ' . $e->getMessage()
+            'message' => 'Error al marcar el artículo: ' . $e->getMessage(),
+            'fotos_guardadas' => 0
         ], 500);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public function marcarNoUsado(Request $request, $solicitudId)
 {
@@ -1599,7 +1903,11 @@ public function marcarNoUsado(Request $request, $solicitudId)
             'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
         ]);
 
-        DB::transaction(function () use ($request, $solicitudId) {
+        // Declarar variables fuera del transaction
+        $totalFotos = $request->hasFile('fotos') ? count($request->file('fotos')) : 0;
+        $fotosGuardadas = 0;
+
+        DB::transaction(function () use ($request, $solicitudId, $totalFotos, &$fotosGuardadas) {
             // Obtener información de la solicitud
             $solicitud = DB::table('solicitudesordenes')
                 ->select('codigo')
@@ -1632,21 +1940,67 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 throw new \Exception('Artículo no encontrado en la solicitud');
             }
 
-            // Procesar fotos en BINARIO para ARTÍCULO NO USADO
-            $fotosBinarioNoUsado = [];
+            // ========================
+            // 🆕 CORRECCIÓN: GUARDAR FOTOS EN TABLA SEPARADA
+            // ========================
+            
+            // 1. Primero eliminar fotos anteriores de "no_usado" para este artículo
+            DB::table('ordenes_articulos_fotos')
+                ->where('orden_articulo_id', $articuloInfo->idordenesarticulos)
+                ->where('tipo_foto', 'no_usado')
+                ->delete();
+
+            Log::info("Fotos anteriores eliminadas para artículo (no usado): " . $articuloInfo->idordenesarticulos);
+
+            // 2. Procesar y guardar NUEVAS fotos en tabla separada
             if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $foto) {
-                    // Convertir la imagen a binario
-                    $contenidoBinario = file_get_contents($foto->getRealPath());
-                    
-                    // Comprimir la imagen si es posible (opcional)
-                    if (function_exists('imagecreatefromstring')) {
-                        $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                foreach ($request->file('fotos') as $index => $foto) {
+                    try {
+                        if (!$foto->isValid()) {
+                            Log::warning("Foto no válida (no usado): " . $foto->getClientOriginalName());
+                            continue;
+                        }
+
+                        // Verificar límite de 5 fotos
+                        if ($fotosGuardadas >= 5) {
+                            Log::warning("Se alcanzó el límite de 5 fotos para la devolución: " . $articuloInfo->nombre);
+                            break;
+                        }
+
+                        // Leer como binario
+                        $contenidoBinario = file_get_contents($foto->getRealPath());
+                        
+                        // Comprimir si es posible
+                        if (function_exists('imagecreatefromstring')) {
+                            $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                        }
+
+                        // 🆕 Insertar en la tabla de fotos SEPARADA
+                        DB::table('ordenes_articulos_fotos')->insert([
+                            'orden_articulo_id' => $articuloInfo->idordenesarticulos,
+                            'tipo_foto' => 'no_usado',
+                            'nombre_archivo' => $foto->getClientOriginalName(),
+                            'mime_type' => $foto->getMimeType(),
+                            'datos' => $contenidoBinario,
+                            'fecha_subida' => now()
+                        ]);
+
+                        $fotosGuardadas++;
+                        
+                        Log::debug("✅ Foto guardada en tabla separada (no usado): {$foto->getClientOriginalName()}, " .
+                                 "Tamaño: " . strlen($contenidoBinario) . " bytes, " .
+                                 "ID Artículo: {$articuloInfo->idordenesarticulos}");
+                        
+                    } catch (\Exception $e) {
+                        Log::error("Error procesando foto {$index} (no usado): " . $e->getMessage());
+                        continue;
                     }
-                    
-                    $fotosBinarioNoUsado[] = $contenidoBinario;
                 }
             }
+
+            // ========================
+            // RESTO DEL CÓDIGO PARA DEVOLUCIÓN DE ARTÍCULOS
+            // ========================
 
             // Buscar la ubicación original donde estaba el artículo
             $ubicacionOriginal = DB::table('rack_ubicaciones')
@@ -1718,45 +2072,96 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 ->where('tipo_ingreso', 'salida')
                 ->delete();
 
-            // 5. Actualizar en la tabla ordenesarticulos
+            // 5. Crear array de datos para actualizar
+            // 🆕 AHORA LIMPIAMOS los campos de fotos en ordenesarticulos
+            $datosActualizar = [
+                'fechaSinUsar' => $request->fecha_devolucion,
+                'fechaUsado' => null,
+                'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
+                'foto_articulo_no_usado' => null, // 🆕 Limpiamos, ya no guardamos aquí
+                'foto_articulo_usado' => null, // 🆕 Limpiamos por seguridad
+                'fotos_evidencia' => null, // 🆕 Limpiamos campo antiguo
+                'updated_at' => now()
+            ];
+
+            // Actualizar en la tabla ordenesarticulos
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $solicitudId)
                 ->where('idarticulos', $request->articulo_id)
-                ->update([
-                    'fechaSinUsar' => $request->fecha_devolucion,
-                    'fechaUsado' => null,
-                    'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
-                    // Guardar fotos en binario para NO USADO
-                    'foto_articulo_no_usado' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null,
-                    // Limpiar fotos de usado si existen
-                    'foto_articulo_usado' => null,
-                    // Mantener compatibilidad con campo antiguo
-                    'fotos_evidencia' => !empty($fotosBinarioNoUsado) ? json_encode($fotosBinarioNoUsado) : null
-                ]);
+                ->update($datosActualizar);
 
             // 6. Registrar en logs
-            Log::info("Artículo devuelto al inventario - Solicitud: {$solicitudId}, Artículo: {$articuloInfo->nombre}, Cantidad: {$articuloInfo->cantidad}, Ubicación: {$ubicacionOriginal->codigo}, Fotos en binario: " . count($fotosBinarioNoUsado));
+            Log::info("✅ Artículo devuelto al inventario - Solicitud: {$solicitudId}, " .
+                     "Artículo: {$articuloInfo->nombre}, Cantidad: {$articuloInfo->cantidad}, " .
+                     "Ubicación: {$ubicacionOriginal->codigo}, " .
+                     "Fotos subidas: {$totalFotos}, " .
+                     "Fotos guardadas en tabla separada: {$fotosGuardadas}");
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Artículo marcado como no usado y devuelto al inventario correctamente'
+            'message' => 'Artículo marcado como no usado y devuelto al inventario correctamente',
+            'fotos_subidas' => $totalFotos,
+            'fotos_guardadas' => $fotosGuardadas,
+            'limite_fotos' => 5
         ]);
-
     } catch (\Exception $e) {
-        Log::error('Error al marcar artículo como no usado: ' . $e->getMessage());
+        Log::error('❌ Error al marcar artículo como no usado: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        
         return response()->json([
             'success' => false,
-            'message' => 'Error al marcar el artículo: ' . $e->getMessage()
+            'message' => 'Error al marcar el artículo: ' . $e->getMessage(),
+            'fotos_subidas' => 0,
+            'fotos_guardadas' => 0
         ], 500);
     }
 }
- public function aceptarIndividual(Request $request, $id)
+
+
+
+
+private function comprimirImagenSimple($contenidoBinario)
+{
+    try {
+        // Crear imagen desde el binario
+        $imagen = imagecreatefromstring($contenidoBinario);
+        if (!$imagen) {
+            return $contenidoBinario; // Retornar original si no se pudo procesar
+        }
+
+        // Capturar contenido comprimido en buffer
+        ob_start();
+        
+        // Guardar como JPEG con calidad 80% (puedes ajustar)
+        imagejpeg($imagen, null, 80);
+        $contenidoComprimido = ob_get_clean();
+        
+        // Liberar memoria
+        imagedestroy($imagen);
+
+        // Si la compresión es exitosa, retornarla
+        if ($contenidoComprimido && strlen($contenidoComprimido) > 0) {
+            return $contenidoComprimido;
+        }
+        
+        return $contenidoBinario;
+        
+    } catch (\Exception $e) {
+        Log::warning("Error en compresión de imagen: " . $e->getMessage());
+        return $contenidoBinario;
+    }
+}
+
+
+
+public function aceptarIndividual(Request $request, $id)
 {
     try {
         DB::beginTransaction();
 
-        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO id_usuario_destino)
+        // Obtener la solicitud con todos los campos necesarios
         $solicitud = DB::table('solicitudesordenes')
             ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario', 'id_usuario_destino')
             ->where('idsolicitudesordenes', $id)
@@ -1770,6 +2175,16 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ], 404);
         }
 
+        // Obtener la asignación relacionada
+        $asignacion = DB::table('asignaciones')
+            ->where('idSolicitud', $solicitud->idsolicitudesordenes)
+            ->where('codigo_solicitud', $solicitud->codigo)
+            ->first();
+
+        if (!$asignacion) {
+            Log::warning("No se encontró asignación para la solicitud: {$solicitud->codigo}");
+        }
+
         $articuloId = $request->input('articulo_id');
         $ubicacionId = $request->input('ubicacion_id');
 
@@ -1780,14 +2195,18 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ], 400);
         }
 
-        // Obtener información del artículo
+        // Obtener información del artículo CON id_asignacion
         $articulo = DB::table('ordenesarticulos as oa')
             ->select(
                 'oa.idordenesarticulos',
                 'oa.cantidad',
+                'oa.id_asignacion',
+                'oa.requiere_devolucion',
+                'oa.fecha_devolucion_programada',
                 'a.idArticulos',
                 'a.nombre',
-                'a.stock_total'
+                'a.stock_total',
+                'a.precio_compra'
             )
             ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
             ->where('oa.idsolicitudesordenes', $id)
@@ -1860,51 +2279,6 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ], 404);
         }
 
-        // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
-        DB::table('rack_ubicacion_articulos')
-            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-            ->decrement('cantidad', $cantidadSolicitada);
-
-        // ✅ 2. DESCONTAR stock total en tabla articulos
-        DB::table('articulos')
-            ->where('idArticulos', $articuloId)
-            ->decrement('stock_total', $cantidadSolicitada);
-
-        // ✅ 3. Registrar el movimiento en rack_movimientos (SALIDA)
-        DB::table('rack_movimientos')->insert([
-            'articulo_id' => $articuloId,
-            'custodia_id' => null,
-            'ubicacion_origen_id' => $ubicacionId,
-            'ubicacion_destino_id' => null,
-            'rack_origen_id' => $stockUbicacion->rack_id,
-            'rack_destino_id' => null,
-            'cantidad' => $cantidadSolicitada,
-            'tipo_movimiento' => 'salida',
-            'usuario_id' => auth()->id(),
-            'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
-            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-            'codigo_ubicacion_destino' => null,
-            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-            'nombre_rack_destino' => null,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // ✅ 4. Registrar en inventario_ingresos_clientes como SALIDA
-        DB::table('inventario_ingresos_clientes')->insert([
-            'compra_id' => null,
-            'articulo_id' => $articuloId,
-            'tipo_ingreso' => 'salida',
-            'ingreso_id' => $solicitud->idsolicitudesordenes,
-            'cliente_general_id' => $stockUbicacion->cliente_general_id,
-            'cantidad' => -$cantidadSolicitada,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // ✅ 5. Actualizar KARDEX para la SALIDA
-        $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
-
         // Determinar el usuario destino final
         $usuarioFinalId = null;
         $tipoEntrega = '';
@@ -1912,7 +2286,6 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
         switch ($request->tipo_destinatario) {
             case 'destino':
-                // Usuario Destino Original
                 if (!$solicitud->id_usuario_destino) {
                     return response()->json([
                         'success' => false,
@@ -1955,7 +2328,52 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
         $nombreDestinatario = "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}";
 
-        // ✅ 6. Registrar en articulos_entregas (NUEVA TABLA)
+        // ✅ 1. DESCONTAR de rack_ubicacion_articulos
+        DB::table('rack_ubicacion_articulos')
+            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+            ->decrement('cantidad', $cantidadSolicitada);
+
+        // ✅ 2. DESCONTAR stock total en tabla articulos
+        DB::table('articulos')
+            ->where('idArticulos', $articuloId)
+            ->decrement('stock_total', $cantidadSolicitada);
+
+        // ✅ 3. Registrar movimiento en rack_movimientos
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $articuloId,
+            'custodia_id' => null,
+            'ubicacion_origen_id' => $ubicacionId,
+            'ubicacion_destino_id' => null,
+            'rack_origen_id' => $stockUbicacion->rack_id,
+            'rack_destino_id' => null,
+            'cantidad' => $cantidadSolicitada,
+            'tipo_movimiento' => 'salida',
+            'usuario_id' => auth()->id(),
+            'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
+            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+            'codigo_ubicacion_destino' => null,
+            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+            'nombre_rack_destino' => null,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 4. Registrar en inventario_ingresos_clientes
+        DB::table('inventario_ingresos_clientes')->insert([
+            'compra_id' => null,
+            'articulo_id' => $articuloId,
+            'tipo_ingreso' => 'salida',
+            'ingreso_id' => $solicitud->idsolicitudesordenes,
+            'cliente_general_id' => $stockUbicacion->cliente_general_id,
+            'cantidad' => -$cantidadSolicitada,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 5. Actualizar KARDEX
+        $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
+
+        // ✅ 6. Registrar en articulos_entregas
         DB::table('articulos_entregas')->insert([
             'solicitud_id' => $solicitud->idsolicitudesordenes,
             'articulo_id' => $articuloId,
@@ -1970,6 +2388,38 @@ public function marcarNoUsado(Request $request, $solicitudId)
             'updated_at' => now()
         ]);
 
+        // ============================================
+// ✅ ACTUALIZAR DETALLE_ASIGNACIONES (CORREGIDO)
+// ============================================
+if ($asignacion) {
+    // Obtener el tipo de la asignación principal
+    $tipoAsignacion = $asignacion->tipo_asignacion ?? 'trabajo_a_realizar';
+    
+    // El tipo del artículo generalmente sigue el tipo de la asignación
+    $tipoArticulo = $tipoAsignacion;
+    
+    // Solo override si el artículo individual requiere devolución 
+    // pero la asignación es de trabajo
+    if ($tipoAsignacion === 'trabajo_a_realizar' && $articulo->requiere_devolucion) {
+        $tipoArticulo = 'prestamo';
+    } elseif ($tipoAsignacion === 'prestamo' && !$articulo->requiere_devolucion) {
+        // Si la asignación es préstamo pero el artículo no requiere devolución,
+        // dejarlo como préstamo
+        $tipoArticulo = 'prestamo';
+    }
+
+    DB::table('detalle_asignaciones')
+        ->where('asignacion_id', $asignacion->id)
+        ->where('articulo_id', $articuloId)
+        ->update([
+            'estado_articulo' => 'activo',
+            'fecha_entrega_real' => now()->format('Y-m-d'),
+            'tipo' => $tipoArticulo,
+            'requiere_devolucion' => $articulo->requiere_devolucion ?? 0,
+            'fecha_devolucion_esperada' => $articulo->fecha_devolucion_programada ?? null,
+            'updated_at' => now()
+        ]);
+}
         // ✅ 7. Marcar el artículo como procesado
         DB::table('ordenesarticulos')
             ->where('idordenesarticulos', $articulo->idordenesarticulos)
@@ -1985,6 +2435,21 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ->count();
 
         $todosProcesados = $articulosPendientes == 0;
+
+        // ============================================
+        // ✅ ACTUALIZAR ASIGNACIÓN PRINCIPAL (si todos están procesados)
+        // ============================================
+        if ($todosProcesados && $asignacion) {
+            DB::table('asignaciones')
+                ->where('id', $asignacion->id)
+                ->update([
+                    'estado' => 'activo',
+                    'fecha_entrega_real' => now()->format('Y-m-d'),
+                    'updated_at' => now()
+                ]);
+
+            Log::info("✅ Asignación actualizada: {$asignacion->codigo_asignacion} - Estado: activo");
+        }
 
         // Si todos los artículos han sido procesados, marcar la solicitud como aprobada
         if ($todosProcesados) {
@@ -2005,6 +2470,8 @@ public function marcarNoUsado(Request $request, $solicitudId)
             'todos_procesados' => $todosProcesados,
             'destinatario' => $nombreDestinatario,
             'tipo_entrega' => $tipoEntrega,
+            'asignacion_actualizada' => ($todosProcesados && $asignacion) ? true : false,
+            'codigo_asignacion' => $asignacion ? $asignacion->codigo_asignacion : null,
             'puede_generar_pdf' => $todosProcesados
         ]);
 
@@ -2045,6 +2512,16 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 'success' => false,
                 'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
             ], 400);
+        }
+
+        // Obtener la asignación relacionada
+        $asignacion = DB::table('asignaciones')
+            ->where('idSolicitud', $solicitud->idsolicitudesordenes)
+            ->where('codigo_solicitud', $solicitud->codigo)
+            ->first();
+
+        if (!$asignacion) {
+            Log::warning("No se encontró asignación para la solicitud: {$solicitud->codigo}");
         }
 
         // Obtener las ubicaciones seleccionadas del request
@@ -2112,6 +2589,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ->select(
                 'oa.idordenesarticulos',
                 'oa.cantidad',
+                'oa.id_asignacion', // ← Nuevo campo
                 'a.idArticulos',
                 'a.nombre',
                 'a.stock_total',
@@ -2135,7 +2613,9 @@ public function marcarNoUsado(Request $request, $solicitudId)
             }
         }
 
-        // Procesar cada artículo
+        // ============================================
+        // PROCESAR CADA ARTÍCULO
+        // ============================================
         foreach ($articulosSolicitud as $articulo) {
             $cantidadSolicitada = $articulo->cantidad;
             $ubicacionId = $ubicacionesSeleccionadas[$articulo->idArticulos] ?? null;
@@ -2191,7 +2671,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 ], 400);
             }
 
-            // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
+            // ✅ 1. DESCONTAR de rack_ubicacion_articulos
             DB::table('rack_ubicacion_articulos')
                 ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
                 ->decrement('cantidad', $cantidadSolicitada);
@@ -2221,7 +2701,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 'updated_at' => now()
             ]);
 
-            // ✅ 4. Registrar en articulos_entregas con el destinatario seleccionado
+            // ✅ 4. Registrar en articulos_entregas
             DB::table('articulos_entregas')->insert([
                 'solicitud_id' => $solicitud->idsolicitudesordenes,
                 'articulo_id' => $articulo->idArticulos,
@@ -2259,7 +2739,61 @@ public function marcarNoUsado(Request $request, $solicitudId)
                     'observacion' => "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado grupalmente - Entregado a: {$nombreDestinatario}"
                 ]);
 
+           // ============================================
+// ✅ ACTUALIZAR DETALLE_ASIGNACIONES (CORREGIDO)
+// ============================================
+if ($asignacion) {
+    // Obtener el tipo de la asignación principal
+    $tipoAsignacion = $asignacion->tipo_asignacion ?? 'trabajo_a_realizar';
+    
+    // El tipo del artículo generalmente sigue el tipo de la asignación
+    $tipoArticulo = $tipoAsignacion;
+    
+    // Consultar si el artículo requiere devolución
+    $articuloDetalle = DB::table('ordenesarticulos')
+        ->select('requiere_devolucion', 'fecha_devolucion_programada')
+        ->where('idordenesarticulos', $articulo->idordenesarticulos)
+        ->first();
+    
+    // Solo override si el artículo individual requiere devolución 
+    // pero la asignación es de trabajo
+    if ($tipoAsignacion === 'trabajo_a_realizar' && $articuloDetalle && $articuloDetalle->requiere_devolucion) {
+        $tipoArticulo = 'prestamo';
+    } elseif ($tipoAsignacion === 'prestamo' && (!$articuloDetalle || !$articuloDetalle->requiere_devolucion)) {
+        // Si la asignación es préstamo pero el artículo no requiere devolución,
+        // dejarlo como préstamo (porque la asignación ya tiene otros artículos con devolución)
+        $tipoArticulo = 'prestamo';
+    }
+
+    DB::table('detalle_asignaciones')
+        ->where('asignacion_id', $asignacion->id)
+        ->where('articulo_id', $articulo->idArticulos)
+        ->update([
+            'estado_articulo' => 'activo',
+            'fecha_entrega_real' => now()->format('Y-m-d'),
+            'tipo' => $tipoArticulo,
+            'requiere_devolucion' => $articuloDetalle ? $articuloDetalle->requiere_devolucion : 0,
+            'fecha_devolucion_esperada' => $articuloDetalle ? $articuloDetalle->fecha_devolucion_programada : null,
+            'updated_at' => now()
+        ]);
+}
+
             Log::info("✅ Artículo procesado grupalmente - Artículo: {$articulo->idArticulos}, Cantidad: {$cantidadSolicitada}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
+        }
+
+        // ============================================
+        // ✅ ACTUALIZAR ASIGNACIÓN PRINCIPAL (NUEVO)
+        // ============================================
+        if ($asignacion) {
+            DB::table('asignaciones')
+                ->where('id', $asignacion->id)
+                ->update([
+                    'estado' => 'activo',
+                    'fecha_entrega_real' => now()->format('Y-m-d'),
+                    'updated_at' => now()
+                ]);
+
+            Log::info("✅ Asignación actualizada: {$asignacion->codigo_asignacion} - Estado: activo");
         }
 
         // Actualizar estado de la solicitud
@@ -2275,9 +2809,11 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
         return response()->json([
             'success' => true,
-            'message' => "Solicitud de artículos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas. Entregado a: {$nombreDestinatario}",
+            'message' => "Solicitud de artículos aprobada correctamente. Entregado a: {$nombreDestinatario}",
             'destinatario' => $nombreDestinatario,
-            'tipo_entrega' => $tipoEntrega
+            'tipo_entrega' => $tipoEntrega,
+            'asignacion_actualizada' => $asignacion ? true : false,
+            'codigo_asignacion' => $asignacion ? $asignacion->codigo_asignacion : null
         ]);
 
     } catch (\Exception $e) {

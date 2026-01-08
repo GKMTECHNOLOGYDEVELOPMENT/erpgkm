@@ -430,17 +430,27 @@
                                                                 </div>
                                                             </td>
 
-                                                            <!-- Columna Checkbox individual (solo cuando NO es uso diario) -->
-                                                            <td x-show="!orderInfo.esUsoDiario"
-                                                                class="px-6 py-4 whitespace-nowrap">
-                                                                <div class="flex items-center">
-                                                                    <input type="checkbox"
-                                                                        x-model="product.requiereDevolucion"
-                                                                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                                                                    <span class="ml-2 text-sm text-gray-600"
-                                                                        x-text="product.requiereDevolucion ? 'Sí' : 'No'"></span>
-                                                                </div>
-                                                            </td>
+                                                         <!-- Columna Checkbox individual (solo cuando NO es uso diario) -->
+<td x-show="!orderInfo.esUsoDiario" class="px-6 py-4 whitespace-nowrap">
+    <div class="flex flex-col items-center space-y-2">
+        <!-- Checkbox -->
+        <div class="flex items-center">
+            <input type="checkbox" 
+                x-model="product.requiereDevolucion"
+                @change="if(!product.requiereDevolucion) product.fechaDevolucion = null"
+                class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+            <span class="ml-2 text-sm text-gray-600"
+                x-text="product.requiereDevolucion ? 'Sí' : 'No'"></span>
+        </div>
+        
+        <!-- Fecha de devolución (si está programada) -->
+        <div x-show="product.requiereDevolucion && product.fechaDevolucion" 
+            class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
+            <i class="fas fa-calendar-day mr-1"></i>
+            <span x-text="formatDateForDisplay(product.fechaDevolucion)"></span>
+        </div>
+    </div>
+</td>
 
                                                             <!-- Columna Acciones -->
                                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -766,6 +776,22 @@
                                         class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 resize-none transition-all duration-200 text-sm sm:text-base"
                                         placeholder="Describa cualquier observación, comentario adicional o instrucción especial para esta solicitud..."></textarea>
                                 </div>
+
+                                <!-- Observación de Devolución (solo visible cuando NO es uso diario) -->
+<div x-show="!orderInfo.esUsoDiario" x-transition class="mt-6 sm:mt-8">
+    <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+        <i class="fas fa-clipboard-check text-purple-500 mr-2 text-sm sm:text-base"></i>
+        Observaciones para Devolución
+    </label>
+    <textarea x-model="orderInfo.observacionDevolucion" rows="3"
+        class="w-full px-3 sm:px-4 py-3 sm:py-4 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-purple-50 text-gray-900 resize-none transition-all duration-200 text-sm sm:text-base"
+        placeholder="Especifique instrucciones especiales para la devolución de artículos (ej: condiciones, lugar, persona encargada)...">
+    </textarea>
+    <p class="text-xs text-purple-600 mt-2">
+        <i class="fas fa-info-circle mr-1"></i>
+        Esta información será útil para el seguimiento de artículos que requieren devolución
+    </p>
+</div>
                             </div>
                         </div>
                     </div>
@@ -1261,16 +1287,16 @@
                 usuarios: @json($usuarios ?? []),
                 usuariosFiltrados: [],
 
-                orderInfo: {
-                    tipoServicio: 'solicitud_articulo',
-                    urgencia: '',
-                    observaciones: '',
-                    fechaRequerida: '',
-                    areaDestino: '', // Nuevo campo
-                    usuarioDestino: '', // Nuevo campo
-                    esUsoDiario: false // Nuevo campo para el checkbox
-
-                },
+               orderInfo: {
+    tipoServicio: 'solicitud_articulo',
+    urgencia: '',
+    observaciones: '',
+    fechaRequerida: '',
+    areaDestino: '', // Nuevo campo
+    usuarioDestino: '', // Nuevo campo
+    esUsoDiario: false, // Nuevo campo para el checkbox
+    observacionDevolucion: '' // NUEVO: campo para observaciones de devolución
+},
                 minDate: '',
                 isCreatingOrder: false,
 
@@ -1362,10 +1388,21 @@
                         }
                     });
 
-                    // Observador para cuando cambie el estado de "esUsoDiario"
-                    this.$watch('orderInfo.esUsoDiario', (newValue) => {
-                        this.resetearDevoluciones(newValue);
-                    });
+                   // Observador para cuando cambie el estado de "esUsoDiario"
+this.$watch('orderInfo.esUsoDiario', (newValue) => {
+    this.resetearDevoluciones(newValue);
+    
+    // Mostrar mensaje informativo
+    if (newValue) {
+        toastr.info(
+            'Modo: Uso diario activado. Los artículos no requerirán devolución.'
+        );
+    } else {
+        toastr.info(
+            'Modo: NO es para uso diario. Puede marcar artículos para devolución.'
+        );
+    }
+});
 
                     this.minDate = new Date().toISOString().split('T')[0];
 
@@ -1376,79 +1413,91 @@
                     });
                 },
 
-                resetearDevoluciones(esUsoDiario) {
-                    if (this.products.length === 0) return;
+             resetearDevoluciones(esUsoDiario) {
+    if (this.products.length === 0) return;
 
-                    if (esUsoDiario) {
-                        // Si se marca como uso diario, quitar todos los checkboxes y fechas de devolución
-                        let resetCount = 0;
+    let resetCount = 0;
+    let devolucionesActivas = 0;
 
-                        this.products.forEach(product => {
-                            if (product.requiereDevolucion || product.fechaDevolucion) {
-                                product.requiereDevolucion = false;
-                                product.fechaDevolucion = null; // También limpiar la fecha
-                                resetCount++;
-                            }
-                        });
+    this.products.forEach(product => {
+        if (esUsoDiario) {
+            // Si se marca como uso diario, quitar todos los checkboxes y fechas de devolución
+            if (product.requiereDevolucion || product.fechaDevolucion) {
+                product.requiereDevolucion = false;
+                product.fechaDevolucion = null;
+                resetCount++;
+            }
+        } else {
+            // Contar cuántos artículos tienen devolución programada
+            if (product.fechaDevolucion) {
+                devolucionesActivas++;
+            }
+        }
+    });
 
-                        if (resetCount > 0) {
-                            toastr.info(
-                                `Se han quitado ${resetCount} marca(s) de devolución porque ahora es para uso diario`
-                            );
-                        }
-                    } else {
-                        // Si se desmarca (NO es uso diario), todos los productos empiezan sin requerir devolución
-                        // PERO mantenemos las fechas si ya estaban asignadas
-                        this.products.forEach(product => {
-                            if (!product.fechaDevolucion) {
-                                product.requiereDevolucion = false;
-                            }
-                        });
-
-                        // Mostrar mensaje informativo
-                        toastr.info(
-                            'Modo: NO es para uso diario. Puede marcar artículos para devolución');
-                    }
-                },
+    if (esUsoDiario && resetCount > 0) {
+        toastr.info(
+            `Se han quitado ${resetCount} marca(s) de devolución porque ahora es para uso diario`
+        );
+    }
+    
+    if (!esUsoDiario && devolucionesActivas > 0) {
+        toastr.info(
+            `${devolucionesActivas} artículo(s) tienen devolución programada`
+        );
+    }
+},
                 initFlatpickrDevolucion() {
                     // Inicializaremos flatpickr cuando se abra el modal
                 },
 
-                // Métodos para la devolución
-                iniciarDevolucion(index) {
-                    this.productoParaDevolucion = this.products[index];
-                    this.productoParaDevolucionIndex = index; // Guardar el índice para poder actualizar
+               iniciarDevolucion(index) {
+    this.productoParaDevolucion = this.products[index];
+    this.productoParaDevolucionIndex = index;
 
-                    // Cargar la fecha guardada si existe, de lo contrario vacío
-                    this.fechaDevolucion = this.productoParaDevolucion.fechaDevolucion || '';
-                    this.showDevolucionModal = true;
+    // Cargar la fecha guardada si existe, de lo contrario vacío
+    this.fechaDevolucion = this.productoParaDevolucion.fechaDevolucion || '';
+    this.showDevolucionModal = true;
 
-                    // Inicializar flatpickr después de que el modal se muestre
-                    this.$nextTick(() => {
-                        if (this.$refs.fechaDevolucionInput) {
-                            this.fechaDevolucionInput = flatpickr(this.$refs
-                                .fechaDevolucionInput, {
-                                    locale: 'es',
-                                    dateFormat: 'Y-m-d',
-                                    minDate: 'today',
-                                    disableMobile: false,
-                                    allowInput: true,
-                                    clickOpens: true,
-                                    onChange: (selectedDates, dateStr) => {
-                                        this.fechaDevolucion = dateStr;
-                                    },
-                                    onReady: (selectedDates, dateStr, instance) => {
-                                        // Establecer la fecha guardada si existe
-                                        if (this.productoParaDevolucion
-                                            .fechaDevolucion) {
-                                            instance.setDate(this.productoParaDevolucion
-                                                .fechaDevolucion);
-                                        }
-                                    }
-                                });
-                        }
-                    });
+    // Obtener la fecha de requerimiento como fecha mínima
+    const fechaMinima = this.orderInfo.fechaRequerida || 'today';
+
+    this.$nextTick(() => {
+        if (this.$refs.fechaDevolucionInput) {
+            this.fechaDevolucionInput = flatpickr(this.$refs.fechaDevolucionInput, {
+                locale: 'es',
+                dateFormat: 'Y-m-d',
+                minDate: fechaMinima, // ¡IMPORTANTE! Fecha mínima basada en fecha de requerimiento
+                disableMobile: false,
+                allowInput: true,
+                clickOpens: true,
+                onChange: (selectedDates, dateStr) => {
+                    this.fechaDevolucion = dateStr;
                 },
+                onReady: (selectedDates, dateStr, instance) => {
+                    // Establecer la fecha guardada si existe
+                    if (this.productoParaDevolucion.fechaDevolucion) {
+                        instance.setDate(this.productoParaDevolucion.fechaDevolucion);
+                    }
+                    
+                    // Mostrar mensaje informativo
+                    if (this.orderInfo.fechaRequerida) {
+                        const minDate = new Date(this.orderInfo.fechaRequerida);
+                        const formattedDate = minDate.toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                        instance.input.setAttribute(
+                            'placeholder', 
+                            `Mínimo ${formattedDate} (fecha de requerimiento)`
+                        );
+                    }
+                }
+            });
+        }
+    });
+},
 
                 confirmarDevolucion() {
                     if (!this.fechaDevolucion) {
@@ -1596,129 +1645,128 @@
                     }
                 },
 
-                addProductFromCotizacion(cotizacionProduct) {
-                    const articuloCompleto = this.articulos.find(
-                        a => a.idArticulos == cotizacionProduct.articulo_id
-                    );
+             addProductFromCotizacion(cotizacionProduct) {
+    const articuloCompleto = this.articulos.find(
+        a => a.idArticulos == cotizacionProduct.articulo_id
+    );
 
-                    if (!articuloCompleto) {
-                        toastr.error('Artículo no encontrado en el catálogo');
-                        return;
-                    }
+    if (!articuloCompleto) {
+        toastr.error('Artículo no encontrado en el catálogo');
+        return;
+    }
 
-                    const existingProductIndex = this.products.findIndex(
-                        product => product.articuloId == cotizacionProduct.articulo_id
-                    );
+    const existingProductIndex = this.products.findIndex(
+        product => product.articuloId == cotizacionProduct.articulo_id
+    );
 
-                    if (existingProductIndex !== -1) {
-                        const nuevaCantidad = this.products[existingProductIndex].cantidad + 1;
-                        const cantidadMaxima = cotizacionProduct.cantidad;
+    if (existingProductIndex !== -1) {
+        const nuevaCantidad = this.products[existingProductIndex].cantidad + 1;
+        const cantidadMaxima = cotizacionProduct.cantidad;
 
-                        if (nuevaCantidad > cantidadMaxima) {
-                            toastr.error(
-                                `No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`
-                            );
-                            return;
-                        }
+        if (nuevaCantidad > cantidadMaxima) {
+            toastr.error(
+                `No puede exceder la cantidad de la cotización: ${cantidadMaxima} unidades`
+            );
+            return;
+        }
 
-                        this.products[existingProductIndex].cantidad = nuevaCantidad;
-                        toastr.info(
-                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`
-                        );
-                    } else {
-                        const product = {
-                            uniqueId: Date.now() + Math.random(),
-                            articuloId: cotizacionProduct.articulo_id,
-                            nombre: articuloCompleto.nombre,
-                            codigo: articuloCompleto.codigo_barras || articuloCompleto
-                                .codigo_repuesto,
-                            codigo_barras: articuloCompleto.codigo_barras,
-                            codigo_repuesto: articuloCompleto.codigo_repuesto,
-                            tipo_articulo: articuloCompleto.tipo_articulo,
-                            modelo: articuloCompleto.modelo,
-                            marca: articuloCompleto.marca,
-                            subcategoria: articuloCompleto.subcategoria,
-                            cantidad: 1,
-                            descripcion: cotizacionProduct.descripcion ||
-                                (this.selectedCotizacionInfo ?
-                                    `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
-                                    'Desde cotización'),
-                            cantidadCotizacion: cotizacionProduct.cantidad,
-                            esDeCotizacion: true,
-                            requiereDevolucion: false // Asegurar que se inicialice
-                        };
+        this.products[existingProductIndex].cantidad = nuevaCantidad;
+        toastr.info(
+            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad}/${cantidadMaxima} unidades`
+        );
+    } else {
+        const product = {
+            uniqueId: Date.now() + Math.random(),
+            articuloId: cotizacionProduct.articulo_id,
+            nombre: articuloCompleto.nombre,
+            codigo: articuloCompleto.codigo_barras || articuloCompleto.codigo_repuesto,
+            codigo_barras: articuloCompleto.codigo_barras,
+            codigo_repuesto: articuloCompleto.codigo_repuesto,
+            tipo_articulo: articuloCompleto.tipo_articulo,
+            modelo: articuloCompleto.modelo,
+            marca: articuloCompleto.marca,
+            subcategoria: articuloCompleto.subcategoria,
+            cantidad: 1,
+            descripcion: cotizacionProduct.descripcion ||
+                (this.selectedCotizacionInfo ?
+                    `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
+                    'Desde cotización'),
+            cantidadCotizacion: cotizacionProduct.cantidad,
+            esDeCotizacion: true,
+            requiereDevolucion: false, // Inicializar
+            fechaDevolucion: null // Inicializar
+        };
 
-                        this.products.push(product);
-                        toastr.success(
-                            `Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`
-                        );
-                    }
-                },
+        this.products.push(product);
+        toastr.success(
+            `Artículo agregado desde cotización (1/${cotizacionProduct.cantidad} unidades)`
+        );
+    }
+},
+             addAllCotizacionProducts() {
+    if (this.cotizacionProducts.length === 0) {
+        toastr.info('No hay artículos para agregar');
+        return;
+    }
 
-                addAllCotizacionProducts() {
-                    if (this.cotizacionProducts.length === 0) {
-                        toastr.info('No hay artículos para agregar');
-                        return;
-                    }
+    let addedCount = 0;
+    let skippedCount = 0;
 
-                    let addedCount = 0;
-                    let skippedCount = 0;
+    this.cotizacionProducts.forEach(cotizacionProduct => {
+        const articuloCompleto = this.articulos.find(
+            a => a.idArticulos == cotizacionProduct.articulo_id
+        );
 
-                    this.cotizacionProducts.forEach(cotizacionProduct => {
-                        const articuloCompleto = this.articulos.find(
-                            a => a.idArticulos == cotizacionProduct.articulo_id
-                        );
+        if (articuloCompleto) {
+            const existingProductIndex = this.products.findIndex(
+                product => product.articuloId == cotizacionProduct.articulo_id
+            );
 
-                        if (articuloCompleto) {
-                            const existingProductIndex = this.products.findIndex(
-                                product => product.articuloId == cotizacionProduct
-                                .articulo_id
-                            );
+            if (existingProductIndex !== -1) {
+                const product = this.products[existingProductIndex];
+                if (product.cantidad < cotizacionProduct.cantidad) {
+                    product.cantidad += 1;
+                    addedCount++;
+                } else {
+                    skippedCount++;
+                }
+            } else {
+                const product = {
+                    uniqueId: Date.now() + Math.random(),
+                    articuloId: cotizacionProduct.articulo_id,
+                    nombre: articuloCompleto.nombre,
+                    codigo: articuloCompleto.codigo_barras ||
+                        articuloCompleto.codigo_repuesto,
+                    codigo_barras: articuloCompleto.codigo_barras,
+                    codigo_repuesto: articuloCompleto.codigo_repuesto,
+                    tipo_articulo: articuloCompleto.tipo_articulo,
+                    modelo: articuloCompleto.modelo,
+                    marca: articuloCompleto.marca,
+                    subcategoria: articuloCompleto.subcategoria,
+                    cantidad: 1,
+                    descripcion: cotizacionProduct.descripcion ||
+                        (this.selectedCotizacionInfo ?
+                            `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
+                            'Desde cotización'),
+                    cantidadCotizacion: cotizacionProduct.cantidad,
+                    esDeCotizacion: true,
+                    requiereDevolucion: false, // Inicializar
+                    fechaDevolucion: null // Inicializar
+                };
 
-                            if (existingProductIndex !== -1) {
-                                const product = this.products[existingProductIndex];
-                                if (product.cantidad < cotizacionProduct.cantidad) {
-                                    product.cantidad += 1;
-                                    addedCount++;
-                                } else {
-                                    skippedCount++;
-                                }
-                            } else {
-                                const product = {
-                                    uniqueId: Date.now() + Math.random(),
-                                    articuloId: cotizacionProduct.articulo_id,
-                                    nombre: articuloCompleto.nombre,
-                                    codigo: articuloCompleto.codigo_barras ||
-                                        articuloCompleto.codigo_repuesto,
-                                    codigo_barras: articuloCompleto.codigo_barras,
-                                    codigo_repuesto: articuloCompleto.codigo_repuesto,
-                                    tipo_articulo: articuloCompleto.tipo_articulo,
-                                    modelo: articuloCompleto.modelo,
-                                    marca: articuloCompleto.marca,
-                                    subcategoria: articuloCompleto.subcategoria,
-                                    cantidad: 1,
-                                    descripcion: cotizacionProduct.descripcion ||
-                                        (this.selectedCotizacionInfo ?
-                                            `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
-                                            'Desde cotización'),
-                                    cantidadCotizacion: cotizacionProduct.cantidad,
-                                    esDeCotizacion: true,
-                                    requiereDevolucion: false // Agregar este campo
-                                };
+                this.products.push(product);
+                addedCount++;
+            }
+        }
+    });
 
-                                this.products.push(product);
-                                addedCount++;
-                            }
-                        }
-                    });
+    let message = `${addedCount} artículos agregados desde la cotización`;
+    if (skippedCount > 0) {
+        message += ` (${skippedCount} ya estaban en cantidad máxima)`;
+    }
 
-                    let message = `${addedCount} artículos agregados desde la cotización`;
-                    if (skippedCount > 0) {
-                        message += ` (${skippedCount} ya estaban en cantidad máxima)`;
-                    }
-
-                    toastr.success(message);
-                },
+    toastr.success(message);
+},
 
                 formatDate(dateString) {
                     if (!dateString) return '';
@@ -1751,62 +1799,61 @@
                     }
                 },
 
-                addProduct() {
-                    if (!this.canAddProduct) {
-                        toastr.error('Por favor seleccione un artículo y cantidad');
-                        return;
-                    }
+               addProduct() {
+    if (!this.canAddProduct) {
+        toastr.error('Por favor seleccione un artículo y cantidad');
+        return;
+    }
 
-                    const selectedOption = $(this.$refs.articuloSelect).find('option:selected');
-                    const articuloData = this.articulos.find(a => a.idArticulos == this.newProduct
-                        .articuloId);
+    const selectedOption = $(this.$refs.articuloSelect).find('option:selected');
+    const articuloData = this.articulos.find(a => a.idArticulos == this.newProduct.articuloId);
 
-                    if (!articuloData) {
-                        toastr.error('Error al obtener información del artículo');
-                        return;
-                    }
+    if (!articuloData) {
+        toastr.error('Error al obtener información del artículo');
+        return;
+    }
 
-                    const existingProductIndex = this.products.findIndex(product =>
-                        product.articuloId === this.newProduct.articuloId
-                    );
+    const existingProductIndex = this.products.findIndex(product =>
+        product.articuloId === this.newProduct.articuloId
+    );
 
-                    if (existingProductIndex !== -1) {
-                        this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
-                        toastr.success(
-                            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
-                        );
-                    } else {
-                        const product = {
-                            uniqueId: Date.now() + Math.random(),
-                            articuloId: this.newProduct.articuloId,
-                            nombre: articuloData.nombre,
-                            codigo: articuloData.codigo_barras || articuloData.codigo_repuesto,
-                            codigo_barras: articuloData.codigo_barras,
-                            codigo_repuesto: articuloData.codigo_repuesto,
-                            tipo_articulo: articuloData.tipo_articulo,
-                            modelo: articuloData.modelo,
-                            marca: articuloData.marca,
-                            subcategoria: articuloData.subcategoria,
-                            cantidad: this.newProduct.cantidad,
-                            descripcion: this.newProduct.descripcion,
-                            requiereDevolucion: false,
-                            fechaDevolucion: null // Nuevo campo para guardar la fecha
-                        };
+    if (existingProductIndex !== -1) {
+        this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
+        toastr.success(
+            `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
+        );
+    } else {
+        const product = {
+            uniqueId: Date.now() + Math.random(),
+            articuloId: this.newProduct.articuloId,
+            nombre: articuloData.nombre,
+            codigo: articuloData.codigo_barras || articuloData.codigo_repuesto,
+            codigo_barras: articuloData.codigo_barras,
+            codigo_repuesto: articuloData.codigo_repuesto,
+            tipo_articulo: articuloData.tipo_articulo,
+            modelo: articuloData.modelo,
+            marca: articuloData.marca,
+            subcategoria: articuloData.subcategoria,
+            cantidad: this.newProduct.cantidad,
+            descripcion: this.newProduct.descripcion,
+            requiereDevolucion: false, // Inicializar
+            fechaDevolucion: null // Inicializar
+        };
 
-                        this.products.push(product);
-                        toastr.success('Artículo agregado correctamente');
-                    }
+        this.products.push(product);
+        toastr.success('Artículo agregado correctamente');
+    }
 
-                    this.newProduct = {
-                        articuloId: '',
-                        cantidad: 1,
-                        descripcion: ''
-                    };
+    this.newProduct = {
+        articuloId: '',
+        cantidad: 1,
+        descripcion: ''
+    };
 
-                    if (this.$refs.articuloSelect) {
-                        $(this.$refs.articuloSelect).val('').trigger('change');
-                    }
-                },
+    if (this.$refs.articuloSelect) {
+        $(this.$refs.articuloSelect).val('').trigger('change');
+    }
+},
 
                 removeProduct(index) {
                     this.products.splice(index, 1);
@@ -1842,20 +1889,32 @@
                     }
                 },
 
-                clearAll() {
-                    if (this.products.length === 0) {
-                        toastr.info('No hay artículos para limpiar');
-                        return;
-                    }
-                    this.showClearModal = true;
-                },
+               clearAll() {
+    if (this.products.length === 0) {
+        toastr.info('No hay artículos para limpiar');
+        return;
+    }
+    
+    // Contar artículos con devolución programada
+    const conDevolucion = this.products.filter(p => p.requiereDevolucion).length;
+    const conFecha = this.products.filter(p => p.fechaDevolucion).length;
+    
+    // Guardar esta información para mostrar en el modal
+    this.devolucionStats = {
+        total: conDevolucion,
+        conFecha: conFecha
+    };
+    
+    this.showClearModal = true;
+},
 
-                confirmClearAll() {
-                    this.products = [];
-                    this.showClearModal = false;
-                    toastr.info('Todos los artículos han sido eliminados');
-                },
-
+confirmClearAll() {
+    this.products = [];
+    // Resetear también el campo de observación de devolución
+    this.orderInfo.observacionDevolucion = '';
+    this.showClearModal = false;
+    toastr.info('Todos los artículos han sido eliminados');
+},
                 getArticuloCompleto(articuloId) {
                     return this.articulos.find(a => a.idArticulos == articuloId);
                 },
@@ -1889,81 +1948,134 @@
                     this.showClearModal = false;
                 },
 
-                async createSolicitud() {
-                    if (!this.canCreateSolicitud) {
-                        toastr.error(
-                            'Complete todos los campos requeridos para crear la solicitud');
-                        return;
-                    }
+               async createSolicitud() {
+    if (!this.canCreateSolicitud) {
+        toastr.error(
+            'Complete todos los campos requeridos para crear la solicitud');
+        return;
+    }
 
-                    this.isCreatingOrder = true;
 
-                    try {
-                        const solicitudData = {
-                            orderInfo: this.orderInfo,
-                            products: this.products,
-                            orderNumber: this.orderNumber,
-                            selectedCotizacion: this.selectedCotizacion
-                        };
 
-                        console.log('Enviando datos de la solicitud:', solicitudData);
+    // VALIDACIÓN EXTRA: Revisar todas las fechas de devolución
+    const fechaRequerida = this.orderInfo.fechaRequerida;
+    let erroresDevolucion = [];
 
-                        const response = await fetch('/solicitudarticulo/store', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector(
-                                    'meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(solicitudData)
-                        });
+    this.products.forEach((product, index) => {
+        if (product.requiereDevolucion && product.fechaDevolucion) {
+            if (product.fechaDevolucion < fechaRequerida) {
+                erroresDevolucion.push({
+                    producto: product.nombre,
+                    fechaDevolucion: product.fechaDevolucion,
+                    fechaRequerida: fechaRequerida
+                });
+            }
+        }
+    });
 
-                        const result = await response.json();
+    if (erroresDevolucion.length > 0) {
+        const mensajeError = erroresDevolucion.map(error => 
+            `"${error.producto}": Devolución (${this.formatDateForDisplay(error.fechaDevolucion)}) 
+             es menor que requerimiento (${this.formatDateForDisplay(error.fechaRequerida)})`
+        ).join('<br>');
+        
+        toastr.error(`<strong>Error en fechas de devolución:</strong><br>${mensajeError}`);
+        return;
+    }
 
-                        if (result.success) {
-                            let mensaje = `¡Solicitud ${result.codigo_orden} creada exitosamente!`;
 
-                            if (result.codigo_cotizacion) {
-                                mensaje += ` (Cotización: ${result.codigo_cotizacion})`;
-                            }
 
-                            toastr.success(mensaje);
 
-                            console.log('Solicitud guardada:', {
-                                id: result.solicitud_id,
-                                codigo: result.codigo_orden,
-                                codigo_cotizacion: result.codigo_cotizacion,
-                                productos_unicos: result.estadisticas.productos_unicos,
-                                total_cantidad: result.estadisticas.total_cantidad
-                            });
+    this.isCreatingOrder = true;
 
-                            await this.getNextOrderNumber();
+    try {
+        // Preparar datos de productos con los nuevos campos
+        const productsWithDevolucion = this.products.map(product => ({
+            articuloId: product.articuloId,
+            cantidad: product.cantidad,
+            descripcion: product.descripcion,
+            requiereDevolucion: product.requiereDevolucion || false,
+            fechaDevolucion: product.fechaDevolucion || null,
+            nombre: product.nombre,
+            codigo: product.codigo
+        }));
 
-                            setTimeout(() => {
-                                this.products = [];
-                                this.orderInfo = {
-                                    tipoServicio: 'solicitud_articulo',
-                                    urgencia: '',
-                                    observaciones: '',
-                                    fechaRequerida: '',
-                                    areaDestino: '',
-                                    usuarioDestino: ''
-                                };
-                                this.selectedCotizacion = '';
-                                this.cotizacionProducts = [];
-                                this.selectedCotizacionInfo = null;
-                            }, 3000);
-                        } else {
-                            throw new Error(result.message);
-                        }
+        const solicitudData = {
+            orderInfo: {
+                tipoServicio: this.orderInfo.tipoServicio,
+                urgencia: this.orderInfo.urgencia,
+                observaciones: this.orderInfo.observaciones || null,
+                fechaRequerida: this.orderInfo.fechaRequerida,
+                areaDestino: this.orderInfo.areaDestino,
+                usuarioDestino: this.orderInfo.usuarioDestino,
+                esUsoDiario: Boolean(this.orderInfo.esUsoDiario),
+                observacionDevolucion: this.orderInfo.observacionDevolucion || null
+            },
+            products: productsWithDevolucion,
+            orderNumber: this.orderNumber,
+            selectedCotizacion: this.selectedCotizacion
+        };
 
-                    } catch (error) {
-                        console.error('Error al crear la solicitud:', error);
-                        toastr.error(`Error: ${error.message}`);
-                    } finally {
-                        this.isCreatingOrder = false;
-                    }
-                },
+        console.log('Enviando datos de la solicitud:', solicitudData);
+
+        const response = await fetch('/solicitudarticulo/store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector(
+                    'meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(solicitudData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            let mensaje = `¡Solicitud ${result.codigo_orden} creada exitosamente!`;
+
+            if (result.codigo_cotizacion) {
+                mensaje += ` (Cotización: ${result.codigo_cotizacion})`;
+            }
+
+            toastr.success(mensaje);
+
+            console.log('Solicitud guardada:', {
+                id: result.solicitud_id,
+                codigo: result.codigo_orden,
+                codigo_cotizacion: result.codigo_cotizacion,
+                productos_unicos: result.estadisticas.productos_unicos,
+                total_cantidad: result.estadisticas.total_cantidad
+            });
+
+            await this.getNextOrderNumber();
+
+            setTimeout(() => {
+                this.products = [];
+                this.orderInfo = {
+                    tipoServicio: 'solicitud_articulo',
+                    urgencia: '',
+                    observaciones: '',
+                    fechaRequerida: '',
+                    areaDestino: '',
+                    usuarioDestino: '',
+                    esUsoDiario: false,
+                    observacionDevolucion: ''
+                };
+                this.selectedCotizacion = '';
+                this.cotizacionProducts = [];
+                this.selectedCotizacionInfo = null;
+            }, 3000);
+        } else {
+            throw new Error(result.message);
+        }
+
+    } catch (error) {
+        console.error('Error al crear la solicitud:', error);
+        toastr.error(`Error: ${error.message}`);
+    } finally {
+        this.isCreatingOrder = false;
+    }
+},
 
                 async getNextOrderNumber() {
                     try {

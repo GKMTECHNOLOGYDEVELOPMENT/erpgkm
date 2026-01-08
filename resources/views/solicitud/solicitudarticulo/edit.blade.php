@@ -75,6 +75,15 @@
                                         class="font-bold ml-1"></span>
                                 </span>
                             </div>
+
+                            <!-- Mostrar si es para uso diario -->
+                            <div x-show="solicitud.es_uso_diario" class="mt-2">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                    <i class="fas fa-user-check mr-1"></i>
+                                    Para uso diario del usuario
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Información en Grid -->
@@ -163,6 +172,17 @@
                         </div>
 
                         <div class="p-4 sm:p-6">
+                            <!-- Checkbox de Uso Diario -->
+                            <div class="mb-6">
+                                <div class="flex items-center space-x-3 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200">
+                                    <input type="checkbox" x-model="orderInfo.esUsoDiario" id="usoDiarioCheckboxEdit"
+                                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                                    <label for="usoDiarioCheckboxEdit" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                        ¿Va para uso diario del usuario?
+                                    </label>
+                                </div>
+                            </div>
+
                             <!-- Selección de Cotización Aprobada -->
                             <div class="bg-green-50 rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-green-200 mb-6"
                                 x-show="!solicitud.codigo_cotizacion">
@@ -347,8 +367,169 @@
                                     </div>
                                 </div>
 
-                                <div class="overflow-x-auto rounded-xl border border-blue-100">
-                                    <table class="w-full min-w-[600px] lg:min-w-full">
+                                <!-- Para pantallas grandes: tabla normal -->
+                                <div class="hidden lg:block overflow-hidden rounded-xl border border-blue-100">
+                                    <div class="overflow-x-auto">
+                                        <!-- Contenedor con altura máxima y scroll vertical -->
+                                        <div class="max-h-[500px] overflow-y-auto">
+                                            <table class="w-full">
+                                                <thead class="bg-blue-50 sticky top-0 z-10">
+                                                    <tr>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Artículo
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Código
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Cantidad
+                                                        </th>
+                                                        <!-- Columna para checkbox individual (solo cuando NO es uso diario) -->
+                                                        <th x-show="!orderInfo.esUsoDiario"
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Requiere Devolución
+                                                        </th>
+                                                        <th
+                                                            class="px-6 py-4 text-center text-sm font-semibold text-blue-600 uppercase tracking-wider bg-blue-50">
+                                                            Acciones
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="bg-white divide-y divide-blue-100">
+                                                    <template x-if="products.length === 0">
+                                                        <tr>
+                                                            <td :colspan="orderInfo.esUsoDiario ? 4 : 5"
+                                                                class="px-6 py-12 text-center text-gray-500">
+                                                                <i
+                                                                    class="fas fa-box-open text-4xl text-gray-300 mb-4"></i>
+                                                                <p class="mt-2 text-lg font-medium text-gray-900">No
+                                                                    hay
+                                                                    artículos agregados</p>
+                                                                <p class="text-sm mt-1 text-gray-600">Agregue artículos
+                                                                    usando el formulario inferior</p>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                    <template x-for="(product, index) in products"
+                                                        :key="product.uniqueId">
+                                                        <tr class="hover:bg-blue-50 transition-all duration-200">
+                                                            <!-- Columna Artículo -->
+                                                            <td class="px-6 py-4">
+                                                                <div class="space-y-1">
+                                                                    <div class="text-base font-semibold text-gray-900"
+                                                                        x-text="product.nombre"></div>
+                                                                    <div class="text-xs text-gray-500 space-y-0.5">
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.tipo_articulo">
+                                                                            <i
+                                                                                class="fas fa-tag text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Tipo:</span>
+                                                                            <span
+                                                                                x-text="product.tipo_articulo"></span>
+                                                                        </div>
+                                                                        <div class="flex items-center space-x-1"
+                                                                            x-show="product.modelo">
+                                                                            <i
+                                                                                class="fas fa-cogs text-xs text-blue-500"></i>
+                                                                            <span class="font-medium">Modelo:</span>
+                                                                            <span x-text="product.modelo"></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Columna Código -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="text-base text-blue-600 font-mono font-bold"
+                                                                    x-text="product.codigo"></div>
+                                                            </td>
+
+                                                            <!-- Columna Cantidad -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div
+                                                                    class="flex items-center space-x-3 justify-center">
+                                                                    <span class="font-bold text-lg"
+                                                                        x-text="product.cantidad"></span>
+                                                                    <div class="flex space-x-2">
+                                                                        <button @click="updateQuantity(index, -1)"
+                                                                            class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
+                                                                            :disabled="product.cantidad <= 1"
+                                                                            :class="{
+                                                                                'opacity-50 cursor-not-allowed': product
+                                                                                    .cantidad <= 1
+                                                                            }">
+                                                                            <i class="fas fa-minus"></i>
+                                                                        </button>
+                                                                        <button @click="updateQuantity(index, 1)"
+                                                                            class="w-8 h-8 flex items-center justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full transition-colors"
+                                                                            :disabled="product.cantidad >= 1000"
+                                                                            :class="{
+                                                                                'opacity-50 cursor-not-allowed': product
+                                                                                    .cantidad >= 1000
+                                                                            }">
+                                                                            <i class="fas fa-plus"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Columna Checkbox individual (solo cuando NO es uso diario) -->
+                                                            <td x-show="!orderInfo.esUsoDiario"
+                                                                class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="flex flex-col items-center space-y-2">
+                                                                    <!-- Checkbox -->
+                                                                    <div class="flex items-center">
+                                                                        <input type="checkbox"
+                                                                            x-model="product.requiereDevolucion"
+                                                                            @change="if(!product.requiereDevolucion) product.fechaDevolucion = null"
+                                                                            class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                                                                        <span class="ml-2 text-sm text-gray-600"
+                                                                            x-text="product.requiereDevolucion ? 'Sí' : 'No'"></span>
+                                                                    </div>
+                                                                    
+                                                                    <!-- Fecha de devolución (si está programada) -->
+                                                                    <div x-show="product.requiereDevolucion && product.fechaDevolucion" 
+                                                                        class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">
+                                                                        <i class="fas fa-calendar-day mr-1"></i>
+                                                                        <span x-text="formatDateForDisplay(product.fechaDevolucion)"></span>
+                                                                    </div>
+                                                                    
+                                                                    <!-- Botón Devolución (solo cuando requiere devolución y NO es uso diario) -->
+                                                                    <button
+                                                                        x-show="product.requiereDevolucion && !orderInfo.esUsoDiario"
+                                                                        @click="iniciarDevolucion(index)"
+                                                                        class="text-purple-600 hover:text-purple-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-purple-50">
+                                                                        <i class="fas fa-undo-alt"></i>
+                                                                        <span>Devolución</span>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+
+                                                            <!-- Columna Acciones -->
+                                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                                <div class="flex items-center space-x-3">
+                                                                    <!-- Botón Eliminar -->
+                                                                    <button @click="removeProduct(index)"
+                                                                        class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-2 transition-colors p-2 rounded-lg hover:bg-red-50">
+                                                                        <i class="fas fa-trash-alt"></i>
+                                                                        <span>Eliminar</span>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Versión móvil/tablet -->
+                                <div class="lg:hidden overflow-x-auto rounded-xl border border-blue-100">
+                                    <table class="w-full min-w-[600px]">
                                         <thead class="bg-blue-50">
                                             <tr>
                                                 <th
@@ -413,14 +594,19 @@
                                                                     <span class="sm:hidden">T:</span>
                                                                     <span x-text="product.tipo_articulo"></span>
                                                                 </div>
-
-                                                                <!-- Modelo -->
-                                                                <div class="flex items-center space-x-1"
-                                                                    x-show="product.modelo">
-                                                                    <span
-                                                                        class="font-medium hidden sm:inline">Modelo:</span>
-                                                                    <span class="sm:hidden">M:</span>
-                                                                    <span x-text="product.modelo"></span>
+                                                            </div>
+                                                            
+                                                            <!-- Devolución en móvil -->
+                                                            <div x-show="!orderInfo.esUsoDiario && product.requiereDevolucion" class="mt-2">
+                                                                <div class="flex items-center space-x-1 text-xs">
+                                                                    <span class="text-purple-600 font-medium">Devolución:</span>
+                                                                    <span x-show="product.fechaDevolucion" class="text-purple-700">
+                                                                        <i class="fas fa-calendar-day mr-1"></i>
+                                                                        <span x-text="formatDateForDisplay(product.fechaDevolucion)"></span>
+                                                                    </span>
+                                                                    <span x-show="!product.fechaDevolucion" class="text-gray-600">
+                                                                        Sin fecha
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -430,12 +616,6 @@
                                                     <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                                                         <div class="text-sm sm:text-base text-blue-600 font-mono font-bold"
                                                             x-text="product.codigo"></div>
-                                                        <div class="text-xs text-gray-400 mt-1 hidden sm:block"
-                                                            x-text="product.codigo_barras ? 'Cód. Barras' : 'Cód. Repuesto'">
-                                                        </div>
-                                                        <div class="text-xs text-gray-400 mt-1 sm:hidden"
-                                                            x-text="product.codigo_barras ? 'Barras' : 'Repuesto'">
-                                                        </div>
                                                     </td>
 
                                                     <!-- Columna Cantidad -->
@@ -482,18 +662,28 @@
                                                     <!-- Columna Acciones -->
                                                     <td
                                                         class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm sm:text-base">
-                                                        <button @click="removeProduct(index)"
-                                                            class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-1 sm:space-x-2 transition-colors p-1 sm:p-2 rounded-lg hover:bg-red-50">
-                                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                                </path>
-                                                            </svg>
-                                                            <span class="hidden sm:inline">Eliminar</span>
-                                                            <span class="sm:hidden">Elim.</span>
-                                                        </button>
+                                                        <div class="flex flex-col space-y-1">
+                                                            <button @click="removeProduct(index)"
+                                                                class="text-red-600 hover:text-red-700 font-semibold flex items-center space-x-1 sm:space-x-2 transition-colors p-1 sm:p-2 rounded-lg hover:bg-red-50">
+                                                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                    </path>
+                                                                </svg>
+                                                                <span class="hidden sm:inline">Eliminar</span>
+                                                                <span class="sm:hidden">Elim.</span>
+                                                            </button>
+                                                            
+                                                            <!-- Botón Devolución en móvil -->
+                                                            <button x-show="!orderInfo.esUsoDiario"
+                                                                @click="iniciarDevolucion(index)"
+                                                                class="text-purple-600 hover:text-purple-700 font-semibold flex items-center space-x-1 sm:space-x-2 transition-colors p-1 sm:p-2 rounded-lg hover:bg-purple-50">
+                                                                <i class="fas fa-undo-alt text-xs sm:text-sm"></i>
+                                                                <span class="text-xs sm:text-sm">Devolución</span>
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             </template>
@@ -664,6 +854,22 @@
                                         <span class="sm:hidden">Destinatario</span>
                                     </div>
                                 </div>
+                            </div>
+
+                            <!-- Observación de Devolución (solo visible cuando NO es uso diario) -->
+                            <div x-show="!orderInfo.esUsoDiario" x-transition class="mb-6 sm:mb-8">
+                                <label class="block text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4">
+                                    <i class="fas fa-clipboard-check text-purple-500 text-sm sm:text-base mr-1 sm:mr-2"></i>
+                                    Observaciones para Devolución
+                                </label>
+                                <textarea x-model="orderInfo.observacionDevolucion" rows="3"
+                                    class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-purple-50 text-gray-900 resize-none transition-all duration-200 text-sm sm:text-base"
+                                    placeholder="Especifique instrucciones especiales para la devolución de artículos (ej: condiciones, lugar, persona encargada)...">
+                                </textarea>
+                                <p class="text-xs text-purple-600 mt-2 flex items-center">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Esta información será útil para el seguimiento de artículos que requieren devolución
+                                </p>
                             </div>
 
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -903,6 +1109,22 @@
                                     x-text="solicitud.estado ? solicitud.estado.charAt(0).toUpperCase() + solicitud.estado.slice(1) : 'Pendiente'"></span>
                             </div>
 
+                            <!-- Resumen de Devoluciones (solo cuando NO es uso diario) -->
+                            <div x-show="!orderInfo.esUsoDiario" class="mt-4 pt-4 border-t border-purple-100">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-purple-700">
+                                        <i class="fas fa-undo-alt mr-1"></i>
+                                        Devoluciones
+                                    </span>
+                                    <span class="text-sm font-bold text-purple-600"
+                                        x-text="products.filter(p => p.requiereDevolucion).length + '/' + totalUniqueProducts">
+                                    </span>
+                                </div>
+                                <div class="text-xs text-purple-600">
+                                    <span x-text="products.filter(p => p.fechaDevolucion).length"></span> con fecha programada
+                                </div>
+                            </div>
+
                             <!-- Información adicional (solo visible en desktop) -->
                             <div class="hidden sm:block mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
                                 <div class="text-center">
@@ -1028,6 +1250,174 @@
             </div>
         </div>
 
+        <!-- Modal para Devolución -->
+        <div x-show="showDevolucionModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div x-show="showDevolucionModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95"
+                class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 mx-auto">
+
+                <!-- Icono de devolución -->
+                <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-undo-alt text-purple-600 text-2xl"></i>
+                </div>
+
+                <!-- Contenido -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        <!-- Mostrar título diferente según si ya tiene fecha -->
+                        <span
+                            x-text="productoParaDevolucion?.fechaDevolucion ? 'Editar Devolución' : 'Programar Devolución'"></span>
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        <!-- Mostrar mensaje diferente según si ya tiene fecha -->
+                        <template x-if="productoParaDevolucion?.fechaDevolucion">
+                            <span>Editar fecha de devolución para:</span>
+                        </template>
+                        <template x-if="!productoParaDevolucion?.fechaDevolucion">
+                            <span>Programar devolución para el artículo:</span>
+                        </template>
+                        <span class="font-semibold text-purple-600" x-text="productoParaDevolucion?.nombre"></span>
+                    </p>
+
+                    <!-- Mostrar fecha actual si ya tiene -->
+                    <div x-show="productoParaDevolucion?.fechaDevolucion" class="mb-4">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-check text-green-500 mr-2"></i>
+                                <span class="text-sm font-medium text-green-700">
+                                    Fecha actual: <span
+                                        x-text="formatDateForDisplay(productoParaDevolucion?.fechaDevolucion)"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fecha de devolución -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <!-- Mostrar etiqueta diferente según si ya tiene fecha -->
+                            <span
+                                x-text="productoParaDevolucion?.fechaDevolucion ? 'Nueva Fecha de Devolución' : 'Fecha de Devolución'"></span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" x-ref="fechaDevolucionInput" x-model="fechaDevolucion"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white text-gray-900"
+                                placeholder="Seleccione una fecha">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <i class="fas fa-calendar-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Seleccione la fecha en la que se realizará la devolución
+                        </p>
+                    </div>
+
+                    <!-- Información del artículo -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 text-left">
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div class="font-medium text-gray-600">Código:</div>
+                            <div class="text-gray-900 font-mono" x-text="productoParaDevolucion?.codigo"></div>
+
+                            <div class="font-medium text-gray-600">Cantidad:</div>
+                            <div class="text-gray-900 font-bold" x-text="productoParaDevolucion?.cantidad"></div>
+
+                            <div class="font-medium text-gray-600" x-show="productoParaDevolucion?.tipo_articulo">
+                                Tipo:</div>
+                            <div class="text-gray-900" x-show="productoParaDevolucion?.tipo_articulo"
+                                x-text="productoParaDevolucion?.tipo_articulo"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3">
+                    <button @click="cancelarDevolucion()"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button @click="confirmarDevolucion()" :disabled="!fechaDevolucion"
+                        :class="{ 'opacity-50 cursor-not-allowed': !fechaDevolucion }"
+                        class="flex-1 px-4 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas"
+                            :class="productoParaDevolucion?.fechaDevolucion ? 'fa-edit' : 'fa-check'"></i>
+                        <!-- Mostrar texto diferente según si ya tiene fecha -->
+                        <span
+                            x-text="productoParaDevolucion?.fechaDevolucion ? 'Editar Devolución' : 'Confirmar Devolución'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para confirmar limpieza -->
+        <div x-show="showClearModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div x-show="showClearModal" x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform scale-95"
+                x-transition:enter-end="opacity-100 transform scale-100"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform scale-100"
+                x-transition:leave-end="opacity-0 transform scale-95"
+                class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 mx-auto">
+
+                <!-- Icono de advertencia -->
+                <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                </div>
+
+                <!-- Contenido -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">¿Eliminar todos los artículos?</h3>
+                    <p class="text-gray-600">
+                        Esta acción eliminará <span class="font-semibold text-red-600"
+                            x-text="totalUniqueProducts"></span> artículo(s)
+                        con un total de <span class="font-semibold text-red-600" x-text="totalQuantity"></span>
+                        unidades.
+                    </p>
+                    
+                    <!-- Mostrar información de devoluciones si hay -->
+                    <div x-show="devolucionStats?.total > 0" class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                            <div>
+                                <p class="text-sm text-yellow-800 font-semibold">
+                                    <span x-text="devolucionStats.total"></span> artículo(s) tienen devolución programada
+                                </p>
+                                <p class="text-xs text-yellow-700" x-show="devolucionStats.conFecha > 0">
+                                    <span x-text="devolucionStats.conFecha"></span> con fecha específica
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-gray-500 mt-2">Esta acción no se puede deshacer.</p>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex space-x-3">
+                    <button @click="cancelClearAll()"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                    <button @click="confirmClearAll()"
+                        class="flex-1 px-4 py-3 bg-danger text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200 flex items-center justify-center space-x-2">
+                        <i class="fas fa-trash"></i>
+                        <span>Eliminar Todo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Notificación Toast -->
         <div x-show="notification.show" x-transition:enter="transition ease-out duration-300 transform"
             x-transition:enter-start="translate-x-full opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
@@ -1057,7 +1447,6 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('solicitudArticuloEdit', (
@@ -1086,7 +1475,9 @@
                     fechaRequerida: solicitud.fecharequerida ? solicitud.fecharequerida.split(' ')[0] :
                         '',
                     areaDestino: solicitud.id_area_destino || '',
-                    usuarioDestino: solicitud.id_usuario_destino || ''
+                    usuarioDestino: solicitud.id_usuario_destino || '',
+                    esUsoDiario: solicitud.es_uso_diario || false, // NUEVO
+                    observacionDevolucion: solicitud.observacion_devolucion || '' // NUEVO
                 },
                 isUpdatingSolicitud: false,
                 articulos: articulos,
@@ -1103,6 +1494,24 @@
                 cotizacionProducts: [],
                 cotizacionActual: cotizacionActual,
                 productosCotizacion: productosCotizacion,
+
+                // Variables para devolución
+                showDevolucionModal: false,
+                productoParaDevolucion: null,
+                productoParaDevolucionIndex: null,
+                fechaDevolucion: '',
+                fechaDevolucionInput: null,
+                devolucionStats: null,
+
+                // Modal para limpiar
+                showClearModal: false,
+
+                // Notificación
+                notification: {
+                    show: false,
+                    type: '',
+                    message: ''
+                },
 
                 // Niveles de urgencia
                 nivelesUrgencia: [{
@@ -1171,15 +1580,149 @@
                     // Filtrar usuarios basado en el área destino actual
                     this.filtrarUsuariosPorArea(this.orderInfo.areaDestino);
 
+                    // Observador para cuando cambie el estado de "esUsoDiario"
+                    this.$watch('orderInfo.esUsoDiario', (newValue) => {
+                        this.resetearDevoluciones(newValue);
+                        
+                        // Mostrar mensaje informativo
+                        if (newValue) {
+                            toastr.info(
+                                'Modo: Uso diario activado. Los artículos no requerirán devolución.'
+                            );
+                        } else {
+                            toastr.info(
+                                'Modo: NO es para uso diario. Puede marcar artículos para devolución.'
+                            );
+                        }
+                    });
+
                     this.$nextTick(() => {
                         this.initSelect2();
                         this.initFlatpickr();
+                        this.initFlatpickrDevolucion();
                     });
 
                     // Watch para cambios en área destino
                     this.$watch('orderInfo.areaDestino', (value) => {
                         this.filtrarUsuariosPorArea(value);
                     });
+                },
+
+                resetearDevoluciones(esUsoDiario) {
+                    if (this.products.length === 0) return;
+
+                    let resetCount = 0;
+                    let devolucionesActivas = 0;
+
+                    this.products.forEach(product => {
+                        if (esUsoDiario) {
+                            // Si se marca como uso diario, quitar todos los checkboxes y fechas de devolución
+                            if (product.requiereDevolucion || product.fechaDevolucion) {
+                                product.requiereDevolucion = false;
+                                product.fechaDevolucion = null;
+                                resetCount++;
+                            }
+                        } else {
+                            // Contar cuántos artículos tienen devolución programada
+                            if (product.fechaDevolucion) {
+                                devolucionesActivas++;
+                            }
+                        }
+                    });
+
+                    if (esUsoDiario && resetCount > 0) {
+                        toastr.info(
+                            `Se han quitado ${resetCount} marca(s) de devolución porque ahora es para uso diario`
+                        );
+                    }
+                    
+                    if (!esUsoDiario && devolucionesActivas > 0) {
+                        toastr.info(
+                            `${devolucionesActivas} artículo(s) tienen devolución programada`
+                        );
+                    }
+                },
+
+                initFlatpickrDevolucion() {
+                    // Inicializaremos flatpickr cuando se abra el modal
+                },
+
+                // Métodos para la devolución
+                iniciarDevolucion(index) {
+                    this.productoParaDevolucion = this.products[index];
+                    this.productoParaDevolucionIndex = index; // Guardar el índice para poder actualizar
+
+                    // Cargar la fecha guardada si existe, de lo contrario vacío
+                    this.fechaDevolucion = this.productoParaDevolucion.fechaDevolucion || '';
+                    this.showDevolucionModal = true;
+
+                    // Inicializar flatpickr después de que el modal se muestre
+                    this.$nextTick(() => {
+                        if (this.$refs.fechaDevolucionInput) {
+                            this.fechaDevolucionInput = flatpickr(this.$refs
+                                .fechaDevolucionInput, {
+                                    locale: 'es',
+                                    dateFormat: 'Y-m-d',
+                                    minDate: 'today',
+                                    disableMobile: false,
+                                    allowInput: true,
+                                    clickOpens: true,
+                                    onChange: (selectedDates, dateStr) => {
+                                        this.fechaDevolucion = dateStr;
+                                    },
+                                    onReady: (selectedDates, dateStr, instance) => {
+                                        // Establecer la fecha guardada si existe
+                                        if (this.productoParaDevolucion
+                                            .fechaDevolucion) {
+                                            instance.setDate(this.productoParaDevolucion
+                                                .fechaDevolucion);
+                                        }
+                                    }
+                                });
+                        }
+                    });
+                },
+
+                confirmarDevolucion() {
+                    if (!this.fechaDevolucion) {
+                        toastr.error('Por favor seleccione una fecha de devolución');
+                        return;
+                    }
+
+                    // Guardar la fecha en el producto
+                    this.products[this.productoParaDevolucionIndex].fechaDevolucion = this
+                        .fechaDevolucion;
+
+                    // Si no estaba marcado como requiere devolución, marcarlo
+                    if (!this.products[this.productoParaDevolucionIndex].requiereDevolucion) {
+                        this.products[this.productoParaDevolucionIndex].requiereDevolucion = true;
+                    }
+
+                    console.log('Datos de devolución guardados:', {
+                        producto: this.productoParaDevolucion.nombre,
+                        fechaDevolucion: this.fechaDevolucion,
+                        indice: this.productoParaDevolucionIndex
+                    });
+
+                    toastr.success(
+                        `Devolución programada para el ${this.formatDateForDisplay(this.fechaDevolucion)} - Artículo: ${this.productoParaDevolucion.nombre}`
+                    );
+
+                    // Cerrar modal
+                    this.cancelarDevolucion();
+                },
+
+                cancelarDevolucion() {
+                    this.showDevolucionModal = false;
+                    this.productoParaDevolucion = null;
+                    this.productoParaDevolucionIndex = null; // Resetear el índice
+                    this.fechaDevolucion = '';
+
+                    // Destruir flatpickr si existe
+                    if (this.fechaDevolucionInput) {
+                        this.fechaDevolucionInput.destroy();
+                        this.fechaDevolucionInput = null;
+                    }
                 },
 
                 filtrarUsuariosPorArea(areaId) {
@@ -1203,6 +1746,15 @@
                     return usuario ? `${usuario.Nombre} ${usuario.apellidoPaterno}` : 'No especificado';
                 },
 
+                getDaysFromNow(dateString) {
+                    if (!dateString) return 0;
+                    const fechaRequerida = new Date(dateString);
+                    const hoy = new Date();
+                    const diffTime = fechaRequerida - hoy;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays;
+                },
+
                 loadExistingProducts() {
                     if (productosActuales && productosActuales.length > 0) {
                         this.products = productosActuales.map(product => ({
@@ -1217,7 +1769,10 @@
                             marca: product.nombre_marca,
                             subcategoria: product.nombre_subcategoria,
                             cantidad: product.cantidad,
-                            descripcion: product.descripcion
+                            descripcion: product.descripcion,
+                            requiereDevolucion: product.requiere_devolucion || false, // NUEVO
+                            fechaDevolucion: product.fecha_devolucion_programada ? 
+                                product.fecha_devolucion_programada.split(' ')[0] : null // NUEVO
                         }));
                     }
                 },
@@ -1367,7 +1922,9 @@
                                     'Desde cotización'),
                             cantidadCotizacion: cotizacionProduct
                                 .cantidad, // Guardar la cantidad máxima
-                            esDeCotizacion: true // Marcar que viene de cotización
+                            esDeCotizacion: true, // Marcar que viene de cotización
+                            requiereDevolucion: false, // Inicializar
+                            fechaDevolucion: null // Inicializar
                         };
 
                         this.products.push(product);
@@ -1426,7 +1983,9 @@
                                             `Desde cotización: ${this.selectedCotizacionInfo.numero_cotizacion}` :
                                             'Desde cotización'),
                                     cantidadCotizacion: cotizacionProduct.cantidad,
-                                    esDeCotizacion: true
+                                    esDeCotizacion: true,
+                                    requiereDevolucion: false, // Inicializar
+                                    fechaDevolucion: null // Inicializar
                                 };
 
                                 this.products.push(product);
@@ -1541,7 +2100,9 @@
                             marca: articuloData.marca,
                             subcategoria: articuloData.subcategoria,
                             cantidad: this.newProduct.cantidad,
-                            descripcion: this.newProduct.descripcion
+                            descripcion: this.newProduct.descripcion,
+                            requiereDevolucion: false, // Inicializar
+                            fechaDevolucion: null // Inicializar
                         };
 
                         this.products.push(product);
@@ -1603,13 +2164,30 @@
                         toastr.info('No hay artículos para limpiar');
                         return;
                     }
+                    
+                    // Contar artículos con devolución programada
+                    const conDevolucion = this.products.filter(p => p.requiereDevolucion).length;
+                    const conFecha = this.products.filter(p => p.fechaDevolucion).length;
+                    
+                    // Guardar esta información para mostrar en el modal
+                    this.devolucionStats = {
+                        total: conDevolucion,
+                        conFecha: conFecha
+                    };
+                    
+                    this.showClearModal = true;
+                },
 
-                    if (confirm(
-                            '¿Está seguro de que desea eliminar todos los artículos de la solicitud?'
-                        )) {
-                        this.products = [];
-                        toastr.info('Todos los artículos han sido eliminados');
-                    }
+                confirmClearAll() {
+                    this.products = [];
+                    // Resetear también el campo de observación de devolución
+                    this.orderInfo.observacionDevolucion = '';
+                    this.showClearModal = false;
+                    toastr.info('Todos los artículos han sido eliminados');
+                },
+
+                cancelClearAll() {
+                    this.showClearModal = false;
                 },
 
                 async updateSolicitud() {
@@ -1622,9 +2200,29 @@
                     this.isUpdatingSolicitud = true;
 
                     try {
+                        // Preparar datos de productos con los nuevos campos
+                        const productsWithDevolucion = this.products.map(product => ({
+                            articuloId: product.articuloId,
+                            cantidad: product.cantidad,
+                            descripcion: product.descripcion,
+                            requiereDevolucion: product.requiereDevolucion || false,
+                            fechaDevolucion: product.fechaDevolucion || null,
+                            nombre: product.nombre,
+                            codigo: product.codigo
+                        }));
+
                         const solicitudData = {
-                            orderInfo: this.orderInfo,
-                            products: this.products,
+                            orderInfo: {
+                                tipoServicio: this.orderInfo.tipoServicio,
+                                urgencia: this.orderInfo.urgencia,
+                                observaciones: this.orderInfo.observaciones || null,
+                                fechaRequerida: this.orderInfo.fechaRequerida,
+                                areaDestino: this.orderInfo.areaDestino,
+                                usuarioDestino: this.orderInfo.usuarioDestino,
+                                esUsoDiario: Boolean(this.orderInfo.esUsoDiario),
+                                observacionDevolucion: this.orderInfo.observacionDevolucion || null
+                            },
+                            products: productsWithDevolucion,
                             selectedCotizacion: this.selectedCotizacion
                         };
 
@@ -1660,6 +2258,38 @@
                         toastr.error(`Error: ${error.message}`);
                     } finally {
                         this.isUpdatingSolicitud = false;
+                    }
+                },
+
+                // Métodos para notificaciones
+                getNotificationClass() {
+                    const baseClasses = 'fixed top-6 right-6 text-white px-6 py-4 rounded-xl shadow-2xl z-50 max-w-sm';
+                    switch(this.notification.type) {
+                        case 'success':
+                            return baseClasses + ' bg-green-500';
+                        case 'error':
+                            return baseClasses + ' bg-red-500';
+                        case 'warning':
+                            return baseClasses + ' bg-yellow-500';
+                        case 'info':
+                            return baseClasses + ' bg-blue-500';
+                        default:
+                            return baseClasses + ' bg-gray-500';
+                    }
+                },
+
+                getNotificationIcon() {
+                    switch(this.notification.type) {
+                        case 'success':
+                            return '<i class="fas fa-check-circle"></i>';
+                        case 'error':
+                            return '<i class="fas fa-times-circle"></i>';
+                        case 'warning':
+                            return '<i class="fas fa-exclamation-triangle"></i>';
+                        case 'info':
+                            return '<i class="fas fa-info-circle"></i>';
+                        default:
+                            return '<i class="fas fa-bell"></i>';
                     }
                 }
             }));

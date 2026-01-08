@@ -247,6 +247,18 @@ class SolicitudrepuestoController extends Controller
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
  public function marcarUsado(Request $request, $solicitudId)
     {
         try {
@@ -365,6 +377,14 @@ class SolicitudrepuestoController extends Controller
             ], 500);
         }
     }
+
+
+
+
+
+
+
+
 /**
  * Comprimir imagen simple sin Intervention Image
  */
@@ -419,7 +439,11 @@ private function comprimirImagenSimple($contenidoBinario)
         Log::warning('Error al comprimir imagen: ' . $e->getMessage());
         return $contenidoBinario;
     }
-}/**
+}
+
+
+
+/**
  * Marcar un repuesto como no usado (devolución al inventario) - VERSIÓN CORREGIDA
  */
 public function marcarNoUsado(Request $request, $solicitudId)

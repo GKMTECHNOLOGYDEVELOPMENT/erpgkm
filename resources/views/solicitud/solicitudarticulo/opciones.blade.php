@@ -350,6 +350,8 @@
                                                     </div>
                                                 </td>
 
+                                                
+
                                                 <!-- Cantidad Solicitada -->
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     <span
