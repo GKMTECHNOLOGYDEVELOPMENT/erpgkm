@@ -25,7 +25,7 @@
         <!-- Filtros -->
         <div class="panel rounded-xl shadow-sm p-4 mb-6">
             <form method="GET" action="{{ route('solicitudcustodia.index') }}">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-6 gap-4"> <!-- Cambiado de 5 a 6 columnas -->
                     <div class="md:col-span-2">
                         <div class="relative">
                             <input type="text" name="search" placeholder="Buscar por cliente, modelo o serie..."
@@ -53,46 +53,47 @@
                             </option>
                         </select>
                     </div>
-                    <div>
-                        <button type="submit" class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                            </svg>
-                            Filtrar
-                        </button>
-                    </div>
-                    <div>
-                        @if (request('search') || request('estado'))
-                            <a href="{{ route('solicitudcustodia.index') }}"
-                                class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                    <div class="flex gap-2"> <!-- Contenedor para ambos botones -->
+                        <div>
+                            <button type="submit" class="btn btn-primary">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                 </svg>
-                                Limpiar
-                            </a>
+                                Filtrar
+                            </button>
+                        </div>
+                        @if (request('search') || request('estado'))
+                            <div>
+                                <a href="{{ route('solicitudcustodia.index') }}"
+                                    class="btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Limpiar
+                                </a>
+                            </div>
                         @endif
                     </div>
                 </div>
             </form>
 
-            @if(\App\Helpers\PermisoHelper::tienePermiso('CREAR NUEVA CUSTODIA'))
-            <!-- Botón "Crear Nueva Custodia" -->
-            <div class="mt-4 flex justify-end">
-                <a href="{{ route('solicitudcustodia.create') }}" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Crear Nueva Custodia
-                </a>
-            </div>
+            @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR NUEVA CUSTODIA'))
+                <!-- Botón "Crear Nueva Custodia" -->
+                <div class="mt-4 flex justify-end">
+                    <a href="{{ route('solicitudcustodia.create') }}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Crear Nueva Custodia
+                    </a>
+                </div>
             @endif
         </div>
-
         <!-- Tarjetas de estadísticas -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             <div class="bg-primary from-blue-500 to-indigo-600 rounded-xl shadow-lg p-5 text-white">
@@ -157,7 +158,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
                                         </svg>
-                                        #{{ $custodia->codigocustodias }}
+                                        {{ $custodia->codigocustodias }}
                                     </span>
 
                                     <span
@@ -350,29 +351,29 @@
 
                             <!-- Footer con botón de opciones -->
                             <div class="px-5 py-3  border-t border-gray-200 gap-2 flex justify-end">
-                                @if(\App\Helpers\PermisoHelper::tienePermiso('OPCIONES CUSTODIA'))
-                                <a href="{{ route('solicitudcustodia.opciones', ['id' => $custodia->id]) }}"
-                                    class="btn btn-warning flex items-center px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-md transition-colors duration-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                    </svg>
-                                    OPCIONES
-                                </a>
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('OPCIONES CUSTODIA'))
+                                    <a href="{{ route('solicitudcustodia.opciones', ['id' => $custodia->id]) }}"
+                                        class="btn btn-warning flex items-center px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-md transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
+                                        </svg>
+                                        OPCIONES
+                                    </a>
                                 @endif
 
-                                @if(\App\Helpers\PermisoHelper::tienePermiso('HARVEST CUSTODIA'))
-                                <!-- Botón Harvest mejorado -->
-                                <a href="{{ route('solicitudcustodia.harvest', ['id' => $custodia->id]) }}"
-                                    class="btn btn-success flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                                    </svg>
-                                    HARVEST
-                                </a>
+                                @if (\App\Helpers\PermisoHelper::tienePermiso('HARVEST CUSTODIA'))
+                                    <!-- Botón Harvest mejorado -->
+                                    <a href="{{ route('solicitudcustodia.harvest', ['id' => $custodia->id]) }}"
+                                        class="btn btn-success flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
+                                            fill="none" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                                        </svg>
+                                        HARVEST
+                                    </a>
                                 @endif
 
                             </div>

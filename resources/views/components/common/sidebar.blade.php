@@ -955,6 +955,34 @@
                         </div>
                     </a>
                 </li>
+<li class="menu nav-item">
+    <a href="{{ route('repuesto-transito.index') }}" class="nav-link group">
+        <div class="flex items-center">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="group-hover:!text-primary shrink-0"
+                width="20" height="20" viewBox="0 0 24 24" fill="none">
+
+                <!-- Caja -->
+                <path d="M3 7h11v7H3z" fill="currentColor" opacity="0.8"/>
+
+                <!-- Camión -->
+                <path d="M14 9h3l3 3v2h-6V9z" fill="currentColor"/>
+
+                <!-- Ruedas -->
+                <circle cx="7" cy="17" r="2" fill="currentColor"/>
+                <circle cx="17" cy="17" r="2" fill="currentColor"/>
+
+            </svg>
+
+            <span
+                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Repuesto en Tránsito
+            </span>
+        </div>
+    </a>
+</li>
+
                 {{--
                 <li class="menu nav-item">
                     <a href="/tables" class="nav-link group">

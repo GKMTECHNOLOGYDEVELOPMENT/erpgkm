@@ -91,6 +91,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\entradasproveedores\EntradasproveedoresController;
 use App\Http\Controllers\GuiaController;
 use App\Http\Controllers\PasswordRecoveryController;
+use App\Http\Controllers\repuestotransito\RepuestoTransitoController;
 use App\Http\Controllers\solicitud\SolicitudalmacenController;
 use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\solicitud\SolicitudcompraController;
@@ -1166,6 +1167,10 @@ Route::post('/usuario/{id}/enviar-recuperacion', [UsuarioController::class, 'env
 Route::get('/usuario/{id}/generar-pdf', [UsuarioController::class, 'generarPDF'])->name('usuario.generar.pdf');
 Route::get('/usuario/{id}/descargar-documentos', [UsuarioController::class, 'descargarDocumentos'])->name('usuario.descargar.documentos');
 
+// En routes/web.php
+Route::get('/reset-password/{token}', [UsuarioController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [UsuarioController::class, 'resetPassword'])->name('password.update');
+
 
 Route::get('/usuario/{idUsuario}/articulos-activos', [UsuarioController::class, 'getArticulosAsignados']);
 
@@ -1977,3 +1982,5 @@ Route::post('/solicitudcompra/{id}/observar', [SolicitudcompraController::class,
 Route::middleware(['auth'])->group(function () {
     Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
 });
+
+

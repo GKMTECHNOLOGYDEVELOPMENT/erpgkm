@@ -643,93 +643,118 @@ class SolicitudalmacenController extends Controller
         }
     }
 
-    // MEJORA el método changeDetailStatus:
+public function changeDetailStatus(Request $request, $id)
+{
+    Log::info('=== CHANGE DETAIL STATUS INICIADO ===');
+    Log::info('ID detalle: ' . $id);
+    Log::info('Nuevo estado: ' . $request->estado);
 
-    public function changeDetailStatus(Request $request, $id)
-    {
-        Log::info('=== CHANGE DETAIL STATUS INICIADO ===');
-        Log::info('ID detalle: ' . $id);
-        Log::info('Nuevo estado: ' . $request->estado);
+    try {
+        DB::beginTransaction();
 
-        try {
-            DB::beginTransaction();
+        // Buscar el detalle con sus relaciones
+        $detalle = SolicitudAlmacenDetalle::with(['solicitud', 'solicitud.detalles'])->findOrFail($id);
+        $solicitud = $detalle->solicitud;
 
-            // Buscar el detalle con sus relaciones
-            $detalle = SolicitudAlmacenDetalle::with(['solicitud', 'solicitud.detalles'])->findOrFail($id);
-            $solicitud = $detalle->solicitud;
+        Log::info('Detalle encontrado - ID: ' . $detalle->idSolicitudAlmacenDetalle);
+        Log::info('Solicitud ID: ' . $solicitud->idSolicitudAlmacen);
+        Log::info('Estado actual solicitud: ' . $solicitud->estado);
+        Log::info('Estado actual detalle: ' . $detalle->estado);
 
-            Log::info('Detalle encontrado - ID: ' . $detalle->idSolicitudAlmacenDetalle);
-            Log::info('Solicitud ID: ' . $solicitud->idSolicitudAlmacen);
-            Log::info('Estado actual solicitud: ' . $solicitud->estado);
-            Log::info('Estado actual detalle: ' . $detalle->estado);
+        $estadoAnteriorDetalle = $detalle->estado;
 
-            $estadoAnteriorDetalle = $detalle->estado;
-
-            // Validar que la solicitud permita cambios
-            if (!in_array($solicitud->estado, ['pendiente', 'en_proceso', 'completada'])) {
-                Log::warning('Solicitud no permite cambios - Estado: ' . $solicitud->estado);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No se puede modificar productos en solicitudes ' . $solicitud->estado
-                ], 400);
-            }
-
-            // Actualizar estado del detalle
-            $detalle->update([
-                'estado' => $request->estado,
-                'observaciones_detalle' => $request->observaciones_detalle,
-                'updated_at' => now()
-            ]);
-
-            Log::info('Detalle actualizado - Nuevo estado: ' . $request->estado);
-
-            // Recalcular estado de la solicitud basado en los detalles
-            $this->recalcularEstadoSolicitud($solicitud);
-
-            // Recargar la solicitud para obtener el estado actualizado
-            $solicitud->refresh();
-
-            // Registrar en el historial del detalle
-            SolicitudAlmacenHistorial::create([
-                'idSolicitudAlmacen' => $solicitud->idSolicitudAlmacen,
-                'estado_anterior' => $estadoAnteriorDetalle,
-                'estado_nuevo' => $request->estado,
-                'observaciones' => "Producto actualizado: " . $detalle->descripcion_producto .
-                    " - Estado: " . $request->estado .
-                    ($request->observaciones_detalle ? " - Observaciones: " . $request->observaciones_detalle : ""),
-                'usuario_id' => auth()->id(),
-                'tipo_cambio' => 'detalle'
-            ]);
-
-            DB::commit();
-
-            Log::info('=== CHANGE DETAIL STATUS COMPLETADO ===');
-            Log::info('Nuevo estado solicitud: ' . $solicitud->estado);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Estado del producto actualizado exitosamente',
-                'solicitud_estado' => $solicitud->estado,
-                'detalles_estado' => [
-                    'aprobados' => $solicitud->detalles->where('estado', 'aprobado')->count(),
-                    'rechazados' => $solicitud->detalles->where('estado', 'rechazado')->count(),
-                    'pendientes' => $solicitud->detalles->where('estado', 'pendiente')->count()
-                ]
-            ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Error en changeDetailStatus: ' . $e->getMessage());
-            Log::error('File: ' . $e->getFile());
-            Log::error('Line: ' . $e->getLine());
-            Log::error('Trace: ' . $e->getTraceAsString());
-
+        // Validar que la solicitud permita cambios
+        if (!in_array($solicitud->estado, ['pendiente', 'en_proceso', 'completada'])) {
+            Log::warning('Solicitud no permite cambios - Estado: ' . $solicitud->estado);
             return response()->json([
                 'success' => false,
-                'message' => 'Error al cambiar el estado del producto: ' . $e->getMessage()
-            ], 500);
+                'message' => 'No se puede modificar productos en solicitudes ' . $solicitud->estado
+            ], 400);
         }
+
+        // Sanitizar el texto de observaciones
+        $observacionesDetalle = $this->sanitizeText($request->observaciones_detalle);
+
+        // Actualizar estado del detalle
+        $detalle->update([
+            'estado' => $request->estado,
+            'observaciones_detalle' => $observacionesDetalle,
+            'updated_at' => now()
+        ]);
+
+        Log::info('Detalle actualizado - Nuevo estado: ' . $request->estado);
+
+        // Recalcular estado de la solicitud basado en los detalles
+        $this->recalcularEstadoSolicitud($solicitud);
+
+        // Recargar la solicitud para obtener el estado actualizado
+        $solicitud->refresh();
+
+        // Crear el texto para observaciones del historial
+        $observacionesHistorial = "Producto actualizado: " . $this->sanitizeText($detalle->descripcion_producto) .
+            " - Estado: " . $request->estado .
+            ($observacionesDetalle ? " - Observaciones: " . $observacionesDetalle : "");
+
+        // Registrar en el historial del detalle
+        SolicitudAlmacenHistorial::create([
+            'idSolicitudAlmacen' => $solicitud->idSolicitudAlmacen,
+            'estado_anterior' => $estadoAnteriorDetalle,
+            'estado_nuevo' => $request->estado,
+            'observaciones' => $observacionesHistorial,
+            'usuario_id' => auth()->id(),
+            'tipo_cambio' => 'detalle'
+        ]);
+
+        DB::commit();
+
+        Log::info('=== CHANGE DETAIL STATUS COMPLETADO ===');
+        Log::info('Nuevo estado solicitud: ' . $solicitud->estado);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Estado del producto actualizado exitosamente',
+            'solicitud_estado' => $solicitud->estado,
+            'detalles_estado' => [
+                'aprobados' => $solicitud->detalles->where('estado', 'aprobado')->count(),
+                'rechazados' => $solicitud->detalles->where('estado', 'rechazado')->count(),
+                'pendientes' => $solicitud->detalles->where('estado', 'pendiente')->count()
+            ]
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        Log::error('Error en changeDetailStatus: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        Log::error('Trace: ' . $e->getTraceAsString());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al cambiar el estado del producto: ' . $e->getMessage()
+        ], 500, [], JSON_UNESCAPED_UNICODE);
     }
+}
+
+/**
+ * Sanitizar texto para asegurar codificación UTF-8 válida
+ */
+private function sanitizeText($text)
+{
+    if (empty($text)) {
+        return $text;
+    }
+
+    // Convertir a UTF-8 si es necesario
+    if (!mb_check_encoding($text, 'UTF-8')) {
+        $text = mb_convert_encoding($text, 'UTF-8', 'auto');
+    }
+
+    // Remover caracteres inválidos
+    $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+    $text = preg_replace('/[^\x{0000}-\x{FFFF}]/u', '', $text);
+
+    return $text;
+}
 
     // REEMPLAZA completamente la función recalcularEstadoSolicitud:
 
@@ -808,7 +833,7 @@ class SolicitudalmacenController extends Controller
                 'idSolicitudAlmacen' => $solicitud->idSolicitudAlmacen,
                 'estado_anterior' => $estadoAnteriorSolicitud,
                 'estado_nuevo' => $nuevoEstado,
-                'observaciones' => 'Cambio automático por sistema. Productos: ' . $aprobados . ' aprobados, ' . $rechazados . ' rechazados, ' . $pendientes . ' pendientes',
+                'observaciones' => 'Cambio automatico por sistema. Productos: ' . $aprobados . ' aprobados, ' . $rechazados . ' rechazados, ' . $pendientes . ' pendientes',
                 'usuario_id' => auth()->id(),
                 'tipo_cambio' => 'solicitud'
             ]);
