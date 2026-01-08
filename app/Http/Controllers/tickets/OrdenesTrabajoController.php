@@ -4062,117 +4062,306 @@ class OrdenesTrabajoController extends Controller
     // }
 
 
-public function obtenerSolicitudes()
-{
-    Log::info('Obteniendo solicitudes con estado 0');
+    public function obtenerSolicitudes()
+    {
+        $usuario = auth()->user();
+        Log::info('[NOTIFICACIONES] Inicio - Usuario ID: ' . $usuario->idUsuario . 
+                ', Nombre: ' . $usuario->Nombre . 
+                ', Rol: ' . $usuario->idRol);
 
-    // Obtener solicitudes con idTipoServicio 1, 2, 3, 4 (las actuales)
-    $solicitudesBase = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->whereIn('solicitudentrega.idTipoServicio', [1, 2, 3, 4])
-        ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
-        ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
-        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTickets',
-            'solicitudentrega.idVisitas',
-            'solicitudentrega.idTipoServicio',
-            'tickets.numero_ticket',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get();
+        $solicitudesFiltradas = collect();
+        $totalPorTipo = [];
 
-    // Obtener solicitudes tipo 5 (Solicitud de repuestos)
-    $solicitudesTipo5 = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->where('solicitudentrega.idTipoServicio', 5)
-        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTipoServicio',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get()
-        ->map(function ($item) {
-            $item->numero_ticket = null; // No tiene ticket
-            $item->idTickets = null;
-            $item->idVisitas = null;
-            return $item;
-        });
+        // 1. Solicitudes tipo 1 - Solicitud de entrega
+        $permiso1 = 'VER_SOLICITUD_ENTREGA';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso1)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso1);
+            $solicitudesTipo1 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 1)
+                ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+                ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+                ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTickets',
+                    'solicitudentrega.idVisitas',
+                    'solicitudentrega.idTipoServicio',
+                    'tickets.numero_ticket',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get();
+            
+            $count1 = $solicitudesTipo1->count();
+            $totalPorTipo[1] = $count1;
+            Log::info('[NOTIFICACIONES] Tipo 1 encontradas: ' . $count1 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo1);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso1);
+        }
 
-    // Obtener solicitudes tipo 6 (Solicitud de artículo)
-    $solicitudesTipo6 = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->where('solicitudentrega.idTipoServicio', 6)
-        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTipoServicio',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get()
-        ->map(function ($item) {
-            $item->numero_ticket = null; // No tiene ticket
-            $item->idTickets = null;
-            $item->idVisitas = null;
-            return $item;
-        });
+        // 2. Solicitudes tipo 2 - Pendiente por programación
+        $permiso2 = 'VER_PENDIENTE_PROGRAMACION';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso2)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso2);
+            $solicitudesTipo2 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 2)
+                ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+                ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+                ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTickets',
+                    'solicitudentrega.idVisitas',
+                    'solicitudentrega.idTipoServicio',
+                    'tickets.numero_ticket',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get();
+            
+            $count2 = $solicitudesTipo2->count();
+            $totalPorTipo[2] = $count2;
+            Log::info('[NOTIFICACIONES] Tipo 2 encontradas: ' . $count2 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo2);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso2);
+        }
 
-    // Obtener solicitudes tipo 7 (Solicitud de custodia)
-    $solicitudesTipo7 = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->where('solicitudentrega.idTipoServicio', 7)
-        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTipoServicio',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get()
-        ->map(function ($item) {
-            $item->numero_ticket = null; // No tiene ticket
-            $item->idTickets = null;
-            $item->idVisitas = null;
-            return $item;
-        });
+        // 3. Solicitudes tipo 3 - Ingreso a laboratorio
+        $permiso3 = 'VER_INGRESO_LABORATORIO';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso3)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso3);
+            $solicitudesTipo3 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 3)
+                ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+                ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+                ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTickets',
+                    'solicitudentrega.idVisitas',
+                    'solicitudentrega.idTipoServicio',
+                    'tickets.numero_ticket',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get();
+            
+            $count3 = $solicitudesTipo3->count();
+            $totalPorTipo[3] = $count3;
+            Log::info('[NOTIFICACIONES] Tipo 3 encontradas: ' . $count3 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo3);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso3);
+        }
 
+        // 4. Solicitudes tipo 4 - Observación de asistencia
+        $permiso4 = 'VER_OBSERVACION_ASISTENCIA';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso4)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso4);
+            $solicitudesTipo4 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 4)
+                ->leftJoin('visitas', 'solicitudentrega.idVisitas', '=', 'visitas.idVisitas')
+                ->leftJoin('tickets', 'solicitudentrega.idTickets', '=', 'tickets.idTickets')
+                ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTickets',
+                    'solicitudentrega.idVisitas',
+                    'solicitudentrega.idTipoServicio',
+                    'tickets.numero_ticket',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get();
+            
+            $count4 = $solicitudesTipo4->count();
+            $totalPorTipo[4] = $count4;
+            Log::info('[NOTIFICACIONES] Tipo 4 encontradas: ' . $count4 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo4);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso4);
+        }
+
+        // 5. Solicitudes tipo 5 - Solicitud de repuestos
+        $permiso5 = 'VER_SOLICITUD_REPUESTOS';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso5)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso5);
+            $solicitudesTipo5 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 5)
+                ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTipoServicio',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get()
+                ->map(function ($item) {
+                    $item->numero_ticket = null;
+                    $item->idTickets = null;
+                    $item->idVisitas = null;
+                    return $item;
+                });
+            
+            $count5 = $solicitudesTipo5->count();
+            $totalPorTipo[5] = $count5;
+            Log::info('[NOTIFICACIONES] Tipo 5 encontradas: ' . $count5 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo5);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso5);
+        }
+
+        // 6. Solicitudes tipo 6 - Solicitud de artículo
+        $permiso6 = 'VER_SOLICITUD_ARTICULO';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso6)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso6);
+            $solicitudesTipo6 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 6)
+                ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTipoServicio',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get()
+                ->map(function ($item) {
+                    $item->numero_ticket = null;
+                    $item->idTickets = null;
+                    $item->idVisitas = null;
+                    return $item;
+                });
+            
+            $count6 = $solicitudesTipo6->count();
+            $totalPorTipo[6] = $count6;
+            Log::info('[NOTIFICACIONES] Tipo 6 encontradas: ' . $count6 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo6);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso6);
+        }
+
+        // 7. Solicitudes tipo 7 - Solicitud de custodia
+        $permiso7 = 'VER_SOLICITUD_CUSTODIA';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso7)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso7);
+            $solicitudesTipo7 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 7)
+                ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTipoServicio',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get()
+                ->map(function ($item) {
+                    $item->numero_ticket = null;
+                    $item->idTickets = null;
+                    $item->idVisitas = null;
+                    return $item;
+                });
+            
+            $count7 = $solicitudesTipo7->count();
+            $totalPorTipo[7] = $count7;
+            Log::info('[NOTIFICACIONES] Tipo 7 encontradas: ' . $count7 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo7);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso7);
+        }
+
+        // 8. Solicitudes tipo 8 - Solicitud de abastecimiento
+        $permiso8 = 'VER_SOLICITUD_ABASTECIMIENTO';
+        if (\App\Helpers\PermisoHelper::tienePermiso($permiso8)) {
+            Log::info('[NOTIFICACIONES] Usuario TIENE permiso: ' . $permiso8);
+            $solicitudesTipo8 = Solicitudentrega::where('solicitudentrega.estado', 0)
+                ->where('solicitudentrega.idTipoServicio', 8)
+                ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
+                ->select(
+                    'solicitudentrega.idSolicitudentrega',
+                    'solicitudentrega.comentario',
+                    'solicitudentrega.idTipoServicio',
+                    'usuarios.Nombre as nombre_usuario',
+                    'solicitudentrega.fechaHora'
+                )
+                ->get()
+                ->map(function ($item) {
+                    $item->numero_ticket = null;
+                    $item->idTickets = null;
+                    $item->idVisitas = null;
+                    return $item;
+                });
+            
+            $count8 = $solicitudesTipo8->count();
+            $totalPorTipo[8] = $count8;
+            Log::info('[NOTIFICACIONES] Tipo 8 encontradas: ' . $count8 . ' solicitudes');
+            
+            $solicitudesFiltradas = $solicitudesFiltradas->concat($solicitudesTipo8);
+        } else {
+            Log::info('[NOTIFICACIONES] Usuario NO tiene permiso: ' . $permiso8);
+        }
+
+        $totalFinal = $solicitudesFiltradas->count();
         
-    // Obtener solicitudes tipo 7 (Solicitud de custodia)
-    $solicitudesTipo8 = Solicitudentrega::where('solicitudentrega.estado', 0)
-        ->where('solicitudentrega.idTipoServicio', 8)
-        ->leftJoin('usuarios', 'solicitudentrega.idUsuario', '=', 'usuarios.idUsuario')
-        ->select(
-            'solicitudentrega.idSolicitudentrega',
-            'solicitudentrega.comentario',
-            'solicitudentrega.idTipoServicio',
-            'usuarios.Nombre as nombre_usuario',
-            'solicitudentrega.fechaHora'
-        )
-        ->get()
-        ->map(function ($item) {
-            $item->numero_ticket = null; // No tiene ticket
-            $item->idTickets = null;
-            $item->idVisitas = null;
-            return $item;
-        });
+        // Log detallado del resumen
+        Log::info('[NOTIFICACIONES] === RESUMEN ===');
+        Log::info('[NOTIFICACIONES] Usuario: ' . $usuario->Nombre . ' (ID: ' . $usuario->idUsuario . ')');
+        Log::info('[NOTIFICACIONES] Total de solicitudes encontradas: ' . $totalFinal);
+        
+        if ($totalFinal > 0) {
+            Log::info('[NOTIFICACIONES] Distribución por tipo:');
+            foreach ($totalPorTipo as $tipo => $cantidad) {
+                $nombreTipo = $this->getNombreTipoServicio($tipo);
+                Log::info('[NOTIFICACIONES]   - Tipo ' . $tipo . ' (' . $nombreTipo . '): ' . $cantidad);
+            }
+            
+            // Log de las primeras 3 solicitudes para debugging
+            Log::info('[NOTIFICACIONES] Primeras solicitudes:');
+            foreach ($solicitudesFiltradas->take(3) as $index => $solicitud) {
+                Log::info('[NOTIFICACIONES]   [' . ($index + 1) . '] ID: ' . $solicitud->idSolicitudentrega . 
+                        ', Tipo: ' . $solicitud->idTipoServicio . 
+                        ', Usuario: ' . ($solicitud->nombre_usuario ?? 'N/A') .
+                        ', Ticket: ' . ($solicitud->numero_ticket ?? 'N/A'));
+            }
+        } else {
+            Log::info('[NOTIFICACIONES] No se encontraron solicitudes para este usuario');
+        }
+        Log::info('[NOTIFICACIONES] === FIN RESUMEN ===');
 
-    // Combinar todas las solicitudes
-    $solicitudes = $solicitudesBase
-        ->concat($solicitudesTipo5)
-        ->concat($solicitudesTipo6)
-        ->concat($solicitudesTipo7)
-        ->concat($solicitudesTipo8);
+        return response()->json($solicitudesFiltradas);
+    }
 
-    Log::info('Total de solicitudes con estado 0 encontradas: ' . $solicitudes->count());
-
-    return response()->json($solicitudes);
-}
-
+    // Método auxiliar para obtener nombre del tipo de servicio
+    private function getNombreTipoServicio($tipo)
+    {
+        $nombres = [
+            1 => 'Solicitud de entrega',
+            2 => 'Pendiente por programación',
+            3 => 'Ingreso a laboratorio',
+            4 => 'Observación de asistencia',
+            5 => 'Solicitud de repuestos',
+            6 => 'Solicitud de artículo',
+            7 => 'Solicitud de custodia',
+            8 => 'Solicitud de abastecimiento'
+        ];
+        
+        return $nombres[$tipo] ?? 'Tipo desconocido';
+    }
 
 
     public function aceptarSolicitud($id)

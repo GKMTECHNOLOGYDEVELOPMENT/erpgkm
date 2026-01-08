@@ -170,7 +170,12 @@ Route::get('/cuentas-bancarias/{idUsuario}', function ($idUsuario) {
 });
 
 Route::post('/guardar-cuenta', [UsuarioController::class, 'guardarCuenta']);
-Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
+// Si es una ruta API (con token)
+// Route::middleware(['auth:sanctum'])->group(function () {
+//     Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
+// });
+
+
 Route::put('/solicitudentrega/denegar/{id}', [OrdenesTrabajoController::class, 'denegarSolicitud']);
 
 // routes/api.php

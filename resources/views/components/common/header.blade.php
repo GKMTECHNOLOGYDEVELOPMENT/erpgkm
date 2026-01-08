@@ -1268,7 +1268,7 @@
 
 
 obtenerSolicitudes() {
-    fetch('/api/solicitudentrega')
+    fetch('/solicitudentrega')
         .then(response => response.json())
         .then(data => {
             this.notifications = data.map(solicitud => {
