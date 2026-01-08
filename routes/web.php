@@ -1984,3 +1984,27 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+// Repuestos en Tránsito
+Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function () {
+    Route::get('/', [RepuestoTransitoController::class, 'index'])->name('index');
+    Route::get('/dashboard', [RepuestoTransitoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/reporte', [RepuestoTransitoController::class, 'reporte'])->name('reporte');
+    Route::get('/{id}', [RepuestoTransitoController::class, 'show'])->name('show');
+    Route::put('/{id}', [RepuestoTransitoController::class, 'update'])->name('update');
+
+    Route::get('/{id}/detalles', [RepuestoTransitoController::class, 'obtenerDetalles'])->name('detalles');
+    Route::get('/{id}/evidencias', [RepuestoTransitoController::class, 'obtenerEvidencias'])->name('evidencias');
+    Route::get('/{id}/imagen/{tipo}', [RepuestoTransitoController::class, 'mostrarImagen'])->name('imagen');
+       Route::get('/{id}/foto/{tipo}', [RepuestoTransitoController::class, 'obtenerFoto'])->name('repuestos-transito.foto');
+    Route::get('/{id}/fotos', [RepuestoTransitoController::class, 'obtenerTodasFotos'])->name('repuestos-transito.todas-fotos');
+    // Ruta de debug
+    Route::get('/{id}/debug-fotos', [RepuestoTransitoController::class, 'debugFotos'])->name('repuestos-transito.debug-fotos');
+    Route::get('/{id}/fotos-tabla', [RepuestoTransitoController::class, 'obtenerTodasFotos'])
+    ->name('repuestos.transito.fotos.tabla');
+
+Route::get('/{id}/foto-tabla/{tipo}', [RepuestoTransitoController::class, 'obtenerFotoTablaSeparada'])
+    ->name('repuestos.transito.foto.tabla');
+
+Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
+    ->name('repuestos.transito.fotos.tipo');
+});
