@@ -65,49 +65,58 @@ public function store(Request $request)
 }
 
 
-    public function getAll(Request $request)
-    {
-        $query = ContactoFinal::with('tipoDocumento');
+public function getAll(Request $request)
+{
+    // 🔴 CAMBIO: Incluir la relación con clientesGenerales
+    $query = ContactoFinal::with(['tipoDocumento', 'clientesGenerales' => function($query) {
+        $query->select('clientegeneral.idClienteGeneral', 'clientegeneral.descripcion');
+    }]);
 
-        $total = ContactoFinal::count();
+    $total = ContactoFinal::count();
 
-        // Buscador general
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre_completo', 'like', "%$search%")
-                  ->orWhere('numero_documento', 'like', "%$search%")
-                  ->orWhere('correo', 'like', "%$search%")
-                  ->orWhere('telefono', 'like', "%$search%");
-            });
-        }
-
-        $filtered = $query->count();
-
-        $contactos = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-
-        $data = $contactos->map(function ($contacto) {
-            return [
-                'idContactoFinal' => $contacto->idContactoFinal,
-                'tipo_documento' => $contacto->tipoDocumento->nombre,
-                'numero_documento' => $contacto->numero_documento,
-                'nombre_completo' => $contacto->nombre_completo,
-                'correo' => $contacto->correo,
-                'telefono' => $contacto->telefono,
-                'estado' => $contacto->estado ? 'Activo' : 'Inactivo',
-            ];
+    // Buscador general
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('nombre_completo', 'like', "%$search%")
+              ->orWhere('numero_documento', 'like', "%$search%")
+              ->orWhere('correo', 'like', "%$search%")
+              ->orWhere('telefono', 'like', "%$search%");
         });
-
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
     }
 
+    $filtered = $query->count();
+
+    $contactos = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $contactos->map(function ($contacto) {
+        return [
+            'idContactoFinal' => $contacto->idContactoFinal,
+            'tipo_documento' => $contacto->tipoDocumento->nombre,
+            'numero_documento' => $contacto->numero_documento,
+            'nombre_completo' => $contacto->nombre_completo,
+            'correo' => $contacto->correo,
+            'telefono' => $contacto->telefono,
+            // 🔴 CAMBIO: Incluir los clientes generales
+            'clientes_generales' => $contacto->clientesGenerales->map(function($cliente) {
+                return [
+                    'idClienteGeneral' => $cliente->idClienteGeneral,
+                    'descripcion' => $cliente->descripcion
+                ];
+            })->toArray(),
+            'estado' => $contacto->estado ? 'Activo' : 'Inactivo',
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
     public function destroy($id)
     {
         try {

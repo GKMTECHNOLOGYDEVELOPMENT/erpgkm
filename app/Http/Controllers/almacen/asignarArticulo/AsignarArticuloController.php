@@ -68,6 +68,9 @@ class AsignarArticuloController extends Controller
 
         return view('almacen.asignar-articulos.create', compact('usuarios', 'articulos'));
     }
+
+
+    
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [

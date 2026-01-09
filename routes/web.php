@@ -166,19 +166,15 @@ Route::get('/auth/cover-lockscreen', [LockscreenController::class, 'show'])->nam
 // 1. RUTA para MOSTRAR el formulario de solicitud de reset (SIN token)
 Route::get('/password/reset', [PasswordResetController::class, 'showPasswordResetForm'])
     ->name('password.request');
-
 // 2. RUTA para ENVIAR el enlace de reset (POST)
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink'])
     ->name('password.email');
-
 // 3. RUTA para MOSTRAR formulario con token (CON token)
 Route::get('/password/reset/{token}', [PasswordResetController::class, 'showResetForm'])
     ->name('password.reset');
-
 // 4. RUTA para ACTUALIZAR la contraseña (POST con token)
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword'])
     ->name('password.update');
-
 // Opcional: Puedes mantener tu ruta personalizada si quieres
 Route::get('/auth/cover-password-reset', [PasswordResetController::class, 'showPasswordResetForm'])
     ->name('auth.password-reset');
@@ -1980,6 +1976,12 @@ Route::get('/cliente-general/{id}/contactos', [OrdenesHelpdeskController::class,
 
 Route::post('/solicitudcompra/{id}/observar', [SolicitudcompraController::class, 'observarSolicitud'])->name('solicitudcompra.observar');
 
+
+
+// Por esto (sesión web normal):
+Route::middleware(['auth'])->group(function () {
+    Route::get('/solicitudentrega', [OrdenesTrabajoController::class, 'obtenerSolicitudes']);
+});
 
 
 // Repuestos en Tránsito

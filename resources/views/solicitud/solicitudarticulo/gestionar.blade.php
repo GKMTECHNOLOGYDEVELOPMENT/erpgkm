@@ -1345,7 +1345,68 @@
                     // Notificación adicional
                     toastr.success('Estado actualizado correctamente en el sistema');
                 }
-            },
+            }
+
+                      // Función para actualizar estado del artículo en la UI para Usado
+            function actualizarEstadoArticulo(articuloId, nuevoEstado) {
+                const articuloElement = document.querySelector(`[data-articulo-id="${articuloId}"]`);
+                if (!articuloElement) {
+                    toastr.error('No se pudo encontrar el artículo en la lista');
+                    return;
+                }
+
+                const estadoElement = articuloElement.querySelector('.estado-articulo');
+                const fechaElement = articuloElement.querySelector('.fecha-actualizacion');
+                const btnUsado = articuloElement.querySelector('.btn-usado');
+                const btnNoUsado = articuloElement.querySelector('.btn-no-usado');
+
+                if (nuevoEstado === 'usado') {
+                    contadorUsados++;
+                    contadorPendientes--;
+
+                    // Actualizar estado visual
+                    estadoElement.className = 'text-sm font-semibold estado-articulo text-green-700';
+                    estadoElement.innerHTML = '<i class="fas fa-check-circle mr-2"></i>Usado';
+
+                    // Deshabilitar botón USADO y habilitar botón NO USADO
+                    btnUsado.disabled = true;
+                    btnUsado.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                    btnUsado.innerHTML =
+                        '<i class="fas fa-check-circle mr-2 text-lg"></i>' +
+                        '<span class="font-semibold">' +
+                        '<i class="fas fa-check-double mr-1"></i> Ya Marcado como Usado' +
+                        '</span>';
+
+                    // Habilitar botón NO USADO si no está ya en estado no_usado
+                    const estadoActual = articuloElement.getAttribute('data-estado-actual') || 'pendiente';
+                    if (estadoActual !== 'no_usado') {
+                        btnNoUsado.disabled = false;
+                        btnNoUsado.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                        btnNoUsado.innerHTML =
+                            '<i class="fas fa-times-circle mr-2 text-lg"></i>' +
+                            '<span class="font-semibold">Marcar como No Usado</span>';
+                    }
+
+                    // Actualizar fecha
+                    const ahora = new Date();
+                    const fechaFormateada =
+                        `${ahora.getDate().toString().padStart(2, '0')}/${(ahora.getMonth() + 1).toString().padStart(2, '0')}/${ahora.getFullYear()}`;
+                    const horaFormateada =
+                        `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+                    fechaElement.innerHTML =
+                        `<span class="font-medium">${fechaFormateada}</span>` +
+                        `<span class="text-gray-500 ml-1">${horaFormateada}</span>`;
+
+                    // Actualizar contadores visuales
+                    actualizarContadores();
+
+                    // Actualizar atributo de estado en el elemento
+                    articuloElement.setAttribute('data-estado-actual', 'usado');
+
+                    // Notificación adicional
+                    toastr.success('Estado actualizado correctamente en el sistema');
+                }
+            }
 
             // Función para actualizar estado del artículo en la UI para No Usado
             function actualizarEstadoArticuloNoUsado(articuloId, nuevoEstado) {
@@ -1406,7 +1467,7 @@
                     // Notificación adicional
                     toastr.success('Artículo marcado como no usado correctamente');
                 }
-            },
+            }
 
             // Inicializar contadores
             actualizarContadores();

@@ -17,6 +17,8 @@ class SolicitudArticulo extends Model
         'codigoSolicitud',
         'idArticulo',
         'cantidad',
+        'es_uso_diario',
+        'observacion_devolucion',
         'descripcion',
     ];
 

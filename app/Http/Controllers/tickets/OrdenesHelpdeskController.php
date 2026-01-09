@@ -39,6 +39,7 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Str;
 use App\Exports\OrdenesHelpdeskExport;
 use App\Models\Fotostickest;
+use Illuminate\Validation\Rule;
 
 class OrdenesHelpdeskController extends Controller
 {
@@ -2635,39 +2636,41 @@ public function getAll(Request $request)
 
 
 
-
     public function actualizarEjecucion(Request $request, $id)
     {
-        // Log para ver los datos que se están recibiendo
+        // Log para ver los datos que se estÃ¡n recibiendo
         Log::info('Datos recibidos para actualizar la orden:', $request->all());
 
         // Validar los datos del formulario
-        $validated = $request->validate([
-            'idCliente' => 'required|exists:cliente,idCliente',
-            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-            'idTienda' => 'required|exists:tienda,idTienda',
-            'fallaReportada' => 'nullable|string',
-            'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
-            'nrmcotizacion' => 'nullable|string',
-            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
-
-
-        ]);
-
+       $validated = $request->validate([
+    'idCliente' => 'required|exists:cliente,idCliente',
+    'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+    'idTienda' => 'required|exists:tienda,idTienda',
+    'fallaReportada' => 'nullable|string',
+    'numero_ticket' => [
+        'required',
+        'string',
+        Rule::unique('tickets', 'numero_ticket')->ignore($id, 'idTickets'),
+    ],
+    'ejecutor' => 'nullable|exists:usuarios,idUsuario',
+    'nrmcotizacion' => 'nullable|string',
+    'idContactoFinal' => 'nullable|integer',
+]);
         // Encontrar la orden y actualizarla
         $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
 
-        // Log para verificar que se encontró la orden
+        // Log para verificar que se encontrÃ³ la orden
         Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
 
         // Actualizar los campos de la orden
         $orden->idCliente = $request->idCliente;
         $orden->idClienteGeneral = $request->idClienteGeneral;
         $orden->idTienda = $request->idTienda;
+        $orden->numero_ticket= $request->numero_ticket;
         $orden->fallaReportada = $request->fallaReportada;
         $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
         $orden->nrmcotizacion = $request->nrmcotizacion;
-        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
+        $orden->idContactoFinal = $request->idContactoFinal; // âœ… NUEVO CAMPO
 
 
         // Guardar los cambios
@@ -2676,10 +2679,9 @@ public function getAll(Request $request)
         // Log para confirmar que los cambios se guardaron
         Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
 
-        // Responder con éxito
+        // Responder con Ã©xito
         return response()->json(['success' => true]);
     }
-
 
 
 

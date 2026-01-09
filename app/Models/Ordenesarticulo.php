@@ -56,6 +56,8 @@ class Ordenesarticulo extends Model
 		'idSolicitudesOrdenes',
 		'foto_articulo_usado',
 		'foto_articulo_no_usado',
+		'requiere_devolucion',
+		'fecha_devolucion_programada',
 		'idArticulos',
 		'idUbicacion',
 		'id_area_destino',

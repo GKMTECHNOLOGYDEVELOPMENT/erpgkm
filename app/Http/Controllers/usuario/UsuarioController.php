@@ -1147,9 +1147,10 @@ public function getArticulosAsignados($idUsuario)
         
         Log::info('Usuario existe en la base de datos');
         
-        // 2. Verificar asignaciones del usuario
+        // 2. Obtener asignaciones del usuario (filtrando por estado si es necesario)
         $asignaciones = DB::table('asignaciones')
             ->where('idUsuario', $idUsuario)
+            ->whereIn('estado', ['pendiente', 'activo', 'vencido']) // Solo asignaciones vigentes
             ->get();
             
         Log::info('Asignaciones encontradas:', [
@@ -1158,20 +1159,21 @@ public function getArticulosAsignados($idUsuario)
         ]);
         
         if ($asignaciones->isEmpty()) {
-            Log::info('El usuario no tiene asignaciones registradas');
+            Log::info('El usuario no tiene asignaciones vigentes');
             return response()->json([
                 'success' => true,
                 'articulos' => [],
-                'message' => 'El usuario no tiene asignaciones registradas'
+                'message' => 'El usuario no tiene asignaciones vigentes'
             ]);
         }
         
         // 3. Obtener IDs de asignaciones
         $asignacionIds = $asignaciones->pluck('id')->toArray();
         
-        // 4. Verificar detalles de asignaciones
+        // 4. Obtener detalles de asignaciones (con las nuevas columnas)
         $detalles = DB::table('detalle_asignaciones')
             ->whereIn('asignacion_id', $asignacionIds)
+            ->whereIn('estado_articulo', ['pendiente', 'activo', 'entregado']) // Estados que muestran artículos asignados
             ->get();
             
         Log::info('Detalles de asignaciones encontrados:', [
@@ -1199,11 +1201,10 @@ public function getArticulosAsignados($idUsuario)
             ->get();
             
         Log::info('Artículos encontrados en BD:', [
-            'count' => $articulos->count(),
-            'articulos' => $articulos->toArray()
+            'count' => $articulos->count()
         ]);
         
-        // 7. Combinar toda la información
+        // 7. Combinar toda la información con las NUEVAS columnas
         $resultado = [];
         
         foreach ($detalles as $detalle) {
@@ -1213,32 +1214,52 @@ public function getArticulosAsignados($idUsuario)
             // Buscar la asignación correspondiente
             $asignacion = $asignaciones->firstWhere('id', $detalle->asignacion_id);
             
-            // Determinar nombre a mostrar
-            $nombreMostrar = 'Artículo ID ' . $detalle->articulo_id;
-            
-            if ($articulo) {
-                if ($articulo->idTipoArticulo == 2 && !empty($articulo->codigo_repuesto)) {
-                    $nombreMostrar = $articulo->codigo_repuesto;
-                } elseif (!empty($articulo->nombre)) {
-                    $nombreMostrar = $articulo->nombre;
+            // Determinar nombre a mostrar - USAR NUEVAS COLUMNAS
+            $nombreMostrar = $detalle->nombre_articulo ?? 'Artículo ID ' . $detalle->articulo_id;
+            if (empty($nombreMostrar) || $nombreMostrar == 'Artículo ID ' . $detalle->articulo_id) {
+                // Fallback a nombre del artículo si no hay en detalle
+                if ($articulo) {
+                    if ($articulo->idTipoArticulo == 2 && !empty($articulo->codigo_repuesto)) {
+                        $nombreMostrar = $articulo->codigo_repuesto;
+                    } elseif (!empty($articulo->nombre)) {
+                        $nombreMostrar = $articulo->nombre;
+                    }
                 }
             }
+            
+            // Determinar tipo de asignación (uso diario o préstamo)
+            $tipoAsignacion = $detalle->tipo ?? ($asignacion->tipo_asignacion ?? 'prestamo');
+            $requiereDevolucion = $detalle->requiere_devolucion ?? 0;
+            
+            // Determinar fechas importantes
+            $fechaAsignacion = $asignacion->fecha_asignacion ?? null;
+            $fechaDevolucion = $detalle->fecha_devolucion_real ?? $detalle->fecha_devolucion_esperada ?? $asignacion->fecha_devolucion ?? null;
+            $fechaEntregaReal = $detalle->fecha_entrega_real ?? $asignacion->fecha_entrega_real ?? null;
             
             $resultado[] = [
                 'id' => $detalle->id,
                 'articulo_id' => $detalle->articulo_id,
                 'cantidad' => (int)$detalle->cantidad,
-                'numero_serie' => $detalle->numero_serie ?: 'N/A',
-                'estado_articulo' => $detalle->estado_articulo,
-                'nombre' => $articulo->nombre ?? 'No encontrado',
+                'numero_serie' => $detalle->numero_serie ?: null,
+                'estado_articulo' => $detalle->estado_articulo ?? 'pendiente',
+                'nombre' => $nombreMostrar,
+                'codigo_articulo' => $detalle->codigo_articulo ?? ($articulo->codigo ?? null),
+                'nombre_articulo' => $detalle->nombre_articulo ?? ($articulo->nombre ?? null),
                 'codigo_barras' => $articulo->codigo_barras ?? null,
                 'sku' => $articulo->sku ?? null,
                 'idTipoArticulo' => $articulo->idTipoArticulo ?? 0,
                 'codigo_repuesto' => $articulo->codigo_repuesto ?? null,
-                'fecha_asignacion' => $asignacion->fecha_asignacion ?? null,
-                'fecha_devolucion' => $asignacion->fecha_devolucion ?? null,
-                'observaciones' => $asignacion->observaciones ?? null,
+                'fecha_asignacion' => $fechaAsignacion,
+                'fecha_devolucion' => $fechaDevolucion,
+                'fecha_entrega_real' => $fechaEntregaReal,
+                'fecha_entrega_esperada' => $detalle->fecha_entrega_esperada ?? null,
+                'fecha_devolucion_esperada' => $detalle->fecha_devolucion_esperada ?? null,
+                'observaciones' => $detalle->observaciones ?? ($asignacion->observaciones ?? null),
                 'estado_asignacion' => $asignacion->estado ?? null,
+                'tipo_asignacion' => $tipoAsignacion,
+                'requiere_devolucion' => $requiereDevolucion,
+                'codigo_asignacion' => $asignacion->codigo_asignacion ?? null,
+                'codigo_solicitud' => $asignacion->codigo_solicitud ?? null,
                 'nombre_mostrar' => $nombreMostrar
             ];
         }
@@ -1251,6 +1272,20 @@ public function getArticulosAsignados($idUsuario)
             'success' => true,
             'articulos' => $resultado,
             'total' => count($resultado),
+          // En el array de estadísticas, línea ~80 del controlador:
+'estadisticas' => [
+    'activos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'activo')),
+    'pendientes' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'pendiente')),
+    'entregados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'entregado')),
+    'dañados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'dañado')),
+    'perdidos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'perdido')),
+    'devueltos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'devuelto')),
+    'uso_diario' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'uso_diario')),
+    'prestamo' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'prestamo')),
+    'reposicion' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'reposicion')),
+    'trabajo_a_realizar' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'trabajo_a_realizar')), // NUEVO
+    'con_devolucion' => count(array_filter($resultado, fn($a) => $a['requiere_devolucion'] == 1))
+],
             'debug_info' => [
                 'usuario_existe' => $usuarioExiste,
                 'asignaciones_count' => $asignaciones->count(),
@@ -1271,7 +1306,6 @@ public function getArticulosAsignados($idUsuario)
         ], 500);
     }
 }
-
 /**
  * Limpiar string de caracteres no UTF-8
  */
