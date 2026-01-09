@@ -1,98 +1,108 @@
 <x-layout.default>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/viewerjs/dist/viewer.min.css" />
+
     <div class="container-fluid px-4 py-6">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">📦 Gestión de Repuestos</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Seguimiento de repuestos usados, no usados y en tránsito</p>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white"><i class="fas fa-box mr-2"></i>Gestión de
+                Repuestos</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Seguimiento de repuestos usados, no usados y en tránsito
+            </p>
         </div>
 
         <!-- Cards de Resumen -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Total -->
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div
+                class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total Repuestos</p>
-                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $contadores['total'] }}</p>
+                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $contadores['total'] }}
+                        </p>
                         <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">Todos los estados</p>
                     </div>
                     <div class="bg-blue-200 dark:bg-blue-800 p-3 rounded-full">
-                        <svg class="w-8 h-8 text-blue-700 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-                        </svg>
+                        <i class="fas fa-boxes text-2xl text-blue-700 dark:text-blue-300"></i>
                     </div>
                 </div>
             </div>
 
             <!-- En Tránsito -->
-            <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div
+                class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium text-yellow-700 dark:text-yellow-300">En Tránsito</p>
-                        <p class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-2">{{ $contadores['pendientes'] }}</p>
+                        <p class="text-sm font-medium text-warning dark:text-yellow-300">En Tránsito</p>
+                        <p class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-2">
+                            {{ $contadores['pendientes'] }}</p>
                         <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Pendientes de uso</p>
                     </div>
                     <div class="bg-yellow-200 dark:bg-yellow-800 p-3 rounded-full">
-                        <svg class="w-8 h-8 text-yellow-700 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fas fa-shipping-fast text-2xl text-warning dark:text-yellow-300"></i>
                     </div>
                 </div>
             </div>
 
             <!-- Usados -->
-            <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div
+                class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-green-700 dark:text-green-300">Usados</p>
-                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">{{ $contadores['usados'] }}</p>
+                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">
+                            {{ $contadores['usados'] }}</p>
                         <p class="text-xs text-green-600 dark:text-green-400 mt-1">Ya utilizados</p>
                     </div>
                     <div class="bg-green-200 dark:bg-green-800 p-3 rounded-full">
-                        <svg class="w-8 h-8 text-green-700 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fas fa-check-circle text-2xl text-green-700 dark:text-green-300"></i>
                     </div>
                 </div>
             </div>
 
             <!-- No Usados -->
-            <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div
+                class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-red-700 dark:text-red-300">No Usados</p>
-                        <p class="text-3xl font-bold text-red-900 dark:text-red-100 mt-2">{{ $contadores['no_usados'] }}</p>
+                        <p class="text-3xl font-bold text-red-900 dark:text-red-100 mt-2">{{ $contadores['no_usados'] }}
+                        </p>
                         <p class="text-xs text-red-600 dark:text-red-400 mt-1">Devueltos al stock</p>
                     </div>
                     <div class="bg-red-200 dark:bg-red-800 p-3 rounded-full">
-                        <svg class="w-8 h-8 text-red-700 dark:text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <i class="fas fa-times-circle text-2xl text-red-700 dark:text-red-300"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Filtros -->
-        <div class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">🔍 Filtros de Búsqueda</h2>
+        <div
+            class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4"><i
+                    class="fas fa-search mr-2"></i>Filtros de Búsqueda</h2>
             <form method="GET" action="" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Estado -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             <span class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <i class="fas fa-filter mr-2 text-sm"></i>
                                 Estado
                             </span>
                         </label>
-                        <select name="estado" class="form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <select name="estado"
+                            class="form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                             <option value="">Todos los estados</option>
-                            <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>🔄 En Tránsito</option>
-                            <option value="usado" {{ request('estado') == 'usado' ? 'selected' : '' }}>✅ Usado</option>
-                            <option value="no_usado" {{ request('estado') == 'no_usado' ? 'selected' : '' }}>❌ No Usado</option>
+                            <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}><i
+                                    class="fas fa-shipping-fast mr-1"></i> En Tránsito</option>
+                            <option value="usado" {{ request('estado') == 'usado' ? 'selected' : '' }}><i
+                                    class="fas fa-check-circle mr-1"></i> Usado</option>
+                            <option value="no_usado" {{ request('estado') == 'no_usado' ? 'selected' : '' }}><i
+                                    class="fas fa-times-circle mr-1"></i> No Usado</option>
                         </select>
                     </div>
 
@@ -100,9 +110,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             <span class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l4.879-4.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242z" />
-                                </svg>
+                                <i class="fas fa-barcode mr-2 text-sm"></i>
                                 Código Repuesto
                             </span>
                         </label>
@@ -115,46 +123,38 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             <span class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <i class="fas fa-calendar-alt mr-2 text-sm"></i>
                                 Desde
                             </span>
                         </label>
-                        <input type="date" name="fecha_desde" value="{{ request('fecha_desde') }}"
-                            class="form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <input type="text" name="fecha_desde" value="{{ request('fecha_desde') }}"
+                            class="flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                            placeholder="Seleccionar fecha">
                     </div>
 
                     <!-- Fecha Hasta -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             <span class="flex items-center">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <i class="fas fa-calendar-alt mr-2 text-sm"></i>
                                 Hasta
                             </span>
                         </label>
-                        <input type="date" name="fecha_hasta" value="{{ request('fecha_hasta') }}"
-                            class="form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <input type="text" name="fecha_hasta" value="{{ request('fecha_hasta') }}"
+                            class="flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                            placeholder="Seleccionar fecha">
                     </div>
                 </div>
 
                 <!-- Botones -->
                 <div class="flex flex-wrap gap-2 pt-2">
-                    <button type="submit"
-                        class="btn btn-primary">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search mr-2"></i>
                         Aplicar Filtros
                     </button>
 
-                    <a href=""
-                        class="btn btn-outline-primary">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                    <a href="{{ url()->current() }}" class="btn btn-outline-primary">
+                        <i class="fas fa-redo mr-2"></i>
                         Limpiar Filtros
                     </a>
                 </div>
@@ -162,13 +162,16 @@
         </div>
 
         <!-- Tabla de Repuestos -->
-        <div class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div
+            class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
             <!-- Header de la tabla -->
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#121c2c]">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">📋 Lista de Repuestos</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Mostrando {{ $repuestos->count() }} de {{ $repuestos->total() }} repuestos</p>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white"><i
+                                class="fas fa-list mr-2"></i>Lista de Repuestos</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Mostrando {{ $repuestos->count() }} de
+                            {{ $repuestos->total() }} repuestos</p>
                     </div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         Página {{ $repuestos->currentPage() }} de {{ $repuestos->lastPage() }}
@@ -181,51 +184,45 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-[#121c2c]">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-box mr-2"></i>
                                     Repuesto
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-file-alt mr-2"></i>
                                     Solicitud
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-info-circle mr-2"></i>
                                     Estado
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-calendar mr-2"></i>
                                     Fechas
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-hashtag mr-2"></i>
                                     Cantidad
                                 </div>
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-cogs mr-2"></i>
                                     Acciones
                                 </div>
                             </th>
@@ -233,552 +230,591 @@
                     </thead>
                     <tbody class="bg-white dark:bg-[#1b2e4b] divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($repuestos as $repuesto)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-[#121c2c] transition-colors">
-                            <!-- Columna Repuesto -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg flex items-center justify-center border border-blue-200 dark:border-blue-800">
-                                        <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                                            {{ $repuesto->nombre_repuesto }}
-                                        </div>
-                                        <div class="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
-                                            Código: {{ $repuesto->codigo_repuesto ?: 'N/A' }}
-                                        </div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 flex flex-wrap gap-1">
-                                            @if($repuesto->subcategoria)
-                                            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full">{{ $repuesto->subcategoria }}</span>
-                                            @endif
-                                            @if($repuesto->modelo)
-                                            <span class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">{{ $repuesto->modelo }}</span>
-                                            @endif
-                                            @if($repuesto->marca)
-                                            <span class="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">{{ $repuesto->marca }}</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-
-                            <!-- Columna Solicitud -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $repuesto->codigo_solicitud }}</div>
-                                <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                        </svg>
-                                        {{ $repuesto->solicitante ?: 'N/A' }}
-                                    </span>
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                                    <span class="flex items-center">
-                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        {{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y') }}
-                                    </span>
-                                </div>
-                            </td>
-
-                            <!-- Columna Estado -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                @php
-                                    $estadoClase = '';
-                                    $estadoIcono = '';
-                                    $estadoTexto = '';
-                                    
-                                    if ($repuesto->fechaUsado) {
-                                        $estadoClase = 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                                        $estadoIcono = '✅';
-                                        $estadoTexto = 'Usado';
-                                    } elseif ($repuesto->fechaSinUsar) {
-                                        $estadoClase = 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                                        $estadoIcono = '❌';
-                                        $estadoTexto = 'No Usado';
-                                    } else {
-                                        $estadoClase = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                                        $estadoIcono = '🔄';
-                                        $estadoTexto = 'En Tránsito';
-                                    }
-                                @endphp
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $estadoClase }}">
-                                    {{ $estadoIcono }} {{ $estadoTexto }}
-                                </span>
-                            </td>
-
-                            <!-- Columna Fechas -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                <div class="space-y-1">
-                                    @if($repuesto->fechaUsado)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-[#121c2c] transition-colors">
+                                <!-- Columna Repuesto -->
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
-                                        <svg class="w-3 h-3 mr-1 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="font-medium">Usado:</span>
-                                        <span class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaUsado)->format('d/m/Y H:i') }}</span>
+                                        <div
+                                            class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                                            <i class="fas fa-box-open text-blue-600 dark:text-blue-400"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">
+                                                {{ $repuesto->nombre_repuesto }}
+                                            </div>
+                                            <div class="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
+                                                Código: {{ $repuesto->codigo_repuesto ?: 'N/A' }}
+                                            </div>
+                                            <div
+                                                class="text-xs text-gray-500 dark:text-gray-500 mt-1 flex flex-wrap gap-1">
+                                                @if ($repuesto->subcategoria)
+                                                    <span
+                                                        class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full">{{ $repuesto->subcategoria }}</span>
+                                                @endif
+                                                @if ($repuesto->modelo)
+                                                    <span
+                                                        class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">{{ $repuesto->modelo }}</span>
+                                                @endif
+                                                @if ($repuesto->marca)
+                                                    <span
+                                                        class="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">{{ $repuesto->marca }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
-                                    @endif
-                                    @if($repuesto->fechaSinUsar)
-                                    <div class="flex items-center">
-                                        <svg class="w-3 h-3 mr-1 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="font-medium">Devuelto:</span>
-                                        <span class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaSinUsar)->format('d/m/Y H:i') }}</span>
-                                    </div>
-                                    @endif
-                                    @if(!$repuesto->fechaUsado && !$repuesto->fechaSinUsar)
-                                    <div class="flex items-center">
-                                        <svg class="w-3 h-3 mr-1 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <span class="font-medium">Solicitado:</span>
-                                        <span class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y H:i') }}</span>
-                                    </div>
-                                    @endif
-                                </div>
-                            </td>
+                                </td>
 
-                            <!-- Columna Cantidad -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-center">
-                                    <span class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-sm font-semibold">
-                                        {{ $repuesto->cantidad }} unidades
-                                    </span>
-                                </div>
-                                @if($repuesto->observacion)
-                                <div class="text-xs text-gray-500 dark:text-gray-500 mt-2 truncate max-w-xs" title="{{ $repuesto->observacion }}">
-                                    📝 {{ Str::limit($repuesto->observacion, 50) }}
-                                </div>
-                                @endif
-                            </td>
+                                <!-- Columna Solicitud -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white text-center">
+                                        {{ $repuesto->codigo_solicitud }}
+                                    </div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1 text-center">
+                                        <span class="flex items-center justify-center">
+                                            <i class="fas fa-user mr-2 text-xs"></i>
+                                            {{ $repuesto->solicitante ?: 'N/A' }}
+                                        </span>
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
+                                        <span class="flex items-center justify-center">
+                                            <i class="fas fa-calendar-day mr-2 text-xs"></i>
+                                            {{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y') }}
+                                        </span>
+                                    </div>
+                                </td>
 
-                            <!-- Columna Acciones -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <!-- Botón Ver Detalles -->
-                                    <button type="button"
-                                        onclick="openDetailsModal({{ $repuesto->idOrdenesArticulos }})"
-                                        class="btn btn-outline-primary btn-sm">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        Ver Detalles
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                                <!-- Columna Estado -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        $estadoClase = '';
+                                        $estadoIcono = '';
+                                        $estadoTexto = '';
+
+                                        if ($repuesto->fechaUsado) {
+                                            $estadoClase =
+                                                'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+                                            $estadoIcono = '<i class="fas fa-check-circle mr-1"></i>';
+                                            $estadoTexto = 'Usado';
+                                        } elseif ($repuesto->fechaSinUsar) {
+                                            $estadoClase =
+                                                'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+                                            $estadoIcono = '<i class="fas fa-times-circle mr-1"></i>';
+                                            $estadoTexto = 'No Usado';
+                                        } else {
+                                            $estadoClase =
+                                                'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+                                            $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
+                                            $estadoTexto = 'En Tránsito';
+                                        }
+                                    @endphp
+                                    <div class="flex justify-center">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {!! $estadoClase !!}">
+                                            {!! $estadoIcono !!} {{ $estadoTexto }}
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <!-- Columna Fechas -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <div class="space-y-1">
+                                        @if ($repuesto->fechaUsado)
+                                            <div class="flex items-center justify-center">
+                                                <i
+                                                    class="fas fa-check text-green-600 dark:text-green-400 mr-2 text-xs"></i>
+                                                <span class="font-medium">Usado:</span>
+                                                <span
+                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaUsado)->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                        @endif
+                                        @if ($repuesto->fechaSinUsar)
+                                            <div class="flex items-center justify-center">
+                                                <i class="fas fa-undo text-red-600 dark:text-red-400 mr-2 text-xs"></i>
+                                                <span class="font-medium">Devuelto:</span>
+                                                <span
+                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaSinUsar)->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                        @endif
+                                        @if (!$repuesto->fechaUsado && !$repuesto->fechaSinUsar)
+                                            <div class="flex items-center justify-center">
+                                                <i
+                                                    class="fas fa-clock text-yellow-600 dark:text-yellow-400 mr-2 text-xs"></i>
+                                                <span class="font-medium">Solicitado:</span>
+                                                <span
+                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y H:i') }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <!-- Columna Cantidad -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-center">
+                                        <span
+                                            class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-sm font-semibold">
+                                            {{ $repuesto->cantidad }} unidades
+                                        </span>
+                                    </div>
+                                    @if ($repuesto->observacion)
+                                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-2 truncate max-w-xs text-center"
+                                            title="{{ $repuesto->observacion }}">
+                                            <i
+                                                class="fas fa-sticky-note mr-1"></i>{{ Str::limit($repuesto->observacion, 50) }}
+                                        </div>
+                                    @endif
+                                </td>
+
+                                <!-- Columna Acciones -->
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <!-- Botón Ver Detalles -->
+                                        <button type="button"
+                                            onclick="openDetailsModal({{ $repuesto->idOrdenesArticulos }})"
+                                            class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye mr-2"></i>
+                                            Ver Detalles
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
-                                <div class="text-gray-400 dark:text-gray-500">
-                                    <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                    </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay repuestos</h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No se encontraron repuestos con los filtros aplicados.</p>
-                                </div>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center">
+                                    <div class="text-gray-400 dark:text-gray-500">
+                                        <i class="fas fa-inbox text-4xl mx-auto mb-4"></i>
+                                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay
+                                            repuestos</h3>
+                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No se encontraron
+                                            repuestos con los filtros aplicados.</p>
+                                    </div>
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
 
             <!-- Paginación -->
-            @if($repuestos->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#121c2c]">
-                <div class="flex items-center justify-between">
-                    <div class="text-sm text-gray-700 dark:text-gray-400">
-                        Mostrando {{ $repuestos->firstItem() }} a {{ $repuestos->lastItem() }} de {{ $repuestos->total() }} resultados
-                    </div>
-                    <div class="flex space-x-2">
-                        {{ $repuestos->links() }}
+            @if ($repuestos->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#121c2c]">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-700 dark:text-gray-400">
+                            Mostrando {{ $repuestos->firstItem() }} a {{ $repuestos->lastItem() }} de
+                            {{ $repuestos->total() }} resultados
+                        </div>
+                        <div class="flex space-x-2">
+                            {{ $repuestos->links() }}
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
         </div>
     </div>
 
-    <!-- MODAL DE DETALLES CON GALERÍA DE MÚLTIPLES FOTOS -->
+    <!-- MODAL DE DETALLES CON VIEWER.JS -->
     <div x-data="modalDetails" x-cloak>
-        <div class="fixed inset-0 bg-[black]/60 z-[999] overflow-y-auto" x-show="open"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-300"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0">
-            
-            <div class="flex items-start justify-center min-h-screen px-4 py-8" @click.self="open = false">
-                <div x-show="open" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-6xl bg-white dark:bg-[#1b2e4b]">
-                    
-                    <!-- Header -->
-                    <div class="flex items-center justify-between px-5 py-3 bg-[#fbfbfb] dark:bg-[#121c2c]">
-                        <div>
-                            <h5 class="font-bold text-lg text-gray-800 dark:text-white" x-text="modalTitle"></h5>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" x-text="modalSubtitle"></p>
+        <!-- Modal Overlay -->
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] overflow-y-auto" x-show="open"
+            x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+            <!-- Modal Container -->
+            <div class="flex items-start justify-center min-h-screen py-8 px-4" @click.self="toggle">
+                <!-- Modal Content -->
+                <div x-show="open" x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                    class="relative bg-white dark:bg-[#1b2e4b] rounded-xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-y-auto border border-gray-200 dark:border-gray-800">
+
+                    <!-- Loading Overlay -->
+                    <div x-show="loading"
+                        class="absolute inset-0 bg-white/80 dark:bg-[#1b2e4b]/80 z-50 flex items-center justify-center rounded-xl">
+                        <div class="text-center">
+                            <div
+                                class="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto">
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 mt-4 font-medium">Cargando detalles...</p>
                         </div>
-                        <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" @click="toggle">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
                     </div>
 
-                    <!-- Contenido -->
-                    <div class="p-5 max-h-[80vh] overflow-y-auto">
-                        <!-- Loading -->
-                        <div x-show="loading" class="text-center py-8">
-                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                            <p class="text-gray-600 dark:text-gray-400 mt-4">Cargando detalles...</p>
-                        </div>
-
-                        <!-- Contenido principal -->
-                        <div x-show="!loading && dataLoaded" class="space-y-6">
-                            <!-- SECCIÓN DE FOTOS CON GALERÍA COMPLETA -->
-                            <div x-show="!fotos.cargandoFotos && tieneFotos" class="border-b border-gray-200 dark:border-gray-700 pb-6">
-                                <div class="flex items-center justify-between mb-6">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">📸 Galería de Fotos</h3>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                                            Total: <span x-text="totalFotos"></span> fotos
-                                        </p>
-                                    </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        <i class="fas fa-info-circle mr-1"></i>
-                                        Haz clic para ampliar
-                                    </div>
+                    <!-- Header -->
+                    <div
+                        class="sticky top-0 z-10 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/40 px-6 py-4 border-b border-blue-200 dark:border-blue-800">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-white dark:bg-blue-900 rounded-lg shadow-sm">
+                                    <i class="fas fa-box-open text-blue-600 dark:text-blue-300 text-lg"></i>
                                 </div>
-
-                                <!-- Fotos por categoría -->
-                                <div class="space-y-8">
-                                    <!-- Fotos No Usadas -->
-                                    <div x-show="fotos.foto_articulo_no_usado && fotos.foto_articulo_no_usado.tiene && fotos.foto_articulo_no_usado.fotos.length > 0">
-                                        <div class="mb-4">
-                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
-                                                <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                                                <span x-text="fotos.foto_articulo_no_usado.titulo || 'Repuesto Devuelto'"></span>
-                                                <span class="ml-2 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full"
-                                                      x-text="fotos.foto_articulo_no_usado.fotos.length + ' foto(s)'"></span>
-                                            </h4>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
-                                               x-text="fotos.foto_articulo_no_usado.descripcion || 'Fotos del repuesto devuelto'"></p>
-                                        </div>
-                                        
-                                        <!-- Galería de fotos no usadas -->
-                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                            <template x-for="(foto, index) in fotos.foto_articulo_no_usado.fotos" :key="foto.id || index">
-                                                <div class="relative group">
-                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                                                        <img :src="foto.base64" 
-                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
-                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                             @click="abrirLightbox('foto_articulo_no_usado', index)">
-                                                        
-                                                        <!-- Indicador de múltiples fotos -->
-                                                        <div x-show="fotos.foto_articulo_no_usado.fotos.length > 1" 
-                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                                            <i class="fas fa-layer-group mr-1"></i>
-                                                            <span x-text="index + 1"></span>/<span x-text="fotos.foto_articulo_no_usado.fotos.length"></span>
-                                                        </div>
-                                                        
-                                                        <!-- Información de la foto -->
-                                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <p class="text-white text-xs truncate" x-text="foto.nombre || 'Foto ' + (index + 1)"></p>
-                                                            <p class="text-gray-300 text-xs" x-text="formatearFecha(foto.fecha)"></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- Fotos Usadas -->
-                                    <div x-show="fotos.foto_articulo_usado && fotos.foto_articulo_usado.tiene && fotos.foto_articulo_usado.fotos.length > 0" 
-                                         class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                                        <div class="mb-4">
-                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
-                                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                                <span x-text="fotos.foto_articulo_usado.titulo || 'Repuesto Usado'"></span>
-                                                <span class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full"
-                                                      x-text="fotos.foto_articulo_usado.fotos.length + ' foto(s)'"></span>
-                                            </h4>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
-                                               x-text="fotos.foto_articulo_usado.descripcion || 'Fotos del repuesto utilizado'"></p>
-                                        </div>
-                                        
-                                        <!-- Galería de fotos usadas -->
-                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                            <template x-for="(foto, index) in fotos.foto_articulo_usado.fotos" :key="foto.id || index">
-                                                <div class="relative group">
-                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                                                        <img :src="foto.base64" 
-                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
-                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                             @click="abrirLightbox('foto_articulo_usado', index)">
-                                                        
-                                                        <div x-show="fotos.foto_articulo_usado.fotos.length > 1" 
-                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                                            <i class="fas fa-layer-group mr-1"></i>
-                                                            <span x-text="index + 1"></span>/<span x-text="fotos.foto_articulo_usado.fotos.length"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- Fotos Originales -->
-                                    <div x-show="fotos.fotoRepuesto && fotos.fotoRepuesto.tiene && fotos.fotoRepuesto.fotos.length > 0" 
-                                         class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                                        <div class="mb-4">
-                                            <h4 class="font-semibold text-gray-800 dark:text-white flex items-center">
-                                                <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                                                <span x-text="fotos.fotoRepuesto.titulo || 'Fotos del Repuesto'"></span>
-                                                <span class="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full"
-                                                      x-text="fotos.fotoRepuesto.fotos.length + ' foto(s)'"></span>
-                                            </h4>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"
-                                               x-text="fotos.fotoRepuesto.descripcion || 'Fotos originales del repuesto'"></p>
-                                        </div>
-                                        
-                                        <!-- Galería de fotos originales -->
-                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                            <template x-for="(foto, index) in fotos.fotoRepuesto.fotos" :key="foto.id || index">
-                                                <div class="relative group">
-                                                    <div class="foto-container dark:bg-gray-800 dark:border-gray-700 h-48 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                                                        <img :src="foto.base64" 
-                                                             :alt="foto.nombre || 'Foto ' + (index + 1)"
-                                                             class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                                             @click="abrirLightbox('fotoRepuesto', index)">
-                                                        
-                                                        <div x-show="fotos.fotoRepuesto.fotos.length > 1" 
-                                                             class="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
-                                                            <i class="fas fa-layer-group mr-1"></i>
-                                                            <span x-text="index + 1"></span>/<span x-text="fotos.fotoRepuesto.fotos.length"></span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-
-                                    <!-- Mensaje cuando no hay fotos -->
-                                    <div x-show="!tieneFotos && !fotos.cargandoFotos" class="text-center py-8">
-                                        <svg class="w-16 h-16 text-gray-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        <p class="text-gray-600 dark:text-gray-400 mt-4">No hay fotos disponibles para este repuesto</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Información básica -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Columna izquierda -->
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Nombre del Repuesto</label>
-                                        <p class="text-lg font-semibold text-gray-800 dark:text-white" x-text="details.nombre_repuesto || 'N/A'"></p>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Códigos</label>
-                                        <div class="space-y-2">
-                                            <p class="text-sm">
-                                                <span class="font-medium">Principal:</span>
-                                                <span class="ml-2" x-text="details.codigo_repuesto || 'N/A'"></span>
-                                            </p>
-                                            <p class="text-sm" x-show="details.sku">
-                                                <span class="font-medium">SKU:</span>
-                                                <span class="ml-2" x-text="details.sku"></span>
-                                            </p>
-                                            <p class="text-sm" x-show="details.codigo_barras">
-                                                <span class="font-medium">Código Barras:</span>
-                                                <span class="ml-2" x-text="details.codigo_barras"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Cantidad</label>
-                                        <p class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="details.cantidad + ' unidades'"></p>
-                                    </div>
-                                </div>
-
-                                <!-- Columna derecha -->
-                                <div class="space-y-4">
-                                    <div>
-                                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Información de Solicitud</label>
-                                        <div class="space-y-2">
-                                            <p class="text-sm">
-                                                <span class="font-medium">Código Solicitud:</span>
-                                                <span class="ml-2" x-text="details.codigo_solicitud || 'N/A'"></span>
-                                            </p>
-                                            <p class="text-sm">
-                                                <span class="font-medium">Solicitante:</span>
-                                                <span class="ml-2" x-text="details.solicitante || 'N/A'"></span>
-                                            </p>
-                                            <p class="text-sm">
-                                                <span class="font-medium">Fecha Solicitud:</span>
-                                                <span class="ml-2" x-text="formatDate(details.fechaCreacion)"></span>
-                                            </p>
-                                            <p class="text-sm" x-show="details.fecharequerida">
-                                                <span class="font-medium">Fecha Requerida:</span>
-                                                <span class="ml-2" x-text="formatDate(details.fecharequerida)"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Estado</label>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                                            :class="getStatusClass(details.estado)">
-                                            <span x-text="getStatusIcon(details.estado)"></span>
-                                            <span class="ml-1" x-text="getStatusText(details.estado)"></span>
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-800 dark:text-white" x-text="modalTitle">
+                                    </h2>
+                                    <div class="flex items-center space-x-3 mt-1">
+                                        <span class="text-sm text-gray-600 dark:text-gray-300"
+                                            x-text="modalSubtitle"></span>
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                            :class="getStatusClass(details.estado)"
+                                            x-show="details.estado && !loading">
+                                            <i :class="getStatusIcon(details.estado)" class="mr-1"></i>
+                                            <span x-text="getStatusText(details.estado)"></span>
                                         </span>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Fechas importantes -->
-                            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-3">Fechas Importantes</label>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div x-show="details.fechaUsado" class="flex items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                        <div class="flex-shrink-0 mr-3">
-                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-green-800 dark:text-green-300">Fecha de Uso</p>
-                                            <p class="text-xs text-green-600 dark:text-green-400" x-text="formatDateTime(details.fechaUsado)"></p>
-                                        </div>
-                                    </div>
-
-                                    <div x-show="details.fechaSinUsar" class="flex items-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                                        <div class="flex-shrink-0 mr-3">
-                                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-red-800 dark:text-red-300">Fecha de Devolución</p>
-                                            <p class="text-xs text-red-600 dark:text-red-400" x-text="formatDateTime(details.fechaSinUsar)"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Categorización -->
-                            <div x-show="details.subcategoria || details.modelo || details.marca" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Categorización</label>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                    <div x-show="details.subcategoria" class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Subcategoría</p>
-                                        <p class="text-sm font-semibold text-gray-800 dark:text-white" x-text="details.subcategoria"></p>
-                                    </div>
-                                    <div x-show="details.modelo" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                                        <p class="text-xs font-medium text-blue-500 dark:text-blue-400 mb-1">Modelo</p>
-                                        <p class="text-sm font-semibold text-blue-800 dark:text-blue-300" x-text="details.modelo"></p>
-                                    </div>
-                                    <div x-show="details.marca" class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
-                                        <p class="text-xs font-medium text-green-500 dark:text-green-400 mb-1">Marca</p>
-                                        <p class="text-sm font-semibold text-green-800 dark:text-green-300" x-text="details.marca"></p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Observaciones -->
-                            <div x-show="details.observacion" class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-2">Observaciones</label>
-                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                    <p class="text-sm text-gray-700 dark:text-gray-300" x-text="details.observacion"></p>
-                                </div>
-                            </div>
+                            <button @click="toggle"
+                                class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                                <i
+                                    class="fas fa-times text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-lg"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Footer -->
-                    <div class="flex justify-end items-center px-5 py-3 border-t border-gray-200 dark:border-gray-700">
-                        <button type="button" class="btn btn-outline-danger" @click="toggle">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <!-- Content -->
+                    <div class="p-6">
+                        <!-- GALERÍA DE FOTOS - VERSIÓN CORREGIDA -->
+                        <div x-show="!loading && dataLoaded && tieneFotos"
+                            class="mb-8 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
+                            <div class="mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+                                    <i class="fas fa-images text-blue-500 mr-2"></i>Galería de Fotos
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    <span x-text="totalFotos"></span> fotos disponibles - Haz clic para ampliar
+                                </p>
+                            </div>
 
-    <!-- MODAL LIGHTBOX PARA FOTOS -->
-    <div x-data="lightboxModal" x-cloak>
-        <div class="fixed inset-0 bg-black/90 z-[1000] flex items-center justify-center p-4" 
-             x-show="open && photos.length > 0"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-300"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0">
-            
-            <button type="button" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10" @click="close">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+                            <!-- Fotos Usadas -->
+                            <div
+                                x-show="fotos.foto_articulo_usado && fotos.foto_articulo_usado.tiene && fotos.foto_articulo_usado.fotos.length > 0">
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+                                        <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>Repuesto Usado
+                                        <span
+                                            class="ml-2 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs rounded-full"
+                                            x-text="fotos.foto_articulo_usado.fotos.length"></span>
+                                    </h4>
+                                </div>
 
-            <button type="button" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10" 
-                    @click="prevPhoto" x-show="hasPrev && photos.length > 0">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-            </button>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
+                                    id="gallery-usado">
+                                    <template x-for="(foto, index) in fotos.foto_articulo_usado.fotos"
+                                        :key="index">
+                                        <div class="relative group">
+                                            <div
+                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                                <img :src="foto.base64" :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    @click="openViewer($event.target, 'grupo-usado')"
+                                                    :data-viewer-group="'grupo-usado'" :data-viewer-src="foto.base64">
 
-            <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300 z-10" 
-                    @click="nextPhoto" x-show="hasNext && photos.length > 0">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </button>
+                                                <div
+                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-search-plus text-white text-2xl mb-1"></i>
+                                                        <p class="text-white text-xs font-medium">Click para ampliar
+                                                        </p>
+                                                    </div>
+                                                </div>
 
-            <div class="relative w-full max-w-6xl max-h-[90vh] flex items-center justify-center">
-                <div class="relative">
-                    <div class="flex items-center justify-center" x-show="photos.length > 0">
-                        <img x-show="!loading && photos.length > 0 && currentPhoto.base64" 
-                             :src="currentPhoto.base64" 
-                             :alt="currentPhoto.nombre || 'Foto'"
-                             class="max-w-full max-h-[80vh] object-contain animate-fade-in">
-                        
-                        <div x-show="loading" class="text-center">
-                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-                            <p class="text-white mt-4">Cargando imagen...</p>
+                                                <div
+                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                    <span x-text="index + 1"></span>/<span
+                                                        x-text="fotos.foto_articulo_usado.fotos.length"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Fotos No Usadas -->
+                            <div x-show="fotos.foto_articulo_no_usado && fotos.foto_articulo_no_usado.tiene && fotos.foto_articulo_no_usado.fotos.length > 0"
+                                class="mt-6">
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+                                        <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>Repuesto Devuelto
+                                        <span
+                                            class="ml-2 px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 text-xs rounded-full"
+                                            x-text="fotos.foto_articulo_no_usado.fotos.length"></span>
+                                    </h4>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
+                                    id="gallery-no-usado">
+                                    <template x-for="(foto, index) in fotos.foto_articulo_no_usado.fotos"
+                                        :key="index">
+                                        <div class="relative group">
+                                            <div
+                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                                <!-- POR ESTO (MÁS SIMPLE): -->
+                                                <img :src="foto.base64" :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    @click="openViewer($event.target, 'grupo-usado')"
+                                                    :data-viewer-group="'grupo-usado'" :data-viewer-src="foto.base64">
+
+                                                <div
+                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Fotos Originales -->
+                            <div x-show="fotos.fotoRepuesto && fotos.fotoRepuesto.tiene && fotos.fotoRepuesto.fotos.length > 0"
+                                class="mt-6">
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>Fotos Originales
+                                        <span
+                                            class="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full"
+                                            x-text="fotos.fotoRepuesto.fotos.length"></span>
+                                    </h4>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
+                                    id="gallery-original">
+                                    <template x-for="(foto, index) in fotos.fotoRepuesto.fotos"
+                                        :key="index">
+                                        <div class="relative group">
+                                            <div
+                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                                <img :src="foto.base64"
+                                                    :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    :data-viewer-group="'grupo-original'"
+                                                    :data-viewer-src="foto.base64"
+                                                    :data-viewer-title="foto.nombre || 'Foto ' + (index + 1)"
+                                                    @click="viewImage($event.target)">
+
+                                                <div
+                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4"
-                         x-show="photos.length > 0 && currentPhoto">
-                        <h3 class="text-lg font-semibold text-white" x-text="currentPhoto.nombre || 'Foto sin título'"></h3>
-                        <p class="text-sm text-gray-300" x-text="formatearFechaLightbox(currentPhoto.fecha)"></p>
-                        <div class="flex items-center justify-between mt-2">
-                            <div class="text-sm text-gray-400" 
-                                 x-text="photos.length > 0 ? (currentIndex + 1) + ' / ' + photos.length : '0 / 0'"></div>
-                            <div class="flex space-x-2">
-                                <button type="button" class="btn btn-sm btn-outline-light" 
-                                        @click="downloadPhoto" 
-                                        x-show="currentPhoto && currentPhoto.base64">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Descargar
+
+                        <!-- Sin Fotos -->
+                        <div x-show="!loading && dataLoaded && !tieneFotos"
+                            class="mb-8 text-center py-8 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                            <i class="fas fa-image text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-600 dark:text-gray-400">No hay fotos disponibles</p>
+                        </div>
+
+                        <!-- INFORMACIÓN DEL REPUESTO -->
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Columna Izquierda -->
+                            <div class="space-y-6">
+                                <!-- Información Principal -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                                        Información Principal
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label
+                                                class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nombre
+                                                del Repuesto</label>
+                                            <p class="text-lg font-semibold text-gray-800 dark:text-white"
+                                                x-text="details.nombre_repuesto || 'N/A'"></p>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label
+                                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Código</label>
+                                                <p class="font-medium text-gray-700 dark:text-gray-300"
+                                                    x-text="details.codigo_repuesto || 'N/A'"></p>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Cantidad</label>
+                                                <p class="text-xl font-bold text-blue-600 dark:text-blue-400"
+                                                    x-text="details.cantidad + ' und'"></p>
+                                            </div>
+                                        </div>
+
+                                        <div x-show="details.sku || details.codigo_barras">
+                                            <label
+                                                class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Códigos
+                                                Adicionales</label>
+                                            <div class="flex flex-wrap gap-2">
+                                                <span x-show="details.sku"
+                                                    class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded">
+                                                    SKU: <span x-text="details.sku"></span>
+                                                </span>
+                                                <span x-show="details.codigo_barras"
+                                                    class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded">
+                                                    Código Barras: <span x-text="details.codigo_barras"></span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Información de Solicitud -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <i class="fas fa-file-alt text-green-500 mr-2"></i>
+                                        Información de Solicitud
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">Código
+                                                Solicitud:</span>
+                                            <span class="font-medium text-gray-800 dark:text-white"
+                                                x-text="details.codigo_solicitud || 'N/A'"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">Solicitante:</span>
+                                            <span class="font-medium text-gray-800 dark:text-white"
+                                                x-text="details.solicitante || 'N/A'"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">Fecha
+                                                Solicitud:</span>
+                                            <span class="font-medium text-gray-800 dark:text-white"
+                                                x-text="formatDate(details.fechaCreacion)"></span>
+                                        </div>
+                                        <div class="flex justify-between items-center"
+                                            x-show="details.fecharequerida">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">Fecha
+                                                Requerida:</span>
+                                            <span class="font-medium text-gray-800 dark:text-white"
+                                                x-text="formatDate(details.fecharequerida)"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Columna Derecha -->
+                            <div class="space-y-6">
+                                <!-- Fechas Importantes -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                                        Fechas Importantes
+                                    </h3>
+                                    <div class="space-y-4">
+                                        <!-- Fecha de Uso -->
+                                        <div x-show="details.fechaUsado"
+                                            class="flex items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                            <div class="flex-shrink-0 mr-4">
+                                                <div
+                                                    class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-check text-green-600 dark:text-green-400"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-green-800 dark:text-green-300">
+                                                    Usado</p>
+                                                <p class="text-sm text-green-600 dark:text-green-400"
+                                                    x-text="formatDateTime(details.fechaUsado)"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fecha de Devolución -->
+                                        <div x-show="details.fechaSinUsar"
+                                            class="flex items-center p-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                            <div class="flex-shrink-0 mr-4">
+                                                <div
+                                                    class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-undo text-red-600 dark:text-red-400"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-red-800 dark:text-red-300">
+                                                    Devuelto</p>
+                                                <p class="text-sm text-red-600 dark:text-red-400"
+                                                    x-text="formatDateTime(details.fechaSinUsar)"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fecha de Solicitud (si no hay otras fechas) -->
+                                        <div x-show="!details.fechaUsado && !details.fechaSinUsar"
+                                            class="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                                            <div class="flex-shrink-0 mr-4">
+                                                <div
+                                                    class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-clock text-yellow-600 dark:text-yellow-400"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
+                                                    Solicitado</p>
+                                                <p class="text-sm text-yellow-600 dark:text-yellow-400"
+                                                    x-text="formatDateTime(details.fechaCreacion)"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Categorización -->
+                                <div x-show="details.subcategoria || details.modelo || details.marca"
+                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <i class="fas fa-tags text-orange-500 mr-2"></i>
+                                        Categorización
+                                    </h3>
+                                    <div class="grid grid-cols-1 gap-3">
+                                        <div x-show="details.subcategoria"
+                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                            <span class="text-sm text-gray-600 dark:text-gray-400">Subcategoría</span>
+                                            <span class="font-medium text-gray-800 dark:text-white"
+                                                x-text="details.subcategoria"></span>
+                                        </div>
+                                        <div x-show="details.modelo"
+                                            class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                            <span class="text-sm text-blue-600 dark:text-blue-400">Modelo</span>
+                                            <span class="font-medium text-blue-800 dark:text-blue-300"
+                                                x-text="details.modelo"></span>
+                                        </div>
+                                        <div x-show="details.marca"
+                                            class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                            <span class="text-sm text-green-600 dark:text-green-400">Marca</span>
+                                            <span class="font-medium text-green-800 dark:text-green-300"
+                                                x-text="details.marca"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Observaciones -->
+                                <div x-show="details.observacion"
+                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
+                                    <h3
+                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                                        <i class="fas fa-sticky-note text-indigo-500 mr-2"></i>
+                                        Observaciones
+                                    </h3>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                                            x-text="details.observacion"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div
+                            class="sticky bottom-0 bg-white dark:bg-[#1b2e4b] border-t border-gray-200 dark:border-gray-800 px-6 py-4 mt-6">
+                            <div class="flex justify-end space-x-3">
+                                <button @click="toggle"
+                                    class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors">
+                                    Cerrar
                                 </button>
                             </div>
                         </div>
@@ -788,6 +824,11 @@
         </div>
     </div>
 
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script>
         // Función global para abrir modal
         window.openDetailsModal = function(id) {
@@ -802,101 +843,7 @@
 
         // Inicializar Alpine cuando esté listo
         document.addEventListener('alpine:init', () => {
-            // Lightbox Modal - CORREGIDO
-            Alpine.data('lightboxModal', () => ({
-                open: false,
-                currentIndex: 0,
-                loading: false,
-                photos: [],
-
-                get currentPhoto() {
-                    return this.photos[this.currentIndex] || {};
-                },
-
-                get totalPhotos() {
-                    return this.photos?.length || 0;
-                },
-
-                get hasPrev() {
-                    return this.currentIndex > 0 && this.photos.length > 0;
-                },
-
-                get hasNext() {
-                    return this.currentIndex < this.totalPhotos - 1 && this.photos.length > 0;
-                },
-
-                openLightbox(photos, startIndex = 0) {
-                    if (!photos || photos.length === 0) {
-                        console.error('No hay fotos para mostrar');
-                        return;
-                    }
-                    
-                    this.photos = photos;
-                    this.currentIndex = startIndex;
-                    this.loading = false;
-                    this.open = true;
-                    document.body.style.overflow = 'hidden';
-                    
-                    console.log('Lightbox abierto con', photos.length, 'fotos');
-                },
-
-                close() {
-                    this.open = false;
-                    this.photos = [];
-                    this.currentIndex = 0;
-                    this.loading = false;
-                    document.body.style.overflow = '';
-                },
-
-                nextPhoto() {
-                    if (this.hasNext) {
-                        this.currentIndex++;
-                    }
-                },
-
-                prevPhoto() {
-                    if (this.hasPrev) {
-                        this.currentIndex--;
-                    }
-                },
-
-                async downloadPhoto() {
-                    try {
-                        if (!this.currentPhoto || !this.currentPhoto.base64) {
-                            throw new Error('No hay foto para descargar');
-                        }
-                        
-                        const photo = this.currentPhoto;
-                        const response = await fetch(photo.base64);
-                        if (!response.ok) throw new Error('Error al obtener la foto');
-                        
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `${photo.nombre || 'foto'}_${Date.now()}.jpg`;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        document.body.removeChild(a);
-                    } catch (error) {
-                        console.error('Error al descargar:', error);
-                        alert('Error al descargar la foto: ' + error.message);
-                    }
-                },
-
-                formatearFechaLightbox(fechaString) {
-                    if (!fechaString) return '';
-                    try {
-                        const fecha = new Date(fechaString);
-                        return fecha.toLocaleDateString('es-PE') + ' ' + fecha.toLocaleTimeString('es-PE');
-                    } catch (error) {
-                        return fechaString;
-                    }
-                }
-            }));
-
-            // Modal de detalles - VERSIÓN COMPLETA CON GALERÍA
+            // Modal de detalles - VERSIÓN SIMPLIFICADA CON VIEWER.JS FUNCIONAL
             Alpine.data('modalDetails', () => ({
                 open: false,
                 loading: false,
@@ -908,10 +855,20 @@
                 fotos: {
                     cargandoFotos: false,
                     tieneFotos: false,
-                    fotoRepuesto: { tiene: false, fotos: [], titulo: 'Fotos del Repuesto', descripcion: 'Fotos originales del repuesto' },
-                    foto_articulo_usado: { tiene: false, fotos: [], titulo: 'Repuesto Usado', descripcion: 'Fotos del repuesto utilizado' },
-                    foto_articulo_no_usado: { tiene: false, fotos: [], titulo: 'Repuesto Devuelto', descripcion: 'Fotos del repuesto devuelto' }
+                    fotoRepuesto: {
+                        tiene: false,
+                        fotos: []
+                    },
+                    foto_articulo_usado: {
+                        tiene: false,
+                        fotos: []
+                    },
+                    foto_articulo_no_usado: {
+                        tiene: false,
+                        fotos: []
+                    }
                 },
+                viewer: null, // Instancia de Viewer.js
 
                 get tieneFotos() {
                     return this.fotos.tieneFotos;
@@ -929,6 +886,11 @@
                     this.open = !this.open;
                     if (!this.open) {
                         this.reset();
+                        // Destruir Viewer.js si existe
+                        if (this.viewer) {
+                            this.viewer.destroy();
+                            this.viewer = null;
+                        }
                     }
                 },
 
@@ -944,14 +906,23 @@
                     this.fotos = {
                         cargandoFotos: false,
                         tieneFotos: false,
-                        fotoRepuesto: { tiene: false, fotos: [], titulo: 'Fotos del Repuesto', descripcion: 'Fotos originales del repuesto' },
-                        foto_articulo_usado: { tiene: false, fotos: [], titulo: 'Repuesto Usado', descripcion: 'Fotos del repuesto utilizado' },
-                        foto_articulo_no_usado: { tiene: false, fotos: [], titulo: 'Repuesto Devuelto', descripcion: 'Fotos del repuesto devuelto' }
+                        fotoRepuesto: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_usado: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_no_usado: {
+                            tiene: false,
+                            fotos: []
+                        }
                     };
                 },
 
                 async loadDetails(id) {
-                    console.group('🔍 Cargando detalles para ID:', id);
+                    console.log('Cargando detalles para ID:', id);
                     this.currentId = id;
                     this.loading = true;
                     this.dataLoaded = false;
@@ -959,166 +930,227 @@
 
                     try {
                         // 1. Cargar detalles básicos
-                        console.log('📋 Cargando detalles básicos...');
                         const response = await fetch(`/repuestos-transito/${id}/detalles`);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
                         const data = await response.json();
-                        console.log('✅ Detalles cargados:', data);
+                        console.log('Detalles cargados:', data);
 
                         if (data.success && data.data) {
                             this.details = data.data;
                             this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
-                            this.modalSubtitle = `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
-                            
-                            // 2. Verificar si hay fotos disponibles
-                            console.log('🔄 Verificando fotos disponibles...');
-                            console.log('¿Tiene fotos?:', data.data.tiene_fotos);
-                            console.log('Fotos disponibles:', data.data.fotos_disponibles);
-                            
+                            this.modalSubtitle =
+                                `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
+
+                            // 2. Cargar fotos si hay
                             if (data.data.tiene_fotos) {
-                                console.log('📸 Hay fotos disponibles, cargando...');
                                 await this.loadFotos(id);
-                            } else {
-                                console.log('❌ No hay fotos disponibles');
                             }
-                            
+
                             this.dataLoaded = true;
-                            console.log('✅ Todo cargado correctamente');
                         } else {
-                            console.error('❌ Error en respuesta:', data.message);
                             alert(data.message || 'Error al cargar detalles');
                         }
                     } catch (error) {
-                        console.error('💥 Error al cargar detalles:', error);
+                        console.error('Error al cargar detalles:', error);
                         alert('Error de conexión: ' + error.message);
                     } finally {
                         this.loading = false;
-                        console.groupEnd();
                     }
                 },
 
                 async loadFotos(id) {
-                    console.log('🔄 Iniciando carga de fotos para ID:', id);
+                    console.log('🔄 Cargando fotos para ID:', id);
                     this.fotos.cargandoFotos = true;
-                    
+
                     try {
-                        // Usar el endpoint que obtiene todas las fotos
                         const response = await fetch(`/repuestos-transito/${id}/fotos`);
-                        
-                        if (!response.ok) {
-                            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                        }
-                        
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
                         const data = await response.json();
-                        console.log('✅ Respuesta de fotos recibida:', data);
+                        console.log('✅ Fotos recibidas:', data);
 
                         if (data.success && data.fotos) {
-                            console.log('📸 Procesando fotos recibidas:', data.fotos);
-                            
                             // Procesar cada tipo de foto
-                            const tipos = ['fotoRepuesto', 'foto_articulo_usado', 'foto_articulo_no_usado'];
-                            
-                            tipos.forEach(tipo => {
+                            ['fotoRepuesto', 'foto_articulo_usado', 'foto_articulo_no_usado']
+                            .forEach(tipo => {
                                 const fotoData = data.fotos[tipo];
-                                console.log(`Procesando ${tipo}:`, fotoData);
-                                
-                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData.fotos.length > 0) {
-                                    console.log(`✅ ${tipo} tiene ${fotoData.fotos.length} fotos`);
+                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
+                                    .fotos.length > 0) {
+                                    console.log(
+                                        `📸 ${tipo}: ${fotoData.fotos.length} fotos`);
                                     this.fotos[tipo].tiene = true;
                                     this.fotos[tipo].fotos = fotoData.fotos;
-                                    this.fotos[tipo].titulo = fotoData.titulo || this.fotos[tipo].titulo;
-                                    this.fotos[tipo].descripcion = fotoData.descripcion || this.fotos[tipo].descripcion;
                                     this.fotos.tieneFotos = true;
-                                } else {
-                                    console.log(`❌ ${tipo} no tiene fotos`);
-                                    this.fotos[tipo].tiene = false;
-                                    this.fotos[tipo].fotos = [];
                                 }
                             });
-                            
-                            console.log('Estado final de fotos:', this.fotos);
-                            console.log('Total de fotos cargadas:', this.totalFotos);
-                        } else {
-                            console.warn('❌ No se pudieron cargar las fotos:', data.message);
+
+                            // Inicializar Viewer.js después de que las imágenes estén en el DOM
+                            this.$nextTick(() => {
+                                this.initViewer();
+                            });
+
                         }
                     } catch (error) {
                         console.error('💥 Error al cargar fotos:', error);
                     } finally {
                         this.fotos.cargandoFotos = false;
-                        console.log('🔄 Carga de fotos finalizada');
                     }
                 },
 
-                abrirLightbox(tipo, index) {
-                    console.log('🔍 Abriendo lightbox para:', tipo, 'índice:', index);
-                    
-                    if (!this.fotos[tipo]?.fotos || this.fotos[tipo].fotos.length === 0) {
-                        console.error(`❌ No se puede abrir lightbox: ${tipo} no tiene fotos`);
+                // 🖼️ INICIALIZAR VIEWER.JS - VERSIÓN SIMPLIFICADA
+                initViewer() {
+                    console.log('🖼️ Inicializando Viewer.js');
+
+                    // Esperar a que Alpine renderice
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            // Buscar TODAS las imágenes del modal
+                            const images = this.$el.querySelectorAll(
+                                'img[src*="base64"]');
+
+                            if (images.length > 0) {
+                                console.log(
+                                    `✅ Encontradas ${images.length} imágenes para Viewer.js`
+                                );
+
+                                try {
+                                    // Crear array de elementos para Viewer.js
+                                    const imageElements = Array.from(images);
+
+                                    // Inicializar Viewer.js con TODAS las imágenes
+                                    this.viewer = new Viewer(imageElements, {
+                                        // Configuración básica
+                                        className: 'viewerjs-modal',
+                                        title: (image, imageData) => {
+                                            return image.alt || 'Imagen';
+                                        },
+                                        toolbar: {
+                                            zoomIn: 1,
+                                            zoomOut: 1,
+                                            oneToOne: 1,
+                                            reset: 1,
+                                            prev: 1,
+                                            next: 1,
+                                            rotateLeft: 1,
+                                            rotateRight: 1,
+                                            flipHorizontal: 1,
+                                            flipVertical: 1,
+                                        },
+                                        // Callbacks
+                                        viewed: () => {
+                                            console.log('👁️ Imagen vista');
+                                        },
+                                        show: () => {
+                                            console.log(
+                                                '🖼️ Viewer.js abierto');
+                                        },
+                                        hide: () => {
+                                            console.log(
+                                                '🚪 Viewer.js cerrado');
+                                        }
+                                    });
+
+                                    console.log(
+                                        '✅ Viewer.js inicializado correctamente');
+
+                                } catch (error) {
+                                    console.error('❌ Error al inicializar Viewer.js:',
+                                        error);
+                                }
+                            } else {
+                                console.warn(
+                                    '⚠️ No se encontraron imágenes para Viewer.js');
+                            }
+                        }, 500); // Dar más tiempo para renderizar
+                    });
+                },
+
+                // 🖱️ ABRIR VIEWER.JS AL HACER CLICK - VERSIÓN DIRECTA
+                openViewer(imgElement, group = 'default') {
+                    console.log('🖱️ Abriendo Viewer.js para imagen del grupo:', group);
+
+                    // Verificar si Viewer.js está disponible
+                    if (typeof Viewer === 'undefined') {
+                        console.error('❌ Viewer.js no está cargado');
+                        alert('Viewer.js no está disponible. Recarga la página.');
                         return;
                     }
-                    
-                    const lightbox = document.querySelector('[x-data="lightboxModal"]');
-                    if (!lightbox) {
-                        console.error('❌ Lightbox no encontrado en el DOM');
-                        return;
-                    }
-                    
-                    const instance = Alpine.$data(lightbox);
-                    
-                    // Obtener todas las fotos del tipo seleccionado
-                    const fotosParaLightbox = this.fotos[tipo].fotos.map(foto => ({
-                        ...foto,
-                        nombre: foto.nombre || `Foto de ${this.fotos[tipo].titulo}`,
-                        tipo: tipo
-                    }));
-                    
-                    console.log('Fotos para lightbox:', fotosParaLightbox);
-                    
-                    if (fotosParaLightbox.length > 0) {
-                        instance.openLightbox(fotosParaLightbox, index);
+
+                    // Si ya tenemos una instancia de Viewer.js, úsala
+                    if (this.viewer) {
+                        try {
+                            // Buscar el índice de la imagen clickeada
+                            const allImages = Array.from(this.$el.querySelectorAll(
+                                'img[src*="base64"]'));
+                            const index = allImages.indexOf(imgElement);
+
+                            if (index !== -1) {
+                                console.log(`🔍 Mostrando imagen ${index + 1} de ${allImages.length}`);
+                                this.viewer.view(index);
+                            } else {
+                                console.warn('⚠️ Imagen no encontrada en la galería');
+                                this.viewer.show();
+                            }
+                        } catch (error) {
+                            console.error('❌ Error al abrir Viewer.js:', error);
+                            // Fallback: abrir en nueva pestaña
+                            window.open(imgElement.src, '_blank');
+                        }
                     } else {
-                        console.warn('⚠️ No hay fotos disponibles para mostrar en el lightbox');
+                        console.warn('⚠️ Viewer.js no inicializado, intentando inicializar...');
+                        // Intentar inicializar Viewer.js
+                        this.initViewer();
+
+                        // Esperar y volver a intentar
+                        setTimeout(() => {
+                            if (this.viewer) {
+                                this.openViewer(imgElement, group);
+                            } else {
+                                // Fallback: abrir en nueva pestaña
+                                window.open(imgElement.src, '_blank');
+                            }
+                        }, 300);
                     }
                 },
 
-                formatearFecha(fechaString) {
-                    if (!fechaString) return '';
-                    try {
-                        const fecha = new Date(fechaString);
-                        return fecha.toLocaleDateString('es-PE');
-                    } catch (error) {
-                        return fechaString;
-                    }
-                },
-
+                // 🎯 MÉTODOS PARA STATUS (mantener igual)
                 getStatusClass(status) {
                     switch (status) {
-                        case 'usado': return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                        case 'no_usado': return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                        case 'pendiente': return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                        default: return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
+                        case 'usado':
+                            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+                        case 'no_usado':
+                            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+                        case 'pendiente':
+                            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+                        default:
+                            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
                     }
                 },
 
                 getStatusIcon(status) {
                     switch (status) {
-                        case 'usado': return '✅';
-                        case 'no_usado': return '❌';
-                        case 'pendiente': return '🔄';
-                        default: return '❓';
+                        case 'usado':
+                            return 'fas fa-check-circle';
+                        case 'no_usado':
+                            return 'fas fa-times-circle';
+                        case 'pendiente':
+                            return 'fas fa-clock';
+                        default:
+                            return 'fas fa-question-circle';
                     }
                 },
 
                 getStatusText(status) {
                     switch (status) {
-                        case 'usado': return 'Usado';
-                        case 'no_usado': return 'No Usado';
-                        case 'pendiente': return 'En Tránsito';
-                        default: return 'Desconocido';
+                        case 'usado':
+                            return 'Usado';
+                        case 'no_usado':
+                            return 'No Usado';
+                        case 'pendiente':
+                            return 'En Tránsito';
+                        default:
+                            return 'Desconocido';
                     }
                 },
 
@@ -1126,8 +1158,9 @@
                     if (!dateString) return 'No disponible';
                     try {
                         const date = new Date(dateString);
-                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString('es-PE');
-                    } catch (error) {
+                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString(
+                            'es-PE');
+                    } catch {
                         return 'Fecha inválida';
                     }
                 },
@@ -1137,130 +1170,65 @@
                     try {
                         const date = new Date(dateString);
                         if (isNaN(date.getTime())) return 'Fecha inválida';
-                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
-                    } catch (error) {
+                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString(
+                            'es-PE');
+                    } catch {
                         return 'Fecha inválida';
                     }
+                },
+
+                // 🔧 MÉTODO DE DEPURACIÓN
+                debugViewer() {
+                    console.log('🔧 Debug Viewer.js:');
+                    console.log('- Viewer disponible:', typeof Viewer !== 'undefined');
+                    console.log('- Instancia viewer:', this.viewer);
+                    console.log('- Total imágenes:', this.$el.querySelectorAll('img[src*="base64"]')
+                        .length);
+
+                    // Verificar estilos de Viewer.js
+                    const viewerStyles = document.querySelector('link[href*="viewer"]');
+                    console.log('- Estilos Viewer cargados:', !!viewerStyles);
                 }
             }));
+            // Después de que Alpine se inicialice, inicializar Flatpickr
+            Alpine.nextTick(() => {
+                setTimeout(() => {
+                    initFlatpickr();
+                }, 100);
+            });
         });
 
-        // Verificar que AlpineJS esté cargado
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ Página de repuestos en tránsito cargada');
-            console.log('🔧 openDetailsModal disponible:', typeof window.openDetailsModal === 'function');
-            
-            if (typeof Alpine === 'undefined') {
-                console.error('❌ AlpineJS no está cargado');
-            } else {
-                console.log('✅ AlpineJS cargado correctamente');
+        // Función para inicializar Flatpickr
+        function initFlatpickr() {
+            // Seleccionar todos los campos con clase flatpickr-date
+            const dateInputs = document.querySelectorAll('.flatpickr-date');
+
+            if (dateInputs.length > 0) {
+                dateInputs.forEach(input => {
+                    flatpickr(input, {
+                        locale: "es",
+                        dateFormat: "Y-m-d",
+                        altFormat: "d/m/Y",
+                        altInput: true,
+                        allowInput: true,
+                        theme: "airbnb",
+                        // Configuración específica para modo oscuro
+                        onReady: function() {
+                            if (document.documentElement.classList.contains('dark')) {
+                                this.calendarContainer.classList.add('flatpickr-dark');
+                            }
+                        }
+                    });
+                });
+                console.log('✅ Flatpickr inicializado correctamente');
             }
+        }
+
+        // También inicializar cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initFlatpickr();
+            }, 300);
         });
     </script>
-
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        /* Animaciones */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Estilos para imágenes */
-        .foto-container {
-            position: relative;
-            overflow: hidden;
-            border-radius: 0.5rem;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            transition: transform 0.3s ease;
-        }
-
-        .foto-container:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .foto-container.dark {
-            background: #1e293b;
-            border-color: #334155;
-        }
-
-        .foto-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .foto-container:hover img {
-            transform: scale(1.05);
-        }
-
-        /* Estilos para el scrollbar */
-        .overflow-y-auto::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
-        }
-
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .dark .overflow-y-auto::-webkit-scrollbar-track {
-            background: #374151;
-        }
-
-        .dark .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #6b7280;
-        }
-
-        .dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
-        }
-
-        /* Estilos para grupos de fotos */
-        .foto-group {
-            transition: all 0.3s ease;
-        }
-
-        .foto-group:hover {
-            transform: translateX(5px);
-        }
-
-        /* Indicador de foto activa */
-        .foto-indicador {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            z-index: 10;
-        }
-    </style>
 </x-layout.default>
