@@ -3734,8 +3734,6 @@ public function aceptarProvincia(Request $request, $id)
         ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
     }
 }
-
-
 public function marcarListoIndividual(Request $request, $id)
 {
     try {
@@ -3865,7 +3863,35 @@ public function marcarListoIndividual(Request $request, $id)
                 'updated_at' => now()
             ]);
 
-        // 4. Registrar en logs
+        // 4. ✅ INSERTAR EN NOTIFICACIONES_SOLICITUD
+        // Verificar si ya existe una notificación para esta solicitud
+        $notificacionExistente = DB::table('notificaciones_solicitud')
+            ->where('idSolicitudesOrdenes', $id)
+            ->first();
+
+        if ($notificacionExistente) {
+            // Si ya existe, actualizar
+            DB::table('notificaciones_solicitud')
+                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
+                ->update([
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'updated_at' => now()
+                ]);
+        } else {
+            // Si no existe, crear nueva
+            DB::table('notificaciones_solicitud')->insert([
+                'idSolicitudesOrdenes' => $id,
+                'estado_web' => 1,
+                'estado_app' => 0,
+                'fecha' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+        }
+
+        // 5. Registrar en logs
         Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Estado: listo_para_entregar, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
 
         DB::commit();
@@ -3878,7 +3904,8 @@ public function marcarListoIndividual(Request $request, $id)
             'ubicacion' => $stockUbicacion->ubicacion_codigo,
             'estado_solicitud' => 'listo_para_entregar',
             'articulo_nombre' => $repuesto->nombre,
-            'cantidad' => $repuesto->cantidad
+            'cantidad' => $repuesto->cantidad,
+            'notificacion_creada' => true
         ]);
     } catch (\Exception $e) {
         DB::rollBack();
@@ -3892,5 +3919,4 @@ public function marcarListoIndividual(Request $request, $id)
         ], 500);
     }
 }
-
 }
