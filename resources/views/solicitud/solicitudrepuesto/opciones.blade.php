@@ -459,100 +459,108 @@
                                                     @endif
                                                 </td>
 
-  <!-- Estado -->
-<td class="px-4 sm:px-6 py-4 sm:py-6">
-    @if ($repuesto->ya_procesado)
-        @if($repuesto->estado_actual == 'entregado')
-            <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-green-200 shadow-sm">
-                <i class="fas fa-check-circle mr-1"></i>
-                <span class="hidden sm:inline">Entregado</span>
-                <span class="sm:hidden">Entreg.</span>
-            </span>
-        @elseif($repuesto->estado_actual == 'pendiente_entrega')
-            <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-yellow-200 shadow-sm">
-                <i class="fas fa-clock mr-1"></i>
-                <span class="hidden sm:inline">Listo para Entregar</span>
-                <span class="sm:hidden">Listo</span>
-            </span>
-        @endif
-    @elseif($repuesto->suficiente_stock)
-        <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-info text-white border border-blue-200 shadow-sm">
-            <i class="fas fa-cog mr-1"></i>
-            <span class="hidden sm:inline">Pendiente</span>
-            <span class="sm:hidden">Pend.</span>
-        </span>
-    @else
-        <span class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-danger text-white border border-red-200 shadow-sm">
-            <i class="fas fa-times-circle mr-1"></i>
-            <span class="hidden sm:inline">Insuficiente</span>
-            <span class="sm:hidden">Ins.</span>
-        </span>
-    @endif
-</td>
+                                                <!-- Estado -->
+                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
+                                                    @if ($repuesto->ya_procesado)
+                                                        @if ($repuesto->estado_actual == 'entregado')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-green-200 shadow-sm">
+                                                                <i class="fas fa-check-circle mr-1"></i>
+                                                                <span class="hidden sm:inline">Entregado</span>
+                                                                <span class="sm:hidden">Entreg.</span>
+                                                            </span>
+                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-yellow-200 shadow-sm">
+                                                                <i class="fas fa-clock mr-1"></i>
+                                                                <span class="hidden sm:inline">Listo para
+                                                                    Entregar</span>
+                                                                <span class="sm:hidden">Listo</span>
+                                                            </span>
+                                                        @endif
+                                                    @elseif($repuesto->suficiente_stock)
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-info text-white border border-blue-200 shadow-sm">
+                                                            <i class="fas fa-cog mr-1"></i>
+                                                            <span class="hidden sm:inline">Pendiente</span>
+                                                            <span class="sm:hidden">Pend.</span>
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-danger text-white border border-red-200 shadow-sm">
+                                                            <i class="fas fa-times-circle mr-1"></i>
+                                                            <span class="hidden sm:inline">Insuficiente</span>
+                                                            <span class="sm:hidden">Ins.</span>
+                                                        </span>
+                                                    @endif
+                                                </td>
 
-                                              <!-- Acción -->
-<td class="px-4 sm:px-6 py-4 sm:py-6">
-    @if ($repuesto->ya_procesado)
-        @if($repuesto->estado_actual == 'entregado')
-            <span class="text-green-600 font-semibold text-xs sm:text-sm">
-                <i class="fas fa-check-circle mr-1"></i>
-                <span class="hidden sm:inline">Entregado</span>
-                <span class="sm:hidden">Entreg.</span>
-            </span>
-        @elseif($repuesto->estado_actual == 'pendiente_entrega')
-            <div class="space-y-2">
-                
-                <!-- Botón para confirmar entrega física -->
-                <button type="button"
-                    @click="confirmarEntregaFisica({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                    <i class="fas fa-truck mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Confirmar Entrega</span>
-                    <span class="sm:hidden">Entregar</span>
-                </button>
-            </div>
-        @endif
-    @elseif($repuesto->suficiente_stock)
-        @if (\App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO INDIVIDUAL'))
-            <button type="button"
-                @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
-                :disabled="!selecciones[{{ $repuesto->idArticulos }}] ||
-                    procesandoIndividual[{{ $repuesto->idArticulos }}]"
-                :class="{
-                    'btn btn-primary': !selecciones[
-                            {{ $repuesto->idArticulos }}] ||
-                        procesandoIndividual[
-                            {{ $repuesto->idArticulos }}],
-                    'bg-blue-600 hover:bg-blue-700': selecciones[
-                            {{ $repuesto->idArticulos }}] && !
-                        procesandoIndividual[
-                            {{ $repuesto->idArticulos }}]
-                }"
-                class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg text-xs sm:text-sm">
-                <span
-                    x-show="!procesandoIndividual[{{ $repuesto->idArticulos }}]">
-                    <i class="fas fa-play-circle mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Marcar como Listo</span>
-                    <span class="sm:hidden">Listo</span>
-                </span>
-                <span
-                    x-show="procesandoIndividual[{{ $repuesto->idArticulos }}]"
-                    class="flex items-center space-x-1 sm:space-x-2">
-                    <i class="fas fa-spinner fa-spin mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Procesando...</span>
-                    <span class="sm:hidden">...</span>
-                </span>
-            </button>
-        @endif
-    @else
-        <button disabled
-            class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
-            <i class="fas fa-ban mr-1 sm:mr-2"></i>
-            <span class="hidden sm:inline">Sin Stock</span>
-            <span class="sm:hidden">Sin</span>
-        </button>
-    @endif
-</td>
+                                                <!-- Acción -->
+                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
+                                                    @if ($repuesto->ya_procesado)
+                                                        @if ($repuesto->estado_actual == 'entregado')
+                                                            <span
+                                                                class="text-green-600 font-semibold text-xs sm:text-sm">
+                                                                <i class="fas fa-check-circle mr-1"></i>
+                                                                <span class="hidden sm:inline">Entregado</span>
+                                                                <span class="sm:hidden">Entreg.</span>
+                                                            </span>
+                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                                                            <div class="space-y-2">
+
+                                                                <!-- Botón para confirmar entrega física -->
+                                                                <button type="button"
+                                                                    @click="confirmarEntregaFisica({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                                                                    class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                                                    <i class="fas fa-truck mr-1 sm:mr-2"></i>
+                                                                    <span class="hidden sm:inline">Confirmar
+                                                                        Entrega</span>
+                                                                    <span class="sm:hidden">Entregar</span>
+                                                                </button>
+                                                            </div>
+                                                        @endif
+                                                    @elseif($repuesto->suficiente_stock)
+                                                        @if (\App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO INDIVIDUAL'))
+                                                            <button type="button"
+                                                                @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
+                                                                :disabled="!selecciones[{{ $repuesto->idArticulos }}] ||
+                                                                    procesandoIndividual[{{ $repuesto->idArticulos }}]"
+                                                                :class="{
+                                                                    'btn btn-primary': !selecciones[
+                                                                            {{ $repuesto->idArticulos }}] ||
+                                                                        procesandoIndividual[
+                                                                            {{ $repuesto->idArticulos }}],
+                                                                    'bg-blue-600 hover:bg-blue-700': selecciones[
+                                                                            {{ $repuesto->idArticulos }}] && !
+                                                                        procesandoIndividual[
+                                                                            {{ $repuesto->idArticulos }}]
+                                                                }"
+                                                                class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 text-white px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center shadow-md hover:shadow-lg text-xs sm:text-sm">
+                                                                <span
+                                                                    x-show="!procesandoIndividual[{{ $repuesto->idArticulos }}]">
+                                                                    <i class="fas fa-play-circle mr-1 sm:mr-2"></i>
+                                                                    <span class="hidden sm:inline">Marcar como
+                                                                        Listo</span>
+                                                                    <span class="sm:hidden">Listo</span>
+                                                                </span>
+                                                                <span
+                                                                    x-show="procesandoIndividual[{{ $repuesto->idArticulos }}]"
+                                                                    class="flex items-center space-x-1 sm:space-x-2">
+                                                                    <i class="fas fa-spinner fa-spin mr-1 sm:mr-2"></i>
+                                                                    <span class="hidden sm:inline">Procesando...</span>
+                                                                    <span class="sm:hidden">...</span>
+                                                                </span>
+                                                            </button>
+                                                        @endif
+                                                    @else
+                                                        <button disabled
+                                                            class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
+                                                            <i class="fas fa-ban mr-1 sm:mr-2"></i>
+                                                            <span class="hidden sm:inline">Sin Stock</span>
+                                                            <span class="sm:hidden">Sin</span>
+                                                        </button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -795,89 +803,233 @@
             @endif
         </div>
 
-       <!-- Modal para seleccionar destinatario - SOLO TÉCNICO -->
-<div x-show="mostrarModalDestinatario" x-cloak
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all duration-300 scale-100"
-        x-show="mostrarModalDestinatario" x-transition:enter="ease-out duration-300"
-        x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <!-- Modal para seleccionar destinatario - SOLO TÉCNICO -->
+        {{-- <div x-show="mostrarModalDestinatario" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all duration-300 scale-100"
+                x-show="mostrarModalDestinatario" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
 
-        <!-- Header del Modal -->
-        <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-t-2xl">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                        <i class="fas fa-user-check text-white"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Marcar como Listo para Entrega</h3>
-                        <p class="text-green-100 text-sm" x-text="repuestoSeleccionadoNombre"></p>
+                <!-- Header del Modal -->
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-user-check text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Marcar como Listo para Entrega</h3>
+                                <p class="text-green-100 text-sm" x-text="repuestoSeleccionadoNombre"></p>
+                            </div>
+                        </div>
+                        <button @click="cerrarModalDestinatario"
+                            class="text-white hover:text-green-200 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
                     </div>
                 </div>
-                <button @click="cerrarModalDestinatario"
-                    class="text-white hover:text-green-200 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
-                </button>
-            </div>
-        </div>
 
-        <!-- Contenido del Modal - SOLO TÉCNICO -->
-        <div class="p-6">
-            <p class="text-gray-600 mb-4">Este repuesto será marcado como <strong>LISTO PARA ENTREGA</strong> para el técnico:</p>
+                <!-- Contenido del Modal - SOLO TÉCNICO -->
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Este repuesto será marcado como <strong>LISTO PARA ENTREGA</strong>
+                        para el técnico:</p>
 
-            <!-- Opción única: Técnico -->
-            <div class="mb-6">
-                <div class="flex items-start space-x-3 p-4 border-2 border-green-300 rounded-xl bg-green-50">
-                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <i class="fas fa-user-cog text-white"></i>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center space-x-2 mb-1">
-                            <span class="font-semibold text-gray-900">Entrega al Técnico</span>
-                        </div>
-                        <p class="text-sm text-gray-700 font-medium">
-                            @if ($tecnico)
-                                {{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}
-                                @if ($tecnico->correo)
-                                    <br><span class="text-gray-500">{{ $tecnico->correo }}</span>
-                                @endif
-                            @else
-                                <span class="text-red-500">No hay técnico asignado</span>
-                            @endif
-                        </p>
-                        
-                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div class="flex items-start">
-                                <i class="fas fa-info-circle text-yellow-500 mt-1 mr-2"></i>
-                                <div>
-                                    <p class="text-sm text-yellow-700 font-semibold">Importante:</p>
-                                    <p class="text-xs text-yellow-600">El stock <strong>NO se descontará</strong> hasta que se confirme la entrega física.</p>
+                    <!-- Opción única: Técnico -->
+                    <div class="mb-6">
+                        <div class="flex items-start space-x-3 p-4 border-2 border-green-300 rounded-xl bg-green-50">
+                            <div
+                                class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-user-cog text-white"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="font-semibold text-gray-900">Entrega al Técnico</span>
+                                </div>
+                                <p class="text-sm text-gray-700 font-medium">
+                                    @if ($tecnico)
+                                        {{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}
+                                        @if ($tecnico->correo)
+                                            <br><span class="text-gray-500">{{ $tecnico->correo }}</span>
+                                        @endif
+                                    @else
+                                        <span class="text-red-500">No hay técnico asignado</span>
+                                    @endif
+                                </p>
+
+                                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-info-circle text-yellow-500 mt-1 mr-2"></i>
+                                        <div>
+                                            <p class="text-sm text-yellow-700 font-semibold">Importante:</p>
+                                            <p class="text-xs text-yellow-600">El stock <strong>NO se
+                                                    descontará</strong> hasta que se confirme la entrega física.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex space-x-3">
+                        <button @click="cerrarModalDestinatario"
+                            class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                            Cancelar
+                        </button>
+                        <button @click="confirmarProcesamientoIndividual" :disabled="!destinatarioValido"
+                            :class="{
+                                'bg-green-600 hover:bg-green-700': destinatarioValido,
+                                'bg-gray-400 cursor-not-allowed': !destinatarioValido
+                            }"
+                            class="flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Listo para Entrega al Técnico
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div> --}}
 
-            <!-- Botones de acción -->
-            <div class="flex space-x-3">
-                <button @click="cerrarModalDestinatario"
-                    class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
-                    Cancelar
-                </button>
-                <button @click="confirmarProcesamientoIndividual" :disabled="!destinatarioValido"
-                    :class="{
-                        'bg-green-600 hover:bg-green-700': destinatarioValido,
-                        'bg-gray-400 cursor-not-allowed': !destinatarioValido
-                    }"
-                    class="flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    Listo para Entrega al Técnico
-                </button>
+        <!-- Modal para confirmar entrega física -->
+        <div x-show="mostrarModalEntregaFisica" x-cloak class="fixed inset-0 bg-[black]/60 z-[9999] overflow-y-auto">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalEntrega()">
+                <div x-show="mostrarModalEntregaFisica" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg bg-white dark:bg-gray-800">
+                    <!-- Header del modal -->
+                    <div class="flex bg-green-600 text-white items-center justify-between px-5 py-3">
+                        <div class="font-bold text-lg flex items-center gap-2">
+                            <i class="fas fa-truck"></i>
+                            <span>Confirmar Entrega Física</span>
+                        </div>
+                        <button type="button" class="text-white hover:text-gray-200" @click="cerrarModalEntrega()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Contenido del modal -->
+                    <div class="p-5">
+                        <!-- Información del repuesto -->
+                        <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de entrega</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400" x-text="repuestoEntregaNombre"></p>
+                            <div class="mt-2 flex items-center gap-2 text-sm">
+                                <i class="fas fa-user-cog text-green-600"></i>
+                                <span
+                                    class="text-gray-700 dark:text-gray-300">{{ $tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico no asignado' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Sección para foto -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-camera mr-2"></i>Foto del repuesto entregado
+                            </label>
+                            <div class="mt-1">
+                                <!-- Contenedor para subir imagen (sin preview) -->
+                                <div class="flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg hover:border-green-400 cursor-pointer transition-colors duration-200"
+                                    @click="abrirFileInput()" x-show="!fotoPreviewEntrega">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="mx-auto h-16 w-16 text-gray-400" stroke="currentColor"
+                                            fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                            <path
+                                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        <div
+                                            class="flex flex-col items-center text-sm text-gray-600 dark:text-gray-400">
+                                            <label
+                                                class="relative cursor-pointer rounded-md font-medium text-green-600 hover:text-green-500">
+                                                <span>Subir una foto</span>
+                                                <input type="file" class="sr-only" accept="image/*"
+                                                    @change="handleFotoUploadEntrega">
+                                            </label>
+                                            <p class="mt-1">o arrastra y suelta</p>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                            PNG, JPG, GIF hasta 5MB • Recomendado: 800x600px
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Contenedor para preview de imagen -->
+                                <div x-show="fotoPreviewEntrega" class="relative">
+                                    <div
+                                        class="border-2 border-green-500 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 p-2">
+                                        <!-- Contenedor con relación de aspecto 4:3 (puedes cambiar a 16:9, 1:1, etc.) -->
+                                        <div class="relative w-full h-64 sm:h-72 md:h-80 overflow-hidden rounded-md">
+                                            <img :src="fotoPreviewEntrega" alt="Vista previa"
+                                                class="absolute inset-0 w-full h-full object-contain">
+                                        </div>
+
+                                        <!-- Indicador de dimensiones -->
+                                        <div class="mt-2 text-center">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                La imagen se ajustará automáticamente al contenedor
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Botón para eliminar foto -->
+                                    <button type="button" @click.stop="removeFotoEntrega()"
+                                        class="absolute top-3 right-3 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors duration-200 shadow-lg">
+                                        <i class="fas fa-times text-sm"></i>
+                                    </button>
+
+                                    <!-- Botón para cambiar foto -->
+                                    <button type="button" @click.stop="abrirFileInput()"
+                                        class="absolute top-3 left-3 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-600 transition-colors duration-200 shadow-lg">
+                                        <i class="fas fa-sync-alt text-sm"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <input type="file" x-ref="fileInputEntrega" class="hidden" accept="image/*"
+                                @change="handleFotoUploadEntrega">
+                        </div>
+
+                        <!-- Observaciones (opcional) -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <i class="fas fa-comment-alt mr-2"></i>Observaciones (opcional)
+                            </label>
+                            <textarea x-model="observacionesEntrega" rows="3"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                                placeholder="Alguna observación sobre la entrega..."></textarea>
+                        </div>
+
+                        <!-- Botones de acción - SOLO UN BOTÓN QUE HACE TODO -->
+                        <div class="flex justify-end items-center mt-8 gap-3">
+                            <button type="button" @click="cerrarModalEntrega()"
+                                class="btn btn-outline-secondary px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                Cancelar
+                            </button>
+
+                            <!-- ESTE ES EL BOTÓN QUE HACE TODO: Sube foto + Pide firmar + Confirma entrega -->
+                            <button type="button" @click="firmarYConfirmarEntrega()"
+                                :disabled="!fotoPreviewEntrega || isLoadingEntrega"
+                                :class="{
+                                    'opacity-50 cursor-not-allowed': !fotoPreviewEntrega || isLoadingEntrega,
+                                    'bg-green-600 hover:bg-green-700': true
+                                }"
+                                class="btn btn-primary text-white px-4 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2">
+                                <template x-if="isLoadingEntrega">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </template>
+                                <template x-if="!isLoadingEntrega">
+                                    <i class="fas fa-signature"></i>
+                                </template>
+                                <span>Firmar y Confirmar Entrega</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -908,7 +1060,7 @@
                 procesandoIndividual: {},
                 isLoadingGrupal: false,
 
-                // Nuevas variables para el modal de destinatario
+                // Variables del modal de destinatario
                 mostrarModalDestinatario: false,
                 destinatarioSeleccionado: '',
                 usuarioSeleccionado: '',
@@ -916,8 +1068,19 @@
                 articuloIdSeleccionado: null,
                 repuestoSeleccionadoNombre: '',
 
-                // En el script Alpine.js
-                destinatarioSeleccionado: 'tecnico', // Siempre seleccionado por defecto
+                // ============ VARIABLES PARA EL MODAL DE ENTREGA FÍSICA ============
+                mostrarModalEntregaFisica: false,
+                fotoPreviewEntrega: null,
+                fotoFileEntrega: null,
+                firmaConfirmadaEntrega: false,
+                fechaFirmaEntrega: null,
+                observacionesEntrega: '',
+                isLoadingEntrega: false,
+                repuestoEntregaNombre: '',
+                articuloEntregaId: null,
+                // ============ FIN VARIABLES ============
+
+                destinatarioSeleccionado: 'tecnico',
 
                 get destinatarioValido() {
                     // Solo válido si hay técnico asignado
@@ -939,6 +1102,280 @@
                     return @json($puede_aceptar);
                 },
 
+                // ============ FUNCIÓN PARA ABRIR MODAL ENTREGA ============
+                confirmarEntregaFisica(solicitudId, articuloId) {
+                    const repuestos = @json($repuestos);
+                    const repuesto = repuestos.find(r => r.idArticulos == articuloId);
+
+                    this.articuloEntregaId = articuloId;
+                    this.repuestoEntregaNombre = repuesto ? repuesto.nombre : 'Repuesto';
+                    this.mostrarModalEntregaFisica = true;
+                    this.resetFormEntrega();
+                },
+
+                // ============ FUNCIONES DEL MODAL DE ENTREGA ============
+                abrirFileInput() {
+                    this.$refs.fileInputEntrega.click();
+                },
+
+                handleFotoUploadEntrega(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                            toastr.error('La foto debe ser menor a 5MB');
+                            return;
+                        }
+
+                        if (!file.type.match('image.*')) {
+                            toastr.error('Por favor, sube una imagen válida');
+                            return;
+                        }
+
+                        this.fotoFileEntrega = file;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.fotoPreviewEntrega = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
+
+                removeFotoEntrega() {
+                    this.fotoPreviewEntrega = null;
+                    this.fotoFileEntrega = null;
+                    if (this.$refs.fileInputEntrega) {
+                        this.$refs.fileInputEntrega.value = '';
+                    }
+                },
+
+                resetFormEntrega() {
+                    this.fotoPreviewEntrega = null;
+                    this.fotoFileEntrega = null;
+                    this.firmaConfirmadaEntrega = false;
+                    this.fechaFirmaEntrega = null;
+                    this.observacionesEntrega = '';
+                    this.isLoadingEntrega = false;
+                },
+
+                cerrarModalEntrega() {
+                    this.mostrarModalEntregaFisica = false;
+                    this.resetFormEntrega();
+                },
+
+                // ============ FUNCIÓN PRINCIPAL: FIRMAR Y CONFIRMAR TODO ============
+                async firmarYConfirmarEntrega() {
+                    // 1. Validar que hay foto
+                    if (!this.fotoPreviewEntrega) {
+                        toastr.error('Por favor, sube una foto del repuesto entregado');
+                        return;
+                    }
+
+                    // 2. Mostrar confirmación de firma
+                    const confirmacionFirma = await Swal.fire({
+                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-gray-800">Confirmar Firma</h3>' +
+                            '</div>',
+                        html: `<div class="text-center px-4 py-2">
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Firmante</p>
+                                    <p class="text-lg font-bold text-gray-800">{{ Auth::user()->name ?? 'Usuario' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
+                                <p class="text-sm text-amber-600">Al firmar, confirmas que has recibido el repuesto <strong>"${this.repuestoEntregaNombre}"</strong> en buen estado y condiciones.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 italic">
+                        ¿Confirmas la recepción del repuesto?
+                    </div>
+                </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-signature"></i>' +
+                            '<span>Sí, firmar y continuar</span>' +
+                            '</div>',
+                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-times-circle"></i>' +
+                            '<span>Cancelar</span>' +
+                            '</div>',
+                        reverseButtons: false,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+                            title: '!mb-0 !pb-0',
+                            htmlContainer: '!mb-0',
+                            actions: 'flex gap-4',
+                            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
+                        },
+                        buttonsStyling: false,
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        width: '500px',
+                        padding: '1.5rem'
+                    });
+
+                    if (!confirmacionFirma.isConfirmed) {
+                        return; // El usuario canceló
+                    }
+
+                    // 3. Registrar fecha de firma
+                    const now = new Date();
+                    this.fechaFirmaEntrega = now.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    this.firmaConfirmadaEntrega = true;
+
+                    // 4. Confirmación final antes de enviar
+                    const confirmacionFinal = await Swal.fire({
+                        title: '¿Confirmar entrega definitiva?',
+                        html: `<div class="text-center">
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Resumen</p>
+                                    <p class="text-lg font-bold text-gray-800">${this.repuestoEntregaNombre}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-semibold text-amber-700 mb-1">Atención</p>
+                                <p class="text-sm text-amber-600">
+                                    Esta acción registrará la entrega, descontará el stock definitivamente y no se podrá revertir.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 italic">
+                        ¿Estás seguro de confirmar la entrega física?
+                    </div>
+                </div>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-check-circle"></i>' +
+                            '<span>Sí, confirmar entrega</span>' +
+                            '</div>',
+                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-times-circle"></i>' +
+                            '<span>Cancelar</span>' +
+                            '</div>',
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+                            actions: 'flex gap-4',
+                            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
+                        },
+                        buttonsStyling: false,
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        width: '500px',
+                        padding: '1.5rem'
+                    });
+
+                    if (!confirmacionFinal.isConfirmed) {
+                        return; // El usuario canceló al final
+                    }
+
+                    // 5. Enviar datos al servidor
+                    this.isLoadingEntrega = true;
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
+                        formData.append('articulo_id', this.articuloEntregaId);
+                        formData.append('observaciones', this.observacionesEntrega);
+                        formData.append('firma_confirmada', true);
+                        formData.append('nombre_firmante',
+                            '{{ Auth::user()->name ?? 'Usuario' }}');
+                        formData.append('fecha_firma', this.fechaFirmaEntrega);
+                        formData.append('foto', this.fotoFileEntrega);
+                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content'));
+
+                        const response = await fetch('/confirmar-entrega-fisica', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Mostrar éxito
+                            await Swal.fire({
+                                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                                    '<i class="fas fa-check-circle text-green-600 text-xl"></i>' +
+                                    '</div>' +
+                                    '<h3 class="text-xl font-bold text-gray-800">¡Entrega Confirmada!</h3>' +
+                                    '</div>',
+                                html: `<div class="text-center">
+                            <p class="text-gray-700 mb-4">El repuesto ha sido entregado exitosamente.</p>
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <p class="text-green-700 font-medium">${data.message || 'Entrega registrada correctamente'}</p>
+                            </div>
+                        </div>`,
+                                icon: 'success',
+                                confirmButtonColor: '#10b981',
+                                confirmButtonText: 'OK',
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
+
+                            this.cerrarModalEntrega();
+
+                            // Recargar después de 2 segundos
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            toastr.error(data.message || 'Error al confirmar la entrega');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        toastr.error('Error al procesar la solicitud');
+                    } finally {
+                        this.isLoadingEntrega = false;
+                    }
+                },
                 // Modificar la función abrirModalDestinatario para seleccionar automáticamente técnico
                 abrirModalDestinatario(solicitudId, articuloId, nombreRepuesto) {
                     const ubicacionId = this.selecciones[articuloId];
@@ -969,23 +1406,23 @@
 
                 // Reemplazar la función confirmarProcesamientoIndividual
                 async confirmarProcesamientoIndividual() {
-    if (!this.destinatarioValido) {
-        toastr.error('No hay técnico asignado para realizar la entrega');
-        return;
-    }
+                    if (!this.destinatarioValido) {
+                        toastr.error('No hay técnico asignado para realizar la entrega');
+                        return;
+                    }
 
-    const ubicacionId = this.selecciones[this.articuloIdSeleccionado];
-    const nombreTecnico = @json($tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico');
+                    const ubicacionId = this.selecciones[this.articuloIdSeleccionado];
+                    const nombreTecnico = @json($tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico');
 
-    // SweetAlert con el texto correcto
-    const result = await Swal.fire({
-        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-            '<i class="fas fa-clipboard-check text-green-600 text-xl"></i>' +
-            '</div>' +
-            '<h3 class="text-xl font-bold text-gray-800">Marcar como Listo para Entrega</h3>' +
-            '</div>',
-        html: `<div class="text-center px-4 py-2">
+                    // SweetAlert con el texto correcto
+                    const result = await Swal.fire({
+                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                            '<i class="fas fa-clipboard-check text-green-600 text-xl"></i>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-gray-800">Marcar como Listo para Entrega</h3>' +
+                            '</div>',
+                        html: `<div class="text-center px-4 py-2">
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100 shadow-sm">
                 <div class="flex flex-col space-y-3">         
                     <div class="flex items-center justify-center gap-3">
@@ -1015,37 +1452,37 @@
             <div class="text-sm text-gray-500 italic mb-2">
                 ¿Marcar este repuesto como listo para entrega al técnico?
             </div>
-        </div>`,
-        icon: 'info',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981', // Verde
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-            '<i class="fas fa-clipboard-check"></i>' +
-            '<span>Marcar como Listo</span>' +
-            '</div>',
-        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-            '<i class="fas fa-times-circle"></i>' +
-            '<span>Cancelar</span>' +
-            '</div>',
-        reverseButtons: false,
-        focusConfirm: true,
-        customClass: {
-            popup: 'rounded-2xl shadow-2xl border border-gray-200',
-            title: '!mb-0 !pb-0',
-            htmlContainer: '!mb-0',
-            actions: 'flex gap-4',
-            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl transition-all duration-200',
-            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base',
-            closeButton: '!text-gray-400 hover:!text-gray-600 transition-colors'
-        },
-        buttonsStyling: false,
-        backdrop: 'rgba(0, 0, 0, 0.5)',
-        width: '500px',
-        padding: '1.5rem',
-        allowOutsideClick: false,
-        allowEscapeKey: true
-    });
+            </div>`,
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981', // Verde
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-clipboard-check"></i>' +
+                            '<span>Marcar como Listo</span>' +
+                            '</div>',
+                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-times-circle"></i>' +
+                            '<span>Cancelar</span>' +
+                            '</div>',
+                        reverseButtons: false,
+                        focusConfirm: true,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+                            title: '!mb-0 !pb-0',
+                            htmlContainer: '!mb-0',
+                            actions: 'flex gap-4',
+                            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl transition-all duration-200',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base',
+                            closeButton: '!text-gray-400 hover:!text-gray-600 transition-colors'
+                        },
+                        buttonsStyling: false,
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        width: '500px',
+                        padding: '1.5rem',
+                        allowOutsideClick: false,
+                        allowEscapeKey: true
+                    });
 
                     if (!result.isConfirmed) {
                         return;
@@ -1151,38 +1588,38 @@
                     const result = await Swal.fire({
                         title: '<h3 class="text-xl font-bold text-gray-800">¿Procesar TODOS los repuestos?</h3>',
                         html: `
-        <div class="mt-3 space-y-4 text-center">
-            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <p class="text-gray-700 font-medium">
-                    Se procesarán <span class="font-bold">todos los repuestos</span> de la solicitud.
-                </p>
-            </div>
-
-            <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
-                <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+            <div class="mt-3 space-y-4 text-center">
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <p class="text-gray-700 font-medium">
+                        Se procesarán <span class="font-bold">todos los repuestos</span> de la solicitud.
+                    </p>
                 </div>
-                <p class="text-sm text-amber-700">
-                    El stock será descontado de las ubicaciones seleccionadas para cada repuesto.
-                    <span class="font-semibold">Esta acción no se puede deshacer.</span>
-                </p>
+
+                <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
+                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                    </div>
+                    <p class="text-sm text-amber-700">
+                        El stock será descontado de las ubicaciones seleccionadas para cada repuesto.
+                        <span class="font-semibold">Esta acción no se puede deshacer.</span>
+                    </p>
+                </div>
             </div>
-        </div>
-    `,
+            `,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: `
-        <div class="flex items-center gap-2 px-2">
-            <i class="fas fa-check-circle"></i>
-            <span>Procesar todo</span>
-        </div>
-    `,
+                <div class="flex items-center gap-2 px-2">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Procesar todo</span>
+                </div>
+            `,
                         cancelButtonText: `
-        <div class="flex items-center gap-2 px-2">
-            <i class="fas fa-times-circle"></i>
-            <span>Cancelar</span>
-        </div>
-    `,
+                <div class="flex items-center gap-2 px-2">
+                    <i class="fas fa-times-circle"></i>
+                    <span>Cancelar</span>
+                </div>
+            `,
                         reverseButtons: true,
                         buttonsStyling: false,
                         customClass: {
