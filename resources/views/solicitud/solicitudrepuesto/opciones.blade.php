@@ -1121,6 +1121,8 @@
                 handleFotoUploadEntrega(event) {
                     const file = event.target.files[0];
                     if (file) {
+                        console.log('📸 Archivo seleccionado:', file.name, file.size, file.type);
+                        
                         if (file.size > 5 * 1024 * 1024) {
                             toastr.error('La foto debe ser menor a 5MB');
                             return;
@@ -1132,11 +1134,16 @@
                         }
 
                         this.fotoFileEntrega = file;
+                        console.log('✅ fotoFileEntrega asignado:', this.fotoFileEntrega);
+                        
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.fotoPreviewEntrega = e.target.result;
+                            console.log('✅ fotoPreviewEntrega generada');
                         };
                         reader.readAsDataURL(file);
+                    } else {
+                        console.error('❌ No se seleccionó archivo');
                     }
                 },
 
@@ -1162,25 +1169,53 @@
                     this.resetFormEntrega();
                 },
 
-                async firmarYConfirmarEntrega() {
-                    // 1. Validar que hay foto
-                    if (!this.fotoPreviewEntrega) {
-                        toastr.error('Por favor, sube una foto del repuesto entregado');
-                        return;
-                    }
+            async firmarYConfirmarEntrega() {
+    // 1. Validar que hay foto
+    if (!this.fotoPreviewEntrega) {
+        toastr.error('Por favor, sube una foto del repuesto entregado');
+        return;
+    }
 
-                    // 2. Cerrar el modal ANTES de mostrar el SweetAlert
-                    this.cerrarModalEntrega();
+    // Debug: Verificar datos ANTES de cerrar el modal
+    console.log('🔍 Datos antes de cerrar modal:');
+    console.log('- articuloEntregaId:', this.articuloEntregaId);
+    console.log('- repuestoEntregaNombre:', this.repuestoEntregaNombre);
+    console.log('- observacionesEntrega:', this.observacionesEntrega);
+    console.log('- fotoFileEntrega:', this.fotoFileEntrega);
+    console.log('- Es File?', this.fotoFileEntrega instanceof File);
+    
+    if (!this.fotoFileEntrega || !(this.fotoFileEntrega instanceof File)) {
+        console.error('❌ ERROR: fotoFileEntrega no es un archivo válido');
+        console.log('  - Tipo:', typeof this.fotoFileEntrega);
+        console.log('  - Valor:', this.fotoFileEntrega);
+        toastr.error('Error: No se pudo cargar la foto. Por favor, sube la foto nuevamente.');
+        return;
+    }
 
-                    // 3. Mostrar confirmación de firma (ÚNICA CONFIRMACIÓN)
-                    const confirmacionFirma = await Swal.fire({
-                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-                            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-                            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
-                            '</div>' +
-                            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
-                            '</div>',
-                        html: `<div class="text-center px-4 py-2">
+    // 2. GUARDAR LOS DATOS ANTES DE CERRAR EL MODAL
+    const datosParaEnviar = {
+        articuloEntregaId: this.articuloEntregaId,
+        repuestoEntregaNombre: this.repuestoEntregaNombre,
+        observacionesEntrega: this.observacionesEntrega,
+        fotoFileEntrega: this.fotoFileEntrega,
+        fechaFirmaEntrega: null, // Se llenará después
+        firmaConfirmadaEntrega: false // Se llenará después
+    };
+    
+    console.log('💾 Datos guardados antes de cerrar modal:', datosParaEnviar);
+
+    // 3. Cerrar el modal
+    this.cerrarModalEntrega();
+
+    // 4. Mostrar confirmación de firma
+    const confirmacionFirma = await Swal.fire({
+        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
+            '</div>' +
+            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
+            '</div>',
+        html: `<div class="text-center px-4 py-2">
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
                 <div class="flex flex-col space-y-3">
                     <div class="flex items-center justify-center gap-3">
@@ -1198,7 +1233,7 @@
                         </div>
                         <div class="text-left">
                             <p class="text-sm font-medium text-gray-500">Repuesto</p>
-                            <p class="text-lg font-bold text-gray-800">${this.repuestoEntregaNombre}</p>
+                            <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
                         </div>
                     </div>
                 </div>
@@ -1213,7 +1248,7 @@
                         <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
                         <p class="text-sm text-amber-600">Al firmar, confirmas que:</p>
                         <ul class="text-sm text-amber-600 mt-1 ml-4 list-disc">
-                            <li>Has recibido el repuesto <strong>"${this.repuestoEntregaNombre}"</strong></li>
+                            <li>Has recibido el repuesto <strong>"${datosParaEnviar.repuestoEntregaNombre}"</strong></li>
                             <li>El repuesto está en buen estado y condiciones</li>
                             <li>Esta acción registrará la entrega definitivamente</li>
                             <li>Se descontará del stock y no se puede revertir</li>
@@ -1226,113 +1261,287 @@
                 ¿Confirmas la recepción del repuesto?
             </div>
         </div>`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-                            '<i class="fas fa-signature"></i>' +
-                            '<span>Confirmar y Firmar Entrega</span>' +
-                            '</div>',
-                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-                            '<i class="fas fa-times-circle"></i>' +
-                            '<span>Cancelar</span>' +
-                            '</div>',
-                        reverseButtons: false,
-                        customClass: {
-                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
-                            title: '!mb-0 !pb-0',
-                            htmlContainer: '!mb-0',
-                            actions: 'flex gap-4',
-                            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
-                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
-                        },
-                        buttonsStyling: false,
-                        backdrop: 'rgba(0, 0, 0, 0.5)',
-                        width: '500px',
-                        padding: '1.5rem'
-                    });
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+            '<i class="fas fa-signature"></i>' +
+            '<span>Confirmar y Firmar Entrega</span>' +
+            '</div>',
+        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+            '<i class="fas fa-times-circle"></i>' +
+            '<span>Cancelar</span>' +
+            '</div>',
+        reverseButtons: false,
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+            title: '!mb-0 !pb-0',
+            htmlContainer: '!mb-0',
+            actions: 'flex gap-4',
+            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
+            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
+        },
+        buttonsStyling: false,
+        backdrop: 'rgba(0, 0, 0, 0.5)',
+        width: '500px',
+        padding: '1.5rem'
+    });
 
-                    if (!confirmacionFirma.isConfirmed) {
-                        // Si el usuario cancela, volver a abrir el modal
-                        this.mostrarModalEntregaFisica = true;
-                        return;
-                    }
+    if (!confirmacionFirma.isConfirmed) {
+        // Si el usuario cancela, volver a abrir el modal con los datos originales
+        console.log('❌ Usuario canceló. Reabriendo modal...');
+        this.mostrarModalEntregaFisica = true;
+        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+        this.fotoPreviewEntrega = null; // Se regenerará si es necesario
+        return;
+    }
 
-                    // 4. Registrar fecha de firma
-                    const now = new Date();
-                    this.fechaFirmaEntrega = now.toLocaleDateString('es-ES', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    this.firmaConfirmadaEntrega = true;
+    // 5. Registrar fecha de firma
+    const now = new Date();
+    datosParaEnviar.fechaFirmaEntrega = now.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    datosParaEnviar.firmaConfirmadaEntrega = true;
+    
+    console.log('📅 Datos actualizados después de confirmación:', datosParaEnviar);
 
-                    // 5. Enviar datos al servidor
-                    this.isLoadingEntrega = true;
+    // 6. Enviar datos al servidor
+    this.isLoadingEntrega = true;
 
-                    try {
-                        const formData = new FormData();
-                        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
-                        formData.append('articulo_id', this.articuloEntregaId);
-                        formData.append('observaciones', this.observacionesEntrega);
-                        formData.append('firma_confirmada', true);
-                        formData.append('nombre_firmante',
-                            '{{ Auth::user()->name ?? 'Usuario' }}');
-                        formData.append('fecha_firma', this.fechaFirmaEntrega);
-                        formData.append('foto', this.fotoFileEntrega);
-                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')
-                            .getAttribute('content'));
+    try {
+        const formData = new FormData();
+        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
+        formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
+        formData.append('observaciones', datosParaEnviar.observacionesEntrega);
+        formData.append('firma_confirmada', 1);
+        formData.append('nombre_firmante', '{{ Auth::user()->name ?? "Usuario" }}');
+        formData.append('fecha_firma', datosParaEnviar.fechaFirmaEntrega);
+        
+        // AGREGAR LA FOTO DESDE LOS DATOS GUARDADOS
+        console.log('📸 Verificando foto para enviar:');
+        console.log('  - Archivo:', datosParaEnviar.fotoFileEntrega);
+        console.log('  - Es File?', datosParaEnviar.fotoFileEntrega instanceof File);
+        console.log('  - Nombre:', datosParaEnviar.fotoFileEntrega.name);
+        console.log('  - Tamaño:', datosParaEnviar.fotoFileEntrega.size);
+        
+        if (datosParaEnviar.fotoFileEntrega && datosParaEnviar.fotoFileEntrega instanceof File) {
+            formData.append('foto', datosParaEnviar.fotoFileEntrega);
+            console.log('✅ Foto agregada al FormData');
+        } else {
+            console.error('❌ ERROR CRÍTICO: fotoFileEntrega no es válido para enviar');
+            throw new Error('La foto se perdió durante el proceso. Por favor, intenta nuevamente.');
+        }
+        
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
 
-                        const response = await fetch('/confirmar-entrega-fisica', {
-                            method: 'POST',
-                            body: formData
-                        });
+        // Debug: Mostrar contenido del FormData
+        console.log('📤 Contenido del FormData a enviar:');
+        for (let [key, value] of formData.entries()) {
+            if (value instanceof File) {
+                console.log(`  ${key}: [File] ${value.name} (${value.size} bytes, ${value.type})`);
+            } else {
+                console.log(`  ${key}: ${value}`);
+            }
+        }
 
-                        const data = await response.json();
+        const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-fisica-con-foto`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        });
 
-                        if (data.success) {
-                            // Mostrar éxito
-                            await Swal.fire({
-                                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-                                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-                                    '<i class="fas fa-check-circle text-green-600 text-xl"></i>' +
-                                    '</div>' +
-                                    '<h3 class="text-xl font-bold text-gray-800">¡Entrega Confirmada!</h3>' +
-                                    '</div>',
-                                html: `<div class="text-center">
+        const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
+
+        if (data.success) {
+            // Mostrar éxito
+            await Swal.fire({
+                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                    '<i class="fas fa-check-circle text-green-600 text-xl"></i>' +
+                    '</div>' +
+                    '<h3 class="text-xl font-bold text-gray-800">¡Entrega Confirmada!</h3>' +
+                    '</div>',
+                html: `<div class="text-center">
                     <p class="text-gray-700 mb-4">El repuesto ha sido entregado exitosamente.</p>
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                         <p class="text-green-700 font-medium">${data.message || 'Entrega registrada correctamente'}</p>
+                        ${data.foto_guardada ? '<p class="text-green-600 text-sm mt-2"><i class="fas fa-camera mr-1"></i>Foto guardada correctamente</p>' : ''}
+                        ${data.firma_confirmada ? '<p class="text-green-600 text-sm mt-1"><i class="fas fa-signature mr-1"></i>Firma confirmada</p>' : ''}
                     </div>
                 </div>`,
-                                icon: 'success',
-                                confirmButtonColor: '#10b981',
-                                confirmButtonText: 'OK',
-                                timer: 2000,
-                                timerProgressBar: true
-                            });
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                confirmButtonText: 'OK',
+                timer: 2000,
+                timerProgressBar: true
+            });
 
-                            // Recargar después de 2 segundos
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2000);
-                        } else {
-                            toastr.error(data.message || 'Error al confirmar la entrega');
-                            // Si hay error, volver a abrir el modal
-                            this.mostrarModalEntregaFisica = true;
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        toastr.error('Error al procesar la solicitud');
-                        // Si hay error, volver a abrir el modal
-                        this.mostrarModalEntregaFisica = true;
-                    } finally {
-                        this.isLoadingEntrega = false;
-                    }
-                },
+            // Recargar después de 2 segundos
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        } else {
+            toastr.error(data.message || 'Error al confirmar la entrega');
+            console.error('❌ Error del servidor:', data);
+            
+            // Si hay error, volver a abrir el modal con los datos
+            this.mostrarModalEntregaFisica = true;
+            this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+            this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+            this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+            this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+            // Regenerar preview si es posible
+            if (this.fotoFileEntrega) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.fotoPreviewEntrega = e.target.result;
+                };
+                reader.readAsDataURL(this.fotoFileEntrega);
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error en fetch:', error);
+        toastr.error('Error al procesar la solicitud: ' + error.message);
+        
+        // Si hay error, volver a abrir el modal
+        this.mostrarModalEntregaFisica = true;
+        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+    } finally {
+        this.isLoadingEntrega = false;
+    }
+},
+
+// ============ FUNCIONES DEL MODAL DE ENTREGA ============
+abrirFileInput() {
+    console.log('🖱️ Intentando abrir selector de archivos...');
+    console.log('📁 Referencia fileInputEntrega:', this.$refs.fileInputEntrega);
+    
+    if (this.$refs.fileInputEntrega) {
+        this.$refs.fileInputEntrega.click();
+    } else {
+        console.error('❌ No se encontró la referencia al input de archivo');
+        // Intentar buscar por ID como fallback
+        const fileInput = document.getElementById('fotoEntregaInput');
+        if (fileInput) {
+            fileInput.click();
+        } else {
+            toastr.error('Error al cargar el selector de archivos');
+        }
+    }
+},
+
+handleFotoUploadEntrega(event) {
+    console.log('📸 Evento handleFotoUploadEntrega disparado');
+    console.log('📁 Input files:', event.target.files);
+    
+    const file = event.target.files[0];
+    if (file) {
+        console.log('✅ Archivo seleccionado:');
+        console.log('  - Nombre:', file.name);
+        console.log('  - Tamaño:', file.size, 'bytes');
+        console.log('  - Tipo:', file.type);
+        console.log('  - Es instancia de File?:', file instanceof File);
+        
+        if (file.size > 5 * 1024 * 1024) {
+            toastr.error('La foto debe ser menor a 5MB');
+            event.target.value = ''; // Limpiar input
+            return;
+        }
+
+        if (!file.type.match('image.*')) {
+            toastr.error('Por favor, sube una imagen válida (JPG, PNG, GIF, etc.)');
+            event.target.value = '';
+            return;
+        }
+
+        this.fotoFileEntrega = file;
+        console.log('✅ fotoFileEntrega asignado:', this.fotoFileEntrega);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.fotoPreviewEntrega = e.target.result;
+            console.log('✅ fotoPreviewEntrega generada (longitud:', e.target.result.length, 'caracteres)');
+        };
+        reader.onerror = (e) => {
+            console.error('❌ Error al leer archivo:', e);
+            toastr.error('Error al leer la imagen');
+        };
+        reader.readAsDataURL(file);
+    } else {
+        console.warn('⚠️ No se seleccionó archivo');
+        this.fotoFileEntrega = null;
+        this.fotoPreviewEntrega = null;
+    }
+},
+
+removeFotoEntrega() {
+    console.log('🗑️ Eliminando foto...');
+    this.fotoPreviewEntrega = null;
+    this.fotoFileEntrega = null;
+    if (this.$refs.fileInputEntrega) {
+        this.$refs.fileInputEntrega.value = '';
+    }
+    console.log('✅ Foto eliminada');
+},
+
+resetFormEntrega() {
+    console.log('🔄 Reseteando formulario de entrega...');
+    // this.fotoPreviewEntrega = null;
+    // this.fotoFileEntrega = null;
+    this.firmaConfirmadaEntrega = false;
+    this.fechaFirmaEntrega = null;
+    // this.observacionesEntrega = '';
+    this.isLoadingEntrega = false;
+    console.log('✅ Formulario reseteado');
+},
+
+resetearCompletamenteModal() {
+    console.log('🧹 Reseteando completamente modal de entrega...');
+    this.fotoPreviewEntrega = null;
+    this.fotoFileEntrega = null;
+    this.firmaConfirmadaEntrega = false;
+    this.fechaFirmaEntrega = null;
+    this.observacionesEntrega = '';
+    this.isLoadingEntrega = false;
+    console.log('✅ Modal completamente reseteado');
+},
+
+cerrarModalEntrega() {
+    console.log('❌ Cerrando modal de entrega...');
+    this.mostrarModalEntregaFisica = false;
+    this.resetFormEntrega();
+},
+
+// ============ FUNCIÓN PARA ABRIR MODAL ENTREGA ============
+confirmarEntregaFisica(solicitudId, articuloId) {
+    console.log('📦 Abriendo modal de entrega física...');
+    const repuestos = @json($repuestos);
+    const repuesto = repuestos.find(r => r.idArticulos == articuloId);
+
+    this.articuloEntregaId = articuloId;
+    this.repuestoEntregaNombre = repuesto ? repuesto.nombre : 'Repuesto';
+    this.mostrarModalEntregaFisica = true;
+    this.resetFormEntrega();
+    
+    console.log('✅ Modal configurado:');
+    console.log('  - articuloEntregaId:', this.articuloEntregaId);
+    console.log('  - repuestoEntregaNombre:', this.repuestoEntregaNombre);
+},
                 // Modificar la función abrirModalDestinatario para seleccionar automáticamente técnico
                 abrirModalDestinatario(solicitudId, articuloId, nombreRepuesto) {
                     const ubicacionId = this.selecciones[articuloId];

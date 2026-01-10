@@ -797,6 +797,10 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
         ->name('conformidad-pdf');
 
         Route::post('/{id}/marcar-listo-individual', [SolicitudrepuestoController::class, 'marcarListoIndividual']);
+
+        // En tu archivo de rutas, agregar estas dos rutas:
+Route::post('/{id}/confirmar-entrega-fisica', [SolicitudrepuestoController::class, 'confirmarEntregaFisica']);
+Route::post('/{id}/confirmar-entrega-fisica-con-foto', [SolicitudrepuestoController::class, 'confirmarEntregaFisicaConFoto']);
 });
 
 
