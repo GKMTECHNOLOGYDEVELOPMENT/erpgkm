@@ -3736,8 +3736,6 @@ public function aceptarProvincia(Request $request, $id)
 }
 
 
-
-
 public function marcarListoIndividual(Request $request, $id)
 {
     try {
@@ -3834,7 +3832,7 @@ public function marcarListoIndividual(Request $request, $id)
         DB::table('repuestos_entregas')->insert([
             'solicitud_id' => $solicitud->idsolicitudesordenes,
             'articulo_id' => $articuloId,
-            'usuario_destino_id' => $solicitud->idTecnico, // Siempre al técnico
+            'usuario_destino_id' => $solicitud->idTecnico,
             'tipo_entrega' => 'tecnico',
             'cantidad' => $repuesto->cantidad,
             'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
@@ -3852,13 +3850,23 @@ public function marcarListoIndividual(Request $request, $id)
         DB::table('ordenesarticulos')
             ->where('idordenesarticulos', $repuesto->idordenesarticulos)
             ->update([
-                'estado' => 2, // 2 = Listo para entregar
+                'estado' => 2,
                 'observacion' => "Listo para entregar al técnico - Ubicación: {$stockUbicacion->ubicacion_codigo}",
                 'updated_at' => now()
             ]);
 
-        // 3. Registrar en logs
-        Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}");
+        // 3. ✅ ACTUALIZAR ESTADO DE LA SOLICITUD A "listo_para_entregar"
+        // REGLA: Si hay al menos un repuesto listo, la solicitud está "listo_para_entregar"
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'estado' => 'listo_para_entregar',
+                'fechaactualizacion' => now(),
+                'updated_at' => now()
+            ]);
+
+        // 4. Registrar en logs
+        Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Estado: listo_para_entregar, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
 
         DB::commit();
 
@@ -3867,11 +3875,17 @@ public function marcarListoIndividual(Request $request, $id)
             'message' => "Repuesto marcado como LISTO PARA ENTREGAR al técnico",
             'numero_ticket' => $numeroTicket,
             'codigo_solicitud' => $solicitud->codigo,
-            'ubicacion' => $stockUbicacion->ubicacion_codigo
+            'ubicacion' => $stockUbicacion->ubicacion_codigo,
+            'estado_solicitud' => 'listo_para_entregar',
+            'articulo_nombre' => $repuesto->nombre,
+            'cantidad' => $repuesto->cantidad
         ]);
     } catch (\Exception $e) {
         DB::rollBack();
         Log::error('Error al marcar repuesto como listo para entregar: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        
         return response()->json([
             'success' => false,
             'message' => 'Error al marcar el repuesto: ' . $e->getMessage()

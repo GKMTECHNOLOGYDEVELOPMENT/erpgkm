@@ -79,23 +79,27 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl">
-                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-info-circle text-orange-600"></i>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Estado General</p>
-                                    <p class="font-semibold text-gray-900 capitalize">
-                                        @if ($solicitud->estado == 'aprobada')
-                                            Aprobada
-                                        @elseif($repuestos_procesados > 0)
-                                            Parcial
-                                        @else
-                                            Pendiente
-                                        @endif
-                                    </p>
-                                </div>
-                            </div>
+                       <div class="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl">
+    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+        <i class="fas fa-info-circle text-orange-600"></i>
+    </div>
+    <div>
+        <p class="text-sm text-gray-500">Estado General</p>
+        <p class="font-semibold text-gray-900 capitalize">
+            @if ($solicitud->estado == 'aprobada')
+                Aprobada
+            @elseif($solicitud->estado == 'listo_para_entregar')
+                Listo para Entregar
+            @elseif($solicitud->estado == 'pendiente')
+                Pendiente
+            @elseif($solicitud->estado == 'parcial_listo')
+                Parcialmente Listo
+            @else
+                {{ $solicitud->estado }}
+            @endif
+        </p>
+    </div>
+</div>
                         </div>
 
                         <!-- Información del Solicitante y Técnico -->
