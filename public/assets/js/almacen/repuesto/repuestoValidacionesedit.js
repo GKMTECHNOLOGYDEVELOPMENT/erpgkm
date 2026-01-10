@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const campos = [
         { id: "codigo_barras", name: "Código de Barras" },
-        { id: "sku", name: "SKU" },
+        // { id: "sku", name: "SKU" },
         { id: "codigo_repuesto", name: "Código Repuesto" },
         { id: "idModelo", name: "Modelo" },
-        { id: "precio_compra", name: "Precio de Compra" },
-        { id: "precio_venta", name: "Precio de Venta" },
+        // { id: "precio_compra", name: "Precio de Compra" },
+        // { id: "precio_venta", name: "Precio de Venta" },
         { id: "stock_total", name: "Stock Total" },
         { id: "stock_minimo", name: "Stock Mínimo" },
         { id: "idUnidad", name: "Unidad de Medida" },
@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     ];
 
-    const camposUnicos = ["codigo_barras", "sku", "codigo_repuesto"];
+    const camposUnicos = ["codigo_barras", "codigo_repuesto"];
 
     camposUnicos.forEach(campoId => {
         const input = document.getElementById(campoId);

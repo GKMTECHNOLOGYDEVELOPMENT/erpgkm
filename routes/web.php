@@ -795,6 +795,8 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
 
     Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
         ->name('conformidad-pdf');
+
+        Route::post('/{id}/marcar-listo-individual', [SolicitudrepuestoController::class, 'marcarListoIndividual']);
 });
 
 

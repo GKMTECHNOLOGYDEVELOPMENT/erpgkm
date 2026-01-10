@@ -183,7 +183,7 @@ public function storesubcategoria(Request $request)
             // Validación de datos
             $validatedData = $request->validate([
                 'codigo_barras' => 'required|string|max:255|unique:articulos,codigo_barras',
-                'sku' => 'required|string|max:255|unique:articulos,sku',
+                'sku' => 'nullable|string|max:255|unique:articulos,sku',
                 'codigo_repuesto' => 'required|string|max:255|unique:articulos,codigo_repuesto',
                 'stock_total' => 'required|nullable|integer',
                 'stock_minimo' => 'required|nullable|integer',
@@ -344,7 +344,7 @@ public function update(Request $request, $id)
         // ✅ Validación igual que en store, sin UNIQUE
         $validatedData = $request->validate([
             'codigo_barras' => 'required|string|max:255',
-            'sku' => 'required|string|max:255',
+            'sku' => 'nullable|string|max:255',
             'codigo_repuesto' => 'required|string|max:255',
             'stock_total' => 'required|nullable|integer',
             'stock_minimo' => 'required|nullable|integer',

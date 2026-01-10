@@ -2018,78 +2018,90 @@ public function marcarNoUsado(Request $request, $solicitudId)
             ->orderBy('apellidoPaterno')
             ->get();
 
-        // Obtener los repuestos de la solicitud
-        $repuestos = DB::table('ordenesarticulos as oa')
+        
+    // Obtener los repuestos de la solicitud
+    $repuestos = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad as cantidad_solicitada',
+            'oa.observacion',
+            'oa.estado as estado_orden', // Este es el estado de ordenesarticulos (0, 1, 2)
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.stock_total',
+            'sc.nombre as tipo_repuesto'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->get();
+
+    // Para cada repuesto, obtener stock disponible y ubicaciones con detalle
+    foreach ($repuestos as $repuesto) {
+        // Obtener ubicaciones con stock detallado
+        $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
             ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad as cantidad_solicitada',
-                'oa.observacion',
-                'a.idArticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.stock_total',
-                'sc.nombre as tipo_repuesto'
+                'rua.idRackUbicacionArticulo',
+                'rua.rack_ubicacion_id',
+                'rua.cantidad as stock_ubicacion',
+                'ru.codigo as ubicacion_codigo',
+                'r.nombre as rack_nombre'
             )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $repuesto->idArticulos)
+            ->where('rua.cantidad', '>', 0)
+            ->orderBy('rua.cantidad', 'desc')
             ->get();
 
-        // Para cada repuesto, obtener stock disponible y ubicaciones con detalle
-        foreach ($repuestos as $repuesto) {
-            // Obtener ubicaciones con stock detallado
-            $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
+        // Calcular stock total disponible
+        $stockDisponible = $ubicaciones->sum('stock_ubicacion');
+
+        // Agregar información al repuesto
+        $repuesto->stock_disponible = $stockDisponible;
+        $repuesto->ubicaciones_detalle = $ubicaciones;
+        $repuesto->suficiente_stock = $stockDisponible >= $repuesto->cantidad_solicitada;
+        $repuesto->diferencia_stock = $stockDisponible - $repuesto->cantidad_solicitada;
+
+        // ✅ CORRECCIÓN: Verificar si ya fue procesado basado en repuestos_entregas
+        $entregaInfo = DB::table('repuestos_entregas')
+            ->where('solicitud_id', $id)
+            ->where('articulo_id', $repuesto->idArticulos)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $repuesto->ya_procesado = $entregaInfo != null; // ✅ Si hay registro en repuestos_entregas
+        
+        if ($repuesto->ya_procesado) {
+            // Obtener información completa de la entrega
+            $entregaInfo = DB::table('repuestos_entregas as re')
                 ->select(
-                    'rua.idRackUbicacionArticulo',
-                    'rua.rack_ubicacion_id',
-                    'rua.cantidad as stock_ubicacion',
-                    'ru.codigo as ubicacion_codigo',
-                    'r.nombre as rack_nombre'
+                    're.tipo_entrega',
+                    're.usuario_destino_id',
+                    're.estado as estado_entrega', // ✅ IMPORTANTE: pediente_entrega o entregado
+                    're.fecha_preparacion',
+                    're.fecha_entrega',
+                    'u.Nombre',
+                    'u.apellidoPaterno',
+                    'u.apellidoMaterno'
                 )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $repuesto->idArticulos)
-                ->where('rua.cantidad', '>', 0)
-                ->orderBy('rua.cantidad', 'desc')
-                ->get();
+                ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
+                ->where('re.solicitud_id', $id)
+                ->where('re.articulo_id', $repuesto->idArticulos)
+                ->orderBy('re.id', 'desc')
+                ->first();
 
-
-
-
-            // Calcular stock total disponible
-            $stockDisponible = $ubicaciones->sum('stock_ubicacion');
-
-            // Agregar información al repuesto
-            $repuesto->stock_disponible = $stockDisponible;
-            $repuesto->ubicaciones_detalle = $ubicaciones;
-            $repuesto->suficiente_stock = $stockDisponible >= $repuesto->cantidad_solicitada;
-            $repuesto->diferencia_stock = $stockDisponible - $repuesto->cantidad_solicitada;
-
-            // Verificar si ya fue procesado individualmente
-            $repuesto->ya_procesado = DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-                ->where('estado', 1)
-                ->exists();
-
-
-            if ($repuesto->ya_procesado) {
-                $entregaInfo = DB::table('repuestos_entregas as re')
-                    ->select(
-                        're.tipo_entrega',
-                        're.usuario_destino_id',
-                        'u.Nombre',
-                        'u.apellidoPaterno',
-                        'u.apellidoMaterno'
-                    )
-                    ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
-                    ->where('re.solicitud_id', $id)
-                    ->where('re.articulo_id', $repuesto->idArticulos)
-                    ->first();
-
-                $repuesto->entrega_info = $entregaInfo;
-            }
+            $repuesto->entrega_info = $entregaInfo;
+            
+            // ✅ Determinar el estado actual basado en repuestos_entregas.estado
+            $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+        } else {
+            $repuesto->entrega_info = null;
+            $repuesto->estado_actual = 'no_procesado';
         }
+    }
 
         // Verificar si toda la solicitud puede ser atendida
         $puede_aceptar = $repuestos->every(function ($repuesto) {
@@ -3720,6 +3732,150 @@ public function aceptarProvincia(Request $request, $id)
             'success' => false,
             'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
         ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+
+
+
+public function marcarListoIndividual(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
+
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_repuesto')
+            ->first();
+
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        $articuloId = (int)$request->input('articulo_id');
+        $ubicacionId = (int)$request->input('ubicacion_id');
+
+        // Verificar si ya fue marcado como listo para entregar
+        $yaMarcadoListo = DB::table('repuestos_entregas')
+            ->where('solicitud_id', $id)
+            ->where('articulo_id', $articuloId)
+            ->where('estado', 'pendiente_entrega')
+            ->exists();
+
+        if ($yaMarcadoListo) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este repuesto ya está marcado como listo para entregar'
+            ], 400);
+        }
+
+        // Obtener información del repuesto
+        $repuesto = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.idordenesarticulos',
+                'oa.cantidad',
+                'oa.idticket',
+                'a.idArticulos',
+                'a.nombre',
+                'a.stock_total'
+            )
+            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+            ->where('oa.idsolicitudesordenes', $id)
+            ->where('a.idArticulos', $articuloId)
+            ->first();
+
+        if (!$repuesto) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Repuesto no encontrado en la solicitud'
+            ], 404);
+        }
+
+        // Verificar stock disponible en la ubicación
+        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+            ->select(
+                'rua.cantidad',
+                'ru.codigo as ubicacion_codigo',
+                'r.nombre as rack_nombre',
+                'rua.cliente_general_id'
+            )
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $articuloId)
+            ->where('rua.rack_ubicacion_id', $ubicacionId)
+            ->first();
+
+        if (!$stockUbicacion) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ubicación no encontrada para este repuesto'
+            ], 404);
+        }
+
+        if ((int)$stockUbicacion->cantidad < (int)$repuesto->cantidad) {
+            return response()->json([
+                'success' => false,
+                'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$repuesto->cantidad}"
+            ], 400);
+        }
+
+        // Obtener número de ticket
+        $ticketInfo = DB::table('tickets')
+            ->select('numero_ticket')
+            ->where('idTickets', $repuesto->idticket)
+            ->first();
+        $numeroTicket = $ticketInfo->numero_ticket ?? 'N/A';
+
+        // 1. Registrar en repuestos_entregas con estado 'pendiente_entrega'
+        DB::table('repuestos_entregas')->insert([
+            'solicitud_id' => $solicitud->idsolicitudesordenes,
+            'articulo_id' => $articuloId,
+            'usuario_destino_id' => $solicitud->idTecnico, // Siempre al técnico
+            'tipo_entrega' => 'tecnico',
+            'cantidad' => $repuesto->cantidad,
+            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+            'ubicacion_id' => $ubicacionId,
+            'numero_ticket' => $numeroTicket,
+            'usuario_preparo_id' => auth()->id(),
+            'estado' => 'pendiente_entrega',
+            'observaciones' => "Marcado como listo para entregar al técnico",
+            'fecha_preparacion' => now(),
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // 2. Marcar en ordenesarticulos con estado 2 (listo para entregar)
+        DB::table('ordenesarticulos')
+            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+            ->update([
+                'estado' => 2, // 2 = Listo para entregar
+                'observacion' => "Listo para entregar al técnico - Ubicación: {$stockUbicacion->ubicacion_codigo}",
+                'updated_at' => now()
+            ]);
+
+        // 3. Registrar en logs
+        Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}");
+
+        DB::commit();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Repuesto marcado como LISTO PARA ENTREGAR al técnico",
+            'numero_ticket' => $numeroTicket,
+            'codigo_solicitud' => $solicitud->codigo,
+            'ubicacion' => $stockUbicacion->ubicacion_codigo
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error al marcar repuesto como listo para entregar: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
+        ], 500);
     }
 }
 

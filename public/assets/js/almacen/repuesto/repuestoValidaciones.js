@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const campos = [
         { id: "codigo_barras", name: "Código de Barras" },
-        { id: "sku", name: "SKU" },
+        // { id: "sku", name: "SKU" },
         { id: "codigo_repuesto", name: "Código Repuesto" },
         { id: "idModelo", name: "Modelo" },
         // { id: "precio_compra", name: "Precio de Compra" },
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     ];
 
-    const camposUnicos = ["codigo_barras", "sku", "codigo_repuesto"];
+    const camposUnicos = ["codigo_barras", "codigo_repuesto"];
 
     camposUnicos.forEach(campoId => {
         const input = document.getElementById(campoId);
