@@ -1138,7 +1138,7 @@
                             this.newProduct.tipo = e.target.value;
                             if (e.target.value && this.newProduct.modelo) {
                                 this.loadCodigosRepuesto(this.newProduct.modelo, e.target
-                                .value);
+                                    .value);
                             } else {
                                 this.clearCodigoSelect();
                             }
@@ -1188,13 +1188,32 @@
                     });
                 },
 
+                // REEMPLAZA TU FUNCIÓN formatDateForDisplay CON ESTA:
                 formatDateForDisplay(dateString) {
                     if (!dateString) return '';
+
+                    // Si la fecha ya viene en formato YYYY-MM-DD de Flatpickr
+                    if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                        // Parsear directamente sin timezone
+                        const [year, month, day] = dateString.split('-').map(Number);
+                        // Usar new Date con año, mes (0-indexed), día - esto evita problemas de zona horaria
+                        const date = new Date(year, month - 1, day);
+                        const formattedYear = date.getFullYear();
+                        const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+                        const formattedDay = String(date.getDate()).padStart(2, '0');
+
+                        return `${formattedYear}/${formattedMonth}/${formattedDay}`;
+                    }
+
+                    // Para cualquier otro formato
                     const date = new Date(dateString);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    return `${year}/${month}/${day}`;
+                    // Usar toLocaleDateString con timezone específica
+                    return date.toLocaleDateString('es-ES', {
+                        timeZone: 'UTC', // <-- ESTO ES CLAVE
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                    }).split('/').reverse().join('/');
                 },
 
                 async loadTicketInfo(ticketId) {
@@ -1420,7 +1439,7 @@
                         this.products[existingProductIndex].cantidad += this.newProduct.cantidad;
                         toastr.success(
                             `Cantidad actualizada: ${this.products[existingProductIndex].cantidad} unidades`
-                            );
+                        );
                     } else {
                         const product = {
                             uniqueId: Date.now() + Math.random(),
