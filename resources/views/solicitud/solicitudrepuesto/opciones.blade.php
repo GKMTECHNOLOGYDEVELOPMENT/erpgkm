@@ -79,15 +79,71 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl">
-                                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-info-circle text-orange-600"></i>
+                            <div
+                                class="flex items-center space-x-3 p-4 rounded-xl
+    @if ($solicitud->estado == 'aprobada') bg-dark/10 border border-dark/20
+    @elseif($solicitud->estado == 'listo_para_entregar')
+        bg-success/10 border border-success/20
+    @elseif($solicitud->estado == 'pendiente')
+        bg-warning/10 border border-warning/20
+    @elseif($solicitud->estado == 'parcial_listo')
+        bg-orange-50 border border-orange-200
+    @else
+        bg-gray-50 border border-gray-200 @endif">
+
+                                <div
+                                    class="w-10 h-10 rounded-lg flex items-center justify-center
+        @if ($solicitud->estado == 'aprobada') bg-dark/20
+        @elseif($solicitud->estado == 'listo_para_entregar')
+            bg-success/20
+        @elseif($solicitud->estado == 'pendiente')
+            bg-warning/20
+        @elseif($solicitud->estado == 'parcial_listo')
+            bg-orange-100
+        @else
+            bg-gray-100 @endif">
+
+                                    <i
+                                        class="fas fa-info-circle 
+            @if ($solicitud->estado == 'aprobada') text-dark
+            @elseif($solicitud->estado == 'listo_para_entregar')
+                text-success
+            @elseif($solicitud->estado == 'pendiente')
+                text-warning
+            @elseif($solicitud->estado == 'parcial_listo')
+                text-orange-600
+            @else
+                text-gray-600 @endif"></i>
                                 </div>
+
                                 <div>
-                                    <p class="text-sm text-gray-500">Estado General</p>
-                                    <p class="font-semibold text-gray-900 capitalize">
+                                    <p
+                                        class="text-sm 
+            @if ($solicitud->estado == 'aprobada') text-dark/70
+            @elseif($solicitud->estado == 'listo_para_entregar')
+                text-success/70
+            @elseif($solicitud->estado == 'pendiente')
+                text-warning/70
+            @elseif($solicitud->estado == 'parcial_listo')
+                text-orange-600/70
+            @else
+                text-gray-500 @endif">
+                                        Estado General
+                                    </p>
+
+                                    <p
+                                        class="font-semibold capitalize
+            @if ($solicitud->estado == 'aprobada') text-dark
+            @elseif($solicitud->estado == 'listo_para_entregar')
+                text-success
+            @elseif($solicitud->estado == 'pendiente')
+                text-warning
+            @elseif($solicitud->estado == 'parcial_listo')
+                text-orange-700
+            @else
+                text-gray-900 @endif">
                                         @if ($solicitud->estado == 'aprobada')
-                                            Aprobada
+                                            Entregado
                                         @elseif($solicitud->estado == 'listo_para_entregar')
                                             Listo para Entregar
                                         @elseif($solicitud->estado == 'pendiente')
@@ -216,12 +272,18 @@
                                                 <i class="fas fa-map-marker-alt text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Ubicación</span>
                                             </th>
+                                            <!-- NUEVA COLUMNA: Ceder -->
                                             <th
+                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <i class="fas fa-exchange-alt text-slate-500 mr-1"></i>
+                                                <span class="hidden sm:inline">Ceder</span>
+                                            </th>
+                                            {{-- <th
                                                 class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-user-check text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Entregado A</span>
                                                 <span class="sm:hidden">Destino</span>
-                                            </th>
+                                            </th> --}}
                                             <th
                                                 class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-tasks text-slate-500 mr-1"></i>
@@ -335,8 +397,19 @@
                                                     </div>
                                                 </td>
 
-                                                <!-- NUEVA COLUMNA: Entregado A -->
+                                                <!-- NUEVA COLUMNA: Ceder -->
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
+                                                    <div class="max-w-[120px]">
+                                                        <select
+                                                            class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm">
+                                                            <option value="">Seleccionar</option>
+                                                            <!-- Opciones estáticas vacías -->
+                                                        </select>
+                                                    </div>
+                                                </td>
+
+                                                <!-- Entregado A -->
+                                                {{-- <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     @if ($repuesto->ya_procesado)
                                                         @php
                                                             // Obtener información de a quién se entregó este repuesto
@@ -457,21 +530,21 @@
                                                             </span>
                                                         </div>
                                                     @endif
-                                                </td>
+                                                </td> --}}
 
                                                 <!-- Estado -->
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     @if ($repuesto->ya_procesado)
                                                         @if ($repuesto->estado_actual == 'entregado')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-green-200 shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark text-white border border-dark shadow-sm">
                                                                 <i class="fas fa-check-circle mr-1"></i>
                                                                 <span class="hidden sm:inline">Entregado</span>
                                                                 <span class="sm:hidden">Entreg.</span>
                                                             </span>
                                                         @elseif($repuesto->estado_actual == 'pendiente_entrega')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-yellow-200 shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-success shadow-sm">
                                                                 <i class="fas fa-clock mr-1"></i>
                                                                 <span class="hidden sm:inline">Listo para
                                                                     Entregar</span>
@@ -480,7 +553,7 @@
                                                         @endif
                                                     @elseif($repuesto->suficiente_stock)
                                                         <span
-                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-info text-white border border-blue-200 shadow-sm">
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-warning shadow-sm">
                                                             <i class="fas fa-cog mr-1"></i>
                                                             <span class="hidden sm:inline">Pendiente</span>
                                                             <span class="sm:hidden">Pend.</span>
@@ -1029,7 +1102,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div>     
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -1122,7 +1195,7 @@
                     const file = event.target.files[0];
                     if (file) {
                         console.log('📸 Archivo seleccionado:', file.name, file.size, file.type);
-                        
+
                         if (file.size > 5 * 1024 * 1024) {
                             toastr.error('La foto debe ser menor a 5MB');
                             return;
@@ -1135,7 +1208,7 @@
 
                         this.fotoFileEntrega = file;
                         console.log('✅ fotoFileEntrega asignado:', this.fotoFileEntrega);
-                        
+
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.fotoPreviewEntrega = e.target.result;
@@ -1169,53 +1242,55 @@
                     this.resetFormEntrega();
                 },
 
-            async firmarYConfirmarEntrega() {
-    // 1. Validar que hay foto
-    if (!this.fotoPreviewEntrega) {
-        toastr.error('Por favor, sube una foto del repuesto entregado');
-        return;
-    }
+                async firmarYConfirmarEntrega() {
+                    // 1. Validar que hay foto
+                    if (!this.fotoPreviewEntrega) {
+                        toastr.error('Por favor, sube una foto del repuesto entregado');
+                        return;
+                    }
 
-    // Debug: Verificar datos ANTES de cerrar el modal
-    console.log('🔍 Datos antes de cerrar modal:');
-    console.log('- articuloEntregaId:', this.articuloEntregaId);
-    console.log('- repuestoEntregaNombre:', this.repuestoEntregaNombre);
-    console.log('- observacionesEntrega:', this.observacionesEntrega);
-    console.log('- fotoFileEntrega:', this.fotoFileEntrega);
-    console.log('- Es File?', this.fotoFileEntrega instanceof File);
-    
-    if (!this.fotoFileEntrega || !(this.fotoFileEntrega instanceof File)) {
-        console.error('❌ ERROR: fotoFileEntrega no es un archivo válido');
-        console.log('  - Tipo:', typeof this.fotoFileEntrega);
-        console.log('  - Valor:', this.fotoFileEntrega);
-        toastr.error('Error: No se pudo cargar la foto. Por favor, sube la foto nuevamente.');
-        return;
-    }
+                    // Debug: Verificar datos ANTES de cerrar el modal
+                    console.log('🔍 Datos antes de cerrar modal:');
+                    console.log('- articuloEntregaId:', this.articuloEntregaId);
+                    console.log('- repuestoEntregaNombre:', this.repuestoEntregaNombre);
+                    console.log('- observacionesEntrega:', this.observacionesEntrega);
+                    console.log('- fotoFileEntrega:', this.fotoFileEntrega);
+                    console.log('- Es File?', this.fotoFileEntrega instanceof File);
 
-    // 2. GUARDAR LOS DATOS ANTES DE CERRAR EL MODAL
-    const datosParaEnviar = {
-        articuloEntregaId: this.articuloEntregaId,
-        repuestoEntregaNombre: this.repuestoEntregaNombre,
-        observacionesEntrega: this.observacionesEntrega,
-        fotoFileEntrega: this.fotoFileEntrega,
-        fechaFirmaEntrega: null, // Se llenará después
-        firmaConfirmadaEntrega: false // Se llenará después
-    };
-    
-    console.log('💾 Datos guardados antes de cerrar modal:', datosParaEnviar);
+                    if (!this.fotoFileEntrega || !(this.fotoFileEntrega instanceof File)) {
+                        console.error('❌ ERROR: fotoFileEntrega no es un archivo válido');
+                        console.log('  - Tipo:', typeof this.fotoFileEntrega);
+                        console.log('  - Valor:', this.fotoFileEntrega);
+                        toastr.error(
+                            'Error: No se pudo cargar la foto. Por favor, sube la foto nuevamente.'
+                        );
+                        return;
+                    }
 
-    // 3. Cerrar el modal
-    this.cerrarModalEntrega();
+                    // 2. GUARDAR LOS DATOS ANTES DE CERRAR EL MODAL
+                    const datosParaEnviar = {
+                        articuloEntregaId: this.articuloEntregaId,
+                        repuestoEntregaNombre: this.repuestoEntregaNombre,
+                        observacionesEntrega: this.observacionesEntrega,
+                        fotoFileEntrega: this.fotoFileEntrega,
+                        fechaFirmaEntrega: null, // Se llenará después
+                        firmaConfirmadaEntrega: false // Se llenará después
+                    };
 
-    // 4. Mostrar confirmación de firma
-    const confirmacionFirma = await Swal.fire({
-        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
-            '</div>' +
-            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
-            '</div>',
-        html: `<div class="text-center px-4 py-2">
+                    console.log('💾 Datos guardados antes de cerrar modal:', datosParaEnviar);
+
+                    // 3. Cerrar el modal
+                    this.cerrarModalEntrega();
+
+                    // 4. Mostrar confirmación de firma
+                    const confirmacionFirma = await Swal.fire({
+                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
+                            '</div>',
+                        html: `<div class="text-center px-4 py-2">
             <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
                 <div class="flex flex-col space-y-3">
                     <div class="flex items-center justify-center gap-3">
@@ -1261,119 +1336,129 @@
                 ¿Confirmas la recepción del repuesto?
             </div>
         </div>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-            '<i class="fas fa-signature"></i>' +
-            '<span>Confirmar y Firmar Entrega</span>' +
-            '</div>',
-        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
-            '<i class="fas fa-times-circle"></i>' +
-            '<span>Cancelar</span>' +
-            '</div>',
-        reverseButtons: false,
-        customClass: {
-            popup: 'rounded-2xl shadow-2xl border border-gray-200',
-            title: '!mb-0 !pb-0',
-            htmlContainer: '!mb-0',
-            actions: 'flex gap-4',
-            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
-            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
-        },
-        buttonsStyling: false,
-        backdrop: 'rgba(0, 0, 0, 0.5)',
-        width: '500px',
-        padding: '1.5rem'
-    });
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-signature"></i>' +
+                            '<span>Confirmar y Firmar Entrega</span>' +
+                            '</div>',
+                        cancelButtonText: '<div class="flex items-center justify-center gap-2 px-4">' +
+                            '<i class="fas fa-times-circle"></i>' +
+                            '<span>Cancelar</span>' +
+                            '</div>',
+                        reverseButtons: false,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl border border-gray-200',
+                            title: '!mb-0 !pb-0',
+                            htmlContainer: '!mb-0',
+                            actions: 'flex gap-4',
+                            confirmButton: 'btn btn-success !rounded-xl !py-3 !font-semibold !text-base !shadow-lg hover:shadow-xl',
+                            cancelButton: 'btn btn-outline-secondary !rounded-xl !py-3 !font-semibold !text-base'
+                        },
+                        buttonsStyling: false,
+                        backdrop: 'rgba(0, 0, 0, 0.5)',
+                        width: '500px',
+                        padding: '1.5rem'
+                    });
 
-    if (!confirmacionFirma.isConfirmed) {
-        // Si el usuario cancela, volver a abrir el modal con los datos originales
-        console.log('❌ Usuario canceló. Reabriendo modal...');
-        this.mostrarModalEntregaFisica = true;
-        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
-        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
-        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
-        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
-        this.fotoPreviewEntrega = null; // Se regenerará si es necesario
-        return;
-    }
+                    if (!confirmacionFirma.isConfirmed) {
+                        // Si el usuario cancela, volver a abrir el modal con los datos originales
+                        console.log('❌ Usuario canceló. Reabriendo modal...');
+                        this.mostrarModalEntregaFisica = true;
+                        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+                        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+                        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+                        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+                        this.fotoPreviewEntrega = null; // Se regenerará si es necesario
+                        return;
+                    }
 
-    // 5. Registrar fecha de firma
-    const now = new Date();
-    datosParaEnviar.fechaFirmaEntrega = now.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    datosParaEnviar.firmaConfirmadaEntrega = true;
-    
-    console.log('📅 Datos actualizados después de confirmación:', datosParaEnviar);
+                    // 5. Registrar fecha de firma
+                    const now = new Date();
+                    datosParaEnviar.fechaFirmaEntrega = now.toLocaleDateString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    datosParaEnviar.firmaConfirmadaEntrega = true;
 
-    // 6. Enviar datos al servidor
-    this.isLoadingEntrega = true;
+                    console.log('📅 Datos actualizados después de confirmación:', datosParaEnviar);
 
-    try {
-        const formData = new FormData();
-        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
-        formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
-        formData.append('observaciones', datosParaEnviar.observacionesEntrega);
-        formData.append('firma_confirmada', 1);
-        formData.append('nombre_firmante', '{{ Auth::user()->name ?? "Usuario" }}');
-        formData.append('fecha_firma', datosParaEnviar.fechaFirmaEntrega);
-        
-        // AGREGAR LA FOTO DESDE LOS DATOS GUARDADOS
-        console.log('📸 Verificando foto para enviar:');
-        console.log('  - Archivo:', datosParaEnviar.fotoFileEntrega);
-        console.log('  - Es File?', datosParaEnviar.fotoFileEntrega instanceof File);
-        console.log('  - Nombre:', datosParaEnviar.fotoFileEntrega.name);
-        console.log('  - Tamaño:', datosParaEnviar.fotoFileEntrega.size);
-        
-        if (datosParaEnviar.fotoFileEntrega && datosParaEnviar.fotoFileEntrega instanceof File) {
-            formData.append('foto', datosParaEnviar.fotoFileEntrega);
-            console.log('✅ Foto agregada al FormData');
-        } else {
-            console.error('❌ ERROR CRÍTICO: fotoFileEntrega no es válido para enviar');
-            throw new Error('La foto se perdió durante el proceso. Por favor, intenta nuevamente.');
-        }
-        
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                    // 6. Enviar datos al servidor
+                    this.isLoadingEntrega = true;
 
-        // Debug: Mostrar contenido del FormData
-        console.log('📤 Contenido del FormData a enviar:');
-        for (let [key, value] of formData.entries()) {
-            if (value instanceof File) {
-                console.log(`  ${key}: [File] ${value.name} (${value.size} bytes, ${value.type})`);
-            } else {
-                console.log(`  ${key}: ${value}`);
-            }
-        }
+                    try {
+                        const formData = new FormData();
+                        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
+                        formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
+                        formData.append('observaciones', datosParaEnviar.observacionesEntrega);
+                        formData.append('firma_confirmada', 1);
+                        formData.append('nombre_firmante',
+                            '{{ Auth::user()->name ?? 'Usuario' }}');
+                        formData.append('fecha_firma', datosParaEnviar.fechaFirmaEntrega);
 
-        const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-fisica-con-foto`, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        });
+                        // AGREGAR LA FOTO DESDE LOS DATOS GUARDADOS
+                        console.log('📸 Verificando foto para enviar:');
+                        console.log('  - Archivo:', datosParaEnviar.fotoFileEntrega);
+                        console.log('  - Es File?', datosParaEnviar
+                            .fotoFileEntrega instanceof File);
+                        console.log('  - Nombre:', datosParaEnviar.fotoFileEntrega.name);
+                        console.log('  - Tamaño:', datosParaEnviar.fotoFileEntrega.size);
 
-        const data = await response.json();
-        console.log('📥 Respuesta del servidor:', data);
+                        if (datosParaEnviar.fotoFileEntrega && datosParaEnviar
+                            .fotoFileEntrega instanceof File) {
+                            formData.append('foto', datosParaEnviar.fotoFileEntrega);
+                            console.log('✅ Foto agregada al FormData');
+                        } else {
+                            console.error(
+                                '❌ ERROR CRÍTICO: fotoFileEntrega no es válido para enviar');
+                            throw new Error(
+                                'La foto se perdió durante el proceso. Por favor, intenta nuevamente.'
+                            );
+                        }
 
-        if (data.success) {
-            // Mostrar éxito
-            await Swal.fire({
-                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-                    '<i class="fas fa-check-circle text-green-600 text-xl"></i>' +
-                    '</div>' +
-                    '<h3 class="text-xl font-bold text-gray-800">¡Entrega Confirmada!</h3>' +
-                    '</div>',
-                html: `<div class="text-center">
+                        formData.append('_token', document.querySelector('meta[name="csrf-token"]')
+                            .getAttribute('content'));
+
+                        // Debug: Mostrar contenido del FormData
+                        console.log('📤 Contenido del FormData a enviar:');
+                        for (let [key, value] of formData.entries()) {
+                            if (value instanceof File) {
+                                console.log(
+                                    `  ${key}: [File] ${value.name} (${value.size} bytes, ${value.type})`
+                                );
+                            } else {
+                                console.log(`  ${key}: ${value}`);
+                            }
+                        }
+
+                        const response = await fetch(
+                            `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-fisica-con-foto`, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            });
+
+                        const data = await response.json();
+                        console.log('📥 Respuesta del servidor:', data);
+
+                        if (data.success) {
+                            // Mostrar éxito
+                            await Swal.fire({
+                                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                                    '<i class="fas fa-check-circle text-green-600 text-xl"></i>' +
+                                    '</div>' +
+                                    '<h3 class="text-xl font-bold text-gray-800">¡Entrega Confirmada!</h3>' +
+                                    '</div>',
+                                html: `<div class="text-center">
                     <p class="text-gray-700 mb-4">El repuesto ha sido entregado exitosamente.</p>
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                         <p class="text-green-700 font-medium">${data.message || 'Entrega registrada correctamente'}</p>
@@ -1381,167 +1466,168 @@
                         ${data.firma_confirmada ? '<p class="text-green-600 text-sm mt-1"><i class="fas fa-signature mr-1"></i>Firma confirmada</p>' : ''}
                     </div>
                 </div>`,
-                icon: 'success',
-                confirmButtonColor: '#10b981',
-                confirmButtonText: 'OK',
-                timer: 2000,
-                timerProgressBar: true
-            });
+                                icon: 'success',
+                                confirmButtonColor: '#10b981',
+                                confirmButtonText: 'OK',
+                                timer: 2000,
+                                timerProgressBar: true
+                            });
 
-            // Recargar después de 2 segundos
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-        } else {
-            toastr.error(data.message || 'Error al confirmar la entrega');
-            console.error('❌ Error del servidor:', data);
-            
-            // Si hay error, volver a abrir el modal con los datos
-            this.mostrarModalEntregaFisica = true;
-            this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
-            this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
-            this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
-            this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
-            // Regenerar preview si es posible
-            if (this.fotoFileEntrega) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.fotoPreviewEntrega = e.target.result;
-                };
-                reader.readAsDataURL(this.fotoFileEntrega);
-            }
-        }
-    } catch (error) {
-        console.error('❌ Error en fetch:', error);
-        toastr.error('Error al procesar la solicitud: ' + error.message);
-        
-        // Si hay error, volver a abrir el modal
-        this.mostrarModalEntregaFisica = true;
-        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
-        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
-        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
-        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
-    } finally {
-        this.isLoadingEntrega = false;
-    }
-},
+                            // Recargar después de 2 segundos
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            toastr.error(data.message || 'Error al confirmar la entrega');
+                            console.error('❌ Error del servidor:', data);
 
-// ============ FUNCIONES DEL MODAL DE ENTREGA ============
-abrirFileInput() {
-    console.log('🖱️ Intentando abrir selector de archivos...');
-    console.log('📁 Referencia fileInputEntrega:', this.$refs.fileInputEntrega);
-    
-    if (this.$refs.fileInputEntrega) {
-        this.$refs.fileInputEntrega.click();
-    } else {
-        console.error('❌ No se encontró la referencia al input de archivo');
-        // Intentar buscar por ID como fallback
-        const fileInput = document.getElementById('fotoEntregaInput');
-        if (fileInput) {
-            fileInput.click();
-        } else {
-            toastr.error('Error al cargar el selector de archivos');
-        }
-    }
-},
+                            // Si hay error, volver a abrir el modal con los datos
+                            this.mostrarModalEntregaFisica = true;
+                            this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+                            this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+                            this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+                            this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+                            // Regenerar preview si es posible
+                            if (this.fotoFileEntrega) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    this.fotoPreviewEntrega = e.target.result;
+                                };
+                                reader.readAsDataURL(this.fotoFileEntrega);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Error en fetch:', error);
+                        toastr.error('Error al procesar la solicitud: ' + error.message);
 
-handleFotoUploadEntrega(event) {
-    console.log('📸 Evento handleFotoUploadEntrega disparado');
-    console.log('📁 Input files:', event.target.files);
-    
-    const file = event.target.files[0];
-    if (file) {
-        console.log('✅ Archivo seleccionado:');
-        console.log('  - Nombre:', file.name);
-        console.log('  - Tamaño:', file.size, 'bytes');
-        console.log('  - Tipo:', file.type);
-        console.log('  - Es instancia de File?:', file instanceof File);
-        
-        if (file.size > 5 * 1024 * 1024) {
-            toastr.error('La foto debe ser menor a 5MB');
-            event.target.value = ''; // Limpiar input
-            return;
-        }
+                        // Si hay error, volver a abrir el modal
+                        this.mostrarModalEntregaFisica = true;
+                        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
+                        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
+                        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
+                        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
+                    } finally {
+                        this.isLoadingEntrega = false;
+                    }
+                },
 
-        if (!file.type.match('image.*')) {
-            toastr.error('Por favor, sube una imagen válida (JPG, PNG, GIF, etc.)');
-            event.target.value = '';
-            return;
-        }
+                // ============ FUNCIONES DEL MODAL DE ENTREGA ============
+                abrirFileInput() {
+                    console.log('🖱️ Intentando abrir selector de archivos...');
+                    console.log('📁 Referencia fileInputEntrega:', this.$refs.fileInputEntrega);
 
-        this.fotoFileEntrega = file;
-        console.log('✅ fotoFileEntrega asignado:', this.fotoFileEntrega);
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            this.fotoPreviewEntrega = e.target.result;
-            console.log('✅ fotoPreviewEntrega generada (longitud:', e.target.result.length, 'caracteres)');
-        };
-        reader.onerror = (e) => {
-            console.error('❌ Error al leer archivo:', e);
-            toastr.error('Error al leer la imagen');
-        };
-        reader.readAsDataURL(file);
-    } else {
-        console.warn('⚠️ No se seleccionó archivo');
-        this.fotoFileEntrega = null;
-        this.fotoPreviewEntrega = null;
-    }
-},
+                    if (this.$refs.fileInputEntrega) {
+                        this.$refs.fileInputEntrega.click();
+                    } else {
+                        console.error('❌ No se encontró la referencia al input de archivo');
+                        // Intentar buscar por ID como fallback
+                        const fileInput = document.getElementById('fotoEntregaInput');
+                        if (fileInput) {
+                            fileInput.click();
+                        } else {
+                            toastr.error('Error al cargar el selector de archivos');
+                        }
+                    }
+                },
 
-removeFotoEntrega() {
-    console.log('🗑️ Eliminando foto...');
-    this.fotoPreviewEntrega = null;
-    this.fotoFileEntrega = null;
-    if (this.$refs.fileInputEntrega) {
-        this.$refs.fileInputEntrega.value = '';
-    }
-    console.log('✅ Foto eliminada');
-},
+                handleFotoUploadEntrega(event) {
+                    console.log('📸 Evento handleFotoUploadEntrega disparado');
+                    console.log('📁 Input files:', event.target.files);
 
-resetFormEntrega() {
-    console.log('🔄 Reseteando formulario de entrega...');
-    // this.fotoPreviewEntrega = null;
-    // this.fotoFileEntrega = null;
-    this.firmaConfirmadaEntrega = false;
-    this.fechaFirmaEntrega = null;
-    // this.observacionesEntrega = '';
-    this.isLoadingEntrega = false;
-    console.log('✅ Formulario reseteado');
-},
+                    const file = event.target.files[0];
+                    if (file) {
+                        console.log('✅ Archivo seleccionado:');
+                        console.log('  - Nombre:', file.name);
+                        console.log('  - Tamaño:', file.size, 'bytes');
+                        console.log('  - Tipo:', file.type);
+                        console.log('  - Es instancia de File?:', file instanceof File);
 
-resetearCompletamenteModal() {
-    console.log('🧹 Reseteando completamente modal de entrega...');
-    this.fotoPreviewEntrega = null;
-    this.fotoFileEntrega = null;
-    this.firmaConfirmadaEntrega = false;
-    this.fechaFirmaEntrega = null;
-    this.observacionesEntrega = '';
-    this.isLoadingEntrega = false;
-    console.log('✅ Modal completamente reseteado');
-},
+                        if (file.size > 5 * 1024 * 1024) {
+                            toastr.error('La foto debe ser menor a 5MB');
+                            event.target.value = ''; // Limpiar input
+                            return;
+                        }
 
-cerrarModalEntrega() {
-    console.log('❌ Cerrando modal de entrega...');
-    this.mostrarModalEntregaFisica = false;
-    this.resetFormEntrega();
-},
+                        if (!file.type.match('image.*')) {
+                            toastr.error('Por favor, sube una imagen válida (JPG, PNG, GIF, etc.)');
+                            event.target.value = '';
+                            return;
+                        }
 
-// ============ FUNCIÓN PARA ABRIR MODAL ENTREGA ============
-confirmarEntregaFisica(solicitudId, articuloId) {
-    console.log('📦 Abriendo modal de entrega física...');
-    const repuestos = @json($repuestos);
-    const repuesto = repuestos.find(r => r.idArticulos == articuloId);
+                        this.fotoFileEntrega = file;
+                        console.log('✅ fotoFileEntrega asignado:', this.fotoFileEntrega);
 
-    this.articuloEntregaId = articuloId;
-    this.repuestoEntregaNombre = repuesto ? repuesto.nombre : 'Repuesto';
-    this.mostrarModalEntregaFisica = true;
-    this.resetFormEntrega();
-    
-    console.log('✅ Modal configurado:');
-    console.log('  - articuloEntregaId:', this.articuloEntregaId);
-    console.log('  - repuestoEntregaNombre:', this.repuestoEntregaNombre);
-},
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.fotoPreviewEntrega = e.target.result;
+                            console.log('✅ fotoPreviewEntrega generada (longitud:', e.target.result
+                                .length, 'caracteres)');
+                        };
+                        reader.onerror = (e) => {
+                            console.error('❌ Error al leer archivo:', e);
+                            toastr.error('Error al leer la imagen');
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        console.warn('⚠️ No se seleccionó archivo');
+                        this.fotoFileEntrega = null;
+                        this.fotoPreviewEntrega = null;
+                    }
+                },
+
+                removeFotoEntrega() {
+                    console.log('🗑️ Eliminando foto...');
+                    this.fotoPreviewEntrega = null;
+                    this.fotoFileEntrega = null;
+                    if (this.$refs.fileInputEntrega) {
+                        this.$refs.fileInputEntrega.value = '';
+                    }
+                    console.log('✅ Foto eliminada');
+                },
+
+                resetFormEntrega() {
+                    console.log('🔄 Reseteando formulario de entrega...');
+                    // this.fotoPreviewEntrega = null;
+                    // this.fotoFileEntrega = null;
+                    this.firmaConfirmadaEntrega = false;
+                    this.fechaFirmaEntrega = null;
+                    // this.observacionesEntrega = '';
+                    this.isLoadingEntrega = false;
+                    console.log('✅ Formulario reseteado');
+                },
+
+                resetearCompletamenteModal() {
+                    console.log('🧹 Reseteando completamente modal de entrega...');
+                    this.fotoPreviewEntrega = null;
+                    this.fotoFileEntrega = null;
+                    this.firmaConfirmadaEntrega = false;
+                    this.fechaFirmaEntrega = null;
+                    this.observacionesEntrega = '';
+                    this.isLoadingEntrega = false;
+                    console.log('✅ Modal completamente reseteado');
+                },
+
+                cerrarModalEntrega() {
+                    console.log('❌ Cerrando modal de entrega...');
+                    this.mostrarModalEntregaFisica = false;
+                    this.resetFormEntrega();
+                },
+
+                // ============ FUNCIÓN PARA ABRIR MODAL ENTREGA ============
+                confirmarEntregaFisica(solicitudId, articuloId) {
+                    console.log('📦 Abriendo modal de entrega física...');
+                    const repuestos = @json($repuestos);
+                    const repuesto = repuestos.find(r => r.idArticulos == articuloId);
+
+                    this.articuloEntregaId = articuloId;
+                    this.repuestoEntregaNombre = repuesto ? repuesto.nombre : 'Repuesto';
+                    this.mostrarModalEntregaFisica = true;
+                    this.resetFormEntrega();
+
+                    console.log('✅ Modal configurado:');
+                    console.log('  - articuloEntregaId:', this.articuloEntregaId);
+                    console.log('  - repuestoEntregaNombre:', this.repuestoEntregaNombre);
+                },
                 // Modificar la función abrirModalDestinatario para seleccionar automáticamente técnico
                 abrirModalDestinatario(solicitudId, articuloId, nombreRepuesto) {
                     const ubicacionId = this.selecciones[articuloId];

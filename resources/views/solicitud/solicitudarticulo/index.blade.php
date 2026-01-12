@@ -422,17 +422,18 @@
                             <div class="flex-shrink-0">
                                 @php
                                     $estados = [
-                                        'aprobada' => ['class' => 'bg-success', 'text' => 'Aprobada'],
-                                        'rechazada' => ['class' => 'bg-danger', 'text' => 'Rechazada'],
+                                        'entregado' => ['class' => 'bg-dark', 'text' => 'Entregado'],
+                                        'listo_para_entregar' => [
+                                            'class' => 'bg-success',
+                                            'text' => 'Listo para Entregar',
+                                        ],
                                         'pendiente' => ['class' => 'bg-warning', 'text' => 'Pendiente'],
-                                        'en_proceso' => ['class' => 'bg-info', 'text' => 'En Proceso'],
-                                        'completada' => ['class' => 'bg-primary', 'text' => 'Completada'],
-                                        'cancelada' => ['class' => 'bg-dark', 'text' => 'Cancelada'],
                                     ];
+
                                     $estado = $solicitud->estado ?? 'pendiente';
                                     $badgeInfo = $estados[$estado] ?? [
                                         'class' => 'bg-secondary',
-                                        'text' => ucfirst($estado),
+                                        'text' => ucfirst(str_replace('_', ' ', $estado)),
                                     ];
                                 @endphp
 
@@ -545,54 +546,28 @@
                         </div>
 
                         @php
-                            $fechaCreacion = $solicitud->fechacreacion
-                                ? \Carbon\Carbon::parse($solicitud->fechacreacion)
-                                : now();
                             $fechaRequerida = $solicitud->fecharequerida
-                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                                : now()->addDays(7);
+                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)->startOfDay()
+                                : now()->addDays(7)->startOfDay();
 
-                            $diasRestantes = intval(now()->diffInDays($fechaRequerida, false));
-
-                            $totalDias = intval($fechaCreacion->diffInDays($fechaRequerida, false));
-                            $diasTranscurridos = intval($fechaCreacion->diffInDays(now(), false));
-
-                            $progreso = 0;
-                            if ($totalDias > 0) {
-                                $progreso = intval(round(($diasTranscurridos / $totalDias) * 100));
-                            }
-
-                            $progreso = max(0, min(100, $progreso));
+                            $diasRestantes = now()->startOfDay()->diffInDays($fechaRequerida, false);
                         @endphp
 
-                        <!-- Progreso de Tiempo -->
-                        <div class="mb-4">
-                            <div class="flex justify-between items-center mb-1">
-                                <p class="text-sm text-gray-500 font-medium">Tiempo Restante</p>
-                                <p
-                                    class="text-xs font-semibold 
-                            @if ($diasRestantes <= 0) text-red-500
-                            @elseif($diasRestantes <= 2) text-red-500 
-                            @elseif($diasRestantes <= 5) text-yellow-500 
-                            @else text-green-500 @endif">
-                                    @if ($diasRestantes > 0)
-                                        {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }}
-                                    @else
-                                        Vencida
-                                    @endif
-                                </p>
-                            </div>
 
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="h-2 rounded-full transition-all duration-500 ease-in-out
-                            @if ($diasRestantes <= 0) bg-red-500 
-                            @elseif($diasRestantes <= 2) bg-red-500 
-                            @elseif($diasRestantes <= 5) bg-yellow-500 
-                            @else bg-green-500 @endif"
-                                    style="width: {{ $progreso }}%;">
-                                </div>
-                            </div>
-                        </div>
+                        <p
+                            class="text-sm font-semibold
+                                @if ($diasRestantes <= 0) text-red-600
+                                @elseif ($diasRestantes <= 2) text-red-500
+                                @elseif ($diasRestantes <= 5) text-yellow-500
+                                @else text-green-600 @endif
+                            ">
+                            @if ($diasRestantes > 0)
+                                {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }} restantes
+                            @else
+                                ⚠️ Vencida
+                            @endif
+                        </p>
+
 
                         @if (!empty($solicitud->observaciones))
                             <div class="mb-4">
