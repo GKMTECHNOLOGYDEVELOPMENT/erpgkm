@@ -1,4 +1,19 @@
 <x-layout.default>
+
+@php
+    $estadosSinCeder = ['entregado', 'listo_para_entregar', 'aprobada'];
+    $mostrarColumnaCeder = !in_array($solicitud->estado, $estadosSinCeder);
+    
+    Log::debug("COLUMNA CEDER - Decisión:", [
+        'solicitud_id' => $solicitud->idsolicitudesordenes,
+        'estado_solicitud' => $solicitud->estado,
+        'mostrar_columna_ceder' => $mostrarColumnaCeder ? 'SÍ' : 'NO',
+        'estados_bloqueados' => $estadosSinCeder
+    ]);
+@endphp
+
+
+
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
@@ -272,12 +287,15 @@
                                                 <i class="fas fa-map-marker-alt text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Ubicación</span>
                                             </th>
-                                            <!-- NUEVA COLUMNA: Ceder -->
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
-                                                <i class="fas fa-exchange-alt text-slate-500 mr-1"></i>
-                                                <span class="hidden sm:inline">Ceder</span>
-                                            </th>
+                                      <!-- NUEVA COLUMNA: Ceder/Estado -->
+<!-- En THEAD -->
+@if ($mostrarColumnaCeder)
+    <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+        <i class="fas fa-exchange-alt text-slate-500 mr-1"></i>
+        <span class="hidden sm:inline">Ceder</span>
+        <span class="sm:hidden">Ced.</span>
+    </th>
+@endif
                                             {{-- <th
                                                 class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-user-check text-slate-500 mr-1"></i>
@@ -396,18 +414,207 @@
                                                         @endif
                                                     </div>
                                                 </td>
-
-                                                <!-- NUEVA COLUMNA: Ceder -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    <div class="max-w-[120px]">
-                                                        <select
-                                                            class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm">
-                                                            <option value="">Seleccionar</option>
-                                                            <!-- Opciones estáticas vacías -->
-                                                        </select>
-                                                    </div>
-                                                </td>
-
+<!-- En TBODY (dentro del foreach) -->
+@if ($mostrarColumnaCeder)
+    <td class="px-4 sm:px-6 py-4 sm:py-6">
+        @php
+            $estadosRepuestoSinSelect = ['entregado', 'pendiente_entrega'];
+            $mostrarSelectRepuesto = !($repuesto->ya_procesado && in_array($repuesto->estado_actual, $estadosRepuestoSinSelect));
+            
+            // ======================= CONSULTA CORREGIDA - SOLO pendiente_por_retorno =======================
+            // Buscar repuestos con estado PENDIENTE_POR_RETORNO de este mismo artículo
+            $repuestosParaCeder = DB::table('repuestos_entregas as re')
+                ->select(
+                    're.id',
+                    're.ubicacion_utilizada',
+                    're.articulo_id',
+                    're.usuario_destino_id',
+                    're.tipo_entrega',
+                    're.cantidad',
+                    're.numero_ticket',
+                    're.estado',
+                    're.solicitud_id',
+                    're.fecha_entrega',
+                    're.fecha_preparacion',
+                    'so.codigo as codigo_solicitud_origen',
+                    'u.Nombre as usuario_nombre',
+                    'u.apellidoPaterno as usuario_apellido',
+                    'a.nombre as articulo_nombre',
+                    'a.codigo_repuesto'
+                )
+                ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
+                ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+                ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
+                ->where('re.articulo_id', $repuesto->idArticulos)           // MISMO ARTÍCULO
+                ->where('re.estado', 'pendiente_por_retorno')              // SOLO PENDIENTE POR RETORNO
+                ->where('re.solicitud_id', '!=', $solicitud->idsolicitudesordenes)  // DE OTRAS SOLICITUDES
+                ->orderBy('re.fecha_entrega', 'desc')
+                ->limit(10)
+                ->get();
+            
+            // ======================= LOG DETALLADO =======================
+            Log::debug("🔍 CEDER - CONSULTA PENDIENTE POR RETORNO:", [
+                'solicitud_actual' => $solicitud->codigo,
+                'solicitud_actual_id' => $solicitud->idsolicitudesordenes,
+                'articulo_actual' => [
+                    'id' => $repuesto->idArticulos,
+                    'nombre' => $repuesto->nombre,
+                    'codigo' => $repuesto->codigo_repuesto ?? 'N/A'
+                ],
+                'condiciones_where' => [
+                    'articulo_id' => $repuesto->idArticulos,
+                    'estado' => 'pendiente_por_retorno',  // ← ESTADO CORRECTO
+                    'solicitud_id !=' => $solicitud->idsolicitudesordenes
+                ],
+                'total_resultados' => $repuestosParaCeder->count(),
+                'resultados_detallados' => $repuestosParaCeder->map(function($item) {
+                    return [
+                        'id' => $item->id,
+                        'solicitud_origen' => $item->codigo_solicitud_origen,
+                        'articulo_id' => $item->articulo_id,
+                        'articulo_nombre' => $item->articulo_nombre,
+                        'estado' => $item->estado,  // Debe ser 'pendiente_por_retorno'
+                        'ubicacion' => $item->ubicacion_utilizada,
+                        'usuario_destino_id' => $item->usuario_destino_id,
+                        'usuario_nombre' => $item->usuario_nombre,
+                        'tipo_entrega' => $item->tipo_entrega,
+                        'cantidad' => $item->cantidad,
+                        'fecha_entrega' => $item->fecha_entrega,
+                        'fecha_preparacion' => $item->fecha_preparacion
+                    ];
+                })->toArray()
+            ]);
+            
+            // ======================= VERIFICAR ESTADOS DISPONIBLES =======================
+            if($repuestosParaCeder->count() == 0) {
+                // Verificar qué estados existen realmente para este artículo
+                $estadosExistentes = DB::table('repuestos_entregas')
+                    ->select('estado', DB::raw('COUNT(*) as total'))
+                    ->where('articulo_id', $repuesto->idArticulos)
+                    ->groupBy('estado')
+                    ->get();
+                
+                Log::debug("🔍 CEDER - ESTADOS EXISTENTES para este artículo:", [
+                    'articulo_id' => $repuesto->idArticulos,
+                    'articulo_nombre' => $repuesto->nombre,
+                    'estados_disponibles' => $estadosExistentes->map(function($item) {
+                        return [
+                            'estado' => $item->estado,
+                            'total' => $item->total
+                        ];
+                    })->toArray(),
+                    'busqueda_estado' => 'pendiente_por_retorno',
+                    'hay_pendiente_por_retorno' => $estadosExistentes->contains('estado', 'pendiente_por_retorno') ? 'SÍ' : 'NO'
+                ]);
+                
+                // Verificar si hay registros con estado similar (por si hay variaciones)
+                $estadosSimilares = DB::table('repuestos_entregas')
+                    ->select('id', 'solicitud_id', 'estado', 'ubicacion_utilizada')
+                    ->where('articulo_id', $repuesto->idArticulos)
+                    ->where('estado', 'like', '%pendiente%')
+                    ->orWhere('estado', 'like', '%retorno%')
+                    ->get();
+                
+                Log::debug("🔍 CEDER - ESTADOS SIMILARES (con 'pendiente' o 'retorno'):", [
+                    'total_similares' => $estadosSimilares->count(),
+                    'estados_encontrados' => $estadosSimilares->map(function($item) {
+                        return [
+                            'id' => $item->id,
+                            'solicitud_id' => $item->solicitud_id,
+                            'estado' => $item->estado,
+                            'ubicacion' => $item->ubicacion_utilizada
+                        ];
+                    })->toArray()
+                ]);
+            }
+            
+        @endphp
+        
+        @if ($mostrarSelectRepuesto)
+            <div class="max-w-[220px]">
+                @if($repuestosParaCeder->count() > 0)
+                    <select class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm hover:bg-white transition-colors"
+                        onchange="cederRepuesto(this.value, {{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                        title="Seleccione un repuesto pendiente por retorno para ceder">
+                        <option value="" class="text-gray-400">-- Ceder repuesto --</option>
+                        
+                        @foreach($repuestosParaCeder as $entrega)
+                            @php
+                                // Formatear información para mostrar
+                                $usuarioInfo = $entrega->usuario_nombre ? 
+                                    substr($entrega->usuario_nombre, 0, 1) . '. ' . $entrega->usuario_apellido :
+                                    'ID:' . $entrega->usuario_destino_id;
+                                    
+                                $fechaEntrega = $entrega->fecha_entrega ? 
+                                    \Carbon\Carbon::parse($entrega->fecha_entrega)->format('d/m/Y') : 
+                                    'N/A';
+                                    
+                                $fechaPreparacion = $entrega->fecha_preparacion ? 
+                                    \Carbon\Carbon::parse($entrega->fecha_preparacion)->format('d/m') : 
+                                    'N/A';
+                                    
+                                // Texto completo para la opción
+                                $textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utilizada} - {$entrega->cantidad}uds - {$usuarioInfo}";
+                                
+                                // Texto corto para tooltip
+                                $tooltipText = "Solicitud origen: {$entrega->codigo_solicitud_origen}\n" .
+                                             "Ubicación: {$entrega->ubicacion_utilizada}\n" .
+                                             "Cantidad: {$entrega->cantidad} unidades\n" .
+                                             "Usuario: {$usuarioInfo}\n" .
+                                             "Fecha entrega: {$fechaEntrega}\n" .
+                                             "Tipo: {$entrega->tipo_entrega}";
+                                
+                                // Log de cada opción
+                                Log::debug("🔍 CEDER - OPCIÓN EN SELECT (pendiente_por_retorno):", [
+                                    'entrega_id' => $entrega->id,
+                                    'estado' => $entrega->estado,
+                                    'solicitud_origen' => $entrega->codigo_solicitud_origen,
+                                    'texto' => $textoOpcion
+                                ]);
+                            @endphp
+                            
+                            <option value="{{ $entrega->id }}" 
+                                data-ubicacion="{{ $entrega->ubicacion_utilizada }}"
+                                data-cantidad="{{ $entrega->cantidad }}"
+                                data-usuario="{{ $entrega->usuario_destino_id }}"
+                                data-tipo="{{ $entrega->tipo_entrega }}"
+                                data-solicitud-origen="{{ $entrega->codigo_solicitud_origen }}"
+                                data-estado="{{ $entrega->estado }}"
+                                title="{{ $tooltipText }}"
+                                class="text-xs">
+                                {{ $textoOpcion }}
+                            </option>
+                        @endforeach
+                    </select>
+                    
+                    <div class="mt-1 text-[10px] text-gray-500 text-center">
+                        <i class="fas fa-clock text-orange-500 mr-1"></i>
+                        {{ $repuestosParaCeder->count() }} pendiente(s) por retorno
+                    </div>
+                @else
+                    <div class="text-center p-2 bg-amber-50 rounded-lg border border-amber-200">
+                        <i class="fas fa-clock text-amber-500 text-sm mb-1"></i>
+                        <p class="text-[11px] text-amber-700 font-medium">Sin retornos pendientes</p>
+                        <p class="text-[10px] text-amber-600 mt-1">
+                            {{ $repuesto->codigo_repuesto ?? $repuesto->nombre }}
+                        </p>
+                        @if($mostrarSelectRepuesto && $repuestosParaCeder->count() == 0)
+                            <p class="text-[9px] text-amber-500 mt-1">
+                                No hay repuestos en "pendiente_por_retorno"
+                            </p>
+                        @endif
+                    </div>
+                @endif
+            </div>
+        @else
+            <div class="text-center">
+                <span class="text-xs text-gray-500 italic">
+                    No aplica
+                </span>
+            </div>
+        @endif
+    </td>
+@endif
                                                 <!-- Entregado A -->
                                                 {{-- <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     @if ($repuesto->ya_procesado)

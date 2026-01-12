@@ -306,8 +306,8 @@
                     const closeProvinciaModal = document.getElementById('closeProvinciaModal');
                     const btnSiProvincia = document.getElementById('btnSiProvincia');
                     const btnNoProvincia = document.getElementById('btnNoProvincia');
-                    const rutaParaProvincia = "{{ route('solicitudrepuesto.create.provincia') }}";
-                    const rutaNoParaProvincia = "{{ route('solicitudrepuesto.create') }}";
+                    const rutaParaProvincia = "/solicitudrepuesto/create/provincia";
+                    const rutaNoParaProvincia = "/solicitudrepuesto/create";
 
                     // Función para abrir modal con animación
                     function openModalWithAnimation(modal) {
