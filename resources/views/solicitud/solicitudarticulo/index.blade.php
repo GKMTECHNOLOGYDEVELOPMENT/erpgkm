@@ -220,96 +220,102 @@
             </div>
         </div>
 
-        <!-- Filtros y búsqueda - SOLUCIÓN SIMPLIFICADA -->
-        <form method="GET" action="{{ route('solicitudarticulo.index') }}"
+        <!-- Filtros y búsqueda - VERSIÓN CON AUTO-APLICACIÓN -->
+        <form method="GET" action="{{ route('solicitudarticulo.index') }}" id="filtrosForm"
             class="bg-white p-4 rounded-lg shadow-sm mb-6">
-            <!-- Inputs hidden para mantener todos los filtros -->
-            <input type="hidden" name="tipo" value="{{ request('tipo') }}">
-            <input type="hidden" name="estado" value="{{ request('estado') }}">
-            <input type="hidden" name="urgencia" value="{{ request('urgencia') }}">
-            <input type="hidden" name="search" value="{{ request('search') }}">
 
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex flex-wrap gap-2">
-                    <!-- Filtro por tipo de solicitud -->
-                    <button type="submit" name="tipo" value=""
-                        class="px-4 py-2 {{ empty(request('tipo')) ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-                        Todas
-                    </button>
-                    <button type="submit" name="tipo" value="solicitud_articulo"
-                        class="px-4 py-2 {{ request('tipo') == 'solicitud_articulo' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-blue-600 transition">
-                        Artículos
-                    </button>
-                    <button type="submit" name="tipo" value="solicitud_repuesto"
-                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green-600 transition">
-                        Repuestos (Lima)
-                    </button>
-                    <button type="submit" name="tipo" value="solicitud_repuesto_provincia"
-                        class="px-4 py-2 {{ request('tipo') == 'solicitud_repuesto_provincia' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
-                        Repuestos (Provincia)
-                    </button>
-
-                    <!-- Filtro por estado -->
-                    <button type="submit" name="estado" value=""
-                        class="px-4 py-2 {{ empty(request('estado')) ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
-                        Todos
-                    </button>
-                    <button type="submit" name="estado" value="pendiente"
-                        class="px-4 py-2 {{ request('estado') == 'pendiente' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
-                        Pendientes
-                    </button>
-                    <button type="submit" name="estado" value="aprobada"
-                        class="px-4 py-2 {{ request('estado') == 'aprobada' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
-                        Aprobadas
-                    </button>
-                    <button type="submit" name="estado" value="rechazada"
-                        class="px-4 py-2 {{ request('estado') == 'rechazada' ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-purple-600 transition">
-                        Rechazadas
-                    </button>
-
-                    <!-- Filtros por urgencia -->
-                    <button type="submit" name="urgencia" value=""
-                        class="px-4 py-2 {{ empty(request('urgencia')) ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-orange-600 transition">
-                        Todas
-                    </button>
-                    <button type="submit" name="urgencia" value="baja"
-                        class="px-4 py-2 {{ request('urgencia') == 'baja' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-green-600 transition">
-                        Baja
-                    </button>
-                    <button type="submit" name="urgencia" value="media"
-                        class="px-4 py-2 {{ request('urgencia') == 'media' ? 'bg-yellow-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-yellow-600 transition">
-                        Media
-                    </button>
-                    <button type="submit" name="urgencia" value="alta"
-                        class="px-4 py-2 {{ request('urgencia') == 'alta' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700' }} rounded hover:bg-red-600 transition">
-                        Alta
-                    </button>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <!-- Select para Tipo de Solicitud -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Solicitud</label>
+                    <select name="tipo"
+                        class="filtro-select w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                        data-autosubmit="true">
+                        <option value="">Todos los tipos</option>
+                        <option value="solicitud_articulo"
+                            {{ request('tipo') == 'solicitud_articulo' ? 'selected' : '' }}>
+                            Artículos
+                        </option>
+                        <option value="solicitud_repuesto"
+                            {{ request('tipo') == 'solicitud_repuesto' ? 'selected' : '' }}>
+                            Repuestos (Lima)
+                        </option>
+                        <option value="solicitud_repuesto_provincia"
+                            {{ request('tipo') == 'solicitud_repuesto_provincia' ? 'selected' : '' }}>
+                            Repuestos (Provincia)
+                        </option>
+                    </select>
                 </div>
 
-                <!-- Búsqueda -->
-                <div class="flex gap-2">
-                    <div class="relative w-full md:w-64">
-                        <input type="text" name="search" placeholder="Buscar por código o ticket..."
+                <!-- Select para Estado -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                    <select name="estado"
+                        class="filtro-select w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                        data-autosubmit="true">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>
+                            Pendientes
+                        </option>
+                        <option value="listo_para_entregar"
+                            {{ request('estado') == 'listo_para_entregar' ? 'selected' : '' }}>
+                            Listo para entregar
+                        </option>
+                        <option value="entregado" {{ request('estado') == 'entregado' ? 'selected' : '' }}>
+                            Entregado
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Select para Urgencia -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Urgencia</label>
+                    <select name="urgencia"
+                        class="filtro-select w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none bg-white"
+                        data-autosubmit="true">
+                        <option value="">Todas las urgencias</option>
+                        <option value="baja" {{ request('urgencia') == 'baja' ? 'selected' : '' }}>
+                            Baja
+                        </option>
+                        <option value="media" {{ request('urgencia') == 'media' ? 'selected' : '' }}>
+                            Media
+                        </option>
+                        <option value="alta" {{ request('urgencia') == 'alta' ? 'selected' : '' }}>
+                            Alta
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Búsqueda con debounce -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Búsqueda</label>
+                    <div class="relative">
+                        <input type="text" name="search" id="searchInput" placeholder="Código, ticket..."
                             value="{{ request('search') }}"
-                            class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
+                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            data-autosubmit="true">
+                        <svg class="absolute left-3 top-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    <button type="submit"
-                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                        Buscar
-                    </button>
-                    @if (request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
-                        <a href="{{ route('solicitudarticulo.index') }}"
-                            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
-                            Limpiar
-                        </a>
-                    @endif
                 </div>
             </div>
+
+            <!-- Solo botón Limpiar (cuando hay filtros activos) -->
+            @if (request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
+                <div class="flex justify-end">
+                    <a href="{{ route('solicitudarticulo.index') }}"
+                        class="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 font-medium flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar Filtros
+                    </a>
+                </div>
+            @endif
 
             <!-- Mostrar filtros activos -->
             @if (request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
@@ -319,7 +325,7 @@
                         <div class="flex flex-wrap gap-2">
                             @if (request('tipo'))
                                 <span
-                                    class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
                                     Tipo:
                                     @if (request('tipo') == 'solicitud_articulo')
                                         Artículos
@@ -331,28 +337,33 @@
                                         {{ request('tipo') }}
                                     @endif
                                     <a href="{{ request()->fullUrlWithoutQuery('tipo') }}"
-                                        class="ml-1 text-blue-600 hover:text-blue-800">×</a>
+                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
                                 </span>
                             @endif
                             @if (request('estado'))
                                 <span
-                                    class="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
-                                    Estado: {{ ucfirst(request('estado')) }}
+                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                                    Estado:
+                                    @if (request('estado') == 'listo_para_entregar')
+                                        Listo para entregar
+                                    @else
+                                        {{ ucfirst(request('estado')) }}
+                                    @endif
                                     <a href="{{ request()->fullUrlWithoutQuery('estado') }}"
-                                        class="ml-1 text-purple-600 hover:text-purple-800">×</a>
+                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
                                 </span>
                             @endif
                             @if (request('urgencia'))
                                 <span
-                                    class="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs">
+                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
                                     Urgencia: {{ ucfirst(request('urgencia')) }}
                                     <a href="{{ request()->fullUrlWithoutQuery('urgencia') }}"
-                                        class="ml-1 text-orange-600 hover:text-orange-800">×</a>
+                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
                                 </span>
                             @endif
                             @if (request('search'))
                                 <span
-                                    class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
+                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
                                     Búsqueda: "{{ request('search') }}"
                                     <a href="{{ request()->fullUrlWithoutQuery('search') }}"
                                         class="ml-1 text-gray-600 hover:text-gray-800">×</a>
@@ -797,77 +808,322 @@
                 </div>
             @endif
 
-            <!-- JavaScript para manejar el modal -->
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const modal = document.getElementById('solicitudModal');
-                    const openModalBtn = document.getElementById('openModalBtn');
-                    const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
-                    const closeModalBtn = document.getElementById('closeModalBtn');
+                    // ========== FILTROS CON AJAX (SIN RECARGAR PÁGINA) ==========
+                    const form = document.getElementById('filtrosForm');
+                    const searchInput = document.getElementById('searchInput');
+                    const resultsContainer = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
+                    let searchTimeout = null;
+                    let currentRequest = null;
 
-                    // Abrir modal desde el botón principal
-                    if (openModalBtn) {
-                        openModalBtn.addEventListener('click', function() {
-                            modal.classList.remove('hidden');
-                        });
+                    // Función para cargar resultados con AJAX
+                    function cargarResultados() {
+                        // Cancelar request anterior si existe
+                        if (currentRequest) {
+                            currentRequest.abort();
+                        }
+
+                        const formData = new FormData(form);
+                        const params = new URLSearchParams(formData);
+
+                        // Mostrar loading
+                        if (resultsContainer) {
+                            const loadingHtml = `
+                    <div class="col-span-full py-12 text-center">
+                        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                        <p class="mt-4 text-gray-600">Buscando solicitudes...</p>
+                    </div>
+                `;
+                            resultsContainer.innerHTML = loadingHtml;
+                        }
+
+                        // Mostrar loading en búsqueda
+                        const searchIcon = searchInput ? searchInput.parentNode.querySelector('svg') : null;
+                        if (searchIcon) {
+                            searchIcon.classList.add('animate-pulse', 'text-blue-500');
+                        }
+
+                        // Hacer request AJAX para obtener toda la página
+                        currentRequest = fetch(`${form.action}?${params.toString()}`, {
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => {
+                                if (!response.ok) throw new Error('Error en la respuesta');
+                                return response.text();
+                            })
+                            .then(html => {
+                                // Parsear el HTML completo
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+
+                                // Extraer SOLO la parte de resultados
+                                const newResults = doc.querySelector(
+                                    '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
+                                if (newResults && resultsContainer) {
+                                    resultsContainer.innerHTML = newResults.innerHTML;
+                                }
+
+                                // Extraer paginación
+                                const newPagination = doc.querySelector('.mt-8');
+                                const paginationContainer = document.querySelector('.mt-8');
+                                if (newPagination && paginationContainer) {
+                                    paginationContainer.innerHTML = newPagination.innerHTML;
+                                } else if (paginationContainer && !newPagination) {
+                                    paginationContainer.innerHTML = '';
+                                }
+
+                                // Extraer filtros activos
+                                const newActiveFilters = doc.querySelector('.mt-4.pt-4');
+                                const activeFiltersContainer = document.querySelector('.mt-4.pt-4');
+                                if (newActiveFilters && activeFiltersContainer) {
+                                    activeFiltersContainer.innerHTML = newActiveFilters.innerHTML;
+
+                                    // Re-asignar eventos a los enlaces de remover filtros
+                                    setTimeout(() => {
+                                        document.querySelectorAll('.mt-4.pt-4 a[href*="fullUrlWithoutQuery"]')
+                                            .forEach(link => {
+                                                link.addEventListener('click', function(e) {
+                                                    e.preventDefault();
+                                                    const url = this.href;
+                                                    fetch(url, {
+                                                            headers: {
+                                                                'X-Requested-With': 'XMLHttpRequest'
+                                                            }
+                                                        })
+                                                        .then(response => response.text())
+                                                        .then(html => {
+                                                            const parser = new DOMParser();
+                                                            const doc = parser.parseFromString(
+                                                                html, 'text/html');
+                                                            const newResults = doc
+                                                                .querySelector(
+                                                                    '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3'
+                                                                    );
+                                                            if (newResults &&
+                                                                resultsContainer) {
+                                                                resultsContainer.innerHTML =
+                                                                    newResults.innerHTML;
+                                                            }
+                                                            window.history.pushState({}, '',
+                                                                url);
+                                                        });
+                                                });
+                                            });
+                                    }, 100);
+                                }
+
+                                // Extraer botón limpiar
+                                const newClearBtn = doc.querySelector('.flex.justify-end');
+                                const clearBtnContainer = document.querySelector('.flex.justify-end');
+                                if (newClearBtn && clearBtnContainer) {
+                                    clearBtnContainer.innerHTML = newClearBtn.innerHTML;
+
+                                    // Re-asignar evento al botón limpiar
+                                    setTimeout(() => {
+                                        const clearBtn = clearBtnContainer.querySelector('a');
+                                        if (clearBtn) {
+                                            clearBtn.addEventListener('click', function(e) {
+                                                e.preventDefault();
+                                                fetch(this.href, {
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest'
+                                                        }
+                                                    })
+                                                    .then(response => response.text())
+                                                    .then(html => {
+                                                        const parser = new DOMParser();
+                                                        const doc = parser.parseFromString(html,
+                                                            'text/html');
+                                                        const newResults = doc.querySelector(
+                                                            '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3'
+                                                            );
+                                                        if (newResults && resultsContainer) {
+                                                            resultsContainer.innerHTML = newResults
+                                                                .innerHTML;
+                                                        }
+                                                        window.history.pushState({}, '', this.href);
+                                                    });
+                                            });
+                                        }
+                                    }, 100);
+                                }
+
+                                // Actualizar URL sin recargar
+                                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                                window.history.pushState({}, '', newUrl);
+
+                                // Actualizar estilos de selects
+                                updateSelectsStyles();
+
+                                // Re-asignar eventos a los botones de los modales
+                                setTimeout(() => {
+                                    if (document.getElementById('openModalBtnEmpty')) {
+                                        document.getElementById('openModalBtnEmpty').addEventListener('click',
+                                            function() {
+                                                openModalWithAnimation(firstModal);
+                                            });
+                                    }
+                                }, 100);
+                            })
+                            .catch(error => {
+                                if (error.name !== 'AbortError') {
+                                    console.error('Error al cargar resultados:', error);
+                                    if (resultsContainer) {
+                                        resultsContainer.innerHTML = `
+                            <div class="col-span-full py-12 text-center">
+                                <div class="text-red-500 mb-4">
+                                    <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900">Error al cargar resultados</h3>
+                                <p class="mt-1 text-gray-500">Intenta de nuevo en unos momentos</p>
+                                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                    Reintentar
+                                </button>
+                            </div>
+                        `;
+                                    }
+                                }
+                            })
+                            .finally(() => {
+                                currentRequest = null;
+                                if (searchIcon) {
+                                    searchIcon.classList.remove('animate-pulse');
+                                    searchIcon.classList.remove('text-blue-500');
+                                    searchIcon.classList.add('text-gray-400');
+                                }
+                            });
                     }
 
-                    // Abrir modal desde el botón cuando no hay solicitudes
-                    if (openModalBtnEmpty) {
-                        openModalBtnEmpty.addEventListener('click', function() {
-                            modal.classList.remove('hidden');
-                        });
+                    // Función para debounce
+                    function debounceSubmit(delay = 600) {
+                        if (searchTimeout) {
+                            clearTimeout(searchTimeout);
+                        }
+                        searchTimeout = setTimeout(cargarResultados, delay);
                     }
 
-                    // Cerrar modal con el botón cancelar
-                    if (closeModalBtn) {
-                        closeModalBtn.addEventListener('click', function() {
-                            modal.classList.add('hidden');
-                        });
-                    }
-
-                    // Cerrar modal al hacer clic fuera del contenido
-                    if (modal) {
-                        modal.addEventListener('click', function(e) {
-                            if (e.target === modal) {
-                                modal.classList.add('hidden');
+                    // Función para actualizar estilos de selects
+                    function updateSelectsStyles() {
+                        const selects = document.querySelectorAll('.filtro-select');
+                        selects.forEach(select => {
+                            if (select.value) {
+                                select.classList.add('font-medium', 'bg-gray-50');
+                            } else {
+                                select.classList.remove('font-medium', 'bg-gray-50');
                             }
                         });
                     }
 
-                    // Cerrar modal con la tecla Escape
-                    document.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
-                            modal.classList.add('hidden');
-                        }
-                    });
-                });
+                    // Manejar cambio en selects
+                    const selects = document.querySelectorAll('.filtro-select');
+                    selects.forEach(select => {
+                        select.addEventListener('change', function() {
+                            // Animación visual
+                            this.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.2)';
+                            setTimeout(() => {
+                                this.style.boxShadow = '';
+                            }, 300);
 
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Elementos del primer modal
+                            // Actualizar estilos
+                            updateSelectsStyles();
+
+                            // Cargar resultados inmediatamente
+                            cargarResultados();
+                        });
+                    });
+
+                    // Manejar búsqueda con debounce
+                    if (searchInput) {
+                        searchInput.addEventListener('input', function() {
+                            // Mostrar indicador de búsqueda
+                            const icon = this.parentNode.querySelector('svg');
+                            if (icon) {
+                                icon.classList.remove('text-gray-400');
+                                icon.classList.add('text-blue-500', 'animate-pulse');
+                            }
+
+                            // Aplicar debounce
+                            debounceSubmit(800);
+                        });
+
+                        // También permitir búsqueda con Enter
+                        searchInput.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (searchTimeout) {
+                                    clearTimeout(searchTimeout);
+                                }
+                                cargarResultados();
+                            }
+                        });
+                    }
+
+                    // Botón Limpiar - prevenir recarga y usar AJAX
+                    const clearBtn = document.querySelector('a[href="{{ route('solicitudarticulo.index') }}"]');
+                    if (clearBtn) {
+                        clearBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+
+                            // Limpiar todos los filtros
+                            selects.forEach(select => {
+                                select.value = '';
+                            });
+
+                            if (searchInput) {
+                                searchInput.value = '';
+                            }
+
+                            // Cargar resultados limpios
+                            fetch("{{ route('solicitudarticulo.index') }}", {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => response.text())
+                                .then(html => {
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(html, 'text/html');
+                                    const newResults = doc.querySelector(
+                                        '.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3');
+                                    if (newResults && resultsContainer) {
+                                        resultsContainer.innerHTML = newResults.innerHTML;
+                                    }
+                                    window.history.pushState({}, '', "{{ route('solicitudarticulo.index') }}");
+                                });
+                        });
+                    }
+
+                    // Inicializar estilos de selects
+                    updateSelectsStyles();
+
+                    // Soporte para navegación con botones atrás/adelante
+                    window.addEventListener('popstate', function() {
+                        cargarResultados();
+                    });
+
+                    // ========== MODALES ==========
                     const firstModal = document.getElementById('solicitudModal');
                     const openModalBtn = document.getElementById('openModalBtn');
                     const openModalBtnEmpty = document.getElementById('openModalBtnEmpty');
                     const closeModalBtn = document.getElementById('closeModalBtn');
                     const btnRepuesto = document.getElementById('btnRepuesto');
-
-                    // Elementos del segundo modal
                     const provinciaModal = document.getElementById('provinciaModal');
                     const backToFirstModal = document.getElementById('backToFirstModal');
                     const closeProvinciaModal = document.getElementById('closeProvinciaModal');
                     const btnSiProvincia = document.getElementById('btnSiProvincia');
                     const btnNoProvincia = document.getElementById('btnNoProvincia');
-
-                    // Rutas
                     const rutaParaProvincia = "{{ route('solicitudrepuesto.create.provincia') }}";
                     const rutaNoParaProvincia = "{{ route('solicitudrepuesto.create') }}";
 
                     // Función para abrir modal con animación
                     function openModalWithAnimation(modal) {
                         if (!modal) return;
-
                         modal.classList.remove('hidden');
-                        // Pequeño delay para que el DOM registre el cambio antes de la animación
                         setTimeout(() => {
                             const content = modal.querySelector('.bg-white');
                             if (content) {
@@ -877,17 +1133,13 @@
                         }, 10);
                     }
 
-                    // Función para cerrar modal con animación
                     function closeModalWithAnimation(modal) {
                         if (!modal) return;
-
                         const content = modal.querySelector('.bg-white');
                         if (content) {
                             content.classList.remove('scale-100', 'opacity-100');
                             content.classList.add('scale-95', 'opacity-0');
                         }
-
-                        // Esperar a que termine la animación antes de ocultar
                         setTimeout(() => {
                             modal.classList.add('hidden');
                         }, 300);
@@ -913,13 +1165,10 @@
                         });
                     }
 
-                    // 3. Cuando hacen clic en "Solicitud de Repuesto" - Transición suave entre modales
+                    // 3. Cuando hacen clic en "Solicitud de Repuesto"
                     if (btnRepuesto) {
                         btnRepuesto.addEventListener('click', function() {
-                            // Cerrar primer modal con animación
                             closeModalWithAnimation(firstModal);
-
-                            // Esperar a que termine la animación de cierre antes de abrir el segundo
                             setTimeout(() => {
                                 openModalWithAnimation(provinciaModal);
                             }, 300);
@@ -929,10 +1178,7 @@
                     // 4. Volver al primer modal desde el segundo con animación
                     if (backToFirstModal) {
                         backToFirstModal.addEventListener('click', function() {
-                            // Cerrar segundo modal con animación
                             closeModalWithAnimation(provinciaModal);
-
-                            // Esperar a que termine la animación de cierre antes de abrir el primero
                             setTimeout(() => {
                                 openModalWithAnimation(firstModal);
                             }, 300);
@@ -946,26 +1192,20 @@
                         });
                     }
 
-                    // 6. Cuando seleccionan SÍ (para provincia) - Con animación de clic
+                    // 6. Cuando seleccionan SÍ (para provincia)
                     if (btnSiProvincia) {
                         btnSiProvincia.addEventListener('click', function(e) {
-                            // Animación de clic
                             e.currentTarget.style.transform = 'scale(0.95)';
-
-                            // Pequeño delay para que se vea la animación
                             setTimeout(() => {
                                 window.location.href = rutaParaProvincia;
                             }, 150);
                         });
                     }
 
-                    // 7. Cuando seleccionan NO (no para provincia) - Con animación de clic
+                    // 7. Cuando seleccionan NO (no para provincia)
                     if (btnNoProvincia) {
                         btnNoProvincia.addEventListener('click', function(e) {
-                            // Animación de clic
                             e.currentTarget.style.transform = 'scale(0.95)';
-
-                            // Pequeño delay para que se vea la animación
                             setTimeout(() => {
                                 window.location.href = rutaNoParaProvincia;
                             }, 150);
@@ -976,7 +1216,6 @@
                     function setupModalClose(modal) {
                         if (modal) {
                             modal.addEventListener('click', function(e) {
-                                // Verificar si se hizo clic en el fondo (no en el contenido)
                                 if (e.target === modal) {
                                     closeModalWithAnimation(modal);
                                 }
@@ -998,13 +1237,19 @@
                         }
                     });
 
-                    // 10. Asegurar que el primer modal también tenga animación
-                    if (firstModal) {
-                        const content = firstModal.querySelector('.bg-white');
-                        if (content && !content.classList.contains('transform')) {
-                            content.classList.add('transform', 'transition-all', 'duration-300', 'scale-95', 'opacity-0');
+                    // 10. Asegurar que los modales tengan animación
+                    function ensureModalAnimation(modal) {
+                        if (modal) {
+                            const content = modal.querySelector('.bg-white');
+                            if (content && !content.classList.contains('transform')) {
+                                content.classList.add('transform', 'transition-all', 'duration-300', 'scale-95',
+                                    'opacity-0');
+                            }
                         }
                     }
+
+                    ensureModalAnimation(firstModal);
+                    ensureModalAnimation(provinciaModal);
                 });
             </script>
     </x-layout.default>
