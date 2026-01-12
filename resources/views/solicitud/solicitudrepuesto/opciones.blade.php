@@ -572,15 +572,16 @@
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     @if ($repuesto->ya_procesado)
                                                         @if ($repuesto->estado_actual == 'entregado')
-                                                            <span
-                                                                class="text-green-600 font-semibold text-xs sm:text-sm">
-                                                                <i class="fas fa-check-circle mr-1"></i>
-                                                                <span class="hidden sm:inline">Entregado</span>
-                                                                <span class="sm:hidden">Entreg.</span>
-                                                            </span>
+                                                            <!-- Botón para ver confirmación -->
+                                                            <button type="button"
+                                                                @click="abrirModalVerConfirmacion({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                                                <i class="fas fa-eye mr-1 sm:mr-2"></i>
+                                                                <span class="hidden sm:inline">Ver Confirmación</span>
+                                                                <span class="sm:hidden">Ver</span>
+                                                            </button>
                                                         @elseif($repuesto->estado_actual == 'pendiente_entrega')
                                                             <div class="space-y-2">
-
                                                                 <!-- Botón para confirmar entrega física -->
                                                                 <button type="button"
                                                                     @click="confirmarEntregaFisica({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
@@ -1102,7 +1103,112 @@
                     </div>
                 </div>
             </div>
-        </div>     
+        </div>
+
+        
+        <!-- Modal confirmación de entrega -->
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
+            :class="mostrarModalVerConfirmacion && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalVerConfirmacion()">
+
+                <div x-show="mostrarModalVerConfirmacion" x-transition x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
+
+                    <!-- Header con fondo gris claro -->
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <div class="font-bold text-lg text-gray-900 dark:text-white">
+                            Confirmación de Entrega
+                        </div>
+                        <button type="button" class="text-white-dark hover:text-dark"
+                            @click="cerrarModalVerConfirmacion()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Contenido del modal -->
+                    <div class="p-5">
+                        <!-- Información del repuesto -->
+                        <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Repuesto</span>
+                            <span class="font-medium text-gray-900 dark:text-white" x-text="repuestoVerNombre"></span>
+                        </div>
+
+                        <!-- Grid de información -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <!-- Entregado por -->
+                            <div>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Entregado por</span>
+                                <span class="text-gray-900 dark:text-white"
+                                    x-text="entregaInfo.usuario_entrego || 'No disponible'"></span>
+                            </div>
+
+                            <!-- Fecha -->
+                            <div>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Fecha</span>
+                                <span class="text-gray-900 dark:text-white"
+                                    x-text="entregaInfo.fecha_entrega || 'No disponible'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Firma -->
+                        <div class="mb-6">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Firma</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
+                                :class="entregaInfo.firma_confirma ?
+                                    'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
+                                    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
+                                <span x-text="entregaInfo.firma_confirma ? 'Confirmada' : 'No confirmada'"></span>
+                            </span>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div x-show="entregaInfo.observaciones_entrega" class="mb-6">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Observaciones</span>
+                            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
+                                <p class="text-gray-600 dark:text-gray-300"
+                                    x-text="entregaInfo.observaciones_entrega"></p>
+                            </div>
+                        </div>
+
+                        <!-- Foto de entrega -->
+                        <div x-show="entregaInfo.foto_url" class="mb-6">
+                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-2">Foto del repuesto</span>
+                            <div
+                                class="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900">
+                                <div class="relative w-full h-64 overflow-hidden">
+                                    <img :src="entregaInfo.foto_url"
+                                        class="absolute inset-0 w-full h-full object-contain"
+                                        x-on:error="entregaInfo.foto_url = null">
+
+                                    <div x-show="!entregaInfo.foto_url"
+                                        class="flex items-center justify-center h-full">
+                                        <div class="text-center">
+                                            <i class="fas fa-image text-gray-400 text-4xl mb-2"></i>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">Imagen no disponible
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de cierre -->
+                        <div class="flex justify-end items-center mt-8">
+                            <button type="button" class="btn btn-primary" @click="cerrarModalVerConfirmacion()">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -1132,6 +1238,10 @@
                 selecciones: {},
                 procesandoIndividual: {},
                 isLoadingGrupal: false,
+
+                entregaInfo: {}, // Para almacenar los datos de la entrega
+                mostrarModalVerConfirmacion: false, // Controla si mostrar el modal
+                repuestoVerNombre: '', // Nombre del repuesto
 
                 // Variables del modal de destinatario
                 mostrarModalDestinatario: false,
@@ -1509,6 +1619,58 @@
                     } finally {
                         this.isLoadingEntrega = false;
                     }
+                },
+
+                // En tu objeto Alpine.data, donde tienes las otras funciones:
+                async abrirModalVerConfirmacion(solicitudId, articuloId) {
+                    try {
+                        console.log('🔍 Abriendo modal de ver confirmación:', {
+                            solicitudId,
+                            articuloId
+                        });
+
+                        // Obtener nombre del repuesto
+                        this.repuestoVerNombre = 'Cargando...';
+
+                        // Llamar a la API
+                        const response = await fetch(
+                            `/api/obtener-info-entrega/${solicitudId}/${articuloId}`);
+
+                        if (!response.ok) {
+                            throw new Error(`Error HTTP: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('📦 Datos recibidos:', data);
+
+                        if (data.success && data.data) {
+                            this.entregaInfo = data.data;
+
+                            // Crear URL para la foto si existe
+                            if (data.data.foto_entrega && data.data.tipo_archivo_foto) {
+                                this.entregaInfo.foto_url =
+                                    `data:${data.data.tipo_archivo_foto};base64,${data.data.foto_entrega}`;
+                                console.log('📸 Foto procesada:', this.entregaInfo.foto_url
+                                    ?.substring(0, 50) + '...');
+                            }
+
+                            this.mostrarModalVerConfirmacion = true;
+                            console.log('✅ Modal abierto exitosamente');
+                        } else {
+                            console.error('❌ Error en respuesta:', data.message);
+                            alert('Error: ' + (data.message || 'No se pudo cargar la información'));
+                        }
+                    } catch (error) {
+                        console.error('💥 Error al abrir modal:', error);
+                        alert('Error al cargar la información de entrega: ' + error.message);
+                    }
+                },
+
+                cerrarModalVerConfirmacion() {
+                    console.log('❌ Cerrando modal de ver confirmación');
+                    this.mostrarModalVerConfirmacion = false;
+                    this.entregaInfo = {};
+                    this.repuestoVerNombre = '';
                 },
 
                 // ============ FUNCIONES DEL MODAL DE ENTREGA ============

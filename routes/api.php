@@ -747,3 +747,4 @@ Route::get('/contactos-por-cliente-general/{idClienteGeneral}', function($idClie
         return response()->json([], 500);
     }
 });
+

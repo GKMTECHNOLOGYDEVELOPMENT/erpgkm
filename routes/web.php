@@ -796,13 +796,15 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::get('/{id}/conformidad-pdf', [SolicitudrepuestoController::class, 'generarConformidad'])
         ->name('conformidad-pdf');
 
-        Route::post('/{id}/marcar-listo-individual', [SolicitudrepuestoController::class, 'marcarListoIndividual']);
+    Route::post('/{id}/marcar-listo-individual', [SolicitudrepuestoController::class, 'marcarListoIndividual']);
 
-        // En tu archivo de rutas, agregar estas dos rutas:
-Route::post('/{id}/confirmar-entrega-fisica', [SolicitudrepuestoController::class, 'confirmarEntregaFisica']);
-Route::post('/{id}/confirmar-entrega-fisica-con-foto', [SolicitudrepuestoController::class, 'confirmarEntregaFisicaConFoto']);
+    // En tu archivo de rutas, agregar estas dos rutas:
+    Route::post('/{id}/confirmar-entrega-fisica-con-foto', [SolicitudrepuestoController::class, 'confirmarEntregaFisicaConFoto']);
 });
-
+Route::get(
+    '/api/obtener-info-entrega/{solicitudId}/{articuloId}',
+    [SolicitudrepuestoController::class, 'obtenerInfoEntrega']
+)->name('api.obtener-info-entrega');
 
 Route::prefix('solicitudrepuestoprovincia')->name('solicitudrepuestoprovincia.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
@@ -2001,16 +2003,16 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
     Route::get('/{id}/detalles', [RepuestoTransitoController::class, 'obtenerDetalles'])->name('detalles');
     Route::get('/{id}/evidencias', [RepuestoTransitoController::class, 'obtenerEvidencias'])->name('evidencias');
     Route::get('/{id}/imagen/{tipo}', [RepuestoTransitoController::class, 'mostrarImagen'])->name('imagen');
-       Route::get('/{id}/foto/{tipo}', [RepuestoTransitoController::class, 'obtenerFoto'])->name('repuestos-transito.foto');
+    Route::get('/{id}/foto/{tipo}', [RepuestoTransitoController::class, 'obtenerFoto'])->name('repuestos-transito.foto');
     Route::get('/{id}/fotos', [RepuestoTransitoController::class, 'obtenerTodasFotos'])->name('repuestos-transito.todas-fotos');
     // Ruta de debug
     Route::get('/{id}/debug-fotos', [RepuestoTransitoController::class, 'debugFotos'])->name('repuestos-transito.debug-fotos');
     Route::get('/{id}/fotos-tabla', [RepuestoTransitoController::class, 'obtenerTodasFotos'])
-    ->name('repuestos.transito.fotos.tabla');
+        ->name('repuestos.transito.fotos.tabla');
 
-Route::get('/{id}/foto-tabla/{tipo}', [RepuestoTransitoController::class, 'obtenerFotoTablaSeparada'])
-    ->name('repuestos.transito.foto.tabla');
+    Route::get('/{id}/foto-tabla/{tipo}', [RepuestoTransitoController::class, 'obtenerFotoTablaSeparada'])
+        ->name('repuestos.transito.foto.tabla');
 
-Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
-    ->name('repuestos.transito.fotos.tipo');
+    Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
+        ->name('repuestos.transito.fotos.tipo');
 });

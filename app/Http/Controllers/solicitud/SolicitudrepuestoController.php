@@ -4238,6 +4238,91 @@ public function confirmarEntregaFisicaConFoto(Request $request, $id)
         ], 500);
     }
 }
+
+public function obtenerInfoEntrega($solicitudId, $articuloId)
+{
+    try {
+        Log::info("🔍 Obteniendo info de entrega", [
+            'solicitud_id' => $solicitudId,
+            'articulo_id' => $articuloId
+        ]);
+
+        // Buscar información de la entrega
+        $entrega = DB::table('repuestos_entregas')
+            ->select([
+                'estado',
+                'fecha_entrega',
+                'usuario_entrego_id',
+                'firma_confirma',
+                'observaciones_entrega',
+                'observaciones',
+                'foto_entrega',
+                'tipo_archivo_foto',
+                'created_at',
+                'updated_at'
+            ])
+            ->where('solicitud_id', $solicitudId)
+            ->where('articulo_id', $articuloId)
+            ->where('estado', 'entregado')
+            ->first();
+
+        if (!$entrega) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró información de entrega'
+            ], 404);
+        }
+
+        // Obtener nombre del usuario que entregó
+        $usuarioEntrego = null;
+        if ($entrega->usuario_entrego_id) {
+            $usuarioEntrego = DB::table('users')
+                ->select('name')
+                ->where('id', $entrega->usuario_entrego_id)
+                ->first();
+        }
+
+        // Preparar datos de respuesta
+        $data = [
+            'estado' => $entrega->estado,
+            'fecha_entrega' => $entrega->fecha_entrega 
+                ? \Carbon\Carbon::parse($entrega->fecha_entrega)->format('d/m/Y H:i:s')
+                : null,
+            'usuario_entrego' => $usuarioEntrego ? $usuarioEntrego->name : null,
+            'firma_confirma' => (bool)$entrega->firma_confirma,
+            'observaciones_entrega' => $entrega->observaciones_entrega,
+            'observaciones' => $entrega->observaciones,
+            'fecha_creacion' => \Carbon\Carbon::parse($entrega->created_at)->format('d/m/Y H:i:s'),
+            'fecha_actualizacion' => \Carbon\Carbon::parse($entrega->updated_at)->format('d/m/Y H:i:s'),
+        ];
+
+        // Incluir foto en base64 si existe
+        if ($entrega->foto_entrega && $entrega->tipo_archivo_foto) {
+            // Convertir BLOB a base64
+            $fotoBase64 = base64_encode($entrega->foto_entrega);
+            $data['foto_entrega'] = $fotoBase64;
+            $data['tipo_archivo_foto'] = $entrega->tipo_archivo_foto;
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al obtener info de entrega:', [
+            'error' => $e->getMessage(),
+            'solicitud' => $solicitudId,
+            'articulo' => $articuloId
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener información: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
 /**
  * Método auxiliar para comprimir imágenes JPEG (si la necesitas)
  */
