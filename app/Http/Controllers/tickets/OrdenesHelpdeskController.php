@@ -121,6 +121,11 @@ public function storehelpdesk(Request $request)
 {
     try {
         Log::debug('Datos recibidos en storehelpdesk:', $request->all());
+        
+        // Convertir idContactoFinal vacío a 0 antes de validar
+        if (empty($request->idContactoFinal) || $request->idContactoFinal === '') {
+            $request->merge(['idContactoFinal' => 0]);
+        }
 
         // Validación - agregar idContactoFinal como nullable
         $validatedData = $request->validate([
@@ -137,7 +142,7 @@ public function storehelpdesk(Request $request)
             'nombreTecnicoEnvio' => 'nullable|array',
             'dniTecnicoEnvio' => 'nullable|array',
             'agencia' => 'nullable|string|max:255',
-            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
+            'idContactoFinal' => 'nullable|integer', // Se validará como 0 si viene vacío
 
             // Validación solo si el tipoServicio es 6
             'tipoProducto' => 'required_if:tipoServicio,6|integer|exists:categoria,idCategoria',
@@ -2548,140 +2553,146 @@ public function getAll(Request $request)
         return response()->json($visitas);
     }
 
+public function actualizarHelpdesk(Request $request, $id)
+{
+    Log::info('Datos recibidos para actualizar la orden (Helpdesk):', $request->all());
 
+    // ? Normalizar ANTES de validar (igual que en actualizarSoporte)
+    $request->merge([
+        'idContactoFinal' => empty($request->idContactoFinal) ? 0 : (int)$request->idContactoFinal
+    ]);
 
-    public function actualizarHelpdesk(Request $request, $id)
-    {
-        // Log para ver los datos que se están recibiendo
-        Log::info('Datos recibidos para actualizar la orden:', $request->all());
+    $validated = $request->validate([
+        'idCliente' => 'required|exists:cliente,idCliente',
+        'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+        'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
+        'idTienda' => 'required|exists:tienda,idTienda',
+        'idContactoFinal' => 'integer', // ? Ya no nullable, siempre será integer
+        'fallaReportada' => 'nullable|string',
+    ]);
 
-        // Validar los datos del formulario
-        $validated = $request->validate([
-            'idCliente' => 'required|exists:cliente,idCliente',
-            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-            'tipoServicio' => 'required|integer|exists:tiposervicio,idTipoServicio',
-            'idTienda' => 'required|exists:tienda,idTienda',
-            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
-            'fallaReportada' => 'nullable|string',
-        ]);
+    // Encontrar la orden y actualizarla
+    $orden = Ticket::findOrFail($id);
 
-        // Encontrar la orden y actualizarla
-        $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
+    // Log para verificar que se encontró la orden
+    Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
 
-        // Log para verificar que se encontró la orden
-        Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
+    // Actualizar los campos de la orden
+    $orden->idCliente = $request->idCliente;
+    $orden->idClienteGeneral = $request->idClienteGeneral;
+    $orden->idTienda = $request->idTienda;
+    $orden->tipoServicio = $request->tipoServicio;
+    $orden->idContactoFinal = $request->idContactoFinal; // ? Ya normalizado
+    $orden->fallaReportada = $request->fallaReportada;
 
-        // Actualizar los campos de la orden
-        $orden->idCliente = $request->idCliente;
-        $orden->idClienteGeneral = $request->idClienteGeneral;
-        $orden->idTienda = $request->idTienda;
-        $orden->tipoServicio = $request->tipoServicio;
-        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
-        $orden->fallaReportada = $request->fallaReportada;
+    // Guardar los cambios
+    $orden->save();
 
-        // Guardar los cambios
-        $orden->save();
+    // Log para confirmar que los cambios se guardaron
+    Log::info('Orden actualizada (Helpdesk):', [
+        'id' => $orden->id,
+        'idContactoFinal' => $orden->idContactoFinal,
+        'tipo_valor' => gettype($orden->idContactoFinal)
+    ]);
 
-        // Log para confirmar que los cambios se guardaron
-        Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
+    // Responder con éxito
+    return response()->json(['success' => true]);
+}
 
-        // Responder con éxito
-        return response()->json(['success' => true]);
-    }
+public function actualizarSoporte(Request $request, $id)
+{
+    Log::info('Datos recibidos para actualizar la orden:', $request->all());
 
+    // ? Normalizar ANTES de validar
+    $request->merge([
+        'idContactoFinal' => empty($request->idContactoFinal) ? 0 : (int)$request->idContactoFinal
+    ]);
 
+    $validated = $request->validate([
+        'idCliente' => 'required|exists:cliente,idCliente',
+        'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+        'idTienda' => 'required|exists:tienda,idTienda',
+        'fallaReportada' => 'nullable|string',
+        'ejecutor' => 'nullable|exists:usuarios,idUsuario',
+        'idContactoFinal' => 'integer', // ? Ya no nullable, siempre será integer
+    ]);
 
+    $orden = Ticket::findOrFail($id);
 
-    public function actualizarSoporte(Request $request, $id)
-    {
-        // Log para ver los datos que se están recibiendo
-        Log::info('Datos recibidos para actualizar la orden:', $request->all());
+    $orden->idContactoFinal = $request->idContactoFinal;
+    $orden->idCliente = $request->idCliente;
+    $orden->idClienteGeneral = $request->idClienteGeneral;
+    $orden->idTienda = $request->idTienda;
+    $orden->fallaReportada = $request->fallaReportada;
+    $orden->ejecutor = $request->ejecutor;
 
-        // Validar los datos del formulario
-        $validated = $request->validate([
-            'idCliente' => 'required|exists:cliente,idCliente',
-            'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-            'idTienda' => 'required|exists:tienda,idTienda',
-            'fallaReportada' => 'nullable|string',
-            'ejecutor' => 'nullable|exists:usuarios,idUsuario', // Validar que el ejecutor sea un usuario válido
-            'idContactoFinal' => 'nullable|integer', // ✅ NUEVO CAMPO
+    $orden->save();
 
-        ]);
+    Log::info('Orden actualizada:', [
+        'id' => $orden->id,
+        'idContactoFinal' => $orden->idContactoFinal
+    ]);
 
-        // Encontrar la orden y actualizarla
-        $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
-
-        // Log para verificar que se encontró la orden
-        Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
-
-        // Actualizar los campos de la orden
-        $orden->idCliente = $request->idCliente;
-        $orden->idClienteGeneral = $request->idClienteGeneral;
-        $orden->idTienda = $request->idTienda;
-        $orden->fallaReportada = $request->fallaReportada;
-        $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
-        $orden->idContactoFinal = $request->idContactoFinal; // ✅ NUEVO CAMPO
-
-
-        // Guardar los cambios
-        $orden->save();
-
-        // Log para confirmar que los cambios se guardaron
-        Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
-
-        // Responder con éxito
-        return response()->json(['success' => true]);
-    }
-
+    return response()->json(['success' => true]);
+}
 
 
 
-    public function actualizarEjecucion(Request $request, $id)
-    {
-        // Log para ver los datos que se estÃ¡n recibiendo
-        Log::info('Datos recibidos para actualizar la orden:', $request->all());
+public function actualizarEjecucion(Request $request, $id)
+{
+    Log::info('Datos recibidos para actualizar la orden (Ejecución):', $request->all());
 
-        // Validar los datos del formulario
-       $validated = $request->validate([
-    'idCliente' => 'required|exists:cliente,idCliente',
-    'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
-    'idTienda' => 'required|exists:tienda,idTienda',
-    'fallaReportada' => 'nullable|string',
-    'numero_ticket' => [
-        'required',
-        'string',
-        Rule::unique('tickets', 'numero_ticket')->ignore($id, 'idTickets'),
-    ],
-    'ejecutor' => 'nullable|exists:usuarios,idUsuario',
-    'nrmcotizacion' => 'nullable|string',
-    'idContactoFinal' => 'nullable|integer',
-]);
-        // Encontrar la orden y actualizarla
-        $orden = Ticket::findOrFail($id); // Usamos findOrFail para asegurarnos que la orden existe
+    // ? Normalizar ANTES de validar
+    $request->merge([
+        'idContactoFinal' => empty($request->idContactoFinal) ? 0 : (int)$request->idContactoFinal
+    ]);
 
-        // Log para verificar que se encontrÃ³ la orden
-        Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
+    // Validar los datos del formulario
+    $validated = $request->validate([
+        'idCliente' => 'required|exists:cliente,idCliente',
+        'idClienteGeneral' => 'required|exists:clientegeneral,idClienteGeneral',
+        'idTienda' => 'required|exists:tienda,idTienda',
+        'fallaReportada' => 'nullable|string',
+        'numero_ticket' => [
+            'required',
+            'string',
+            Rule::unique('tickets', 'numero_ticket')->ignore($id, 'idTickets'),
+        ],
+        'ejecutor' => 'nullable|exists:usuarios,idUsuario',
+        'nrmcotizacion' => 'nullable|string',
+        'idContactoFinal' => 'integer', // ? Ya no nullable, siempre será integer
+    ]);
 
-        // Actualizar los campos de la orden
-        $orden->idCliente = $request->idCliente;
-        $orden->idClienteGeneral = $request->idClienteGeneral;
-        $orden->idTienda = $request->idTienda;
-        $orden->numero_ticket= $request->numero_ticket;
-        $orden->fallaReportada = $request->fallaReportada;
-        $orden->ejecutor = $request->ejecutor; // Actualizamos el ejecutor
-        $orden->nrmcotizacion = $request->nrmcotizacion;
-        $orden->idContactoFinal = $request->idContactoFinal; // âœ… NUEVO CAMPO
+    // Encontrar la orden y actualizarla
+    $orden = Ticket::findOrFail($id);
 
+    // Log para verificar que se encontró la orden
+    Log::info('Orden encontrada con ID:', ['id' => $orden->id]);
 
-        // Guardar los cambios
-        $orden->save();
+    // Actualizar los campos de la orden
+    $orden->idCliente = $request->idCliente;
+    $orden->idClienteGeneral = $request->idClienteGeneral;
+    $orden->idTienda = $request->idTienda;
+    $orden->numero_ticket = $request->numero_ticket;
+    $orden->fallaReportada = $request->fallaReportada;
+    $orden->ejecutor = $request->ejecutor;
+    $orden->nrmcotizacion = $request->nrmcotizacion;
+    $orden->idContactoFinal = $request->idContactoFinal; // ? Ya normalizado
 
-        // Log para confirmar que los cambios se guardaron
-        Log::info('Orden actualizada:', ['id' => $orden->id, 'nuevos_datos' => $orden->toArray()]);
+    // Guardar los cambios
+    $orden->save();
 
-        // Responder con Ã©xito
-        return response()->json(['success' => true]);
-    }
+    // Log para confirmar que los cambios se guardaron
+    Log::info('Orden actualizada (Ejecución):', [
+        'id' => $orden->id,
+        'idContactoFinal' => $orden->idContactoFinal,
+        'tipo_valor' => gettype($orden->idContactoFinal)
+    ]);
+
+    // Responder con éxito
+    return response()->json(['success' => true]);
+}
+
 
 
 
