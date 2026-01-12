@@ -4335,43 +4335,58 @@ public function confirmarEntregaFisicaConFoto(Request $request, $id)
             (float)$articuloInfo->precio_compra
         );
 
-        // ========================
-        // 10. ACTUALIZAR ESTADO DE LA SOLICITUD
-        // ========================
-        Log::info("🔄 Actualizando estado de solicitud...");
-        $repuestosEntregados = DB::table('repuestos_entregas')
-            ->where('solicitud_id', $id)
-            ->where('estado', 'entregado')
-            ->count();
+       // ========================
+// 10. ACTUALIZAR ESTADO DE LA SOLICITUD
+// ========================
+Log::info("🔄 Actualizando estado de solicitud...");
 
-        $totalRepuestos = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->count();
+// Contar repuestos entregados
+$repuestosEntregados = DB::table('repuestos_entregas')
+    ->where('solicitud_id', $id)
+    ->where('estado', 'entregado')
+    ->count();
 
-        Log::info("📊 Estadísticas:");
-        Log::info("  - Repuestos entregados: " . $repuestosEntregados);
-        Log::info("  - Total repuestos: " . $totalRepuestos);
+// Contar total de repuestos en la solicitud
+$totalRepuestos = DB::table('ordenesarticulos')
+    ->where('idsolicitudesordenes', $id)
+    ->count();
 
-        if ($repuestosEntregados == $totalRepuestos && $totalRepuestos > 0) {
-            Log::info("✅ TODOS los repuestos entregados. Actualizando estado a 'aprobada'");
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'estado' => 'aprobada',
-                    'fechaaprobacion' => now(),
-                    'fechaactualizacion' => now(),
-                    'idaprobador' => auth()->id(),
-                    'updated_at' => now()
-                ]);
-        } else {
-            Log::info("ℹ️ No todos los repuestos entregados. Manteniendo estado actual.");
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'fechaactualizacion' => now(),
-                    'updated_at' => now()
-                ]);
-        }
+Log::info("📊 Estadísticas:");
+Log::info("  - Repuestos entregados: " . $repuestosEntregados);
+Log::info("  - Total repuestos en orden: " . $totalRepuestos);
+
+// NUEVA LÓGICA: Si al menos UN repuesto fue entregado, estado = "entregado"
+if ($repuestosEntregados > 0) {
+    Log::info("✅ AL MENOS UN repuesto entregado. Actualizando estado a 'entregado'");
+    
+    $updateData = [
+        'estado' => 'entregado',
+        'fechaactualizacion' => now(),
+        'updated_at' => now()
+    ];
+    
+    // Solo agregar fecha de aprobación si TODOS están entregados (opcional)
+    if ($repuestosEntregados == $totalRepuestos && $totalRepuestos > 0) {
+        Log::info("🎉 ¡BONUS! Todos los repuestos entregados. Agregando fecha de aprobación");
+        $updateData['fechaaprobacion'] = now();
+        $updateData['idaprobador'] = auth()->id();
+    }
+    
+    DB::table('solicitudesordenes')
+        ->where('idsolicitudesordenes', $id)
+        ->update($updateData);
+        
+} else {
+    Log::info("ℹ️ Ningún repuesto entregado aún. Manteniendo estado actual.");
+    DB::table('solicitudesordenes')
+        ->where('idsolicitudesordenes', $id)
+        ->update([
+            'fechaactualizacion' => now(),
+            'updated_at' => now()
+        ]);
+}
+
+Log::info("✅ Estado de solicitud procesado");
 
         // ========================
         // 11. NOTIFICACIONES
