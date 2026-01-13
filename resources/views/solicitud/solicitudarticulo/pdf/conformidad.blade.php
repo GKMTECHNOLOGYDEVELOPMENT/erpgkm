@@ -1,243 +1,241 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conformidad de Entrega - {{ $solicitud->codigo }}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acta de Conformidad</title>
+
     <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, "DejaVu Sans", sans-serif;
             font-size: 12px;
-            line-height: 1.4;
-            margin: 0;
-            padding: 20px;
+            line-height: 1.35;
+            color: #111;
         }
-        .header {
+
+        /* Hoja A4 con fondo membretado */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: url('{{ $bgBase64 }}') no-repeat center center;
+            background-size: cover;
+            box-sizing: border-box;
+
+            /* ajusta según tu hoja */
+            padding: 42mm 18mm 22mm 18mm;
+            /* top right bottom left */
+        }
+
+        .title {
+            font-family: "Times New Roman", Times, serif;
             text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            font-weight: 800;
+            letter-spacing: .3px;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin: 0 0 14px 0;
         }
-        .company-info {
-            text-align: center;
-            margin-bottom: 15px;
+
+
+        .p {
+            margin: 0 0 10px 0;
+            text-align: justify;
         }
-        .company-info h2 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 18px;
+
+        .inline-fill {
+            display: inline-block;
+            border-bottom: 1px solid #333;
+            min-width: 80px;
+            padding: 0 2px 1px 2px;
+            font-weight: 700;
         }
-        .company-info p {
-            margin: 5px 0;
-            color: #7f8c8d;
+
+        .bullets {
+            margin: 6px 0 12px 18px;
+            padding: 0;
         }
-        .document-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin: 15px 0;
-            color: #2c3e50;
+
+        .bullets li {
+            margin: 6px 0;
+            text-align: justify;
         }
-        .section {
-            margin-bottom: 15px;
-        }
-        .section-title {
-            font-weight: bold;
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-left: 4px solid #3498db;
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
-            font-weight: bold;
-            color: #34495e;
-        }
-        table {
+
+        .table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
+            margin-top: 10px;
             font-size: 11px;
         }
-        th, td {
-            border: 1px solid #bdc3c7;
-            padding: 8px;
-            text-align: left;
+
+        .table th,
+        .table td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            vertical-align: top;
         }
-        th {
-            background-color: #34495e;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        .signature-section {
-            margin-top: 50px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-        }
-        .signature-line {
-            border-top: 1px solid #7f8c8d;
-            margin-top: 60px;
+
+        .table th {
+            font-weight: 800;
+            text-transform: uppercase;
             text-align: center;
-            padding-top: 5px;
-            font-weight: bold;
+            background: rgba(255, 255, 255, .65);
         }
-        .signature-label {
-            text-align: center;
-            margin-top: 5px;
-            color: #7f8c8d;
+
+        .table td {
+            background: rgba(255, 255, 255, .55);
+        }
+
+        .signatures {
+            margin-top: 22mm;
+            width: 100%;
+            border-collapse: collapse;
             font-size: 11px;
         }
-        .footer {
-            margin-top: 30px;
+
+        .signatures td {
+            border: 1px solid #333;
+            padding: 0;
+            vertical-align: top;
+            background: rgba(255, 255, 255, .55);
+        }
+
+        .sig-col {
+            width: 33.33%;
+        }
+
+        .sig-head {
+            text-align: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 6px 6px 4px 6px;
+            border-bottom: 1px solid #333;
+            background: rgba(255, 255, 255, .65);
+        }
+
+        .sig-body {
+            padding: 10px 10px 8px 10px;
+        }
+
+        .sig-line {
+            margin-top: 26px;
+            border-top: 1px solid #333;
+            padding-top: 4px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .sig-sub {
             text-align: center;
             font-size: 10px;
-            color: #95a5a6;
-            border-top: 1px solid #bdc3c7;
-            padding-top: 10px;
+            padding: 6px 6px 8px 6px;
+            color: #222;
         }
-        .page-break {
-            page-break-before: always;
+
+        .sig-role {
+            border-top: 1px solid #333;
+            padding: 6px;
+            text-align: center;
+            font-size: 10px;
+            text-transform: uppercase;
+            font-weight: 700;
+            background: rgba(255, 255, 255, .65);
+        }
+
+        /* evita cortes feos */
+        .no-break {
+            page-break-inside: avoid;
         }
     </style>
 </head>
+
 <body>
-    <!-- Encabezado -->
-    <div class="header">
-        <div class="company-info">
-            <h2>GKM TECHNOLOGY</h2>
-            <p>Av. Principal 123 | Tel: 9999 | RUC: 000000</p>
-        </div>
-        
-        <div class="document-title">ACTA DE CONFORMIDAD DE ENTREGA</div>
-        <div><strong>Solicitud:</strong> {{ $solicitud->codigo }}</div>
-    </div>
+    <div class="page">
 
-    <!-- Información de la Solicitud -->
-    <div class="section">
-        <div class="section-title">INFORMACIÓN DE LA SOLICITUD</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Código:</span> {{ $solicitud->codigo }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Creación:</span> {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d/m/Y') }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Solicitante:</span> {{ $solicitud->solicitante_nombre }} {{ $solicitud->solicitante_apellido }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Aprobación:</span> {{ $solicitud->fechaaprobacion ? \Carbon\Carbon::parse($solicitud->fechaaprobacion)->format('d/m/Y') : 'N/A' }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Tipo de Servicio:</span> {{ $solicitud->tiposervicio }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Nivel de Urgencia:</span> {{ ucfirst($solicitud->niveldeurgencia) }}
-            </div>
+        <div class="title">
+            ACTA DE CONFORMIDAD DE ENTREGA BAJO CUSTODIA DEL TÉCNICO
         </div>
-    </div>
 
-    <!-- Artículos Entregados -->
-    <div class="section">
-        <div class="section-title">ARTÍCULOS ENTREGADOS</div>
-        <table>
+        <p class="p">
+            Yo <span class="inline-fill">NOMBRE COMPLETO</span>, identificado(a) con DNI/CE
+            N.° <span class="inline-fill">00000000</span>, declaro haber recibido a conformidad
+            los siguientes bienes, los mismos que se encuentran en buen estado de conservación y funcionamiento,
+            quedando bajo mi custodia y responsabilidad.
+        </p>
+
+        <p class="p" style="margin-top:8px;">
+            Asimismo, me comprometo a:
+        </p>
+
+        <ul class="bullets no-break">
+            <li>Hacer uso adecuado de los bienes conforme a su finalidad y especificaciones técnicas.</li>
+            <li>Mantener los bienes en buen estado, evitando daños por mal uso, negligencia o manipulación indebida.
+            </li>
+            <li>Informar oportunamente cualquier falla, desperfecto o deterioro que se presente durante su uso.</li>
+            <li>No ceder, trasladar o entregar los bienes a terceros sin la autorización correspondiente.</li>
+        </ul>
+
+        <table class="table no-break">
             <thead>
                 <tr>
-                    <th width="30%">Artículo</th>
-                    <th width="15%">Código</th>
-                    <th width="10%">Cantidad</th>
-                    <th width="15%">Ubicación</th>
-                    <th width="20%">Destinatario</th>
-                    <th width="20%">Fecha Entrega</th>
+                    <th style="width:60%;">INSUMO / BIEN</th>
+                    <th style="width:15%;">CANTIDAD</th>
+                    <th style="width:25%;">OBSERVACIÓN</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($articulos as $articulo)
                 <tr>
-                    <td>{{ $articulo->articulo_nombre }}</td>
-                    <td>{{ $articulo->codigo_barras ?: $articulo->codigo_repuesto }}</td>
-                    <td style="text-align: center;">{{ $articulo->cantidad }}</td>
-                    <td>{{ $articulo->ubicacion_utilizada ?? 'N/A' }}</td>
-                    <td>
-                        @if($articulo->destinatario_nombre)
-                            {{ $articulo->destinatario_nombre }} {{ $articulo->destinatario_apellido }}
-                        @else
-                            N/A
-                        @endif
-                    </td>
-                    <td>
-                        @if($articulo->fecha_entrega)
-                            {{ \Carbon\Carbon::parse($articulo->fecha_entrega)->format('d/m/Y H:i') }}
-                        @else
-                            N/A
-                        @endif
-                    </td>
+                    <td>SILLA DE OFICINA GT-861</td>
+                    <td style="text-align:center; font-weight:800;">6</td>
+                    <td>1ra Dotación</td>
                 </tr>
-                @endforeach
+                <tr>
+                    <td>—</td>
+                    <td style="text-align:center;">—</td>
+                    <td>—</td>
+                </tr>
             </tbody>
         </table>
-    </div>
 
-    <!-- Resumen -->
-    <div class="section">
-        <div class="section-title">RESUMEN</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Total Artículos Únicos:</span> {{ $solicitud->cantidad }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Total Unidades Entregadas:</span> {{ $solicitud->totalcantidadproductos }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Estado:</span> <strong>{{ ucfirst($solicitud->estado) }}</strong>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Código Cotización:</span> {{ $solicitud->codigo_cotizacion ?? 'N/A' }}
-            </div>
-        </div>
-    </div>
+        <table class="signatures no-break">
+            <tr>
+                <td class="sig-col">
+                    <div class="sig-head">ENTREGA CONFORME</div>
+                    <div class="sig-body">
+                        <div class="sig-line">NOMBRES Y APELLIDOS</div>
+                        <div class="sig-sub">Firma y Fecha</div>
+                    </div>
+                    <div class="sig-role">CARGO</div>
+                </td>
 
-    <!-- Observaciones -->
-    @if($solicitud->observaciones)
-    <div class="section">
-        <div class="section-title">OBSERVACIONES</div>
-        <p>{{ $solicitud->observaciones }}</p>
-    </div>
-    @endif
+                <td class="sig-col">
+                    <div class="sig-head">RECIBE CONFORME</div>
+                    <div class="sig-body">
+                        <div class="sig-line">NOMBRES Y APELLIDOS</div>
+                        <div class="sig-sub">Firma y Fecha</div>
+                    </div>
+                    <div class="sig-role">CARGO</div>
+                </td>
 
-    <!-- Firmas -->
-    <div class="signature-section">
-        <div>
-            <div class="signature-line">
-                {{ $solicitud->solicitante_nombre }} {{ $solicitud->solicitante_apellido }}
-            </div>
-            <div class="signature-label">SOLICITANTE</div>
-        </div>
-        
-        <div>
-            <div class="signature-line">
-                {{ $solicitud->aprobador_nombre ?? 'Administrador del Sistema' }} {{ $solicitud->aprobador_apellido ?? '' }}
-            </div>
-            <div class="signature-label">PERSONA QUE ENTREGA</div>
-        </div>
-    </div>
+                <td class="sig-col">
+                    <div class="sig-head">AUTORIZADO POR</div>
+                    <div class="sig-body">
+                        <div class="sig-line">NOMBRES Y APELLIDOS</div>
+                        <div class="sig-sub">Firma y Fecha</div>
+                    </div>
+                    <div class="sig-role">CARGO</div>
+                </td>
+            </tr>
+        </table>
 
-    <!-- Pie de página -->
-    <div class="footer">
-        <p><strong>Documento generado automáticamente</strong> | Fecha de generación: {{ $fecha_generacion }}</p>
-        <p>GKM TECHNOLOGY - Sistema de Gestión de Inventarios</p>
     </div>
 </body>
+
 </html>

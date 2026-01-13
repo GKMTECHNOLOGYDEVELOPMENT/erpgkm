@@ -15,6 +15,7 @@ use App\Models\TipoSolicitud;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Spatie\Browsershot\Browsershot;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -1513,7 +1514,7 @@ public function update(Request $request, $id)
         return $tipos[$tipoServicio] ?? 5;
     }
 
-    public function opciones($id)
+public function opciones($id)
 {
      // Obtener la solicitud con el campo idusuario incluido
     $solicitud = DB::table('solicitudesordenes as so')
@@ -1528,8 +1529,6 @@ public function update(Request $request, $id)
             'so.observaciones',
             'so.cantidad',
             'so.totalcantidadproductos',
-            'so.es_uso_diario',  // NUEVO
-            'so.observacion_devolucion',  // NUEVO
             'so.idticket',
             'so.idusuario',
             'so.id_area_destino',           // Nuevo campo
@@ -1666,6 +1665,7 @@ public function update(Request $request, $id)
 
     ));
 }
+
 
 
 public function gestionar($id)
@@ -2156,12 +2156,12 @@ private function comprimirImagenSimple($contenidoBinario)
 
 
 
-public function aceptarIndividual(Request $request, $id)
+ public function aceptarIndividual(Request $request, $id)
 {
     try {
         DB::beginTransaction();
 
-        // Obtener la solicitud con todos los campos necesarios
+        // Obtener la solicitud con todos los campos necesarios (INCLUYENDO id_usuario_destino)
         $solicitud = DB::table('solicitudesordenes')
             ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idusuario', 'id_usuario_destino')
             ->where('idsolicitudesordenes', $id)
@@ -2175,16 +2175,6 @@ public function aceptarIndividual(Request $request, $id)
             ], 404);
         }
 
-        // Obtener la asignación relacionada
-        $asignacion = DB::table('asignaciones')
-            ->where('idSolicitud', $solicitud->idsolicitudesordenes)
-            ->where('codigo_solicitud', $solicitud->codigo)
-            ->first();
-
-        if (!$asignacion) {
-            Log::warning("No se encontró asignación para la solicitud: {$solicitud->codigo}");
-        }
-
         $articuloId = $request->input('articulo_id');
         $ubicacionId = $request->input('ubicacion_id');
 
@@ -2195,18 +2185,14 @@ public function aceptarIndividual(Request $request, $id)
             ], 400);
         }
 
-        // Obtener información del artículo CON id_asignacion
+        // Obtener información del artículo
         $articulo = DB::table('ordenesarticulos as oa')
             ->select(
                 'oa.idordenesarticulos',
                 'oa.cantidad',
-                'oa.id_asignacion',
-                'oa.requiere_devolucion',
-                'oa.fecha_devolucion_programada',
                 'a.idArticulos',
                 'a.nombre',
-                'a.stock_total',
-                'a.precio_compra'
+                'a.stock_total'
             )
             ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
             ->where('oa.idsolicitudesordenes', $id)
@@ -2279,6 +2265,51 @@ public function aceptarIndividual(Request $request, $id)
             ], 404);
         }
 
+        // ✅ 1. DESCONTAR de rack_ubicacion_articulos (ubicación específica)
+        DB::table('rack_ubicacion_articulos')
+            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+            ->decrement('cantidad', $cantidadSolicitada);
+
+        // ✅ 2. DESCONTAR stock total en tabla articulos
+        DB::table('articulos')
+            ->where('idArticulos', $articuloId)
+            ->decrement('stock_total', $cantidadSolicitada);
+
+        // ✅ 3. Registrar el movimiento en rack_movimientos (SALIDA)
+        DB::table('rack_movimientos')->insert([
+            'articulo_id' => $articuloId,
+            'custodia_id' => null,
+            'ubicacion_origen_id' => $ubicacionId,
+            'ubicacion_destino_id' => null,
+            'rack_origen_id' => $stockUbicacion->rack_id,
+            'rack_destino_id' => null,
+            'cantidad' => $cantidadSolicitada,
+            'tipo_movimiento' => 'salida',
+            'usuario_id' => auth()->id(),
+            'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
+            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+            'codigo_ubicacion_destino' => null,
+            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+            'nombre_rack_destino' => null,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 4. Registrar en inventario_ingresos_clientes como SALIDA
+        DB::table('inventario_ingresos_clientes')->insert([
+            'compra_id' => null,
+            'articulo_id' => $articuloId,
+            'tipo_ingreso' => 'salida',
+            'ingreso_id' => $solicitud->idsolicitudesordenes,
+            'cliente_general_id' => $stockUbicacion->cliente_general_id,
+            'cantidad' => -$cantidadSolicitada,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        // ✅ 5. Actualizar KARDEX para la SALIDA
+        $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
+
         // Determinar el usuario destino final
         $usuarioFinalId = null;
         $tipoEntrega = '';
@@ -2286,6 +2317,7 @@ public function aceptarIndividual(Request $request, $id)
 
         switch ($request->tipo_destinatario) {
             case 'destino':
+                // Usuario Destino Original
                 if (!$solicitud->id_usuario_destino) {
                     return response()->json([
                         'success' => false,
@@ -2328,52 +2360,7 @@ public function aceptarIndividual(Request $request, $id)
 
         $nombreDestinatario = "{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}";
 
-        // ✅ 1. DESCONTAR de rack_ubicacion_articulos
-        DB::table('rack_ubicacion_articulos')
-            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-            ->decrement('cantidad', $cantidadSolicitada);
-
-        // ✅ 2. DESCONTAR stock total en tabla articulos
-        DB::table('articulos')
-            ->where('idArticulos', $articuloId)
-            ->decrement('stock_total', $cantidadSolicitada);
-
-        // ✅ 3. Registrar movimiento en rack_movimientos
-        DB::table('rack_movimientos')->insert([
-            'articulo_id' => $articuloId,
-            'custodia_id' => null,
-            'ubicacion_origen_id' => $ubicacionId,
-            'ubicacion_destino_id' => null,
-            'rack_origen_id' => $stockUbicacion->rack_id,
-            'rack_destino_id' => null,
-            'cantidad' => $cantidadSolicitada,
-            'tipo_movimiento' => 'salida',
-            'usuario_id' => auth()->id(),
-            'observaciones' => "Solicitud artículo aprobada (individual): {$solicitud->codigo}",
-            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-            'codigo_ubicacion_destino' => null,
-            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-            'nombre_rack_destino' => null,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // ✅ 4. Registrar en inventario_ingresos_clientes
-        DB::table('inventario_ingresos_clientes')->insert([
-            'compra_id' => null,
-            'articulo_id' => $articuloId,
-            'tipo_ingreso' => 'salida',
-            'ingreso_id' => $solicitud->idsolicitudesordenes,
-            'cliente_general_id' => $stockUbicacion->cliente_general_id,
-            'cantidad' => -$cantidadSolicitada,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // ✅ 5. Actualizar KARDEX
-        $this->actualizarKardexSalida($articuloId, $stockUbicacion->cliente_general_id, $cantidadSolicitada, $articuloInfo->precio_compra);
-
-        // ✅ 6. Registrar en articulos_entregas
+        // ✅ 6. Registrar en articulos_entregas (NUEVA TABLA)
         DB::table('articulos_entregas')->insert([
             'solicitud_id' => $solicitud->idsolicitudesordenes,
             'articulo_id' => $articuloId,
@@ -2388,38 +2375,6 @@ public function aceptarIndividual(Request $request, $id)
             'updated_at' => now()
         ]);
 
-        // ============================================
-// ✅ ACTUALIZAR DETALLE_ASIGNACIONES (CORREGIDO)
-// ============================================
-if ($asignacion) {
-    // Obtener el tipo de la asignación principal
-    $tipoAsignacion = $asignacion->tipo_asignacion ?? 'trabajo_a_realizar';
-    
-    // El tipo del artículo generalmente sigue el tipo de la asignación
-    $tipoArticulo = $tipoAsignacion;
-    
-    // Solo override si el artículo individual requiere devolución 
-    // pero la asignación es de trabajo
-    if ($tipoAsignacion === 'trabajo_a_realizar' && $articulo->requiere_devolucion) {
-        $tipoArticulo = 'prestamo';
-    } elseif ($tipoAsignacion === 'prestamo' && !$articulo->requiere_devolucion) {
-        // Si la asignación es préstamo pero el artículo no requiere devolución,
-        // dejarlo como préstamo
-        $tipoArticulo = 'prestamo';
-    }
-
-    DB::table('detalle_asignaciones')
-        ->where('asignacion_id', $asignacion->id)
-        ->where('articulo_id', $articuloId)
-        ->update([
-            'estado_articulo' => 'activo',
-            'fecha_entrega_real' => now()->format('Y-m-d'),
-            'tipo' => $tipoArticulo,
-            'requiere_devolucion' => $articulo->requiere_devolucion ?? 0,
-            'fecha_devolucion_esperada' => $articulo->fecha_devolucion_programada ?? null,
-            'updated_at' => now()
-        ]);
-}
         // ✅ 7. Marcar el artículo como procesado
         DB::table('ordenesarticulos')
             ->where('idordenesarticulos', $articulo->idordenesarticulos)
@@ -2435,21 +2390,6 @@ if ($asignacion) {
             ->count();
 
         $todosProcesados = $articulosPendientes == 0;
-
-        // ============================================
-        // ✅ ACTUALIZAR ASIGNACIÓN PRINCIPAL (si todos están procesados)
-        // ============================================
-        if ($todosProcesados && $asignacion) {
-            DB::table('asignaciones')
-                ->where('id', $asignacion->id)
-                ->update([
-                    'estado' => 'activo',
-                    'fecha_entrega_real' => now()->format('Y-m-d'),
-                    'updated_at' => now()
-                ]);
-
-            Log::info("✅ Asignación actualizada: {$asignacion->codigo_asignacion} - Estado: activo");
-        }
 
         // Si todos los artículos han sido procesados, marcar la solicitud como aprobada
         if ($todosProcesados) {
@@ -2470,8 +2410,6 @@ if ($asignacion) {
             'todos_procesados' => $todosProcesados,
             'destinatario' => $nombreDestinatario,
             'tipo_entrega' => $tipoEntrega,
-            'asignacion_actualizada' => ($todosProcesados && $asignacion) ? true : false,
-            'codigo_asignacion' => $asignacion ? $asignacion->codigo_asignacion : null,
             'puede_generar_pdf' => $todosProcesados
         ]);
 
@@ -2484,6 +2422,7 @@ if ($asignacion) {
         ], 500);
     }
 }
+
 
 
 
@@ -2918,7 +2857,6 @@ if ($asignacion) {
 public function generarConformidad($id)
 {
     try {
-        // Obtener la solicitud con información completa - AGREGAR CAMPO estado
         $solicitud = DB::table('solicitudesordenes as so')
             ->select(
                 'so.idsolicitudesordenes',
@@ -2933,7 +2871,7 @@ public function generarConformidad($id)
                 'so.cantidad',
                 'so.totalcantidadproductos',
                 'so.idusuario',
-                'so.estado', // ← ESTE ES EL CAMPO QUE FALTABA
+                'so.estado',
                 'u_solicitante.Nombre as solicitante_nombre',
                 'u_solicitante.apellidoPaterno as solicitante_apellido',
                 'u_solicitante.documento as solicitante_documento',
@@ -2947,13 +2885,9 @@ public function generarConformidad($id)
             ->first();
 
         if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Solicitud no encontrada'], 404);
         }
 
-        // Verificar que todos los artículos estén procesados
         $articulosPendientes = DB::table('ordenesarticulos')
             ->where('idsolicitudesordenes', $id)
             ->where('estado', 0)
@@ -2966,7 +2900,6 @@ public function generarConformidad($id)
             ], 400);
         }
 
-        // Obtener artículos entregados con información CORREGIDA
         $articulos = DB::table('ordenesarticulos as oa')
             ->select(
                 'oa.cantidad',
@@ -2982,9 +2915,9 @@ public function generarConformidad($id)
                 'u_entrego.apellidoPaterno as entregador_apellido'
             )
             ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('articulos_entregas as ae', function($join) use ($id) {
+            ->leftJoin('articulos_entregas as ae', function ($join) use ($id) {
                 $join->on('ae.articulo_id', '=', 'a.idArticulos')
-                     ->where('ae.solicitud_id', $id);
+                    ->where('ae.solicitud_id', $id);
             })
             ->leftJoin('usuarios as u_destino', 'ae.usuario_destino_id', '=', 'u_destino.idUsuario')
             ->leftJoin('usuarios as u_entrego', 'ae.usuario_entrego_id', '=', 'u_entrego.idUsuario')
@@ -2992,45 +2925,62 @@ public function generarConformidad($id)
             ->where('oa.estado', 1)
             ->get();
 
-        // Verificar que hay artículos procesados
         if ($articulos->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No hay artículos procesados para generar la conformidad'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'No hay artículos procesados para generar la conformidad'], 400);
         }
 
-        // Datos estáticos de la empresa
-        $empresa = (object) [
+        $empresa = (object)[
             'nombre_empresa' => 'GKM TECHNOLOGY',
-            'direccion' => 'Av. Principal 123',
-            'telefono' => '9999',
-            'ruc' => '000000',
-            'logo' => null
+            'direccion'      => 'Av. Principal 123',
+            'telefono'       => '9999',
+            'ruc'            => '000000',
+            'logo'           => null,
         ];
-
-        // Generar PDF
-        $pdf = \PDF::loadView('solicitud.solicitudarticulo.pdf.conformidad', [
-            'solicitud' => $solicitud,
-            'articulos' => $articulos,
-            'empresa' => $empresa,
-            'fecha_generacion' => now()->format('d/m/Y H:i')
-        ]);
 
         $nombreArchivo = 'conformidad_entrega_' . $solicitud->codigo . '_' . now()->format('Ymd_His') . '.pdf';
 
-        return $pdf->download($nombreArchivo);
+        $bgPath = public_path('assets/images/hojamembretada.jpg');
 
-    } catch (\Exception $e) {
-        Log::error('Error al generar PDF de conformidad: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al generar el PDF: ' . $e->getMessage()
-        ], 500);
-    }
+        if (!file_exists($bgPath)) {
+                throw new \Exception("No se encontró la hoja membretada en: " . $bgPath);
+        }
+
+        $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+
+
+        // 1) Render HTML desde tu blade
+        $html = view('solicitud.solicitudarticulo.pdf.conformidad', [
+            'solicitud'        => $solicitud,
+            'articulos'        => $articulos,
+            'empresa'          => $empresa,
+            'fecha_generacion' => now()->format('d/m/Y H:i'),
+            'bgBase64'         => $bgBase64, // ✅
+
+        ])->render();
+
+        // 2) Generar PDF con Browsershot a archivo temporal
+        $tempPath = storage_path('app/tmp_' . uniqid() . '.pdf');
+
+        Browsershot::html($html)
+            ->format('A4')
+            ->margins(0, 0, 0, 0) // si usas hoja membretada, mejor 0
+            ->showBackground()
+            ->waitUntilNetworkIdle()
+            ->savePdf($tempPath);
+
+        // 3) Mostrar en el navegador (inline) y borrar luego manualmente
+        return response()->file($tempPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$nombreArchivo.'"',
+        ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al generar conformidad de entrega: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar la conformidad: ' . $e->getMessage()
+            ], 500);
+        }
 }
 
 
