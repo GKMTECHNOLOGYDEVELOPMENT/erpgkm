@@ -898,7 +898,7 @@
 
                                 <!-- Botones en fila horizontal -->
                                 <div class="flex flex-row items-center gap-2 sm:gap-3 mt-3 lg:mt-0">
-                                    {{-- @if ($puede_generar_pdf)
+                                    @if ($puede_generar_pdf)
                                         <a href="{{ route('solicitudrepuesto.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
                                             target="_blank"
                                             class="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-danger text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm whitespace-nowrap">
@@ -906,7 +906,7 @@
                                             <span class="hidden sm:inline">Descargar Conformidad</span>
                                             <span class="sm:hidden">Conformidad</span>
                                         </a>
-                                    @endif --}}
+                                    @endif
 
                                     <!-- Botón Volver -->
                                     <a href="{{ route('solicitudarticulo.index') }}"
