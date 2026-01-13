@@ -789,6 +789,20 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::post('/{id}/aceptar', [SolicitudRepuestoController::class, 'aceptar'])->name('solicitudrepuesto.aceptar');
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
+    // En routes/web.php
+Route::post('/{id}/confirmar-entrega-cedida', 
+    [SolicitudRepuestoController::class, 'confirmarEntregaCedidaConFoto'])
+    ->name('solicitudrepuesto.confirmar-entrega-cedida');
+
+    // Rutas para ceder repuestos
+Route::post('/{id}/ceder-repuesto', [SolicitudRepuestoController::class, 'cederRepuesto'])
+    ->name('solicitudrepuesto.ceder-repuesto')
+    ->middleware('auth');
+
+Route::post('/{id}/confirmar-entrega-cedido', [SolicitudRepuestoController::class, 'confirmarEntregaCedido'])
+    ->name('solicitudrepuesto.confirmar-entrega-cedido')
+    ->middleware('auth');
+
     Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
         ->name('solicitudrepuesto.store-provincia')
         ->middleware('auth');
