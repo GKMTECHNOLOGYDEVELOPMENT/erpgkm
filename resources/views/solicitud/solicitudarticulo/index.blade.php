@@ -124,9 +124,176 @@
             </div>
         </div>
 
-        <!-- Filtros y búsqueda -->
+         <!-- Primer Modal (tu código original) -->
+        <div id="solicitudModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <!-- Header del Modal -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-xl font-semibold text-gray-800">Crear Nueva Solicitud</h3>
+                    <p class="text-sm text-gray-600 mt-1">Selecciona el tipo de solicitud que deseas crear</p>
+                </div>
+
+                <!-- Opciones del Modal -->
+                <div class="p-6">
+                    <div class="grid grid-cols-1 gap-4">
+
+                        @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR SOLICITUD ARTICULO'))
+                            <!-- Opción para solicitud de artículo -->
+                            <a href="{{ route('solicitudarticulo.create') }}"
+                                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+                                <div
+                                    class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Solicitud de Artículo</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un artículo general
+                                    </p>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (\App\Helpers\PermisoHelper::tienePermiso('CREAR SOLICITUD REPUESTO'))
+                            <!-- Opción para solicitud de repuesto - CAMBIADO A BOTÓN -->
+                            <button type="button" id="btnRepuesto"
+                                class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-all duration-200 text-left w-full">
+                                <div
+                                    class="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-medium text-gray-800">Solicitud de Repuesto</h4>
+                                    <p class="text-sm text-gray-600 mt-1">Crear una solicitud para un repuesto
+                                        específico</p>
+                                </div>
+                                <div class="ml-2">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </button>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
+                    <button id="closeModalBtn"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segundo Modal - CON LA MISMA ESTRUCTURA DEL PRIMER MODAL -->
+        <div id="provinciaModal"
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div
+                class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 transform transition-all duration-300 scale-95 opacity-0">
+                <!-- Header del Modal -->
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <button id="backToFirstModal" class="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">Tipo de Repuesto</h3>
+                            <p class="text-sm text-gray-600 mt-1">Selecciona una opción</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opciones del Modal -->
+                <div class="p-6">
+                    <div class="text-center mb-6">
+                        <p class="text-lg font-medium text-gray-800">¿El repuesto es para provincia?</p>
+                        <p class="text-sm text-gray-600 mt-2">Esta elección determinará el formulario a mostrar</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Opción SI (Para provincia) -->
+                        <button type="button" id="btnSiProvincia"
+                            class="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-300 transition-all duration-200 transform hover:scale-105">
+                            <div
+                                class="flex-shrink-0 w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-medium text-gray-800 text-lg">SÍ</h4>
+                            <p class="text-sm text-gray-600 mt-1">Para provincia</p>
+                        </button>
+
+                        <!-- Opción NO (No para provincia) -->
+                        <button type="button" id="btnNoProvincia"
+                            class="flex flex-col items-center p-6 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 transform hover:scale-105">
+                            <div
+                                class="flex-shrink-0 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                            <h4 class="font-medium text-gray-800 text-lg">NO</h4>
+                            <p class="text-sm text-gray-600 mt-1">No es para provincia</p>
+                        </button>
+                    </div>
+
+                    <!-- Nota informativa -->
+                    <div
+                        class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg transition-all duration-300 hover:bg-yellow-100">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-yellow-800 font-medium">Información importante</p>
+                                <p class="text-xs text-yellow-700 mt-1">
+                                    Selecciona "SÍ" si el repuesto será enviado a una ubicación provincial,
+                                    esto habilitará campos adicionales para dirección y logística.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer del Modal -->
+                <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
+                    <button id="closeProvinciaModal"
+                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition-colors duration-200">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros y búsqueda - VERSIÓN CON AUTO-APLICACIÓN -->
         <form method="GET" action="{{ route('solicitudarticulo.index') }}" id="filtrosForm"
             class="bg-white p-4 rounded-lg shadow-sm mb-6">
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                 <!-- Select para Tipo de Solicitud -->
                 <div>
@@ -193,7 +360,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Búsqueda</label>
                     <div class="relative">
-                        <input type="text" name="search" id="searchInput" placeholder="Código"
+                        <input type="text" name="search" id="searchInput" placeholder="Código, ticket..."
                             value="{{ request('search') }}"
                             class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             data-autosubmit="true">
@@ -278,16 +445,15 @@
             @endif
         </form>
 
-        <!-- Lista de solicitudes -->
+        <!-- Resto del código permanece igual -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             @forelse($solicitudes as $solicitud)
-                <!-- Card de solicitud -->
                 <div
                     class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 
-                        @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
-                        @elseif($solicitud->tipoorden == 'solicitud_repuesto') border-green-500
-                        @else border-purple-500 @endif
-                        transition transform hover:scale-[1.02] hover:shadow-lg">
+                    @if ($solicitud->tipoorden == 'solicitud_articulo') border-blue-500
+                    @elseif($solicitud->tipoorden == 'solicitud_repuesto') border-green-500
+                    @else border-purple-500 @endif
+                    transition transform hover:scale-[1.02] hover:shadow-lg">
 
                     <!-- Header de la Card -->
                     <div class="px-4 md:px-6 py-4 bg-gray-50 border-b">
@@ -298,9 +464,9 @@
                                     <!-- Badge de tipo de solicitud -->
                                     <span
                                         class="px-2 py-1 text-xs font-semibold rounded-full 
-                                        @if ($solicitud->tipoorden == 'solicitud_articulo') bg-blue-100 text-blue-800
-                                        @elseif($solicitud->tipoorden == 'solicitud_repuesto') bg-green-100 text-green-800
-                                        @else bg-purple-100 text-purple-800 @endif">
+                                    @if ($solicitud->tipoorden == 'solicitud_articulo') bg-blue-100 text-blue-800
+                                    @elseif($solicitud->tipoorden == 'solicitud_repuesto') bg-green-100 text-green-800
+                                    @else bg-purple-100 text-purple-800 @endif">
                                         @if ($solicitud->tipoorden == 'solicitud_articulo')
                                             📦 Artículo
                                         @elseif($solicitud->tipoorden == 'solicitud_repuesto')
@@ -333,7 +499,7 @@
                                 </p>
                             </div>
 
-                            <!-- Badge de estado -->
+                            <!-- Badge de estado - alineado a la derecha -->
                             <div class="flex-shrink-0">
                                 @php
                                     $estados = [
@@ -363,37 +529,27 @@
                     <div class="px-4 md:px-6 py-4">
                         <!-- Información de Productos -->
                         <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium flex items-center">
+                            <p class="text-sm text-gray-500 font-medium">
                                 @if ($solicitud->tipoorden == 'solicitud_articulo')
-                                    <i class="fas fa-boxes text-blue-400 mr-2"></i>
                                     Artículos
                                 @elseif($solicitud->tipoorden == 'solicitud_repuesto')
-                                    <i class="fas fa-cogs text-green-400 mr-2"></i>
                                     Repuestos (Lima)
                                 @else
-                                    <i class="fas fa-shipping-fast text-purple-400 mr-2"></i>
                                     Repuestos (Provincia)
                                 @endif
                             </p>
-                            <p class="font-medium text-gray-800 flex items-center mt-1">
-                                <i class="fas fa-cube text-gray-400 mr-2"></i>
+                            <p class="font-medium text-gray-800">
                                 {{ $solicitud->total_productos ?? 0 }} productos
-                                <span class="mx-2 text-gray-300">•</span>
-                                {{ $solicitud->totalcantidadproductos ?? 0 }} unidades
+                                ({{ $solicitud->totalcantidadproductos ?? 0 }} unidades)
                             </p>
                         </div>
 
                         <!-- Mostrar número de ticket para provincia -->
                         @if ($solicitud->tipoorden == 'solicitud_repuesto_provincia' && $solicitud->numeroticket)
                             <div class="mb-3">
-                                <p class="text-sm text-gray-500 font-medium flex items-center">
-                                    <i class="fas fa-ticket-alt text-purple-400 mr-2"></i>
-                                    Número de Ticket
-                                </p>
-                                <p class="font-medium text-gray-800 truncate flex items-center">
-                                    <span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-md text-sm mr-2">
-                                        <i class="fas fa-hashtag mr-1"></i>{{ $solicitud->numeroticket }}
-                                    </span>
+                                <p class="text-sm text-gray-500 font-medium">Número de Ticket</p>
+                                <p class="font-medium text-gray-800 truncate">
+                                    🎫 {{ $solicitud->numeroticket }}
                                 </p>
                             </div>
                         @endif
@@ -401,57 +557,43 @@
                         <!-- Código de Cotización -->
                         @if ($solicitud->codigo_cotizacion ?? false)
                             <div class="mb-3">
-                                <p class="text-sm text-gray-500 font-medium flex items-center">
-                                    <i class="fas fa-file-invoice-dollar text-purple-400 mr-2"></i>
-                                    Cotización
-                                </p>
-                                <p class="font-medium text-purple-600 truncate flex items-center">
-                                    <i class="fas fa-file-contract mr-2"></i>
-                                    {{ $solicitud->codigo_cotizacion }}
+                                <p class="text-sm text-gray-500 font-medium">Cotización</p>
+                                <p class="font-medium text-purple-600 truncate">
+                                    📋 {{ $solicitud->codigo_cotizacion }}
                                 </p>
                             </div>
                         @endif
 
                         <!-- Tipo de Servicio -->
                         <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium flex items-center">
-                                <i class="fas fa-tools text-gray-400 mr-2"></i>
-                                Tipo de Servicio
-                            </p>
-                            <p class="font-medium text-gray-800 truncate flex items-center">
+                            <p class="text-sm text-gray-500 font-medium">Tipo de Servicio</p>
+                            <p class="font-medium text-gray-800 truncate">
                                 @switch($solicitud->tiposervicio)
                                     @case('solicitud_articulo')
-                                        <i class="fas fa-box text-blue-500 mr-2"></i>
-                                        Solicitud de Artículo
+                                        📦 Solicitud de Artículo
                                     @break
 
                                     @case('solicitud_repuesto')
-                                        <i class="fas fa-cog text-green-500 mr-2"></i>
-                                        Solicitud de Repuesto
+                                        🔧 Solicitud de Repuesto
                                     @break
 
                                     @case('mantenimiento')
-                                        <i class="fas fa-tools text-yellow-500 mr-2"></i>
-                                        Mantenimiento
+                                        🛠️ Mantenimiento
                                     @break
 
                                     @case('reparacion')
-                                        <i class="fas fa-wrench text-red-500 mr-2"></i>
-                                        Reparación
+                                        🔧 Reparación
                                     @break
 
                                     @case('instalacion')
-                                        <i class="fas fa-plug text-blue-500 mr-2"></i>
-                                        Instalación
+                                        ⚡ Instalación
                                     @break
 
                                     @case('garantia')
-                                        <i class="fas fa-shield-alt text-green-500 mr-2"></i>
-                                        Garantía
+                                        📋 Garantía
                                     @break
 
                                     @default
-                                        <i class="fas fa-question-circle text-gray-400 mr-2"></i>
                                         {{ $solicitud->tiposervicio ?? 'No especificado' }}
                                 @endswitch
                             </p>
@@ -461,16 +603,11 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <!-- Fecha de Creación -->
                             <div>
-                                <p class="text-sm text-gray-500 font-medium flex items-center">
-                                    <i class="far fa-calendar-plus text-gray-400 mr-2"></i>
-                                    Fecha Creación
-                                </p>
-                                <p class="font-medium text-gray-800 text-sm flex items-center mt-1">
+                                <p class="text-sm text-gray-500 font-medium">Fecha Creación</p>
+                                <p class="font-medium text-gray-800 text-sm">
                                     @if ($solicitud->fechacreacion)
-                                        <i class="far fa-clock text-gray-300 mr-2"></i>
                                         {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y') }}
                                     @else
-                                        <i class="far fa-times-circle text-gray-300 mr-2"></i>
                                         No especificada
                                     @endif
                                 </p>
@@ -478,16 +615,11 @@
 
                             <!-- Fecha Requerida -->
                             <div>
-                                <p class="text-sm text-gray-500 font-medium flex items-center">
-                                    <i class="far fa-calendar-check text-gray-400 mr-2"></i>
-                                    Fecha Requerida
-                                </p>
-                                <p class="font-medium text-gray-800 text-sm flex items-center mt-1">
+                                <p class="text-sm text-gray-500 font-medium">Fecha Requerida</p>
+                                <p class="font-medium text-gray-800 text-sm">
                                     @if ($solicitud->fecharequerida)
-                                        <i class="fas fa-hourglass-half text-gray-300 mr-2"></i>
                                         {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y') }}
                                     @else
-                                        <i class="far fa-times-circle text-gray-300 mr-2"></i>
                                         No especificada
                                     @endif
                                 </p>
@@ -502,42 +634,26 @@
                             $diasRestantes = now()->startOfDay()->diffInDays($fechaRequerida, false);
                         @endphp
 
-                        <div class="mb-4">
-                            <p class="text-sm text-gray-500 font-medium flex items-center">
-                                <i class="fas fa-business-time text-gray-400 mr-2"></i>
-                                Tiempo Restante
-                            </p>
-                            <p
-                                class="text-sm font-semibold flex items-center mt-1
-            @if ($diasRestantes <= 0) text-red-600
-            @elseif ($diasRestantes <= 2) text-red-500
-            @elseif ($diasRestantes <= 5) text-yellow-500
-            @else text-green-600 @endif">
-                                @if ($diasRestantes > 0)
-                                    <i
-                                        class="fas fa-clock 
-                    @if ($diasRestantes <= 5) text-yellow-500 @else text-green-500 @endif
-                    mr-2"></i>
-                                    {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }} restantes
-                                @else
-                                    <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-                                    Vencida
-                                @endif
-                            </p>
-                        </div>
+
+                        <p
+                            class="text-sm font-semibold
+                                @if ($diasRestantes <= 0) text-red-600
+                                @elseif ($diasRestantes <= 2) text-red-500
+                                @elseif ($diasRestantes <= 5) text-yellow-500
+                                @else text-green-600 @endif
+                            ">
+                            @if ($diasRestantes > 0)
+                                {{ $diasRestantes }} día{{ $diasRestantes != 1 ? 's' : '' }} restantes
+                            @else
+                                ⚠️ Vencida
+                            @endif
+                        </p>
+
 
                         @if (!empty($solicitud->observaciones))
                             <div class="mb-4">
-                                <p class="text-sm text-gray-500 font-medium flex items-center">
-                                    <i class="far fa-sticky-note text-gray-400 mr-2"></i>
-                                    Observaciones
-                                </p>
-                                <div class="mt-1 bg-gray-50 rounded-lg p-3 border border-gray-100">
-                                    <p class="text-sm text-gray-700 flex">
-                                        <i class="fas fa-quote-left text-gray-300 mr-2 mt-1"></i>
-                                        <span class="line-clamp-3">{{ $solicitud->observaciones }}</span>
-                                    </p>
-                                </div>
+                                <p class="text-sm text-gray-500 font-medium">Observaciones</p>
+                                <p class="text-sm text-gray-700 line-clamp-2">{{ $solicitud->observaciones }}</p>
                             </div>
                         @endif
                     </div>
@@ -695,6 +811,8 @@
                                     </a>
                                 @endif
 
+                                <!-- BOTÓN GESTIONAR REMOVIDO -->
+
                                 @if ($solicitud->estado == 'pendiente')
                                     @if (\App\Helpers\PermisoHelper::tienePermiso('EDITAR SOLICITUD REPUESTO'))
                                         <a href="{{ route('solicitudrepuestoprovincia.edit', $solicitud->idsolicitudesordenes) }}"
@@ -759,18 +877,6 @@
                     {{ $solicitudes->appends(request()->query())->links() }}
                 </div>
             @endif
-        </div>
 
-        <!-- Modales (mantener igual que antes) -->
-        <div id="solicitudModal"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <!-- Contenido del modal -->
-        </div>
-
-        <div id="provinciaModal"
-            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-            <!-- Contenido del modal -->
-        </div>
-
-        <script src="{{ asset('assets/js/solicitud/solicitudarticulo.js') }}"></script>
+    <script src="{{ asset('assets/js/solicitud/solicitudarticulo.js') }}"></script>
     </x-layout.default>
