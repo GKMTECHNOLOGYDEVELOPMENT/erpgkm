@@ -1,60 +1,130 @@
 <x-layout.default title="Solicitud Articulos - ERP Solutions Force">
-    <style>
-        /* Estilos para las animaciones de los modales */
-        .modal-active .modal-overlay {
-            opacity: 0.5;
-        }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        .modal-active .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        /* Para el primer modal (ya existente) */
-        #solicitudModal .modal-overlay {
-            transition: opacity 0.3s ease;
-        }
-
-        #solicitudModal .modal-content {
-            transition: all 0.3s ease;
-        }
-
-        /* Animación para los botones al hacer hover */
-        #btnSiProvincia:hover svg {
-            transform: scale(1.1);
-            transition: transform 0.2s ease;
-        }
-
-        #btnNoProvincia:hover svg {
-            transform: scale(1.1);
-            transition: transform 0.2s ease;
-        }
-
-        /* Animación suave para la flecha de volver */
-        #backToFirstModal:hover svg {
-            transform: translateX(-2px);
-            transition: transform 0.2s ease;
-        }
-    </style>
     <div class="container mx-auto px-4 py-8">
-
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Solicitudes</h1>
+        <div class="mb-6">
+            <ul class="flex flex-wrap space-x-2 rtl:space-x-reverse">
+                <li>
+                    <a href="{{ route('solicitudarticulo.index') }}" class="text-primary hover:underline">Solicitudes</a>
+                </li>
+            </ul>
+        </div>
+        <!-- Encabezado principal -->
+        <div class=" panel w-full flex flex-col lg:flex-row lg:items-center justify-between mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Solicitudes</h1>
+                <p class="text-gray-600 mt-2">Gestione las solicitudes según su tipo y ubicación</p>
+            </div>
 
             @if (\App\Helpers\PermisoHelper::tienePermiso('NUEVA SOLICITUD ARTICULO'))
-                <button id="openModalBtn"
-                    class="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Nueva Solicitud
-                </button>
+                <div class="flex space-x-3">
+                    <!-- Botón principal para nueva solicitud -->
+                    <button id="openModalBtn"
+                        class="flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg">
+                        <!-- Reemplaza el SVG con este icono de Font Awesome -->
+                        <i class="fas fa-plus-circle mr-2 text-lg"></i>
+                        Nueva Solicitud
+                    </button>
+                </div>
             @endif
-
         </div>
 
-        <!-- Primer Modal (tu código original) -->
+        <!-- Resumen rápido con estadísticas reales -->
+        <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    Resumen de Solicitudes Pendientes
+                </h3>
+                <span class="text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-sync-alt text-gray-400 mr-1"></i>
+                    Actualizado hoy
+                </span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Repuesto Lima -->
+                <div
+                    class="text-center p-4 rounded-xl bg-green-50 border border-green-100 hover:shadow-md transition-shadow hover:-translate-y-1 duration-200">
+                    <div class="flex justify-center mb-2">
+                        <div class="p-2 bg-green-100 rounded-full">
+                            <i class="fas fa-wrench text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-green-700 mb-1" id="contadorRepuestoLima">
+                        {{ $contadores['repuesto_lima'] ?? 0 }}
+                    </div>
+                    <div class="text-sm font-medium text-green-600">Repuesto (Lima)</div>
+                    <div class="text-xs text-green-500 mt-1 flex items-center justify-center">
+                        <i class="fas fa-clock mr-1"></i>Pendientes
+                    </div>
+                </div>
+
+                <!-- Repuesto Provincia -->
+                <div
+                    class="text-center p-4 rounded-xl bg-purple-50 border border-purple-100 hover:shadow-md transition-shadow hover:-translate-y-1 duration-200">
+                    <div class="flex justify-center mb-2">
+                        <div class="p-2 bg-purple-100 rounded-full">
+                            <i class="fas fa-truck text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-purple-700 mb-1" id="contadorRepuestoProvincia">
+                        {{ $contadores['repuesto_provincia'] ?? 0 }}
+                    </div>
+                    <div class="text-sm font-medium text-purple-600">Repuesto (Provincia)</div>
+                    <div class="text-xs text-purple-500 mt-1 flex items-center justify-center">
+                        <i class="fas fa-clock mr-1"></i>Pendientes
+                    </div>
+                </div>
+
+                <!-- Solicitud Artículo -->
+                <div
+                    class="text-center p-4 rounded-xl bg-blue-50 border border-blue-100 hover:shadow-md transition-shadow hover:-translate-y-1 duration-200">
+                    <div class="flex justify-center mb-2">
+                        <div class="p-2 bg-blue-100 rounded-full">
+                            <i class="fas fa-box-open text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-blue-700 mb-1" id="contadorSolicitudArticulo">
+                        {{ $contadores['solicitud_articulo'] ?? 0 }}
+                    </div>
+                    <div class="text-sm font-medium text-blue-600">Solicitud Artículo</div>
+                    <div class="text-xs text-blue-500 mt-1 flex items-center justify-center">
+                        <i class="fas fa-clock mr-1"></i>Pendientes
+                    </div>
+                </div>
+
+                <!-- Total General -->
+                <div
+                    class="text-center p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow hover:-translate-y-1 duration-200">
+                    <div class="flex justify-center mb-2">
+                        <div class="p-2 bg-gray-100 rounded-full">
+                            <i class="fas fa-clipboard-list text-gray-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="text-2xl font-bold text-gray-700 mb-1" id="contadorTotal">
+                        {{ $contadores['total'] ?? 0 }}
+                    </div>
+                    <div class="text-sm font-medium text-gray-600">Total Solicitudes</div>
+                    <div class="text-xs text-gray-500 mt-1 flex items-center justify-center">
+                        <i class="fas fa-list-check mr-1"></i>Todas pendientes
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nota informativa -->
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center text-sm text-gray-600 bg-blue-50 px-3 py-2 rounded-lg">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400 mr-2"></i>
+                    </div>
+                    <span class="text-blue-700 font-medium">
+                        Estadísticas actualizadas basadas en solicitudes pendientes de atención
+                    </span>
+                </div>
+            </div>
+        </div>
+
+         <!-- Primer Modal (tu código original) -->
         <div id="solicitudModal"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
