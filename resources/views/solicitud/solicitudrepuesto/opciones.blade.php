@@ -800,98 +800,6 @@ text-rose-600 @endif">
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Procesamiento Grupal -->
-                            <div
-                                class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border border-emerald-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                                <div class="flex items-start gap-2 sm:gap-3 mb-4 sm:mb-5">
-                                    <div
-                                        class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-emerald-100 to-emerald-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner flex-shrink-0">
-                                        <i
-                                            class="fas fa-users-cog text-emerald-600 text-sm sm:text-base lg:text-lg"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h3
-                                            class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 tracking-tight mb-1">
-                                            Procesamiento Grupal
-                                        </h3>
-                                        <p class="text-xs sm:text-sm text-slate-600">Procese todos los repuestos en una
-                                            sola acción eficiente.</p>
-                                    </div>
-                                </div>
-
-                                <ul class="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
-                                    <li class="flex items-start text-xs sm:text-sm text-slate-700">
-                                        <i class="fas fa-check-circle text-emerald-500 mt-0.5 mr-2 flex-shrink-0"></i>
-                                        <span>Seleccione ubicaciones para todos los repuestos.</span>
-                                    </li>
-                                    <li class="flex items-center text-xs sm:text-sm text-slate-700">
-                                        <i class="fas fa-check-circle text-emerald-500 mt-0.5 mr-2 flex-shrink-0"></i>
-                                        <span>Procese todo el lote con un solo clic.</span>
-                                    </li>
-                                    <li class="flex items-start text-xs sm:text-sm text-slate-700">
-                                        <i class="fas fa-check-circle text-emerald-500 mt-0.5 mr-2 flex-shrink-0"></i>
-                                        <span>Requiere stock completo en todos los repuestos.</span>
-                                    </li>
-                                </ul>
-
-                                <div class="space-y-3 sm:space-y-4">
-                                    @if (App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO GRUPAL'))
-                                        @if ($repuestos_procesados == $total_repuestos)
-                                            <button disabled
-                                                class="w-full flex items-center justify-center px-3 sm:px-6 py-2.5 sm:py-3 bg-gray-300 text-gray-600 rounded-lg sm:rounded-xl font-semibold cursor-not-allowed text-xs sm:text-sm">
-                                                <i class="fas fa-check-circle mr-1.5 sm:mr-2"></i>
-                                                <span>Todos los repuestos ya están procesados</span>
-                                            </button>
-                                        @else
-                                            <button
-                                                @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
-                                                :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
-                                                :class="{
-                                                    'opacity-50 cursor-not-allowed': isLoadingGrupal || !
-                                                        todasUbicacionesSeleccionadas || !todosDisponibles,
-                                                    'bg-success hover:bg-green-600 shadow-md hover:shadow-lg': todasUbicacionesSeleccionadas &&
-                                                        todosDisponibles,
-                                                    'bg-primary': !todasUbicacionesSeleccionadas || !todosDisponibles
-                                                }"
-                                                class="w-full flex items-center justify-center px-3 sm:px-6 py-2.5 sm:py-3 text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm">
-                                                <i x-show="!isLoadingGrupal"
-                                                    class="fas fa-play-circle mr-1.5 sm:mr-2"></i>
-                                                <i x-show="isLoadingGrupal"
-                                                    class="fas fa-spinner fa-spin mr-1.5 sm:mr-2"></i>
-                                                <span
-                                                    x-text="isLoadingGrupal ? 'Procesando...' : 'Procesar Todo el Lote'"></span>
-                                            </button>
-                                        @endif
-                                    @endif
-
-                                    <div
-                                        class="text-center text-xs sm:text-sm font-semibold @if ($puede_aceptar) text-success @else text-danger @endif">
-                                        @if ($repuestos_procesados == $total_repuestos)
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-check-double text-success"></i>
-                                                <span class="hidden sm:inline">Todos los repuestos ya fueron
-                                                    procesados</span>
-                                                <span class="sm:hidden">Completamente procesado</span>
-                                            </div>
-                                        @elseif($puede_aceptar)
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-check-circle"></i>
-                                                <span class="hidden sm:inline">Condiciones óptimas para procesamiento
-                                                    grupal</span>
-                                                <span class="sm:hidden">Óptimo para grupal</span>
-                                            </div>
-                                        @else
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                <span class="hidden sm:inline">Algunos repuestos no cumplen las
-                                                    condiciones</span>
-                                                <span class="sm:hidden">No óptimo para grupal</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Barra de Estado Mejorada -->
@@ -973,14 +881,14 @@ text-rose-600 @endif">
                 x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
 
                 <!-- Header del Modal -->
-                <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-t-2xl">
+                <div class="bg-success px-6 py-4 rounded-t-2xl">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-3">
                             <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                                 <i class="fas fa-user-check text-white"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-black">Marcar como Listo para Entrega</h3>
+                                <h3 class="text-lg font-bold text-white">Marcar como Listo para Entrega</h3>
                                 <p class="text-green-100 text-sm" x-text="repuestoSeleccionadoNombre"></p>
                             </div>
                         </div>
@@ -1024,7 +932,7 @@ text-rose-600 @endif">
                                         <div>
                                             <p class="text-sm text-yellow-700 font-semibold">Importante:</p>
                                             <p class="text-xs text-yellow-600">El stock <strong>NO se
-                                                    descontará</strong> hasta que se confirme la entrega física.</p>
+                                                    descontará</strong> hasta que el técnico marque como "usado".</p>
                                         </div>
                                     </div>
                                 </div>
