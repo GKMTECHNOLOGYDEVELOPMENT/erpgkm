@@ -77,7 +77,6 @@ class SolicitudrepuestoController extends Controller
                         ->from('visitas as v')
                         ->whereColumn('v.idTickets', 't.idTickets')
                         ->where('v.idUsuario', $userId)
-                        ->where('v.estado', 1)
                         ->whereExists(function ($flujoQuery) {
                             $flujoQuery->select(DB::raw(1))
                                 ->from('ticketflujo as tf')
@@ -4025,6 +4024,16 @@ public function confirmarEntregaFisicaConFoto(Request $request, $id)
         Log::info("  - Ubicación: " . $entregaPendiente->ubicacion_utilizada);
         Log::info("  - Cantidad: " . $entregaPendiente->cantidad);
 
+
+         // Obtener usuario que entregó
+        $usuarioEntregoId = $request->input('usuario_entrego_id');
+        $nombreFirmante = $request->input('nombre_firmante');
+        
+        // Si no se especifica usuario_entrego_id, usar el usuario autenticado
+        if (!$usuarioEntregoId) {
+            $usuarioEntregoId = auth()->id();
+        }
+
         // ========================
         // 1. PROCESAR LA FOTO (en LONGBLOB)
         // ========================
@@ -4086,7 +4095,7 @@ public function confirmarEntregaFisicaConFoto(Request $request, $id)
         // Datos base para actualizar
         $updateData = [
             'estado' => 'entregado',
-            'usuario_entrego_id' => auth()->id(),
+            'usuario_entrego_id' => $usuarioEntregoId,
             'fecha_entrega' => now(),
             'firma_confirma' => $firmaConfirmada,
             'observaciones_entrega' => $observacionesEntrega,

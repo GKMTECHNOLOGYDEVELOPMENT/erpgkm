@@ -4,6 +4,13 @@
     $estadosSinCeder = ['entregado', 'listo_para_entregar', 'aprobada'];
     $mostrarColumnaCeder = !in_array($solicitud->estado, $estadosSinCeder);
     
+    // Obtener todos los usuarios disponibles para entregar repuestos
+    $usuariosDisponibles = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'correo')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->get();
+    
     Log::debug("COLUMNA CEDER - Decisión:", [
         'solicitud_id' => $solicitud->idsolicitudesordenes,
         'estado_solicitud' => $solicitud->estado,
@@ -205,7 +212,7 @@
 
             <!-- Verificar si hay repuestos -->
             @if (!$repuestos || $repuestos->count() == 0)
-                <!-- Mensaje cuando no hay repuestos - Ya es responsive -->
+                <!-- Mensaje cuando no hay repuestos -->
                 <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-yellow-200 mb-8">
                     <div class="bg-gradient-to-r from-yellow-400 to-orange-500 px-4 sm:px-6 py-4">
                         <div class="flex items-center space-x-3">
@@ -237,7 +244,7 @@
                     </div>
                 </div>
             @else
-                <!-- Panel Principal de Gestión - Responsive -->
+                <!-- Panel Principal de Gestión -->
                 <div
                     class="bg-white/80 backdrop-blur-sm rounded-3xl sm:rounded-3xl shadow-xl overflow-hidden border border-white/20 mb-8">
                     <div class="bg-blue-600 px-4 sm:px-8 py-4 sm:py-6">
@@ -257,50 +264,42 @@
                     <div class="p-4 sm:p-8">
                         <!-- Formulario para selección -->
                         <form id="formUbicaciones" @submit.prevent="procesarSeleccion">
-                            <!-- Tabla Mejorada - Responsive -->
+                            <!-- Tabla Mejorada -->
                             <div class="overflow-x-auto rounded-2xl border border-slate-200/60 shadow-sm mb-8">
                                 <table class="w-full min-w-[900px] lg:min-w-full">
-                                    <!-- En el thead de la tabla, agregar nueva columna -->
                                     <thead class="bg-gradient-to-r from-slate-50 to-blue-50/30">
                                         <tr>
-                                            <th
-                                                class="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <div class="flex items-center space-x-2">
                                                     <i class="fas fa-cog text-slate-500"></i>
                                                     <span class="hidden sm:inline">Repuesto</span>
                                                 </div>
                                             </th>
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <span class="hidden sm:inline">Solicitado</span>
                                                 <span class="sm:hidden">Sol.</span>
                                             </th>
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <span class="hidden sm:inline">Disponible</span>
                                                 <span class="sm:hidden">Disp.</span>
                                             </th>
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-map-marker-alt text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Ubicación</span>
                                             </th>
                                             <!-- NUEVA COLUMNA: Ceder/Estado -->
                                             @if ($mostrarColumnaCeder)
-                                                <th
-                                                    class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                                <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                     <i class="fas fa-exchange-alt text-slate-500 mr-1"></i>
                                                     <span class="hidden sm:inline">Ceder</span>
                                                     <span class="sm:hidden">Ced.</span>
                                                 </th>
                                             @endif
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-tasks text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Estado</span>
                                             </th>
-                                            <th
-                                                class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
+                                            <th class="px-4 sm:px-6 py-4 sm:py-5 text-left text-xs sm:text-sm font-semibold text-slate-700 uppercase tracking-wider border-b border-slate-200/60">
                                                 <i class="fas fa-play-circle text-slate-500 mr-1"></i>
                                                 <span class="hidden sm:inline">Acción</span>
                                             </th>
@@ -309,7 +308,6 @@
                                     <tbody class="divide-y divide-slate-200/40">
                                         @foreach ($repuestos as $repuesto)
                                             @php
-                                                // Verificar si es repuesto cedido
                                                 $esCedido = $repuesto->entrega_info && isset($repuesto->entrega_info->entrega_origen_id) && !empty($repuesto->entrega_info->entrega_origen_id);
                                                 $estadoRepuesto = $repuesto->estado_actual ?? 'no_procesado';
                                             @endphp
@@ -402,9 +400,7 @@
                                                             </span>
                                                         </div>
                                                     @elseif(isset($repuesto->ubicaciones_detalle) && count($repuesto->ubicaciones_detalle) > 0)
-                                                        <!-- Contenedor para ubicación -->
                                                         <div class="space-y-2 max-w-[180px] sm:max-w-xs">
-                                                            <!-- Select de ubicación -->
                                                             <select name="ubicaciones[{{ $repuesto->idArticulos }}]"
                                                                 class="w-full border border-slate-300 rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                                                                 x-model="seleccionesUbicacion[{{ $repuesto->idArticulos }}]"
@@ -425,7 +421,6 @@
                                                                 @endforeach
                                                             </select>
                                                             
-                                                            <!-- Botón para procesar ubicación -->
                                                             <button type="button"
                                                                 @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
                                                                 :disabled="!seleccionesUbicacion[{{ $repuesto->idArticulos }}] || 
@@ -493,7 +488,6 @@
                                                         @if ($mostrarSelectRepuesto)
                                                             <div class="space-y-2 max-w-[220px]">
                                                                 @if($repuestosParaCeder->count() > 0)
-                                                                    <!-- Select de ceder -->
                                                                     <select class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
                                                                         x-model="seleccionesCeder[{{ $repuesto->idArticulos }}]"
                                                                         :disabled="seleccionesUbicacion[{{ $repuesto->idArticulos }}] || procesandoIndividual[{{ $repuesto->idArticulos }}]"
@@ -524,7 +518,6 @@
                                                                         @endforeach
                                                                     </select>
                                                                     
-                                                                    <!-- Botón para ceder repuesto -->
                                                                     <button type="button"
                                                                         @click="abrirModalCeder({{ $repuesto->idArticulos }})"
                                                                         :disabled="!seleccionesCeder[{{ $repuesto->idArticulos }}] || 
@@ -567,104 +560,101 @@
                                                     </td>
                                                 @endif
 
-                                               <!-- Estado -->
-<td class="px-4 sm:px-6 py-4 sm:py-6">
-    @if ($repuesto->ya_procesado)
-        @if ($repuesto->estado_actual == 'entregado')
-            <span
-                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark text-white border border-dark shadow-sm">
-                <i class="fas fa-check-circle mr-1"></i>
-                <span class="hidden sm:inline">Entregado</span>
-                <span class="sm:hidden">Entreg.</span>
-            </span>
-        @elseif($repuesto->estado_actual == 'entregado_cedido')
-            <span
-                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-purple-700 text-white border border-purple-800 shadow-sm">
-                <i class="fas fa-exchange-alt mr-1"></i>
-                <span class="hidden sm:inline">Entregado Cedido</span>
-                <span class="sm:hidden">Ent. Cedido</span>
-            </span>
-        @elseif($repuesto->estado_actual == 'pendiente_entrega')
-            <span
-                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-success shadow-sm">
-                <i class="fas fa-clock mr-1"></i>
-                <span class="hidden sm:inline">Listo para Entregar</span>
-                <span class="sm:hidden">Listo</span>
-            </span>
-        @elseif($repuesto->estado_actual == 'listo_para_ceder')
-            <span
-                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-purple-600 text-white border border-purple-700 shadow-sm">
-                <i class="fas fa-exchange-alt mr-1"></i>
-                <span class="hidden sm:inline">Listo para Ceder</span>
-                <span class="sm:hidden">Ceder</span>
-            </span>
-        @endif
-    @elseif($repuesto->suficiente_stock)
-        <span
-            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-warning shadow-sm">
-            <i class="fas fa-cog mr-1"></i>
-            <span class="hidden sm:inline">Pendiente</span>
-            <span class="sm:hidden">Pend.</span>
-        </span>
-    @else
-        <span
-            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-danger text-white border border-red-200 shadow-sm">
-            <i class="fas fa-times-circle mr-1"></i>
-            <span class="hidden sm:inline">Insuficiente</span>
-            <span class="sm:hidden">Ins.</span>
-        </span>
-    @endif
-</td>
+                                                <!-- Estado -->
+                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
+                                                    @if ($repuesto->ya_procesado)
+                                                        @if ($repuesto->estado_actual == 'entregado')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark text-white border border-dark shadow-sm">
+                                                                <i class="fas fa-check-circle mr-1"></i>
+                                                                <span class="hidden sm:inline">Entregado</span>
+                                                                <span class="sm:hidden">Entreg.</span>
+                                                            </span>
+                                                        @elseif($repuesto->estado_actual == 'entregado_cedido')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-purple-700 text-white border border-purple-800 shadow-sm">
+                                                                <i class="fas fa-exchange-alt mr-1"></i>
+                                                                <span class="hidden sm:inline">Entregado Cedido</span>
+                                                                <span class="sm:hidden">Ent. Cedido</span>
+                                                            </span>
+                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-success shadow-sm">
+                                                                <i class="fas fa-clock mr-1"></i>
+                                                                <span class="hidden sm:inline">Listo para Entregar</span>
+                                                                <span class="sm:hidden">Listo</span>
+                                                            </span>
+                                                        @elseif($repuesto->estado_actual == 'listo_para_ceder')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-purple-600 text-white border border-purple-700 shadow-sm">
+                                                                <i class="fas fa-exchange-alt mr-1"></i>
+                                                                <span class="hidden sm:inline">Listo para Ceder</span>
+                                                                <span class="sm:hidden">Ceder</span>
+                                                            </span>
+                                                        @endif
+                                                    @elseif($repuesto->suficiente_stock)
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-warning shadow-sm">
+                                                            <i class="fas fa-cog mr-1"></i>
+                                                            <span class="hidden sm:inline">Pendiente</span>
+                                                            <span class="sm:hidden">Pend.</span>
+                                                        </span>
+                                                    @else
+                                                        <span
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-danger text-white border border-red-200 shadow-sm">
+                                                            <i class="fas fa-times-circle mr-1"></i>
+                                                            <span class="hidden sm:inline">Insuficiente</span>
+                                                            <span class="sm:hidden">Ins.</span>
+                                                        </span>
+                                                    @endif
+                                                </td>
 
-                                            <!-- Acción -->
-<td class="px-4 sm:px-6 py-4 sm:py-6">
-    @if ($repuesto->ya_procesado)
-        @if ($repuesto->estado_actual == 'entregado' || $repuesto->estado_actual == 'entregado_cedido')
-            <!-- Botón para ver confirmación - Para ambos tipos de entrega -->
-            <button type="button"
-                @click="abrirModalVerConfirmacion({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                <i class="fas fa-eye mr-1 sm:mr-2"></i>
-                <span class="hidden sm:inline">Ver Confirmación</span>
-                <span class="sm:hidden">Ver</span>
-            </button>
-        @elseif($repuesto->estado_actual == 'pendiente_entrega')
-            <div class="space-y-2">
-                <!-- Botón para confirmar entrega física -->
-                <button type="button"
-                    @click="confirmarEntregaFisica({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                    <i class="fas fa-truck mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Confirmar Entrega</span>
-                    <span class="sm:hidden">Entregar</span>
-                </button>
-            </div>
-        @elseif($repuesto->estado_actual == 'listo_para_ceder')
-            <div class="space-y-2">
-                <!-- Botón para confirmar entrega física de repuesto CEDIDO -->
-                <button type="button"
-                    @click="confirmarEntregaCedida({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, {{ $repuesto->entrega_info->entrega_id ?? 0 }})"
-                    class="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                    <i class="fas fa-exchange-alt mr-1 sm:mr-2"></i>
-                    <span class="hidden sm:inline">Confirmar Entrega Cedida</span>
-                    <span class="sm:hidden">Entregar Cedido</span>
-                </button>
-            </div>
-        @endif
-    @elseif($repuesto->suficiente_stock)
-        <!-- Los botones ahora están en las columnas individuales -->
-        <div class="text-center text-xs text-gray-500">
-            Seleccione una opción
-        </div>
-    @else
-        <button disabled
-            class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
-            <i class="fas fa-ban mr-1 sm:mr-2"></i>
-            <span class="hidden sm:inline">Sin Stock</span>
-            <span class="sm:hidden">Sin</span>
-        </button>
-    @endif
-</td>
+                                                <!-- Acción -->
+                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
+                                                    @if ($repuesto->ya_procesado)
+                                                        @if ($repuesto->estado_actual == 'entregado' || $repuesto->estado_actual == 'entregado_cedido')
+                                                            <button type="button"
+                                                                @click="abrirModalVerConfirmacion({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                                                <i class="fas fa-eye mr-1 sm:mr-2"></i>
+                                                                <span class="hidden sm:inline">Ver Confirmación</span>
+                                                                <span class="sm:hidden">Ver</span>
+                                                            </button>
+                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                                                            <div class="space-y-2">
+                                                                <!-- Nuevo botón para seleccionar quién entrega -->
+                                                                <button type="button"
+                                                                    @click="abrirModalSeleccionarEntregador({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
+                                                                    class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                                                    <i class="fas fa-user-check mr-1 sm:mr-2"></i>
+                                                                    <span class="hidden sm:inline">Seleccionar Entregador</span>
+                                                                    <span class="sm:hidden">Entregar</span>
+                                                                </button>
+                                                            </div>
+                                                        @elseif($repuesto->estado_actual == 'listo_para_ceder')
+                                                            <div class="space-y-2">
+                                                                <button type="button"
+                                                                    @click="confirmarEntregaCedida({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, {{ $repuesto->entrega_info->entrega_id ?? 0 }})"
+                                                                    class="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                                                    <i class="fas fa-exchange-alt mr-1 sm:mr-2"></i>
+                                                                    <span class="hidden sm:inline">Confirmar Entrega Cedida</span>
+                                                                    <span class="sm:hidden">Entregar Cedido</span>
+                                                                </button>
+                                                            </div>
+                                                        @endif
+                                                    @elseif($repuesto->suficiente_stock)
+                                                        <div class="text-center text-xs text-gray-500">
+                                                            Seleccione una opción
+                                                        </div>
+                                                    @else
+                                                        <button disabled
+                                                            class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
+                                                            <i class="fas fa-ban mr-1 sm:mr-2"></i>
+                                                            <span class="hidden sm:inline">Sin Stock</span>
+                                                            <span class="sm:hidden">Sin</span>
+                                                        </button>
+                                                    @endif
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -674,7 +664,7 @@
                     </div>
                 </div>
 
-                <!-- Panel de Estrategias de Procesamiento - Responsive -->
+                <!-- Panel de Estrategias de Procesamiento -->
                 <div
                     class="bg-white/80 backdrop-blur-sm rounded-3xl sm:rounded-3xl shadow-xl overflow-hidden border border-white/20">
                     <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-4 sm:px-8 py-4 sm:py-6">
@@ -776,16 +766,13 @@
 
                                 <div class="space-y-3 sm:space-y-4">
                                     @if (App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO GRUPAL'))
-                                        <!-- Verificar si ya están todos procesados -->
                                         @if ($repuestos_procesados == $total_repuestos)
-                                            <!-- Botón deshabilitado cuando ya está todo procesado -->
                                             <button disabled
                                                 class="w-full flex items-center justify-center px-3 sm:px-6 py-2.5 sm:py-3 bg-gray-300 text-gray-600 rounded-lg sm:rounded-xl font-semibold cursor-not-allowed text-xs sm:text-sm">
                                                 <i class="fas fa-check-circle mr-1.5 sm:mr-2"></i>
                                                 <span>Todos los repuestos ya están procesados</span>
                                             </button>
                                         @else
-                                            <!-- Botón activo solo si no están todos procesados -->
                                             <button
                                                 @click="validarYProcesarGrupal({{ $solicitud->idsolicitudesordenes }})"
                                                 :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
@@ -836,7 +823,7 @@
                             </div>
                         </div>
 
-                        <!-- Barra de Estado Mejorada - Responsive -->
+                        <!-- Barra de Estado Mejorada -->
                         <div
                             class="mt-4 sm:mt-6 lg:mt-8 p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-slate-50 rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm">
                             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 sm:gap-4">
@@ -994,6 +981,160 @@
             </div>
         </div>
 
+        <!-- Modal para seleccionar quién entregará el repuesto -->
+        <div x-show="mostrarModalSeleccionarEntregador" x-cloak
+            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg transform transition-all duration-300 scale-100"
+                x-show="mostrarModalSeleccionarEntregador" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+
+                <!-- Header del Modal -->
+                <div class="bg-gradient-to-r from-orange-600 to-amber-600 px-6 py-4 rounded-t-2xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-user-tag text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-black">Seleccionar Quién Entregará</h3>
+                                <p class="text-amber-100 text-sm" x-text="repuestoEntregaNombre"></p>
+                            </div>
+                        </div>
+                        <button @click="cerrarModalSeleccionarEntregador"
+                            class="text-white hover:text-amber-200 transition-colors">
+                            <i class="fas fa-times text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contenido del Modal -->
+                <div class="p-6">
+                    <div class="mb-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                            <h4 class="font-semibold text-blue-700 mb-2">¿Quién entregará este repuesto?</h4>
+                            <p class="text-sm text-gray-600">
+                                Seleccione el usuario que realizará la entrega física del repuesto. 
+                                Este usuario deberá confirmar la entrega posteriormente.
+                            </p>
+                        </div>
+
+                        <!-- Selección de usuario entregador -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                <i class="fas fa-user-circle mr-2"></i>Usuario que entregará:
+                            </label>
+                            
+                            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                                <!-- En el modal de selección de entregador, actualizar los elementos click -->
+<!-- Opción: Yo mismo (usuario actual) -->
+<div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+    :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-100 border-blue-300' : ''"
+    @click="seleccionarUsuarioEntregador('yo_mismo', '{{ Auth::user()->name ?? 'Usuario Actual' }}')">
+    <div class="flex-shrink-0 mr-3">
+        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+            <i class="fas fa-user text-white"></i>
+        </div>
+    </div>
+    <div class="flex-1">
+        <p class="font-semibold text-gray-900">{{ Auth::user()->name ?? 'Usuario Actual' }}</p>
+        <p class="text-xs text-gray-500">Yo mismo ({{ Auth::user()->email ?? 'Usuario' }})</p>
+    </div>
+    <div class="flex-shrink-0">
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
+            :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-500 border-blue-500' : ''">
+            <i x-show="usuarioEntregadorSeleccionado === 'yo_mismo'" 
+               class="fas fa-check text-white text-xs"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Opción: Técnico asignado -->
+@if ($tecnico)
+<div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-green-50 cursor-pointer transition-colors"
+    :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ? 'bg-green-100 border-green-300' : ''"
+    @click="seleccionarUsuarioEntregador('{{ $tecnico->idUsuario }}', '{{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}')">
+    <div class="flex-shrink-0 mr-3">
+        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-cog text-white"></i>
+        </div>
+    </div>
+    <div class="flex-1">
+        <p class="font-semibold text-gray-900">{{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}</p>
+        <p class="text-xs text-gray-500">Técnico asignado a esta solicitud</p>
+    </div>
+    <div class="flex-shrink-0">
+        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
+            :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ? 'bg-green-500 border-green-500' : ''">
+            <i x-show="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}'" 
+               class="fas fa-check text-white text-xs"></i>
+        </div>
+    </div>
+</div>
+@endif
+
+<!-- Lista de otros usuarios -->
+@foreach ($usuariosDisponibles as $usuario)
+    @if (!$tecnico || $usuario->idUsuario != $tecnico->idUsuario)
+    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors"
+        :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ? 'bg-purple-100 border-purple-300' : ''"
+        @click="seleccionarUsuarioEntregador('{{ $usuario->idUsuario }}', '{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}')">
+        <div class="flex-shrink-0 mr-3">
+            <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-user-friends text-white"></i>
+            </div>
+        </div>
+        <div class="flex-1">
+            <p class="font-semibold text-gray-900">{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}</p>
+            <p class="text-xs text-gray-500">{{ $usuario->correo ?? 'Sin correo' }}</p>
+        </div>
+        <div class="flex-shrink-0">
+            <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ? 'bg-purple-500 border-purple-500' : ''">
+                <i x-show="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}'" 
+                   class="fas fa-check text-white text-xs"></i>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-yellow-500 mt-1 mr-2"></i>
+                                <div>
+                                    <p class="text-sm font-semibold text-yellow-700 mb-1">Importante:</p>
+                                    <p class="text-xs text-yellow-600">
+                                        El usuario seleccionado deberá confirmar la entrega posteriormente con foto y firma.
+                                        El stock se descontará una vez confirmada la entrega.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex space-x-3">
+                        <button @click="cerrarModalSeleccionarEntregador"
+                            class="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+                            Cancelar
+                        </button>
+                        <button @click="confirmarSeleccionEntregador" :disabled="!usuarioEntregadorSeleccionado"
+                            :class="{
+                                'bg-orange-600 hover:bg-orange-700': usuarioEntregadorSeleccionado,
+                                'bg-gray-400 cursor-not-allowed': !usuarioEntregadorSeleccionado
+                            }"
+                            class="flex-1 px-4 py-2.5 text-white rounded-xl font-medium transition-colors flex items-center justify-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Confirmar Entregador
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal para ceder repuesto -->
         <div x-show="mostrarModalCeder" x-cloak
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1103,14 +1244,21 @@
 
                     <!-- Contenido del modal -->
                     <div class="p-5">
-                        <!-- Información del repuesto -->
+                        <!-- Información del repuesto y entregador -->
                         <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <h4 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Detalles de entrega</h4>
                             <p class="text-sm text-gray-600 dark:text-gray-400" x-text="repuestoEntregaNombre"></p>
-                            <div class="mt-2 flex items-center gap-2 text-sm">
-                                <i class="fas fa-user-cog text-green-600"></i>
-                                <span
-                                    class="text-gray-700 dark:text-gray-300">{{ $tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico no asignado' }}</span>
+                            <div class="mt-3 space-y-2">
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i class="fas fa-user-tag text-green-600"></i>
+                                    <span class="text-gray-700 dark:text-gray-300 font-medium">Entregador:</span>
+                                    <span class="text-gray-700 dark:text-gray-300" x-text="nombreEntregador"></span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i class="fas fa-user-check text-blue-600"></i>
+                                    <span class="text-gray-700 dark:text-gray-300 font-medium">Para:</span>
+                                    <span class="text-gray-700 dark:text-gray-300">{{ $tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico no asignado' }}</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1344,7 +1492,7 @@
             </div>
         </div>
 
-        <!-- Modal confirmación de entrega - Textos más pequeños -->
+        <!-- Modal confirmación de entrega -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="mostrarModalVerConfirmacion && '!block'">
             <div class="flex items-start justify-center min-h-screen px-4 py-8"
@@ -1361,7 +1509,6 @@
                                     <i class="fas fa-clipboard-check text-white text-sm"></i>
                                 </div>
                                 <div>
-                                    <!-- TÍTULO MÁS PEQUEÑO -->
                                     <h3 class="text-base font-bold text-white">CONFIRMACIÓN DE ENTREGA</h3>
                                     <p class="text-xs text-blue-100 dark:text-gray-300 mt-0.5">Documentación del
                                         repuesto entregado</p>
@@ -1389,7 +1536,6 @@
                                 class="mb-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-lg">
                                 <div class="flex items-center mb-4">
                                     <div class="relative mr-4">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div
                                             class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
                                             <i class="fas fa-box-open text-white text-lg"></i>
@@ -1402,7 +1548,6 @@
 
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between mb-2">
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <h4
                                                 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                                 REPUESTO ENTREGADO</h4>
@@ -1412,11 +1557,9 @@
                                             </span>
                                         </div>
 
-                                        <!-- CÓDIGO MÁS PEQUEÑO -->
                                         <p class="text-lg font-bold text-gray-900 dark:text-white mb-2"
                                             x-text="repuestoVerCodigo" :title="repuestoVerCodigo"></p>
 
-                                        <!-- TIPO MÁS PEQUEÑO -->
                                         <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
                                             <i class="fas fa-tag text-gray-400 mr-2 text-xs"></i>
                                             <span class="font-medium" x-text="repuestoVerTipo"
@@ -1433,20 +1576,17 @@
                                 <div
                                     class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div class="flex items-center mb-3">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div
                                             class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
                                             <i class="fas fa-user-check text-blue-600 dark:text-blue-400 text-xs"></i>
                                         </div>
                                         <div>
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <span
                                                 class="text-xs font-semibold text-gray-500 dark:text-gray-400">ENTREGADO
                                                 POR</span>
                                         </div>
                                     </div>
                                     <div class="pl-11">
-                                        <!-- TEXTO MÁS PEQUEÑO -->
                                         <p class="text-sm font-bold text-gray-900 dark:text-white mb-1"
                                             x-text="entregaInfo.usuario_entrego || 'Almacén'"></p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">Personal autorizado</p>
@@ -1457,20 +1597,17 @@
                                 <div
                                     class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div class="flex items-center mb-3">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div
                                             class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
                                             <i
                                                 class="fas fa-calendar-check text-green-600 dark:text-green-400 text-xs"></i>
                                         </div>
                                         <div>
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">FECHA
                                                 Y HORA</span>
                                         </div>
                                     </div>
                                     <div class="pl-11">
-                                        <!-- TEXTO MÁS PEQUEÑO -->
                                         <p class="text-sm font-bold text-gray-900 dark:text-white mb-1"
                                             x-text="entregaInfo.fecha_entrega || 'No disponible'"></p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">Fecha de entrega</p>
@@ -1481,7 +1618,6 @@
                                 <div
                                     class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div class="flex items-center mb-3">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
                                             :class="entregaInfo.firma_confirma ?
                                                 'bg-green-100 dark:bg-green-900/30' :
@@ -1492,13 +1628,11 @@
                                                     'text-orange-600 dark:text-orange-400'"></i>
                                         </div>
                                         <div>
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">FIRMA
                                                 DIGITAL</span>
                                         </div>
                                     </div>
                                     <div class="pl-11">
-                                        <!-- TEXTO MÁS PEQUEÑO -->
                                         <p class="text-sm font-bold mb-1"
                                             :class="entregaInfo.firma_confirma ?
                                                 'text-green-700 dark:text-green-300' :
@@ -1511,19 +1645,16 @@
                                 <div
                                     class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
                                     <div class="flex items-center mb-3">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div
                                             class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
                                             <i class="fas fa-truck text-purple-600 dark:text-purple-400 text-xs"></i>
                                         </div>
                                         <div>
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <span
                                                 class="text-xs font-semibold text-gray-500 dark:text-gray-400">MÉTODO</span>
                                         </div>
                                     </div>
                                     <div class="pl-11">
-                                        <!-- TEXTO MÁS PEQUEÑO -->
                                         <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">ENTREGA FÍSICA
                                         </p>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">Presencial con evidencia
@@ -1535,20 +1666,17 @@
                             <!-- Observaciones -->
                             <div x-show="entregaInfo.observaciones_entrega" class="mb-6">
                                 <div class="flex items-center mb-3">
-                                    <!-- ICONO MÁS PEQUEÑO -->
                                     <div
                                         class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
                                         <i class="fas fa-sticky-note text-yellow-600 dark:text-yellow-400 text-xs"></i>
                                     </div>
                                     <div>
-                                        <!-- TEXTO MÁS PEQUEÑO -->
                                         <span
                                             class="text-sm font-semibold text-gray-500 dark:text-gray-400">OBSERVACIONES</span>
                                     </div>
                                 </div>
                                 <div
                                     class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 ml-11">
-                                    <!-- TEXTO MÁS PEQUEÑO -->
                                     <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
                                         x-text="entregaInfo.observaciones_entrega"></p>
                                 </div>
@@ -1564,13 +1692,11 @@
                             <div x-show="entregaInfo.foto_url" class="mb-6">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center">
-                                        <!-- ICONO MÁS PEQUEÑO -->
                                         <div
                                             class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mr-3">
                                             <i class="fas fa-camera text-red-600 dark:text-red-400 text-xs"></i>
                                         </div>
                                         <div>
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <h4 class="text-sm font-bold text-gray-900 dark:text-white">EVIDENCIA
                                                 VISUAL</h4>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">Foto de entrega</p>
@@ -1606,7 +1732,6 @@
                                     <div
                                         class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
                                         <div class="text-white">
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <p class="text-xs font-medium">Foto de entrega confirmada</p>
                                             <p class="text-[10px] text-gray-300">Tomada al momento de la entrega</p>
                                         </div>
@@ -1618,13 +1743,11 @@
                                     class="mt-4 bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
                                     <div class="grid grid-cols-2 gap-3">
                                         <div class="text-center">
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <p class="text-xs text-gray-500 dark:text-gray-400">TIPO</p>
                                             <p class="text-xs font-semibold text-gray-900 dark:text-white">Entrega
                                                 Física</p>
                                         </div>
                                         <div class="text-center">
-                                            <!-- TEXTO MÁS PEQUEÑO -->
                                             <p class="text-xs text-gray-500 dark:text-gray-400">ESTADO</p>
                                             <p class="text-xs font-semibold text-green-600 dark:text-green-400">
                                                 Completado</p>
@@ -1664,865 +1787,941 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        // Configurar Toastr
-        toastr.options = {
-            "closeButton": true,
-            "debug": false,
-            "newestOnTop": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "preventDuplicates": false,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "5000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        };
+ <script>
+// Configurar Toastr
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+};
 
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('solicitudRepuestoOpciones', () => ({
-                // Variables para ubicación
-                seleccionesUbicacion: {},
-                seleccionesCeder: {},
-                procesandoIndividual: {},
-                isLoadingGrupal: false,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('solicitudRepuestoOpciones', () => ({
+        // Variables para ubicación
+        seleccionesUbicacion: {},
+        seleccionesCeder: {},
+        procesandoIndividual: {},
+        isLoadingGrupal: false,
 
-                // Variables para modales
-                entregaInfo: {},
-                mostrarModalVerConfirmacion: false,
-                repuestoVerNombre: '',
+        // Variables para modales
+        entregaInfo: {},
+        mostrarModalVerConfirmacion: false,
+        repuestoVerNombre: '',
 
-                // Modal destinatario
-                mostrarModalDestinatario: false,
-                destinatarioSeleccionado: 'tecnico',
-                solicitudIdSeleccionada: null,
-                articuloIdSeleccionado: null,
-                repuestoSeleccionadoNombre: '',
+        // Modal destinatario
+        mostrarModalDestinatario: false,
+        destinatarioSeleccionado: 'tecnico',
+        solicitudIdSeleccionada: null,
+        articuloIdSeleccionado: null,
+        repuestoSeleccionadoNombre: '',
 
-                // Modal ceder
-                mostrarModalCeder: false,
-                entregaCederInfo: {},
-                articuloCederId: null,
+        // Variables para controlar el flujo de entrega
+        usuarioEntregadorSeleccionado: null,
+        nombreEntregador: '',
+        solicitudIdParaEntrega: null,
+        articuloIdParaEntrega: null,
+        repuestoNombreParaEntrega: '',
 
-                // Modal entrega física
-                mostrarModalEntregaFisica: false,
-                fotoPreviewEntrega: null,
-                fotoFileEntrega: null,
-                firmaConfirmadaEntrega: false,
-                fechaFirmaEntrega: null,
-                observacionesEntrega: '',
-                isLoadingEntrega: false,
-                repuestoEntregaNombre: '',
-                articuloEntregaId: null,
+        // Modal seleccionar entregador
+        mostrarModalSeleccionarEntregador: false,
 
-                // Modal entrega cedida
-                mostrarModalEntregaCedida: false,
-                fotoPreviewEntregaCedida: null,
-                fotoFileEntregaCedida: null,
-                observacionesEntregaCedida: '',
-                isLoadingEntregaCedida: false,
-                entregaCedidaId: null,
+        // Modal ceder
+        mostrarModalCeder: false,
+        entregaCederInfo: {},
+        articuloCederId: null,
 
-                // Getters
-                get destinatarioValido() {
-                    return @json($tecnico != null);
-                },
+        // Modal entrega física
+        mostrarModalEntregaFisica: false,
+        fotoPreviewEntrega: null,
+        fotoFileEntrega: null,
+        firmaConfirmadaEntrega: false,
+        fechaFirmaEntrega: null,
+        observacionesEntrega: '',
+        isLoadingEntrega: false,
 
-                get todasUbicacionesSeleccionadas() {
-                    const repuestos = @json($repuestos);
-                    return repuestos.every(repuesto => {
-                        if (repuesto.ya_procesado || !repuesto.suficiente_stock) {
-                            return true;
-                        }
-                        return this.seleccionesUbicacion[repuesto.idArticulos] && this.seleccionesUbicacion[
-                            repuesto.idArticulos] !== '';
-                    });
-                },
+        // Modal entrega cedida
+        mostrarModalEntregaCedida: false,
+        fotoPreviewEntregaCedida: null,
+        fotoFileEntregaCedida: null,
+        observacionesEntregaCedida: '',
+        isLoadingEntregaCedida: false,
+        entregaCedidaId: null,
 
-                get todosDisponibles() {
-                    return @json($puede_aceptar);
-                },
+        // Getters
+        get destinatarioValido() {
+            return @json($tecnico != null);
+        },
 
-                // ============ FUNCIONES PARA BLOQUEO MUTUO ============
-                resetearCeder(articuloId) {
-                    if (this.seleccionesUbicacion[articuloId]) {
-                        this.seleccionesCeder[articuloId] = '';
-                    }
-                },
+        get todasUbicacionesSeleccionadas() {
+            const repuestos = @json($repuestos);
+            return repuestos.every(repuesto => {
+                if (repuesto.ya_procesado || !repuesto.suficiente_stock) {
+                    return true;
+                }
+                return this.seleccionesUbicacion[repuesto.idArticulos] && this.seleccionesUbicacion[
+                    repuesto.idArticulos] !== '';
+            });
+        },
+
+        get todosDisponibles() {
+            return @json($puede_aceptar);
+        },
+
+        // ============ FUNCIONES PARA BLOQUEO MUTUO ============
+        resetearCeder(articuloId) {
+            if (this.seleccionesUbicacion[articuloId]) {
+                this.seleccionesCeder[articuloId] = '';
+            }
+        },
+        
+        resetearUbicacion(articuloId) {
+            if (this.seleccionesCeder[articuloId]) {
+                this.seleccionesUbicacion[articuloId] = '';
+            }
+        },
+
+        // ============ MÉTODOS PARA SELECCIONAR QUIÉN ENTREGARÁ ============
+        abrirModalSeleccionarEntregador(solicitudId, articuloId, nombreRepuesto) {
+            console.log('🔍 Abriendo modal para seleccionar entregador');
+            console.log('   - Solicitud ID:', solicitudId);
+            console.log('   - Artículo ID:', articuloId);
+            console.log('   - Repuesto:', nombreRepuesto);
+            
+            // Guardar los datos para la entrega
+            this.solicitudIdParaEntrega = solicitudId;
+            this.articuloIdParaEntrega = articuloId;
+            this.repuestoNombreParaEntrega = nombreRepuesto;
+            
+            // Resetear selección previa
+            this.usuarioEntregadorSeleccionado = null;
+            this.nombreEntregador = '';
+            
+            this.mostrarModalSeleccionarEntregador = true;
+        },
+
+        cerrarModalSeleccionarEntregador() {
+            this.mostrarModalSeleccionarEntregador = false;
+        },
+
+        confirmarSeleccionEntregador() {
+            console.log('✅ Confirmando selección de entregador');
+            console.log('   - Usuario seleccionado:', this.usuarioEntregadorSeleccionado);
+            console.log('   - Nombre entregador:', this.nombreEntregador);
+            
+            if (!this.usuarioEntregadorSeleccionado) {
+                toastr.error('Seleccione un usuario que entregará el repuesto');
+                return;
+            }
+
+            this.cerrarModalSeleccionarEntregador();
+            
+            // Ahora abrir el modal de confirmación de entrega con foto
+            console.log('🔄 Abriendo modal de confirmación de entrega');
+            console.log('   - Solicitud ID:', this.solicitudIdParaEntrega);
+            console.log('   - Artículo ID:', this.articuloIdParaEntrega);
+            console.log('   - Repuesto:', this.repuestoNombreParaEntrega);
+            
+            this.abrirModalConfirmarEntrega();
+        },
+
+        abrirModalConfirmarEntrega() {
+            console.log('📸 Abriendo modal para confirmar entrega con foto');
+            
+            // Usar los datos guardados
+            this.articuloEntregaId = this.articuloIdParaEntrega;
+            this.repuestoEntregaNombre = this.repuestoNombreParaEntrega;
+            
+            // Resetear el formulario de entrega
+            this.resetFormEntrega();
+            
+            this.mostrarModalEntregaFisica = true;
+        },
+
+        // ============ MÉTODOS PARA MANEJAR SELECCIÓN DE USUARIO ============
+        seleccionarUsuarioEntregador(usuarioId, nombreUsuario) {
+            console.log('👤 Seleccionando usuario entregador:', usuarioId, nombreUsuario);
+            this.usuarioEntregadorSeleccionado = usuarioId;
+            this.nombreEntregador = nombreUsuario;
+        },
+
+        // Helper para obtener nombre de usuario
+        obtenerNombreUsuario(usuarioId) {
+            if (usuarioId === 'yo_mismo') {
+                return '{{ Auth::user()->name ?? "Usuario Actual" }}';
+            }
+            
+            // Buscar en la lista de usuarios
+            const usuarios = @json($usuariosDisponibles);
+            const tecnico = @json($tecnico);
+            
+            if (usuarioId === '{{ $tecnico->idUsuario ?? "" }}') {
+                return '{{ $tecnico ? $tecnico->Nombre . " " . $tecnico->apellidoPaterno : "" }}';
+            }
+            
+            const usuarioEncontrado = usuarios.find(u => u.idUsuario == usuarioId);
+            return usuarioEncontrado ? 
+                `${usuarioEncontrado.Nombre} ${usuarioEncontrado.apellidoPaterno}` : 
+                'Usuario desconocido';
+        },
+
+        // ============ MÉTODOS PARA CEDER REPUESTO ============
+        abrirModalCeder(articuloId) {
+            console.log('🔍 =========== DEBUG ABRIR MODAL CEDER ===========');
+            
+            const selectElement = document.querySelector(`select[x-model="seleccionesCeder[${articuloId}]"]`);
+            
+            if (!selectElement) {
+                console.error('❌ Select no encontrado');
+                toastr.error('Error: No se encontró el selector de ceder');
+                return;
+            }
+            
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (!selectedOption || !selectedOption.value || selectedOption.value === '') {
+                console.error('❌ No hay opción seleccionada');
+                toastr.error('Seleccione un repuesto para ceder');
+                return;
+            }
+            
+            const entregaId = selectedOption.value;
+            
+            const repuestos = @json($repuestos);
+            const repuesto = repuestos.find(r => parseInt(r.idArticulos) === parseInt(articuloId));
+            
+            if (!repuesto) {
+                console.error('❌ Repuesto no encontrado');
+                toastr.error('No se encontró información del repuesto');
+                return;
+            }
+            
+            this.articuloCederId = parseInt(articuloId);
+            this.entregaCederInfo = {
+                id: parseInt(entregaId),
+                ubicacion: selectedOption.dataset.ubicacion || '',
+                cantidad: selectedOption.dataset.cantidad ? parseInt(selectedOption.dataset.cantidad) : 0,
+                usuario: selectedOption.dataset.usuario || '',
+                tipo: selectedOption.dataset.tipo || '',
+                solicitudOrigen: selectedOption.dataset.solicitudOrigen || '',
+                solicitudId: selectedOption.dataset.solicitudId || '',
+                estado: selectedOption.dataset.estado || '',
+                repuestoNombre: repuesto.nombre || repuesto.codigo_repuesto || 'Repuesto'
+            };
+            
+            this.mostrarModalCeder = true;
+        },
+
+        cerrarModalCeder() {
+            this.mostrarModalCeder = false;
+            this.entregaCederInfo = {};
+            this.articuloCederId = null;
+        },
+
+        async confirmarCeder() {
+            console.log('=========== CONFIRMAR CEDER ===========');
+            
+            const selectElement = document.querySelector(`select[x-model="seleccionesCeder[${this.articuloCederId}]"]`);
+            
+            if (!selectElement) {
+                console.error('❌ Select no encontrado');
+                toastr.error('Error interno: No se encontró el selector');
+                return;
+            }
+            
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            
+            if (!selectedOption || !selectedOption.value) {
+                toastr.error('No hay repuesto seleccionado para ceder');
+                return;
+            }
+            
+            const entregaId = selectedOption.value;
+            const articuloId = this.articuloCederId;
+            
+            const payload = {
+                articulo_id: articuloId,
+                entrega_id: entregaId,
+                ubicacion: selectedOption.dataset.ubicacion || '',
+                cantidad: selectedOption.dataset.cantidad || 0,
+                tipo_entrega: selectedOption.dataset.tipo || '',
+                usuario_destino: selectedOption.dataset.usuario || '',
+                solicitud_origen: selectedOption.dataset.solicitudOrigen || '',
+                solicitud_id_origen: selectedOption.dataset.solicitudId || ''
+            };
+            
+            try {
+                this.procesandoIndividual[articuloId] = true;
+                this.cerrarModalCeder();
                 
-                resetearUbicacion(articuloId) {
-                    if (this.seleccionesCeder[articuloId]) {
-                        this.seleccionesUbicacion[articuloId] = '';
-                    }
-                },
-
-                // ============ MÉTODOS PARA CEDER REPUESTO ============
-                abrirModalCeder(articuloId) {
-                    console.log('🔍 =========== DEBUG ABRIR MODAL CEDER ===========');
-                    console.log('📋 Parámetro articuloId:', articuloId);
-                    
-                    const selectElement = document.querySelector(`select[x-model="seleccionesCeder[${articuloId}]"]`);
-                    console.log('🔍 Select encontrado:', selectElement);
-                    
-                    if (!selectElement) {
-                        console.error('❌ Select no encontrado');
-                        toastr.error('Error: No se encontró el selector de ceder');
-                        return;
-                    }
-                    
-                    const selectedOption = selectElement.options[selectElement.selectedIndex];
-                    console.log('🔍 Opción seleccionada:', selectedOption);
-                    console.log('🔍 Valor de la opción:', selectedOption?.value);
-                    console.log('🔍 Dataset de la opción:', selectedOption?.dataset);
-                    
-                    if (!selectedOption || !selectedOption.value || selectedOption.value === '') {
-                        console.error('❌ No hay opción seleccionada');
-                        toastr.error('Seleccione un repuesto para ceder');
-                        return;
-                    }
-                    
-                    const entregaId = selectedOption.value;
-                    console.log('📋 Entrega ID extraída:', entregaId);
-                    
-                    const repuestos = @json($repuestos);
-                    const repuesto = repuestos.find(r => parseInt(r.idArticulos) === parseInt(articuloId));
-                    
-                    if (!repuesto) {
-                        console.error('❌ Repuesto no encontrado en @json($repuestos)');
-                        toastr.error('No se encontró información del repuesto');
-                        return;
-                    }
-                    
-                    console.log('📋 Repuesto encontrado:', repuesto);
-                    
-                    const ubicacion = selectedOption.dataset.ubicacion || '';
-                    const cantidad = selectedOption.dataset.cantidad ? parseInt(selectedOption.dataset.cantidad) : 0;
-                    const usuario = selectedOption.dataset.usuario || '';
-                    const tipo = selectedOption.dataset.tipo || '';
-                    const solicitudOrigen = selectedOption.dataset.solicitudOrigen || '';
-                    const solicitudIdOrigen = selectedOption.dataset.solicitudId || '';
-                    const estado = selectedOption.dataset.estado || '';
-                    
-                    console.log('📋 Datos extraídos del dataset:');
-                    console.log('  - ubicacion:', ubicacion);
-                    console.log('  - cantidad:', cantidad);
-                    console.log('  - usuario:', usuario);
-                    console.log('  - tipo:', tipo);
-                    console.log('  - solicitudOrigen:', solicitudOrigen);
-                    console.log('  - solicitudIdOrigen:', solicitudIdOrigen);
-                    console.log('  - estado:', estado);
-                    
-                    this.articuloCederId = parseInt(articuloId);
-                    this.entregaCederInfo = {
-                        id: parseInt(entregaId),
-                        ubicacion: ubicacion,
-                        cantidad: cantidad,
-                        usuario: usuario,
-                        tipo: tipo,
-                        solicitudOrigen: solicitudOrigen,
-                        solicitudId: solicitudIdOrigen,
-                        estado: estado,
-                        repuestoNombre: repuesto.nombre || repuesto.codigo_repuesto || 'Repuesto'
-                    };
-                    
-                    console.log('✅ this.entregaCederInfo después de asignar:', this.entregaCederInfo);
-                    
-                    this.mostrarModalCeder = true;
-                },
-
-                cerrarModalCeder() {
-                    this.mostrarModalCeder = false;
-                    this.entregaCederInfo = {};
-                    this.articuloCederId = null;
-                },
-
-                async confirmarCeder() {
-                    console.log('=========== CONFIRMAR CEDER ===========');
-                    
-                    const selectElement = document.querySelector(`select[x-model="seleccionesCeder[${this.articuloCederId}]"]`);
-                    
-                    if (!selectElement) {
-                        console.error('❌ Select no encontrado');
-                        toastr.error('Error interno: No se encontró el selector');
-                        return;
-                    }
-                    
-                    const selectedOption = selectElement.options[selectElement.selectedIndex];
-                    
-                    if (!selectedOption || !selectedOption.value) {
-                        toastr.error('No hay repuesto seleccionado para ceder');
-                        return;
-                    }
-                    
-                    const entregaId = selectedOption.value;
-                    const articuloId = this.articuloCederId;
-                    
-                    console.log('📋 Datos obtenidos directamente:');
-                    console.log('  - articuloId:', articuloId);
-                    console.log('  - entregaId:', entregaId);
-                    console.log('  - dataset:', selectedOption.dataset);
-                    
-                    const payload = {
-                        articulo_id: articuloId,
-                        entrega_id: entregaId,
-                        ubicacion: selectedOption.dataset.ubicacion || '',
-                        cantidad: selectedOption.dataset.cantidad || 0,
-                        tipo_entrega: selectedOption.dataset.tipo || '',
-                        usuario_destino: selectedOption.dataset.usuario || '',
-                        solicitud_origen: selectedOption.dataset.solicitudOrigen || '',
-                        solicitud_id_origen: selectedOption.dataset.solicitudId || ''
-                    };
-                    
-                    console.log('📦 Payload final:', payload);
-                    
-                    try {
-                        this.procesandoIndividual[articuloId] = true;
-                        this.cerrarModalCeder();
-                        
-                        const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/ceder-repuesto`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify(payload)
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            toastr.success(data.message);
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            toastr.error(data.message);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        toastr.error('Error de conexión');
-                    } finally {
-                        this.procesandoIndividual[articuloId] = false;
-                    }
-                },
-
-                // ============ MÉTODOS PARA ENTREGA CEDIDA ============
-                confirmarEntregaCedida(solicitudId, articuloId, entregaId) {
-                    console.log('🔍 Confirmar entrega cedida:');
-                    console.log('  - Solicitud ID:', solicitudId);
-                    console.log('  - Artículo ID:', articuloId);
-                    console.log('  - Entrega ID:', entregaId);
-                    
-                    const repuestos = @json($repuestos);
-                    const repuesto = repuestos.find(r => parseInt(r.idArticulos) === parseInt(articuloId));
-                    
-                    if (!repuesto) {
-                        toastr.error('No se encontró información del repuesto');
-                        return;
-                    }
-                    
-                    this.articuloEntregaId = articuloId;
-                    this.repuestoEntregaNombre = repuesto.nombre || repuesto.codigo_repuesto || 'Repuesto';
-                    this.entregaCedidaId = entregaId;
-                    
-                    this.abrirModalEntregaCedida();
-                },
-
-                abrirModalEntregaCedida() {
-                    this.mostrarModalEntregaCedida = true;
-                    this.resetFormEntregaCedida();
-                },
-
-                cerrarModalEntregaCedida() {
-                    this.mostrarModalEntregaCedida = false;
-                    this.resetFormEntregaCedida();
-                },
-
-                resetFormEntregaCedida() {
-                    this.fotoPreviewEntregaCedida = null;
-                    this.fotoFileEntregaCedida = null;
-                    this.observacionesEntregaCedida = '';
-                    this.isLoadingEntregaCedida = false;
-                },
-
-                abrirFileInputCedida() {
-                    this.$refs.fileInputEntregaCedida.click();
-                },
-
-                handleFotoUploadEntregaCedida(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        if (file.size > 5 * 1024 * 1024) {
-                            toastr.error('La foto debe ser menor a 5MB');
-                            return;
-                        }
-
-                        if (!file.type.match('image.*')) {
-                            toastr.error('Por favor, sube una imagen válida');
-                            return;
-                        }
-
-                        this.fotoFileEntregaCedida = file;
-
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.fotoPreviewEntregaCedida = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                },
-
-                removeFotoEntregaCedida() {
-                    this.fotoPreviewEntregaCedida = null;
-                    this.fotoFileEntregaCedida = null;
-                    if (this.$refs.fileInputEntregaCedida) {
-                        this.$refs.fileInputEntregaCedida.value = '';
-                    }
-                },
-async firmarYConfirmarEntregaCedida() {
-    if (!this.fotoPreviewEntregaCedida) {
-        toastr.error('Por favor, sube una foto del repuesto cedido entregado');
-        return;
-    }
-
-    const datosParaEnviar = {
-        articuloEntregaId: this.articuloEntregaId,
-        repuestoEntregaNombre: this.repuestoEntregaNombre,
-        entregaCedidaId: this.entregaCedidaId,
-        observacionesEntregaCedida: this.observacionesEntregaCedida,
-        fotoFileEntregaCedida: this.fotoFileEntregaCedida
-    };
-
-    this.cerrarModalEntregaCedida();
-
-    const confirmacionFirma = await Swal.fire({
-        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-            '<div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">' +
-            '<i class="fas fa-exchange-alt text-purple-600 text-xl"></i>' +
-            '</div>' +
-            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega de Repuesto Cedido</h3>' +
-            '</div>',
-        html: `<div class="text-center px-4 py-2">
-            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 mb-4 border border-purple-100">
-                <div class="flex flex-col space-y-3">
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user text-white"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-sm font-medium text-gray-500">Firmante</p>
-                            <p class="text-lg font-bold text-gray-800">{{ Auth::user()->name ?? 'Usuario' }}</p>
-                        </div>
-                    </div>
-                    <div class="mt-3 flex items-center justify-center gap-3">
-                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
-                            <i class="fas fa-box text-white"></i>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-sm font-medium text-gray-500">Repuesto Cedido</p>
-                            <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
-                <div class="flex items-start gap-3">
-                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
-                    </div>
-                    <div class="text-left">
-                        <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
-                        <p class="text-sm text-amber-600">Al firmar, confirmas que has recibido el repuesto CEDIDO.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="text-sm text-gray-500 italic">
-                ¿Confirmas la recepción del repuesto cedido?
-            </div>
-        </div>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#8b5cf6',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Confirmar y Firmar Entrega Cedida',
-        cancelButtonText: 'Cancelar'
-    });
-
-    if (!confirmacionFirma.isConfirmed) {
-        this.abrirModalEntregaCedida();
-        return;
-    }
-
-    this.isLoadingEntregaCedida = true;
-
-    try {
-        const formData = new FormData();
-        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
-        formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
-        formData.append('entrega_id', datosParaEnviar.entregaCedidaId);
-        formData.append('observaciones', datosParaEnviar.observacionesEntregaCedida);
-        formData.append('firma_confirmada', 1);
-        formData.append('nombre_firmante', '{{ Auth::user()->name ?? 'Usuario' }}');
-        formData.append('fecha_firma', new Date().toLocaleString());
-
-        if (datosParaEnviar.fotoFileEntregaCedida) {
-            formData.append('foto', datosParaEnviar.fotoFileEntregaCedida);
-        }
-
-        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-        const response = await fetch(
-            `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-cedida`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+                const response = await fetch(`/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/ceder-repuesto`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    toastr.success(data.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    toastr.error(data.message);
                 }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error de conexión');
+            } finally {
+                this.procesandoIndividual[articuloId] = false;
+            }
+        },
 
-        const data = await response.json();
-
-        if (data.success) {
-            await Swal.fire({
-                title: '¡Éxito!',
-                text: data.message || 'Entrega de repuesto cedido confirmada exitosamente',
-                icon: 'success',
-                confirmButtonColor: '#8b5cf6',
-                confirmButtonText: 'OK',
-                timer: 2000,
-                timerProgressBar: true
-            });
-
-            setTimeout(() => {
-                location.reload();
-            }, 2000);
-        } else {
-            toastr.error(data.message || 'Error al confirmar la entrega cedida');
+        // ============ MÉTODOS PARA ENTREGA CEDIDA ============
+        confirmarEntregaCedida(solicitudId, articuloId, entregaId) {
+            console.log('🔍 Confirmar entrega cedida:');
+            console.log('  - Solicitud ID:', solicitudId);
+            console.log('  - Artículo ID:', articuloId);
+            console.log('  - Entrega ID:', entregaId);
+            
+            const repuestos = @json($repuestos);
+            const repuesto = repuestos.find(r => parseInt(r.idArticulos) === parseInt(articuloId));
+            
+            if (!repuesto) {
+                toastr.error('No se encontró información del repuesto');
+                return;
+            }
+            
+            this.articuloEntregaId = articuloId;
+            this.repuestoEntregaNombre = repuesto.nombre || repuesto.codigo_repuesto || 'Repuesto';
+            this.entregaCedidaId = entregaId;
+            
             this.abrirModalEntregaCedida();
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        toastr.error('Error al procesar la solicitud');
-        this.abrirModalEntregaCedida();
-    } finally {
-        this.isLoadingEntregaCedida = false;
-    }
-},
+        },
 
-                // ============ MODAL DESTINATARIO (UBICACIÓN) ============
-                abrirModalDestinatario(solicitudId, articuloId, nombreRepuesto) {
-                    const ubicacionId = this.seleccionesUbicacion[articuloId];
+        abrirModalEntregaCedida() {
+            this.mostrarModalEntregaCedida = true;
+            this.resetFormEntregaCedida();
+        },
 
-                    if (!ubicacionId) {
-                        toastr.error('Seleccione una ubicación para este repuesto');
-                        return;
-                    }
+        cerrarModalEntregaCedida() {
+            this.mostrarModalEntregaCedida = false;
+            this.resetFormEntregaCedida();
+        },
 
-                    if (!@json($tecnico != null)) {
-                        toastr.error('No hay técnico asignado a esta solicitud');
-                        return;
-                    }
+        resetFormEntregaCedida() {
+            this.fotoPreviewEntregaCedida = null;
+            this.fotoFileEntregaCedida = null;
+            this.observacionesEntregaCedida = '';
+            this.isLoadingEntregaCedida = false;
+        },
 
-                    this.solicitudIdSeleccionada = solicitudId;
-                    this.articuloIdSeleccionado = articuloId;
-                    this.repuestoSeleccionadoNombre = nombreRepuesto;
-                    this.destinatarioSeleccionado = 'tecnico';
-                    this.mostrarModalDestinatario = true;
-                },
+        abrirFileInputCedida() {
+            this.$refs.fileInputEntregaCedida.click();
+        },
 
-                cerrarModalDestinatario() {
-                    this.mostrarModalDestinatario = false;
-                    this.destinatarioSeleccionado = '';
-                    this.usuarioSeleccionado = '';
-                },
-
-                async confirmarProcesamientoIndividual() {
-                    if (!this.destinatarioValido) {
-                        toastr.error('No hay técnico asignado para realizar la entrega');
-                        return;
-                    }
-
-                    const ubicacionId = this.seleccionesUbicacion[this.articuloIdSeleccionado];
-                    const nombreTecnico = @json($tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico');
-                    const nombreRepuesto = this.repuestoSeleccionadoNombre;
-
-                    this.procesandoIndividual[this.articuloIdSeleccionado] = true;
-                    this.mostrarModalDestinatario = false;
-
-                    toastr.info(`Procesando: ${nombreRepuesto} para ${nombreTecnico}...`);
-
-                    try {
-                        const response = await fetch(
-                            `/solicitudrepuesto/${this.solicitudIdSeleccionada}/marcar-listo-individual`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: JSON.stringify({
-                                    articulo_id: this.articuloIdSeleccionado,
-                                    ubicacion_id: ubicacionId,
-                                    tipo_destinatario: this.destinatarioSeleccionado,
-                                    usuario_destino_id: this.destinatarioSeleccionado === 'otro' ? this.usuarioSeleccionado : null
-                                })
-                            });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            toastr.success(`✅ ${data.message || 'Repuesto listo para entrega!'}`);
-                            setTimeout(() => {
-                                location.reload();
-                            }, 1500);
-                        } else {
-                            toastr.error(`❌ ${data.message || 'Error al procesar'}`);
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        toastr.error('❌ Error de conexión al servidor');
-                    } finally {
-                        this.procesandoIndividual[this.articuloIdSeleccionado] = false;
-                    }
-                },
-
-                // ============ FUNCIONES PARA ENTREGA FÍSICA NORMAL ============
-                confirmarEntregaFisica(solicitudId, articuloId) {
-                    const repuestos = @json($repuestos);
-                    const repuesto = repuestos.find(r => r.idArticulos == articuloId);
-
-                    this.articuloEntregaId = articuloId;
-                    this.repuestoEntregaNombre = repuesto ? repuesto.nombre : 'Repuesto';
-                    this.mostrarModalEntregaFisica = true;
-                    this.resetFormEntrega();
-                },
-
-                abrirFileInput() {
-                    this.$refs.fileInputEntrega.click();
-                },
-
-                handleFotoUploadEntrega(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        if (file.size > 5 * 1024 * 1024) {
-                            toastr.error('La foto debe ser menor a 5MB');
-                            return;
-                        }
-
-                        if (!file.type.match('image.*')) {
-                            toastr.error('Por favor, sube una imagen válida');
-                            return;
-                        }
-
-                        this.fotoFileEntrega = file;
-
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.fotoPreviewEntrega = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                },
-
-                removeFotoEntrega() {
-                    this.fotoPreviewEntrega = null;
-                    this.fotoFileEntrega = null;
-                    if (this.$refs.fileInputEntrega) {
-                        this.$refs.fileInputEntrega.value = '';
-                    }
-                },
-
-                resetFormEntrega() {
-                    this.fotoPreviewEntrega = null;
-                    this.fotoFileEntrega = null;
-                    this.firmaConfirmadaEntrega = false;
-                    this.fechaFirmaEntrega = null;
-                    this.observacionesEntrega = '';
-                    this.isLoadingEntrega = false;
-                },
-
-                cerrarModalEntrega() {
-                    this.mostrarModalEntregaFisica = false;
-                    this.resetFormEntrega();
-                },
-
-                async firmarYConfirmarEntrega() {
-                    if (!this.fotoPreviewEntrega) {
-                        toastr.error('Por favor, sube una foto del repuesto entregado');
-                        return;
-                    }
-
-                    const datosParaEnviar = {
-                        articuloEntregaId: this.articuloEntregaId,
-                        repuestoEntregaNombre: this.repuestoEntregaNombre,
-                        observacionesEntrega: this.observacionesEntrega,
-                        fotoFileEntrega: this.fotoFileEntrega
-                    };
-
-                    this.cerrarModalEntrega();
-
-                    const confirmacionFirma = await Swal.fire({
-                        title: '<div class="flex items-center justify-center gap-3 mb-4">' +
-                            '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
-                            '<i class="fas fa-signature text-green-600 text-xl"></i>' +
-                            '</div>' +
-                            '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
-                            '</div>',
-                        html: `<div class="text-center px-4 py-2">
-                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
-                                <div class="flex flex-col space-y-3">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                        <div class="text-left">
-                                            <p class="text-sm font-medium text-gray-500">Firmante</p>
-                                            <p class="text-lg font-bold text-gray-800">{{ Auth::user()->name ?? 'Usuario' }}</p>
-                                        </div>
-                                    </div>
-                                    <div class="mt-3 flex items-center justify-center gap-3">
-                                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-box text-white"></i>
-                                        </div>
-                                        <div class="text-left">
-                                            <p class="text-sm font-medium text-gray-500">Repuesto</p>
-                                            <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
-                                <div class="flex items-start gap-3">
-                                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
-                                    </div>
-                                    <div class="text-left">
-                                        <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
-                                        <p class="text-sm text-amber-600">Al firmar, confirmas que has recibido el repuesto.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="text-sm text-gray-500 italic">
-                                ¿Confirmas la recepción del repuesto?
-                            </div>
-                        </div>`,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Confirmar y Firmar Entrega',
-                        cancelButtonText: 'Cancelar'
-                    });
-
-                    if (!confirmacionFirma.isConfirmed) {
-                        this.mostrarModalEntregaFisica = true;
-                        this.articuloEntregaId = datosParaEnviar.articuloEntregaId;
-                        this.repuestoEntregaNombre = datosParaEnviar.repuestoEntregaNombre;
-                        this.observacionesEntrega = datosParaEnviar.observacionesEntrega;
-                        this.fotoFileEntrega = datosParaEnviar.fotoFileEntrega;
-                        this.fotoPreviewEntrega = null;
-                        return;
-                    }
-
-                    this.isLoadingEntrega = true;
-
-                    try {
-                        const formData = new FormData();
-                        formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
-                        formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
-                        formData.append('observaciones', datosParaEnviar.observacionesEntrega);
-                        formData.append('firma_confirmada', 1);
-                        formData.append('nombre_firmante', '{{ Auth::user()->name ?? 'Usuario' }}');
-                        formData.append('fecha_firma', new Date().toLocaleString());
-
-                        if (datosParaEnviar.fotoFileEntrega) {
-                            formData.append('foto', datosParaEnviar.fotoFileEntrega);
-                        }
-
-                        formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-                        const response = await fetch(
-                            `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-fisica-con-foto`, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest',
-                                    'Accept': 'application/json'
-                                }
-                            });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            await Swal.fire({
-                                title: '¡Éxito!',
-                                text: data.message || 'Entrega confirmada exitosamente',
-                                icon: 'success',
-                                confirmButtonColor: '#10b981',
-                                confirmButtonText: 'OK',
-                                timer: 2000,
-                                timerProgressBar: true
-                            });
-
-                            setTimeout(() => {
-                                location.reload();
-                            }, 2000);
-                        } else {
-                            toastr.error(data.message || 'Error al confirmar la entrega');
-                            this.mostrarModalEntregaFisica = true;
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        toastr.error('Error al procesar la solicitud');
-                        this.mostrarModalEntregaFisica = true;
-                    } finally {
-                        this.isLoadingEntrega = false;
-                    }
-                },
-
-                // ============ FUNCIONES PARA VER CONFIRMACIÓN ============
-                async abrirModalVerConfirmacion(solicitudId, articuloId) {
-                    try {
-                        this.repuestoVerNombre = 'Cargando...';
-                        const response = await fetch(`/api/obtener-info-entrega/${solicitudId}/${articuloId}`);
-
-                        if (!response.ok) {
-                            throw new Error(`Error HTTP: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        if (data.success && data.data) {
-                            this.entregaInfo = data.data;
-                            if (data.data.foto_entrega && data.data.tipo_archivo_foto) {
-                                this.entregaInfo.foto_url = `data:${data.data.tipo_archivo_foto};base64,${data.data.foto_entrega}`;
-                            }
-                            this.mostrarModalVerConfirmacion = true;
-                        } else {
-                            alert('Error: ' + (data.message || 'No se pudo cargar la información'));
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error al cargar la información de entrega: ' + error.message);
-                    }
-                },
-
-                cerrarModalVerConfirmacion() {
-                    this.mostrarModalVerConfirmacion = false;
-                    this.entregaInfo = {};
-                    this.repuestoVerNombre = '';
-                },
-
-                // ============ FUNCIÓN PARA PROCESAMIENTO GRUPAL ============
-                async validarYProcesarGrupal(id) {
-                    if (@json($repuestos_procesados) == @json($total_repuestos)) {
-                        toastr.info('Todos los repuestos ya fueron procesados');
-                        return;
-                    }
-
-                    if (!this.todasUbicacionesSeleccionadas) {
-                        toastr.error('Debe seleccionar una ubicación para todos los repuestos disponibles');
-                        return;
-                    }
-
-                    if (!this.todosDisponibles) {
-                        toastr.error('No todos los repuestos tienen stock suficiente para procesamiento grupal');
-                        return;
-                    }
-
-                    const result = await Swal.fire({
-                        title: '<h3 class="text-xl font-bold text-gray-800">¿Procesar TODOS los repuestos?</h3>',
-                        html: `
-                            <div class="mt-3 space-y-4 text-center">
-                                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                                    <p class="text-gray-700 font-medium">
-                                        Se procesarán <span class="font-bold">todos los repuestos</span> de la solicitud.
-                                    </p>
-                                </div>
-
-                                <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
-                                    <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
-                                        <i class="fas fa-exclamation-triangle text-white text-sm"></i>
-                                    </div>
-                                    <p class="text-sm text-amber-700">
-                                        Esta acción no se puede deshacer.
-                                    </p>
-                                </div>
-                            </div>
-                        `,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Procesar todo',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true
-                    });
-
-                    if (!result.isConfirmed) {
-                        return;
-                    }
-
-                    this.isLoadingGrupal = true;
-
-                    try {
-                        const response = await fetch(`/solicitudrepuesto/${id}/aceptar`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            body: JSON.stringify({
-                                ubicaciones: this.seleccionesUbicacion
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            await Swal.fire({
-                                title: '¡Éxito!',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonColor: '#3085d6',
-                                confirmButtonText: 'OK',
-                                timer: 2000,
-                                timerProgressBar: true,
-                                willClose: () => {
-                                    location.reload();
-                                }
-                            });
-                        } else {
-                            await Swal.fire({
-                                title: 'Error',
-                                text: data.message,
-                                icon: 'error',
-                                confirmButtonColor: '#d33',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        await Swal.fire({
-                            title: 'Error',
-                            text: 'Error al procesar la solicitud',
-                            icon: 'error',
-                            confirmButtonColor: '#d33',
-                            confirmButtonText: 'OK'
-                        });
-                    } finally {
-                        this.isLoadingGrupal = false;
-                    }
+        handleFotoUploadEntregaCedida(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('La foto debe ser menor a 5MB');
+                    return;
                 }
-            }));
-        });
-    </script>
+
+                if (!file.type.match('image.*')) {
+                    toastr.error('Por favor, sube una imagen válida');
+                    return;
+                }
+
+                this.fotoFileEntregaCedida = file;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.fotoPreviewEntregaCedida = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
+        removeFotoEntregaCedida() {
+            this.fotoPreviewEntregaCedida = null;
+            this.fotoFileEntregaCedida = null;
+            if (this.$refs.fileInputEntregaCedida) {
+                this.$refs.fileInputEntregaCedida.value = '';
+            }
+        },
+
+        async firmarYConfirmarEntregaCedida() {
+            if (!this.fotoPreviewEntregaCedida) {
+                toastr.error('Por favor, sube una foto del repuesto cedido entregado');
+                return;
+            }
+
+            const datosParaEnviar = {
+                articuloEntregaId: this.articuloEntregaId,
+                repuestoEntregaNombre: this.repuestoEntregaNombre,
+                entregaCedidaId: this.entregaCedidaId,
+                observacionesEntregaCedida: this.observacionesEntregaCedida,
+                fotoFileEntregaCedida: this.fotoFileEntregaCedida
+            };
+
+            this.cerrarModalEntregaCedida();
+
+            const confirmacionFirma = await Swal.fire({
+                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                    '<div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">' +
+                    '<i class="fas fa-exchange-alt text-purple-600 text-xl"></i>' +
+                    '</div>' +
+                    '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega de Repuesto Cedido</h3>' +
+                    '</div>',
+                html: `<div class="text-center px-4 py-2">
+                    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 mb-4 border border-purple-100">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Firmante</p>
+                                    <p class="text-lg font-bold text-gray-800">{{ Auth::user()->name ?? 'Usuario' }}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Repuesto Cedido</p>
+                                    <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
+                                <p class="text-sm text-amber-600">Al firmar, confirmas que has recibido el repuesto CEDIDO.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 italic">
+                        ¿Confirmas la recepción del repuesto cedido?
+                    </div>
+                </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#8b5cf6',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Confirmar y Firmar Entrega Cedida',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!confirmacionFirma.isConfirmed) {
+                this.abrirModalEntregaCedida();
+                return;
+            }
+
+            this.isLoadingEntregaCedida = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('solicitud_id', {{ $solicitud->idsolicitudesordenes }});
+                formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
+                formData.append('entrega_id', datosParaEnviar.entregaCedidaId);
+                formData.append('observaciones', datosParaEnviar.observacionesEntregaCedida);
+                formData.append('firma_confirmada', 1);
+                formData.append('nombre_firmante', '{{ Auth::user()->name ?? 'Usuario' }}');
+                formData.append('fecha_firma', new Date().toLocaleString());
+
+                if (datosParaEnviar.fotoFileEntregaCedida) {
+                    formData.append('foto', datosParaEnviar.fotoFileEntregaCedida);
+                }
+
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+                const response = await fetch(
+                    `/solicitudrepuesto/{{ $solicitud->idsolicitudesordenes }}/confirmar-entrega-cedida`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message || 'Entrega de repuesto cedido confirmada exitosamente',
+                        icon: 'success',
+                        confirmButtonColor: '#8b5cf6',
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.error(data.message || 'Error al confirmar la entrega cedida');
+                    this.abrirModalEntregaCedida();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al procesar la solicitud');
+                this.abrirModalEntregaCedida();
+            } finally {
+                this.isLoadingEntregaCedida = false;
+            }
+        },
+
+        // ============ MODAL DESTINATARIO (UBICACIÓN) ============
+        abrirModalDestinatario(solicitudId, articuloId, nombreRepuesto) {
+            const ubicacionId = this.seleccionesUbicacion[articuloId];
+
+            if (!ubicacionId) {
+                toastr.error('Seleccione una ubicación para este repuesto');
+                return;
+            }
+
+            if (!@json($tecnico != null)) {
+                toastr.error('No hay técnico asignado a esta solicitud');
+                return;
+            }
+
+            this.solicitudIdSeleccionada = solicitudId;
+            this.articuloIdSeleccionado = articuloId;
+            this.repuestoSeleccionadoNombre = nombreRepuesto;
+            this.destinatarioSeleccionado = 'tecnico';
+            this.mostrarModalDestinatario = true;
+        },
+
+        cerrarModalDestinatario() {
+            this.mostrarModalDestinatario = false;
+            this.destinatarioSeleccionado = '';
+            this.usuarioSeleccionado = '';
+        },
+
+        async confirmarProcesamientoIndividual() {
+            if (!this.destinatarioValido) {
+                toastr.error('No hay técnico asignado para realizar la entrega');
+                return;
+            }
+
+            const ubicacionId = this.seleccionesUbicacion[this.articuloIdSeleccionado];
+            const nombreTecnico = @json($tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico');
+            const nombreRepuesto = this.repuestoSeleccionadoNombre;
+
+            this.procesandoIndividual[this.articuloIdSeleccionado] = true;
+            this.mostrarModalDestinatario = false;
+
+            toastr.info(`Procesando: ${nombreRepuesto} para ${nombreTecnico}...`);
+
+            try {
+                const response = await fetch(
+                    `/solicitudrepuesto/${this.solicitudIdSeleccionada}/marcar-listo-individual`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector(
+                                'meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            articulo_id: this.articuloIdSeleccionado,
+                            ubicacion_id: ubicacionId,
+                            tipo_destinatario: this.destinatarioSeleccionado,
+                            usuario_destino_id: this.destinatarioSeleccionado === 'otro' ? this.usuarioSeleccionado : null
+                        })
+                    });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    toastr.success(`✅ ${data.message || 'Repuesto listo para entrega!'}`);
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    toastr.error(`❌ ${data.message || 'Error al procesar'}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('❌ Error de conexión al servidor');
+            } finally {
+                this.procesandoIndividual[this.articuloIdSeleccionado] = false;
+            }
+        },
+
+        // ============ FUNCIONES PARA ENTREGA FÍSICA NORMAL ============
+        abrirFileInput() {
+            this.$refs.fileInputEntrega.click();
+        },
+
+        handleFotoUploadEntrega(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('La foto debe ser menor a 5MB');
+                    return;
+                }
+
+                if (!file.type.match('image.*')) {
+                    toastr.error('Por favor, sube una imagen válida');
+                    return;
+                }
+
+                this.fotoFileEntrega = file;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.fotoPreviewEntrega = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
+        removeFotoEntrega() {
+            this.fotoPreviewEntrega = null;
+            this.fotoFileEntrega = null;
+            if (this.$refs.fileInputEntrega) {
+                this.$refs.fileInputEntrega.value = '';
+            }
+        },
+
+        resetFormEntrega() {
+            this.fotoPreviewEntrega = null;
+            this.fotoFileEntrega = null;
+            this.firmaConfirmadaEntrega = false;
+            this.fechaFirmaEntrega = null;
+            this.observacionesEntrega = '';
+            this.isLoadingEntrega = false;
+        },
+
+        cerrarModalEntrega() {
+            this.mostrarModalEntregaFisica = false;
+            this.resetFormEntrega();
+        },
+
+        async firmarYConfirmarEntrega() {
+            console.log('📝 Iniciando firma y confirmación de entrega');
+            console.log('   - Usuario entregador seleccionado:', this.usuarioEntregadorSeleccionado);
+            console.log('   - Nombre entregador:', this.nombreEntregador);
+            console.log('   - Tiene foto:', !!this.fotoPreviewEntrega);
+            
+            if (!this.fotoPreviewEntrega) {
+                toastr.error('Por favor, sube una foto del repuesto entregado');
+                return;
+            }
+
+            if (!this.usuarioEntregadorSeleccionado) {
+                toastr.error('No se ha seleccionado quién entregará el repuesto');
+                return;
+            }
+
+            const datosParaEnviar = {
+                articuloEntregaId: this.articuloEntregaId,
+                repuestoEntregaNombre: this.repuestoEntregaNombre,
+                observacionesEntrega: this.observacionesEntrega,
+                fotoFileEntrega: this.fotoFileEntrega,
+                usuarioEntregadorSeleccionado: this.usuarioEntregadorSeleccionado,
+                nombreEntregador: this.nombreEntregador,
+                solicitudId: this.solicitudIdParaEntrega
+            };
+
+            this.cerrarModalEntrega();
+
+            const confirmacionFirma = await Swal.fire({
+                title: '<div class="flex items-center justify-center gap-3 mb-4">' +
+                    '<div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">' +
+                    '<i class="fas fa-signature text-green-600 text-xl"></i>' +
+                    '</div>' +
+                    '<h3 class="text-xl font-bold text-gray-800">Confirmar Entrega Física</h3>' +
+                    '</div>',
+                html: `<div class="text-center px-4 py-2">
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 mb-4 border border-green-100">
+                        <div class="flex flex-col space-y-3">
+                            <div class="flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Entregador</p>
+                                    <p class="text-lg font-bold text-gray-800">${datosParaEnviar.nombreEntregador}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-box text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Repuesto</p>
+                                    <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-center gap-3">
+                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-check text-white"></i>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-sm font-medium text-gray-500">Para</p>
+                                    <p class="text-lg font-bold text-gray-800">{{ $tecnico ? $tecnico->Nombre . ' ' . $tecnico->apellidoPaterno : 'Técnico no asignado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-4 mb-6 border border-amber-200">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                            </div>
+                            <div class="text-left">
+                                <p class="font-semibold text-amber-700 mb-1">Confirmación Legal</p>
+                                <p class="text-sm text-amber-600">Al firmar, confirmas que has entregado el repuesto.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 italic">
+                        ¿Confirmas la entrega del repuesto?
+                    </div>
+                </div>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Confirmar y Firmar Entrega',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!confirmacionFirma.isConfirmed) {
+                console.log('❌ Usuario canceló la confirmación');
+                this.mostrarModalEntregaFisica = true;
+                return;
+            }
+
+            this.isLoadingEntrega = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('solicitud_id', datosParaEnviar.solicitudId);
+                formData.append('articulo_id', datosParaEnviar.articuloEntregaId);
+                formData.append('observaciones', datosParaEnviar.observacionesEntrega);
+                formData.append('firma_confirmada', 1);
+                formData.append('nombre_firmante', datosParaEnviar.nombreEntregador);
+                
+                // Manejar el usuario_entrego_id correctamente
+                if (datosParaEnviar.usuarioEntregadorSeleccionado === 'yo_mismo') {
+                    formData.append('usuario_entrego_id', '{{ Auth::id() ?? 'null' }}');
+                } else {
+                    formData.append('usuario_entrego_id', datosParaEnviar.usuarioEntregadorSeleccionado);
+                }
+                
+                formData.append('fecha_firma', new Date().toLocaleString());
+
+                if (datosParaEnviar.fotoFileEntrega) {
+                    formData.append('foto', datosParaEnviar.fotoFileEntrega);
+                }
+
+                formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+                console.log('📤 Enviando datos al servidor...');
+                const response = await fetch(
+                    `/solicitudrepuesto/${datosParaEnviar.solicitudId}/confirmar-entrega-fisica-con-foto`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message || 'Entrega confirmada exitosamente',
+                        icon: 'success',
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    toastr.error(data.message || 'Error al confirmar la entrega');
+                    this.mostrarModalEntregaFisica = true;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastr.error('Error al procesar la solicitud');
+                this.mostrarModalEntregaFisica = true;
+            } finally {
+                this.isLoadingEntrega = false;
+            }
+        },
+
+        // ============ FUNCIONES PARA VER CONFIRMACIÓN ============
+        async abrirModalVerConfirmacion(solicitudId, articuloId) {
+            try {
+                this.repuestoVerNombre = 'Cargando...';
+                const response = await fetch(`/api/obtener-info-entrega/${solicitudId}/${articuloId}`);
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    this.entregaInfo = data.data;
+                    if (data.data.foto_entrega && data.data.tipo_archivo_foto) {
+                        this.entregaInfo.foto_url = `data:${data.data.tipo_archivo_foto};base64,${data.data.foto_entrega}`;
+                    }
+                    this.mostrarModalVerConfirmacion = true;
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo cargar la información'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar la información de entrega: ' + error.message);
+            }
+        },
+
+        cerrarModalVerConfirmacion() {
+            this.mostrarModalVerConfirmacion = false;
+            this.entregaInfo = {};
+            this.repuestoVerNombre = '';
+        },
+
+        // ============ FUNCIÓN PARA PROCESAMIENTO GRUPAL ============
+        async validarYProcesarGrupal(id) {
+            if (@json($repuestos_procesados) == @json($total_repuestos)) {
+                toastr.info('Todos los repuestos ya fueron procesados');
+                return;
+            }
+
+            if (!this.todasUbicacionesSeleccionadas) {
+                toastr.error('Debe seleccionar una ubicación para todos los repuestos disponibles');
+                return;
+            }
+
+            if (!this.todosDisponibles) {
+                toastr.error('No todos los repuestos tienen stock suficiente para procesamiento grupal');
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: '<h3 class="text-xl font-bold text-gray-800">¿Procesar TODOS los repuestos?</h3>',
+                html: `
+                    <div class="mt-3 space-y-4 text-center">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <p class="text-gray-700 font-medium">
+                                Se procesarán <span class="font-bold">todos los repuestos</span> de la solicitud.
+                            </p>
+                        </div>
+
+                        <div class="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-white text-sm"></i>
+                            </div>
+                            <p class="text-sm text-amber-700">
+                                Esta acción no se puede deshacer.
+                            </p>
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Procesar todo',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            });
+
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            this.isLoadingGrupal = true;
+
+            try {
+                const response = await fetch(`/solicitudrepuesto/${id}/aceptar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        ubicaciones: this.seleccionesUbicacion
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    await Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#3085d6',
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true,
+                        willClose: () => {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    await Swal.fire({
+                        title: 'Error',
+                        text: data.message,
+                        icon: 'error',
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await Swal.fire({
+                    title: 'Error',
+                    text: 'Error al procesar la solicitud',
+                    icon: 'error',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK'
+                });
+            } finally {
+                this.isLoadingGrupal = false;
+            }
+        }
+    }));
+});
+</script>
 
     <style>
         [x-cloak] {
