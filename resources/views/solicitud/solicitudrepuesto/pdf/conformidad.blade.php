@@ -1,253 +1,324 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conformidad de Entrega - {{ $solicitud->codigo }}</title>
+    <title>Acta de Conformidad</title>
+
     <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-family: "DejaVu Sans", Arial, sans-serif;
             font-size: 12px;
             line-height: 1.4;
-            margin: 0;
-            padding: 20px;
+            color: #111;
         }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+
+        /* === HOJA MEMBRETADA === */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: url('{{ $bgBase64 }}') no-repeat center center;
+            background-size: cover;
+            box-sizing: border-box;
+
+            /* AJUSTA ESTOS MÁRGENES A TU HOJA */
+            padding: 42mm 18mm 22mm 18mm;
         }
-        .company-info {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .company-info h2 {
-            margin: 0;
-            color: #2c3e50;
-            font-size: 18px;
-        }
-        .company-info p {
-            margin: 5px 0;
-            color: #7f8c8d;
-        }
+
+        /* TÍTULO PRINCIPAL */
         .document-title {
             font-size: 16px;
             font-weight: bold;
-            margin: 15px 0;
-            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: "Times New Roman", Times, serif;
+            padding-bottom: 8px;
         }
+
+        /* SECCIONES */
         .section {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
+
         .section-title {
             font-weight: bold;
-            background-color: #f8f9fa;
-            padding: 8px;
-            border-left: 4px solid #3498db;
+            padding: 6px;
+            border-left: 4px solid #2c3e50;
+            background: #f4f6f7;
             margin-bottom: 10px;
-            color: #2c3e50;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 0.2px;
         }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+
+        /* TEXTO DEL ACTA */
+        .acta-text {
+            margin-bottom: 12px;
+            text-align: justify;
+            font-size: 12px;
+            line-height: 1.5;
         }
-        .info-item {
-            margin-bottom: 8px;
-        }
-        .info-label {
+
+        .linea {
             font-weight: bold;
-            color: #34495e;
+            text-align: justify;
         }
+
+        /* LISTA DE COMPROMISOS */
+        .compromisos {
+            margin: 10px 0 15px 20px;
+            padding: 0;
+        }
+
+        .compromisos li {
+            margin-bottom: 8px;
+            text-align: justify;
+            line-height: 1.4;
+        }
+
+        /* TABLA */
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
+            font-size: 11px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 8px;
+            vertical-align: top;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        th {
+            background: #E1322D;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
             font-size: 11px;
         }
-        th, td {
-            border: 1px solid #bdc3c7;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #34495e;
-            color: white;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
+
+        /* FIRMAS */
         .signature-section {
-            margin-top: 50px;
+            margin-top: 40px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
         }
+
         .signature-line {
-            border-top: 1px solid #7f8c8d;
-            margin-top: 60px;
+            border-top: 1px solid #333;
+            margin-top: 50px;
             text-align: center;
-            padding-top: 5px;
+            font-weight: bold;
+            padding-top: 8px;
+            font-size: 12px;
+            text-transform: uppercase;
+            min-height: 60px;
+        }
+
+        .sig-label {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
             font-weight: bold;
         }
-        .signature-label {
-            text-align: center;
-            margin-top: 5px;
-            color: #7f8c8d;
-            font-size: 11px;
-        }
+
+
+        /* FOOTER */
         .footer {
             margin-top: 30px;
             text-align: center;
             font-size: 10px;
-            color: #95a5a6;
-            border-top: 1px solid #bdc3c7;
-            padding-top: 10px;
+            border-top: 1px solid #aaa;
+            padding-top: 8px;
+            color: #444;
+        }
+
+        /* Evitar que la tabla o firmas se corten feo */
+        .no-break {
+            page-break-inside: avoid;
+        }
+
+        /* Estilos para datos específicos */
+        .bold-text {
+            font-weight: bold;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
         }
     </style>
 </head>
+
 <body>
-    <!-- Encabezado -->
-    <div class="header">
-        <div class="company-info">
-            <h2>GKM TECHNOLOGY</h2>
-            <p>Av. Principal 123 | Tel: 9999 | RUC: 000000</p>
+    <div class="page">
+
+        <!-- TÍTULO PRINCIPAL -->
+        <h1 class="document-title">ACTA DE CONFORMIDAD</h1>
+
+        <!-- TEXTO DEL ACTA -->
+        <div class="section no-break">
+            <p class="acta-text">
+                Por medio de la presente, yo
+                <span class="linea">
+                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
+                </span>,
+                identificado(a) con {{ $solicitud->solicitante_tipo_documento ?? 'DOCUMENTO' }} N.°
+                <span class="linea">{{ $solicitud->solicitante_documento ?? 'NÚMERO' }}</span>
+                en mi calidad de técnico asignado, dejo constancia de haber recibido a conformidad por parte del área
+                correspondiente
+                los repuestos detallados en el presente documento.
+            </p>
+
+            <p class="acta-text">
+                La entrega de los repuestos se realiza en atención al
+                <strong>Ticket N.° {{ $solicitud->numero_ticket ?? 'N/A' }}</strong>,
+                el cual sustenta la necesidad operativa y técnica de los bienes entregados para la ejecución de las
+                labores asignadas.
+                Declaro que los repuestos han sido recibidos en buen estado de conservación y funcionamiento, sin
+                observaciones al momento de la entrega.
+            </p>
+
+            <p class="acta-text">
+                Asimismo, asumo plena responsabilidad por la custodia, uso adecuado y conservación de los repuestos
+                entregados,
+                comprometiéndome a destinarlos únicamente para los fines establecidos en el ticket que origina la
+                presente entrega.
+            </p>
+
+            <p class="acta-text" style="margin-top: 10px; font-weight: bold;">
+                Me comprometo expresamente a:
+            </p>
+
+            <ul class="compromisos">
+                <li>Utilizar los repuestos únicamente para las labores técnicas autorizadas.</li>
+                <li>Evitar su pérdida, deterioro, daño o uso indebido.</li>
+                <li>No transferir, prestar ni ceder los repuestos a terceros sin autorización expresa del área
+                    responsable.</li>
+                <li>Informar de manera inmediata cualquier incidente, falla o daño que se presente durante su uso.</li>
+                <li>Devolver los repuestos cuando sean requeridos por la empresa o una vez concluida la labor para la
+                    cual fueron asignados.</li>
+            </ul>
+
+            <p class="acta-text">
+                La pérdida, daño o uso indebido de los repuestos entregados será de mi entera responsabilidad,
+                conforme a las disposiciones internas de la empresa.
+            </p>
+
+            <p class="acta-text">
+                En señal de conformidad, se firma la presente acta, dejando constancia de la entrega por parte de
+                <strong>
+                    {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
+                </strong>,
+                identificado(a) con {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
+                <strong>{{ $solicitud->aprobador_documento ?? 'NÚMERO' }}</strong>
+                quien actúa en representación del área que efectúa la entrega.
+            </p>
         </div>
-        
-        <div class="document-title">ACTA DE CONFORMIDAD DE ENTREGA - REPUESTOS</div>
-        <div><strong>Solicitud:</strong> {{ $solicitud->codigo }}</div>
-    </div>
 
-    <!-- Información de la Solicitud -->
-    <div class="section">
-        <div class="section-title">INFORMACIÓN DE LA SOLICITUD</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Código Solicitud:</span> {{ $solicitud->codigo }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Ticket:</span> {{ $solicitud->numero_ticket ?? 'N/A' }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Solicitante:</span> {{ $solicitud->solicitante_nombre }} {{ $solicitud->solicitante_apellido }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Creación:</span> {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d/m/Y') }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Tipo de Servicio:</span> {{ $solicitud->tiposervicio }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Nivel de Urgencia:</span> {{ ucfirst($solicitud->niveldeurgencia) }}
-            </div>
-            @if($solicitud->marca_nombre)
-            <div class="info-item">
-                <span class="info-label">Marca:</span> {{ $solicitud->marca_nombre }}
-            </div>
-            @endif
-            @if($solicitud->modelo_nombre)
-            <div class="info-item">
-                <span class="info-label">Modelo:</span> {{ $solicitud->modelo_nombre }}
-            </div>
-            @endif
-            @if($solicitud->serie)
-            <div class="info-item">
-                <span class="info-label">Serie:</span> {{ $solicitud->serie }}
-            </div>
-            @endif
+
+        <!-- TABLA DE REPUESTOS -->
+        <div class="section no-break">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width:5%;">N°</th>
+                        <th class="text-center" style="width:18%;">Código</th>
+                        <th class="text-center" style="width:20%;">Modelo</th>
+                        <th class="text-center" style="width:20%;">Tipo Repuesto</th>
+                        <th class="text-center" style="width:10%;">Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $contador = 1; @endphp
+                    @forelse($repuestos as $r)
+                        <tr>
+                            <td class="text-center">{{ $contador++ }}</td>
+                            <td class="text-center">
+                                {{ $r->codigo_repuesto ?? 'N/A' }}
+                            </td>
+                            <td class="text-center">
+                                {{ $r->modelo ?? 'N/A' }}
+                            </td>
+                            <td class="text-center">
+                                {{ $r->tipo_repuesto ?? 'N/A' }}
+                            </td>
+                            <td class="text-center bold-text">
+                                {{ $r->cantidad ?? 0 }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="text-center" style="padding: 20px;">
+                                No hay repuestos registrados en esta solicitud
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-    </div>
 
-    <!-- Repuestos Entregados -->
-    <div class="section">
-        <div class="section-title">REPUESTOS ENTREGADOS</div>
-        <table>
-            <thead>
-                <tr>
-                    <th width="25%">Repuesto</th>
-                    <th width="15%">Código</th>
-                    <th width="10%">Cantidad</th>
-                    <th width="15%">Ubicación</th>
-                    <th width="20%">Destinatario</th>
-                    <th width="15%">Ticket</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($repuestos as $repuesto)
-                <tr>
-                    <td>{{ $repuesto->repuesto_nombre }}</td>
-                    <td>{{ $repuesto->codigo_barras ?: $repuesto->codigo_repuesto }}</td>
-                    <td style="text-align: center;">{{ $repuesto->cantidad }}</td>
-                    <td>{{ $repuesto->ubicacion_utilizada ?? 'N/A' }}</td>
-                    <td>
-                        @if($repuesto->destinatario_nombre)
-                            {{ $repuesto->destinatario_nombre }} {{ $repuesto->destinatario_apellido }}
-                            @if($repuesto->tipo_entrega)
-                                <br><small>({{ ucfirst(str_replace('_', ' ', $repuesto->tipo_entrega)) }})</small>
-                            @endif
-                        @else
-                            N/A
-                        @endif
-                    </td>
-                    <td>{{ $repuesto->numero_ticket ?? 'N/A' }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
 
-    <!-- Resumen -->
-    <div class="section">
-        <div class="section-title">RESUMEN</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Total Repuestos Únicos:</span> {{ $solicitud->cantidad }}
+
+        <!-- FIRMAS -->
+        <div class="signature-section no-break">
+            <!-- QUIEN RECIBE -->
+            <div>
+                <div class="signature-line">
+                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    <br>
+                    @if (!empty($solicitud->solicitante_cargo))
+                        {{ $solicitud->solicitante_cargo }}
+                    @else
+                        CARGO
+                    @endif
+                </div>
+
             </div>
-            <div class="info-item">
-                <span class="info-label">Total Unidades Entregadas:</span> {{ $solicitud->totalcantidadproductos }}
-            </div>
-            <div class="info-item">
-                <span class="info-label">Estado:</span> <strong>{{ ucfirst($solicitud->estado) }}</strong>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Aprobación:</span> 
-                {{ $solicitud->fechaaprobacion ? \Carbon\Carbon::parse($solicitud->fechaaprobacion)->format('d/m/Y H:i') : 'N/A' }}
+
+            <!-- QUIEN ENTREGA -->
+            <div>
+                <div class="signature-line">
+                    {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    <br>
+                    @if (!empty($solicitud->aprobador_cargo))
+                        {{ $solicitud->aprobador_cargo }}
+                    @else
+                        RESPONSABLE DE ALMACÉN
+                    @endif
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Observaciones -->
-    @if($solicitud->observaciones)
-    <div class="section">
-        <div class="section-title">OBSERVACIONES</div>
-        <p>{{ $solicitud->observaciones }}</p>
-    </div>
-    @endif
-
-    <!-- Firmas -->
-    <div class="signature-section">
-        <div>
-            <div class="signature-line">
-                {{ $solicitud->solicitante_nombre }} {{ $solicitud->solicitante_apellido }}
-            </div>
-            <div class="signature-label">SOLICITANTE</div>
-        </div>
-        
-        <div>
-            <div class="signature-line">
-                {{ $solicitud->aprobador_nombre ?? 'Administrador del Sistema' }} {{ $solicitud->aprobador_apellido ?? '' }}
-            </div>
-            <div class="signature-label">PERSONA QUE ENTREGA</div>
-        </div>
-    </div>
-
-    <!-- Pie de página -->
-    <div class="footer">
-        <p><strong>Documento generado automáticamente</strong> | Fecha de generación: {{ $fecha_generacion }}</p>
-        <p>GKM TECHNOLOGY - Sistema de Gestión de Repuestos</p>
     </div>
 </body>
+
 </html>

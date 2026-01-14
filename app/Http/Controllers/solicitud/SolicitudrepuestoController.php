@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Spatie\Browsershot\Browsershot;
 
 class SolicitudrepuestoController extends Controller
 {
@@ -53,54 +54,54 @@ class SolicitudrepuestoController extends Controller
     }
 
     public function create()
-{
-    $userId = auth()->id();
+    {
+        $userId = auth()->id();
 
-    $tickets = DB::table('tickets as t')
-        ->select(
-            't.idTickets',
-            't.numero_ticket',
-            't.idModelo',
-            'm.nombre as modelo_nombre',
-            DB::raw('COUNT(v.idVisitas) as total_visitas') // Opcional: para contar visitas
-        )
-        ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
-        ->leftJoin('visitas as v', 't.idTickets', '=', 'v.idTickets') // Join con visitas
-        ->where('t.idTipotickets', 1)
-        ->where(function ($query) use ($userId) {
-            if ($userId == 1) {
-                // Para admin: solo tickets con al menos una visita
-                return $query;
-            } else {
-                return $query->whereExists(function ($subQuery) use ($userId) {
-                    $subQuery->select(DB::raw(1))
-                        ->from('visitas as v')
-                        ->whereColumn('v.idTickets', 't.idTickets')
-                        ->where('v.idUsuario', $userId)
-                        ->where('v.estado', 1)
-                        ->whereExists(function ($flujoQuery) {
-                            $flujoQuery->select(DB::raw(1))
-                                ->from('ticketflujo as tf')
-                                ->whereColumn('tf.idTicket', 't.idTickets')
-                                ->where('tf.idestadflujo', 2);
-                        });
-                });
-            }
-        })
-        ->groupBy('t.idTickets', 't.numero_ticket', 't.idModelo', 'm.nombre') // Agrupar por ticket
-        ->having('total_visitas', '>', 0) // Solo tickets con visitas
-        ->orderBy('t.fecha_creacion', 'desc')
-        ->get();
+        $tickets = DB::table('tickets as t')
+            ->select(
+                't.idTickets',
+                't.numero_ticket',
+                't.idModelo',
+                'm.nombre as modelo_nombre',
+                DB::raw('COUNT(v.idVisitas) as total_visitas') // Opcional: para contar visitas
+            )
+            ->leftJoin('modelo as m', 't.idModelo', '=', 'm.idModelo')
+            ->leftJoin('visitas as v', 't.idTickets', '=', 'v.idTickets') // Join con visitas
+            ->where('t.idTipotickets', 1)
+            ->where(function ($query) use ($userId) {
+                if ($userId == 1) {
+                    // Para admin: solo tickets con al menos una visita
+                    return $query;
+                } else {
+                    return $query->whereExists(function ($subQuery) use ($userId) {
+                        $subQuery->select(DB::raw(1))
+                            ->from('visitas as v')
+                            ->whereColumn('v.idTickets', 't.idTickets')
+                            ->where('v.idUsuario', $userId)
+                            ->where('v.estado', 1)
+                            ->whereExists(function ($flujoQuery) {
+                                $flujoQuery->select(DB::raw(1))
+                                    ->from('ticketflujo as tf')
+                                    ->whereColumn('tf.idTicket', 't.idTickets')
+                                    ->where('tf.idestadflujo', 2);
+                            });
+                    });
+                }
+            })
+            ->groupBy('t.idTickets', 't.numero_ticket', 't.idModelo', 'm.nombre') // Agrupar por ticket
+            ->having('total_visitas', '>', 0) // Solo tickets con visitas
+            ->orderBy('t.fecha_creacion', 'desc')
+            ->get();
 
-    // Obtener el último número de orden
-    $lastOrder = DB::table('solicitudesordenes')
-        ->orderBy('idsolicitudesordenes', 'desc')
-        ->first();
+        // Obtener el último número de orden
+        $lastOrder = DB::table('solicitudesordenes')
+            ->orderBy('idsolicitudesordenes', 'desc')
+            ->first();
 
-    $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
+        $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
 
-    return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
-}
+        return view("solicitud.solicitudrepuesto.create", compact('tickets', 'nextOrderNumber'));
+    }
 
     public function createProvincia()
     {
@@ -259,7 +260,7 @@ class SolicitudrepuestoController extends Controller
 
 
 
- public function marcarUsado(Request $request, $solicitudId)
+    public function marcarUsado(Request $request, $solicitudId)
     {
         try {
             $request->validate([
@@ -318,7 +319,7 @@ class SolicitudrepuestoController extends Controller
 
                             // Leer como binario
                             $contenidoBinario = file_get_contents($foto->getRealPath());
-                            
+
                             // Comprimir si es posible
                             if (function_exists('imagecreatefromstring')) {
                                 $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
@@ -335,8 +336,7 @@ class SolicitudrepuestoController extends Controller
                             ]);
 
                             Log::debug("Foto guardada en tabla separada: {$foto->getClientOriginalName()}, " .
-                                     "Tamaño: " . strlen($contenidoBinario) . " bytes");
-                            
+                                "Tamaño: " . strlen($contenidoBinario) . " bytes");
                         } catch (\Exception $e) {
                             Log::error("Error procesando foto {$index}: " . $e->getMessage());
                             continue;
@@ -359,8 +359,8 @@ class SolicitudrepuestoController extends Controller
                     ]);
 
                 Log::info("Repuesto marcado como usado - Solicitud: {$solicitudId}, " .
-                         "Repuesto: {$repuestoInfo->nombre}, " .
-                         "Fotos procesadas: " . ($request->hasFile('fotos') ? count($request->file('fotos')) : 0));
+                    "Repuesto: {$repuestoInfo->nombre}, " .
+                    "Fotos procesadas: " . ($request->hasFile('fotos') ? count($request->file('fotos')) : 0));
             });
 
             return response()->json([
@@ -385,318 +385,326 @@ class SolicitudrepuestoController extends Controller
 
 
 
-/**
- * Comprimir imagen simple sin Intervention Image
- */
-private function comprimirImagenSimple($contenidoBinario)
-{
-    // Si GD no está instalado, devolver original
-    if (!function_exists('imagecreatefromstring')) {
-        return $contenidoBinario;
-    }
-
-    try {
-        // Intentar crear imagen desde string
-        $imagen = @imagecreatefromstring($contenidoBinario);
-        if ($imagen === false) {
+    /**
+     * Comprimir imagen simple sin Intervention Image
+     */
+    private function comprimirImagenSimple($contenidoBinario)
+    {
+        // Si GD no está instalado, devolver original
+        if (!function_exists('imagecreatefromstring')) {
             return $contenidoBinario;
         }
 
-        // Obtener dimensiones
-        $ancho = imagesx($imagen);
-        $alto = imagesy($imagen);
-
-        // Redimensionar solo si es mayor a 1200px
-        if ($ancho > 1200) {
-            $nuevoAncho = 1200;
-            $nuevoAlto = intval($alto * ($nuevoAncho / $ancho));
-
-            $nuevaImagen = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-            
-            // Preservar transparencia para PNG
-            if (imagecolortransparent($imagen) >= 0) {
-                imagealphablending($nuevaImagen, false);
-                imagesavealpha($nuevaImagen, true);
+        try {
+            // Intentar crear imagen desde string
+            $imagen = @imagecreatefromstring($contenidoBinario);
+            if ($imagen === false) {
+                return $contenidoBinario;
             }
-            
-            imagecopyresampled($nuevaImagen, $imagen, 0, 0, 0, 0, 
-                              $nuevoAncho, $nuevoAlto, $ancho, $alto);
-            
+
+            // Obtener dimensiones
+            $ancho = imagesx($imagen);
+            $alto = imagesy($imagen);
+
+            // Redimensionar solo si es mayor a 1200px
+            if ($ancho > 1200) {
+                $nuevoAncho = 1200;
+                $nuevoAlto = intval($alto * ($nuevoAncho / $ancho));
+
+                $nuevaImagen = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+
+                // Preservar transparencia para PNG
+                if (imagecolortransparent($imagen) >= 0) {
+                    imagealphablending($nuevaImagen, false);
+                    imagesavealpha($nuevaImagen, true);
+                }
+
+                imagecopyresampled(
+                    $nuevaImagen,
+                    $imagen,
+                    0,
+                    0,
+                    0,
+                    0,
+                    $nuevoAncho,
+                    $nuevoAlto,
+                    $ancho,
+                    $alto
+                );
+
+                imagedestroy($imagen);
+                $imagen = $nuevaImagen;
+            }
+
+            // Exportar como JPEG con calidad 80%
+            ob_start();
+            imagejpeg($imagen, null, 80);
+            $resultado = ob_get_clean();
+
             imagedestroy($imagen);
-            $imagen = $nuevaImagen;
+
+            return $resultado;
+        } catch (\Exception $e) {
+            Log::warning('Error al comprimir imagen: ' . $e->getMessage());
+            return $contenidoBinario;
         }
-
-        // Exportar como JPEG con calidad 80%
-        ob_start();
-        imagejpeg($imagen, null, 80);
-        $resultado = ob_get_clean();
-        
-        imagedestroy($imagen);
-        
-        return $resultado;
-
-    } catch (\Exception $e) {
-        Log::warning('Error al comprimir imagen: ' . $e->getMessage());
-        return $contenidoBinario;
     }
-}
 
 
 
-/**
- * Marcar un repuesto como no usado (devolución al inventario) - VERSIÓN CORREGIDA
- */
-public function marcarNoUsado(Request $request, $solicitudId)
-{
-    try {
-        $request->validate([
-            'articulo_id' => 'required|integer',
-            'fecha_devolucion' => 'required|date',
-            'observacion' => 'nullable|string|max:500',
-            'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
-        ]);
+    /**
+     * Marcar un repuesto como no usado (devolución al inventario) - VERSIÓN CORREGIDA
+     */
+    public function marcarNoUsado(Request $request, $solicitudId)
+    {
+        try {
+            $request->validate([
+                'articulo_id' => 'required|integer',
+                'fecha_devolucion' => 'required|date',
+                'observacion' => 'nullable|string|max:500',
+                'fotos.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120'
+            ]);
 
-        // Declarar variables fuera del transaction
-        $totalFotos = $request->hasFile('fotos') ? count($request->file('fotos')) : 0;
-        $fotosGuardadas = 0;
+            // Declarar variables fuera del transaction
+            $totalFotos = $request->hasFile('fotos') ? count($request->file('fotos')) : 0;
+            $fotosGuardadas = 0;
 
-        DB::transaction(function () use ($request, $solicitudId, $totalFotos, &$fotosGuardadas) {
-            // Obtener información de la solicitud
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('codigo')
-                ->where('idsolicitudesordenes', $solicitudId)
-                ->first();
+            DB::transaction(function () use ($request, $solicitudId, $totalFotos, &$fotosGuardadas) {
+                // Obtener información de la solicitud
+                $solicitud = DB::table('solicitudesordenes')
+                    ->select('codigo')
+                    ->where('idsolicitudesordenes', $solicitudId)
+                    ->first();
 
-            if (!$solicitud) {
-                throw new \Exception('Solicitud no encontrada');
-            }
+                if (!$solicitud) {
+                    throw new \Exception('Solicitud no encontrada');
+                }
 
-            // Obtener información del repuesto y entrega
-            $repuestoInfo = DB::table('ordenesarticulos as oa')
-                ->select(
-                    'oa.idordenesarticulos',
-                    'oa.cantidad',
-                    'oa.idticket',
-                    'a.idArticulos',
-                    'a.nombre',
-                    're.ubicacion_utilizada',
-                    're.usuario_destino_id',
-                    're.tipo_entrega',
-                    't.numero_ticket',
-                    't.idClienteGeneral'
-                )
-                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-                ->leftJoin('repuestos_entregas as re', function ($join) use ($solicitudId) {
-                    $join->on('re.solicitud_id', '=', 'oa.idsolicitudesordenes')
-                        ->on('re.articulo_id', '=', 'oa.idarticulos');
-                })
-                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
-                ->where('oa.idsolicitudesordenes', $solicitudId)
-                ->where('oa.idarticulos', $request->articulo_id)
-                ->first();
+                // Obtener información del repuesto y entrega
+                $repuestoInfo = DB::table('ordenesarticulos as oa')
+                    ->select(
+                        'oa.idordenesarticulos',
+                        'oa.cantidad',
+                        'oa.idticket',
+                        'a.idArticulos',
+                        'a.nombre',
+                        're.ubicacion_utilizada',
+                        're.usuario_destino_id',
+                        're.tipo_entrega',
+                        't.numero_ticket',
+                        't.idClienteGeneral'
+                    )
+                    ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                    ->leftJoin('repuestos_entregas as re', function ($join) use ($solicitudId) {
+                        $join->on('re.solicitud_id', '=', 'oa.idsolicitudesordenes')
+                            ->on('re.articulo_id', '=', 'oa.idarticulos');
+                    })
+                    ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                    ->where('oa.idsolicitudesordenes', $solicitudId)
+                    ->where('oa.idarticulos', $request->articulo_id)
+                    ->first();
 
-            if (!$repuestoInfo) {
-                throw new \Exception('Repuesto no encontrado en la solicitud');
-            }
+                if (!$repuestoInfo) {
+                    throw new \Exception('Repuesto no encontrado en la solicitud');
+                }
 
-            // ========================
-            // 🆕 CORRECCIÓN: GUARDAR FOTOS EN TABLA SEPARADA
-            // ========================
-            
-            // 1. Primero eliminar fotos anteriores de "no_usado" para este artículo
-            DB::table('ordenes_articulos_fotos')
-                ->where('orden_articulo_id', $repuestoInfo->idordenesarticulos)
-                ->where('tipo_foto', 'no_usado')
-                ->delete();
+                // ========================
+                // 🆕 CORRECCIÓN: GUARDAR FOTOS EN TABLA SEPARADA
+                // ========================
 
-            Log::info("Fotos anteriores eliminadas para artículo (no usado): " . $repuestoInfo->idordenesarticulos);
+                // 1. Primero eliminar fotos anteriores de "no_usado" para este artículo
+                DB::table('ordenes_articulos_fotos')
+                    ->where('orden_articulo_id', $repuestoInfo->idordenesarticulos)
+                    ->where('tipo_foto', 'no_usado')
+                    ->delete();
 
-            // 2. Procesar y guardar NUEVAS fotos en tabla separada
-            if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $index => $foto) {
-                    try {
-                        if (!$foto->isValid()) {
-                            Log::warning("Foto no válida (no usado): " . $foto->getClientOriginalName());
+                Log::info("Fotos anteriores eliminadas para artículo (no usado): " . $repuestoInfo->idordenesarticulos);
+
+                // 2. Procesar y guardar NUEVAS fotos en tabla separada
+                if ($request->hasFile('fotos')) {
+                    foreach ($request->file('fotos') as $index => $foto) {
+                        try {
+                            if (!$foto->isValid()) {
+                                Log::warning("Foto no válida (no usado): " . $foto->getClientOriginalName());
+                                continue;
+                            }
+
+                            // Verificar límite de 5 fotos
+                            if ($fotosGuardadas >= 5) {
+                                Log::warning("Se alcanzó el límite de 5 fotos para la devolución: " . $repuestoInfo->nombre);
+                                break;
+                            }
+
+                            // Leer como binario
+                            $contenidoBinario = file_get_contents($foto->getRealPath());
+
+                            // Comprimir si es posible
+                            if (function_exists('imagecreatefromstring')) {
+                                $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
+                            }
+
+                            // 🆕 Insertar en la tabla de fotos SEPARADA
+                            DB::table('ordenes_articulos_fotos')->insert([
+                                'orden_articulo_id' => $repuestoInfo->idordenesarticulos,
+                                'tipo_foto' => 'no_usado',
+                                'nombre_archivo' => $foto->getClientOriginalName(),
+                                'mime_type' => $foto->getMimeType(),
+                                'datos' => $contenidoBinario,
+                                'fecha_subida' => now()
+                            ]);
+
+                            $fotosGuardadas++;
+
+                            Log::debug("✅ Foto guardada en tabla separada (no usado): {$foto->getClientOriginalName()}, " .
+                                "Tamaño: " . strlen($contenidoBinario) . " bytes, " .
+                                "ID Artículo: {$repuestoInfo->idordenesarticulos}");
+                        } catch (\Exception $e) {
+                            Log::error("Error procesando foto {$index} (no usado): " . $e->getMessage());
                             continue;
                         }
-
-                        // Verificar límite de 5 fotos
-                        if ($fotosGuardadas >= 5) {
-                            Log::warning("Se alcanzó el límite de 5 fotos para la devolución: " . $repuestoInfo->nombre);
-                            break;
-                        }
-
-                        // Leer como binario
-                        $contenidoBinario = file_get_contents($foto->getRealPath());
-                        
-                        // Comprimir si es posible
-                        if (function_exists('imagecreatefromstring')) {
-                            $contenidoBinario = $this->comprimirImagenSimple($contenidoBinario);
-                        }
-
-                        // 🆕 Insertar en la tabla de fotos SEPARADA
-                        DB::table('ordenes_articulos_fotos')->insert([
-                            'orden_articulo_id' => $repuestoInfo->idordenesarticulos,
-                            'tipo_foto' => 'no_usado',
-                            'nombre_archivo' => $foto->getClientOriginalName(),
-                            'mime_type' => $foto->getMimeType(),
-                            'datos' => $contenidoBinario,
-                            'fecha_subida' => now()
-                        ]);
-
-                        $fotosGuardadas++;
-                        
-                        Log::debug("✅ Foto guardada en tabla separada (no usado): {$foto->getClientOriginalName()}, " .
-                                 "Tamaño: " . strlen($contenidoBinario) . " bytes, " .
-                                 "ID Artículo: {$repuestoInfo->idordenesarticulos}");
-                        
-                    } catch (\Exception $e) {
-                        Log::error("Error procesando foto {$index} (no usado): " . $e->getMessage());
-                        continue;
                     }
                 }
-            }
 
-            // ========================
-            // RESTO DEL CÓDIGO (se mantiene igual)
-            // ========================
+                // ========================
+                // RESTO DEL CÓDIGO (se mantiene igual)
+                // ========================
 
-            // Buscar la ubicación original donde estaba el repuesto
-            $ubicacionOriginal = DB::table('rack_ubicaciones')
-                ->select('idRackUbicacion', 'codigo', 'rack_id')
-                ->where('codigo', $repuestoInfo->ubicacion_utilizada)
-                ->first();
+                // Buscar la ubicación original donde estaba el repuesto
+                $ubicacionOriginal = DB::table('rack_ubicaciones')
+                    ->select('idRackUbicacion', 'codigo', 'rack_id')
+                    ->where('codigo', $repuestoInfo->ubicacion_utilizada)
+                    ->first();
 
-            if (!$ubicacionOriginal) {
-                throw new \Exception('No se pudo encontrar la ubicación original del repuesto. Ubicación: ' . ($repuestoInfo->ubicacion_utilizada ?? 'NULL'));
-            }
+                if (!$ubicacionOriginal) {
+                    throw new \Exception('No se pudo encontrar la ubicación original del repuesto. Ubicación: ' . ($repuestoInfo->ubicacion_utilizada ?? 'NULL'));
+                }
 
-            // Obtener información del rack
-            $rackInfo = DB::table('racks')
-                ->select('nombre')
-                ->where('idRack', $ubicacionOriginal->rack_id)
-                ->first();
+                // Obtener información del rack
+                $rackInfo = DB::table('racks')
+                    ->select('nombre')
+                    ->where('idRack', $ubicacionOriginal->rack_id)
+                    ->first();
 
-            // Obtener cliente_general_id del ticket
-            $clienteGeneralId = $repuestoInfo->idClienteGeneral ?? 1;
+                // Obtener cliente_general_id del ticket
+                $clienteGeneralId = $repuestoInfo->idClienteGeneral ?? 1;
 
-            // 1. INCREMENTAR stock en rack_ubicacion_articulos (ubicación original)
-            $rackUbicacionArticulo = DB::table('rack_ubicacion_articulos')
-                ->where('rack_ubicacion_id', $ubicacionOriginal->idRackUbicacion)
-                ->where('articulo_id', $request->articulo_id)
-                ->first();
+                // 1. INCREMENTAR stock en rack_ubicacion_articulos (ubicación original)
+                $rackUbicacionArticulo = DB::table('rack_ubicacion_articulos')
+                    ->where('rack_ubicacion_id', $ubicacionOriginal->idRackUbicacion)
+                    ->where('articulo_id', $request->articulo_id)
+                    ->first();
 
-            if ($rackUbicacionArticulo) {
-                // Si ya existe registro, incrementar
-                DB::table('rack_ubicacion_articulos')
-                    ->where('idRackUbicacionArticulo', $rackUbicacionArticulo->idRackUbicacionArticulo)
-                    ->increment('cantidad', $repuestoInfo->cantidad);
-            } else {
-                // Si no existe, crear nuevo registro
-                DB::table('rack_ubicacion_articulos')->insert([
-                    'rack_ubicacion_id' => $ubicacionOriginal->idRackUbicacion,
+                if ($rackUbicacionArticulo) {
+                    // Si ya existe registro, incrementar
+                    DB::table('rack_ubicacion_articulos')
+                        ->where('idRackUbicacionArticulo', $rackUbicacionArticulo->idRackUbicacionArticulo)
+                        ->increment('cantidad', $repuestoInfo->cantidad);
+                } else {
+                    // Si no existe, crear nuevo registro
+                    DB::table('rack_ubicacion_articulos')->insert([
+                        'rack_ubicacion_id' => $ubicacionOriginal->idRackUbicacion,
+                        'articulo_id' => $request->articulo_id,
+                        'cantidad' => $repuestoInfo->cantidad,
+                        'cliente_general_id' => $clienteGeneralId,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                // 2. INCREMENTAR stock total en tabla articulos
+                DB::table('articulos')
+                    ->where('idArticulos', $request->articulo_id)
+                    ->increment('stock_total', $repuestoInfo->cantidad);
+
+                // 3. Registrar movimiento en rack_movimientos (ENTRADA por devolución)
+                DB::table('rack_movimientos')->insert([
                     'articulo_id' => $request->articulo_id,
+                    'custodia_id' => null,
+                    'ubicacion_origen_id' => null,
+                    'ubicacion_destino_id' => $ubicacionOriginal->idRackUbicacion,
+                    'rack_origen_id' => null,
+                    'rack_destino_id' => $ubicacionOriginal->rack_id,
                     'cantidad' => $repuestoInfo->cantidad,
-                    'cliente_general_id' => $clienteGeneralId,
+                    'tipo_movimiento' => 'entrada',
+                    'usuario_id' => auth()->id(),
+                    'observaciones' => "Devolución repuesto no usado - Solicitud: {$solicitud->codigo} - Ticket: {$repuestoInfo->numero_ticket} - Observación: {$request->observacion}",
+                    'codigo_ubicacion_origen' => null,
+                    'codigo_ubicacion_destino' => $ubicacionOriginal->codigo,
+                    'nombre_rack_origen' => null,
+                    'nombre_rack_destino' => $rackInfo->nombre ?? 'Desconocido',
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
-            }
 
-            // 2. INCREMENTAR stock total en tabla articulos
-            DB::table('articulos')
-                ->where('idArticulos', $request->articulo_id)
-                ->increment('stock_total', $repuestoInfo->cantidad);
+                // 4. ELIMINAR registro en inventario_ingresos_clientes (donde se registró la salida)
+                $registrosEliminados = DB::table('inventario_ingresos_clientes')
+                    ->where('codigo_solicitud', $solicitud->codigo)
+                    ->where('articulo_id', $request->articulo_id)
+                    ->where('tipo_ingreso', 'salida')
+                    ->delete();
 
-            // 3. Registrar movimiento en rack_movimientos (ENTRADA por devolución)
-            DB::table('rack_movimientos')->insert([
-                'articulo_id' => $request->articulo_id,
-                'custodia_id' => null,
-                'ubicacion_origen_id' => null,
-                'ubicacion_destino_id' => $ubicacionOriginal->idRackUbicacion,
-                'rack_origen_id' => null,
-                'rack_destino_id' => $ubicacionOriginal->rack_id,
-                'cantidad' => $repuestoInfo->cantidad,
-                'tipo_movimiento' => 'entrada',
-                'usuario_id' => auth()->id(),
-                'observaciones' => "Devolución repuesto no usado - Solicitud: {$solicitud->codigo} - Ticket: {$repuestoInfo->numero_ticket} - Observación: {$request->observacion}",
-                'codigo_ubicacion_origen' => null,
-                'codigo_ubicacion_destino' => $ubicacionOriginal->codigo,
-                'nombre_rack_origen' => null,
-                'nombre_rack_destino' => $rackInfo->nombre ?? 'Desconocido',
-                'created_at' => now(),
-                'updated_at' => now()
+                // 5. Actualizar KARDEX para la ENTRADA (devolución)
+                $articuloInfo = DB::table('articulos')
+                    ->select('precio_compra')
+                    ->where('idArticulos', $request->articulo_id)
+                    ->first();
+
+                if ($articuloInfo) {
+                    $this->actualizarKardexEntrada(
+                        $request->articulo_id,
+                        $clienteGeneralId,
+                        $repuestoInfo->cantidad,
+                        $articuloInfo->precio_compra,
+                        "Devolución repuesto no usado - Solicitud: {$solicitud->codigo}"
+                    );
+                }
+
+                // 6. Crear array de datos para actualizar
+                // 🆕 AHORA LIMPIAMOS los campos de fotos en ordenesarticulos
+                $datosActualizar = [
+                    'fechaSinUsar' => $request->fecha_devolucion,
+                    'fechaUsado' => null,
+                    'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
+                    'foto_articulo_no_usado' => null, // 🆕 Limpiamos, ya no guardamos aquí
+                    'foto_articulo_usado' => null, // 🆕 Limpiamos por seguridad
+                    'fotos_evidencia' => null, // 🆕 Limpiamos campo antiguo
+                    'updated_at' => now()
+                ];
+
+                // Actualizar en la tabla ordenesarticulos
+                DB::table('ordenesarticulos')
+                    ->where('idsolicitudesordenes', $solicitudId)
+                    ->where('idarticulos', $request->articulo_id)
+                    ->update($datosActualizar);
+
+                // 7. Registrar en logs
+                Log::info("✅ Repuesto devuelto al inventario - Solicitud: {$solicitudId}, " .
+                    "Repuesto: {$repuestoInfo->nombre}, Cantidad: {$repuestoInfo->cantidad}, " .
+                    "Ubicación: {$ubicacionOriginal->codigo}, " .
+                    "Fotos subidas: {$totalFotos}, " .
+                    "Fotos guardadas en tabla separada: {$fotosGuardadas}");
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Repuesto marcado como no usado y devuelto al inventario correctamente',
+                'fotos_subidas' => $totalFotos,
+                'fotos_guardadas' => $fotosGuardadas,
+                'limite_fotos' => 5
             ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error al marcar repuesto como no usado: ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
 
-            // 4. ELIMINAR registro en inventario_ingresos_clientes (donde se registró la salida)
-            $registrosEliminados = DB::table('inventario_ingresos_clientes')
-                ->where('codigo_solicitud', $solicitud->codigo)
-                ->where('articulo_id', $request->articulo_id)
-                ->where('tipo_ingreso', 'salida')
-                ->delete();
-
-            // 5. Actualizar KARDEX para la ENTRADA (devolución)
-            $articuloInfo = DB::table('articulos')
-                ->select('precio_compra')
-                ->where('idArticulos', $request->articulo_id)
-                ->first();
-
-            if ($articuloInfo) {
-                $this->actualizarKardexEntrada(
-                    $request->articulo_id, 
-                    $clienteGeneralId, 
-                    $repuestoInfo->cantidad, 
-                    $articuloInfo->precio_compra, 
-                    "Devolución repuesto no usado - Solicitud: {$solicitud->codigo}"
-                );
-            }
-
-            // 6. Crear array de datos para actualizar
-            // 🆕 AHORA LIMPIAMOS los campos de fotos en ordenesarticulos
-            $datosActualizar = [
-                'fechaSinUsar' => $request->fecha_devolucion,
-                'fechaUsado' => null,
-                'observacion' => $request->observacion . " | Devolución completada: " . now()->format('d/m/Y H:i'),
-                'foto_articulo_no_usado' => null, // 🆕 Limpiamos, ya no guardamos aquí
-                'foto_articulo_usado' => null, // 🆕 Limpiamos por seguridad
-                'fotos_evidencia' => null, // 🆕 Limpiamos campo antiguo
-                'updated_at' => now()
-            ];
-
-            // Actualizar en la tabla ordenesarticulos
-            DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $solicitudId)
-                ->where('idarticulos', $request->articulo_id)
-                ->update($datosActualizar);
-
-            // 7. Registrar en logs
-            Log::info("✅ Repuesto devuelto al inventario - Solicitud: {$solicitudId}, " .
-                     "Repuesto: {$repuestoInfo->nombre}, Cantidad: {$repuestoInfo->cantidad}, " .
-                     "Ubicación: {$ubicacionOriginal->codigo}, " .
-                     "Fotos subidas: {$totalFotos}, " .
-                     "Fotos guardadas en tabla separada: {$fotosGuardadas}");
-        });
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Repuesto marcado como no usado y devuelto al inventario correctamente',
-            'fotos_subidas' => $totalFotos,
-            'fotos_guardadas' => $fotosGuardadas,
-            'limite_fotos' => 5
-        ]);
-    } catch (\Exception $e) {
-        Log::error('❌ Error al marcar repuesto como no usado: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al marcar el repuesto: ' . $e->getMessage(),
-            'fotos_subidas' => 0,
-            'fotos_guardadas' => 0
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al marcar el repuesto: ' . $e->getMessage(),
+                'fotos_subidas' => 0,
+                'fotos_guardadas' => 0
+            ], 500);
+        }
     }
-}
     private function actualizarKardexEntrada($articuloId, $clienteGeneralId, $cantidad, $precioUnitario, $observaciones)
     {
         try {
@@ -1964,7 +1972,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
 
 
-  public function opciones($id)
+    public function opciones($id)
     {
         // Obtener la solicitud
         $solicitud = DB::table('solicitudesordenes as so')
@@ -2088,7 +2096,7 @@ public function marcarNoUsado(Request $request, $solicitudId)
                 $repuesto->entrega_info = $entregaInfo;
                 $repuesto->ya_procesado = true;
                 $repuesto->es_cedido = !empty($entregaInfo->entrega_origen_id);
-                
+
                 // Determinar estado actual
                 if ($repuesto->es_cedido) {
                     // Estados específicos para repuestos cedidos
@@ -2145,190 +2153,485 @@ public function marcarNoUsado(Request $request, $solicitudId)
 
 
 
-public function aceptar(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
+    public function aceptar(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
 
-        // Obtener la solicitud con todos los campos necesarios
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto')
-            ->first();
+            // Obtener la solicitud con todos los campos necesarios
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto')
+                ->first();
 
-        if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Verificar si la solicitud ya está aprobada
-        if ($solicitud->estado == 'aprobada') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Obtener las ubicaciones seleccionadas del request
-        $ubicacionesSeleccionadas = $request->input('ubicaciones', []);
-
-        if (empty($ubicacionesSeleccionadas)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se han seleccionado ubicaciones para los repuestos'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Obtener repuestos de la solicitud CON EL IDTICKET
-        $repuestosSolicitud = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'oa.idticket',
-                'a.idArticulos',
-                'a.nombre',
-                'a.stock_total',
-                'a.precio_compra'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->get();
-
-        // Verificar que todos los repuestos tengan stock suficiente
-        foreach ($repuestosSolicitud as $repuesto) {
-            $stockDisponible = DB::table('rack_ubicacion_articulos')
-                ->where('articulo_id', $repuesto->idArticulos)
-                ->sum('cantidad');
-
-            if ($stockDisponible < $repuesto->cantidad) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+            if (!$solicitud) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Stock insuficiente para el repuesto: {$nombreRepuesto}. Disponible: {$stockDisponible}, Solicitado: {$repuesto->cantidad}"
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                    'message' => 'Solicitud no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
             }
-        }
 
-        // Obtener información del solicitante para todas las entregas
-        $solicitanteInfo = DB::table('usuarios')
-            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
-            ->where('idUsuario', $solicitud->idUsuario)
-            ->first();
-
-        $nombreSolicitante = $solicitanteInfo
-            ? mb_convert_encoding("{$solicitanteInfo->Nombre} {$solicitanteInfo->apellidoPaterno}", 'UTF-8', 'ISO-8859-1')
-            : 'Solicitante no encontrado';
-
-        // Procesar cada repuesto
-        foreach ($repuestosSolicitud as $repuesto) {
-            $cantidadSolicitada = (int)$repuesto->cantidad;
-            $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
-
-            if (!$ubicacionId) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+            // Verificar si la solicitud ya está aprobada
+            if ($solicitud->estado == 'aprobada') {
                 return response()->json([
                     'success' => false,
-                    'message' => "No se seleccionó ubicación para el repuesto: {$nombreRepuesto}"
+                    'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
                 ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
             }
 
-            // Obtener el número de ticket desde la tabla tickets
+            // Obtener las ubicaciones seleccionadas del request
+            $ubicacionesSeleccionadas = $request->input('ubicaciones', []);
+
+            if (empty($ubicacionesSeleccionadas)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se han seleccionado ubicaciones para los repuestos'
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            // Obtener repuestos de la solicitud CON EL IDTICKET
+            $repuestosSolicitud = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'oa.idticket',
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.stock_total',
+                    'a.precio_compra'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $id)
+                ->get();
+
+            // Verificar que todos los repuestos tengan stock suficiente
+            foreach ($repuestosSolicitud as $repuesto) {
+                $stockDisponible = DB::table('rack_ubicacion_articulos')
+                    ->where('articulo_id', $repuesto->idArticulos)
+                    ->sum('cantidad');
+
+                if ($stockDisponible < $repuesto->cantidad) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuficiente para el repuesto: {$nombreRepuesto}. Disponible: {$stockDisponible}, Solicitado: {$repuesto->cantidad}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+            }
+
+            // Obtener información del solicitante para todas las entregas
+            $solicitanteInfo = DB::table('usuarios')
+                ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+                ->where('idUsuario', $solicitud->idUsuario)
+                ->first();
+
+            $nombreSolicitante = $solicitanteInfo
+                ? mb_convert_encoding("{$solicitanteInfo->Nombre} {$solicitanteInfo->apellidoPaterno}", 'UTF-8', 'ISO-8859-1')
+                : 'Solicitante no encontrado';
+
+            // Procesar cada repuesto
+            foreach ($repuestosSolicitud as $repuesto) {
+                $cantidadSolicitada = (int)$repuesto->cantidad;
+                $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
+
+                if (!$ubicacionId) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "No se seleccionó ubicación para el repuesto: {$nombreRepuesto}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                // Obtener el número de ticket desde la tabla tickets
+                $ticketInfo = DB::table('tickets')
+                    ->select('numero_ticket')
+                    ->where('idTickets', $repuesto->idticket)
+                    ->first();
+
+                if (!$ticketInfo) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Ticket no encontrado para el repuesto: {$nombreRepuesto}"
+                    ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                $numeroTicket = $ticketInfo->numero_ticket;
+
+                // Verificar stock en la ubicación seleccionada
+                $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                    ->select(
+                        'rua.cantidad',
+                        'rua.idRackUbicacionArticulo',
+                        'rua.cliente_general_id',
+                        'ru.codigo as ubicacion_codigo',
+                        'ru.idRackUbicacion',
+                        'r.idRack as rack_id',
+                        'r.nombre as rack_nombre'
+                    )
+                    ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                    ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                    ->where('rua.articulo_id', $repuesto->idArticulos)
+                    ->where('rua.rack_ubicacion_id', $ubicacionId)
+                    ->first();
+
+                if (!$stockUbicacion) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Ubicación no encontrada para el repuesto: {$nombreRepuesto}"
+                    ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuficiente en la ubicación seleccionada para: {$nombreRepuesto}. Ubicación: {$ubicacionCodigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                // Verificar si ya fue procesado
+                $yaProcesado = DB::table('ordenesarticulos')
+                    ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+                    ->where('estado', 1)
+                    ->exists();
+
+                if ($yaProcesado) {
+                    $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                    return response()->json([
+                        'success' => false,
+                        'message' => "El repuesto {$nombreRepuesto} ya fue procesado anteriormente"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                // 1) DESCONTAR de rack_ubicacion_articulos (por PK)
+                DB::table('rack_ubicacion_articulos')
+                    ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+                    ->decrement('cantidad', $cantidadSolicitada);
+
+                // ? 1.1) DESCONTAR de cajas si existen
+                $this->descontarDeCajasSiExisten(
+                    (int)$repuesto->idArticulos,
+                    (int)$ubicacionId,
+                    (int)$cantidadSolicitada,
+                    null
+                );
+
+                // 2) DESCONTAR stock total en tabla articulos
+                DB::table('articulos')
+                    ->where('idArticulos', $repuesto->idArticulos)
+                    ->decrement('stock_total', $cantidadSolicitada);
+
+                // 3) Registrar movimiento en rack_movimientos
+                $observacionesMovimiento = mb_convert_encoding(
+                    "Solicitud repuesto aprobada (grupal): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreSolicitante} (solicitante)",
+                    'UTF-8',
+                    'ISO-8859-1'
+                );
+
+                $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
+                $rackNombre = mb_convert_encoding($stockUbicacion->rack_nombre, 'UTF-8', 'ISO-8859-1');
+
+                DB::table('rack_movimientos')->insert([
+                    'articulo_id' => $repuesto->idArticulos,
+                    'custodia_id' => null,
+                    'ubicacion_origen_id' => $ubicacionId,
+                    'ubicacion_destino_id' => null,
+                    'rack_origen_id' => $stockUbicacion->rack_id,
+                    'rack_destino_id' => null,
+                    'cantidad' => $cantidadSolicitada,
+                    'tipo_movimiento' => 'salida',
+                    'usuario_id' => auth()->id(),
+                    'observaciones' => $observacionesMovimiento,
+                    'codigo_ubicacion_origen' => $ubicacionCodigo,
+                    'codigo_ubicacion_destino' => null,
+                    'nombre_rack_origen' => $rackNombre,
+                    'nombre_rack_destino' => null,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 4) inventario_ingresos_clientes
+                DB::table('inventario_ingresos_clientes')->insert([
+                    'compra_id' => null,
+                    'articulo_id' => $repuesto->idArticulos,
+                    'tipo_ingreso' => 'salida',
+                    'ingreso_id' => $solicitud->idsolicitudesordenes,
+                    'cliente_general_id' => $stockUbicacion->cliente_general_id,
+                    'numero_orden' => $numeroTicket,
+                    'codigo_solicitud' => $solicitud->codigo,
+                    'cantidad' => -$cantidadSolicitada,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 5) repuestos_entregas (grupal -> solicitante)
+                $observacionesEntrega = mb_convert_encoding(
+                    "Repuesto entregado grupalmente - Ticket: {$numeroTicket} - Destinatario: {$nombreSolicitante}",
+                    'UTF-8',
+                    'ISO-8859-1'
+                );
+
+                DB::table('repuestos_entregas')->insert([
+                    'solicitud_id' => $solicitud->idsolicitudesordenes,
+                    'articulo_id' => $repuesto->idArticulos,
+                    'usuario_destino_id' => $solicitud->idUsuario,
+                    'tipo_entrega' => 'solicitante',
+                    'cantidad' => $cantidadSolicitada,
+                    'ubicacion_utilizada' => $ubicacionCodigo,
+                    'usuario_entrego_id' => auth()->id(),
+                    'observaciones' => $observacionesEntrega,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 6) Kardex
+                $this->actualizarKardexSalida(
+                    (int)$repuesto->idArticulos,
+                    (int)$stockUbicacion->cliente_general_id,
+                    (int)$cantidadSolicitada,
+                    (float)$repuesto->precio_compra
+                );
+
+                // 7) Marcar como procesado
+                $observacion = mb_convert_encoding(
+                    "Ubicación utilizada: {$ubicacionCodigo} - Procesado grupalmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreSolicitante} (solicitante)",
+                    'UTF-8',
+                    'ISO-8859-1'
+                );
+
+                DB::table('ordenesarticulos')
+                    ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+                    ->update([
+                        'estado' => 1,
+                        'observacion' => $observacion
+                    ]);
+
+                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+                Log::info("? Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos} ({$nombreRepuesto}), Cantidad: {$cantidadSolicitada}, Ubicación: {$ubicacionCodigo}, Ticket: {$numeroTicket}, Solicitud: {$solicitud->codigo}, Destinatario: {$nombreSolicitante}");
+            }
+
+            // Actualizar estado de la solicitud
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => 'aprobada',
+                    'fechaaprobacion' => now(),
+                    'idaprobador' => auth()->id()
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Solicitud de repuestos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.'
+            ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al aceptar solicitud de repuestos (grupal): ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
+            ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+
+    public function aceptarIndividual(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto')
+                ->first();
+
+            if (!$solicitud) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            $articuloId = (int)$request->input('articulo_id');
+            $ubicacionId = (int)$request->input('ubicacion_id');
+            $tipoDestinatario = $request->input('tipo_destinatario');
+            $usuarioDestinoId = $request->input('usuario_destino_id');
+
+            if (!$articuloId || !$ubicacionId || !$tipoDestinatario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos incompletos para procesar el repuesto'
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            // Determinar el usuario destino final
+            $usuarioFinalId = null;
+            $tipoEntrega = '';
+
+            switch ($tipoDestinatario) {
+                case 'solicitante':
+                    $usuarioFinalId = $solicitud->idUsuario;
+                    $tipoEntrega = 'solicitante';
+                    break;
+                case 'tecnico':
+                    $usuarioFinalId = $solicitud->idTecnico;
+                    $tipoEntrega = 'tecnico';
+                    break;
+                case 'otro':
+                    $usuarioFinalId = $usuarioDestinoId;
+                    $tipoEntrega = 'otro_usuario';
+                    break;
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Tipo de destinatario no válido'
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            if (!$usuarioFinalId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo determinar el usuario destino'
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            // Nombre destinatario
+            $destinatarioInfo = DB::table('usuarios')
+                ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
+                ->where('idUsuario', $usuarioFinalId)
+                ->first();
+
+            $nombreDestinatario = $destinatarioInfo
+                ? mb_convert_encoding("{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}", 'UTF-8', 'ISO-8859-1')
+                : 'Usuario no encontrado';
+
+            // Repuesto con ticket
+            $repuesto = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'oa.idticket',
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.stock_total'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $id)
+                ->where('a.idArticulos', $articuloId)
+                ->first();
+
+            if (!$repuesto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Repuesto no encontrado en la solicitud'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
             $ticketInfo = DB::table('tickets')
                 ->select('numero_ticket')
                 ->where('idTickets', $repuesto->idticket)
                 ->first();
 
             if (!$ticketInfo) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
                 return response()->json([
                     'success' => false,
-                    'message' => "Ticket no encontrado para el repuesto: {$nombreRepuesto}"
+                    'message' => 'Ticket no encontrado'
                 ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
             }
 
             $numeroTicket = $ticketInfo->numero_ticket;
 
-            // Verificar stock en la ubicación seleccionada
-            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-                ->select(
-                    'rua.cantidad',
-                    'rua.idRackUbicacionArticulo',
-                    'rua.cliente_general_id',
-                    'ru.codigo as ubicacion_codigo',
-                    'ru.idRackUbicacion',
-                    'r.idRack as rack_id',
-                    'r.nombre as rack_nombre'
-                )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $repuesto->idArticulos)
-                ->where('rua.rack_ubicacion_id', $ubicacionId)
-                ->first();
-
-            if (!$stockUbicacion) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
-                return response()->json([
-                    'success' => false,
-                    'message' => "Ubicación no encontrada para el repuesto: {$nombreRepuesto}"
-                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-            }
-
-            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
-                $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
-                return response()->json([
-                    'success' => false,
-                    'message' => "Stock insuficiente en la ubicación seleccionada para: {$nombreRepuesto}. Ubicación: {$ubicacionCodigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-            }
-
-            // Verificar si ya fue procesado
+            // Ya procesado
             $yaProcesado = DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->where('estado', 1)
                 ->exists();
 
             if ($yaProcesado) {
-                $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
                 return response()->json([
                     'success' => false,
-                    'message' => "El repuesto {$nombreRepuesto} ya fue procesado anteriormente"
+                    'message' => 'Este repuesto ya fue procesado anteriormente'
                 ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
             }
 
-            // 1) DESCONTAR de rack_ubicacion_articulos (por PK)
+            $cantidadSolicitada = (int)$repuesto->cantidad;
+
+            // Stock ubicación
+            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                ->select(
+                    'rua.cantidad',
+                    'rua.idRackUbicacionArticulo',
+                    'ru.codigo as ubicacion_codigo',
+                    'ru.idRackUbicacion',
+                    'r.idRack as rack_id',
+                    'r.nombre as rack_nombre',
+                    'rua.cliente_general_id'
+                )
+                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->where('rua.articulo_id', $articuloId)
+                ->where('rua.rack_ubicacion_id', $ubicacionId)
+                ->first();
+
+            if (!$stockUbicacion) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ubicación no encontrada para este repuesto'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            // Articulo info (kardex)
+            $articuloInfo = DB::table('articulos')
+                ->select('precio_compra', 'precio_venta')
+                ->where('idArticulos', $articuloId)
+                ->first();
+
+            if (!$articuloInfo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Información del artículo no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            // 1) Descontar de rack_ubicacion_articulos (por PK)
             DB::table('rack_ubicacion_articulos')
                 ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
                 ->decrement('cantidad', $cantidadSolicitada);
 
-            // ? 1.1) DESCONTAR de cajas si existen
+            // ? 1.1) Descontar de CAJAS si existen
             $this->descontarDeCajasSiExisten(
-                (int)$repuesto->idArticulos,
+                (int)$articuloId,
                 (int)$ubicacionId,
                 (int)$cantidadSolicitada,
                 null
             );
 
-            // 2) DESCONTAR stock total en tabla articulos
-            DB::table('articulos')
-                ->where('idArticulos', $repuesto->idArticulos)
-                ->decrement('stock_total', $cantidadSolicitada);
-
-            // 3) Registrar movimiento en rack_movimientos
+            // 2) Movimiento
             $observacionesMovimiento = mb_convert_encoding(
-                "Solicitud repuesto aprobada (grupal): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreSolicitante} (solicitante)",
+                "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
                 'UTF-8',
                 'ISO-8859-1'
             );
 
-            $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
-            $rackNombre = mb_convert_encoding($stockUbicacion->rack_nombre, 'UTF-8', 'ISO-8859-1');
-
             DB::table('rack_movimientos')->insert([
-                'articulo_id' => $repuesto->idArticulos,
+                'articulo_id' => $articuloId,
                 'custodia_id' => null,
                 'ubicacion_origen_id' => $ubicacionId,
                 'ubicacion_destino_id' => null,
@@ -2338,18 +2641,18 @@ public function aceptar(Request $request, $id)
                 'tipo_movimiento' => 'salida',
                 'usuario_id' => auth()->id(),
                 'observaciones' => $observacionesMovimiento,
-                'codigo_ubicacion_origen' => $ubicacionCodigo,
+                'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
                 'codigo_ubicacion_destino' => null,
-                'nombre_rack_origen' => $rackNombre,
+                'nombre_rack_origen' => $stockUbicacion->rack_nombre,
                 'nombre_rack_destino' => null,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // 4) inventario_ingresos_clientes
+            // 3) inventario_ingresos_clientes
             DB::table('inventario_ingresos_clientes')->insert([
                 'compra_id' => null,
-                'articulo_id' => $repuesto->idArticulos,
+                'articulo_id' => $articuloId,
                 'tipo_ingreso' => 'salida',
                 'ingreso_id' => $solicitud->idsolicitudesordenes,
                 'cliente_general_id' => $stockUbicacion->cliente_general_id,
@@ -2360,37 +2663,42 @@ public function aceptar(Request $request, $id)
                 'updated_at' => now()
             ]);
 
-            // 5) repuestos_entregas (grupal -> solicitante)
+            // 4) repuestos_entregas
             $observacionesEntrega = mb_convert_encoding(
-                "Repuesto entregado grupalmente - Ticket: {$numeroTicket} - Destinatario: {$nombreSolicitante}",
+                "Repuesto entregado individualmente - Ticket: {$numeroTicket} - Destinatario: {$nombreDestinatario}",
                 'UTF-8',
                 'ISO-8859-1'
             );
 
             DB::table('repuestos_entregas')->insert([
                 'solicitud_id' => $solicitud->idsolicitudesordenes,
-                'articulo_id' => $repuesto->idArticulos,
-                'usuario_destino_id' => $solicitud->idUsuario,
-                'tipo_entrega' => 'solicitante',
+                'articulo_id' => $articuloId,
+                'usuario_destino_id' => $usuarioFinalId,
+                'tipo_entrega' => $tipoEntrega,
                 'cantidad' => $cantidadSolicitada,
-                'ubicacion_utilizada' => $ubicacionCodigo,
+                'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
                 'usuario_entrego_id' => auth()->id(),
                 'observaciones' => $observacionesEntrega,
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
+            // 5) Stock total
+            DB::table('articulos')
+                ->where('idArticulos', $articuloId)
+                ->decrement('stock_total', $cantidadSolicitada);
+
             // 6) Kardex
             $this->actualizarKardexSalida(
-                (int)$repuesto->idArticulos,
+                (int)$articuloId,
                 (int)$stockUbicacion->cliente_general_id,
                 (int)$cantidadSolicitada,
-                (float)$repuesto->precio_compra
+                (float)$articuloInfo->precio_compra
             );
 
-            // 7) Marcar como procesado
+            // 7) Marcar procesado
             $observacion = mb_convert_encoding(
-                "Ubicación utilizada: {$ubicacionCodigo} - Procesado grupalmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreSolicitante} (solicitante)",
+                "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
                 'UTF-8',
                 'ISO-8859-1'
             );
@@ -2402,350 +2710,50 @@ public function aceptar(Request $request, $id)
                     'observacion' => $observacion
                 ]);
 
-            $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
-            Log::info("? Repuesto procesado grupalmente - Artículo: {$repuesto->idArticulos} ({$nombreRepuesto}), Cantidad: {$cantidadSolicitada}, Ubicación: {$ubicacionCodigo}, Ticket: {$numeroTicket}, Solicitud: {$solicitud->codigo}, Destinatario: {$nombreSolicitante}");
-        }
-
-        // Actualizar estado de la solicitud
-        DB::table('solicitudesordenes')
-            ->where('idsolicitudesordenes', $id)
-            ->update([
-                'estado' => 'aprobada',
-                'fechaaprobacion' => now(),
-                'idaprobador' => auth()->id()
-            ]);
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Solicitud de repuestos aprobada correctamente. Stock descontado de las ubicaciones seleccionadas.'
-        ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al aceptar solicitud de repuestos (grupal): ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
-        ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-    }
-}
-   public function aceptarIndividual(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
-
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto')
-            ->first();
-
-        if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        $articuloId = (int)$request->input('articulo_id');
-        $ubicacionId = (int)$request->input('ubicacion_id');
-        $tipoDestinatario = $request->input('tipo_destinatario');
-        $usuarioDestinoId = $request->input('usuario_destino_id');
-
-        if (!$articuloId || !$ubicacionId || !$tipoDestinatario) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Datos incompletos para procesar el repuesto'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Determinar el usuario destino final
-        $usuarioFinalId = null;
-        $tipoEntrega = '';
-
-        switch ($tipoDestinatario) {
-            case 'solicitante':
-                $usuarioFinalId = $solicitud->idUsuario;
-                $tipoEntrega = 'solicitante';
-                break;
-            case 'tecnico':
-                $usuarioFinalId = $solicitud->idTecnico;
-                $tipoEntrega = 'tecnico';
-                break;
-            case 'otro':
-                $usuarioFinalId = $usuarioDestinoId;
-                $tipoEntrega = 'otro_usuario';
-                break;
-            default:
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tipo de destinatario no válido'
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        if (!$usuarioFinalId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo determinar el usuario destino'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Nombre destinatario
-        $destinatarioInfo = DB::table('usuarios')
-            ->select('Nombre', 'apellidoPaterno', 'apellidoMaterno')
-            ->where('idUsuario', $usuarioFinalId)
-            ->first();
-
-        $nombreDestinatario = $destinatarioInfo
-            ? mb_convert_encoding("{$destinatarioInfo->Nombre} {$destinatarioInfo->apellidoPaterno}", 'UTF-8', 'ISO-8859-1')
-            : 'Usuario no encontrado';
-
-        // Repuesto con ticket
-        $repuesto = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'oa.idticket',
-                'a.idArticulos',
-                'a.nombre',
-                'a.stock_total'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->where('a.idArticulos', $articuloId)
-            ->first();
-
-        if (!$repuesto) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Repuesto no encontrado en la solicitud'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        $ticketInfo = DB::table('tickets')
-            ->select('numero_ticket')
-            ->where('idTickets', $repuesto->idticket)
-            ->first();
-
-        if (!$ticketInfo) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ticket no encontrado'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        $numeroTicket = $ticketInfo->numero_ticket;
-
-        // Ya procesado
-        $yaProcesado = DB::table('ordenesarticulos')
-            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-            ->where('estado', 1)
-            ->exists();
-
-        if ($yaProcesado) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Este repuesto ya fue procesado anteriormente'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        $cantidadSolicitada = (int)$repuesto->cantidad;
-
-        // Stock ubicación
-        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-            ->select(
-                'rua.cantidad',
-                'rua.idRackUbicacionArticulo',
-                'ru.codigo as ubicacion_codigo',
-                'ru.idRackUbicacion',
-                'r.idRack as rack_id',
-                'r.nombre as rack_nombre',
-                'rua.cliente_general_id'
-            )
-            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-            ->where('rua.articulo_id', $articuloId)
-            ->where('rua.rack_ubicacion_id', $ubicacionId)
-            ->first();
-
-        if (!$stockUbicacion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ubicación no encontrada para este repuesto'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
-            return response()->json([
-                'success' => false,
-                'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // Articulo info (kardex)
-        $articuloInfo = DB::table('articulos')
-            ->select('precio_compra', 'precio_venta')
-            ->where('idArticulos', $articuloId)
-            ->first();
-
-        if (!$articuloInfo) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Información del artículo no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
-
-        // 1) Descontar de rack_ubicacion_articulos (por PK)
-        DB::table('rack_ubicacion_articulos')
-            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-            ->decrement('cantidad', $cantidadSolicitada);
-
-        // ? 1.1) Descontar de CAJAS si existen
-        $this->descontarDeCajasSiExisten(
-            (int)$articuloId,
-            (int)$ubicacionId,
-            (int)$cantidadSolicitada,
-            null
-        );
-
-        // 2) Movimiento
-        $observacionesMovimiento = mb_convert_encoding(
-            "Solicitud repuesto aprobada (individual): {$solicitud->codigo} - Ticket: {$numeroTicket} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
-            'UTF-8',
-            'ISO-8859-1'
-        );
-
-        DB::table('rack_movimientos')->insert([
-            'articulo_id' => $articuloId,
-            'custodia_id' => null,
-            'ubicacion_origen_id' => $ubicacionId,
-            'ubicacion_destino_id' => null,
-            'rack_origen_id' => $stockUbicacion->rack_id,
-            'rack_destino_id' => null,
-            'cantidad' => $cantidadSolicitada,
-            'tipo_movimiento' => 'salida',
-            'usuario_id' => auth()->id(),
-            'observaciones' => $observacionesMovimiento,
-            'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-            'codigo_ubicacion_destino' => null,
-            'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-            'nombre_rack_destino' => null,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 3) inventario_ingresos_clientes
-        DB::table('inventario_ingresos_clientes')->insert([
-            'compra_id' => null,
-            'articulo_id' => $articuloId,
-            'tipo_ingreso' => 'salida',
-            'ingreso_id' => $solicitud->idsolicitudesordenes,
-            'cliente_general_id' => $stockUbicacion->cliente_general_id,
-            'numero_orden' => $numeroTicket,
-            'codigo_solicitud' => $solicitud->codigo,
-            'cantidad' => -$cantidadSolicitada,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 4) repuestos_entregas
-        $observacionesEntrega = mb_convert_encoding(
-            "Repuesto entregado individualmente - Ticket: {$numeroTicket} - Destinatario: {$nombreDestinatario}",
-            'UTF-8',
-            'ISO-8859-1'
-        );
-
-        DB::table('repuestos_entregas')->insert([
-            'solicitud_id' => $solicitud->idsolicitudesordenes,
-            'articulo_id' => $articuloId,
-            'usuario_destino_id' => $usuarioFinalId,
-            'tipo_entrega' => $tipoEntrega,
-            'cantidad' => $cantidadSolicitada,
-            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
-            'usuario_entrego_id' => auth()->id(),
-            'observaciones' => $observacionesEntrega,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 5) Stock total
-        DB::table('articulos')
-            ->where('idArticulos', $articuloId)
-            ->decrement('stock_total', $cantidadSolicitada);
-
-        // 6) Kardex
-        $this->actualizarKardexSalida(
-            (int)$articuloId,
-            (int)$stockUbicacion->cliente_general_id,
-            (int)$cantidadSolicitada,
-            (float)$articuloInfo->precio_compra
-        );
-
-        // 7) Marcar procesado
-        $observacion = mb_convert_encoding(
-            "Ubicación utilizada: {$stockUbicacion->ubicacion_codigo} - Procesado individualmente - Ticket: {$numeroTicket} - Código Solicitud: {$solicitud->codigo} - Entregado a: {$nombreDestinatario} ({$tipoEntrega})",
-            'UTF-8',
-            'ISO-8859-1'
-        );
-
-        DB::table('ordenesarticulos')
-            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-            ->update([
-                'estado' => 1,
-                'observacion' => $observacion
-            ]);
-
-        // Completar solicitud si ya no quedan pendientes
-        $repuestosPendientes = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('estado', 0)
-            ->count();
-
-        $todosProcesados = ($repuestosPendientes == 0);
-
-        if ($todosProcesados) {
-            DB::table('solicitudesordenes')
+            // Completar solicitud si ya no quedan pendientes
+            $repuestosPendientes = DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'estado' => 'aprobada',
-                    'fechaaprobacion' => now(),
-                    'idaprobador' => auth()->id()
-                ]);
+                ->where('estado', 0)
+                ->count();
+
+            $todosProcesados = ($repuestosPendientes == 0);
+
+            if ($todosProcesados) {
+                DB::table('solicitudesordenes')
+                    ->where('idsolicitudesordenes', $id)
+                    ->update([
+                        'estado' => 'aprobada',
+                        'fechaaprobacion' => now(),
+                        'idaprobador' => auth()->id()
+                    ]);
+            }
+
+            DB::commit();
+
+            Log::info("? Repuesto procesado individualmente - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Solicitud: {$solicitud->codigo}, Destinatario: {$nombreDestinatario} ({$tipoEntrega})");
+
+            return response()->json([
+                'success' => true,
+                'message' => "Repuesto procesado correctamente. Entregado a: {$nombreDestinatario}",
+                'todos_procesados' => $todosProcesados,
+                'numero_ticket' => $numeroTicket,
+                'codigo_solicitud' => $solicitud->codigo,
+                'destinatario' => $nombreDestinatario,
+                'tipo_entrega' => $tipoEntrega
+            ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al procesar repuesto individual: ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el repuesto: ' . $e->getMessage()
+            ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
         }
-
-        DB::commit();
-
-        Log::info("? Repuesto procesado individualmente - Artículo: {$articuloId}, Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Solicitud: {$solicitud->codigo}, Destinatario: {$nombreDestinatario} ({$tipoEntrega})");
-
-        return response()->json([
-            'success' => true,
-            'message' => "Repuesto procesado correctamente. Entregado a: {$nombreDestinatario}",
-            'todos_procesados' => $todosProcesados,
-            'numero_ticket' => $numeroTicket,
-            'codigo_solicitud' => $solicitud->codigo,
-            'destinatario' => $nombreDestinatario,
-            'tipo_entrega' => $tipoEntrega
-        ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al procesar repuesto individual: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al procesar el repuesto: ' . $e->getMessage()
-        ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
     }
-}
 
 
     public function opcionesProvincia($id)
@@ -2879,279 +2887,278 @@ public function aceptar(Request $request, $id)
 
 
 
-   public function aceptarProvinciaIndividual(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
+    public function aceptarProvinciaIndividual(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
 
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'numeroTicket')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto_provincia')
-            ->first();
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'numeroTicket')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto_provincia')
+                ->first();
 
-        if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            if (!$solicitud) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
 
-        $articuloId = (int)$request->input('articulo_id');
-        $ubicacionId = (int)$request->input('ubicacion_id');
-        $transportista = $request->input('transportista');
-        $placaVehiculo = $request->input('placa_vehiculo');
-        $fechaEntregaTransporte = $request->input('fecha_entrega_transporte');
-        $observaciones = $request->input('observaciones');
+            $articuloId = (int)$request->input('articulo_id');
+            $ubicacionId = (int)$request->input('ubicacion_id');
+            $transportista = $request->input('transportista');
+            $placaVehiculo = $request->input('placa_vehiculo');
+            $fechaEntregaTransporte = $request->input('fecha_entrega_transporte');
+            $observaciones = $request->input('observaciones');
 
-        if (!$articuloId || !$ubicacionId || !$transportista || !$placaVehiculo || !$fechaEntregaTransporte) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Datos incompletos para procesar el envío'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            if (!$articuloId || !$ubicacionId || !$transportista || !$placaVehiculo || !$fechaEntregaTransporte) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos incompletos para procesar el envío'
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
 
-        // (si realmente lo necesitas por tu BD legacy)
-        $transportista = mb_convert_encoding($transportista, 'UTF-8', 'ISO-8859-1');
-        $placaVehiculo = mb_convert_encoding($placaVehiculo, 'UTF-8', 'ISO-8859-1');
-        $observaciones = $observaciones ? mb_convert_encoding($observaciones, 'UTF-8', 'ISO-8859-1') : null;
+            // (si realmente lo necesitas por tu BD legacy)
+            $transportista = mb_convert_encoding($transportista, 'UTF-8', 'ISO-8859-1');
+            $placaVehiculo = mb_convert_encoding($placaVehiculo, 'UTF-8', 'ISO-8859-1');
+            $observaciones = $observaciones ? mb_convert_encoding($observaciones, 'UTF-8', 'ISO-8859-1') : null;
 
-        $repuesto = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'a.idArticulos',
-                'a.nombre',
-                'a.stock_total'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->where('a.idArticulos', $articuloId)
-            ->first();
+            $repuesto = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.stock_total'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $id)
+                ->where('a.idArticulos', $articuloId)
+                ->first();
 
-        if (!$repuesto) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Repuesto no encontrado en la solicitud'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            if (!$repuesto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Repuesto no encontrado en la solicitud'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
 
-        $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
+            $nombreRepuesto = mb_convert_encoding($repuesto->nombre, 'UTF-8', 'ISO-8859-1');
 
-        $numeroTicket = $solicitud->numeroTicket ?? 'N/A';
+            $numeroTicket = $solicitud->numeroTicket ?? 'N/A';
 
-        $yaProcesado = DB::table('ordenesarticulos')
-            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-            ->where('estado', 1)
-            ->exists();
+            $yaProcesado = DB::table('ordenesarticulos')
+                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+                ->where('estado', 1)
+                ->exists();
 
-        if ($yaProcesado) {
-            return response()->json([
-                'success' => false,
-                'message' => "Este repuesto ({$nombreRepuesto}) ya fue procesado para envío"
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            if ($yaProcesado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Este repuesto ({$nombreRepuesto}) ya fue procesado para envío"
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
 
-        $cantidadSolicitada = (int)$repuesto->cantidad;
+            $cantidadSolicitada = (int)$repuesto->cantidad;
 
-        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-            ->select(
-                'rua.cantidad',
-                'rua.idRackUbicacionArticulo',
-                'ru.codigo as ubicacion_codigo',
-                'ru.idRackUbicacion',
-                'r.idRack as rack_id',
-                'r.nombre as rack_nombre',
-                'rua.cliente_general_id'
-            )
-            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-            ->where('rua.articulo_id', $articuloId)
-            ->where('rua.rack_ubicacion_id', $ubicacionId)
-            ->first();
+            $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                ->select(
+                    'rua.cantidad',
+                    'rua.idRackUbicacionArticulo',
+                    'ru.codigo as ubicacion_codigo',
+                    'ru.idRackUbicacion',
+                    'r.idRack as rack_id',
+                    'r.nombre as rack_nombre',
+                    'rua.cliente_general_id'
+                )
+                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                ->where('rua.articulo_id', $articuloId)
+                ->where('rua.rack_ubicacion_id', $ubicacionId)
+                ->first();
 
-        if (!$stockUbicacion) {
-            return response()->json([
-                'success' => false,
-                'message' => "Ubicación no encontrada para el repuesto: {$nombreRepuesto}"
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            if (!$stockUbicacion) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Ubicación no encontrada para el repuesto: {$nombreRepuesto}"
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
 
-        if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stock insuficiente en la ubicación seleccionada para: {$nombreRepuesto}. Ubicación: {$ubicacionCodigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            $articuloInfo = DB::table('articulos')
+                ->select('precio_compra', 'precio_venta')
+                ->where('idArticulos', $articuloId)
+                ->first();
+
+            if (!$articuloInfo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Información del artículo no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
             $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
-            return response()->json([
-                'success' => false,
-                'message' => "Stock insuficiente en la ubicación seleccionada para: {$nombreRepuesto}. Ubicación: {$ubicacionCodigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            $rackNombre = mb_convert_encoding($stockUbicacion->rack_nombre, 'UTF-8', 'ISO-8859-1');
 
-        $articuloInfo = DB::table('articulos')
-            ->select('precio_compra', 'precio_venta')
-            ->where('idArticulos', $articuloId)
-            ->first();
+            // Foto comprobante
+            $fotoComprobantePath = null;
+            if ($request->hasFile('foto_comprobante')) {
+                $file = $request->file('foto_comprobante');
+                $fileName = 'comprobante_' . time() . '_' . $solicitud->codigo . '_' . $articuloId . '.' . $file->getClientOriginalExtension();
+                $fotoComprobantePath = $file->storeAs('comprobantes_envios', $fileName, 'public');
+            }
 
-        if (!$articuloInfo) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Información del artículo no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-        }
+            // 1) Descontar de rack_ubicacion_articulos (por PK)
+            DB::table('rack_ubicacion_articulos')
+                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+                ->decrement('cantidad', $cantidadSolicitada);
 
-        $ubicacionCodigo = mb_convert_encoding($stockUbicacion->ubicacion_codigo, 'UTF-8', 'ISO-8859-1');
-        $rackNombre = mb_convert_encoding($stockUbicacion->rack_nombre, 'UTF-8', 'ISO-8859-1');
+            // ? 1.1) Descontar de CAJAS si existen
+            $this->descontarDeCajasSiExisten(
+                (int)$articuloId,
+                (int)$ubicacionId,
+                (int)$cantidadSolicitada,
+                null
+            );
 
-        // Foto comprobante
-        $fotoComprobantePath = null;
-        if ($request->hasFile('foto_comprobante')) {
-            $file = $request->file('foto_comprobante');
-            $fileName = 'comprobante_' . time() . '_' . $solicitud->codigo . '_' . $articuloId . '.' . $file->getClientOriginalExtension();
-            $fotoComprobantePath = $file->storeAs('comprobantes_envios', $fileName, 'public');
-        }
+            // 2) Movimiento
+            $observacionesMovimiento = mb_convert_encoding(
+                "Envío a provincia: {$solicitud->codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo} - Artículo: {$nombreRepuesto}",
+                'UTF-8',
+                'ISO-8859-1'
+            );
 
-        // 1) Descontar de rack_ubicacion_articulos (por PK)
-        DB::table('rack_ubicacion_articulos')
-            ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-            ->decrement('cantidad', $cantidadSolicitada);
-
-        // ? 1.1) Descontar de CAJAS si existen
-        $this->descontarDeCajasSiExisten(
-            (int)$articuloId,
-            (int)$ubicacionId,
-            (int)$cantidadSolicitada,
-            null
-        );
-
-        // 2) Movimiento
-        $observacionesMovimiento = mb_convert_encoding(
-            "Envío a provincia: {$solicitud->codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo} - Artículo: {$nombreRepuesto}",
-            'UTF-8',
-            'ISO-8859-1'
-        );
-
-        DB::table('rack_movimientos')->insert([
-            'articulo_id' => $articuloId,
-            'custodia_id' => null,
-            'ubicacion_origen_id' => $ubicacionId,
-            'ubicacion_destino_id' => null,
-            'rack_origen_id' => $stockUbicacion->rack_id,
-            'rack_destino_id' => null,
-            'cantidad' => $cantidadSolicitada,
-            'tipo_movimiento' => 'salida_provincia',
-            'usuario_id' => auth()->id(),
-            'observaciones' => $observacionesMovimiento,
-            'codigo_ubicacion_origen' => $ubicacionCodigo,
-            'codigo_ubicacion_destino' => null,
-            'nombre_rack_origen' => $rackNombre,
-            'nombre_rack_destino' => null,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 3) inventario_ingresos_clientes
-        DB::table('inventario_ingresos_clientes')->insert([
-            'compra_id' => null,
-            'articulo_id' => $articuloId,
-            'tipo_ingreso' => 'salida_provincia',
-            'ingreso_id' => $solicitud->idsolicitudesordenes,
-            'cliente_general_id' => $stockUbicacion->cliente_general_id,
-            'numero_orden' => $numeroTicket,
-            'codigo_solicitud' => $solicitud->codigo,
-            'cantidad' => -$cantidadSolicitada,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 4) repuestos_envios_provincia
-        DB::table('repuestos_envios_provincia')->insert([
-            'solicitud_id' => $solicitud->idsolicitudesordenes,
-            'articulo_id' => $articuloId,
-            'transportista' => $transportista,
-            'placa_vehiculo' => $placaVehiculo,
-            'fecha_entrega_transporte' => $fechaEntregaTransporte,
-            'foto_comprobante' => $fotoComprobantePath,
-            'observaciones' => $observaciones,
-            'usuario_entrego_id' => auth()->id(),
-            'ubicacion_origen' => $ubicacionCodigo,
-            'rack_origen' => $rackNombre,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 5) Stock total
-        DB::table('articulos')
-            ->where('idArticulos', $articuloId)
-            ->decrement('stock_total', $cantidadSolicitada);
-
-        // 6) Kardex
-        $this->actualizarKardexSalida(
-            (int)$articuloId,
-            (int)$stockUbicacion->cliente_general_id,
-            (int)$cantidadSolicitada,
-            (float)$articuloInfo->precio_compra
-        );
-
-        // 7) Marcar procesado
-        $observacion = mb_convert_encoding(
-            "Envío a provincia - Ubicación: {$ubicacionCodigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo} - Fecha entrega transporte: {$fechaEntregaTransporte} - Artículo: {$nombreRepuesto}",
-            'UTF-8',
-            'ISO-8859-1'
-        );
-
-        DB::table('ordenesarticulos')
-            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-            ->update([
-                'estado' => 1,
-                'observacion' => $observacion
+            DB::table('rack_movimientos')->insert([
+                'articulo_id' => $articuloId,
+                'custodia_id' => null,
+                'ubicacion_origen_id' => $ubicacionId,
+                'ubicacion_destino_id' => null,
+                'rack_origen_id' => $stockUbicacion->rack_id,
+                'rack_destino_id' => null,
+                'cantidad' => $cantidadSolicitada,
+                'tipo_movimiento' => 'salida_provincia',
+                'usuario_id' => auth()->id(),
+                'observaciones' => $observacionesMovimiento,
+                'codigo_ubicacion_origen' => $ubicacionCodigo,
+                'codigo_ubicacion_destino' => null,
+                'nombre_rack_origen' => $rackNombre,
+                'nombre_rack_destino' => null,
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
 
-        // Completar solicitud si ya no quedan pendientes
-        $repuestosPendientes = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('estado', 0)
-            ->count();
+            // 3) inventario_ingresos_clientes
+            DB::table('inventario_ingresos_clientes')->insert([
+                'compra_id' => null,
+                'articulo_id' => $articuloId,
+                'tipo_ingreso' => 'salida_provincia',
+                'ingreso_id' => $solicitud->idsolicitudesordenes,
+                'cliente_general_id' => $stockUbicacion->cliente_general_id,
+                'numero_orden' => $numeroTicket,
+                'codigo_solicitud' => $solicitud->codigo,
+                'cantidad' => -$cantidadSolicitada,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-        $todosProcesados = ($repuestosPendientes == 0);
+            // 4) repuestos_envios_provincia
+            DB::table('repuestos_envios_provincia')->insert([
+                'solicitud_id' => $solicitud->idsolicitudesordenes,
+                'articulo_id' => $articuloId,
+                'transportista' => $transportista,
+                'placa_vehiculo' => $placaVehiculo,
+                'fecha_entrega_transporte' => $fechaEntregaTransporte,
+                'foto_comprobante' => $fotoComprobantePath,
+                'observaciones' => $observaciones,
+                'usuario_entrego_id' => auth()->id(),
+                'ubicacion_origen' => $ubicacionCodigo,
+                'rack_origen' => $rackNombre,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-        if ($todosProcesados) {
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
+            // 5) Stock total
+            DB::table('articulos')
+                ->where('idArticulos', $articuloId)
+                ->decrement('stock_total', $cantidadSolicitada);
+
+            // 6) Kardex
+            $this->actualizarKardexSalida(
+                (int)$articuloId,
+                (int)$stockUbicacion->cliente_general_id,
+                (int)$cantidadSolicitada,
+                (float)$articuloInfo->precio_compra
+            );
+
+            // 7) Marcar procesado
+            $observacion = mb_convert_encoding(
+                "Envío a provincia - Ubicación: {$ubicacionCodigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo} - Fecha entrega transporte: {$fechaEntregaTransporte} - Artículo: {$nombreRepuesto}",
+                'UTF-8',
+                'ISO-8859-1'
+            );
+
+            DB::table('ordenesarticulos')
+                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->update([
-                    'estado' => 'aprobada',
-                    'fechaaprobacion' => now(),
-                    'idaprobador' => auth()->id()
+                    'estado' => 1,
+                    'observacion' => $observacion
                 ]);
+
+            // Completar solicitud si ya no quedan pendientes
+            $repuestosPendientes = DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('estado', 0)
+                ->count();
+
+            $todosProcesados = ($repuestosPendientes == 0);
+
+            if ($todosProcesados) {
+                DB::table('solicitudesordenes')
+                    ->where('idsolicitudesordenes', $id)
+                    ->update([
+                        'estado' => 'aprobada',
+                        'fechaaprobacion' => now(),
+                        'idaprobador' => auth()->id()
+                    ]);
+            }
+
+            DB::commit();
+
+            Log::info("? Repuesto procesado para envío a provincia - Artículo: {$articuloId} ({$nombreRepuesto}), Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Transportista: {$transportista}, Placa: {$placaVehiculo}, Ubicación: {$ubicacionCodigo}");
+
+            return response()->json([
+                'success' => true,
+                'message' => "Repuesto preparado para envío a provincia. Transportista: {$transportista}, Artículo: {$nombreRepuesto}",
+                'todos_procesados' => $todosProcesados,
+                'numero_ticket' => $numeroTicket,
+                'codigo_solicitud' => $solicitud->codigo,
+                'transportista' => $transportista,
+                'placa_vehiculo' => $placaVehiculo,
+                'articulo' => $nombreRepuesto,
+                'ubicacion' => $ubicacionCodigo,
+                'cantidad' => $cantidadSolicitada
+            ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al procesar envío a provincia individual: ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al procesar el envío: ' . $e->getMessage()
+            ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
         }
-
-        DB::commit();
-
-        Log::info("? Repuesto procesado para envío a provincia - Artículo: {$articuloId} ({$nombreRepuesto}), Cantidad: {$cantidadSolicitada}, Ticket: {$numeroTicket}, Transportista: {$transportista}, Placa: {$placaVehiculo}, Ubicación: {$ubicacionCodigo}");
-
-        return response()->json([
-            'success' => true,
-            'message' => "Repuesto preparado para envío a provincia. Transportista: {$transportista}, Artículo: {$nombreRepuesto}",
-            'todos_procesados' => $todosProcesados,
-            'numero_ticket' => $numeroTicket,
-            'codigo_solicitud' => $solicitud->codigo,
-            'transportista' => $transportista,
-            'placa_vehiculo' => $placaVehiculo,
-            'articulo' => $nombreRepuesto,
-            'ubicacion' => $ubicacionCodigo,
-            'cantidad' => $cantidadSolicitada
-        ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al procesar envío a provincia individual: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al procesar el envío: ' . $e->getMessage()
-        ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
     }
-}
 
 
 
@@ -3249,6 +3256,160 @@ public function aceptar(Request $request, $id)
             throw $e;
         }
     }
+
+    public function generarConformidad($id)
+    {
+        try {
+
+            /* =========================
+         * 1. OBTENER SOLICITUD + TICKET + QUIEN ENTREGA (usuario_entrego_id)
+         * ========================= */
+
+            // subquery: última entrega registrada para esa solicitud
+            $lastEntregaSub = DB::table('repuestos_entregas')
+                ->select('solicitud_id', DB::raw('MAX(id) as last_id'))
+                ->groupBy('solicitud_id');
+
+            $solicitud = DB::table('solicitudesordenes as so')
+                ->select(
+                    'so.idsolicitudesordenes',
+                    'so.codigo',
+                    'so.fechacreacion',
+                    'so.fechaaprobacion',
+                    'so.tiposervicio',
+                    'so.niveldeurgencia',
+                    'so.observaciones',
+                    'so.cantidad',
+                    'so.totalcantidadproductos',
+                    'so.estado',
+
+                    't.numero_ticket as numero_ticket',
+
+                    // solicitante
+                    'u.Nombre as solicitante_nombre',
+                    'u.apellidoPaterno as solicitante_apellido_paterno',
+                    'u.apellidoMaterno as solicitante_apellido_materno',
+                    'u.documento as solicitante_documento',
+                    'td.nombre as solicitante_tipo_documento',
+
+                    // ✅ quien entrega / acepta (desde repuestos_entregas.usuario_entrego_id)
+                    'ue.Nombre as aprobador_nombre',
+                    'ue.apellidoPaterno as aprobador_apellido_paterno',
+                    'ue.apellidoMaterno as aprobador_apellido_materno',
+                    'ue.documento as aprobador_documento',
+                    'tde.nombre as aprobador_tipo_documento'
+                )
+                ->leftJoin('ordenesarticulos as oa', 'oa.idsolicitudesordenes', '=', 'so.idsolicitudesordenes')
+                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+
+                ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+                ->leftJoin('tipodocumento as td', 'u.idTipoDocumento', '=', 'td.idTipoDocumento')
+
+                // ✅ última entrega
+                ->leftJoinSub($lastEntregaSub, 're_last', function ($join) {
+                    $join->on('re_last.solicitud_id', '=', 'so.idsolicitudesordenes');
+                })
+                ->leftJoin('repuestos_entregas as re', 're.id', '=', 're_last.last_id')
+                ->leftJoin('usuarios as ue', 're.usuario_entrego_id', '=', 'ue.idUsuario')
+                ->leftJoin('tipodocumento as tde', 'ue.idTipoDocumento', '=', 'tde.idTipoDocumento')
+
+                ->where('so.idsolicitudesordenes', $id)
+                ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto'])
+                ->first();
+
+            if (!$solicitud) {
+                abort(404, 'Solicitud no encontrada');
+            }
+
+            /* =========================
+         * 2. VALIDAR QUE NO HAYA REPUESTOS PENDIENTES
+         * ========================= */
+            $pendientes = DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('estado', 0)
+                ->count();
+
+            if ($pendientes > 0) {
+                abort(400, 'Aún existen repuestos pendientes de entrega');
+            }
+
+            /* =========================
+         * 3. REPUESTOS ENTREGADOS
+         * ========================= */
+            $repuestos = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.cantidad',
+                    'a.nombre as repuesto_nombre',
+                    'a.codigo_barras',
+                    'a.codigo_repuesto',
+                    'sc.nombre as tipo_repuesto',
+
+                    // ✅ varios modelos por artículo (pivot)
+                    DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
+                )
+                ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+
+                // ✅ pivote articulo_modelo -> modelo
+                ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
+                ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
+
+                ->where('oa.idSolicitudesOrdenes', $id)
+                ->where('oa.estado', 1)
+
+                ->groupBy(
+                    'oa.idOrdenesArticulos',
+                    'oa.cantidad',
+                    'a.nombre',
+                    'a.codigo_barras',
+                    'a.codigo_repuesto',
+                    'sc.nombre'
+                )
+                ->get();
+
+            if ($repuestos->isEmpty()) {
+                abort(400, 'No hay repuestos entregados');
+            }
+
+            /* =========================
+         * 4. FONDO MEMBRETADO (BASE64)
+         * ========================= */
+            $bgPath = public_path('assets/images/hojamembretada.jpg');
+            $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+
+            /* =========================
+         * 5. RENDER HTML
+         * ========================= */
+            $html = view('solicitud.solicitudrepuesto.pdf.conformidad', [
+                'solicitud'        => $solicitud,
+                'repuestos'        => $repuestos,
+                'fecha_generacion' => now()->format('d/m/Y H:i'),
+                'bgBase64'         => $bgBase64,
+            ])->render();
+
+            /* =========================
+         * 6. GENERAR PDF
+         * ========================= */
+            $tempPath = storage_path('app/conformidad_' . uniqid() . '.pdf');
+
+            Browsershot::html($html)
+                ->format('A4')
+                ->margins(0, 0, 0, 0)
+                ->showBackground()
+                ->noSandbox()
+                ->setOption('args', ['--disable-dev-shm-usage'])
+                ->savePdf($tempPath);
+
+            return response()->file($tempPath, [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="ACTA DE CONFORMIDAD REPUESTO -' . $solicitud->codigo . '.pdf"',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error Conformidad Repuesto: ' . $e->getMessage());
+            abort(500, 'Error al generar la conformidad');
+        }
+    }
+
 
 
     public function generarConformidadProvincia($id)
@@ -3404,1285 +3565,1280 @@ public function aceptar(Request $request, $id)
         }
     }
 
-/**
- * Descuenta unidades desde la tabla `cajas` si existen cajas para:
- *  - idArticulo = $articuloId
- *  - idubicaciones_rack = $ubicacionRackId (FK hacia rack_ubicaciones.idRackUbicacion)
- *
- * Reglas:
- *  - Si NO hay cajas, no hace nada (silencioso).
- *  - Solo considera cajas "abierta" (puedes incluir "cerrada" si tu negocio lo requiere).
- *  - Descuenta primero las cajas más antiguas (FIFO por fecha_entrada).
- *  - No permite dejar cantidad_actual negativa.
- *  - Si hay cajas pero no alcanza cantidad_actual total, lanza excepción (rollback).
- *
- * @throws \Exception
- */
+    /**
+     * Descuenta unidades desde la tabla `cajas` si existen cajas para:
+     *  - idArticulo = $articuloId
+     *  - idubicaciones_rack = $ubicacionRackId (FK hacia rack_ubicaciones.idRackUbicacion)
+     *
+     * Reglas:
+     *  - Si NO hay cajas, no hace nada (silencioso).
+     *  - Solo considera cajas "abierta" (puedes incluir "cerrada" si tu negocio lo requiere).
+     *  - Descuenta primero las cajas más antiguas (FIFO por fecha_entrada).
+     *  - No permite dejar cantidad_actual negativa.
+     *  - Si hay cajas pero no alcanza cantidad_actual total, lanza excepción (rollback).
+     *
+     * @throws \Exception
+     */
 
 
 
-private function descontarDeCajasSiExisten(int $articuloId, int $ubicacionRackId, int $cantidad, ?int $tipoArticuloId = null): void
-{
-    if ($cantidad <= 0) {
-        return;
-    }
-
-    // Base query: cajas del artículo en esa ubicación
-    $q = DB::table('cajas')
-        ->where('idArticulo', $articuloId)
-        ->where('idubicaciones_rack', $ubicacionRackId)
-        ->where('cantidad_actual', '>', 0)
-        ->where('estado', 'abierta'); // si quieres incluir cerradas: ->whereIn('estado',['abierta','cerrada'])
-
-    // (Opcional) Si tu data mezcla tipos por artículo y quieres evitarlo
-    if (!is_null($tipoArticuloId)) {
-        $q->where('idTipoArticulo', $tipoArticuloId);
-    }
-
-    // Si no hay cajas: no hacemos nada (regla pedida)
-    $existenCajas = (clone $q)->exists();
-    if (!$existenCajas) {
-        return;
-    }
-
-    // Traer cajas ordenadas (FIFO)
-    // lockForUpdate para evitar carreras dentro de la misma transacción
-    $cajas = (clone $q)
-        ->select('idCaja', 'cantidad_actual')
-        ->orderBy('fecha_entrada', 'asc')
-        ->orderBy('idCaja', 'asc')
-        ->lockForUpdate()
-        ->get();
-
-    $disponibleTotal = 0;
-    foreach ($cajas as $c) {
-        $disponibleTotal += (int)$c->cantidad_actual;
-    }
-
-    if ($disponibleTotal < $cantidad) {
-        // OJO: aquí lanzo excepción para que el método que llama haga rollback
-        throw new \Exception(
-            "Stock en cajas insuficiente para descontar. Articulo={$articuloId}, UbicacionRack={$ubicacionRackId}, " .
-            "DisponibleEnCajas={$disponibleTotal}, Solicitado={$cantidad}"
-        );
-    }
-
-    // Descontar progresivamente
-    $restante = $cantidad;
-
-    foreach ($cajas as $caja) {
-        if ($restante <= 0) break;
-
-        $actual = (int)$caja->cantidad_actual;
-        if ($actual <= 0) continue;
-
-        $descuento = min($actual, $restante);
-        $nuevo = $actual - $descuento;
-
-        DB::table('cajas')
-            ->where('idCaja', (int)$caja->idCaja)
-            ->update([
-                'cantidad_actual' => $nuevo,
-            ]);
-
-        $restante -= $descuento;
-    }
-
-    // Por seguridad (no debería pasar por la validación previa)
-    if ($restante > 0) {
-        throw new \Exception(
-            "No se logró descontar completamente de cajas. Restante={$restante} (Articulo={$articuloId}, UbicacionRack={$ubicacionRackId})"
-        );
-    }
-}
-
-
-
-
-public function aceptarProvincia(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
-
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'numeroTicket')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto_provincia')
-            ->first();
-
-        if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+    private function descontarDeCajasSiExisten(int $articuloId, int $ubicacionRackId, int $cantidad, ?int $tipoArticuloId = null): void
+    {
+        if ($cantidad <= 0) {
+            return;
         }
 
-        if ($solicitud->estado == 'aprobada') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+        // Base query: cajas del artículo en esa ubicación
+        $q = DB::table('cajas')
+            ->where('idArticulo', $articuloId)
+            ->where('idubicaciones_rack', $ubicacionRackId)
+            ->where('cantidad_actual', '>', 0)
+            ->where('estado', 'abierta'); // si quieres incluir cerradas: ->whereIn('estado',['abierta','cerrada'])
+
+        // (Opcional) Si tu data mezcla tipos por artículo y quieres evitarlo
+        if (!is_null($tipoArticuloId)) {
+            $q->where('idTipoArticulo', $tipoArticuloId);
         }
 
-        $ubicacionesSeleccionadas = json_decode($request->input('ubicaciones'), true);
-        $transportista = $request->input('transportista');
-        $placaVehiculo = $request->input('placa_vehiculo');
-        $fechaEntregaTransporte = $request->input('fecha_entrega_transporte');
-        $observaciones = $request->input('observaciones');
-
-        if (empty($ubicacionesSeleccionadas) || !$transportista || !$placaVehiculo || !$fechaEntregaTransporte) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Datos incompletos para procesar el envío grupal'
-            ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+        // Si no hay cajas: no hacemos nada (regla pedida)
+        $existenCajas = (clone $q)->exists();
+        if (!$existenCajas) {
+            return;
         }
 
-        $numeroTicket = $solicitud->numeroTicket ?? 'N/A';
-
-        $repuestosSolicitud = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'a.idArticulos',
-                'a.nombre',
-                'a.stock_total'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->where('oa.idsolicitudesordenes', $id)
+        // Traer cajas ordenadas (FIFO)
+        // lockForUpdate para evitar carreras dentro de la misma transacción
+        $cajas = (clone $q)
+            ->select('idCaja', 'cantidad_actual')
+            ->orderBy('fecha_entrada', 'asc')
+            ->orderBy('idCaja', 'asc')
+            ->lockForUpdate()
             ->get();
 
-        foreach ($repuestosSolicitud as $repuesto) {
-            $stockDisponible = DB::table('rack_ubicacion_articulos')
-                ->where('articulo_id', $repuesto->idArticulos)
-                ->sum('cantidad');
-
-            if ($stockDisponible < $repuesto->cantidad) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "Stock insuficiente para el repuesto: {$repuesto->nombre}. Disponible: {$stockDisponible}, Solicitado: {$repuesto->cantidad}"
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-            }
+        $disponibleTotal = 0;
+        foreach ($cajas as $c) {
+            $disponibleTotal += (int)$c->cantidad_actual;
         }
 
-        // Foto comprobante (una para todos)
-        $fotoComprobantePath = null;
-        if ($request->hasFile('foto_comprobante')) {
-            $file = $request->file('foto_comprobante');
-            $fileName = 'comprobante_grupal_' . time() . '_' . $solicitud->codigo . '.' . $file->getClientOriginalExtension();
-            $fotoComprobantePath = $file->storeAs('comprobantes_envios', $fileName, 'public');
+        if ($disponibleTotal < $cantidad) {
+            // OJO: aquí lanzo excepción para que el método que llama haga rollback
+            throw new \Exception(
+                "Stock en cajas insuficiente para descontar. Articulo={$articuloId}, UbicacionRack={$ubicacionRackId}, " .
+                    "DisponibleEnCajas={$disponibleTotal}, Solicitado={$cantidad}"
+            );
         }
 
-        foreach ($repuestosSolicitud as $repuesto) {
-            $cantidadSolicitada = (int)$repuesto->cantidad;
-            $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
+        // Descontar progresivamente
+        $restante = $cantidad;
 
-            if (!$ubicacionId) {
+        foreach ($cajas as $caja) {
+            if ($restante <= 0) break;
+
+            $actual = (int)$caja->cantidad_actual;
+            if ($actual <= 0) continue;
+
+            $descuento = min($actual, $restante);
+            $nuevo = $actual - $descuento;
+
+            DB::table('cajas')
+                ->where('idCaja', (int)$caja->idCaja)
+                ->update([
+                    'cantidad_actual' => $nuevo,
+                ]);
+
+            $restante -= $descuento;
+        }
+
+        // Por seguridad (no debería pasar por la validación previa)
+        if ($restante > 0) {
+            throw new \Exception(
+                "No se logró descontar completamente de cajas. Restante={$restante} (Articulo={$articuloId}, UbicacionRack={$ubicacionRackId})"
+            );
+        }
+    }
+
+
+
+
+    public function aceptarProvincia(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'numeroTicket')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto_provincia')
+                ->first();
+
+            if (!$solicitud) {
                 return response()->json([
                     'success' => false,
-                    'message' => "No se seleccionó ubicación para el repuesto: {$repuesto->nombre}"
+                    'message' => 'Solicitud no encontrada'
+                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            if ($solicitud->estado == 'aprobada') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Esta solicitud ya ha sido aprobada anteriormente'
                 ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
             }
 
+            $ubicacionesSeleccionadas = json_decode($request->input('ubicaciones'), true);
+            $transportista = $request->input('transportista');
+            $placaVehiculo = $request->input('placa_vehiculo');
+            $fechaEntregaTransporte = $request->input('fecha_entrega_transporte');
+            $observaciones = $request->input('observaciones');
+
+            if (empty($ubicacionesSeleccionadas) || !$transportista || !$placaVehiculo || !$fechaEntregaTransporte) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Datos incompletos para procesar el envío grupal'
+                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+            }
+
+            $numeroTicket = $solicitud->numeroTicket ?? 'N/A';
+
+            $repuestosSolicitud = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.stock_total'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $id)
+                ->get();
+
+            foreach ($repuestosSolicitud as $repuesto) {
+                $stockDisponible = DB::table('rack_ubicacion_articulos')
+                    ->where('articulo_id', $repuesto->idArticulos)
+                    ->sum('cantidad');
+
+                if ($stockDisponible < $repuesto->cantidad) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuficiente para el repuesto: {$repuesto->nombre}. Disponible: {$stockDisponible}, Solicitado: {$repuesto->cantidad}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+            }
+
+            // Foto comprobante (una para todos)
+            $fotoComprobantePath = null;
+            if ($request->hasFile('foto_comprobante')) {
+                $file = $request->file('foto_comprobante');
+                $fileName = 'comprobante_grupal_' . time() . '_' . $solicitud->codigo . '.' . $file->getClientOriginalExtension();
+                $fotoComprobantePath = $file->storeAs('comprobantes_envios', $fileName, 'public');
+            }
+
+            foreach ($repuestosSolicitud as $repuesto) {
+                $cantidadSolicitada = (int)$repuesto->cantidad;
+                $ubicacionId = $ubicacionesSeleccionadas[$repuesto->idArticulos] ?? null;
+
+                if (!$ubicacionId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "No se seleccionó ubicación para el repuesto: {$repuesto->nombre}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+                    ->select(
+                        'rua.cantidad',
+                        'rua.idRackUbicacionArticulo',
+                        'rua.cliente_general_id',
+                        'ru.codigo as ubicacion_codigo',
+                        'ru.idRackUbicacion',
+                        'r.idRack as rack_id',
+                        'r.nombre as rack_nombre'
+                    )
+                    ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                    ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+                    ->where('rua.articulo_id', $repuesto->idArticulos)
+                    ->where('rua.rack_ubicacion_id', $ubicacionId)
+                    ->first();
+
+                if (!$stockUbicacion) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Ubicación no encontrada para el repuesto: {$repuesto->nombre}"
+                    ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Stock insuficiente en la ubicación seleccionada para: {$repuesto->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                $yaProcesado = DB::table('ordenesarticulos')
+                    ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+                    ->where('estado', 1)
+                    ->exists();
+
+                if ($yaProcesado) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "El repuesto {$repuesto->nombre} ya fue procesado anteriormente"
+                    ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                }
+
+                $articuloInfo = DB::table('articulos')
+                    ->select('precio_compra', 'precio_venta')
+                    ->where('idArticulos', $repuesto->idArticulos)
+                    ->first();
+
+                // 1) Descontar stock en ubicación (por PK)
+                DB::table('rack_ubicacion_articulos')
+                    ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+                    ->decrement('cantidad', $cantidadSolicitada);
+
+                // ? 1.1) Descontar de CAJAS si existen
+                $this->descontarDeCajasSiExisten(
+                    (int)$repuesto->idArticulos,
+                    (int)$ubicacionId,
+                    (int)$cantidadSolicitada,
+                    null
+                );
+
+                // 2) Stock total
+                DB::table('articulos')
+                    ->where('idArticulos', $repuesto->idArticulos)
+                    ->decrement('stock_total', $cantidadSolicitada);
+
+                // 3) Movimiento
+                DB::table('rack_movimientos')->insert([
+                    'articulo_id' => $repuesto->idArticulos,
+                    'custodia_id' => null,
+                    'ubicacion_origen_id' => $ubicacionId,
+                    'ubicacion_destino_id' => null,
+                    'rack_origen_id' => $stockUbicacion->rack_id,
+                    'rack_destino_id' => null,
+                    'cantidad' => $cantidadSolicitada,
+                    'tipo_movimiento' => 'salida_provincia',
+                    'usuario_id' => auth()->id(),
+                    'observaciones' => "Envío a provincia (grupal): {$solicitud->codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista}",
+                    'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
+                    'codigo_ubicacion_destino' => null,
+                    'nombre_rack_origen' => $stockUbicacion->rack_nombre,
+                    'nombre_rack_destino' => null,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 4) inventario_ingresos_clientes
+                DB::table('inventario_ingresos_clientes')->insert([
+                    'compra_id' => null,
+                    'articulo_id' => $repuesto->idArticulos,
+                    'tipo_ingreso' => 'salida_provincia',
+                    'ingreso_id' => $solicitud->idsolicitudesordenes,
+                    'cliente_general_id' => $stockUbicacion->cliente_general_id,
+                    'numero_orden' => $numeroTicket,
+                    'codigo_solicitud' => $solicitud->codigo,
+                    'cantidad' => -$cantidadSolicitada,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 5) repuestos_envios_provincia
+                DB::table('repuestos_envios_provincia')->insert([
+                    'solicitud_id' => $solicitud->idsolicitudesordenes,
+                    'articulo_id' => $repuesto->idArticulos,
+                    'transportista' => $transportista,
+                    'placa_vehiculo' => $placaVehiculo,
+                    'fecha_entrega_transporte' => $fechaEntregaTransporte,
+                    'foto_comprobante' => $fotoComprobantePath,
+                    'observaciones' => $observaciones,
+                    'usuario_entrego_id' => auth()->id(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // 6) Kardex
+                $this->actualizarKardexSalida(
+                    (int)$repuesto->idArticulos,
+                    (int)$stockUbicacion->cliente_general_id,
+                    (int)$cantidadSolicitada,
+                    (float)$articuloInfo->precio_compra
+                );
+
+                // 7) Marcar procesado
+                DB::table('ordenesarticulos')
+                    ->where('idordenesarticulos', $repuesto->idordenesarticulos)
+                    ->update([
+                        'estado' => 1,
+                        'observacion' => "Envío a provincia (grupal) - Ubicación: {$stockUbicacion->ubicacion_codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo}"
+                    ]);
+
+                Log::info("? Repuesto procesado para envío grupal a provincia - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Transportista: {$transportista}, Ticket: {$numeroTicket}");
+            }
+
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => 'aprobada',
+                    'fechaaprobacion' => now(),
+                    'idaprobador' => auth()->id()
+                ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Solicitud de repuestos para provincia aprobada correctamente. Todos los repuestos preparados para envío con transportista: {$transportista}. Ticket: {$numeroTicket}"
+            ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al aceptar solicitud de repuestos para provincia (grupal): ' . $e->getMessage());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
+            ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+        }
+    }
+
+
+
+    public function marcarListoIndividual(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto')
+                ->first();
+
+            if (!$solicitud) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404);
+            }
+
+            $articuloId = (int)$request->input('articulo_id');
+            $ubicacionId = (int)$request->input('ubicacion_id');
+
+            // Verificar si ya fue marcado como listo para entregar
+            $yaMarcadoListo = DB::table('repuestos_entregas')
+                ->where('solicitud_id', $id)
+                ->where('articulo_id', $articuloId)
+                ->where('estado', 'pendiente_entrega')
+                ->exists();
+
+            if ($yaMarcadoListo) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este repuesto ya está marcado como listo para entregar'
+                ], 400);
+            }
+
+            // Obtener información del repuesto
+            $repuesto = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.idordenesarticulos',
+                    'oa.cantidad',
+                    'oa.idticket',
+                    'a.idArticulos',
+                    'a.nombre',
+                    'a.stock_total'
+                )
+                ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+                ->where('oa.idsolicitudesordenes', $id)
+                ->where('a.idArticulos', $articuloId)
+                ->first();
+
+            if (!$repuesto) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Repuesto no encontrado en la solicitud'
+                ], 404);
+            }
+
+            // Verificar stock disponible en la ubicación
             $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
                 ->select(
                     'rua.cantidad',
-                    'rua.idRackUbicacionArticulo',
-                    'rua.cliente_general_id',
                     'ru.codigo as ubicacion_codigo',
-                    'ru.idRackUbicacion',
-                    'r.idRack as rack_id',
-                    'r.nombre as rack_nombre'
+                    'r.nombre as rack_nombre',
+                    'rua.cliente_general_id'
                 )
                 ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
                 ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $repuesto->idArticulos)
+                ->where('rua.articulo_id', $articuloId)
                 ->where('rua.rack_ubicacion_id', $ubicacionId)
                 ->first();
 
             if (!$stockUbicacion) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Ubicación no encontrada para el repuesto: {$repuesto->nombre}"
-                ], 404, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                    'message' => 'Ubicación no encontrada para este repuesto'
+                ], 404);
             }
 
-            if ((int)$stockUbicacion->cantidad < $cantidadSolicitada) {
+            if ((int)$stockUbicacion->cantidad < (int)$repuesto->cantidad) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Stock insuficiente en la ubicación seleccionada para: {$repuesto->nombre}. Ubicación: {$stockUbicacion->ubicacion_codigo}, Disponible: {$stockUbicacion->cantidad}, Solicitado: {$cantidadSolicitada}"
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
+                    'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$repuesto->cantidad}"
+                ], 400);
             }
 
-            $yaProcesado = DB::table('ordenesarticulos')
-                ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-                ->where('estado', 1)
-                ->exists();
-
-            if ($yaProcesado) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "El repuesto {$repuesto->nombre} ya fue procesado anteriormente"
-                ], 400, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-            }
-
-            $articuloInfo = DB::table('articulos')
-                ->select('precio_compra', 'precio_venta')
-                ->where('idArticulos', $repuesto->idArticulos)
+            // Obtener número de ticket
+            $ticketInfo = DB::table('tickets')
+                ->select('numero_ticket')
+                ->where('idTickets', $repuesto->idticket)
                 ->first();
+            $numeroTicket = $ticketInfo->numero_ticket ?? 'N/A';
 
-            // 1) Descontar stock en ubicación (por PK)
-            DB::table('rack_ubicacion_articulos')
-                ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
-                ->decrement('cantidad', $cantidadSolicitada);
-
-            // ? 1.1) Descontar de CAJAS si existen
-            $this->descontarDeCajasSiExisten(
-                (int)$repuesto->idArticulos,
-                (int)$ubicacionId,
-                (int)$cantidadSolicitada,
-                null
-            );
-
-            // 2) Stock total
-            DB::table('articulos')
-                ->where('idArticulos', $repuesto->idArticulos)
-                ->decrement('stock_total', $cantidadSolicitada);
-
-            // 3) Movimiento
-            DB::table('rack_movimientos')->insert([
-                'articulo_id' => $repuesto->idArticulos,
-                'custodia_id' => null,
-                'ubicacion_origen_id' => $ubicacionId,
-                'ubicacion_destino_id' => null,
-                'rack_origen_id' => $stockUbicacion->rack_id,
-                'rack_destino_id' => null,
-                'cantidad' => $cantidadSolicitada,
-                'tipo_movimiento' => 'salida_provincia',
-                'usuario_id' => auth()->id(),
-                'observaciones' => "Envío a provincia (grupal): {$solicitud->codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista}",
-                'codigo_ubicacion_origen' => $stockUbicacion->ubicacion_codigo,
-                'codigo_ubicacion_destino' => null,
-                'nombre_rack_origen' => $stockUbicacion->rack_nombre,
-                'nombre_rack_destino' => null,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // 4) inventario_ingresos_clientes
-            DB::table('inventario_ingresos_clientes')->insert([
-                'compra_id' => null,
-                'articulo_id' => $repuesto->idArticulos,
-                'tipo_ingreso' => 'salida_provincia',
-                'ingreso_id' => $solicitud->idsolicitudesordenes,
-                'cliente_general_id' => $stockUbicacion->cliente_general_id,
-                'numero_orden' => $numeroTicket,
-                'codigo_solicitud' => $solicitud->codigo,
-                'cantidad' => -$cantidadSolicitada,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-
-            // 5) repuestos_envios_provincia
-            DB::table('repuestos_envios_provincia')->insert([
+            // 1. Registrar en repuestos_entregas con estado 'pendiente_entrega'
+            DB::table('repuestos_entregas')->insert([
                 'solicitud_id' => $solicitud->idsolicitudesordenes,
-                'articulo_id' => $repuesto->idArticulos,
-                'transportista' => $transportista,
-                'placa_vehiculo' => $placaVehiculo,
-                'fecha_entrega_transporte' => $fechaEntregaTransporte,
-                'foto_comprobante' => $fotoComprobantePath,
-                'observaciones' => $observaciones,
-                'usuario_entrego_id' => auth()->id(),
+                'articulo_id' => $articuloId,
+                'usuario_destino_id' => $solicitud->idTecnico,
+                'tipo_entrega' => 'tecnico',
+                'cantidad' => $repuesto->cantidad,
+                'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
+                'ubicacion_id' => $ubicacionId,
+                'numero_ticket' => $numeroTicket,
+                'usuario_preparo_id' => auth()->id(),
+                'estado' => 'pendiente_entrega',
+                'observaciones' => "Marcado como listo para entregar al técnico",
+                'fecha_preparacion' => now(),
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // 6) Kardex
-            $this->actualizarKardexSalida(
-                (int)$repuesto->idArticulos,
-                (int)$stockUbicacion->cliente_general_id,
-                (int)$cantidadSolicitada,
-                (float)$articuloInfo->precio_compra
-            );
-
-            // 7) Marcar procesado
+            // 2. Marcar en ordenesarticulos con estado 2 (listo para entregar)
             DB::table('ordenesarticulos')
                 ->where('idordenesarticulos', $repuesto->idordenesarticulos)
                 ->update([
-                    'estado' => 1,
-                    'observacion' => "Envío a provincia (grupal) - Ubicación: {$stockUbicacion->ubicacion_codigo} - Ticket: {$numeroTicket} - Transportista: {$transportista} - Placa: {$placaVehiculo}"
-                ]);
-
-            Log::info("? Repuesto procesado para envío grupal a provincia - Artículo: {$repuesto->idArticulos}, Cantidad: {$cantidadSolicitada}, Transportista: {$transportista}, Ticket: {$numeroTicket}");
-        }
-
-        DB::table('solicitudesordenes')
-            ->where('idsolicitudesordenes', $id)
-            ->update([
-                'estado' => 'aprobada',
-                'fechaaprobacion' => now(),
-                'idaprobador' => auth()->id()
-            ]);
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => "Solicitud de repuestos para provincia aprobada correctamente. Todos los repuestos preparados para envío con transportista: {$transportista}. Ticket: {$numeroTicket}"
-        ], 200, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al aceptar solicitud de repuestos para provincia (grupal): ' . $e->getMessage());
-        Log::error('Trace: ' . $e->getTraceAsString());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al aceptar la solicitud: ' . $e->getMessage()
-        ], 500, ['Content-Type' => 'application/json; charset=utf-8'], JSON_UNESCAPED_UNICODE);
-    }
-}
-
-
-
-public function marcarListoIndividual(Request $request, $id)
-{
-    try {
-        DB::beginTransaction();
-
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto')
-            ->first();
-
-        if (!$solicitud) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404);
-        }
-
-        $articuloId = (int)$request->input('articulo_id');
-        $ubicacionId = (int)$request->input('ubicacion_id');
-
-        // Verificar si ya fue marcado como listo para entregar
-        $yaMarcadoListo = DB::table('repuestos_entregas')
-            ->where('solicitud_id', $id)
-            ->where('articulo_id', $articuloId)
-            ->where('estado', 'pendiente_entrega')
-            ->exists();
-
-        if ($yaMarcadoListo) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Este repuesto ya está marcado como listo para entregar'
-            ], 400);
-        }
-
-        // Obtener información del repuesto
-        $repuesto = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad',
-                'oa.idticket',
-                'a.idArticulos',
-                'a.nombre',
-                'a.stock_total'
-            )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->where('oa.idsolicitudesordenes', $id)
-            ->where('a.idArticulos', $articuloId)
-            ->first();
-
-        if (!$repuesto) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Repuesto no encontrado en la solicitud'
-            ], 404);
-        }
-
-        // Verificar stock disponible en la ubicación
-        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
-            ->select(
-                'rua.cantidad',
-                'ru.codigo as ubicacion_codigo',
-                'r.nombre as rack_nombre',
-                'rua.cliente_general_id'
-            )
-            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-            ->where('rua.articulo_id', $articuloId)
-            ->where('rua.rack_ubicacion_id', $ubicacionId)
-            ->first();
-
-        if (!$stockUbicacion) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ubicación no encontrada para este repuesto'
-            ], 404);
-        }
-
-        if ((int)$stockUbicacion->cantidad < (int)$repuesto->cantidad) {
-            return response()->json([
-                'success' => false,
-                'message' => "Stock insuficiente en la ubicación seleccionada. Disponible: {$stockUbicacion->cantidad}, Solicitado: {$repuesto->cantidad}"
-            ], 400);
-        }
-
-        // Obtener número de ticket
-        $ticketInfo = DB::table('tickets')
-            ->select('numero_ticket')
-            ->where('idTickets', $repuesto->idticket)
-            ->first();
-        $numeroTicket = $ticketInfo->numero_ticket ?? 'N/A';
-
-        // 1. Registrar en repuestos_entregas con estado 'pendiente_entrega'
-        DB::table('repuestos_entregas')->insert([
-            'solicitud_id' => $solicitud->idsolicitudesordenes,
-            'articulo_id' => $articuloId,
-            'usuario_destino_id' => $solicitud->idTecnico,
-            'tipo_entrega' => 'tecnico',
-            'cantidad' => $repuesto->cantidad,
-            'ubicacion_utilizada' => $stockUbicacion->ubicacion_codigo,
-            'ubicacion_id' => $ubicacionId,
-            'numero_ticket' => $numeroTicket,
-            'usuario_preparo_id' => auth()->id(),
-            'estado' => 'pendiente_entrega',
-            'observaciones' => "Marcado como listo para entregar al técnico",
-            'fecha_preparacion' => now(),
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // 2. Marcar en ordenesarticulos con estado 2 (listo para entregar)
-        DB::table('ordenesarticulos')
-            ->where('idordenesarticulos', $repuesto->idordenesarticulos)
-            ->update([
-                'estado' => 2,
-                'observacion' => "Listo para entregar al técnico - Ubicación: {$stockUbicacion->ubicacion_codigo}",
-                'updated_at' => now()
-            ]);
-
-        // 3. ✅ ACTUALIZAR ESTADO DE LA SOLICITUD A "listo_para_entregar"
-        // REGLA: Si hay al menos un repuesto listo, la solicitud está "listo_para_entregar"
-        DB::table('solicitudesordenes')
-            ->where('idsolicitudesordenes', $id)
-            ->update([
-                'estado' => 'listo_para_entregar',
-                'fechaactualizacion' => now(),
-                'updated_at' => now()
-            ]);
-
-        // 4. ✅ INSERTAR EN NOTIFICACIONES_SOLICITUD
-        // Verificar si ya existe una notificación para esta solicitud
-        $notificacionExistente = DB::table('notificaciones_solicitud')
-            ->where('idSolicitudesOrdenes', $id)
-            ->first();
-
-        if ($notificacionExistente) {
-            // Si ya existe, actualizar
-            DB::table('notificaciones_solicitud')
-                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
-                ->update([
-                    'estado_web' => 1,
-                    'estado_app' => 0,
-                    'fecha' => now(),
+                    'estado' => 2,
+                    'observacion' => "Listo para entregar al técnico - Ubicación: {$stockUbicacion->ubicacion_codigo}",
                     'updated_at' => now()
                 ]);
-        } else {
-            // Si no existe, crear nueva
-            DB::table('notificaciones_solicitud')->insert([
-                'idSolicitudesOrdenes' => $id,
-                'estado_web' => 1,
-                'estado_app' => 0,
-                'fecha' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
 
-        // 5. Registrar en logs
-        Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Estado: listo_para_entregar, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
-
-        DB::commit();
-
-        return response()->json([
-            'success' => true,
-            'message' => "Repuesto marcado como LISTO PARA ENTREGAR al técnico",
-            'numero_ticket' => $numeroTicket,
-            'codigo_solicitud' => $solicitud->codigo,
-            'ubicacion' => $stockUbicacion->ubicacion_codigo,
-            'estado_solicitud' => 'listo_para_entregar',
-            'articulo_nombre' => $repuesto->nombre,
-            'cantidad' => $repuesto->cantidad,
-            'notificacion_creada' => true
-        ]);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error al marcar repuesto como listo para entregar: ' . $e->getMessage());
-        Log::error('File: ' . $e->getFile());
-        Log::error('Line: ' . $e->getLine());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
-        ], 500);
-    }
-}
-public function confirmarEntregaFisicaConFoto(Request $request, $id)
-{
-    Log::info("════════════════════════════════════════════════════════");
-    Log::info("🚀 INICIANDO confirmarEntregaFisicaConFoto (SIMPLIFICADO)");
-    Log::info("════════════════════════════════════════════════════════");
-    
-    // Log de todos los datos recibidos
-    Log::info("📦 DATOS RECIBIDOS EN REQUEST:");
-    Log::info("- Solicitud ID: " . $id);
-    Log::info("- Articulo ID: " . $request->input('articulo_id'));
-    Log::info("- Observaciones: " . $request->input('observaciones'));
-    Log::info("- Nombre Firmante: " . $request->input('nombre_firmante'));
-    Log::info("- Fecha Firma: " . $request->input('fecha_firma'));
-    Log::info("- Firma Confirmada: " . $request->input('firma_confirmada'));
-    Log::info("- Tiene archivo foto: " . ($request->hasFile('foto') ? 'SÍ' : 'NO'));
-    Log::info("User ID autenticado: " . (auth()->id() ?? 'No autenticado'));
-    
-    if ($request->hasFile('foto')) {
-        $file = $request->file('foto');
-        Log::info("📸 INFO ARCHIVO FOTO:");
-        Log::info("  - Nombre: " . $file->getClientOriginalName());
-        Log::info("  - Tamaño: " . $file->getSize() . " bytes");
-        Log::info("  - MIME: " . $file->getMimeType());
-        Log::info("  - Extensión: " . $file->getClientOriginalExtension());
-    }
-
-    try {
-        Log::info("🔍 Buscando solicitud...");
-        DB::beginTransaction();
-
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto')
-            ->first();
-
-        if (!$solicitud) {
-            Log::error("❌ Solicitud no encontrada con ID: " . $id);
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404);
-        }
-
-        Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
-
-        $articuloId = (int)$request->input('articulo_id');
-        $observacionesEntrega = $request->input('observaciones');
-        $nombreFirmante = $request->input('nombre_firmante');
-        $fechaFirma = $request->input('fecha_firma');
-        
-        // Procesar firma_confirmada correctamente
-        $firmaConfirmadaRaw = $request->input('firma_confirmada');
-        $firmaConfirmada = 0;
-        
-        if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
-            $firmaConfirmada = 1;
-        }
-
-        Log::info("📊 DATOS PROCESADOS:");
-        Log::info("- Articulo ID: " . $articuloId);
-        Log::info("- Observaciones Entrega: " . $observacionesEntrega);
-        Log::info("- Nombre Firmante: " . $nombreFirmante);
-        Log::info("- Fecha Firma: " . $fechaFirma);
-        Log::info("- Firma Confirmada (procesada): " . $firmaConfirmada);
-
-        if (!$articuloId) {
-            Log::error("❌ Articulo ID no proporcionado");
-            return response()->json([
-                'success' => false,
-                'message' => 'ID de artículo no proporcionado'
-            ], 400);
-        }
-
-        // Buscar en repuestos_entregas con estado 'pendiente_entrega'
-        Log::info("🔍 Buscando entrega pendiente...");
-        $entregaPendiente = DB::table('repuestos_entregas')
-            ->where('solicitud_id', $id)
-            ->where('articulo_id', $articuloId)
-            ->where('estado', 'pendiente_entrega')
-            ->first();
-
-        if (!$entregaPendiente) {
-            Log::error("❌ No se encontró entrega pendiente para solicitud: " . $id . ", artículo: " . $articuloId);
-            return response()->json([
-                'success' => false,
-                'message' => 'No se encontró el repuesto listo para entregar'
-            ], 404);
-        }
-
-        Log::info("✅ Entrega pendiente encontrada ID: " . $entregaPendiente->id);
-        Log::info("📋 Datos entrega pendiente:");
-        Log::info("  - Estado actual: " . $entregaPendiente->estado);
-        Log::info("  - Ubicación: " . $entregaPendiente->ubicacion_utilizada);
-        Log::info("  - Cantidad: " . $entregaPendiente->cantidad);
-
-        // ========================
-        // 1. PROCESAR LA FOTO (en LONGBLOB)
-        // ========================
-        $fotoBlob = null;
-        $tipoArchivo = null;
-        $tamanoFoto = 0;
-        
-        Log::info("🖼️ Procesando foto...");
-        if ($request->hasFile('foto')) {
-            try {
-                $file = $request->file('foto');
-                
-                // Validaciones
-                $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-                $mimeType = $file->getMimeType();
-                
-                Log::info("🔍 Validando tipo MIME: " . $mimeType);
-                if (!in_array($mimeType, $validMimeTypes)) {
-                    Log::error("❌ Tipo MIME no válido: " . $mimeType);
-                    throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
-                }
-                
-                // Tamaño máximo: 10MB
-                $maxSize = 10 * 1024 * 1024;
-                $fileSize = $file->getSize();
-                Log::info("📏 Tamaño archivo: " . $fileSize . " bytes, Máximo: " . $maxSize . " bytes");
-                
-                if ($fileSize > $maxSize) {
-                    Log::error("❌ Tamaño excedido: " . $fileSize . " > " . $maxSize);
-                    throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
-                }
-                
-                // Leer la imagen
-                Log::info("📖 Leyendo archivo...");
-                $fotoBlob = file_get_contents($file->getRealPath());
-                $tipoArchivo = $mimeType;
-                $tamanoFoto = strlen($fotoBlob);
-                
-                Log::info("✅ Foto procesada exitosamente:");
-                Log::info("  - Tamaño BLOB: " . $tamanoFoto . " bytes");
-                Log::info("  - Tipo Archivo: " . $tipoArchivo);
-                
-            } catch (\Exception $e) {
-                Log::error("❌ Error al procesar foto: " . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al procesar la foto: ' . $e->getMessage()
-                ], 400);
-            }
-        } else {
-            Log::warning("⚠️ No se recibió archivo de foto");
-        }
-
-        // ========================
-        // 2. PREPARAR DATOS PARA ACTUALIZACIÓN
-        // ========================
-        Log::info("📝 Preparando datos para actualización...");
-        
-        // Datos base para actualizar
-        $updateData = [
-            'estado' => 'entregado',
-            'usuario_entrego_id' => auth()->id(),
-            'fecha_entrega' => now(),
-            'firma_confirma' => $firmaConfirmada,
-            'observaciones_entrega' => $observacionesEntrega,
-            'updated_at' => now()
-        ];
-
-        // Agregar foto si existe
-        if ($fotoBlob) {
-            $updateData['foto_entrega'] = $fotoBlob;
-            $updateData['tipo_archivo_foto'] = $tipoArchivo;
-            Log::info("📸 Foto agregada al update");
-        }
-
-        // Actualizar observaciones generales
-        $observacionesCompletas = $entregaPendiente->observaciones . 
-            " | ✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-            " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
-            " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
-            ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
-            ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
-
-        $updateData['observaciones'] = $observacionesCompletas;
-
-        // ========================
-        // 3. EJECUTAR ACTUALIZACIÓN
-        // ========================
-        Log::info("⚡ Actualizando repuestos_entregas...");
-        
-        $affected = DB::table('repuestos_entregas')
-            ->where('id', $entregaPendiente->id)
-            ->update($updateData);
-
-        Log::info("✅ Filas afectadas: " . $affected);
-
-        if ($affected === 0) {
-            Log::error("❌ No se actualizó ninguna fila");
-            throw new \Exception("No se pudo actualizar el registro de entrega");
-        }
-
-        // ========================
-        // 4. ACTUALIZAR ORDENESARTICULOS
-        // ========================
-        Log::info("📝 Actualizando ordenesarticulos...");
-        DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('idarticulos', $articuloId)
-            ->update([
-                'estado' => 1,
-                'observacion' => "✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                    " | Ubicación: {$entregaPendiente->ubicacion_utilizada}" .
-                    " | Firmado por: {$nombreFirmante}" .
-                    " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
-                    ($fotoBlob ? " | Foto adjunta" : ""),
-                'updated_at' => now()
-            ]);
-
-        // ========================
-        // 5. ACTUALIZAR ESTADO DE LA SOLICITUD
-        // ========================
-        Log::info("🔄 Actualizando estado de solicitud...");
-
-        // Verificar si existe al menos un repuesto entregado
-        $existeEntrega = DB::table('repuestos_entregas')
-            ->where('solicitud_id', $id)
-            ->where('estado', 'entregado')
-            ->exists();
-
-        Log::info("📊 ¿Existe al menos un repuesto entregado?: " . ($existeEntrega ? 'SÍ' : 'NO'));
-
-        if ($existeEntrega) {
-            // Si existe al menos UN repuesto entregado, estado = "entregado"
-            Log::info("✅ Al menos un repuesto entregado. Estado actualizado a 'entregado'");
-            
+            // 3. ✅ ACTUALIZAR ESTADO DE LA SOLICITUD A "listo_para_entregar"
+            // REGLA: Si hay al menos un repuesto listo, la solicitud está "listo_para_entregar"
             DB::table('solicitudesordenes')
                 ->where('idsolicitudesordenes', $id)
                 ->update([
-                    'estado' => 'entregado',
+                    'estado' => 'listo_para_entregar',
                     'fechaactualizacion' => now(),
                     'updated_at' => now()
                 ]);
-        } else {
-            // Ningún repuesto entregado, mantener estado actual
-            Log::info("ℹ️ Ningún repuesto entregado. Estado no cambia.");
-            
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'fechaactualizacion' => now(),
-                    'updated_at' => now()
-                ]);
-        }
 
-        // ========================
-        // 6. NOTIFICACIONES
-        // ========================
-        Log::info("🔔 Procesando notificaciones...");
-        $notificacionExistente = DB::table('notificaciones_solicitud')
-            ->where('idSolicitudesOrdenes', $id)
-            ->first();
-
-        if ($notificacionExistente) {
-            Log::info("📝 Actualizando notificación existente...");
-            DB::table('notificaciones_solicitud')
-                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
-                ->update([
-                    'estado_web' => 1,
-                    'estado_app' => 0,
-                    'fecha' => now(),
-                    'updated_at' => now()
-                ]);
-        } else {
-            Log::info("🆕 Creando nueva notificación...");
-            DB::table('notificaciones_solicitud')->insert([
-                'idSolicitudesOrdenes' => $id,
-                'estado_web' => 1,
-                'estado_app' => 0,
-                'fecha' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-
-        DB::commit();
-        
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("🎉 confirmarEntregaFisicaConFoto COMPLETADO EXITOSAMENTE");
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("📋 RESUMEN:");
-        Log::info("  - Solicitud: " . $solicitud->codigo);
-        Log::info("  - Artículo ID: " . $articuloId);
-        Log::info("  - Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO'));
-        Log::info("  - Foto guardada: " . ($fotoBlob ? 'SÍ' : 'NO'));
-        Log::info("  - Estado solicitud: " . ($existeEntrega ? 'entregado' : 'sin cambios'));
-        Log::info("════════════════════════════════════════════════════════");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Entrega confirmada exitosamente',
-            'codigo_solicitud' => $solicitud->codigo,
-            'articulo_id' => $articuloId,
-            'foto_guardada' => $fotoBlob ? true : false,
-            'firma_confirmada' => (bool)$firmaConfirmada,
-            'observaciones_entrega' => $observacionesEntrega,
-            'estado_solicitud' => $existeEntrega ? 'entregado' : 'sin cambios'
-        ]);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error("════════════════════════════════════════════════════════");
-        Log::error("💥 ERROR en confirmarEntregaFisicaConFoto");
-        Log::error("════════════════════════════════════════════════════════");
-        Log::error('Mensaje: ' . $e->getMessage());
-        Log::error('Archivo: ' . $e->getFile());
-        Log::error('Línea: ' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al confirmar la entrega: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-/**
- * Confirmar entrega de repuesto cedido con foto
- */
-public function confirmarEntregaCedidaConFoto(Request $request, $id)
-{
-    Log::info("════════════════════════════════════════════════════════");
-    Log::info("📦 INICIANDO confirmarEntregaCedidaConFoto");
-    Log::info("════════════════════════════════════════════════════════");
-    
-    Log::info("📦 DATOS RECIBIDOS:");
-    Log::info("- Solicitud ID: " . $id);
-    Log::info("- Articulo ID: " . $request->input('articulo_id'));
-    Log::info("- Entrega ID: " . $request->input('entrega_id'));
-    Log::info("- Todos los datos: " . json_encode($request->all()));
-
-    try {
-        DB::beginTransaction();
-
-        $solicitud = DB::table('solicitudesordenes')
-            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-            ->where('idsolicitudesordenes', $id)
-            ->where('tipoorden', 'solicitud_repuesto')
-            ->first();
-
-        if (!$solicitud) {
-            Log::error("❌ Solicitud no encontrada");
-            return response()->json([
-                'success' => false,
-                'message' => 'Solicitud no encontrada'
-            ], 404);
-        }
-
-        Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
-
-        $articuloId = (int)$request->input('articulo_id');
-        $entregaId = (int)$request->input('entrega_id');
-        $observacionesEntrega = $request->input('observaciones');
-        $nombreFirmante = $request->input('nombre_firmante');
-        $fechaFirma = $request->input('fecha_firma');
-        
-        // Procesar firma_confirmada
-        $firmaConfirmada = 0;
-        $firmaConfirmadaRaw = $request->input('firma_confirmada');
-        if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
-            $firmaConfirmada = 1;
-        }
-
-        // ==========================================
-        // 1. VALIDAR ENTREGA CEDIDA
-        // ==========================================
-        Log::info("🔍 Validando entrega cedida...");
-        $entregaCedida = DB::table('repuestos_entregas as re')
-            ->select(
-                're.id',
-                're.solicitud_id',
-                're.articulo_id',
-                're.cantidad',
-                're.ubicacion_utilizada',
-                're.entrega_origen_id',
-                're.estado',
-                're.observaciones',
-                're.numero_ticket',
-                'so.codigo as codigo_solicitud',
-                'a.nombre as articulo_nombre'
-            )
-            ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
-            ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
-            ->where('re.id', $entregaId)
-            ->where('re.solicitud_id', $id)
-            ->where('re.articulo_id', $articuloId)
-            ->where('re.estado', 'listo_para_ceder')
-            ->first();
-
-        if (!$entregaCedida) {
-            Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
-            return response()->json([
-                'success' => false,
-                'message' => 'Entrega cedida no encontrada o no está disponible'
-            ], 404);
-        }
-
-        Log::info("✅ Entrega cedida validada:");
-        Log::info("   - ID: " . $entregaCedida->id);
-        Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
-        Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
-
-        // ==========================================
-        // 2. PROCESAR FOTO
-        // ==========================================
-        $fotoBlob = null;
-        $tipoArchivo = null;
-        
-        Log::info("🖼️ Procesando foto...");
-        if ($request->hasFile('foto')) {
-            try {
-                $file = $request->file('foto');
-                
-                // Validaciones
-                $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-                $mimeType = $file->getMimeType();
-                
-                if (!in_array($mimeType, $validMimeTypes)) {
-                    throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
-                }
-                
-                // Tamaño máximo: 10MB
-                $maxSize = 10 * 1024 * 1024;
-                $fileSize = $file->getSize();
-                
-                if ($fileSize > $maxSize) {
-                    throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
-                }
-                
-                // Leer la imagen
-                $fotoBlob = file_get_contents($file->getRealPath());
-                $tipoArchivo = $mimeType;
-                
-                Log::info("✅ Foto procesada exitosamente");
-                
-            } catch (\Exception $e) {
-                Log::error("❌ Error al procesar foto: " . $e->getMessage());
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al procesar la foto: ' . $e->getMessage()
-                ], 400);
-            }
-        }
-
-        // ==========================================
-        // 3. ACTUALIZAR ENTREGA CEDIDA
-        // ==========================================
-        Log::info("🔄 Actualizando entrega cedida...");
-        
-        // Preparar datos de actualización
-        $updateData = [
-            'estado' => 'entregado',
-            'usuario_entrego_id' => auth()->id(),
-            'fecha_entrega' => now(),
-            'firma_confirma' => $firmaConfirmada,
-            'observaciones_entrega' => $observacionesEntrega,
-            'updated_at' => now()
-        ];
-
-        // Agregar foto si existe
-        if ($fotoBlob) {
-            $updateData['foto_entrega'] = $fotoBlob;
-            $updateData['tipo_archivo_foto'] = $tipoArchivo;
-        }
-
-        // Actualizar observaciones generales
-        $observacionesCompletas = $entregaCedida->observaciones . 
-            " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-            " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
-            " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
-            ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
-            ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
-
-        $updateData['observaciones'] = $observacionesCompletas;
-
-        // Ejecutar actualización
-        $affected = DB::table('repuestos_entregas')
-            ->where('id', $entregaCedida->id)
-            ->update($updateData);
-
-        if ($affected === 0) {
-            throw new \Exception("No se pudo actualizar el registro de entrega cedida");
-        }
-
-        Log::info("✅ Entrega cedida actualizada exitosamente");
-
-        // ==========================================
-        // 4. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
-        // ==========================================
-        if ($entregaCedida->entrega_origen_id) {
-            Log::info("🔄 Actualizando entrega origen...");
-            DB::table('repuestos_entregas')
-                ->where('id', $entregaCedida->entrega_origen_id)
-                ->update([
-                    'observaciones' => DB::raw("CONCAT(observaciones, ' | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s') . "')"),
-                    'updated_at' => now()
-                ]);
-        }
-
-        // ==========================================
-        // 5. ACTUALIZAR ORDENESARTICULOS
-        // ==========================================
-        Log::info("📝 Actualizando ordenesarticulos...");
-        DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('idarticulos', $articuloId)
-            ->update([
-                'estado' => 1,
-                'observacion' => "✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                    " | Ubicación: {$entregaCedida->ubicacion_utilizada}" .
-                    " | Firmado por: {$nombreFirmante}" .
-                    " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
-                    ($fotoBlob ? " | Foto adjunta" : ""),
-                'updated_at' => now()
-            ]);
-
-        // ==========================================
-        // 6. ACTUALIZAR ESTADO SOLICITUD
-        // ==========================================
-        Log::info("🔄 Actualizando estado de solicitud...");
-        
-        $totalRepuestos = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->count();
-            
-        $repuestosEntregados = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('estado', 1)
-            ->count();
-
-        Log::info("📊 Estado de repuestos:");
-        Log::info("   - Total: " . $totalRepuestos);
-        Log::info("   - Entregados: " . $repuestosEntregados);
-
-        $nuevoEstado = 'parcial_listo';
-        if ($repuestosEntregados == $totalRepuestos) {
-            $nuevoEstado = 'entregado';
-        }
-
-        DB::table('solicitudesordenes')
-            ->where('idsolicitudesordenes', $id)
-            ->update([
-                'estado' => $nuevoEstado,
-                'fechaactualizacion' => now(),
-                'updated_at' => now()
-            ]);
-
-        Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
-
-        // ==========================================
-        // 7. NOTIFICACIONES
-        // ==========================================
-        Log::info("🔔 Procesando notificaciones...");
-        $notificacionExistente = DB::table('notificaciones_solicitud')
-            ->where('idsolicitudesordenes', $id)
-            ->first();
-
-        if ($notificacionExistente) {
-            DB::table('notificaciones_solicitud')
-                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
-                ->update([
-                    'estado_web' => 1,
-                    'estado_app' => 0,
-                    'fecha' => now(),
-                    'updated_at' => now()
-                ]);
-        } else {
-            DB::table('notificaciones_solicitud')->insert([
-                'idsolicitudesordenes' => $id,
-                'estado_web' => 1,
-                'estado_app' => 0,
-                'fecha' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
-        }
-
-        DB::commit();
-
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("✅ confirmarEntregaCedidaConFoto COMPLETADO EXITOSAMENTE");
-        Log::info("════════════════════════════════════════════════════════");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Entrega de repuesto cedido confirmada exitosamente',
-            'codigo_solicitud' => $solicitud->codigo,
-            'articulo_nombre' => $entregaCedida->articulo_nombre,
-            'estado_solicitud' => $nuevoEstado,
-            'repuestos_entregados' => $repuestosEntregados,
-            'repuestos_totales' => $totalRepuestos,
-            'foto_guardada' => $fotoBlob ? true : false,
-            'firma_confirmada' => (bool)$firmaConfirmada
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error("💥 ERROR en confirmarEntregaCedidaConFoto: " . $e->getMessage());
-        Log::error("Trace: " . $e->getTraceAsString());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al confirmar entrega cedida: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-public function obtenerInfoEntrega($solicitudId, $articuloId)
-{
-    try {
-        Log::info("🔍 Obteniendo info de entrega", [
-            'solicitud_id' => $solicitudId,
-            'articulo_id' => $articuloId
-        ]);
-
-        // Buscar información de la entrega
-        $entrega = DB::table('repuestos_entregas')
-            ->select([
-                'estado',
-                'fecha_entrega',
-                'usuario_entrego_id',
-                'firma_confirma',
-                'observaciones_entrega',
-                'observaciones',
-                'foto_entrega',
-                'tipo_archivo_foto',
-                'created_at',
-                'updated_at'
-            ])
-            ->where('solicitud_id', $solicitudId)
-            ->where('articulo_id', $articuloId)
-            ->where('estado', 'entregado')
-            ->first();
-
-        if (!$entrega) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No se encontró información de entrega'
-            ], 404);
-        }
-
-        // Obtener nombre del usuario que entregó
-        $usuarioEntrego = null;
-        if ($entrega->usuario_entrego_id) {
-            $usuarioEntrego = DB::table('users')
-                ->select('name')
-                ->where('id', $entrega->usuario_entrego_id)
+            // 4. ✅ INSERTAR EN NOTIFICACIONES_SOLICITUD
+            // Verificar si ya existe una notificación para esta solicitud
+            $notificacionExistente = DB::table('notificaciones_solicitud')
+                ->where('idSolicitudesOrdenes', $id)
                 ->first();
+
+            if ($notificacionExistente) {
+                // Si ya existe, actualizar
+                DB::table('notificaciones_solicitud')
+                    ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
+                    ->update([
+                        'estado_web' => 1,
+                        'estado_app' => 0,
+                        'fecha' => now(),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // Si no existe, crear nueva
+                DB::table('notificaciones_solicitud')->insert([
+                    'idSolicitudesOrdenes' => $id,
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            // 5. Registrar en logs
+            Log::info("✅ Repuesto marcado como listo para entregar - Solicitud: {$solicitud->codigo}, Estado: listo_para_entregar, Artículo: {$articuloId}, Cantidad: {$repuesto->cantidad}, Ubicación: {$stockUbicacion->ubicacion_codigo}");
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Repuesto marcado como LISTO PARA ENTREGAR al técnico",
+                'numero_ticket' => $numeroTicket,
+                'codigo_solicitud' => $solicitud->codigo,
+                'ubicacion' => $stockUbicacion->ubicacion_codigo,
+                'estado_solicitud' => 'listo_para_entregar',
+                'articulo_nombre' => $repuesto->nombre,
+                'cantidad' => $repuesto->cantidad,
+                'notificacion_creada' => true
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al marcar repuesto como listo para entregar: ' . $e->getMessage());
+            Log::error('File: ' . $e->getFile());
+            Log::error('Line: ' . $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al marcar el repuesto: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Preparar datos de respuesta
-        $data = [
-            'estado' => $entrega->estado,
-            'fecha_entrega' => $entrega->fecha_entrega 
-                ? \Carbon\Carbon::parse($entrega->fecha_entrega)->format('d/m/Y H:i:s')
-                : null,
-            'usuario_entrego' => $usuarioEntrego ? $usuarioEntrego->name : null,
-            'firma_confirma' => (bool)$entrega->firma_confirma,
-            'observaciones_entrega' => $entrega->observaciones_entrega,
-            'observaciones' => $entrega->observaciones,
-            'fecha_creacion' => \Carbon\Carbon::parse($entrega->created_at)->format('d/m/Y H:i:s'),
-            'fecha_actualizacion' => \Carbon\Carbon::parse($entrega->updated_at)->format('d/m/Y H:i:s'),
-        ];
-
-        // Incluir foto en base64 si existe
-        if ($entrega->foto_entrega && $entrega->tipo_archivo_foto) {
-            // Convertir BLOB a base64
-            $fotoBase64 = base64_encode($entrega->foto_entrega);
-            $data['foto_entrega'] = $fotoBase64;
-            $data['tipo_archivo_foto'] = $entrega->tipo_archivo_foto;
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $data
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error al obtener info de entrega:', [
-            'error' => $e->getMessage(),
-            'solicitud' => $solicitudId,
-            'articulo' => $articuloId
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al obtener información: ' . $e->getMessage()
-        ], 500);
     }
-}
+    public function confirmarEntregaFisicaConFoto(Request $request, $id)
+    {
+        Log::info("════════════════════════════════════════════════════════");
+        Log::info("🚀 INICIANDO confirmarEntregaFisicaConFoto (SIMPLIFICADO)");
+        Log::info("════════════════════════════════════════════════════════");
 
-/**
- * Método auxiliar para comprimir imágenes JPEG (si la necesitas)
- */
-private function comprimirImagenJPEG($path, $calidad = 80)
-{
-    try {
-        Log::info("🖼️ Comprimiendo imagen JPEG...");
-        Log::info("  - Ruta: " . $path);
-        Log::info("  - Calidad: " . $calidad);
-        
-        $image = imagecreatefromjpeg($path);
-        if (!$image) {
-            Log::warning("⚠️ No se pudo crear imagen desde JPEG, devolviendo original");
+        // Log de todos los datos recibidos
+        Log::info("📦 DATOS RECIBIDOS EN REQUEST:");
+        Log::info("- Solicitud ID: " . $id);
+        Log::info("- Articulo ID: " . $request->input('articulo_id'));
+        Log::info("- Observaciones: " . $request->input('observaciones'));
+        Log::info("- Nombre Firmante: " . $request->input('nombre_firmante'));
+        Log::info("- Fecha Firma: " . $request->input('fecha_firma'));
+        Log::info("- Firma Confirmada: " . $request->input('firma_confirmada'));
+        Log::info("- Tiene archivo foto: " . ($request->hasFile('foto') ? 'SÍ' : 'NO'));
+        Log::info("User ID autenticado: " . (auth()->id() ?? 'No autenticado'));
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            Log::info("📸 INFO ARCHIVO FOTO:");
+            Log::info("  - Nombre: " . $file->getClientOriginalName());
+            Log::info("  - Tamaño: " . $file->getSize() . " bytes");
+            Log::info("  - MIME: " . $file->getMimeType());
+            Log::info("  - Extensión: " . $file->getClientOriginalExtension());
+        }
+
+        try {
+            Log::info("🔍 Buscando solicitud...");
+            DB::beginTransaction();
+
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto')
+                ->first();
+
+            if (!$solicitud) {
+                Log::error("❌ Solicitud no encontrada con ID: " . $id);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404);
+            }
+
+            Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
+
+            $articuloId = (int)$request->input('articulo_id');
+            $observacionesEntrega = $request->input('observaciones');
+            $nombreFirmante = $request->input('nombre_firmante');
+            $fechaFirma = $request->input('fecha_firma');
+
+            // Procesar firma_confirmada correctamente
+            $firmaConfirmadaRaw = $request->input('firma_confirmada');
+            $firmaConfirmada = 0;
+
+            if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
+                $firmaConfirmada = 1;
+            }
+
+            Log::info("📊 DATOS PROCESADOS:");
+            Log::info("- Articulo ID: " . $articuloId);
+            Log::info("- Observaciones Entrega: " . $observacionesEntrega);
+            Log::info("- Nombre Firmante: " . $nombreFirmante);
+            Log::info("- Fecha Firma: " . $fechaFirma);
+            Log::info("- Firma Confirmada (procesada): " . $firmaConfirmada);
+
+            if (!$articuloId) {
+                Log::error("❌ Articulo ID no proporcionado");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID de artículo no proporcionado'
+                ], 400);
+            }
+
+            // Buscar en repuestos_entregas con estado 'pendiente_entrega'
+            Log::info("🔍 Buscando entrega pendiente...");
+            $entregaPendiente = DB::table('repuestos_entregas')
+                ->where('solicitud_id', $id)
+                ->where('articulo_id', $articuloId)
+                ->where('estado', 'pendiente_entrega')
+                ->first();
+
+            if (!$entregaPendiente) {
+                Log::error("❌ No se encontró entrega pendiente para solicitud: " . $id . ", artículo: " . $articuloId);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró el repuesto listo para entregar'
+                ], 404);
+            }
+
+            Log::info("✅ Entrega pendiente encontrada ID: " . $entregaPendiente->id);
+            Log::info("📋 Datos entrega pendiente:");
+            Log::info("  - Estado actual: " . $entregaPendiente->estado);
+            Log::info("  - Ubicación: " . $entregaPendiente->ubicacion_utilizada);
+            Log::info("  - Cantidad: " . $entregaPendiente->cantidad);
+
+            // ========================
+            // 1. PROCESAR LA FOTO (en LONGBLOB)
+            // ========================
+            $fotoBlob = null;
+            $tipoArchivo = null;
+            $tamanoFoto = 0;
+
+            Log::info("🖼️ Procesando foto...");
+            if ($request->hasFile('foto')) {
+                try {
+                    $file = $request->file('foto');
+
+                    // Validaciones
+                    $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+                    $mimeType = $file->getMimeType();
+
+                    Log::info("🔍 Validando tipo MIME: " . $mimeType);
+                    if (!in_array($mimeType, $validMimeTypes)) {
+                        Log::error("❌ Tipo MIME no válido: " . $mimeType);
+                        throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
+                    }
+
+                    // Tamaño máximo: 10MB
+                    $maxSize = 10 * 1024 * 1024;
+                    $fileSize = $file->getSize();
+                    Log::info("📏 Tamaño archivo: " . $fileSize . " bytes, Máximo: " . $maxSize . " bytes");
+
+                    if ($fileSize > $maxSize) {
+                        Log::error("❌ Tamaño excedido: " . $fileSize . " > " . $maxSize);
+                        throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
+                    }
+
+                    // Leer la imagen
+                    Log::info("📖 Leyendo archivo...");
+                    $fotoBlob = file_get_contents($file->getRealPath());
+                    $tipoArchivo = $mimeType;
+                    $tamanoFoto = strlen($fotoBlob);
+
+                    Log::info("✅ Foto procesada exitosamente:");
+                    Log::info("  - Tamaño BLOB: " . $tamanoFoto . " bytes");
+                    Log::info("  - Tipo Archivo: " . $tipoArchivo);
+                } catch (\Exception $e) {
+                    Log::error("❌ Error al procesar foto: " . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al procesar la foto: ' . $e->getMessage()
+                    ], 400);
+                }
+            } else {
+                Log::warning("⚠️ No se recibió archivo de foto");
+            }
+
+            // ========================
+            // 2. PREPARAR DATOS PARA ACTUALIZACIÓN
+            // ========================
+            Log::info("📝 Preparando datos para actualización...");
+
+            // Datos base para actualizar
+            $updateData = [
+                'estado' => 'entregado',
+                'usuario_entrego_id' => auth()->id(),
+                'fecha_entrega' => now(),
+                'firma_confirma' => $firmaConfirmada,
+                'observaciones_entrega' => $observacionesEntrega,
+                'updated_at' => now()
+            ];
+
+            // Agregar foto si existe
+            if ($fotoBlob) {
+                $updateData['foto_entrega'] = $fotoBlob;
+                $updateData['tipo_archivo_foto'] = $tipoArchivo;
+                Log::info("📸 Foto agregada al update");
+            }
+
+            // Actualizar observaciones generales
+            $observacionesCompletas = $entregaPendiente->observaciones .
+                " | ✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+                " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
+                " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
+                ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
+                ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
+
+            $updateData['observaciones'] = $observacionesCompletas;
+
+            // ========================
+            // 3. EJECUTAR ACTUALIZACIÓN
+            // ========================
+            Log::info("⚡ Actualizando repuestos_entregas...");
+
+            $affected = DB::table('repuestos_entregas')
+                ->where('id', $entregaPendiente->id)
+                ->update($updateData);
+
+            Log::info("✅ Filas afectadas: " . $affected);
+
+            if ($affected === 0) {
+                Log::error("❌ No se actualizó ninguna fila");
+                throw new \Exception("No se pudo actualizar el registro de entrega");
+            }
+
+            // ========================
+            // 4. ACTUALIZAR ORDENESARTICULOS
+            // ========================
+            Log::info("📝 Actualizando ordenesarticulos...");
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('idarticulos', $articuloId)
+                ->update([
+                    'estado' => 1,
+                    'observacion' => "✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+                        " | Ubicación: {$entregaPendiente->ubicacion_utilizada}" .
+                        " | Firmado por: {$nombreFirmante}" .
+                        " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
+                        ($fotoBlob ? " | Foto adjunta" : ""),
+                    'updated_at' => now()
+                ]);
+
+            // ========================
+            // 5. ACTUALIZAR ESTADO DE LA SOLICITUD
+            // ========================
+            Log::info("🔄 Actualizando estado de solicitud...");
+
+            // Verificar si existe al menos un repuesto entregado
+            $existeEntrega = DB::table('repuestos_entregas')
+                ->where('solicitud_id', $id)
+                ->where('estado', 'entregado')
+                ->exists();
+
+            Log::info("📊 ¿Existe al menos un repuesto entregado?: " . ($existeEntrega ? 'SÍ' : 'NO'));
+
+            if ($existeEntrega) {
+                // Si existe al menos UN repuesto entregado, estado = "entregado"
+                Log::info("✅ Al menos un repuesto entregado. Estado actualizado a 'entregado'");
+
+                DB::table('solicitudesordenes')
+                    ->where('idsolicitudesordenes', $id)
+                    ->update([
+                        'estado' => 'entregado',
+                        'fechaactualizacion' => now(),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                // Ningún repuesto entregado, mantener estado actual
+                Log::info("ℹ️ Ningún repuesto entregado. Estado no cambia.");
+
+                DB::table('solicitudesordenes')
+                    ->where('idsolicitudesordenes', $id)
+                    ->update([
+                        'fechaactualizacion' => now(),
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // ========================
+            // 6. NOTIFICACIONES
+            // ========================
+            Log::info("🔔 Procesando notificaciones...");
+            $notificacionExistente = DB::table('notificaciones_solicitud')
+                ->where('idSolicitudesOrdenes', $id)
+                ->first();
+
+            if ($notificacionExistente) {
+                Log::info("📝 Actualizando notificación existente...");
+                DB::table('notificaciones_solicitud')
+                    ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
+                    ->update([
+                        'estado_web' => 1,
+                        'estado_app' => 0,
+                        'fecha' => now(),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                Log::info("🆕 Creando nueva notificación...");
+                DB::table('notificaciones_solicitud')->insert([
+                    'idSolicitudesOrdenes' => $id,
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            Log::info("════════════════════════════════════════════════════════");
+            Log::info("🎉 confirmarEntregaFisicaConFoto COMPLETADO EXITOSAMENTE");
+            Log::info("════════════════════════════════════════════════════════");
+            Log::info("📋 RESUMEN:");
+            Log::info("  - Solicitud: " . $solicitud->codigo);
+            Log::info("  - Artículo ID: " . $articuloId);
+            Log::info("  - Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO'));
+            Log::info("  - Foto guardada: " . ($fotoBlob ? 'SÍ' : 'NO'));
+            Log::info("  - Estado solicitud: " . ($existeEntrega ? 'entregado' : 'sin cambios'));
+            Log::info("════════════════════════════════════════════════════════");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Entrega confirmada exitosamente',
+                'codigo_solicitud' => $solicitud->codigo,
+                'articulo_id' => $articuloId,
+                'foto_guardada' => $fotoBlob ? true : false,
+                'firma_confirmada' => (bool)$firmaConfirmada,
+                'observaciones_entrega' => $observacionesEntrega,
+                'estado_solicitud' => $existeEntrega ? 'entregado' : 'sin cambios'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("════════════════════════════════════════════════════════");
+            Log::error("💥 ERROR en confirmarEntregaFisicaConFoto");
+            Log::error("════════════════════════════════════════════════════════");
+            Log::error('Mensaje: ' . $e->getMessage());
+            Log::error('Archivo: ' . $e->getFile());
+            Log::error('Línea: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al confirmar la entrega: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Confirmar entrega de repuesto cedido con foto
+     */
+    public function confirmarEntregaCedidaConFoto(Request $request, $id)
+    {
+        Log::info("════════════════════════════════════════════════════════");
+        Log::info("📦 INICIANDO confirmarEntregaCedidaConFoto");
+        Log::info("════════════════════════════════════════════════════════");
+
+        Log::info("📦 DATOS RECIBIDOS:");
+        Log::info("- Solicitud ID: " . $id);
+        Log::info("- Articulo ID: " . $request->input('articulo_id'));
+        Log::info("- Entrega ID: " . $request->input('entrega_id'));
+        Log::info("- Todos los datos: " . json_encode($request->all()));
+
+        try {
+            DB::beginTransaction();
+
+            $solicitud = DB::table('solicitudesordenes')
+                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+                ->where('idsolicitudesordenes', $id)
+                ->where('tipoorden', 'solicitud_repuesto')
+                ->first();
+
+            if (!$solicitud) {
+                Log::error("❌ Solicitud no encontrada");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Solicitud no encontrada'
+                ], 404);
+            }
+
+            Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
+
+            $articuloId = (int)$request->input('articulo_id');
+            $entregaId = (int)$request->input('entrega_id');
+            $observacionesEntrega = $request->input('observaciones');
+            $nombreFirmante = $request->input('nombre_firmante');
+            $fechaFirma = $request->input('fecha_firma');
+
+            // Procesar firma_confirmada
+            $firmaConfirmada = 0;
+            $firmaConfirmadaRaw = $request->input('firma_confirmada');
+            if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
+                $firmaConfirmada = 1;
+            }
+
+            // ==========================================
+            // 1. VALIDAR ENTREGA CEDIDA
+            // ==========================================
+            Log::info("🔍 Validando entrega cedida...");
+            $entregaCedida = DB::table('repuestos_entregas as re')
+                ->select(
+                    're.id',
+                    're.solicitud_id',
+                    're.articulo_id',
+                    're.cantidad',
+                    're.ubicacion_utilizada',
+                    're.entrega_origen_id',
+                    're.estado',
+                    're.observaciones',
+                    're.numero_ticket',
+                    'so.codigo as codigo_solicitud',
+                    'a.nombre as articulo_nombre'
+                )
+                ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
+                ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+                ->where('re.id', $entregaId)
+                ->where('re.solicitud_id', $id)
+                ->where('re.articulo_id', $articuloId)
+                ->where('re.estado', 'listo_para_ceder')
+                ->first();
+
+            if (!$entregaCedida) {
+                Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Entrega cedida no encontrada o no está disponible'
+                ], 404);
+            }
+
+            Log::info("✅ Entrega cedida validada:");
+            Log::info("   - ID: " . $entregaCedida->id);
+            Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
+            Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
+
+            // ==========================================
+            // 2. PROCESAR FOTO
+            // ==========================================
+            $fotoBlob = null;
+            $tipoArchivo = null;
+
+            Log::info("🖼️ Procesando foto...");
+            if ($request->hasFile('foto')) {
+                try {
+                    $file = $request->file('foto');
+
+                    // Validaciones
+                    $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+                    $mimeType = $file->getMimeType();
+
+                    if (!in_array($mimeType, $validMimeTypes)) {
+                        throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
+                    }
+
+                    // Tamaño máximo: 10MB
+                    $maxSize = 10 * 1024 * 1024;
+                    $fileSize = $file->getSize();
+
+                    if ($fileSize > $maxSize) {
+                        throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
+                    }
+
+                    // Leer la imagen
+                    $fotoBlob = file_get_contents($file->getRealPath());
+                    $tipoArchivo = $mimeType;
+
+                    Log::info("✅ Foto procesada exitosamente");
+                } catch (\Exception $e) {
+                    Log::error("❌ Error al procesar foto: " . $e->getMessage());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error al procesar la foto: ' . $e->getMessage()
+                    ], 400);
+                }
+            }
+
+            // ==========================================
+            // 3. ACTUALIZAR ENTREGA CEDIDA
+            // ==========================================
+            Log::info("🔄 Actualizando entrega cedida...");
+
+            // Preparar datos de actualización
+            $updateData = [
+                'estado' => 'entregado',
+                'usuario_entrego_id' => auth()->id(),
+                'fecha_entrega' => now(),
+                'firma_confirma' => $firmaConfirmada,
+                'observaciones_entrega' => $observacionesEntrega,
+                'updated_at' => now()
+            ];
+
+            // Agregar foto si existe
+            if ($fotoBlob) {
+                $updateData['foto_entrega'] = $fotoBlob;
+                $updateData['tipo_archivo_foto'] = $tipoArchivo;
+            }
+
+            // Actualizar observaciones generales
+            $observacionesCompletas = $entregaCedida->observaciones .
+                " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+                " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
+                " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
+                ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
+                ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
+
+            $updateData['observaciones'] = $observacionesCompletas;
+
+            // Ejecutar actualización
+            $affected = DB::table('repuestos_entregas')
+                ->where('id', $entregaCedida->id)
+                ->update($updateData);
+
+            if ($affected === 0) {
+                throw new \Exception("No se pudo actualizar el registro de entrega cedida");
+            }
+
+            Log::info("✅ Entrega cedida actualizada exitosamente");
+
+            // ==========================================
+            // 4. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
+            // ==========================================
+            if ($entregaCedida->entrega_origen_id) {
+                Log::info("🔄 Actualizando entrega origen...");
+                DB::table('repuestos_entregas')
+                    ->where('id', $entregaCedida->entrega_origen_id)
+                    ->update([
+                        'observaciones' => DB::raw("CONCAT(observaciones, ' | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s') . "')"),
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // ==========================================
+            // 5. ACTUALIZAR ORDENESARTICULOS
+            // ==========================================
+            Log::info("📝 Actualizando ordenesarticulos...");
+            DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('idarticulos', $articuloId)
+                ->update([
+                    'estado' => 1,
+                    'observacion' => "✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+                        " | Ubicación: {$entregaCedida->ubicacion_utilizada}" .
+                        " | Firmado por: {$nombreFirmante}" .
+                        " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
+                        ($fotoBlob ? " | Foto adjunta" : ""),
+                    'updated_at' => now()
+                ]);
+
+            // ==========================================
+            // 6. ACTUALIZAR ESTADO SOLICITUD
+            // ==========================================
+            Log::info("🔄 Actualizando estado de solicitud...");
+
+            $totalRepuestos = DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->count();
+
+            $repuestosEntregados = DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('estado', 1)
+                ->count();
+
+            Log::info("📊 Estado de repuestos:");
+            Log::info("   - Total: " . $totalRepuestos);
+            Log::info("   - Entregados: " . $repuestosEntregados);
+
+            $nuevoEstado = 'parcial_listo';
+            if ($repuestosEntregados == $totalRepuestos) {
+                $nuevoEstado = 'entregado';
+            }
+
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => $nuevoEstado,
+                    'fechaactualizacion' => now(),
+                    'updated_at' => now()
+                ]);
+
+            Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
+
+            // ==========================================
+            // 7. NOTIFICACIONES
+            // ==========================================
+            Log::info("🔔 Procesando notificaciones...");
+            $notificacionExistente = DB::table('notificaciones_solicitud')
+                ->where('idsolicitudesordenes', $id)
+                ->first();
+
+            if ($notificacionExistente) {
+                DB::table('notificaciones_solicitud')
+                    ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
+                    ->update([
+                        'estado_web' => 1,
+                        'estado_app' => 0,
+                        'fecha' => now(),
+                        'updated_at' => now()
+                    ]);
+            } else {
+                DB::table('notificaciones_solicitud')->insert([
+                    'idsolicitudesordenes' => $id,
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            Log::info("════════════════════════════════════════════════════════");
+            Log::info("✅ confirmarEntregaCedidaConFoto COMPLETADO EXITOSAMENTE");
+            Log::info("════════════════════════════════════════════════════════");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Entrega de repuesto cedido confirmada exitosamente',
+                'codigo_solicitud' => $solicitud->codigo,
+                'articulo_nombre' => $entregaCedida->articulo_nombre,
+                'estado_solicitud' => $nuevoEstado,
+                'repuestos_entregados' => $repuestosEntregados,
+                'repuestos_totales' => $totalRepuestos,
+                'foto_guardada' => $fotoBlob ? true : false,
+                'firma_confirmada' => (bool)$firmaConfirmada
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("💥 ERROR en confirmarEntregaCedidaConFoto: " . $e->getMessage());
+            Log::error("Trace: " . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al confirmar entrega cedida: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function obtenerInfoEntrega($solicitudId, $articuloId)
+    {
+        try {
+            Log::info("🔍 Obteniendo info de entrega", [
+                'solicitud_id' => $solicitudId,
+                'articulo_id' => $articuloId
+            ]);
+
+            // Buscar información de la entrega
+            $entrega = DB::table('repuestos_entregas')
+                ->select([
+                    'estado',
+                    'fecha_entrega',
+                    'usuario_entrego_id',
+                    'firma_confirma',
+                    'observaciones_entrega',
+                    'observaciones',
+                    'foto_entrega',
+                    'tipo_archivo_foto',
+                    'created_at',
+                    'updated_at'
+                ])
+                ->where('solicitud_id', $solicitudId)
+                ->where('articulo_id', $articuloId)
+                ->where('estado', 'entregado')
+                ->first();
+
+            if (!$entrega) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se encontró información de entrega'
+                ], 404);
+            }
+
+            // Obtener nombre del usuario que entregó
+            $usuarioEntrego = null;
+            if ($entrega->usuario_entrego_id) {
+                $usuarioEntrego = DB::table('users')
+                    ->select('name')
+                    ->where('id', $entrega->usuario_entrego_id)
+                    ->first();
+            }
+
+            // Preparar datos de respuesta
+            $data = [
+                'estado' => $entrega->estado,
+                'fecha_entrega' => $entrega->fecha_entrega
+                    ? \Carbon\Carbon::parse($entrega->fecha_entrega)->format('d/m/Y H:i:s')
+                    : null,
+                'usuario_entrego' => $usuarioEntrego ? $usuarioEntrego->name : null,
+                'firma_confirma' => (bool)$entrega->firma_confirma,
+                'observaciones_entrega' => $entrega->observaciones_entrega,
+                'observaciones' => $entrega->observaciones,
+                'fecha_creacion' => \Carbon\Carbon::parse($entrega->created_at)->format('d/m/Y H:i:s'),
+                'fecha_actualizacion' => \Carbon\Carbon::parse($entrega->updated_at)->format('d/m/Y H:i:s'),
+            ];
+
+            // Incluir foto en base64 si existe
+            if ($entrega->foto_entrega && $entrega->tipo_archivo_foto) {
+                // Convertir BLOB a base64
+                $fotoBase64 = base64_encode($entrega->foto_entrega);
+                $data['foto_entrega'] = $fotoBase64;
+                $data['tipo_archivo_foto'] = $entrega->tipo_archivo_foto;
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al obtener info de entrega:', [
+                'error' => $e->getMessage(),
+                'solicitud' => $solicitudId,
+                'articulo' => $articuloId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener información: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Método auxiliar para comprimir imágenes JPEG (si la necesitas)
+     */
+    private function comprimirImagenJPEG($path, $calidad = 80)
+    {
+        try {
+            Log::info("🖼️ Comprimiendo imagen JPEG...");
+            Log::info("  - Ruta: " . $path);
+            Log::info("  - Calidad: " . $calidad);
+
+            $image = imagecreatefromjpeg($path);
+            if (!$image) {
+                Log::warning("⚠️ No se pudo crear imagen desde JPEG, devolviendo original");
+                return file_get_contents($path);
+            }
+
+            ob_start();
+            imagejpeg($image, null, $calidad);
+            $contenido = ob_get_clean();
+            imagedestroy($image);
+
+            $tamanoOriginal = filesize($path);
+            $tamanoComprimido = strlen($contenido);
+            $porcentaje = round(($tamanoComprimido / $tamanoOriginal) * 100, 2);
+
+            Log::info("✅ Imagen comprimida:");
+            Log::info("  - Original: " . $tamanoOriginal . " bytes");
+            Log::info("  - Comprimida: " . $tamanoComprimido . " bytes");
+            Log::info("  - Tamaño: " . $porcentaje . "% del original");
+
+            return $contenido;
+        } catch (\Exception $e) {
+            Log::warning("⚠️ No se pudo comprimir la imagen: " . $e->getMessage());
             return file_get_contents($path);
         }
-        
-        ob_start();
-        imagejpeg($image, null, $calidad);
-        $contenido = ob_get_clean();
-        imagedestroy($image);
-        
-        $tamanoOriginal = filesize($path);
-        $tamanoComprimido = strlen($contenido);
-        $porcentaje = round(($tamanoComprimido / $tamanoOriginal) * 100, 2);
-        
-        Log::info("✅ Imagen comprimida:");
-        Log::info("  - Original: " . $tamanoOriginal . " bytes");
-        Log::info("  - Comprimida: " . $tamanoComprimido . " bytes");
-        Log::info("  - Tamaño: " . $porcentaje . "% del original");
-        
-        return $contenido;
-    } catch (\Exception $e) {
-        Log::warning("⚠️ No se pudo comprimir la imagen: " . $e->getMessage());
-        return file_get_contents($path);
     }
-}
 
-/**
- * Ceder un repuesto que está pendiente por retorno a la solicitud actual
- * FLUJO CORREGIDO:
- * 1. Verificar que el repuesto existe en la solicitud destino (ordenesarticulos)
- * 2. Verificar que hay una entrega pendiente por retorno de OTRA solicitud
- * 3. Comparar que el artículo y cantidad coincidan
- * 4. Verificar ubicación en repuestos_entregas
- * 5. Ceder a la nueva solicitud
- */
-public function cederRepuesto(Request $request, $idSolicitudDestino)
+    /**
+     * Ceder un repuesto que está pendiente por retorno a la solicitud actual
+     * FLUJO CORREGIDO:
+     * 1. Verificar que el repuesto existe en la solicitud destino (ordenesarticulos)
+     * 2. Verificar que hay una entrega pendiente por retorno de OTRA solicitud
+     * 3. Comparar que el artículo y cantidad coincidan
+     * 4. Verificar ubicación en repuestos_entregas
+     * 5. Ceder a la nueva solicitud
+     */
+    public function cederRepuesto(Request $request, $idSolicitudDestino)
     {
         Log::info("════════════════════════════════════════════════════════");
         Log::info("🔄 INICIANDO cederRepuesto");
         Log::info("════════════════════════════════════════════════════════");
-        
+
         // Validar datos del request
         $articuloId = $request->input('articulo_id');
         $entregaIdOrigen = $request->input('entrega_id');
-        
+
         Log::info("🔍 Datos recibidos:");
         Log::info("  - articulo_id: " . ($articuloId ?? 'NULL'));
         Log::info("  - entrega_id: " . ($entregaIdOrigen ?? 'NULL'));
-        
+
         if (empty($articuloId) || empty($entregaIdOrigen)) {
             Log::error("❌ Datos requeridos faltantes");
             return response()->json([
@@ -4690,10 +4846,10 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                 'message' => 'Faltan datos requeridos: artículo ID y entrega ID'
             ], 400);
         }
-        
+
         $articuloId = (int)$articuloId;
         $entregaIdOrigen = (int)$entregaIdOrigen;
-        
+
         try {
             DB::beginTransaction();
 
@@ -4797,13 +4953,13 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                     'message' => 'Los artículos no coinciden'
                 ], 400);
             }
-            
+
             if ($entregaOrigen->cantidad < $repuestoSolicitudDestino->cantidad_solicitada) {
                 Log::error("❌ Cantidad insuficiente");
                 return response()->json([
                     'success' => false,
-                    'message' => 'Cantidad insuficiente en la entrega origen. Disponible: ' . 
-                               $entregaOrigen->cantidad . ', Solicitado: ' . $repuestoSolicitudDestino->cantidad_solicitada
+                    'message' => 'Cantidad insuficiente en la entrega origen. Disponible: ' .
+                        $entregaOrigen->cantidad . ', Solicitado: ' . $repuestoSolicitudDestino->cantidad_solicitada
                 ], 400);
             }
 
@@ -4824,8 +4980,8 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                 ->where('id', $entregaOrigen->id)
                 ->update([
                     'estado' => 'cedido',
-                    'observaciones' => ($entregaOrigen->observaciones ?? '') . 
-                        " | ✅ CEDIDO a solicitud: " . $solicitudDestino->codigo . 
+                    'observaciones' => ($entregaOrigen->observaciones ?? '') .
+                        " | ✅ CEDIDO a solicitud: " . $solicitudDestino->codigo .
                         " (" . now()->format('d/m/Y H:i:s') . ")",
                     'updated_at' => now()
                 ]);
@@ -4846,10 +5002,10 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                 'usuario_preparo_id' => auth()->id(),
                 'estado' => 'listo_para_ceder',
                 'entrega_origen_id' => $entregaOrigen->id,
-                'observaciones' => "Repuesto CEDIDO desde solicitud: " . $entregaOrigen->codigo_solicitud_origen . 
-                    " | Cantidad: " . $repuestoSolicitudDestino->cantidad_solicitada . 
-                    " | Ubicación: " . $entregaOrigen->ubicacion_utilizada . 
-                    " | Preparado por: " . (auth()->user()->name ?? 'Usuario') . 
+                'observaciones' => "Repuesto CEDIDO desde solicitud: " . $entregaOrigen->codigo_solicitud_origen .
+                    " | Cantidad: " . $repuestoSolicitudDestino->cantidad_solicitada .
+                    " | Ubicación: " . $entregaOrigen->ubicacion_utilizada .
+                    " | Preparado por: " . (auth()->user()->name ?? 'Usuario') .
                     " (" . now()->format('d/m/Y H:i:s') . ")",
                 'fecha_preparacion' => now(),
                 'created_at' => now(),
@@ -4864,8 +5020,8 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                 ->where('idOrdenesArticulos', $repuestoSolicitudDestino->idOrdenesArticulos)
                 ->update([
                     'estado' => 2, // Listo para entregar
-                    'observacion' => "Repuesto CEDIDO | Origen: " . $entregaOrigen->codigo_solicitud_origen . 
-                        " | Ubicación: " . $entregaOrigen->ubicacion_utilizada . 
+                    'observacion' => "Repuesto CEDIDO | Origen: " . $entregaOrigen->codigo_solicitud_origen .
+                        " | Ubicación: " . $entregaOrigen->ubicacion_utilizada .
                         " | " . now()->format('d/m/Y H:i:s'),
                     'updated_at' => now()
                 ]);
@@ -4874,11 +5030,11 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
             // 9. ACTUALIZAR ESTADO DE LA SOLICITUD DESTINO
             // ==========================================
             Log::info("🔄 Actualizando estado de solicitud destino...");
-            
+
             $totalRepuestos = DB::table('ordenesarticulos')
                 ->where('idSolicitudesOrdenes', $idSolicitudDestino)
                 ->count();
-                
+
             $repuestosListos = DB::table('ordenesarticulos')
                 ->where('idSolicitudesOrdenes', $idSolicitudDestino)
                 ->whereIn('estado', [1, 2])
@@ -4935,12 +5091,11 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
                     'estado_solicitud' => $nuevoEstado
                 ]
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("💥 ERROR en cederRepuesto: " . $e->getMessage());
             Log::error("Trace: " . $e->getTraceAsString());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al ceder el repuesto: ' . $e->getMessage()
@@ -4948,182 +5103,181 @@ public function cederRepuesto(Request $request, $idSolicitudDestino)
         }
     }
 
-/**
- * Confirmar la entrega física de un repuesto cedido
- */
-public function confirmarEntregaCedido(Request $request, $id)
-{
-    Log::info("════════════════════════════════════════════════════════");
-    Log::info("📦 INICIANDO confirmarEntregaCedido");
-    Log::info("════════════════════════════════════════════════════════");
-    
-    Log::info("📦 DATOS RECIBIDOS:");
-    Log::info("- Solicitud ID: " . $id);
-    Log::info("- Articulo ID: " . $request->input('articulo_id'));
-    Log::info("- Entrega ID: " . $request->input('entrega_id'));
-    Log::info("- Todos los datos: " . json_encode($request->all()));
+    /**
+     * Confirmar la entrega física de un repuesto cedido
+     */
+    public function confirmarEntregaCedido(Request $request, $id)
+    {
+        Log::info("════════════════════════════════════════════════════════");
+        Log::info("📦 INICIANDO confirmarEntregaCedido");
+        Log::info("════════════════════════════════════════════════════════");
 
-    try {
-        DB::beginTransaction();
+        Log::info("📦 DATOS RECIBIDOS:");
+        Log::info("- Solicitud ID: " . $id);
+        Log::info("- Articulo ID: " . $request->input('articulo_id'));
+        Log::info("- Entrega ID: " . $request->input('entrega_id'));
+        Log::info("- Todos los datos: " . json_encode($request->all()));
 
-        $solicitudId = $id;
-        $articuloId = (int)$request->input('articulo_id');
-        $entregaId = (int)$request->input('entrega_id');
+        try {
+            DB::beginTransaction();
 
-        // ==========================================
-        // 1. VALIDAR ENTREGA CEDIDA - CORREGIDO
-        // ==========================================
-        Log::info("🔍 Validando entrega cedida...");
-        $entregaCedida = DB::table('repuestos_entregas as re')
-            ->select(
-                're.id',
-                're.solicitud_id',
-                're.articulo_id',
-                're.cantidad',
-                're.ubicacion_utilizada',
-                're.entrega_origen_id',
-                're.estado',
-                're.observaciones',
-                'so.codigo as codigo_solicitud',
-                'a.nombre as articulo_nombre'
-            )
-            ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idSolicitudesOrdenes') // COLUMNA CORRECTA
-            ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
-            ->where('re.id', $entregaId)
-            ->where('re.solicitud_id', $solicitudId)
-            ->where('re.articulo_id', $articuloId)
-            ->where('re.estado', 'listo_para_ceder')
-            ->first();
+            $solicitudId = $id;
+            $articuloId = (int)$request->input('articulo_id');
+            $entregaId = (int)$request->input('entrega_id');
 
-        if (!$entregaCedida) {
-            Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
-            return response()->json([
-                'success' => false,
-                'message' => 'Entrega cedida no encontrada'
-            ], 404);
-        }
+            // ==========================================
+            // 1. VALIDAR ENTREGA CEDIDA - CORREGIDO
+            // ==========================================
+            Log::info("🔍 Validando entrega cedida...");
+            $entregaCedida = DB::table('repuestos_entregas as re')
+                ->select(
+                    're.id',
+                    're.solicitud_id',
+                    're.articulo_id',
+                    're.cantidad',
+                    're.ubicacion_utilizada',
+                    're.entrega_origen_id',
+                    're.estado',
+                    're.observaciones',
+                    'so.codigo as codigo_solicitud',
+                    'a.nombre as articulo_nombre'
+                )
+                ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idSolicitudesOrdenes') // COLUMNA CORRECTA
+                ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+                ->where('re.id', $entregaId)
+                ->where('re.solicitud_id', $solicitudId)
+                ->where('re.articulo_id', $articuloId)
+                ->where('re.estado', 'listo_para_ceder')
+                ->first();
 
-        Log::info("✅ Entrega cedida encontrada:");
-        Log::info("   - ID: " . $entregaCedida->id);
-        Log::info("   - Entrega origen ID: " . $entregaCedida->entrega_origen_id);
-        Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
-        Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
+            if (!$entregaCedida) {
+                Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Entrega cedida no encontrada'
+                ], 404);
+            }
 
-        // ==========================================
-        // 2. ACTUALIZAR ENTREGA CEDIDA
-        // ==========================================
-        Log::info("🔄 Actualizando entrega cedida...");
-        DB::table('repuestos_entregas')
-            ->where('id', $entregaId)
-            ->update([
-                'estado' => 'entregado',
-                'usuario_entrego_id' => auth()->id(),
-                'fecha_entrega' => now(),
-                'firma_confirma' => 1,
-                'observaciones_entrega' => "Repuesto cedido entregado físicamente",
-                'observaciones' => $entregaCedida->observaciones . 
-                    " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s'),
-                'updated_at' => now()
-            ]);
+            Log::info("✅ Entrega cedida encontrada:");
+            Log::info("   - ID: " . $entregaCedida->id);
+            Log::info("   - Entrega origen ID: " . $entregaCedida->entrega_origen_id);
+            Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
+            Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
 
-        // ==========================================
-        // 3. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
-        // ==========================================
-        if ($entregaCedida->entrega_origen_id) {
-            Log::info("🔄 Actualizando entrega origen...");
+            // ==========================================
+            // 2. ACTUALIZAR ENTREGA CEDIDA
+            // ==========================================
+            Log::info("🔄 Actualizando entrega cedida...");
             DB::table('repuestos_entregas')
-                ->where('id', $entregaCedida->entrega_origen_id)
+                ->where('id', $entregaId)
                 ->update([
-                    'observaciones' => DB::raw("CONCAT(observaciones, ' | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s') . "')"),
+                    'estado' => 'entregado',
+                    'usuario_entrego_id' => auth()->id(),
+                    'fecha_entrega' => now(),
+                    'firma_confirma' => 1,
+                    'observaciones_entrega' => "Repuesto cedido entregado físicamente",
+                    'observaciones' => $entregaCedida->observaciones .
+                        " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s'),
                     'updated_at' => now()
                 ]);
+
+            // ==========================================
+            // 3. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
+            // ==========================================
+            if ($entregaCedida->entrega_origen_id) {
+                Log::info("🔄 Actualizando entrega origen...");
+                DB::table('repuestos_entregas')
+                    ->where('id', $entregaCedida->entrega_origen_id)
+                    ->update([
+                        'observaciones' => DB::raw("CONCAT(observaciones, ' | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s') . "')"),
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // ==========================================
+            // 4. ACTUALIZAR ORDENESARTICULOS - CORREGIDO
+            // ==========================================
+            Log::info("📝 Actualizando ordenesarticulos...");
+            DB::table('ordenesarticulos')
+                ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
+                ->where('idarticulos', $articuloId)
+                ->update([
+                    'estado' => 1, // Entregado
+                    'observacion' => "Repuesto CEDIDO entregado físicamente | " . now()->format('d/m/Y H:i:s'),
+                    'updated_at' => now()
+                ]);
+
+            // ==========================================
+            // 5. ACTUALIZAR ESTADO SOLICITUD - CORREGIDO
+            // ==========================================
+            Log::info("🔄 Actualizando estado de solicitud...");
+
+            // Usar nombre correcto de columna
+            $totalRepuestos = DB::table('ordenesarticulos')
+                ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
+                ->count();
+
+            $repuestosEntregados = DB::table('ordenesarticulos')
+                ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
+                ->where('estado', 1)
+                ->count();
+
+            Log::info("📊 Estado de repuestos:");
+            Log::info("   - Total: " . $totalRepuestos);
+            Log::info("   - Entregados: " . $repuestosEntregados);
+
+            $nuevoEstado = 'parcial_listo';
+            if ($repuestosEntregados == $totalRepuestos) {
+                $nuevoEstado = 'aprobada';
+            }
+
+            // Usar nombre correcto de columna
+            DB::table('solicitudesordenes')
+                ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
+                ->update([
+                    'estado' => $nuevoEstado,
+                    'fechaactualizacion' => now(),
+                    'updated_at' => now()
+                ]);
+
+            Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
+
+            // ==========================================
+            // 6. NOTIFICACIONES
+            // ==========================================
+            Log::info("🔔 Actualizando notificaciones...");
+            DB::table('notificaciones_solicitud')
+                ->where('idSolicitudesOrdenes', $solicitudId)
+                ->update([
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'updated_at' => now()
+                ]);
+
+            DB::commit();
+
+            Log::info("════════════════════════════════════════════════════════");
+            Log::info("✅ confirmarEntregaCedido COMPLETADO EXITOSAMENTE");
+            Log::info("════════════════════════════════════════════════════════");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Entrega de repuesto cedido confirmada',
+                'codigo_solicitud' => $entregaCedida->codigo_solicitud,
+                'articulo_nombre' => $entregaCedida->articulo_nombre,
+                'estado_solicitud' => $nuevoEstado,
+                'repuestos_entregados' => $repuestosEntregados,
+                'repuestos_totales' => $totalRepuestos
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("💥 ERROR en confirmarEntregaCedido: " . $e->getMessage());
+            Log::error("Trace: " . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al confirmar entrega cedida: ' . $e->getMessage()
+            ], 500);
         }
-
-        // ==========================================
-        // 4. ACTUALIZAR ORDENESARTICULOS - CORREGIDO
-        // ==========================================
-        Log::info("📝 Actualizando ordenesarticulos...");
-        DB::table('ordenesarticulos')
-            ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
-            ->where('idarticulos', $articuloId)
-            ->update([
-                'estado' => 1, // Entregado
-                'observacion' => "Repuesto CEDIDO entregado físicamente | " . now()->format('d/m/Y H:i:s'),
-                'updated_at' => now()
-            ]);
-
-        // ==========================================
-        // 5. ACTUALIZAR ESTADO SOLICITUD - CORREGIDO
-        // ==========================================
-        Log::info("🔄 Actualizando estado de solicitud...");
-        
-        // Usar nombre correcto de columna
-        $totalRepuestos = DB::table('ordenesarticulos')
-            ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
-            ->count();
-            
-        $repuestosEntregados = DB::table('ordenesarticulos')
-            ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
-            ->where('estado', 1)
-            ->count();
-
-        Log::info("📊 Estado de repuestos:");
-        Log::info("   - Total: " . $totalRepuestos);
-        Log::info("   - Entregados: " . $repuestosEntregados);
-
-        $nuevoEstado = 'parcial_listo';
-        if ($repuestosEntregados == $totalRepuestos) {
-            $nuevoEstado = 'aprobada';
-        }
-
-        // Usar nombre correcto de columna
-        DB::table('solicitudesordenes')
-            ->where('idSolicitudesOrdenes', $solicitudId)  // COLUMNA CORRECTA
-            ->update([
-                'estado' => $nuevoEstado,
-                'fechaactualizacion' => now(),
-                'updated_at' => now()
-            ]);
-
-        Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
-
-        // ==========================================
-        // 6. NOTIFICACIONES
-        // ==========================================
-        Log::info("🔔 Actualizando notificaciones...");
-        DB::table('notificaciones_solicitud')
-            ->where('idSolicitudesOrdenes', $solicitudId)
-            ->update([
-                'estado_web' => 1,
-                'estado_app' => 0,
-                'fecha' => now(),
-                'updated_at' => now()
-            ]);
-
-        DB::commit();
-
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("✅ confirmarEntregaCedido COMPLETADO EXITOSAMENTE");
-        Log::info("════════════════════════════════════════════════════════");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Entrega de repuesto cedido confirmada',
-            'codigo_solicitud' => $entregaCedida->codigo_solicitud,
-            'articulo_nombre' => $entregaCedida->articulo_nombre,
-            'estado_solicitud' => $nuevoEstado,
-            'repuestos_entregados' => $repuestosEntregados,
-            'repuestos_totales' => $totalRepuestos
-        ]);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error("💥 ERROR en confirmarEntregaCedido: " . $e->getMessage());
-        Log::error("Trace: " . $e->getTraceAsString());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al confirmar entrega cedida: ' . $e->getMessage()
-        ], 500);
     }
-}
 }
