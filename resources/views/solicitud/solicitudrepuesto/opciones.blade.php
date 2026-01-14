@@ -1344,103 +1344,316 @@
             </div>
         </div>
 
-        <!-- Modal confirmación de entrega -->
+        <!-- Modal confirmación de entrega - Textos más pequeños -->
         <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto"
             :class="mostrarModalVerConfirmacion && '!block'">
-            <div class="flex items-start justify-center min-h-screen px-4" @click.self="cerrarModalVerConfirmacion()">
+            <div class="flex items-start justify-center min-h-screen px-4 py-8"
+                @click.self="cerrarModalVerConfirmacion()">
 
                 <div x-show="mostrarModalVerConfirmacion" x-transition x-transition.duration.300
-                    class="panel border-0 p-0 rounded-lg overflow-hidden my-8 w-full max-w-lg">
+                    class="panel border-0 p-0 rounded-xl overflow-hidden my-8 w-full max-w-4xl shadow-2xl dark:shadow-2xl dark:shadow-gray-900/30">
 
-                    <!-- Header con fondo gris claro -->
-                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
-                        <div class="font-bold text-lg text-gray-900 dark:text-white">
-                            Confirmación de Entrega
+                    <!-- Header con gradiente -->
+                    <div class="relative bg-primary px-6 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clipboard-check text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <!-- TÍTULO MÁS PEQUEÑO -->
+                                    <h3 class="text-base font-bold text-white">CONFIRMACIÓN DE ENTREGA</h3>
+                                    <p class="text-xs text-blue-100 dark:text-gray-300 mt-0.5">Documentación del
+                                        repuesto entregado</p>
+                                </div>
+                            </div>
+                            <button type="button"
+                                class="text-white hover:text-blue-200 dark:hover:text-gray-300 transition-colors"
+                                @click="cerrarModalVerConfirmacion()">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
-                        <button type="button" class="text-white-dark hover:text-dark"
-                            @click="cerrarModalVerConfirmacion()">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
                     </div>
 
-                    <!-- Contenido del modal -->
-                    <div class="p-5">
-                        <!-- Información del repuesto -->
-                        <div class="mb-6 bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Repuesto</span>
-                            <span class="font-medium text-gray-900 dark:text-white" x-text="repuestoVerNombre"></span>
-                        </div>
+                    <!-- Contenido del modal - Diseño de dos columnas -->
+                    <div class="flex flex-col lg:flex-row bg-white dark:bg-gray-800">
 
-                        <!-- Grid de información -->
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <!-- Entregado por -->
-                            <div>
-                                <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Entregado por</span>
-                                <span class="text-gray-900 dark:text-white"
-                                    x-text="entregaInfo.usuario_entrego || 'No disponible'"></span>
-                            </div>
+                        <!-- COLUMNA IZQUIERDA - INFORMACIÓN -->
+                        <div class="lg:w-2/3 p-6">
 
-                            <!-- Fecha -->
-                            <div>
-                                <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Fecha</span>
-                                <span class="text-gray-900 dark:text-white"
-                                    x-text="entregaInfo.fecha_entrega || 'No disponible'"></span>
-                            </div>
-                        </div>
-
-                        <!-- Firma -->
-                        <div class="mb-6">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Firma</span>
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium"
-                                :class="entregaInfo.firma_confirma ?
-                                    'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
-                                    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'">
-                                <span x-text="entregaInfo.firma_confirma ? 'Confirmada' : 'No confirmada'"></span>
-                            </span>
-                        </div>
-
-                        <!-- Observaciones -->
-                        <div x-show="entregaInfo.observaciones_entrega" class="mb-6">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Observaciones</span>
-                            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                                <p class="text-gray-600 dark:text-gray-300"
-                                    x-text="entregaInfo.observaciones_entrega"></p>
-                            </div>
-                        </div>
-
-                        <!-- Foto de entrega -->
-                        <div x-show="entregaInfo.foto_url" class="mb-6">
-                            <span class="text-xs text-gray-500 dark:text-gray-400 block mb-2">Foto del repuesto</span>
+                            <!-- Tarjeta principal del repuesto -->
                             <div
-                                class="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900">
-                                <div class="relative w-full h-64 overflow-hidden">
-                                    <img :src="entregaInfo.foto_url"
-                                        class="absolute inset-0 w-full h-full object-contain"
-                                        x-on:error="entregaInfo.foto_url = null">
+                                class="mb-6 bg-gradient-to-r from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-lg">
+                                <div class="flex items-center mb-4">
+                                    <div class="relative mr-4">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div
+                                            class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+                                            <i class="fas fa-box-open text-white text-lg"></i>
+                                        </div>
+                                        <div
+                                            class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center">
+                                            <i class="fas fa-check text-white text-[8px]"></i>
+                                        </div>
+                                    </div>
 
-                                    <div x-show="!entregaInfo.foto_url"
-                                        class="flex items-center justify-center h-full">
-                                        <div class="text-center">
-                                            <i class="fas fa-image text-gray-400 text-4xl mb-2"></i>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">Imagen no disponible
-                                            </p>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <h4
+                                                class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                                                REPUESTO ENTREGADO</h4>
+                                            <span
+                                                class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 font-semibold">
+                                                <i class="fas fa-check-circle mr-1"></i>CONFIRMADO
+                                            </span>
+                                        </div>
+
+                                        <!-- CÓDIGO MÁS PEQUEÑO -->
+                                        <p class="text-lg font-bold text-gray-900 dark:text-white mb-2"
+                                            x-text="repuestoVerCodigo" :title="repuestoVerCodigo"></p>
+
+                                        <!-- TIPO MÁS PEQUEÑO -->
+                                        <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                                            <i class="fas fa-tag text-gray-400 mr-2 text-xs"></i>
+                                            <span class="font-medium" x-text="repuestoVerTipo"
+                                                :title="repuestoVerTipo"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Grid de información detallada -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+
+                                <!-- Tarjeta Entregado por -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div
+                                            class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-user-check text-blue-600 dark:text-blue-400 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <span
+                                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">ENTREGADO
+                                                POR</span>
+                                        </div>
+                                    </div>
+                                    <div class="pl-11">
+                                        <!-- TEXTO MÁS PEQUEÑO -->
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white mb-1"
+                                            x-text="entregaInfo.usuario_entrego || 'Almacén'"></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Personal autorizado</p>
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta Fecha de entrega -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div
+                                            class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3">
+                                            <i
+                                                class="fas fa-calendar-check text-green-600 dark:text-green-400 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">FECHA
+                                                Y HORA</span>
+                                        </div>
+                                    </div>
+                                    <div class="pl-11">
+                                        <!-- TEXTO MÁS PEQUEÑO -->
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white mb-1"
+                                            x-text="entregaInfo.fecha_entrega || 'No disponible'"></p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Fecha de entrega</p>
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta Estado de firma -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center mr-3"
+                                            :class="entregaInfo.firma_confirma ?
+                                                'bg-green-100 dark:bg-green-900/30' :
+                                                'bg-orange-100 dark:bg-orange-900/30'">
+                                            <i class="fas fa-signature text-xs"
+                                                :class="entregaInfo.firma_confirma ?
+                                                    'text-green-600 dark:text-green-400' :
+                                                    'text-orange-600 dark:text-orange-400'"></i>
+                                        </div>
+                                        <div>
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">FIRMA
+                                                DIGITAL</span>
+                                        </div>
+                                    </div>
+                                    <div class="pl-11">
+                                        <!-- TEXTO MÁS PEQUEÑO -->
+                                        <p class="text-sm font-bold mb-1"
+                                            :class="entregaInfo.firma_confirma ?
+                                                'text-green-700 dark:text-green-300' :
+                                                'text-orange-700 dark:text-orange-300'"
+                                            x-text="entregaInfo.firma_confirma ? 'CONFIRMADA' : 'PENDIENTE'"></p>
+                                    </div>
+                                </div>
+
+                                <!-- Tarjeta Método de entrega -->
+                                <div
+                                    class="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                                    <div class="flex items-center mb-3">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div
+                                            class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-truck text-purple-600 dark:text-purple-400 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <span
+                                                class="text-xs font-semibold text-gray-500 dark:text-gray-400">MÉTODO</span>
+                                        </div>
+                                    </div>
+                                    <div class="pl-11">
+                                        <!-- TEXTO MÁS PEQUEÑO -->
+                                        <p class="text-sm font-bold text-gray-900 dark:text-white mb-1">ENTREGA FÍSICA
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Presencial con evidencia
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observaciones -->
+                            <div x-show="entregaInfo.observaciones_entrega" class="mb-6">
+                                <div class="flex items-center mb-3">
+                                    <!-- ICONO MÁS PEQUEÑO -->
+                                    <div
+                                        class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-sticky-note text-yellow-600 dark:text-yellow-400 text-xs"></i>
+                                    </div>
+                                    <div>
+                                        <!-- TEXTO MÁS PEQUEÑO -->
+                                        <span
+                                            class="text-sm font-semibold text-gray-500 dark:text-gray-400">OBSERVACIONES</span>
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 ml-11">
+                                    <!-- TEXTO MÁS PEQUEÑO -->
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed"
+                                        x-text="entregaInfo.observaciones_entrega"></p>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- Botón de cierre -->
-                        <div class="flex justify-end items-center mt-8">
-                            <button type="button" class="btn btn-primary" @click="cerrarModalVerConfirmacion()">
-                                Cerrar
-                            </button>
+                        <!-- COLUMNA DERECHA - FOTO Y DETALLES VISUALES -->
+                        <div
+                            class="lg:w-1/3 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black p-6 border-l border-gray-200 dark:border-gray-700">
+
+                            <!-- Sección de Foto Principal -->
+                            <div x-show="entregaInfo.foto_url" class="mb-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center">
+                                        <!-- ICONO MÁS PEQUEÑO -->
+                                        <div
+                                            class="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mr-3">
+                                            <i class="fas fa-camera text-red-600 dark:text-red-400 text-xs"></i>
+                                        </div>
+                                        <div>
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <h4 class="text-sm font-bold text-gray-900 dark:text-white">EVIDENCIA
+                                                VISUAL</h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">Foto de entrega</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contenedor de la foto -->
+                                <div
+                                    class="relative rounded-xl overflow-hidden border-2 border-white dark:border-gray-800 shadow-xl bg-black">
+                                    <div class="relative w-full h-80 bg-gray-900">
+                                        <img :src="entregaInfo.foto_url" class="w-full h-full object-contain p-3"
+                                            x-on:error="entregaInfo.foto_url = null"
+                                            alt="Evidencia fotográfica de entrega">
+
+                                        <!-- Overlay de verificación -->
+                                        <div class="absolute top-3 right-3">
+                                            <div
+                                                class="bg-green-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center shadow-md">
+                                                <i class="fas fa-check-circle mr-1 text-xs"></i>
+                                                <span class="font-semibold">VERIFICADO</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Marca de agua sutil -->
+                                        <div
+                                            class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-5">
+                                            <i class="fas fa-check-circle text-6xl text-white"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Pie de foto -->
+                                    <div
+                                        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                        <div class="text-white">
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <p class="text-xs font-medium">Foto de entrega confirmada</p>
+                                            <p class="text-[10px] text-gray-300">Tomada al momento de la entrega</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Detalles de la foto -->
+                                <div
+                                    class="mt-4 bg-white dark:bg-gray-900 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="text-center">
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">TIPO</p>
+                                            <p class="text-xs font-semibold text-gray-900 dark:text-white">Entrega
+                                                Física</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <!-- TEXTO MÁS PEQUEÑO -->
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">ESTADO</p>
+                                            <p class="text-xs font-semibold text-green-600 dark:text-green-400">
+                                                Completado</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botón de cierre en versión móvil -->
+                            <div class="lg:hidden mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+                                <button type="button"
+                                    class="btn w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 border-0 text-white text-sm py-2.5 shadow-lg"
+                                    @click="cerrarModalVerConfirmacion()">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Cerrar confirmación
+                                </button>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Botón de cierre (solo desktop) -->
+                    <div
+                        class="hidden lg:flex justify-end items-center px-6 py-5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                        <button type="button"
+                            class="btn bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 border-0 text-white text-sm py-2.5 px-6 shadow-lg transition-all duration-300"
+                            @click="cerrarModalVerConfirmacion()">
+                            <i class="fas fa-times mr-2"></i>
+                            Cerrar confirmación
+                        </button>
                     </div>
                 </div>
             </div>
