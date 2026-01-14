@@ -960,8 +960,7 @@ text-rose-600 @endif">
             </div>
         </div>
 
-        <!-- Modal para seleccionar quién entregará el repuesto -->
-        <div x-show="mostrarModalSeleccionarEntregador" x-cloak @click.self="cerrarModalSeleccionarEntregador()"
+<div x-show="mostrarModalSeleccionarEntregador" x-cloak @click.self="cerrarModalSeleccionarEntregador()"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg transform transition-all duration-300 scale-100"
                 x-show="mostrarModalSeleccionarEntregador" x-transition:enter="ease-out duration-300"
@@ -987,130 +986,158 @@ text-rose-600 @endif">
                 </div>
 
                 <!-- Contenido del Modal -->
-                <div class="p-6">
-                    <div class="mb-6">
-                        <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
-                            <h4 class="font-semibold text-blue-700 mb-2">¿Quién entregará este repuesto?</h4>
-                            <p class="text-sm text-gray-600">
-                                Seleccione el usuario que realizará la entrega física del repuesto.
-                                Este usuario deberá confirmar la entrega posteriormente.
-                            </p>
-                        </div>
-
-                        <!-- Selección de usuario entregador -->
+                <div class="p-6 flex flex-col h-full">
+                    <div class="flex-1 overflow-hidden flex flex-col">
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-3">
-                                <i class="fas fa-user-circle mr-2"></i>Usuario que entregará:
-                            </label>
+                            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                                <h4 class="font-semibold text-blue-700 mb-2">¿Quién entregará este repuesto?</h4>
+                                <p class="text-sm text-gray-600">
+                                    Seleccione el usuario que realizará la entrega física del repuesto.
+                                    Este usuario deberá confirmar la entrega posteriormente.
+                                </p>
+                            </div>
 
-                            <div class="space-y-3 max-h-60 overflow-y-auto pr-2">
-                                <!-- En el modal de selección de entregador, actualizar los elementos click -->
-                                <!-- Opción: Yo mismo (usuario actual) -->
-                                <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
-                                    :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-100 border-blue-300' : ''"
-                                    @click="seleccionarUsuarioEntregador('yo_mismo', '{{ Auth::user()->name ?? 'Usuario Actual' }}')">
-                                    <div class="flex-shrink-0 mr-3">
-                                        <div
-                                            class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-semibold text-gray-900">
-                                            {{ Auth::user()->name ?? 'Usuario Actual' }}</p>
-                                        <p class="text-xs text-gray-500">Yo mismo
-                                            ({{ Auth::user()->email ?? 'Usuario' }})</p>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
-                                            :class="usuarioEntregadorSeleccionado === 'yo_mismo' ?
-                                                'bg-primary border-primary' : ''">
-                                            <i x-show="usuarioEntregadorSeleccionado === 'yo_mismo'"
-                                                class="fas fa-check text-white text-xs"></i>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- Selección de usuario entregador -->
+                            <div class="mb-6 flex-1 min-h-0">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">
+                                    <i class="fas fa-user-circle mr-2"></i>Usuario que entregará:
+                                </label>
 
-                                <!-- Opción: Técnico asignado -->
-                                @if ($tecnico)
-                                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-green-50 cursor-pointer transition-colors"
-                                        :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ?
-                                            'bg-green-100 border-green-300' : ''"
-                                        @click="seleccionarUsuarioEntregador('{{ $tecnico->idUsuario }}', '{{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}')">
+                                <!-- Contenedor con scroll - MEJORADO -->
+                                <div class="space-y-3 h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                    <!-- Estilos personalizados para scroll -->
+                                    <style>
+                                        .scrollbar-thin::-webkit-scrollbar {
+                                            width: 6px;
+                                        }
+                                        .scrollbar-thin::-webkit-scrollbar-track {
+                                            background: #f1f1f1;
+                                            border-radius: 3px;
+                                        }
+                                        .scrollbar-thin::-webkit-scrollbar-thumb {
+                                            background: #d1d5db;
+                                            border-radius: 3px;
+                                        }
+                                        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+                                            background: #9ca3af;
+                                        }
+                                    </style>
+
+                                    <!-- Opción: Yo mismo (usuario actual) -->
+                                    <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                                        :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-100 border-blue-300' : ''"
+                                        @click="seleccionarUsuarioEntregador('yo_mismo', '{{ Auth::user()->name ?? 'Usuario Actual' }}')">
                                         <div class="flex-shrink-0 mr-3">
                                             <div
-                                                class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                                                <i class="fas fa-user-cog text-white"></i>
+                                                class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-user text-white"></i>
                                             </div>
                                         </div>
                                         <div class="flex-1">
-                                            <p class="font-semibold text-gray-900">{{ $tecnico->Nombre }}
-                                                {{ $tecnico->apellidoPaterno }}</p>
-                                            <p class="text-xs text-gray-500">Técnico asignado a esta solicitud</p>
+                                            <p class="font-semibold text-gray-900">
+                                                {{ Auth::user()->name ?? 'Usuario Actual' }}</p>
+                                            <p class="text-xs text-gray-500">Yo mismo
+                                                ({{ Auth::user()->email ?? 'Usuario' }})</p>
                                         </div>
                                         <div class="flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
-                                                :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ?
-                                                    'bg-success border-success' : ''">
-                                                <i x-show="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}'"
+                                                :class="usuarioEntregadorSeleccionado === 'yo_mismo' ?
+                                                    'bg-primary border-primary' : ''">
+                                                <i x-show="usuarioEntregadorSeleccionado === 'yo_mismo'"
                                                     class="fas fa-check text-white text-xs"></i>
                                             </div>
                                         </div>
                                     </div>
-                                @endif
-                                <!-- 👇 AQUI VA EL TITULO -->
-                                <div class="flex items-center gap-2 mt-4 mb-2">
-                                    <div class="flex-1 border-t border-gray-200"></div>
-                                    <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                        Otros usuarios
-                                    </span>
-                                    <div class="flex-1 border-t border-gray-200"></div>
-                                </div>
-                                <!-- Lista de otros usuarios -->
-                                @foreach ($usuariosDisponibles as $usuario)
-                                    @if (!$tecnico || $usuario->idUsuario != $tecnico->idUsuario)
-                                        <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors"
-                                            :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ?
-                                                'bg-purple-100 border-purple-300' : ''"
-                                            @click="seleccionarUsuarioEntregador('{{ $usuario->idUsuario }}', '{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}')">
+
+                                    <!-- Opción: Técnico asignado -->
+                                    @if ($tecnico)
+                                        <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-green-50 cursor-pointer transition-colors"
+                                            :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ?
+                                                'bg-green-100 border-green-300' : ''"
+                                            @click="seleccionarUsuarioEntregador('{{ $tecnico->idUsuario }}', '{{ $tecnico->Nombre }} {{ $tecnico->apellidoPaterno }}')">
                                             <div class="flex-shrink-0 mr-3">
                                                 <div
-                                                    class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
-                                                    <i class="fas fa-user-friends text-black"></i>
+                                                    class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-user-cog text-white"></i>
                                                 </div>
                                             </div>
                                             <div class="flex-1">
-                                                <p class="font-semibold text-gray-900">{{ $usuario->Nombre }}
-                                                    {{ $usuario->apellidoPaterno }}</p>
-                                                <p class="text-xs text-gray-500">
-                                                    {{ $usuario->correo ?? 'Sin correo' }}</p>
+                                                <p class="font-semibold text-gray-900">{{ $tecnico->Nombre }}
+                                                    {{ $tecnico->apellidoPaterno }}</p>
+                                                <p class="text-xs text-gray-500">Técnico asignado a esta solicitud</p>
                                             </div>
                                             <div class="flex-shrink-0">
                                                 <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
-                                                    :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ?
-                                                        'bg-secondary border-secondary' : ''">
-                                                    <i x-show="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}'"
+                                                    :class="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}' ?
+                                                        'bg-success border-success' : ''">
+                                                    <i x-show="usuarioEntregadorSeleccionado === '{{ $tecnico->idUsuario }}'"
                                                         class="fas fa-check text-white text-xs"></i>
                                                 </div>
                                             </div>
                                         </div>
                                     @endif
-                                @endforeach
+
+                                    <!-- Separador "Otros usuarios" -->
+                                    @if($usuariosDisponibles->count() > 0)
+                                    <div class="flex items-center gap-2 mt-4 mb-2">
+                                        <div class="flex-1 border-t border-gray-200"></div>
+                                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                            Otros usuarios
+                                        </span>
+                                        <div class="flex-1 border-t border-gray-200"></div>
+                                    </div>
+                                    @endif
+
+                                    <!-- Lista de otros usuarios -->
+                                    @forelse ($usuariosDisponibles as $usuario)
+                                        @if (!$tecnico || $usuario->idUsuario != $tecnico->idUsuario)
+                                            <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors"
+                                                :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ?
+                                                    'bg-purple-100 border-purple-300' : ''"
+                                                @click="seleccionarUsuarioEntregador('{{ $usuario->idUsuario }}', '{{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}')">
+                                                <div class="flex-shrink-0 mr-3">
+                                                    <div
+                                                        class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                                        <i class="fas fa-user-friends text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <p class="font-semibold text-gray-900">{{ $usuario->Nombre }}
+                                                        {{ $usuario->apellidoPaterno }}</p>
+                                                    <p class="text-xs text-gray-500">
+                                                        {{ $usuario->correo ?? 'Sin correo' }}</p>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
+                                                        :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ?
+                                                            'bg-secondary border-secondary' : ''">
+                                                        <i x-show="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}'"
+                                                            class="fas fa-check text-white text-xs"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @empty
+                                        <div class="text-center py-4 text-gray-500">
+                                            <i class="fas fa-users-slash text-2xl mb-2"></i>
+                                            <p>No hay otros usuarios disponibles</p>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Información adicional -->
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                            <div class="flex items-start">
-                                <i class="fas fa-info-circle text-yellow-500 mt-1 mr-2"></i>
-                                <div>
-                                    <p class="text-sm font-semibold text-yellow-700 mb-1">Importante:</p>
-                                    <p class="text-xs text-yellow-600">
-                                        El usuario seleccionado deberá confirmar la entrega posteriormente con foto y
-                                        firma.
-                                        El stock se descontará una vez confirmada la entrega.
-                                    </p>
-                                </div>
+                    <!-- Información adicional -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-yellow-500 mt-1 mr-2"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-yellow-700 mb-1">Importante:</p>
+                                <p class="text-xs text-yellow-600">
+                                    El usuario seleccionado deberá confirmar la entrega posteriormente con foto y
+                                    firma.
+                                </p>
                             </div>
                         </div>
                     </div>
