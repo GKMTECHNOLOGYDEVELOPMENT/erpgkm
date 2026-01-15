@@ -12,64 +12,72 @@
             </p>
         </div>
 
-       <!-- Cards de Resumen ACTUALIZADAS -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Total -->
-    <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total Entregas</p>
-                <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $contadores['total'] }}</p>
-                <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">Con entregas registradas</p>
+        <!-- Cards de Resumen ACTUALIZADAS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total -->
+            <div
+                class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total Entregas</p>
+                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $contadores['total'] }}
+                        </p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">Con entregas registradas</p>
+                    </div>
+                    <div class="bg-blue-200 dark:bg-blue-800 p-3 rounded-full">
+                        <i class="fas fa-boxes text-2xl text-blue-700 dark:text-blue-300"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-blue-200 dark:bg-blue-800 p-3 rounded-full">
-                <i class="fas fa-boxes text-2xl text-blue-700 dark:text-blue-300"></i>
-            </div>
-        </div>
-    </div>
 
-    <!-- En Tránsito -->
-    <div class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-warning dark:text-yellow-300">En Tránsito</p>
-                <p class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-2">{{ $contadores['en_transito'] }}</p>
-                <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Entregados en uso</p>
+            <!-- En Tránsito -->
+            <div
+                class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-warning dark:text-yellow-300">En Tránsito</p>
+                        <p class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-2">
+                            {{ $contadores['en_transito'] }}</p>
+                        <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Entregados en uso</p>
+                    </div>
+                    <div class="bg-yellow-200 dark:bg-yellow-800 p-3 rounded-full">
+                        <i class="fas fa-shipping-fast text-2xl text-warning dark:text-yellow-300"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-yellow-200 dark:bg-yellow-800 p-3 rounded-full">
-                <i class="fas fa-shipping-fast text-2xl text-warning dark:text-yellow-300"></i>
-            </div>
-        </div>
-    </div>
 
-    <!-- Usados -->
-    <div class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-green-700 dark:text-green-300">Usados</p>
-                <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">{{ $contadores['usados'] }}</p>
-                <p class="text-xs text-green-600 dark:text-green-400 mt-1">Ya utilizados</p>
+            <!-- Usados -->
+            <div
+                class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-green-700 dark:text-green-300">Usados</p>
+                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">
+                            {{ $contadores['usados'] }}</p>
+                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">Ya utilizados</p>
+                    </div>
+                    <div class="bg-green-200 dark:bg-green-800 p-3 rounded-full">
+                        <i class="fas fa-check-circle text-2xl text-green-700 dark:text-green-300"></i>
+                    </div>
+                </div>
             </div>
-            <div class="bg-green-200 dark:bg-green-800 p-3 rounded-full">
-                <i class="fas fa-check-circle text-2xl text-green-700 dark:text-green-300"></i>
-            </div>
-        </div>
-    </div>
 
-    <!-- Devueltos -->
-    <div class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-medium text-red-700 dark:text-red-300">Devueltos</p>
-                <p class="text-3xl font-bold text-red-900 dark:text-red-100 mt-2">{{ $contadores['devueltos'] }}</p>
-                <p class="text-xs text-red-600 dark:text-red-400 mt-1">Devueltos al stock</p>
-            </div>
-            <div class="bg-red-200 dark:bg-red-800 p-3 rounded-full">
-                <i class="fas fa-undo-alt text-2xl text-red-700 dark:text-red-300"></i>
+            <!-- Devueltos -->
+            <div
+                class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-red-700 dark:text-red-300">Devueltos</p>
+                        <p class="text-3xl font-bold text-red-900 dark:text-red-100 mt-2">{{ $contadores['devueltos'] }}
+                        </p>
+                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">Devueltos al stock</p>
+                    </div>
+                    <div class="bg-red-200 dark:bg-red-800 p-3 rounded-full">
+                        <i class="fas fa-undo-alt text-2xl text-red-700 dark:text-red-300"></i>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- Filtros -->
         <div
@@ -79,30 +87,30 @@
             <form method="GET" action="" class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Estado -->
-<div>
-    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        <span class="flex items-center">
-            <i class="fas fa-filter mr-2 text-sm"></i>
-            Estado
-        </span>
-    </label>
-    <select name="estado"
-        class="form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-        <option value="">Todos los estados</option>
-        <option value="en_transito" {{ request('estado') == 'en_transito' ? 'selected' : '' }}>
-            <i class="fas fa-shipping-fast mr-1"></i> En Tránsito
-        </option>
-        <option value="usado" {{ request('estado') == 'usado' ? 'selected' : '' }}>
-            <i class="fas fa-check-circle mr-1"></i> Usado
-        </option>
-        <option value="devuelto" {{ request('estado') == 'devuelto' ? 'selected' : '' }}>
-            <i class="fas fa-undo-alt mr-1"></i> Devuelto
-        </option>
-        <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>
-            <i class="fas fa-clock mr-1"></i> Pendiente
-        </option>
-    </select>
-</div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            <span class="flex items-center">
+                                <i class="fas fa-filter mr-2 text-sm"></i>
+                                Estado
+                            </span>
+                        </label>
+                        <select name="estado"
+                            class="form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                            <option value="">Todos los estados</option>
+                            <option value="en_transito" {{ request('estado') == 'en_transito' ? 'selected' : '' }}>
+                                <i class="fas fa-shipping-fast mr-1"></i> En Tránsito
+                            </option>
+                            <option value="usado" {{ request('estado') == 'usado' ? 'selected' : '' }}>
+                                <i class="fas fa-check-circle mr-1"></i> Usado
+                            </option>
+                            <option value="devuelto" {{ request('estado') == 'devuelto' ? 'selected' : '' }}>
+                                <i class="fas fa-undo-alt mr-1"></i> Devuelto
+                            </option>
+                            <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>
+                                <i class="fas fa-clock mr-1"></i> Pendiente
+                            </option>
+                        </select>
+                    </div>
 
                     <!-- Código Repuesto -->
                     <div>
@@ -210,6 +218,14 @@
                                     Fechas
                                 </div>
                             </th>
+
+                            <th scope="col"
+                                class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-hourglass-half mr-2"></i>
+                                    Días
+                                </div>
+                            </th>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
                                 <div class="flex items-center justify-center">
@@ -239,9 +255,6 @@
                                         <div class="ml-4">
                                             <div class="text-sm font-semibold text-gray-900 dark:text-white">
                                                 {{ $repuesto->nombre_repuesto }}
-                                            </div>
-                                            <div class="text-xs text-gray-600 dark:text-gray-400 font-medium mt-0.5">
-                                                Código: {{ $repuesto->codigo_repuesto ?: 'N/A' }}
                                             </div>
                                             <div
                                                 class="text-xs text-gray-500 dark:text-gray-500 mt-1 flex flex-wrap gap-1">
@@ -273,65 +286,67 @@
                                             {{ $repuesto->solicitante ?: 'N/A' }}
                                         </span>
                                     </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
-                                        <span class="flex items-center justify-center">
-                                            <i class="fas fa-calendar-day mr-2 text-xs"></i>
-                                            {{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y') }}
-                                        </span>
-                                    </div>
                                 </td>
 
                                 <!-- Columna Estado ACTUALIZADA -->
-<td class="px-6 py-4 whitespace-nowrap">
-    @php
-        $estadoClase = '';
-        $estadoIcono = '';
-        $estadoTexto = '';
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        switch ($repuesto->estado_entrega) {
+                                            case 'entregado':
+                                                $estadoClase =
+                                                    'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+                                                $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
+                                                $estadoTexto = 'En Tránsito';
+                                                break;
 
-        // Basado en estado_entrega de repuestos_entregas
-        switch ($repuesto->estado_entrega) {
-            case 'entregado':
-                $estadoClase = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
-                $estadoTexto = 'En Tránsito';
-                break;
-             case 'cedido':
-                $estadoClase = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
-                $estadoTexto = 'En Tránsito';
-                break;
-            case 'usado':
-                $estadoClase = 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                $estadoIcono = '<i class="fas fa-check-circle mr-1"></i>';
-                $estadoTexto = 'Usado';
-                break;
-            case 'devuelto':
-                $estadoClase = 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                $estadoIcono = '<i class="fas fa-undo-alt mr-1"></i>';
-                $estadoTexto = 'Devuelto';
-                break;
-            case 'pendiente':
-                $estadoClase = 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-                $estadoIcono = '<i class="fas fa-clock mr-1"></i>';
-                $estadoTexto = 'Pendiente';
-                break;
-            default:
-                $estadoClase = 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-400';
-                $estadoIcono = '<i class="fas fa-question-circle mr-1"></i>';
-                $estadoTexto = $repuesto->estado_entrega ?? 'Sin Entrega';
-        }
-    @endphp
-    <div class="flex justify-center">
-        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {!! $estadoClase !!}">
-            {!! $estadoIcono !!} {{ $estadoTexto }}
-        </span>
-    </div>
-    @if($repuesto->numero_ticket)
-    <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
-        <i class="fas fa-ticket-alt mr-1"></i>{{ $repuesto->numero_ticket }}
-    </div>
-    @endif
-</td>
+                                            case 'cedido':
+                                                $estadoClase =
+                                                    'bg-secondary-light text-secondary dark:bg-secondary/30 dark:text-secondary';
+                                                $estadoIcono = '<i class="fas fa-exchange-alt mr-1"></i>';
+                                                $estadoTexto = 'Cedido';
+                                                break;
+
+                                            case 'usado':
+                                                $estadoClase =
+                                                    'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+                                                $estadoIcono = '<i class="fas fa-check-circle mr-1"></i>';
+                                                $estadoTexto = 'Usado';
+                                                break;
+
+                                            case 'devuelto':
+                                                $estadoClase =
+                                                    'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+                                                $estadoIcono = '<i class="fas fa-undo-alt mr-1"></i>';
+                                                $estadoTexto = 'Devuelto';
+                                                break;
+
+                                            case 'pendiente_entrega':
+                                                $estadoClase =
+                                                    'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
+                                                $estadoIcono = '<i class="fas fa-clock mr-1"></i>';
+                                                $estadoTexto = 'Pendiente';
+                                                break;
+
+                                            default:
+                                                $estadoClase =
+                                                    'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-400';
+                                                $estadoIcono = '<i class="fas fa-question-circle mr-1"></i>';
+                                                $estadoTexto = $repuesto->estado_entrega ?? 'Sin Entrega';
+                                        }
+                                    @endphp
+
+                                    <div class="flex justify-center">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {!! $estadoClase !!}">
+                                            {!! $estadoIcono !!} {{ $estadoTexto }}
+                                        </span>
+                                    </div>
+                                    @if ($repuesto->numero_ticket)
+                                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
+                                            <i class="fas fa-ticket-alt mr-1"></i>{{ $repuesto->numero_ticket }}
+                                        </div>
+                                    @endif
+                                </td>
 
                                 <!-- Columna Fechas -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -364,6 +379,39 @@
                                         @endif
                                     </div>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    @php
+                                        $inicio = $repuesto->fecha_solicitud
+                                            ? \Carbon\Carbon::parse($repuesto->fecha_solicitud)
+                                            : null;
+
+                                        if ($repuesto->fechaUsado) {
+                                            $fin = \Carbon\Carbon::parse($repuesto->fechaUsado);
+                                        } elseif ($repuesto->fechaSinUsar) {
+                                            $fin = \Carbon\Carbon::parse($repuesto->fechaSinUsar);
+                                        } else {
+                                            $fin = now();
+                                        }
+
+                                        $dias =
+                                            $inicio && $fin
+                                                ? (int) $inicio->startOfDay()->diffInDays($fin->startOfDay())
+                                                : 0;
+                                    @endphp
+
+
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+        {{ $dias >= 10
+            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            : ($dias >= 5
+                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400') }}">
+                                        {{ $dias }} días
+                                    </span>
+                                </td>
+
+
 
                                 <!-- Columna Cantidad -->
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -619,84 +667,87 @@
 
 
                             <!-- Fotos de Entrega -->
-<div x-show="fotos.foto_entrega && fotos.foto_entrega.tiene && fotos.foto_entrega.fotos.length > 0"
-    class="mt-6">
-    <div class="mb-3">
-        <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
-            <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>Fotos de Entrega
-            <span
-                class="ml-2 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full"
-                x-text="fotos.foto_entrega.fotos.length"></span>
-        </h4>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia de la entrega del repuesto</p>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
-        id="gallery-entrega">
-        <template x-for="(foto, index) in fotos.foto_entrega.fotos" :key="index">
-            <div class="relative group">
-                <div
-                    class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-                    <img :src="foto.base64" :alt="foto.nombre || 'Foto de entrega ' + (index + 1)"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                        :data-viewer-group="'grupo-entrega'"
-                        :data-viewer-src="foto.base64"
-                        @click="viewImage($event.target)">
+                            <div x-show="fotos.foto_entrega && fotos.foto_entrega.tiene && fotos.foto_entrega.fotos.length > 0"
+                                class="mt-6">
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+                                        <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>Fotos de Entrega
+                                        <span
+                                            class="ml-2 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full"
+                                            x-text="fotos.foto_entrega.fotos.length"></span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia de la entrega del
+                                        repuesto</p>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
+                                    id="gallery-entrega">
+                                    <template x-for="(foto, index) in fotos.foto_entrega.fotos"
+                                        :key="index">
+                                        <div class="relative group">
+                                            <div
+                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                                <img :src="foto.base64"
+                                                    :alt="foto.nombre || 'Foto de entrega ' + (index + 1)"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    :data-viewer-group="'grupo-entrega'"
+                                                    :data-viewer-src="foto.base64" @click="viewImage($event.target)">
 
-                    <div
-                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <i class="fas fa-search-plus text-white text-2xl"></i>
-                    </div>
-                    
-                    <div
-                        class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        <span x-text="index + 1"></span>/<span
-                            x-text="fotos.foto_entrega.fotos.length"></span>
-                    </div>
-                </div>
-            </div>
-        </template>
-    </div>
-</div>
+                                                <div
+                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
+                                                </div>
 
-<!-- Fotos de Retorno -->
-<div x-show="fotos.fotoRetorno && fotos.fotoRetorno.tiene && fotos.fotoRetorno.fotos.length > 0"
-    class="mt-6">
-    <div class="mb-3">
-        <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
-            <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>Fotos de Retorno
-            <span
-                class="ml-2 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs rounded-full"
-                x-text="fotos.fotoRetorno.fotos.length"></span>
-        </h4>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia del retorno del repuesto</p>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
-        id="gallery-retorno">
-        <template x-for="(foto, index) in fotos.fotoRetorno.fotos" :key="index">
-            <div class="relative group">
-                <div
-                    class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-                    <img :src="foto.base64" :alt="foto.nombre || 'Foto de retorno ' + (index + 1)"
-                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                        :data-viewer-group="'grupo-retorno'"
-                        :data-viewer-src="foto.base64"
-                        @click="viewImage($event.target)">
+                                                <div
+                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                    <span x-text="index + 1"></span>/<span
+                                                        x-text="fotos.foto_entrega.fotos.length"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
 
-                    <div
-                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <i class="fas fa-search-plus text-white text-2xl"></i>
-                    </div>
-                    
-                    <div
-                        class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                        <span x-text="index + 1"></span>/<span
-                            x-text="fotos.fotoRetorno.fotos.length"></span>
-                    </div>
-                </div>
-            </div>
-        </template>
-    </div>
-</div>
+                            <!-- Fotos de Retorno -->
+                            <div x-show="fotos.fotoRetorno && fotos.fotoRetorno.tiene && fotos.fotoRetorno.fotos.length > 0"
+                                class="mt-6">
+                                <div class="mb-3">
+                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
+                                        <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>Fotos de Retorno
+                                        <span
+                                            class="ml-2 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs rounded-full"
+                                            x-text="fotos.fotoRetorno.fotos.length"></span>
+                                    </h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia del retorno del
+                                        repuesto</p>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
+                                    id="gallery-retorno">
+                                    <template x-for="(foto, index) in fotos.fotoRetorno.fotos" :key="index">
+                                        <div class="relative group">
+                                            <div
+                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+                                                <img :src="foto.base64"
+                                                    :alt="foto.nombre || 'Foto de retorno ' + (index + 1)"
+                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                    :data-viewer-group="'grupo-retorno'"
+                                                    :data-viewer-src="foto.base64" @click="viewImage($event.target)">
+
+                                                <div
+                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
+                                                </div>
+
+                                                <div
+                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                                                    <span x-text="index + 1"></span>/<span
+                                                        x-text="fotos.fotoRetorno.fotos.length"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
 
 
 
@@ -932,87 +983,27 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script>
-    // Función global para abrir modal
-    window.openDetailsModal = function(id) {
-        console.log('Abriendo detalles para ID:', id);
-        const modal = document.querySelector('[x-data="modalDetails"]');
-        if (modal) {
-            const instance = Alpine.$data(modal);
-            instance.toggle();
-            instance.loadDetails(id);
-        }
-    };
+        // Función global para abrir modal
+        window.openDetailsModal = function(id) {
+            console.log('Abriendo detalles para ID:', id);
+            const modal = document.querySelector('[x-data="modalDetails"]');
+            if (modal) {
+                const instance = Alpine.$data(modal);
+                instance.toggle();
+                instance.loadDetails(id);
+            }
+        };
 
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('modalDetails', () => ({
-            open: false,
-            loading: false,
-            dataLoaded: false,
-            modalTitle: 'Detalles del Repuesto',
-            modalSubtitle: '',
-            details: {},
-            currentId: null,
-            fotos: {
-                cargandoFotos: false,
-                tieneFotos: false,
-                fotoRepuesto: {
-                    tiene: false,
-                    fotos: []
-                },
-                foto_articulo_usado: {
-                    tiene: false,
-                    fotos: []
-                },
-                foto_articulo_no_usado: {
-                    tiene: false,
-                    fotos: []
-                },
-                foto_entrega: {
-                    tiene: false,
-                    fotos: []
-                },
-                fotoRetorno: {
-                    tiene: false,
-                    fotos: []
-                }
-            },
-            viewer: null,
-
-            get tieneFotos() {
-                return this.fotos.tieneFotos;
-            },
-
-            get totalFotos() {
-                let total = 0;
-                total += this.fotos.fotoRepuesto.fotos?.length || 0;
-                total += this.fotos.foto_articulo_usado.fotos?.length || 0;
-                total += this.fotos.foto_articulo_no_usado.fotos?.length || 0;
-                total += this.fotos.foto_entrega.fotos?.length || 0;
-                total += this.fotos.fotoRetorno.fotos?.length || 0;
-                return total;
-            },
-
-            toggle() {
-                this.open = !this.open;
-                if (!this.open) {
-                    this.reset();
-                    if (this.viewer) {
-                        this.viewer.destroy();
-                        this.viewer = null;
-                    }
-                }
-            },
-
-            reset() {
-                this.loading = false;
-                this.dataLoaded = false;
-                this.details = {};
-                this.currentId = null;
-                this.resetFotos();
-            },
-
-            resetFotos() {
-                this.fotos = {
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('modalDetails', () => ({
+                open: false,
+                loading: false,
+                dataLoaded: false,
+                modalTitle: 'Detalles del Repuesto',
+                modalSubtitle: '',
+                details: {},
+                currentId: null,
+                fotos: {
                     cargandoFotos: false,
                     tieneFotos: false,
                     fotoRepuesto: {
@@ -1035,273 +1026,346 @@
                         tiene: false,
                         fotos: []
                     }
-                };
-            },
+                },
+                viewer: null,
 
-            async loadDetails(id) {
-                console.log('Cargando detalles para ID:', id);
-                this.currentId = id;
-                this.loading = true;
-                this.dataLoaded = false;
-                this.resetFotos();
+                get tieneFotos() {
+                    return this.fotos.tieneFotos;
+                },
 
-                try {
-                    const response = await fetch(`/repuestos-transito/${id}/detalles`);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                get totalFotos() {
+                    let total = 0;
+                    total += this.fotos.fotoRepuesto.fotos?.length || 0;
+                    total += this.fotos.foto_articulo_usado.fotos?.length || 0;
+                    total += this.fotos.foto_articulo_no_usado.fotos?.length || 0;
+                    total += this.fotos.foto_entrega.fotos?.length || 0;
+                    total += this.fotos.fotoRetorno.fotos?.length || 0;
+                    return total;
+                },
 
-                    const data = await response.json();
-                    console.log('Detalles cargados:', data);
-
-                    if (data.success && data.data) {
-                        this.details = data.data;
-                        this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
-                        this.modalSubtitle = 
-                            `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
-
-                        if (data.data.tiene_fotos) {
-                            await this.loadFotos(id);
+                toggle() {
+                    this.open = !this.open;
+                    if (!this.open) {
+                        this.reset();
+                        if (this.viewer) {
+                            this.viewer.destroy();
+                            this.viewer = null;
                         }
-
-                        this.dataLoaded = true;
-                    } else {
-                        alert(data.message || 'Error al cargar detalles');
                     }
-                } catch (error) {
-                    console.error('Error al cargar detalles:', error);
-                    alert('Error de conexión: ' + error.message);
-                } finally {
+                },
+
+                reset() {
                     this.loading = false;
-                }
-            },
+                    this.dataLoaded = false;
+                    this.details = {};
+                    this.currentId = null;
+                    this.resetFotos();
+                },
 
-            async loadFotos(id) {
-                console.log('🔄 Cargando fotos para ID:', id);
-                this.fotos.cargandoFotos = true;
-
-                try {
-                    const response = await fetch(`/repuestos-transito/${id}/fotos`);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                    const data = await response.json();
-                    console.log('✅ Fotos recibidas:', data);
-
-                    if (data.success && data.fotos) {
-                        this.resetFotos();
-                        
-                        const tiposFotos = [
-                            'fotoRepuesto', 
-                            'foto_articulo_usado', 
-                            'foto_articulo_no_usado',
-                            'foto_entrega',
-                            'fotoRetorno'
-                        ];
-                        
-                        tiposFotos.forEach(tipo => {
-                            const fotoData = data.fotos[tipo];
-                            if (fotoData && fotoData.tiene && fotoData.fotos && fotoData.fotos.length > 0) {
-                                console.log(`📸 ${tipo}: ${fotoData.fotos.length} fotos`);
-                                this.fotos[tipo].tiene = true;
-                                this.fotos[tipo].fotos = fotoData.fotos;
-                                this.fotos.tieneFotos = true;
-                            }
-                        });
-
-                        this.$nextTick(() => {
-                            this.initViewer();
-                        });
-                    }
-                } catch (error) {
-                    console.error('💥 Error al cargar fotos:', error);
-                } finally {
-                    this.fotos.cargandoFotos = false;
-                }
-            },
-
-            initViewer() {
-                console.log('🖼️ Inicializando Viewer.js');
-
-                this.$nextTick(() => {
-                    setTimeout(() => {
-                        const images = this.$el.querySelectorAll('img[src*="base64"]');
-
-                        if (images.length > 0) {
-                            console.log(`✅ Encontradas ${images.length} imágenes para Viewer.js`);
-
-                            try {
-                                const imageElements = Array.from(images);
-                                this.viewer = new Viewer(imageElements, {
-                                    className: 'viewerjs-modal',
-                                    title: (image, imageData) => {
-                                        return image.alt || 'Imagen';
-                                    },
-                                    toolbar: {
-                                        zoomIn: 1,
-                                        zoomOut: 1,
-                                        oneToOne: 1,
-                                        reset: 1,
-                                        prev: 1,
-                                        next: 1,
-                                        rotateLeft: 1,
-                                        rotateRight: 1,
-                                        flipHorizontal: 1,
-                                        flipVertical: 1,
-                                    },
-                                    viewed: () => {
-                                        console.log('👁️ Imagen vista');
-                                    },
-                                    show: () => {
-                                        console.log('🖼️ Viewer.js abierto');
-                                    },
-                                    hide: () => {
-                                        console.log('🚪 Viewer.js cerrado');
-                                    }
-                                });
-
-                                console.log('✅ Viewer.js inicializado correctamente');
-                            } catch (error) {
-                                console.error('❌ Error al inicializar Viewer.js:', error);
-                            }
-                        } else {
-                            console.warn('⚠️ No se encontraron imágenes para Viewer.js');
+                resetFotos() {
+                    this.fotos = {
+                        cargandoFotos: false,
+                        tieneFotos: false,
+                        fotoRepuesto: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_usado: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_no_usado: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_entrega: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        fotoRetorno: {
+                            tiene: false,
+                            fotos: []
                         }
-                    }, 500);
-                });
-            },
+                    };
+                },
 
-            viewImage(imgElement) {
-                console.log('🖱️ Click en imagen:', imgElement);
-                
-                if (typeof Viewer === 'undefined') {
-                    console.error('❌ Viewer.js no está cargado');
-                    alert('Viewer.js no está disponible. Recarga la página.');
-                    return;
-                }
-                
-                if (this.viewer) {
+                async loadDetails(id) {
+                    console.log('Cargando detalles para ID:', id);
+                    this.currentId = id;
+                    this.loading = true;
+                    this.dataLoaded = false;
+                    this.resetFotos();
+
                     try {
-                        const allImages = Array.from(this.$el.querySelectorAll('img[src*="base64"]'));
-                        const index = allImages.indexOf(imgElement);
-                        
-                        if (index !== -1) {
-                            console.log(`🔍 Mostrando imagen ${index + 1} de ${allImages.length}`);
-                            this.viewer.view(index);
+                        const response = await fetch(`/repuestos-transito/${id}/detalles`);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                        const data = await response.json();
+                        console.log('Detalles cargados:', data);
+
+                        if (data.success && data.data) {
+                            this.details = data.data;
+                            this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
+                            this.modalSubtitle =
+                                `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
+
+                            if (data.data.tiene_fotos) {
+                                await this.loadFotos(id);
+                            }
+
+                            this.dataLoaded = true;
                         } else {
-                            console.warn('⚠️ Imagen no encontrada en la galería');
-                            this.viewer.show();
+                            alert(data.message || 'Error al cargar detalles');
                         }
                     } catch (error) {
-                        console.error('❌ Error al abrir Viewer.js:', error);
-                        window.open(imgElement.src, '_blank');
+                        console.error('Error al cargar detalles:', error);
+                        alert('Error de conexión: ' + error.message);
+                    } finally {
+                        this.loading = false;
                     }
-                } else {
-                    console.warn('⚠️ Viewer.js no inicializado, intentando inicializar...');
-                    this.initViewer();
-                    
-                    setTimeout(() => {
-                        if (this.viewer) {
-                            this.viewImage(imgElement);
-                        } else {
+                },
+
+                async loadFotos(id) {
+                    console.log('🔄 Cargando fotos para ID:', id);
+                    this.fotos.cargandoFotos = true;
+
+                    try {
+                        const response = await fetch(`/repuestos-transito/${id}/fotos`);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                        const data = await response.json();
+                        console.log('✅ Fotos recibidas:', data);
+
+                        if (data.success && data.fotos) {
+                            this.resetFotos();
+
+                            const tiposFotos = [
+                                'fotoRepuesto',
+                                'foto_articulo_usado',
+                                'foto_articulo_no_usado',
+                                'foto_entrega',
+                                'fotoRetorno'
+                            ];
+
+                            tiposFotos.forEach(tipo => {
+                                const fotoData = data.fotos[tipo];
+                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
+                                    .fotos.length > 0) {
+                                    console.log(
+                                        `📸 ${tipo}: ${fotoData.fotos.length} fotos`);
+                                    this.fotos[tipo].tiene = true;
+                                    this.fotos[tipo].fotos = fotoData.fotos;
+                                    this.fotos.tieneFotos = true;
+                                }
+                            });
+
+                            this.$nextTick(() => {
+                                this.initViewer();
+                            });
+                        }
+                    } catch (error) {
+                        console.error('💥 Error al cargar fotos:', error);
+                    } finally {
+                        this.fotos.cargandoFotos = false;
+                    }
+                },
+
+                initViewer() {
+                    console.log('🖼️ Inicializando Viewer.js');
+
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            const images = this.$el.querySelectorAll(
+                                'img[src*="base64"]');
+
+                            if (images.length > 0) {
+                                console.log(
+                                    `✅ Encontradas ${images.length} imágenes para Viewer.js`
+                                );
+
+                                try {
+                                    const imageElements = Array.from(images);
+                                    this.viewer = new Viewer(imageElements, {
+                                        className: 'viewerjs-modal',
+                                        title: (image, imageData) => {
+                                            return image.alt || 'Imagen';
+                                        },
+                                        toolbar: {
+                                            zoomIn: 1,
+                                            zoomOut: 1,
+                                            oneToOne: 1,
+                                            reset: 1,
+                                            prev: 1,
+                                            next: 1,
+                                            rotateLeft: 1,
+                                            rotateRight: 1,
+                                            flipHorizontal: 1,
+                                            flipVertical: 1,
+                                        },
+                                        viewed: () => {
+                                            console.log('👁️ Imagen vista');
+                                        },
+                                        show: () => {
+                                            console.log(
+                                                '🖼️ Viewer.js abierto');
+                                        },
+                                        hide: () => {
+                                            console.log(
+                                                '🚪 Viewer.js cerrado');
+                                        }
+                                    });
+
+                                    console.log(
+                                        '✅ Viewer.js inicializado correctamente');
+                                } catch (error) {
+                                    console.error('❌ Error al inicializar Viewer.js:',
+                                        error);
+                                }
+                            } else {
+                                console.warn(
+                                    '⚠️ No se encontraron imágenes para Viewer.js');
+                            }
+                        }, 500);
+                    });
+                },
+
+                viewImage(imgElement) {
+                    console.log('🖱️ Click en imagen:', imgElement);
+
+                    if (typeof Viewer === 'undefined') {
+                        console.error('❌ Viewer.js no está cargado');
+                        alert('Viewer.js no está disponible. Recarga la página.');
+                        return;
+                    }
+
+                    if (this.viewer) {
+                        try {
+                            const allImages = Array.from(this.$el.querySelectorAll(
+                                'img[src*="base64"]'));
+                            const index = allImages.indexOf(imgElement);
+
+                            if (index !== -1) {
+                                console.log(`🔍 Mostrando imagen ${index + 1} de ${allImages.length}`);
+                                this.viewer.view(index);
+                            } else {
+                                console.warn('⚠️ Imagen no encontrada en la galería');
+                                this.viewer.show();
+                            }
+                        } catch (error) {
+                            console.error('❌ Error al abrir Viewer.js:', error);
                             window.open(imgElement.src, '_blank');
                         }
-                    }, 300);
-                }
-            },
+                    } else {
+                        console.warn('⚠️ Viewer.js no inicializado, intentando inicializar...');
+                        this.initViewer();
 
-            getStatusClass(status) {
-                switch (status) {
-                    case 'en_transito':
-                        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                    case 'usado':
-                        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                    case 'devuelto':
-                        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                    case 'pendiente':
-                        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-                    default:
-                        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
-                }
-            },
-
-            getStatusIcon(status) {
-                switch (status) {
-                    case 'en_transito':
-                        return 'fas fa-shipping-fast';
-                    case 'usado':
-                        return 'fas fa-check-circle';
-                    case 'devuelto':
-                        return 'fas fa-undo-alt';
-                    case 'pendiente':
-                        return 'fas fa-clock';
-                    default:
-                        return 'fas fa-question-circle';
-                }
-            },
-
-            getStatusText(status) {
-                switch (status) {
-                    case 'en_transito':
-                        return 'En Tránsito';
-                    case 'usado':
-                        return 'Usado';
-                    case 'devuelto':
-                        return 'Devuelto';
-                    case 'pendiente':
-                        return 'Pendiente';
-                    default:
-                        return status || 'Sin Estado';
-                }
-            },
-
-            formatDate(dateString) {
-                if (!dateString) return 'No disponible';
-                try {
-                    const date = new Date(dateString);
-                    return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString('es-PE');
-                } catch {
-                    return 'Fecha inválida';
-                }
-            },
-
-            formatDateTime(dateString) {
-                if (!dateString) return 'No disponible';
-                try {
-                    const date = new Date(dateString);
-                    if (isNaN(date.getTime())) return 'Fecha inválida';
-                    return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
-                } catch {
-                    return 'Fecha inválida';
-                }
-            }
-        }));
-    });
-
-    // Flatpickr initialization
-    function initFlatpickr() {
-        const dateInputs = document.querySelectorAll('.flatpickr-date');
-        if (dateInputs.length > 0) {
-            dateInputs.forEach(input => {
-                flatpickr(input, {
-                    locale: "es",
-                    dateFormat: "Y-m-d",
-                    altFormat: "d/m/Y",
-                    altInput: true,
-                    allowInput: true,
-                    theme: "airbnb",
-                    onReady: function() {
-                        if (document.documentElement.classList.contains('dark')) {
-                            this.calendarContainer.classList.add('flatpickr-dark');
-                        }
+                        setTimeout(() => {
+                            if (this.viewer) {
+                                this.viewImage(imgElement);
+                            } else {
+                                window.open(imgElement.src, '_blank');
+                            }
+                        }, 300);
                     }
-                });
-            });
-            console.log('✅ Flatpickr inicializado correctamente');
-        }
-    }
+                },
 
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(() => {
-            initFlatpickr();
-        }, 300);
-    });
-</script>
+                getStatusClass(status) {
+                    switch (status) {
+                        case 'en_transito':
+                            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+                        case 'usado':
+                            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+                        case 'devuelto':
+                            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+                        case 'pendiente':
+                            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
+                        default:
+                            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
+                    }
+                },
+
+                getStatusIcon(status) {
+                    switch (status) {
+                        case 'en_transito':
+                            return 'fas fa-shipping-fast';
+                        case 'usado':
+                            return 'fas fa-check-circle';
+                        case 'devuelto':
+                            return 'fas fa-undo-alt';
+                        case 'pendiente':
+                            return 'fas fa-clock';
+                        default:
+                            return 'fas fa-question-circle';
+                    }
+                },
+
+                getStatusText(status) {
+                    switch (status) {
+                        case 'en_transito':
+                            return 'En Tránsito';
+                        case 'usado':
+                            return 'Usado';
+                        case 'devuelto':
+                            return 'Devuelto';
+                        case 'pendiente':
+                            return 'Pendiente';
+                        default:
+                            return status || 'Sin Estado';
+                    }
+                },
+
+                formatDate(dateString) {
+                    if (!dateString) return 'No disponible';
+                    try {
+                        const date = new Date(dateString);
+                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString(
+                            'es-PE');
+                    } catch {
+                        return 'Fecha inválida';
+                    }
+                },
+
+                formatDateTime(dateString) {
+                    if (!dateString) return 'No disponible';
+                    try {
+                        const date = new Date(dateString);
+                        if (isNaN(date.getTime())) return 'Fecha inválida';
+                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString(
+                            'es-PE');
+                    } catch {
+                        return 'Fecha inválida';
+                    }
+                }
+            }));
+        });
+
+        // Flatpickr initialization
+        function initFlatpickr() {
+            const dateInputs = document.querySelectorAll('.flatpickr-date');
+            if (dateInputs.length > 0) {
+                dateInputs.forEach(input => {
+                    flatpickr(input, {
+                        locale: "es",
+                        dateFormat: "Y-m-d",
+                        altFormat: "d/m/Y",
+                        altInput: true,
+                        allowInput: true,
+                        theme: "airbnb",
+                        onReady: function() {
+                            if (document.documentElement.classList.contains('dark')) {
+                                this.calendarContainer.classList.add('flatpickr-dark');
+                            }
+                        }
+                    });
+                });
+                console.log('✅ Flatpickr inicializado correctamente');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initFlatpickr();
+            }, 300);
+        });
+    </script>
 </x-layout.default>
