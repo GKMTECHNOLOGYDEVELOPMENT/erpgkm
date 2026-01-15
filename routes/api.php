@@ -748,3 +748,5 @@ Route::get('/contactos-por-cliente-general/{idClienteGeneral}', function($idClie
     }
 });
 
+Route::get('/obtener-info-entrega/{solicitudId}/{articuloId}',[SolicitudrepuestoController::class, 'obtenerInfoEntrega']
+)->name('api.obtener-info-entrega');
