@@ -15,80 +15,16 @@
             </p>
         </div>
 
-
         <!-- Cards de Resumen ACTUALIZADAS -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Total -->
-            <div
-                class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-blue-700 dark:text-blue-300">Total Entregas</p>
-                        <p class="text-3xl font-bold text-blue-900 dark:text-blue-100 mt-2">{{ $contadores['total'] }}
-                        </p>
-                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">Con entregas registradas</p>
-                    </div>
-                    <div class="bg-blue-200 dark:bg-blue-800 p-3 rounded-full">
-                        <i class="fas fa-boxes text-2xl text-blue-700 dark:text-blue-300"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- En Tránsito -->
-            <div
-                class="bg-gradient-to-r from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-warning dark:text-yellow-300">En Tránsito</p>
-                        <p class="text-3xl font-bold text-yellow-900 dark:text-yellow-100 mt-2">
-                            {{ $contadores['en_transito'] }}</p>
-                        <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Entregados en uso</p>
-                    </div>
-                    <div class="bg-yellow-200 dark:bg-yellow-800 p-3 rounded-full">
-                        <i class="fas fa-shipping-fast text-2xl text-warning dark:text-yellow-300"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Usados -->
-            <div
-                class="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border border-green-200 dark:border-green-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-green-700 dark:text-green-300">Usados</p>
-                        <p class="text-3xl font-bold text-green-900 dark:text-green-100 mt-2">
-                            {{ $contadores['usados'] }}</p>
-                        <p class="text-xs text-green-600 dark:text-green-400 mt-1">Ya utilizados</p>
-                    </div>
-                    <div class="bg-green-200 dark:bg-green-800 p-3 rounded-full">
-                        <i class="fas fa-check-circle text-2xl text-green-700 dark:text-green-300"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Devueltos -->
-            <div
-                class="bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border border-red-200 dark:border-red-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-red-700 dark:text-red-300">Devueltos</p>
-                        <p class="text-3xl font-bold text-red-900 dark:text-red-100 mt-2">{{ $contadores['devueltos'] }}
-                        </p>
-                        <p class="text-xs text-red-600 dark:text-red-400 mt-1">Devueltos al stock</p>
-                    </div>
-                    <div class="bg-red-200 dark:bg-red-800 p-3 rounded-full">
-                        <i class="fas fa-undo-alt text-2xl text-red-700 dark:text-red-300"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" id="summary-cards">
+            <!-- Las tarjetas se cargarán dinámicamente via AJAX -->
+            @include('repuestos-transito.partials.summary-cards', compact('contadores'))
         </div>
 
-        <!-- Filtros -->
-        <div
-            class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4"><i
-                    class="fas fa-search mr-2"></i>Filtros de Búsqueda</h2>
-            <form method="GET" action="" class="space-y-4">
+        <!-- Filtros CON AJAX -->
+        <div class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4"><i class="fas fa-search mr-2"></i>Filtros de Búsqueda</h2>
+            <div class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Estado -->
                     <div>
@@ -98,21 +34,14 @@
                                 Estado
                             </span>
                         </label>
-                        <select name="estado"
-                            class="form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                        <select name="estado" id="estado"
+                            class="filter-select form-select w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
                             <option value="">Todos los estados</option>
-                            <option value="en_transito" {{ request('estado') == 'en_transito' ? 'selected' : '' }}>
-                                <i class="fas fa-shipping-fast mr-1"></i> En Tránsito
-                            </option>
-                            <option value="usado" {{ request('estado') == 'usado' ? 'selected' : '' }}>
-                                <i class="fas fa-check-circle mr-1"></i> Usado
-                            </option>
-                            <option value="devuelto" {{ request('estado') == 'devuelto' ? 'selected' : '' }}>
-                                <i class="fas fa-undo-alt mr-1"></i> Devuelto
-                            </option>
-                            <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>
-                                <i class="fas fa-clock mr-1"></i> Pendiente
-                            </option>
+                            <option value="en_transito">En Tránsito</option>
+                            <option value="cedido">Cedido</option>
+                            <option value="usado">Usado</option>
+                            <option value="devuelto">Devuelto</option>
+                            <option value="pendiente">Pendiente</option>
                         </select>
                     </div>
 
@@ -124,8 +53,8 @@
                                 Código Repuesto
                             </span>
                         </label>
-                        <input type="text" name="codigo_repuesto" value="{{ request('codigo_repuesto') }}"
-                            class="form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                        <input type="text" name="codigo_repuesto" id="codigo_repuesto"
+                            class="filter-input form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                             placeholder="Ej: REP-001">
                     </div>
 
@@ -137,8 +66,8 @@
                                 Desde
                             </span>
                         </label>
-                        <input type="text" name="fecha_desde" value="{{ request('fecha_desde') }}"
-                            class="flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                        <input type="text" name="fecha_desde" id="fecha_desde"
+                            class="filter-date flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                             placeholder="Seleccionar fecha">
                     </div>
 
@@ -150,338 +79,40 @@
                                 Hasta
                             </span>
                         </label>
-                        <input type="text" name="fecha_hasta" value="{{ request('fecha_hasta') }}"
-                            class="flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                        <input type="text" name="fecha_hasta" id="fecha_hasta"
+                            class="filter-date flatpickr-date form-input w-full border-gray-300 dark:border-gray-600 dark:bg-[#121c2c] dark:text-white rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                             placeholder="Seleccionar fecha">
                     </div>
                 </div>
 
                 <!-- Botones -->
                 <div class="flex flex-wrap gap-2 pt-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-search mr-2"></i>
-                        Aplicar Filtros
-                    </button>
-
-                    <a href="{{ url()->current() }}" class="btn btn-outline-primary">
+                    <button id="btnLimpiar" class="btn btn-outline-primary">
                         <i class="fas fa-redo mr-2"></i>
                         Limpiar Filtros
-                    </a>
+                    </button>
+                    
+                    <div class="ml-auto flex items-center space-x-2">
+                        <div id="loading-indicator" class="hidden">
+                            <div class="flex items-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Buscando...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
 
         <!-- Tabla de Repuestos -->
-        <div
+        <div id="tabla-container"
             class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm overflow-hidden border border-gray-200 dark:border-gray-700">
-            <!-- Header de la tabla -->
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#121c2c]">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-white"><i
-                                class="fas fa-list mr-2"></i>Lista de Repuestos</h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400">Mostrando {{ $repuestos->count() }} de
-                            {{ $repuestos->total() }} repuestos</p>
-                    </div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                        Página {{ $repuestos->currentPage() }} de {{ $repuestos->lastPage() }}
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabla -->
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-[#121c2c]">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-box mr-2"></i>
-                                    Repuesto
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-file-alt mr-2"></i>
-                                    Solicitud
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    Estado
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-calendar mr-2"></i>
-                                    Fechas
-                                </div>
-                            </th>
-
-                            <th scope="col"
-                                class="px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-hourglass-half mr-2"></i>
-                                    Días
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-hashtag mr-2"></i>
-                                    Cantidad
-                                </div>
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                <div class="flex items-center justify-center">
-                                    <i class="fas fa-cogs mr-2"></i>
-                                    Acciones
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-[#1b2e4b] divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($repuestos as $repuesto)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-[#121c2c] transition-colors">
-                                <!-- Columna Repuesto -->
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div
-                                            class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg flex items-center justify-center border border-blue-200 dark:border-blue-800">
-                                            <i class="fas fa-box-open text-blue-600 dark:text-blue-400"></i>
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-semibold text-gray-900 dark:text-white">
-                                                {{ $repuesto->nombre_repuesto }}
-                                            </div>
-                                            <div
-                                                class="text-xs text-gray-500 dark:text-gray-500 mt-1 flex flex-wrap gap-1">
-                                                @if ($repuesto->subcategoria)
-                                                    <span
-                                                        class="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full">{{ $repuesto->subcategoria }}</span>
-                                                @endif
-                                                @if ($repuesto->modelo)
-                                                    <span
-                                                        class="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full">{{ $repuesto->modelo }}</span>
-                                                @endif
-                                                @if ($repuesto->marca)
-                                                    <span
-                                                        class="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">{{ $repuesto->marca }}</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-
-                                <!-- Columna Solicitud -->
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white text-center">
-                                        {{ $repuesto->codigo_solicitud }}
-                                    </div>
-                                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1 text-center">
-                                        <span class="flex items-center justify-center">
-                                            <i class="fas fa-user mr-2 text-xs"></i>
-                                            {{ $repuesto->solicitante ?: 'N/A' }}
-                                        </span>
-                                    </div>
-                                </td>
-
-                                <!-- Columna Estado ACTUALIZADA -->
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        switch ($repuesto->estado_entrega) {
-                                            case 'entregado':
-                                                $estadoClase =
-                                                    'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                                                $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
-                                                $estadoTexto = 'En Tránsito';
-                                                break;
-
-                                            case 'cedido':
-                                                $estadoClase =
-                                                    'bg-secondary-light text-secondary dark:bg-secondary/30 dark:text-secondary';
-                                                $estadoIcono = '<i class="fas fa-exchange-alt mr-1"></i>';
-                                                $estadoTexto = 'Cedido';
-                                                break;
-
-                                            case 'usado':
-                                                $estadoClase =
-                                                    'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                                                $estadoIcono = '<i class="fas fa-check-circle mr-1"></i>';
-                                                $estadoTexto = 'Usado';
-                                                break;
-
-                                            case 'devuelto':
-                                                $estadoClase =
-                                                    'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                                                $estadoIcono = '<i class="fas fa-undo-alt mr-1"></i>';
-                                                $estadoTexto = 'Devuelto';
-                                                break;
-
-                                            case 'pendiente_entrega':
-                                                $estadoClase =
-                                                    'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-                                                $estadoIcono = '<i class="fas fa-clock mr-1"></i>';
-                                                $estadoTexto = 'Pendiente';
-                                                break;
-
-                                            default:
-                                                $estadoClase =
-                                                    'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-400';
-                                                $estadoIcono = '<i class="fas fa-question-circle mr-1"></i>';
-                                                $estadoTexto = $repuesto->estado_entrega ?? 'Sin Entrega';
-                                        }
-                                    @endphp
-
-                                    <div class="flex justify-center">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {!! $estadoClase !!}">
-                                            {!! $estadoIcono !!} {{ $estadoTexto }}
-                                        </span>
-                                    </div>
-                                    @if ($repuesto->numero_ticket)
-                                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-1 text-center">
-                                            <i class="fas fa-ticket-alt mr-1"></i>{{ $repuesto->numero_ticket }}
-                                        </div>
-                                    @endif
-                                </td>
-
-                                <!-- Columna Fechas -->
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    <div class="space-y-1">
-                                        @if ($repuesto->fechaUsado)
-                                            <div class="flex items-center justify-center">
-                                                <i
-                                                    class="fas fa-check text-green-600 dark:text-green-400 mr-2 text-xs"></i>
-                                                <span class="font-medium">Usado:</span>
-                                                <span
-                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaUsado)->format('d/m/Y H:i') }}</span>
-                                            </div>
-                                        @endif
-                                        @if ($repuesto->fechaSinUsar)
-                                            <div class="flex items-center justify-center">
-                                                <i class="fas fa-undo text-red-600 dark:text-red-400 mr-2 text-xs"></i>
-                                                <span class="font-medium">Devuelto:</span>
-                                                <span
-                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fechaSinUsar)->format('d/m/Y H:i') }}</span>
-                                            </div>
-                                        @endif
-                                        @if (!$repuesto->fechaUsado && !$repuesto->fechaSinUsar)
-                                            <div class="flex items-center justify-center">
-                                                <i
-                                                    class="fas fa-clock text-yellow-600 dark:text-yellow-400 mr-2 text-xs"></i>
-                                                <span class="font-medium">Solicitado:</span>
-                                                <span
-                                                    class="ml-1">{{ \Carbon\Carbon::parse($repuesto->fecha_solicitud)->format('d/m/Y H:i') }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    @php
-                                        $inicio = $repuesto->fecha_solicitud
-                                            ? \Carbon\Carbon::parse($repuesto->fecha_solicitud)
-                                            : null;
-
-                                        if ($repuesto->fechaUsado) {
-                                            $fin = \Carbon\Carbon::parse($repuesto->fechaUsado);
-                                        } elseif ($repuesto->fechaSinUsar) {
-                                            $fin = \Carbon\Carbon::parse($repuesto->fechaSinUsar);
-                                        } else {
-                                            $fin = now();
-                                        }
-
-                                        $dias =
-                                            $inicio && $fin
-                                                ? (int) $inicio->startOfDay()->diffInDays($fin->startOfDay())
-                                                : 0;
-                                    @endphp
-
-
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
-        {{ $dias >= 10
-            ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-            : ($dias >= 5
-                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400') }}">
-                                        {{ $dias }} días
-                                    </span>
-                                </td>
-
-
-
-                                <!-- Columna Cantidad -->
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-center">
-                                        <span
-                                            class="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-sm font-semibold">
-                                            {{ $repuesto->cantidad }} unidades
-                                        </span>
-                                    </div>
-                                    @if ($repuesto->observacion)
-                                        <div class="text-xs text-gray-500 dark:text-gray-500 mt-2 truncate max-w-xs text-center"
-                                            title="{{ $repuesto->observacion }}">
-                                            <i
-                                                class="fas fa-sticky-note mr-1"></i>{{ Str::limit($repuesto->observacion, 50) }}
-                                        </div>
-                                    @endif
-                                </td>
-
-                                <!-- Columna Acciones -->
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center justify-center space-x-2">
-                                        <!-- Botón Ver Detalles -->
-                                        <button type="button"
-                                            onclick="openDetailsModal({{ $repuesto->idOrdenesArticulos }})"
-                                            class="btn btn-outline-primary btn-sm">
-                                            <i class="fas fa-eye mr-2"></i>
-                                            Ver Detalles
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
-                                    <div class="text-gray-400 dark:text-gray-500">
-                                        <i class="fas fa-inbox text-4xl mx-auto mb-4"></i>
-                                        <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay
-                                            repuestos</h3>
-                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No se encontraron
-                                            repuestos con los filtros aplicados.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Paginación -->
-            @if ($repuestos->hasPages())
-                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#121c2c]">
-                    <div class="flex items-center justify-between">
-                        <div class="text-sm text-gray-700 dark:text-gray-400">
-                            Mostrando {{ $repuestos->firstItem() }} a {{ $repuestos->lastItem() }} de
-                            {{ $repuestos->total() }} resultados
-                        </div>
-                        <div class="flex space-x-2">
-                            {{ $repuestos->links() }}
-                        </div>
-                    </div>
-                </div>
-            @endif
+            <!-- El contenido de la tabla se cargará dinámicamente via AJAX -->
+            @include('repuestos-transito.partials.tabla', compact('repuestos'))
         </div>
     </div>
 
-    <!-- MODAL DE DETALLES CON VIEWER.JS -->
+    <!-- MODAL DE DETALLES (igual que antes) -->
     <div x-data="modalDetails" x-cloak>
         <!-- Modal Overlay -->
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] overflow-y-auto" x-show="open"
@@ -543,7 +174,7 @@
 
                     <!-- Content -->
                     <div class="p-6">
-                        <!-- GALERÍA DE FOTOS - VERSIÓN CORREGIDA -->
+                        <!-- GALERÍA DE FOTOS -->
                         <div x-show="!loading && dataLoaded && tieneFotos"
                             class="mb-8 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-800">
                             <div class="mb-4">
@@ -566,7 +197,6 @@
                                             x-text="fotos.foto_articulo_usado.fotos.length"></span>
                                     </h4>
                                 </div>
-
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
                                     id="gallery-usado">
                                     <template x-for="(foto, index) in fotos.foto_articulo_usado.fotos"
@@ -576,22 +206,11 @@
                                                 class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
                                                 <img :src="foto.base64" :alt="foto.nombre || 'Foto ' + (index + 1)"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                                    @click="openViewer($event.target, 'grupo-usado')"
-                                                    :data-viewer-group="'grupo-usado'" :data-viewer-src="foto.base64">
+                                                    @click="viewImage($event.target)">
 
                                                 <div
                                                     class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <div class="text-center">
-                                                        <i class="fas fa-search-plus text-white text-2xl mb-1"></i>
-                                                        <p class="text-white text-xs font-medium">Click para ampliar
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <div
-                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                                    <span x-text="index + 1"></span>/<span
-                                                        x-text="fotos.foto_articulo_usado.fotos.length"></span>
+                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
                                                 </div>
                                             </div>
                                         </div>
@@ -617,11 +236,9 @@
                                         <div class="relative group">
                                             <div
                                                 class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-                                                <!-- POR ESTO (MÁS SIMPLE): -->
                                                 <img :src="foto.base64" :alt="foto.nombre || 'Foto ' + (index + 1)"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                                    @click="openViewer($event.target, 'grupo-usado')"
-                                                    :data-viewer-group="'grupo-usado'" :data-viewer-src="foto.base64">
+                                                    @click="viewImage($event.target)">
 
                                                 <div
                                                     class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -654,9 +271,6 @@
                                                 <img :src="foto.base64"
                                                     :alt="foto.nombre || 'Foto ' + (index + 1)"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                                    :data-viewer-group="'grupo-original'"
-                                                    :data-viewer-src="foto.base64"
-                                                    :data-viewer-title="foto.nombre || 'Foto ' + (index + 1)"
                                                     @click="viewImage($event.target)">
 
                                                 <div
@@ -669,7 +283,6 @@
                                 </div>
                             </div>
 
-
                             <!-- Fotos de Entrega -->
                             <div x-show="fotos.foto_entrega && fotos.foto_entrega.tiene && fotos.foto_entrega.fotos.length > 0"
                                 class="mt-6">
@@ -680,8 +293,6 @@
                                             class="ml-2 px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs rounded-full"
                                             x-text="fotos.foto_entrega.fotos.length"></span>
                                     </h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia de la entrega del
-                                        repuesto</p>
                                 </div>
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
                                     id="gallery-entrega">
@@ -693,68 +304,17 @@
                                                 <img :src="foto.base64"
                                                     :alt="foto.nombre || 'Foto de entrega ' + (index + 1)"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                                    :data-viewer-group="'grupo-entrega'"
-                                                    :data-viewer-src="foto.base64" @click="viewImage($event.target)">
+                                                    @click="viewImage($event.target)">
 
                                                 <div
                                                     class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                     <i class="fas fa-search-plus text-white text-2xl"></i>
-                                                </div>
-
-                                                <div
-                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                                    <span x-text="index + 1"></span>/<span
-                                                        x-text="fotos.foto_entrega.fotos.length"></span>
                                                 </div>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
                             </div>
-
-                            <!-- Fotos de Retorno -->
-                            <div x-show="fotos.fotoRetorno && fotos.fotoRetorno.tiene && fotos.fotoRetorno.fotos.length > 0"
-                                class="mt-6">
-                                <div class="mb-3">
-                                    <h4 class="font-medium text-gray-800 dark:text-white flex items-center">
-                                        <span class="w-2 h-2 bg-indigo-500 rounded-full mr-2"></span>Fotos de Retorno
-                                        <span
-                                            class="ml-2 px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-xs rounded-full"
-                                            x-text="fotos.fotoRetorno.fotos.length"></span>
-                                    </h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">Evidencia del retorno del
-                                        repuesto</p>
-                                </div>
-                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
-                                    id="gallery-retorno">
-                                    <template x-for="(foto, index) in fotos.fotoRetorno.fotos" :key="index">
-                                        <div class="relative group">
-                                            <div
-                                                class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-                                                <img :src="foto.base64"
-                                                    :alt="foto.nombre || 'Foto de retorno ' + (index + 1)"
-                                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
-                                                    :data-viewer-group="'grupo-retorno'"
-                                                    :data-viewer-src="foto.base64" @click="viewImage($event.target)">
-
-                                                <div
-                                                    class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <i class="fas fa-search-plus text-white text-2xl"></i>
-                                                </div>
-
-                                                <div
-                                                    class="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                                                    <span x-text="index + 1"></span>/<span
-                                                        x-text="fotos.fotoRetorno.fotos.length"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-
-
-
                         </div>
 
                         <!-- Sin Fotos -->
@@ -799,22 +359,6 @@
                                                     x-text="details.cantidad + ' und'"></p>
                                             </div>
                                         </div>
-
-                                        <div x-show="details.sku || details.codigo_barras">
-                                            <label
-                                                class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Códigos
-                                                Adicionales</label>
-                                            <div class="flex flex-wrap gap-2">
-                                                <span x-show="details.sku"
-                                                    class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded">
-                                                    SKU: <span x-text="details.sku"></span>
-                                                </span>
-                                                <span x-show="details.codigo_barras"
-                                                    class="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded">
-                                                    Código Barras: <span x-text="details.codigo_barras"></span>
-                                                </span>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -843,13 +387,6 @@
                                                 Solicitud:</span>
                                             <span class="font-medium text-gray-800 dark:text-white"
                                                 x-text="formatDate(details.fechaCreacion)"></span>
-                                        </div>
-                                        <div class="flex justify-between items-center"
-                                            x-show="details.fecharequerida">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">Fecha
-                                                Requerida:</span>
-                                            <span class="font-medium text-gray-800 dark:text-white"
-                                                x-text="formatDate(details.fecharequerida)"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -900,7 +437,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Fecha de Solicitud (si no hay otras fechas) -->
+                                        <!-- Fecha de Solicitud -->
                                         <div x-show="!details.fechaUsado && !details.fechaSinUsar"
                                             class="flex items-center p-3 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                                             <div class="flex-shrink-0 mr-4">
@@ -915,36 +452,6 @@
                                                 <p class="text-sm text-yellow-600 dark:text-yellow-400"
                                                     x-text="formatDateTime(details.fechaCreacion)"></p>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Categorización -->
-                                <div x-show="details.subcategoria || details.modelo || details.marca"
-                                    class="bg-white dark:bg-gray-900 rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm">
-                                    <h3
-                                        class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-                                        <i class="fas fa-tags text-orange-500 mr-2"></i>
-                                        Categorización
-                                    </h3>
-                                    <div class="grid grid-cols-1 gap-3">
-                                        <div x-show="details.subcategoria"
-                                            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                            <span class="text-sm text-gray-600 dark:text-gray-400">Subcategoría</span>
-                                            <span class="font-medium text-gray-800 dark:text-white"
-                                                x-text="details.subcategoria"></span>
-                                        </div>
-                                        <div x-show="details.modelo"
-                                            class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                            <span class="text-sm text-blue-600 dark:text-blue-400">Modelo</span>
-                                            <span class="font-medium text-blue-800 dark:text-blue-300"
-                                                x-text="details.modelo"></span>
-                                        </div>
-                                        <div x-show="details.marca"
-                                            class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                            <span class="text-sm text-green-600 dark:text-green-400">Marca</span>
-                                            <span class="font-medium text-green-800 dark:text-green-300"
-                                                x-text="details.marca"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -981,23 +488,154 @@
         </div>
     </div>
 
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    
     <script>
-        // Función global para abrir modal
-        window.openDetailsModal = function(id) {
-            console.log('Abriendo detalles para ID:', id);
-            const modal = document.querySelector('[x-data="modalDetails"]');
-            if (modal) {
-                const instance = Alpine.$data(modal);
-                instance.toggle();
-                instance.loadDetails(id);
-            }
-        };
+        // Configuración de AJAX
+        let ajaxTimeout;
+        let currentPage = 1;
+        let currentFilters = {};
 
+        // Función para aplicar filtros via AJAX
+        function aplicarFiltrosAJAX() {
+            clearTimeout(ajaxTimeout);
+            
+            // Obtener valores de filtros
+            const filtros = {
+                estado: $('#estado').val(),
+                codigo_repuesto: $('#codigo_repuesto').val(),
+                fecha_desde: $('#fecha_desde').val(),
+                fecha_hasta: $('#fecha_hasta').val(),
+                page: currentPage
+            };
+
+            currentFilters = filtros;
+
+            // Mostrar loading
+            $('#loading-indicator').removeClass('hidden');
+            
+            // Retraso para evitar muchas llamadas mientras se escribe
+            ajaxTimeout = setTimeout(() => {
+                $.ajax({
+                    url: '{{ route("repuesto-transito.filtrar") }}',
+                    method: 'GET',
+                    data: filtros,
+                    dataType: 'json',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        // Actualizar tabla
+                        $('#tabla-container').html(response.tabla);
+                        
+                        // Actualizar tarjetas de resumen
+                        $('#summary-cards').html(response.summary);
+                        
+                        // Actualizar parámetros de paginación
+                        setupPaginationEvents();
+                        
+                        // Restaurar valores de filtros en selects
+                        $('#estado').val(filtros.estado);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error en AJAX:', error);
+                        alert('Error al aplicar filtros: ' + error);
+                    },
+                    complete: function() {
+                        $('#loading-indicator').addClass('hidden');
+                    }
+                });
+            }, 500); // Debounce de 500ms
+        }
+
+        // Función para limpiar filtros
+        function limpiarFiltros() {
+            $('#estado').val('');
+            $('#codigo_repuesto').val('');
+            $('#fecha_desde').val('');
+            $('#fecha_hasta').val('');
+            
+            // Limpiar flatpickr
+            if (window.flatpickrInstances) {
+                window.flatpickrInstances.forEach(instance => {
+                    instance.clear();
+                });
+            }
+            
+            currentPage = 1;
+            aplicarFiltrosAJAX();
+        }
+
+        // Función para configurar eventos de paginación
+        function setupPaginationEvents() {
+            $('.pagination a').on('click', function(e) {
+                e.preventDefault();
+                
+                const url = $(this).attr('href');
+                const pageMatch = url.match(/page=(\d+)/);
+                
+                if (pageMatch) {
+                    currentPage = pageMatch[1];
+                    aplicarFiltrosAJAX();
+                }
+            });
+        }
+
+        // Event Listeners para filtros
+        $(document).ready(function() {
+            // Inicializar flatpickr
+            const dateInputs = document.querySelectorAll('.flatpickr-date');
+            window.flatpickrInstances = [];
+            
+            if (dateInputs.length > 0) {
+                dateInputs.forEach(input => {
+                    const fp = flatpickr(input, {
+                        locale: "es",
+                        dateFormat: "Y-m-d",
+                        altFormat: "d/m/Y",
+                        altInput: true,
+                        allowInput: true,
+                        theme: "airbnb",
+                        onChange: function() {
+                            aplicarFiltrosAJAX();
+                        },
+                        onReady: function() {
+                            if (document.documentElement.classList.contains('dark')) {
+                                this.calendarContainer.classList.add('flatpickr-dark');
+                            }
+                        }
+                    });
+                    window.flatpickrInstances.push(fp);
+                });
+            }
+
+            // Eventos para filtros
+            $('.filter-select, .filter-input').on('change keyup', function() {
+                aplicarFiltrosAJAX();
+            });
+
+            // Evento para botón limpiar
+            $('#btnLimpiar').on('click', function() {
+                limpiarFiltros();
+            });
+
+            // Configurar paginación inicial
+            setupPaginationEvents();
+
+            // Preservar filtros al cargar la página
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('estado')) {
+                $('#estado').val(urlParams.get('estado'));
+            }
+            if (urlParams.get('codigo_repuesto')) {
+                $('#codigo_repuesto').val(urlParams.get('codigo_repuesto'));
+            }
+        });
+
+        // Alpine.js para modal (igual que antes)
         document.addEventListener('alpine:init', () => {
             Alpine.data('modalDetails', () => ({
                 open: false,
@@ -1010,26 +648,10 @@
                 fotos: {
                     cargandoFotos: false,
                     tieneFotos: false,
-                    fotoRepuesto: {
-                        tiene: false,
-                        fotos: []
-                    },
-                    foto_articulo_usado: {
-                        tiene: false,
-                        fotos: []
-                    },
-                    foto_articulo_no_usado: {
-                        tiene: false,
-                        fotos: []
-                    },
-                    foto_entrega: {
-                        tiene: false,
-                        fotos: []
-                    },
-                    fotoRetorno: {
-                        tiene: false,
-                        fotos: []
-                    }
+                    fotoRepuesto: { tiene: false, fotos: [] },
+                    foto_articulo_usado: { tiene: false, fotos: [] },
+                    foto_articulo_no_usado: { tiene: false, fotos: [] },
+                    foto_entrega: { tiene: false, fotos: [] }
                 },
                 viewer: null,
 
@@ -1043,7 +665,6 @@
                     total += this.fotos.foto_articulo_usado.fotos?.length || 0;
                     total += this.fotos.foto_articulo_no_usado.fotos?.length || 0;
                     total += this.fotos.foto_entrega.fotos?.length || 0;
-                    total += this.fotos.fotoRetorno.fotos?.length || 0;
                     return total;
                 },
 
@@ -1070,31 +691,14 @@
                     this.fotos = {
                         cargandoFotos: false,
                         tieneFotos: false,
-                        fotoRepuesto: {
-                            tiene: false,
-                            fotos: []
-                        },
-                        foto_articulo_usado: {
-                            tiene: false,
-                            fotos: []
-                        },
-                        foto_articulo_no_usado: {
-                            tiene: false,
-                            fotos: []
-                        },
-                        foto_entrega: {
-                            tiene: false,
-                            fotos: []
-                        },
-                        fotoRetorno: {
-                            tiene: false,
-                            fotos: []
-                        }
+                        fotoRepuesto: { tiene: false, fotos: [] },
+                        foto_articulo_usado: { tiene: false, fotos: [] },
+                        foto_articulo_no_usado: { tiene: false, fotos: [] },
+                        foto_entrega: { tiene: false, fotos: [] }
                     };
                 },
 
                 async loadDetails(id) {
-                    console.log('Cargando detalles para ID:', id);
                     this.currentId = id;
                     this.loading = true;
                     this.dataLoaded = false;
@@ -1105,13 +709,10 @@
                         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                         const data = await response.json();
-                        console.log('Detalles cargados:', data);
-
                         if (data.success && data.data) {
                             this.details = data.data;
                             this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
-                            this.modalSubtitle =
-                                `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
+                            this.modalSubtitle = `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
 
                             if (data.data.tiene_fotos) {
                                 await this.loadFotos(id);
@@ -1130,7 +731,6 @@
                 },
 
                 async loadFotos(id) {
-                    console.log('🔄 Cargando fotos para ID:', id);
                     this.fotos.cargandoFotos = true;
 
                     try {
@@ -1138,8 +738,6 @@
                         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
                         const data = await response.json();
-                        console.log('✅ Fotos recibidas:', data);
-
                         if (data.success && data.fotos) {
                             this.resetFotos();
 
@@ -1147,16 +745,12 @@
                                 'fotoRepuesto',
                                 'foto_articulo_usado',
                                 'foto_articulo_no_usado',
-                                'foto_entrega',
-                                'fotoRetorno'
+                                'foto_entrega'
                             ];
 
                             tiposFotos.forEach(tipo => {
                                 const fotoData = data.fotos[tipo];
-                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
-                                    .fotos.length > 0) {
-                                    console.log(
-                                        `📸 ${tipo}: ${fotoData.fotos.length} fotos`);
+                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData.fotos.length > 0) {
                                     this.fotos[tipo].tiene = true;
                                     this.fotos[tipo].fotos = fotoData.fotos;
                                     this.fotos.tieneFotos = true;
@@ -1168,32 +762,22 @@
                             });
                         }
                     } catch (error) {
-                        console.error('💥 Error al cargar fotos:', error);
+                        console.error('Error al cargar fotos:', error);
                     } finally {
                         this.fotos.cargandoFotos = false;
                     }
                 },
 
                 initViewer() {
-                    console.log('🖼️ Inicializando Viewer.js');
-
                     this.$nextTick(() => {
                         setTimeout(() => {
-                            const images = this.$el.querySelectorAll(
-                                'img[src*="base64"]');
-
+                            const images = this.$el.querySelectorAll('img[src*="base64"]');
                             if (images.length > 0) {
-                                console.log(
-                                    `✅ Encontradas ${images.length} imágenes para Viewer.js`
-                                );
-
                                 try {
                                     const imageElements = Array.from(images);
                                     this.viewer = new Viewer(imageElements, {
                                         className: 'viewerjs-modal',
-                                        title: (image, imageData) => {
-                                            return image.alt || 'Imagen';
-                                        },
+                                        title: (image, imageData) => image.alt || 'Imagen',
                                         toolbar: {
                                             zoomIn: 1,
                                             zoomOut: 1,
@@ -1205,125 +789,95 @@
                                             rotateRight: 1,
                                             flipHorizontal: 1,
                                             flipVertical: 1,
-                                        },
-                                        viewed: () => {
-                                            console.log('👁️ Imagen vista');
-                                        },
-                                        show: () => {
-                                            console.log(
-                                                '🖼️ Viewer.js abierto');
-                                        },
-                                        hide: () => {
-                                            console.log(
-                                                '🚪 Viewer.js cerrado');
                                         }
                                     });
-
-                                    console.log(
-                                        '✅ Viewer.js inicializado correctamente');
                                 } catch (error) {
-                                    console.error('❌ Error al inicializar Viewer.js:',
-                                        error);
+                                    console.error('Error al inicializar Viewer.js:', error);
                                 }
-                            } else {
-                                console.warn(
-                                    '⚠️ No se encontraron imágenes para Viewer.js');
                             }
                         }, 500);
                     });
                 },
 
                 viewImage(imgElement) {
-                    console.log('🖱️ Click en imagen:', imgElement);
-
                     if (typeof Viewer === 'undefined') {
-                        console.error('❌ Viewer.js no está cargado');
                         alert('Viewer.js no está disponible. Recarga la página.');
                         return;
                     }
 
                     if (this.viewer) {
                         try {
-                            const allImages = Array.from(this.$el.querySelectorAll(
-                                'img[src*="base64"]'));
+                            const allImages = Array.from(this.$el.querySelectorAll('img[src*="base64"]'));
                             const index = allImages.indexOf(imgElement);
-
                             if (index !== -1) {
-                                console.log(`🔍 Mostrando imagen ${index + 1} de ${allImages.length}`);
                                 this.viewer.view(index);
                             } else {
-                                console.warn('⚠️ Imagen no encontrada en la galería');
                                 this.viewer.show();
                             }
                         } catch (error) {
-                            console.error('❌ Error al abrir Viewer.js:', error);
+                            console.error('Error al abrir Viewer.js:', error);
                             window.open(imgElement.src, '_blank');
                         }
                     } else {
-                        console.warn('⚠️ Viewer.js no inicializado, intentando inicializar...');
-                        this.initViewer();
-
-                        setTimeout(() => {
-                            if (this.viewer) {
-                                this.viewImage(imgElement);
-                            } else {
-                                window.open(imgElement.src, '_blank');
-                            }
-                        }, 300);
+                        window.open(imgElement.src, '_blank');
                     }
                 },
 
-                getStatusClass(status) {
-                    switch (status) {
-                        case 'en_transito':
-                            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-                        case 'usado':
-                            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-                        case 'devuelto':
-                            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-                        case 'pendiente':
-                            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-                        default:
-                            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
-                    }
-                },
+             getStatusClass(status) {
+    switch (status) {
+        case 'en_transito':
+            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+        case 'cedido':
+            return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400';  // NUEVO
+        case 'usado':
+            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+        case 'devuelto':
+            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+        case 'pendiente':
+            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
+        default:
+            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
+    }
+},
 
-                getStatusIcon(status) {
-                    switch (status) {
-                        case 'en_transito':
-                            return 'fas fa-shipping-fast';
-                        case 'usado':
-                            return 'fas fa-check-circle';
-                        case 'devuelto':
-                            return 'fas fa-undo-alt';
-                        case 'pendiente':
-                            return 'fas fa-clock';
-                        default:
-                            return 'fas fa-question-circle';
-                    }
-                },
+getStatusIcon(status) {
+    switch (status) {
+        case 'en_transito':
+            return 'fas fa-shipping-fast';
+        case 'cedido':
+            return 'fas fa-exchange-alt';  // NUEVO
+        case 'usado':
+            return 'fas fa-check-circle';
+        case 'devuelto':
+            return 'fas fa-undo-alt';
+        case 'pendiente':
+            return 'fas fa-clock';
+        default:
+            return 'fas fa-question-circle';
+    }
+},
 
-                getStatusText(status) {
-                    switch (status) {
-                        case 'en_transito':
-                            return 'En Tránsito';
-                        case 'usado':
-                            return 'Usado';
-                        case 'devuelto':
-                            return 'Devuelto';
-                        case 'pendiente':
-                            return 'Pendiente';
-                        default:
-                            return status || 'Sin Estado';
-                    }
-                },
-
+getStatusText(status) {
+    switch (status) {
+        case 'en_transito':
+            return 'En Tránsito';
+        case 'cedido':
+            return 'Cedido';  // NUEVO
+        case 'usado':
+            return 'Usado';
+        case 'devuelto':
+            return 'Devuelto';
+        case 'pendiente':
+            return 'Pendiente';
+        default:
+            return status || 'Sin Estado';
+    }
+},
                 formatDate(dateString) {
                     if (!dateString) return 'No disponible';
                     try {
                         const date = new Date(dateString);
-                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString(
-                            'es-PE');
+                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString('es-PE');
                     } catch {
                         return 'Fecha inválida';
                     }
@@ -1334,8 +888,7 @@
                     try {
                         const date = new Date(dateString);
                         if (isNaN(date.getTime())) return 'Fecha inválida';
-                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString(
-                            'es-PE');
+                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
                     } catch {
                         return 'Fecha inválida';
                     }
@@ -1343,33 +896,14 @@
             }));
         });
 
-        // Flatpickr initialization
-        function initFlatpickr() {
-            const dateInputs = document.querySelectorAll('.flatpickr-date');
-            if (dateInputs.length > 0) {
-                dateInputs.forEach(input => {
-                    flatpickr(input, {
-                        locale: "es",
-                        dateFormat: "Y-m-d",
-                        altFormat: "d/m/Y",
-                        altInput: true,
-                        allowInput: true,
-                        theme: "airbnb",
-                        onReady: function() {
-                            if (document.documentElement.classList.contains('dark')) {
-                                this.calendarContainer.classList.add('flatpickr-dark');
-                            }
-                        }
-                    });
-                });
-                console.log('✅ Flatpickr inicializado correctamente');
+        // Función global para abrir modal
+        window.openDetailsModal = function(id) {
+            const modal = document.querySelector('[x-data="modalDetails"]');
+            if (modal) {
+                const instance = Alpine.$data(modal);
+                instance.toggle();
+                instance.loadDetails(id);
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                initFlatpickr();
-            }, 300);
-        });
+        };
     </script>
 </x-layout.default>

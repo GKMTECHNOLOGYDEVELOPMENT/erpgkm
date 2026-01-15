@@ -2011,25 +2011,31 @@ Route::middleware(['auth'])->group(function () {
 
 // Repuestos en Tránsito
 Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function () {
+    // Rutas principales
     Route::get('/', [RepuestoTransitoController::class, 'index'])->name('index');
     Route::get('/dashboard', [RepuestoTransitoController::class, 'dashboard'])->name('dashboard');
     Route::get('/reporte', [RepuestoTransitoController::class, 'reporte'])->name('reporte');
+    
+    // Ruta AJAX para filtrar DEBE estar ANTES de la ruta /{id}
+    Route::get('/filtrar', [RepuestoTransitoController::class, 'filtrar'])->name('filtrar');
+    
+    // Ruta para mostrar detalles (show) - viene DESPUÉS de filtrar
     Route::get('/{id}', [RepuestoTransitoController::class, 'show'])->name('show');
     Route::put('/{id}', [RepuestoTransitoController::class, 'update'])->name('update');
 
+    // Rutas para AJAX (detalles y fotos del modal)
     Route::get('/{id}/detalles', [RepuestoTransitoController::class, 'obtenerDetalles'])->name('detalles');
     Route::get('/{id}/evidencias', [RepuestoTransitoController::class, 'obtenerEvidencias'])->name('evidencias');
     Route::get('/{id}/imagen/{tipo}', [RepuestoTransitoController::class, 'mostrarImagen'])->name('imagen');
     Route::get('/{id}/foto/{tipo}', [RepuestoTransitoController::class, 'obtenerFoto'])->name('repuestos-transito.foto');
     Route::get('/{id}/fotos', [RepuestoTransitoController::class, 'obtenerTodasFotos'])->name('repuestos-transito.todas-fotos');
-    // Ruta de debug
+    
+    // Rutas de debug
     Route::get('/{id}/debug-fotos', [RepuestoTransitoController::class, 'debugFotos'])->name('repuestos-transito.debug-fotos');
     Route::get('/{id}/fotos-tabla', [RepuestoTransitoController::class, 'obtenerTodasFotos'])
         ->name('repuestos.transito.fotos.tabla');
-
     Route::get('/{id}/foto-tabla/{tipo}', [RepuestoTransitoController::class, 'obtenerFotoTablaSeparada'])
         ->name('repuestos.transito.foto.tabla');
-
     Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
         ->name('repuestos.transito.fotos.tipo');
 });

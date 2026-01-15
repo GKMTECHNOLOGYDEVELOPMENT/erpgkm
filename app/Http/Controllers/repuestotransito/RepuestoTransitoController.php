@@ -18,140 +18,211 @@ class RepuestoTransitoController extends Controller
         Log::info('Filtros recibidos:', $filtros);
         
         // Obtener los repuestos en tránsito basados en repuestos_entregas
-        $query = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.idOrdenesArticulos',
-                'oa.cantidad',
-                'oa.observacion',
-                'oa.fechaUsado',
-                'oa.fechaSinUsar',
-                'oa.created_at as fecha_solicitud',
-                'a.idArticulos',
-                'a.codigo_repuesto as nombre_repuesto',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.sku',
-                'so.idSolicitudesOrdenes',
-                'so.codigo as codigo_solicitud',
-                'so.fechaCreacion',
-                'so.fecharequerida',
-                'so.estado as estado_solicitud',
-                'u.Nombre as solicitante',
-                'sc.nombre as subcategoria',
-                'm.nombre as modelo',
-                'mar.nombre as marca',
-                're.estado as estado_entrega',
-                're.fecha_entrega',
-                're.observaciones as obs_entrega',
-                're.numero_ticket',
-                // Estado dinámico basado en repuestos_entregas
-                DB::raw('CASE 
-                    WHEN re.estado = "entregado" THEN "en_transito"
-                    WHEN re.estado = "usado" THEN "usado"
-                    WHEN re.estado = "devuelto" THEN "devuelto"
-                    WHEN re.estado = "pendiente" THEN "pendiente"
-                    ELSE COALESCE(re.estado, "sin_entrega")
-                END as estado_repuesto')
-            )
-            ->join('solicitudesordenes as so', 'oa.idSolicitudesOrdenes', '=', 'so.idSolicitudesOrdenes')
-            ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-            ->leftJoin('usuarios as u', 'so.idUsuario', '=', 'u.idUsuario')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->leftJoin('articulo_modelo as am', function($join) {
-                $join->on('a.idArticulos', '=', 'am.articulo_id')
-                     ->where('a.idTipoArticulo', 2); // Solo para tipo 2 si aplica
-            })
-            ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-            ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-            // UNIR CON REPUESTOS_ENTREGAS (esto es clave)
-            ->leftJoin('repuestos_entregas as re', function($join) {
-                $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
-                     ->on('oa.idArticulos', '=', 're.articulo_id');
-            })
-            ->where('so.tipoorden', 'solicitud_repuesto')
-            // Considerar repuestos que tengan entrega o estén en proceso
-            ->where(function($q) {
-                $q->whereNotNull('re.id')
-                  ->orWhereIn('oa.estado', [0, 1]); // Mantener lógica anterior si es necesario
-            });
-
-        // Aplicar filtros BASADOS EN REPUESTOS_ENTREGAS
-        if (!empty($filtros['estado'])) {
-            switch ($filtros['estado']) {
-                case 'en_transito':
-                    $query->where('re.estado', 'entregado', 'cedido');
-                    break;
-                case 'usado':
-                    $query->where('re.estado', 'usado');
-                    break;
-                case 'devuelto':
-                    $query->where('re.estado', 'devuelto');
-                    break;
-                case 'pendiente':
-                    $query->where('re.estado', 'pendiente');
-                    break;
-                default:
-                    // Si el filtro es otro estado específico
-                    $query->where('re.estado', $filtros['estado']);
-                    break;
-            }
-        }
-
-        // Mantener otros filtros existentes
-        if (!empty($filtros['codigo_repuesto'])) {
-            $query->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
-        }
-
-        if (!empty($filtros['codigo_solicitud'])) {
-            $query->where('so.codigo', 'like', '%' . $filtros['codigo_solicitud'] . '%');
-        }
-
-        if (!empty($filtros['fecha_desde'])) {
-            $query->whereDate('re.fecha_entrega', '>=', $filtros['fecha_desde']);
-        }
-
-        if (!empty($filtros['fecha_hasta'])) {
-            $query->whereDate('re.fecha_entrega', '<=', $filtros['fecha_hasta']);
-        }
-
-        $repuestos = $query->orderBy('re.fecha_entrega', 'desc')
-                          ->orderBy('oa.created_at', 'desc')
-                          ->paginate(20);
+        $query = $this->buildQuery($filtros);
+        
+        $repuestos = $query->paginate(20);
 
         // CONTADORES ACTUALIZADOS BASADOS EN REPUESTOS_ENTREGAS
-        $contadores = [
-            'total' => DB::table('ordenesarticulos as oa')
-                ->join('solicitudesordenes as so', 'oa.idSolicitudesOrdenes', '=', 'so.idSolicitudesOrdenes')
-                ->leftJoin('repuestos_entregas as re', function($join) {
-                    $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
-                         ->on('oa.idArticulos', '=', 're.articulo_id');
-                })
-                ->where('so.tipoorden', 'solicitud_repuesto')
-                ->whereNotNull('re.id')
-                ->count(),
-            
-            'en_transito' => DB::table('repuestos_entregas as re')
-                ->where('re.estado', 'entregado')
-                ->count(),
-                
-            'usados' => DB::table('repuestos_entregas as re')
-                ->where('re.estado', 'usado')
-                ->count(),
-                
-            'devueltos' => DB::table('repuestos_entregas as re')
-                ->where('re.estado', 'devuelto')
-                ->count(),
-                
-            'pendientes' => DB::table('repuestos_entregas as re')
-                ->where('re.estado', 'pendiente')
-                ->count(),
-        ];
+        $contadores = $this->getContadores($filtros);
         
         Log::info('Total repuestos encontrados: ' . $repuestos->total());
         Log::info('Contadores:', $contadores);
         
         return view('repuestos-transito.index', compact('repuestos', 'contadores', 'filtros'));
     }
+
+    /**
+     * Método AJAX para filtrar
+     */
+   public function filtrar(Request $request)
+{
+    $filtros = $request->all();
+    
+    Log::info('=== FILTRAR AJAX ===');
+    Log::info('Filtros AJAX:', $filtros);
+    
+    // Construir consulta con filtros
+    $query = $this->buildQuery($filtros);
+    
+    // Obtener repuestos paginados
+    $repuestos = $query->paginate(20)->appends($filtros);
+    
+    // Obtener contadores actualizados
+    $contadores = $this->getContadores($filtros);
+    
+    // Verificar si es solicitud AJAX
+    if ($request->ajax()) {
+        // Devolver vista parcial de tabla
+        $tablaView = view('repuestos-transito.partials.tabla', compact('repuestos'))->render();
+        $summaryView = view('repuestos-transito.partials.summary-cards', compact('contadores'))->render();
+        
+        return response()->json([
+            'success' => true,
+            'tabla' => $tablaView,
+            'summary' => $summaryView,
+            'total' => $repuestos->total(),
+            'current_page' => $repuestos->currentPage(),
+            'last_page' => $repuestos->lastPage()
+        ]);
+    }
+    
+    return back()->withInput();
+}
+
+  private function buildQuery($filtros = [])
+{
+    $query = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idOrdenesArticulos',
+            'oa.cantidad',
+            'oa.observacion',
+            'oa.fechaUsado',
+            'oa.fechaSinUsar',
+            'oa.created_at as fecha_solicitud',
+            'a.idArticulos',
+            'a.codigo_repuesto as nombre_repuesto',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.sku',
+            'so.idSolicitudesOrdenes',
+            'so.codigo as codigo_solicitud',
+            'so.fechaCreacion',
+            'so.fecharequerida',
+            'so.estado as estado_solicitud',
+            'u.Nombre as solicitante',
+            'sc.nombre as subcategoria',
+            'm.nombre as modelo',
+            'mar.nombre as marca',
+            're.estado as estado_entrega',
+            're.fecha_entrega',
+            're.observaciones as obs_entrega',
+            're.numero_ticket',
+            // Estado dinámico basado en repuestos_entregas - AGREGADO CEDIDO
+            DB::raw('CASE 
+                WHEN re.estado = "entregado" THEN "en_transito"
+                WHEN re.estado = "cedido" THEN "cedido"
+                WHEN re.estado = "usado" THEN "usado"
+                WHEN re.estado = "devuelto" THEN "devuelto"
+                WHEN re.estado = "pendiente" THEN "pendiente"
+                ELSE COALESCE(re.estado, "sin_entrega")
+            END as estado_repuesto')
+        )
+        ->join('solicitudesordenes as so', 'oa.idSolicitudesOrdenes', '=', 'so.idSolicitudesOrdenes')
+        ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+        ->leftJoin('usuarios as u', 'so.idUsuario', '=', 'u.idUsuario')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->leftJoin('articulo_modelo as am', function($join) {
+            $join->on('a.idArticulos', '=', 'am.articulo_id')
+                 ->where('a.idTipoArticulo', 2);
+        })
+        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        ->leftJoin('repuestos_entregas as re', function($join) {
+            $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
+                 ->on('oa.idArticulos', '=', 're.articulo_id');
+        })
+        ->where('so.tipoorden', 'solicitud_repuesto')
+        ->where(function($q) {
+            $q->whereNotNull('re.id')
+              ->orWhereIn('oa.estado', [0, 1]);
+        });
+
+    // Aplicar filtros BASADOS EN REPUESTOS_ENTREGAS - AGREGADO CEDIDO
+    if (!empty($filtros['estado'])) {
+        $query->where(function($q) use ($filtros) {
+            switch ($filtros['estado']) {
+                case 'en_transito':
+                    $q->where('re.estado', 'entregado');
+                    break;
+                case 'cedido':
+                    $q->where('re.estado', 'cedido');
+                    break;
+                case 'usado':
+                    $q->where('re.estado', 'usado');
+                    break;
+                case 'devuelto':
+                    $q->where('re.estado', 'devuelto');
+                    break;
+                case 'pendiente':
+                    $q->where('re.estado', 'pendiente');
+                    break;
+                default:
+                    $q->where('re.estado', $filtros['estado']);
+                    break;
+            }
+        });
+    }
+
+    // Mantener otros filtros existentes
+    if (!empty($filtros['codigo_repuesto'])) {
+        $query->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
+    }
+
+    if (!empty($filtros['fecha_desde'])) {
+        $query->whereDate('re.fecha_entrega', '>=', $filtros['fecha_desde']);
+    }
+
+    if (!empty($filtros['fecha_hasta'])) {
+        $query->whereDate('re.fecha_entrega', '<=', $filtros['fecha_hasta']);
+    }
+
+    return $query->orderBy('re.fecha_entrega', 'desc')
+                 ->orderBy('oa.created_at', 'desc');
+}
+
+    /**
+     * Obtiene contadores con filtros aplicados
+     */
+   private function getContadores($filtros = [])
+{
+    // Base query para contadores
+    $baseQuery = DB::table('ordenesarticulos as oa')
+        ->join('solicitudesordenes as so', 'oa.idSolicitudesOrdenes', '=', 'so.idSolicitudesOrdenes')
+        ->leftJoin('repuestos_entregas as re', function($join) {
+            $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
+                 ->on('oa.idArticulos', '=', 're.articulo_id');
+        })
+        ->where('so.tipoorden', 'solicitud_repuesto')
+        ->whereNotNull('re.id');
+
+    // Aplicar mismos filtros a contadores
+    if (!empty($filtros['codigo_repuesto'])) {
+        $baseQuery->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+                  ->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
+    }
+
+    if (!empty($filtros['fecha_desde'])) {
+        $baseQuery->whereDate('re.fecha_entrega', '>=', $filtros['fecha_desde']);
+    }
+
+    if (!empty($filtros['fecha_hasta'])) {
+        $baseQuery->whereDate('re.fecha_entrega', '<=', $filtros['fecha_hasta']);
+    }
+
+    return [
+        'total' => (clone $baseQuery)->count(),
+        
+        'en_transito' => (clone $baseQuery)
+            ->where('re.estado', 'entregado')
+            ->count(),
+            
+        'cedidos' => (clone $baseQuery)  // NUEVO CONTADOR PARA CEDIDOS
+            ->where('re.estado', 'cedido')
+            ->count(),
+            
+        'usados' => (clone $baseQuery)
+            ->where('re.estado', 'usado')
+            ->count(),
+            
+        'devueltos' => (clone $baseQuery)
+            ->where('re.estado', 'devuelto')
+            ->count(),
+            
+        'pendientes' => (clone $baseQuery)
+            ->where('re.estado', 'pendiente')
+            ->count(),
+    ];
+}
 
     public function obtenerDetalles($id)
 {
@@ -611,4 +682,11 @@ public function obtenerTodasFotos($id)
         ], 500);
     }
 }
+
+
+public  function show ($id)
+    {
+        //
+        return view('repuestos-transito.show', compact('id'));
+    }
 }
