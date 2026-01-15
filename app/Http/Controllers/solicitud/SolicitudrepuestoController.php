@@ -3254,202 +3254,202 @@ class SolicitudrepuestoController extends Controller
         }
     }
 
-public function generarConformidad($id)
-{
-    try {
+    public function generarConformidad($id)
+    {
+        try {
 
-        /* =========================
-         * 1. OBTENER SOLICITUD + TICKET + QUIEN ENTREGA
-         * ========================= */
+            /* =========================
+            * 1. OBTENER SOLICITUD + TICKET + QUIEN ENTREGA
+            * ========================= */
 
-        $lastEntregaSub = DB::table('repuestos_entregas')
-            ->select('solicitud_id', DB::raw('MAX(id) as last_id'))
-            ->groupBy('solicitud_id');
+            $lastEntregaSub = DB::table('repuestos_entregas')
+                ->select('solicitud_id', DB::raw('MAX(id) as last_id'))
+                ->groupBy('solicitud_id');
 
-        $solicitud = DB::table('solicitudesordenes as so')
-            ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.fechacreacion',
-                'so.fechaaprobacion',
-                'so.tiposervicio',
-                'so.niveldeurgencia',
-                'so.observaciones',
-                'so.cantidad',
-                'so.totalcantidadproductos',
-                'so.estado',
+            $solicitud = DB::table('solicitudesordenes as so')
+                ->select(
+                    'so.idsolicitudesordenes',
+                    'so.codigo',
+                    'so.fechacreacion',
+                    'so.fechaaprobacion',
+                    'so.tiposervicio',
+                    'so.niveldeurgencia',
+                    'so.observaciones',
+                    'so.cantidad',
+                    'so.totalcantidadproductos',
+                    'so.estado',
 
-                't.numero_ticket',
+                    't.numero_ticket',
 
-                // =====================
-                // SOLICITANTE
-                // =====================
-                'u.idUsuario as solicitante_id',
-                'u.Nombre as solicitante_nombre',
-                'u.apellidoPaterno as solicitante_apellido_paterno',
-                'u.apellidoMaterno as solicitante_apellido_materno',
-                'u.documento as solicitante_documento',
-                'td.nombre as solicitante_tipo_documento',
-                'r.nombre as solicitante_rol',
-                'ta.nombre as solicitante_area',
+                    // =====================
+                    // SOLICITANTE
+                    // =====================
+                    'u.idUsuario as solicitante_id',
+                    'u.Nombre as solicitante_nombre',
+                    'u.apellidoPaterno as solicitante_apellido_paterno',
+                    'u.apellidoMaterno as solicitante_apellido_materno',
+                    'u.documento as solicitante_documento',
+                    'td.nombre as solicitante_tipo_documento',
+                    'r.nombre as solicitante_rol',
+                    'ta.nombre as solicitante_area',
 
-                // =====================
-                // QUIEN ENTREGA
-                // =====================
-                'ue.idUsuario as aprobador_id',
-                'ue.Nombre as aprobador_nombre',
-                'ue.apellidoPaterno as aprobador_apellido_paterno',
-                'ue.apellidoMaterno as aprobador_apellido_materno',
-                'ue.documento as aprobador_documento',
-                'tde.nombre as aprobador_tipo_documento',
-                'r2.nombre as aprobador_rol',
-                'ta_entrega.nombre as aprobador_area'
+                    // =====================
+                    // QUIEN ENTREGA
+                    // =====================
+                    'ue.idUsuario as aprobador_id',
+                    'ue.Nombre as aprobador_nombre',
+                    'ue.apellidoPaterno as aprobador_apellido_paterno',
+                    'ue.apellidoMaterno as aprobador_apellido_materno',
+                    'ue.documento as aprobador_documento',
+                    'tde.nombre as aprobador_tipo_documento',
+                    'r2.nombre as aprobador_rol',
+                    'ta_entrega.nombre as aprobador_area'
 
-            )
-            ->leftJoin('ordenesarticulos as oa', 'oa.idsolicitudesordenes', '=', 'so.idsolicitudesordenes')
-            ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                )
+                ->leftJoin('ordenesarticulos as oa', 'oa.idsolicitudesordenes', '=', 'so.idsolicitudesordenes')
+                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
 
-            // solicitante
-            ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
-            ->leftJoin('tipodocumento as td', 'u.idTipoDocumento', '=', 'td.idTipoDocumento')
-            ->leftJoin('rol as r', 'u.idRol', '=', 'r.idRol')
-            ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
+                // solicitante
+                ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
+                ->leftJoin('tipodocumento as td', 'u.idTipoDocumento', '=', 'td.idTipoDocumento')
+                ->leftJoin('rol as r', 'u.idRol', '=', 'r.idRol')
+                ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
 
-            // quien entrega
-            ->leftJoinSub($lastEntregaSub, 're_last', function ($join) {
-                $join->on('re_last.solicitud_id', '=', 'so.idsolicitudesordenes');
-            })
-            ->leftJoin('repuestos_entregas as re', 're.id', '=', 're_last.last_id')
-            ->leftJoin('usuarios as ue', 're.usuario_entrego_id', '=', 'ue.idUsuario')
-            ->leftJoin('tipodocumento as tde', 'ue.idTipoDocumento', '=', 'tde.idTipoDocumento')
-            ->leftJoin('rol as r2', 'ue.idRol', '=', 'r2.idRol')
-            ->leftJoin('tipoarea as ta_entrega', 'ue.idTipoArea', '=', 'ta_entrega.idTipoArea')
+                // quien entrega
+                ->leftJoinSub($lastEntregaSub, 're_last', function ($join) {
+                    $join->on('re_last.solicitud_id', '=', 'so.idsolicitudesordenes');
+                })
+                ->leftJoin('repuestos_entregas as re', 're.id', '=', 're_last.last_id')
+                ->leftJoin('usuarios as ue', 're.usuario_entrego_id', '=', 'ue.idUsuario')
+                ->leftJoin('tipodocumento as tde', 'ue.idTipoDocumento', '=', 'tde.idTipoDocumento')
+                ->leftJoin('rol as r2', 'ue.idRol', '=', 'r2.idRol')
+                ->leftJoin('tipoarea as ta_entrega', 'ue.idTipoArea', '=', 'ta_entrega.idTipoArea')
 
 
-            ->where('so.idsolicitudesordenes', $id)
-            ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto'])
-            ->first();
+                ->where('so.idsolicitudesordenes', $id)
+                ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto'])
+                ->first();
 
-        if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
-        }
-
-        /* =========================
-         * 2. VALIDAR REPUESTOS PENDIENTES
-         * ========================= */
-
-        $pendientes = DB::table('ordenesarticulos')
-            ->where('idsolicitudesordenes', $id)
-            ->where('estado', 0)
-            ->count();
-
-        if ($pendientes > 0) {
-            abort(400, 'Aún existen repuestos pendientes de entrega');
-        }
-
-        /* =========================
-         * 3. REPUESTOS ENTREGADOS
-         * ========================= */
-
-        $repuestos = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.cantidad',
-                'a.nombre as repuesto_nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'sc.nombre as tipo_repuesto',
-                DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
-            )
-            ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
-            ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
-            ->where('oa.idSolicitudesOrdenes', $id)
-            ->where('oa.estado', 1)
-            ->groupBy(
-                'oa.idOrdenesArticulos',
-                'oa.cantidad',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'sc.nombre'
-            )
-            ->get();
-
-        if ($repuestos->isEmpty()) {
-            abort(400, 'No hay repuestos entregados');
-        }
-
-        /* =========================
-         * 4. FIRMAS
-         * ========================= */
-
-        $firmaSolicitante = null;
-        if ($solicitud->solicitante_id) {
-            $firmaBlob = DB::table('usuarios')
-                ->where('idUsuario', $solicitud->solicitante_id)
-                ->value('firma');
-
-            if ($firmaBlob) {
-                $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firmaBlob);
+            if (!$solicitud) {
+                abort(404, 'Solicitud no encontrada');
             }
-        }
 
-        $firmaAprobador = null;
-        if ($solicitud->aprobador_id) {
-            $firmaBlob = DB::table('usuarios')
-                ->where('idUsuario', $solicitud->aprobador_id)
-                ->value('firma');
+            /* =========================
+            * 2. VALIDAR REPUESTOS PENDIENTES
+            * ========================= */
 
-            if ($firmaBlob) {
-                $firmaAprobador = 'data:image/png;base64,' . base64_encode($firmaBlob);
+            $pendientes = DB::table('ordenesarticulos')
+                ->where('idsolicitudesordenes', $id)
+                ->where('estado', 0)
+                ->count();
+
+            if ($pendientes > 0) {
+                abort(400, 'Aún existen repuestos pendientes de entrega');
             }
+
+            /* =========================
+            * 3. REPUESTOS ENTREGADOS
+            * ========================= */
+
+            $repuestos = DB::table('ordenesarticulos as oa')
+                ->select(
+                    'oa.cantidad',
+                    'a.nombre as repuesto_nombre',
+                    'a.codigo_barras',
+                    'a.codigo_repuesto',
+                    'sc.nombre as tipo_repuesto',
+                    DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
+                )
+                ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+                ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
+                ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
+                ->where('oa.idSolicitudesOrdenes', $id)
+                ->where('oa.estado', 1)
+                ->groupBy(
+                    'oa.idOrdenesArticulos',
+                    'oa.cantidad',
+                    'a.nombre',
+                    'a.codigo_barras',
+                    'a.codigo_repuesto',
+                    'sc.nombre'
+                )
+                ->get();
+
+            if ($repuestos->isEmpty()) {
+                abort(400, 'No hay repuestos entregados');
+            }
+
+            /* =========================
+            * 4. FIRMAS
+            * ========================= */
+
+            $firmaSolicitante = null;
+            if ($solicitud->solicitante_id) {
+                $firmaBlob = DB::table('usuarios')
+                    ->where('idUsuario', $solicitud->solicitante_id)
+                    ->value('firma');
+
+                if ($firmaBlob) {
+                    $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firmaBlob);
+                }
+            }
+
+            $firmaAprobador = null;
+            if ($solicitud->aprobador_id) {
+                $firmaBlob = DB::table('usuarios')
+                    ->where('idUsuario', $solicitud->aprobador_id)
+                    ->value('firma');
+
+                if ($firmaBlob) {
+                    $firmaAprobador = 'data:image/png;base64,' . base64_encode($firmaBlob);
+                }
+            }
+
+            /* =========================
+            * 5. FONDO MEMBRETADO
+            * ========================= */
+
+            $bgPath = public_path('assets/images/hojamembretada.jpg');
+            $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+
+            /* =========================
+            * 6. RENDER HTML
+            * ========================= */
+
+            $html = view('solicitud.solicitudrepuesto.pdf.conformidad', [
+                'solicitud'        => $solicitud,
+                'repuestos'        => $repuestos,
+                'fecha_generacion' => now()->format('d/m/Y H:i'),
+                'bgBase64'         => $bgBase64,
+                'firmaSolicitante' => $firmaSolicitante,
+                'firmaAprobador'   => $firmaAprobador,
+            ])->render();
+
+            /* =========================
+            * 7. GENERAR PDF
+            * ========================= */
+
+            $tempPath = storage_path('app/conformidad_' . uniqid() . '.pdf');
+
+            Browsershot::html($html)
+                ->format('A4')
+                ->margins(0, 0, 0, 0)
+                ->showBackground()
+                ->noSandbox()
+                ->setOption('args', ['--disable-dev-shm-usage'])
+                ->savePdf($tempPath);
+
+            return response()->file($tempPath, [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="ACTA DE CONFORMIDAD REPUESTO - ' . $solicitud->codigo . '.pdf"',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error Conformidad Repuesto: ' . $e->getMessage());
+            abort(500, 'Error al generar la conformidad');
         }
-
-        /* =========================
-         * 5. FONDO MEMBRETADO
-         * ========================= */
-
-        $bgPath = public_path('assets/images/hojamembretada.jpg');
-        $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
-
-        /* =========================
-         * 6. RENDER HTML
-         * ========================= */
-
-        $html = view('solicitud.solicitudrepuesto.pdf.conformidad', [
-            'solicitud'        => $solicitud,
-            'repuestos'        => $repuestos,
-            'fecha_generacion' => now()->format('d/m/Y H:i'),
-            'bgBase64'         => $bgBase64,
-            'firmaSolicitante' => $firmaSolicitante,
-            'firmaAprobador'   => $firmaAprobador,
-        ])->render();
-
-        /* =========================
-         * 7. GENERAR PDF
-         * ========================= */
-
-        $tempPath = storage_path('app/conformidad_' . uniqid() . '.pdf');
-
-        Browsershot::html($html)
-            ->format('A4')
-            ->margins(0, 0, 0, 0)
-            ->showBackground()
-            ->noSandbox()
-            ->setOption('args', ['--disable-dev-shm-usage'])
-            ->savePdf($tempPath);
-
-        return response()->file($tempPath, [
-            'Content-Type'        => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="ACTA DE CONFORMIDAD REPUESTO - ' . $solicitud->codigo . '.pdf"',
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error Conformidad Repuesto: ' . $e->getMessage());
-        abort(500, 'Error al generar la conformidad');
     }
-}
 
 
 

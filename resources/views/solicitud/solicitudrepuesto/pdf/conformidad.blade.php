@@ -50,19 +50,20 @@
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
                 Por medio de la presente, yo
                 <span class="font-bold">
-                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
-                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
-                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
                 </span>,
-                identificado(a) con {{ $solicitud->solicitante_tipo_documento ?? 'DOCUMENTO' }} N.°
+                identificado(a) con {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
                 <span class="font-bold">
-                    {{ $solicitud->solicitante_documento ?? 'NÚMERO' }}
-                </span>
-                en mi calidad de {{ $solicitud->solicitante_rol ?? 'Técnico asignado' }}, dejo constancia de haber
-                recibido a conformidad por parte del área
-                {{ $solicitud->solicitante_area ?? 'N/A' }} correspondiente los repuestos detallados en el presente
-                documento.
+                    {{ $solicitud->aprobador_documento ?? 'NÚMERO' }}
+                </span>,
+                en mi calidad de {{ $solicitud->aprobador_rol ?? 'RESPONSABLE' }},
+                dejo constancia de haber realizado la entrega por parte del área de
+                {{ $solicitud->aprobador_area ?? 'N/A' }} correspondiente,
+                de los repuestos detallados en el presente documento.
             </p>
+
 
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
                 La entrega de los repuestos se realiza en atención al
@@ -98,18 +99,19 @@
             </p>
 
             <p class="text-justify text-[12px] leading-[1.5]">
-                En señal de conformidad, se firma la presente acta, dejando constancia de la entrega por parte de
+                En señal de conformidad, se firma la presente acta, dejando constancia de la recepción por parte de
                 <strong>
-                    {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
-                    {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
-                    {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
                 </strong>,
-                identificado(a) con {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
-                <strong>{{ $solicitud->aprobador_documento ?? 'NÚMERO' }}</strong>,
-                quien actúa en representación del área de
-                <strong>{{ $solicitud->aprobador_area ?? 'N/A' }}</strong>.
+                identificado(a) con {{ $solicitud->solicitante_tipo_documento ?? 'DOCUMENTO' }} N.°
+                <strong>{{ $solicitud->solicitante_documento ?? 'NÚMERO' }}</strong>,
+                quien actúa en su calidad de
+                <strong>{{ $solicitud->solicitante_rol ?? 'TÉCNICO ASIGNADO' }}</strong>,
+                perteneciente al área de
+                <strong>{{ $solicitud->solicitante_area ?? 'N/A' }}</strong>.
             </p>
-
 
         </div>
 
@@ -183,16 +185,16 @@
             <div class="relative text-center h-[120px]">
 
                 @if (!empty($firmaSolicitante))
-                    <img src="{{ $firmaSolicitante }}"
-                        class="absolute left-1/2 -translate-x-1/2
-               top-[4px]
-               max-h-[110px] max-w-[320px]
-               z-10 opacity-90 object-contain">
+                    <div class="absolute inset-x-0 top-0 h-[90px] flex items-center justify-center">
+                        <img src="{{ $firmaSolicitante }}"
+                            class="max-h-[90px] max-w-[360px] opacity-90 object-contain">
+                    </div>
                 @endif
 
 
+
                 <!-- Línea -->
-<div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-[220px] border-t border-gray-800"></div>
+                <div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-[220px] border-t border-gray-800"></div>
 
                 <!-- Texto -->
                 <div class="absolute top-[68px] left-0 right-0 text-center text-xs font-bold uppercase leading-tight">
@@ -209,15 +211,15 @@
             <div class="relative text-center h-[120px]">
 
                 @if (!empty($firmaAprobador))
-                    <img src="{{ $firmaAprobador }}"
-                        class="absolute left-1/2 -translate-x-1/2
-               top-[4px]
-               max-h-[110px] max-w-[320px]
-               z-10 opacity-90 object-contain">
+                    <div class="absolute inset-x-0 top-0 h-[90px] flex items-center justify-center">
+                        <img src="{{ $firmaAprobador }}" class="max-h-[90px] max-w-[360px] opacity-90 object-contain">
+                    </div>
                 @endif
 
+
+
                 <!-- Línea -->
-<div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-[220px] border-t border-gray-800"></div>
+                <div class="absolute top-[60px] left-1/2 -translate-x-1/2 w-[220px] border-t border-gray-800"></div>
 
                 <!-- Texto -->
                 <div class="absolute top-[68px] left-0 right-0 text-center text-xs font-bold uppercase leading-tight">
