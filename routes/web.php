@@ -815,10 +815,11 @@ Route::post('/{id}/confirmar-entrega-cedido', [SolicitudRepuestoController::clas
     // En tu archivo de rutas, agregar estas dos rutas:
     Route::post('/{id}/confirmar-entrega-fisica-con-foto', [SolicitudrepuestoController::class, 'confirmarEntregaFisicaConFoto']);
 });
-Route::get(
-    '/api/obtener-info-entrega/{solicitudId}/{articuloId}',
-    [SolicitudrepuestoController::class, 'obtenerInfoEntrega']
-)->name('api.obtener-info-entrega');
+
+
+
+
+
 
 Route::prefix('solicitudrepuestoprovincia')->name('solicitudrepuestoprovincia.')->group(function () {
     Route::get('/', [SolicitudrepuestoController::class, 'index'])->name('index');
@@ -2030,3 +2031,7 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
     Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
         ->name('repuestos.transito.fotos.tipo');
 });
+
+
+Route::get('/obtener-info-entrega/{solicitudId}/{articuloId}',[SolicitudrepuestoController::class, 'obtenerInfoEntrega']
+)->name('api.obtener-info-entrega');
