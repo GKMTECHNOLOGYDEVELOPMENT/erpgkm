@@ -186,7 +186,35 @@
                                     searchIcon.classList.add('text-gray-400');
                                 }
                             });
+
+                                actualizarContadores();
+
                     }
+
+
+                    // Función para actualizar contadores con AJAX
+function actualizarContadores() {
+    fetch('{{ route("solicitudarticulo.contadores") }}', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Actualizar cada contador
+        const contadorLima = document.getElementById('contadorRepuestoLima');
+        const contadorProvincia = document.getElementById('contadorRepuestoProvincia');
+        const contadorArticulo = document.getElementById('contadorSolicitudArticulo');
+        const contadorTotal = document.getElementById('contadorTotal');
+        
+        if (contadorLima) contadorLima.textContent = data.repuesto_lima || 0;
+        if (contadorProvincia) contadorProvincia.textContent = data.repuesto_provincia || 0;
+        if (contadorArticulo) contadorArticulo.textContent = data.solicitud_articulo || 0;
+        if (contadorTotal) contadorTotal.textContent = data.total || 0;
+    })
+    .catch(error => console.error('Error al actualizar contadores:', error));
+}
 
                     // Función para debounce
                     function debounceSubmit(delay = 600) {

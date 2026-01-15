@@ -1783,6 +1783,8 @@ Route::post('/series/cambiar-estado', [ProductoController::class, 'cambiarEstado
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
 
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
+// En web.php
+Route::get('/solicitudes/contadores', [SolicitudArticuloController::class, 'contadores'])->name('solicitudarticulo.contadores');
 
 // En web.php
 Route::post('/solicitud-ingreso/cambiar-estado-grupo', [SolicitudIngresoController::class, 'cambiarEstadoGrupo'])->name('solicitud-ingreso.cambiar-estado-grupo');

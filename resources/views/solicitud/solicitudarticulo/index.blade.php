@@ -50,9 +50,9 @@
                             <i class="fas fa-wrench text-green-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-green-700 mb-1" id="contadorRepuestoLima">
-                        {{ $contadores['repuesto_lima'] ?? 0 }}
-                    </div>
+                 <div class="text-2xl font-bold text-green-700 mb-1" id="contadorRepuestoLima">
+                    {{ $contadoresArray['repuesto_lima'] }}
+                </div>
                     <div class="text-sm font-medium text-green-600">Repuesto (Lima)</div>
                     <div class="text-xs text-green-500 mt-1 flex items-center justify-center">
                         <i class="fas fa-clock mr-1"></i>Pendientes
@@ -67,8 +67,8 @@
                             <i class="fas fa-truck text-purple-600 text-xl"></i>
                         </div>
                     </div>
-                    <div class="text-2xl font-bold text-purple-700 mb-1" id="contadorRepuestoProvincia">
-                        {{ $contadores['repuesto_provincia'] ?? 0 }}
+                   <div class="text-2xl font-bold text-purple-700 mb-1" id="contadorRepuestoProvincia">
+                        {{ $contadoresArray['repuesto_provincia'] }}
                     </div>
                     <div class="text-sm font-medium text-purple-600">Repuesto (Provincia)</div>
                     <div class="text-xs text-purple-500 mt-1 flex items-center justify-center">
@@ -85,7 +85,7 @@
                         </div>
                     </div>
                     <div class="text-2xl font-bold text-blue-700 mb-1" id="contadorSolicitudArticulo">
-                        {{ $contadores['solicitud_articulo'] ?? 0 }}
+                        {{ $contadoresArray['solicitud_articulo'] }}
                     </div>
                     <div class="text-sm font-medium text-blue-600">Solicitud Artículo</div>
                     <div class="text-xs text-blue-500 mt-1 flex items-center justify-center">
@@ -102,7 +102,7 @@
                         </div>
                     </div>
                     <div class="text-2xl font-bold text-gray-700 mb-1" id="contadorTotal">
-                        {{ $contadores['total'] ?? 0 }}
+                        {{ $contadoresArray['total'] }}
                     </div>
                     <div class="text-sm font-medium text-gray-600">Total Solicitudes</div>
                     <div class="text-xs text-gray-500 mt-1 flex items-center justify-center">
