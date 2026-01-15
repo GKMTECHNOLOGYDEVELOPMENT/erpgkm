@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 
 class SolicitudarticuloController extends Controller
 {
-    public function index()
+ public function index()
 {
     $query = DB::table('solicitudesordenes as so')
         ->select(
@@ -37,7 +37,7 @@ class SolicitudarticuloController extends Controller
             'so.cantidad as total_productos',
             'so.totalcantidadproductos',
             'so.observaciones',
-            'so.numeroticket', // Nuevo campo para mostrar número de ticket
+            'so.numeroticket',
             DB::raw("CONCAT(u.Nombre, ' ', u.apellidoPaterno) as nombre_solicitante")
         )
         ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
@@ -63,13 +63,32 @@ class SolicitudarticuloController extends Controller
         $search = request('search');
         $query->where(function($q) use ($search) {
             $q->where('so.codigo', 'LIKE', "%{$search}%")
-              ->orWhere('so.numeroticket', 'LIKE', "%{$search}%"); // Buscar también por número de ticket
+              ->orWhere('so.numeroticket', 'LIKE', "%{$search}%");
         });
     }
 
     $solicitudes = $query->orderBy('so.fechacreacion', 'desc')->paginate(10);
 
-    return view("solicitud.solicitudarticulo.index", compact('solicitudes'));
+    // **CONTADORES SIN FILTRAR POR ESTADO - Cuenta TODAS las solicitudes**
+    $contadores = DB::table('solicitudesordenes')
+        ->selectRaw("
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto' THEN 1 ELSE 0 END) as repuesto_lima,
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto_provincia' THEN 1 ELSE 0 END) as repuesto_provincia,
+            SUM(CASE WHEN tipoorden = 'solicitud_articulo' THEN 1 ELSE 0 END) as solicitud_articulo,
+            COUNT(*) as total
+        ")
+        ->whereIn('tipoorden', ['solicitud_articulo', 'solicitud_repuesto', 'solicitud_repuesto_provincia'])
+        ->first();
+
+    // Convertir el objeto a array
+    $contadoresArray = [
+        'repuesto_lima' => $contadores->repuesto_lima ?? 0,
+        'repuesto_provincia' => $contadores->repuesto_provincia ?? 0,
+        'solicitud_articulo' => $contadores->solicitud_articulo ?? 0,
+        'total' => $contadores->total ?? 0
+    ];
+
+    return view("solicitud.solicitudarticulo.index", compact('solicitudes', 'contadoresArray'));
 }
 
 
@@ -3292,6 +3311,26 @@ public function enviarAlmacen(Request $request, $solicitudId)
         ]);
     }
 
+
+public function contadores()
+{
+    $contadores = DB::table('solicitudesordenes')
+        ->selectRaw("
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto' THEN 1 ELSE 0 END) as repuesto_lima,
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto_provincia' THEN 1 ELSE 0 END) as repuesto_provincia,
+            SUM(CASE WHEN tipoorden = 'solicitud_articulo' THEN 1 ELSE 0 END) as solicitud_articulo,
+            COUNT(*) as total
+        ")
+        ->whereIn('tipoorden', ['solicitud_articulo', 'solicitud_repuesto', 'solicitud_repuesto_provincia'])
+        ->first();
+
+    return response()->json([
+        'repuesto_lima' => $contadores->repuesto_lima ?? 0,
+        'repuesto_provincia' => $contadores->repuesto_provincia ?? 0,
+        'solicitud_articulo' => $contadores->solicitud_articulo ?? 0,
+        'total' => $contadores->total ?? 0
+    ]);
+}
 
 
 
