@@ -2033,5 +2033,3 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
 });
 
 
-Route::get('/obtener-info-entrega/{solicitudId}/{articuloId}',[SolicitudrepuestoController::class, 'obtenerInfoEntrega']
-)->name('api.obtener-info-entrega');
