@@ -295,6 +295,11 @@
                 $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
                 $estadoTexto = 'En Tránsito';
                 break;
+             case 'cedido':
+                $estadoClase = 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
+                $estadoIcono = '<i class="fas fa-shipping-fast mr-1"></i>';
+                $estadoTexto = 'En Tránsito';
+                break;
             case 'usado':
                 $estadoClase = 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
                 $estadoIcono = '<i class="fas fa-check-circle mr-1"></i>';
