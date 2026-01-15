@@ -2094,24 +2094,30 @@ class SolicitudrepuestoController extends Controller
             if ($entregaInfo) {
                 $repuesto->entrega_info = $entregaInfo;
                 $repuesto->ya_procesado = true;
-                $repuesto->es_cedido = !empty($entregaInfo->entrega_origen_id);
 
-                // Determinar estado actual
-                if ($repuesto->es_cedido) {
-                    // Estados específicos para repuestos cedidos
-                    switch ($entregaInfo->estado_entrega) {
-                        case 'listo_para_ceder':
-                            $repuesto->estado_actual = 'listo_para_ceder';
-                            break;
-                        case 'entregado':
-                            $repuesto->estado_actual = 'entregado_cedido';
-                            break;
-                        default:
-                            $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
-                    }
+                // 🔥 PRIORIDAD ABSOLUTA: estado CEDIDO desde BD
+                if ($entregaInfo->estado_entrega === 'cedido') {
+                    $repuesto->estado_actual = 'cedido';
+                    $repuesto->es_cedido = true;
                 } else {
-                    // Estados para repuestos normales
-                    $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+                    $repuesto->es_cedido = !empty($entregaInfo->entrega_origen_id);
+
+                    if ($repuesto->es_cedido) {
+                        // Estados de repuesto cedido
+                        switch ($entregaInfo->estado_entrega) {
+                            case 'listo_para_ceder':
+                                $repuesto->estado_actual = 'listo_para_ceder';
+                                break;
+                            case 'entregado':
+                                $repuesto->estado_actual = 'entregado_cedido';
+                                break;
+                            default:
+                                $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+                        }
+                    } else {
+                        // Repuesto normal
+                        $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+                    }
                 }
             } else {
                 $repuesto->entrega_info = null;

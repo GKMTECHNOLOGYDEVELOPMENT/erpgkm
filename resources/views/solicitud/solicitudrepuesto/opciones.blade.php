@@ -631,52 +631,75 @@ text-rose-600 @endif">
                                                 <!-- Estado -->
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
                                                     @if ($repuesto->ya_procesado)
-                                                        @if ($repuesto->estado_actual == 'entregado')
+
+                                                        @if ($repuesto->estado_actual == 'cedido')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-dark text-white border border-dark shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2
+                       rounded-xl text-xs sm:text-sm font-semibold
+                       bg-secondary-light text-secondary border border-purple-500 shadow-sm">
+                                                                <i class="fas fa-exchange-alt mr-1"></i>
+                                                                <span class="hidden sm:inline">Cedido</span>
+                                                                <span class="sm:hidden">Ced.</span>
+                                                            </span>
+                                                        @elseif ($repuesto->estado_actual == 'entregado')
+                                                            <span
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                       text-xs sm:text-sm font-semibold bg-dark text-white
+                       border border-dark shadow-sm">
                                                                 <i class="fas fa-check-circle mr-1"></i>
                                                                 <span class="hidden sm:inline">Entregado</span>
                                                                 <span class="sm:hidden">Entreg.</span>
                                                             </span>
-                                                        @elseif($repuesto->estado_actual == 'entregado_cedido')
+                                                        @elseif ($repuesto->estado_actual == 'entregado_cedido')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-secondary-light text-secondary border border-purple-500 shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                       text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
+                       border border-purple-500 shadow-sm">
                                                                 <i class="fas fa-exchange-alt mr-1"></i>
                                                                 <span class="hidden sm:inline">Entregado Cedido</span>
                                                                 <span class="sm:hidden">Ent. Cedido</span>
                                                             </span>
-                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                                                        @elseif ($repuesto->estado_actual == 'pendiente_entrega')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-success text-white border border-success shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                       text-xs sm:text-sm font-semibold bg-success text-white
+                       border border-success shadow-sm">
                                                                 <i class="fas fa-clock mr-1"></i>
                                                                 <span class="hidden sm:inline">Listo para
                                                                     Entregar</span>
                                                                 <span class="sm:hidden">Listo</span>
                                                             </span>
-                                                        @elseif($repuesto->estado_actual == 'listo_para_ceder')
+                                                        @elseif ($repuesto->estado_actual == 'listo_para_ceder')
                                                             <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-secondary-light text-secondary border border-purple-500 shadow-sm">
+                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                       text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
+                       border border-purple-500 shadow-sm">
                                                                 <i class="fas fa-exchange-alt mr-1"></i>
                                                                 <span class="hidden sm:inline">Listo para Ceder</span>
                                                                 <span class="sm:hidden">Ceder</span>
                                                             </span>
                                                         @endif
-                                                    @elseif($repuesto->suficiente_stock)
+                                                    @elseif ($repuesto->suficiente_stock)
                                                         <span
-                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-warning text-white border border-warning shadow-sm">
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                   text-xs sm:text-sm font-semibold bg-warning text-white
+                   border border-warning shadow-sm">
                                                             <i class="fas fa-cog mr-1"></i>
                                                             <span class="hidden sm:inline">Pendiente</span>
                                                             <span class="sm:hidden">Pend.</span>
                                                         </span>
                                                     @else
                                                         <span
-                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-danger text-white border border-red-200 shadow-sm">
+                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                   text-xs sm:text-sm font-semibold bg-danger text-white
+                   border border-red-200 shadow-sm">
                                                             <i class="fas fa-times-circle mr-1"></i>
                                                             <span class="hidden sm:inline">Insuficiente</span>
                                                             <span class="sm:hidden">Ins.</span>
                                                         </span>
                                                     @endif
                                                 </td>
+
 
                                                 <!-- Acción -->
                                                 <td class="px-4 sm:px-6 py-4 sm:py-6">
