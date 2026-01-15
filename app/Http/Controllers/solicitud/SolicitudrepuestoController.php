@@ -3444,7 +3444,6 @@ class SolicitudrepuestoController extends Controller
                 'Content-Type'        => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="ACTA DE CONFORMIDAD REPUESTO - ' . $solicitud->codigo . '.pdf"',
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error Conformidad Repuesto: ' . $e->getMessage());
             abort(500, 'Error al generar la conformidad');
@@ -4132,32 +4131,7 @@ class SolicitudrepuestoController extends Controller
     }
     public function confirmarEntregaFisicaConFoto(Request $request, $id)
     {
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("🚀 INICIANDO confirmarEntregaFisicaConFoto (SIMPLIFICADO)");
-        Log::info("════════════════════════════════════════════════════════");
-
-        // Log de todos los datos recibidos
-        Log::info("📦 DATOS RECIBIDOS EN REQUEST:");
-        Log::info("- Solicitud ID: " . $id);
-        Log::info("- Articulo ID: " . $request->input('articulo_id'));
-        Log::info("- Observaciones: " . $request->input('observaciones'));
-        Log::info("- Nombre Firmante: " . $request->input('nombre_firmante'));
-        Log::info("- Fecha Firma: " . $request->input('fecha_firma'));
-        Log::info("- Firma Confirmada: " . $request->input('firma_confirmada'));
-        Log::info("- Tiene archivo foto: " . ($request->hasFile('foto') ? 'SÍ' : 'NO'));
-        Log::info("User ID autenticado: " . (auth()->id() ?? 'No autenticado'));
-
-        if ($request->hasFile('foto')) {
-            $file = $request->file('foto');
-            Log::info("📸 INFO ARCHIVO FOTO:");
-            Log::info("  - Nombre: " . $file->getClientOriginalName());
-            Log::info("  - Tamaño: " . $file->getSize() . " bytes");
-            Log::info("  - MIME: " . $file->getMimeType());
-            Log::info("  - Extensión: " . $file->getClientOriginalExtension());
-        }
-
         try {
-            Log::info("🔍 Buscando solicitud...");
             DB::beginTransaction();
 
             $solicitud = DB::table('solicitudesordenes')
@@ -4167,45 +4141,36 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if (!$solicitud) {
-                Log::error("❌ Solicitud no encontrada con ID: " . $id);
                 return response()->json([
                     'success' => false,
                     'message' => 'Solicitud no encontrada'
                 ], 404);
             }
 
-            Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
-
-            $articuloId = (int)$request->input('articulo_id');
+            $articuloId = (int) $request->input('articulo_id');
             $observacionesEntrega = $request->input('observaciones');
             $nombreFirmante = $request->input('nombre_firmante');
             $fechaFirma = $request->input('fecha_firma');
 
-            // Procesar firma_confirmada correctamente
-            $firmaConfirmadaRaw = $request->input('firma_confirmada');
-            $firmaConfirmada = 0;
-
-            if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
-                $firmaConfirmada = 1;
-            }
-
-            Log::info("📊 DATOS PROCESADOS:");
-            Log::info("- Articulo ID: " . $articuloId);
-            Log::info("- Observaciones Entrega: " . $observacionesEntrega);
-            Log::info("- Nombre Firmante: " . $nombreFirmante);
-            Log::info("- Fecha Firma: " . $fechaFirma);
-            Log::info("- Firma Confirmada (procesada): " . $firmaConfirmada);
-
             if (!$articuloId) {
-                Log::error("❌ Articulo ID no proporcionado");
                 return response()->json([
                     'success' => false,
                     'message' => 'ID de artículo no proporcionado'
                 ], 400);
             }
 
-            // Buscar en repuestos_entregas con estado 'pendiente_entrega'
-            Log::info("🔍 Buscando entrega pendiente...");
+            $articulo = DB::table('articulos')
+                ->select('codigo_repuesto')
+                ->where('idArticulos', $articuloId)
+                ->first();
+
+            $codigoRepuesto = $articulo->codigo_repuesto ?? null;
+
+            // Firma confirmada
+            $firmaConfirmadaRaw = $request->input('firma_confirmada');
+            $firmaConfirmada = in_array($firmaConfirmadaRaw, ['true', true, '1', 1], true) ? 1 : 0;
+
+            // Buscar entrega pendiente
             $entregaPendiente = DB::table('repuestos_entregas')
                 ->where('solicitud_id', $id)
                 ->where('articulo_id', $articuloId)
@@ -4213,87 +4178,48 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if (!$entregaPendiente) {
-                Log::error("❌ No se encontró entrega pendiente para solicitud: " . $id . ", artículo: " . $articuloId);
                 return response()->json([
                     'success' => false,
                     'message' => 'No se encontró el repuesto listo para entregar'
                 ], 404);
             }
 
-            Log::info("✅ Entrega pendiente encontrada ID: " . $entregaPendiente->id);
-            Log::info("📋 Datos entrega pendiente:");
-            Log::info("  - Estado actual: " . $entregaPendiente->estado);
-            Log::info("  - Ubicación: " . $entregaPendiente->ubicacion_utilizada);
-            Log::info("  - Cantidad: " . $entregaPendiente->cantidad);
-
-
-            // Obtener usuario que entregó
-            $usuarioEntregoId = $request->input('usuario_entrego_id');
-            $nombreFirmante = $request->input('nombre_firmante');
-
-            // Si no se especifica usuario_entrego_id, usar el usuario autenticado
-            if (!$usuarioEntregoId) {
-                $usuarioEntregoId = auth()->id();
-            }
+            // Usuario que entrega
+            $usuarioEntregoId = $request->input('usuario_entrego_id') ?: auth()->id();
 
             // ========================
-            // 1. PROCESAR LA FOTO (en LONGBLOB)
+            // PROCESAR FOTO
             // ========================
             $fotoBlob = null;
             $tipoArchivo = null;
-            $tamanoFoto = 0;
 
-            Log::info("🖼️ Procesando foto...");
             if ($request->hasFile('foto')) {
-                try {
-                    $file = $request->file('foto');
+                $file = $request->file('foto');
 
-                    // Validaciones
-                    $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-                    $mimeType = $file->getMimeType();
+                $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+                $mimeType = $file->getMimeType();
 
-                    Log::info("🔍 Validando tipo MIME: " . $mimeType);
-                    if (!in_array($mimeType, $validMimeTypes)) {
-                        Log::error("❌ Tipo MIME no válido: " . $mimeType);
-                        throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
-                    }
-
-                    // Tamaño máximo: 10MB
-                    $maxSize = 10 * 1024 * 1024;
-                    $fileSize = $file->getSize();
-                    Log::info("📏 Tamaño archivo: " . $fileSize . " bytes, Máximo: " . $maxSize . " bytes");
-
-                    if ($fileSize > $maxSize) {
-                        Log::error("❌ Tamaño excedido: " . $fileSize . " > " . $maxSize);
-                        throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
-                    }
-
-                    // Leer la imagen
-                    Log::info("📖 Leyendo archivo...");
-                    $fotoBlob = file_get_contents($file->getRealPath());
-                    $tipoArchivo = $mimeType;
-                    $tamanoFoto = strlen($fotoBlob);
-
-                    Log::info("✅ Foto procesada exitosamente:");
-                    Log::info("  - Tamaño BLOB: " . $tamanoFoto . " bytes");
-                    Log::info("  - Tipo Archivo: " . $tipoArchivo);
-                } catch (\Exception $e) {
-                    Log::error("❌ Error al procesar foto: " . $e->getMessage());
+                if (!in_array($mimeType, $validMimeTypes)) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Error al procesar la foto: ' . $e->getMessage()
+                        'message' => 'Formato de imagen no válido'
                     ], 400);
                 }
-            } else {
-                Log::warning("⚠️ No se recibió archivo de foto");
+
+                if ($file->getSize() > (10 * 1024 * 1024)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'La imagen es demasiado grande (máx. 10MB)'
+                    ], 400);
+                }
+
+                $fotoBlob = file_get_contents($file->getRealPath());
+                $tipoArchivo = $mimeType;
             }
 
             // ========================
-            // 2. PREPARAR DATOS PARA ACTUALIZACIÓN
+            // ACTUALIZAR REPUESTOS_ENTREGAS
             // ========================
-            Log::info("📝 Preparando datos para actualización...");
-
-            // Datos base para actualizar
             $updateData = [
                 'estado' => 'entregado',
                 'usuario_entrego_id' => $usuarioEntregoId,
@@ -4303,43 +4229,31 @@ class SolicitudrepuestoController extends Controller
                 'updated_at' => now()
             ];
 
-            // Agregar foto si existe
             if ($fotoBlob) {
                 $updateData['foto_entrega'] = $fotoBlob;
                 $updateData['tipo_archivo_foto'] = $tipoArchivo;
-                Log::info("📸 Foto agregada al update");
             }
 
-            // Actualizar observaciones generales
             $observacionesCompletas = $entregaPendiente->observaciones .
                 " | ✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
                 " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
                 " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
                 ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
-                ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
+                ($fotoBlob ? " | Foto adjunta" : "");
 
             $updateData['observaciones'] = $observacionesCompletas;
-
-            // ========================
-            // 3. EJECUTAR ACTUALIZACIÓN
-            // ========================
-            Log::info("⚡ Actualizando repuestos_entregas...");
 
             $affected = DB::table('repuestos_entregas')
                 ->where('id', $entregaPendiente->id)
                 ->update($updateData);
 
-            Log::info("✅ Filas afectadas: " . $affected);
-
             if ($affected === 0) {
-                Log::error("❌ No se actualizó ninguna fila");
-                throw new \Exception("No se pudo actualizar el registro de entrega");
+                throw new \Exception('No se pudo actualizar la entrega');
             }
 
             // ========================
-            // 4. ACTUALIZAR ORDENESARTICULOS
+            // ACTUALIZAR ORDENESARTICULOS
             // ========================
-            Log::info("📝 Actualizando ordenesarticulos...");
             DB::table('ordenesarticulos')
                 ->where('idsolicitudesordenes', $id)
                 ->where('idarticulos', $articuloId)
@@ -4354,51 +4268,29 @@ class SolicitudrepuestoController extends Controller
                 ]);
 
             // ========================
-            // 5. ACTUALIZAR ESTADO DE LA SOLICITUD
+            // ACTUALIZAR ESTADO SOLICITUD
             // ========================
-            Log::info("🔄 Actualizando estado de solicitud...");
-
-            // Verificar si existe al menos un repuesto entregado
             $existeEntrega = DB::table('repuestos_entregas')
                 ->where('solicitud_id', $id)
                 ->where('estado', 'entregado')
                 ->exists();
 
-            Log::info("📊 ¿Existe al menos un repuesto entregado?: " . ($existeEntrega ? 'SÍ' : 'NO'));
-
-            if ($existeEntrega) {
-                // Si existe al menos UN repuesto entregado, estado = "entregado"
-                Log::info("✅ Al menos un repuesto entregado. Estado actualizado a 'entregado'");
-
-                DB::table('solicitudesordenes')
-                    ->where('idsolicitudesordenes', $id)
-                    ->update([
-                        'estado' => 'entregado',
-                        'fechaactualizacion' => now(),
-                        'updated_at' => now()
-                    ]);
-            } else {
-                // Ningún repuesto entregado, mantener estado actual
-                Log::info("ℹ️ Ningún repuesto entregado. Estado no cambia.");
-
-                DB::table('solicitudesordenes')
-                    ->where('idsolicitudesordenes', $id)
-                    ->update([
-                        'fechaactualizacion' => now(),
-                        'updated_at' => now()
-                    ]);
-            }
+            DB::table('solicitudesordenes')
+                ->where('idsolicitudesordenes', $id)
+                ->update([
+                    'estado' => $existeEntrega ? 'entregado' : $solicitud->estado,
+                    'fechaactualizacion' => now(),
+                    'updated_at' => now()
+                ]);
 
             // ========================
-            // 6. NOTIFICACIONES
+            // NOTIFICACIONES
             // ========================
-            Log::info("🔔 Procesando notificaciones...");
             $notificacionExistente = DB::table('notificaciones_solicitud')
                 ->where('idSolicitudesOrdenes', $id)
                 ->first();
 
             if ($notificacionExistente) {
-                Log::info("📝 Actualizando notificación existente...");
                 DB::table('notificaciones_solicitud')
                     ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
                     ->update([
@@ -4408,7 +4300,6 @@ class SolicitudrepuestoController extends Controller
                         'updated_at' => now()
                     ]);
             } else {
-                Log::info("🆕 Creando nueva notificación...");
                 DB::table('notificaciones_solicitud')->insert([
                     'idSolicitudesOrdenes' => $id,
                     'estado_web' => 1,
@@ -4421,36 +4312,19 @@ class SolicitudrepuestoController extends Controller
 
             DB::commit();
 
-            Log::info("════════════════════════════════════════════════════════");
-            Log::info("🎉 confirmarEntregaFisicaConFoto COMPLETADO EXITOSAMENTE");
-            Log::info("════════════════════════════════════════════════════════");
-            Log::info("📋 RESUMEN:");
-            Log::info("  - Solicitud: " . $solicitud->codigo);
-            Log::info("  - Artículo ID: " . $articuloId);
-            Log::info("  - Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO'));
-            Log::info("  - Foto guardada: " . ($fotoBlob ? 'SÍ' : 'NO'));
-            Log::info("  - Estado solicitud: " . ($existeEntrega ? 'entregado' : 'sin cambios'));
-            Log::info("════════════════════════════════════════════════════════");
-
             return response()->json([
                 'success' => true,
                 'message' => 'Entrega confirmada exitosamente',
                 'codigo_solicitud' => $solicitud->codigo,
                 'articulo_id' => $articuloId,
-                'foto_guardada' => $fotoBlob ? true : false,
-                'firma_confirmada' => (bool)$firmaConfirmada,
+                'codigo_repuesto' => $codigoRepuesto,
+                'foto_guardada' => (bool) $fotoBlob,
+                'firma_confirmada' => (bool) $firmaConfirmada,
                 'observaciones_entrega' => $observacionesEntrega,
                 'estado_solicitud' => $existeEntrega ? 'entregado' : 'sin cambios'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("════════════════════════════════════════════════════════");
-            Log::error("💥 ERROR en confirmarEntregaFisicaConFoto");
-            Log::error("════════════════════════════════════════════════════════");
-            Log::error('Mensaje: ' . $e->getMessage());
-            Log::error('Archivo: ' . $e->getFile());
-            Log::error('Línea: ' . $e->getLine());
-            Log::error('Trace: ' . $e->getTraceAsString());
 
             return response()->json([
                 'success' => false,
@@ -4458,6 +4332,7 @@ class SolicitudrepuestoController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Confirmar entrega de repuesto cedido con foto
@@ -4750,28 +4625,26 @@ class SolicitudrepuestoController extends Controller
     public function obtenerInfoEntrega($solicitudId, $articuloId)
     {
         try {
-            Log::info("🔍 Obteniendo info de entrega", [
-                'solicitud_id' => $solicitudId,
-                'articulo_id' => $articuloId
-            ]);
-
-            // Buscar información de la entrega
-            $entrega = DB::table('repuestos_entregas')
+            $entrega = DB::table('repuestos_entregas as re')
+                ->join('articulos as a', 'a.idArticulos', '=', 're.articulo_id')
+                ->leftJoin('subcategorias as s', 's.id', '=', 'a.idsubcategoria')
                 ->select([
-                    'estado',
-                    'fecha_entrega',
-                    'usuario_entrego_id',
-                    'firma_confirma',
-                    'observaciones_entrega',
-                    'observaciones',
-                    'foto_entrega',
-                    'tipo_archivo_foto',
-                    'created_at',
-                    'updated_at'
+                    're.estado',
+                    're.fecha_entrega',
+                    're.usuario_entrego_id',
+                    're.firma_confirma',
+                    're.observaciones_entrega',
+                    're.observaciones',
+                    're.foto_entrega',
+                    're.tipo_archivo_foto',
+                    're.created_at',
+                    're.updated_at',
+                    'a.codigo_repuesto',
+                    's.nombre as subcategoria_nombre' // 👈 AQUÍ
                 ])
-                ->where('solicitud_id', $solicitudId)
-                ->where('articulo_id', $articuloId)
-                ->where('estado', 'entregado')
+                ->where('re.solicitud_id', $solicitudId)
+                ->where('re.articulo_id', $articuloId)
+                ->where('re.estado', 'entregado')
                 ->first();
 
             if (!$entrega) {
@@ -4781,7 +4654,6 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
-            // Obtener nombre del usuario que entregó
             $usuarioEntrego = null;
             if ($entrega->usuario_entrego_id) {
                 $usuarioEntrego = DB::table('users')
@@ -4790,25 +4662,23 @@ class SolicitudrepuestoController extends Controller
                     ->first();
             }
 
-            // Preparar datos de respuesta
             $data = [
                 'estado' => $entrega->estado,
+                'codigo_repuesto' => $entrega->codigo_repuesto,
+                'subcategoria' => $entrega->subcategoria_nombre, // 👈 LISTO
                 'fecha_entrega' => $entrega->fecha_entrega
                     ? \Carbon\Carbon::parse($entrega->fecha_entrega)->format('d/m/Y H:i:s')
                     : null,
                 'usuario_entrego' => $usuarioEntrego ? $usuarioEntrego->name : null,
-                'firma_confirma' => (bool)$entrega->firma_confirma,
+                'firma_confirma' => (bool) $entrega->firma_confirma,
                 'observaciones_entrega' => $entrega->observaciones_entrega,
                 'observaciones' => $entrega->observaciones,
                 'fecha_creacion' => \Carbon\Carbon::parse($entrega->created_at)->format('d/m/Y H:i:s'),
                 'fecha_actualizacion' => \Carbon\Carbon::parse($entrega->updated_at)->format('d/m/Y H:i:s'),
             ];
 
-            // Incluir foto en base64 si existe
             if ($entrega->foto_entrega && $entrega->tipo_archivo_foto) {
-                // Convertir BLOB a base64
-                $fotoBase64 = base64_encode($entrega->foto_entrega);
-                $data['foto_entrega'] = $fotoBase64;
+                $data['foto_entrega'] = base64_encode($entrega->foto_entrega);
                 $data['tipo_archivo_foto'] = $entrega->tipo_archivo_foto;
             }
 
@@ -4817,18 +4687,14 @@ class SolicitudrepuestoController extends Controller
                 'data' => $data
             ]);
         } catch (\Exception $e) {
-            Log::error('Error al obtener info de entrega:', [
-                'error' => $e->getMessage(),
-                'solicitud' => $solicitudId,
-                'articulo' => $articuloId
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener información: ' . $e->getMessage()
             ], 500);
         }
     }
+
+
 
     /**
      * Método auxiliar para comprimir imágenes JPEG (si la necesitas)

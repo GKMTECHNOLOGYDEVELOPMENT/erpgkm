@@ -960,7 +960,7 @@ text-rose-600 @endif">
             </div>
         </div>
 
-<div x-show="mostrarModalSeleccionarEntregador" x-cloak @click.self="cerrarModalSeleccionarEntregador()"
+        <div x-show="mostrarModalSeleccionarEntregador" x-cloak @click.self="cerrarModalSeleccionarEntregador()"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg transform transition-all duration-300 scale-100"
                 x-show="mostrarModalSeleccionarEntregador" x-transition:enter="ease-out duration-300"
@@ -1004,20 +1004,24 @@ text-rose-600 @endif">
                                 </label>
 
                                 <!-- Contenedor con scroll - MEJORADO -->
-                                <div class="space-y-3 h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+                                <div
+                                    class="space-y-3 h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
                                     <!-- Estilos personalizados para scroll -->
                                     <style>
                                         .scrollbar-thin::-webkit-scrollbar {
                                             width: 6px;
                                         }
+
                                         .scrollbar-thin::-webkit-scrollbar-track {
                                             background: #f1f1f1;
                                             border-radius: 3px;
                                         }
+
                                         .scrollbar-thin::-webkit-scrollbar-thumb {
                                             background: #d1d5db;
                                             border-radius: 3px;
                                         }
+
                                         .scrollbar-thin::-webkit-scrollbar-thumb:hover {
                                             background: #9ca3af;
                                         }
@@ -1025,7 +1029,8 @@ text-rose-600 @endif">
 
                                     <!-- Opción: Yo mismo (usuario actual) -->
                                     <div class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
-                                        :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-100 border-blue-300' : ''"
+                                        :class="usuarioEntregadorSeleccionado === 'yo_mismo' ? 'bg-blue-100 border-blue-300' :
+                                            ''"
                                         @click="seleccionarUsuarioEntregador('yo_mismo', '{{ Auth::user()->name ?? 'Usuario Actual' }}')">
                                         <div class="flex-shrink-0 mr-3">
                                             <div
@@ -1078,14 +1083,14 @@ text-rose-600 @endif">
                                     @endif
 
                                     <!-- Separador "Otros usuarios" -->
-                                    @if($usuariosDisponibles->count() > 0)
-                                    <div class="flex items-center gap-2 mt-4 mb-2">
-                                        <div class="flex-1 border-t border-gray-200"></div>
-                                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                                            Otros usuarios
-                                        </span>
-                                        <div class="flex-1 border-t border-gray-200"></div>
-                                    </div>
+                                    @if ($usuariosDisponibles->count() > 0)
+                                        <div class="flex items-center gap-2 mt-4 mb-2">
+                                            <div class="flex-1 border-t border-gray-200"></div>
+                                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                Otros usuarios
+                                            </span>
+                                            <div class="flex-1 border-t border-gray-200"></div>
+                                        </div>
                                     @endif
 
                                     <!-- Lista de otros usuarios -->
@@ -1109,7 +1114,8 @@ text-rose-600 @endif">
                                                 </div>
                                                 <div class="flex-shrink-0">
                                                     <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center"
-                                                        :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}' ?
+                                                        :class="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}'
+                                                            ?
                                                             'bg-secondary border-secondary' : ''">
                                                         <i x-show="usuarioEntregadorSeleccionado === '{{ $usuario->idUsuario }}'"
                                                             class="fas fa-check text-white text-xs"></i>
@@ -1624,13 +1630,15 @@ text-rose-600 @endif">
                                             </span>
                                         </div>
 
-                                        <p class="text-lg font-bold text-gray-900 dark:text-white mb-2"
+                                        <!-- Código -->
+                                        <p class="text-lg font-bold text-gray-900 dark:text-white"
                                             x-text="repuestoVerCodigo" :title="repuestoVerCodigo"></p>
 
-                                        <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                                            <i class="fas fa-tag text-gray-400 mr-2 text-xs"></i>
-                                            <span class="font-medium" x-text="repuestoVerTipo"
-                                                :title="repuestoVerTipo"></span>
+                                        <!-- Subcategoría -->
+                                        <div class="flex items-center text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                            <i class="fas fa-layer-group text-gray-400 mr-2 text-xs"></i>
+                                            <span x-text="repuestoVerSubcategoria"
+                                                :title="repuestoVerSubcategoria"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -1884,6 +1892,8 @@ text-rose-600 @endif">
 
                 // Variables para modales
                 entregaInfo: {},
+                repuestoVerCodigo: null,
+                repuestoVerSubcategoria: null,
                 mostrarModalVerConfirmacion: false,
                 repuestoVerNombre: '',
 
@@ -1924,6 +1934,7 @@ text-rose-600 @endif">
                 fotoFileEntregaCedida: null,
                 observacionesEntregaCedida: '',
                 isLoadingEntregaCedida: false,
+                repuestoEntregaNombre: null,
                 entregaCedidaId: null,
 
                 // Getters
@@ -2005,15 +2016,27 @@ text-rose-600 @endif">
                 },
 
                 abrirModalConfirmarEntrega() {
-                    console.log('📸 Abriendo modal para confirmar entrega con foto');
+                    const repuestos = @json($repuestos);
+                    const repuesto = repuestos.find(r =>
+                        parseInt(r.idArticulos) === parseInt(this.articuloIdParaEntrega)
+                    );
 
-                    // Usar los datos guardados
-                    this.articuloEntregaId = this.articuloIdParaEntrega;
-                    this.repuestoEntregaNombre = this.repuestoNombreParaEntrega;
+                    if (!repuesto) {
+                        toastr.error('No se encontró información del repuesto');
+                        return;
+                    }
 
-                    // Resetear el formulario de entrega
+                    this.articuloEntregaId = repuesto.idArticulos;
+
+                    // ✅ AQUÍ se arma el texto FINAL
+                    this.repuestoEntregaNombre = repuesto.codigo_repuesto ?
+                        `${repuesto.nombre} (${repuesto.codigo_repuesto})` :
+                        repuesto.nombre;
+
+                    // (opcional) si quieres usarlo aparte
+                    this.repuestoVerCodigo = repuesto.codigo_repuesto ?? null;
+
                     this.resetFormEntrega();
-
                     this.mostrarModalEntregaFisica = true;
                 },
 
@@ -2267,7 +2290,7 @@ text-rose-600 @endif">
                     <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-5 mb-4 border border-purple-100">
                         <div class="flex flex-col space-y-3">
                             <div class="flex items-center justify-center gap-3">
-                                <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
                                     <i class="fas fa-user text-white"></i>
                                 </div>
                                 <div class="text-left">
@@ -2276,7 +2299,7 @@ text-rose-600 @endif">
                                 </div>
                             </div>
                             <div class="mt-3 flex items-center justify-center gap-3">
-                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                                <div class="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
                                     <i class="fas fa-box text-white"></i>
                                 </div>
                                 <div class="text-left">
@@ -2555,16 +2578,19 @@ text-rose-600 @endif">
                                 </div>
                             </div>
                             <div class="mt-3 flex items-center justify-center gap-3">
-                                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                                     <i class="fas fa-box text-white"></i>
                                 </div>
                                 <div class="text-left">
                                     <p class="text-sm font-medium text-gray-500">Repuesto</p>
-                                    <p class="text-lg font-bold text-gray-800">${datosParaEnviar.repuestoEntregaNombre}</p>
+                                    <p class="text-lg font-bold text-gray-800">
+                                        ${datosParaEnviar.repuestoEntregaNombre}
+                                    </p>
+
                                 </div>
                             </div>
                             <div class="mt-3 flex items-center justify-center gap-3">
-                                <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
+                                <div class="w-10 h-10 bg-warning rounded-full flex items-center justify-center">
                                     <i class="fas fa-user-check text-white"></i>
                                 </div>
                                 <div class="text-left">
@@ -2687,10 +2713,16 @@ text-rose-600 @endif">
 
                         if (data.success && data.data) {
                             this.entregaInfo = data.data;
+
+                            this.repuestoVerCodigo = data.data.codigo_repuesto ?? '—';
+                            this.repuestoVerSubcategoria = data.data.subcategoria ??
+                                '—'; // 👈 NUEVO
+
                             if (data.data.foto_entrega && data.data.tipo_archivo_foto) {
                                 this.entregaInfo.foto_url =
                                     `data:${data.data.tipo_archivo_foto};base64,${data.data.foto_entrega}`;
                             }
+
                             this.mostrarModalVerConfirmacion = true;
                         } else {
                             alert('Error: ' + (data.message || 'No se pudo cargar la información'));
