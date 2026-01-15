@@ -5,12 +5,16 @@
 
     <div class="container-fluid px-4 py-6">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-white"><i class="fas fa-box mr-2"></i>Gestión de
-                Repuestos</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">Seguimiento de repuestos usados, no usados y en tránsito
+        <div class="panel mb-8 p-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+                <i class="fas fa-box mr-2"></i>
+                Gestión de Repuestos
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">
+                Seguimiento de repuestos usados, no usados y en tránsito
             </p>
         </div>
+
 
         <!-- Cards de Resumen ACTUALIZADAS -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
