@@ -79,7 +79,7 @@ class RepuestoTransitoController extends Controller
         if (!empty($filtros['estado'])) {
             switch ($filtros['estado']) {
                 case 'en_transito':
-                    $query->where('re.estado', 'entregado');
+                    $query->where('re.estado', 'entregado', 'cedido');
                     break;
                 case 'usado':
                     $query->where('re.estado', 'usado');
