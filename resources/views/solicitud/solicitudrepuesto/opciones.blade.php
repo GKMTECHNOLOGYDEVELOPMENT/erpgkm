@@ -312,446 +312,522 @@
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-200/40">
-                                        @foreach ($repuestos as $repuesto)
-                                            @php
-                                                $esCedido =
-                                                    $repuesto->entrega_info &&
-                                                    isset($repuesto->entrega_info->entrega_origen_id) &&
-                                                    !empty($repuesto->entrega_info->entrega_origen_id);
-                                                $estadoRepuesto = $repuesto->estado_actual ?? 'no_procesado';
-                                            @endphp
-                                            <tr
-                                                class="transition-all duration-200 hover:bg-blue-50/30
-                                                    @if ($repuesto->ya_procesado) @if ($esCedido) bg-purple-50/50
-                                                        @else bg-emerald-50/50 @endif
-                                                    @endif">
+                 <tbody class="divide-y divide-slate-200/40">
+    @foreach ($repuestos as $repuesto)
+        @php
+            $esCedido = $repuesto->entrega_info && isset($repuesto->entrega_info->entrega_origen_id) && !empty($repuesto->entrega_info->entrega_origen_id);
+            $estadoRepuesto = $repuesto->estado_actual ?? 'no_procesado';
+            
+            // Determinar estados especiales
+            $esPendienteRetorno = $repuesto->ya_procesado && $repuesto->estado_actual == 'pendiente_por_retorno';
+            $esUsado = $repuesto->ya_procesado && $repuesto->estado_actual == 'usado';
+            $esDevuelto = $repuesto->ya_procesado && $repuesto->estado_actual == 'devuelto';
+            
+            // Si es pendiente por retorno, no debe mostrarse como cedido
+            if ($esPendienteRetorno || $esUsado || $esDevuelto) {
+                $esCedido = false;
+            }
+        @endphp
+        
+        <tr
+            class="transition-all duration-200 hover:bg-blue-50/30
+                @if ($repuesto->ya_procesado) 
+                    @if ($esCedido) bg-purple-50/50
+                    @elseif($esPendienteRetorno) bg-amber-50/50
+                    @elseif($esUsado) bg-slate-50/50
+                    @elseif($esDevuelto) bg-indigo-50/50
+                    @else bg-emerald-50/50 
+                    @endif
+                @endif">
 
-                                                <!-- Información del Repuesto -->
-                                                <td class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                                                    <div class="flex items-center space-x-3 sm:space-x-4">
-                                                        <div
-                                                            class="w-8 h-8 sm:w-10 sm:h-10
-                                                                @if ($esCedido) bg-gradient-to-br from-purple-100 to-indigo-100
-                                                                @else bg-gradient-to-br from-blue-100 to-indigo-100 @endif rounded-xl flex items-center justify-center flex-shrink-0">
-                                                            <i
-                                                                class="fas fa-cog
-                                                                @if ($esCedido) text-purple-600
-                                                                @else text-blue-600 @endif text-sm sm:text-base"></i>
-                                                        </div>
-                                                        <div class="min-w-0">
-                                                            <p class="font-semibold text-slate-900 text-sm sm:text-base truncate"
-                                                                title="{{ $repuesto->nombre }}">
-                                                                {{ $repuesto->nombre }}
-                                                                @if ($esCedido)
-                                                                    <span class="text-xs text-purple-600 font-normal">
-                                                                        (Cedido)</span>
-                                                                @endif
-                                                            </p>
-                                                            <p class="text-xs text-slate-500 mt-1 truncate"
-                                                                title="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}">
-                                                                {{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}
-                                                            </p>
-                                                            <p class="text-xs text-slate-400 font-medium truncate"
-                                                                title="{{ $repuesto->tipo_repuesto }}">
-                                                                {{ $repuesto->tipo_repuesto }}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </td>
+            <!-- Información del Repuesto -->
+            <td class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div
+                        class="w-8 h-8 sm:w-10 sm:h-10
+                            @if ($esCedido) bg-gradient-to-br from-purple-100 to-indigo-100
+                            @elseif($esPendienteRetorno) bg-gradient-to-br from-amber-100 to-orange-100
+                            @elseif($esUsado) bg-gradient-to-br from-slate-100 to-gray-100
+                            @elseif($esDevuelto) bg-gradient-to-br from-indigo-100 to-blue-100
+                            @else bg-gradient-to-br from-blue-100 to-indigo-100 @endif rounded-xl flex items-center justify-center flex-shrink-0">
+                        <i
+                            class="fas fa-cog
+                            @if ($esCedido) text-purple-600
+                            @elseif($esPendienteRetorno) text-amber-600
+                            @elseif($esUsado) text-slate-600
+                            @elseif($esDevuelto) text-indigo-600
+                            @else text-blue-600 @endif text-sm sm:text-base"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-slate-900 text-sm sm:text-base truncate"
+                            title="{{ $repuesto->nombre }}">
+                            {{ $repuesto->nombre }}
+                            @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto)
+                                <span class="text-xs text-purple-600 font-normal">
+                                    (Cedido)</span>
+                            @endif
+                            @if ($esPendienteRetorno)
+                                <span class="text-xs text-amber-600 font-normal">
+                                    (Retorno Pendiente)</span>
+                            @endif
+                            @if ($esUsado)
+                                <span class="text-xs text-slate-600 font-normal">
+                                    (Usado)</span>
+                            @endif
+                            @if ($esDevuelto)
+                                <span class="text-xs text-indigo-600 font-normal">
+                                    (Devuelto)</span>
+                            @endif
+                        </p>
+                        <p class="text-xs text-slate-500 mt-1 truncate"
+                            title="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}">
+                            {{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}
+                        </p>
+                        <p class="text-xs text-slate-400 font-medium truncate"
+                            title="{{ $repuesto->tipo_repuesto }}">
+                            {{ $repuesto->tipo_repuesto }}
+                        </p>
+                    </div>
+                </div>
+            </td>
 
-                                                <!-- Cantidad Solicitada -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    <span
-                                                        class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
-                                                            @if ($esCedido) bg-purple-100 text-purple-700
-                                                            @else bg-blue-100 text-blue-700 @endif">
-                                                        <i class="fas fa-sort-numeric-up mr-1 hidden sm:inline"></i>
-                                                        {{ $repuesto->cantidad_solicitada }} <span
-                                                            class="hidden sm:inline ml-1">unidades</span>
-                                                        <span class="sm:hidden">uds</span>
-                                                    </span>
-                                                </td>
+            <!-- Cantidad Solicitada -->
+            <td class="px-4 sm:px-6 py-4 sm:py-6">
+                <span
+                    class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
+                        @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-purple-100 text-purple-700
+                        @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                        @elseif($esUsado) bg-slate-100 text-slate-700
+                        @elseif($esDevuelto) bg-indigo-100 text-indigo-700
+                        @else bg-blue-100 text-blue-700 @endif">
+                    <i class="fas fa-sort-numeric-up mr-1 hidden sm:inline"></i>
+                    {{ $repuesto->cantidad_solicitada }} <span
+                        class="hidden sm:inline ml-1">unidades</span>
+                    <span class="sm:hidden">uds</span>
+                </span>
+            </td>
 
-                                                <!-- Stock Disponible -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    <div class="text-center">
-                                                        <span
-                                                            class="text-base sm:text-lg font-bold
-                                                                @if ($repuesto->suficiente_stock) @if ($esCedido) text-purple-600
-                                                                    @else text-emerald-600 @endif
-@else
-text-rose-600 @endif">
-                                                            {{ $repuesto->stock_disponible }}
-                                                        </span>
-                                                        <span class="text-xs sm:text-sm text-slate-500 block">
-                                                            <span class="hidden sm:inline">disponibles</span>
-                                                            <span class="sm:hidden">disp</span>
-                                                        </span>
-                                                    </div>
-                                                </td>
+            <!-- Stock Disponible -->
+            <td class="px-4 sm:px-6 py-4 sm:py-6">
+                <div class="text-center">
+                    <span
+                        class="text-base sm:text-lg font-bold
+                            @if ($repuesto->suficiente_stock) 
+                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) text-purple-600
+                                @elseif($esPendienteRetorno) text-amber-600
+                                @elseif($esUsado) text-slate-600
+                                @elseif($esDevuelto) text-indigo-600
+                                @else text-emerald-600 @endif
+                            @else text-rose-600 @endif">
+                        {{ $repuesto->stock_disponible }}
+                    </span>
+                    <span class="text-xs sm:text-sm text-slate-500 block">
+                        <span class="hidden sm:inline">disponibles</span>
+                        <span class="sm:hidden">disp</span>
+                    </span>
+                </div>
+            </td>
 
-                                                <!-- Selección de Ubicación -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    @if ($repuesto->ya_procesado)
-                                                        <div class="text-center">
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
-                                                                    @if ($esCedido) bg-purple-100 text-purple-700
-                                                                    @else bg-emerald-100 text-emerald-700 @endif">
-                                                                <i class="fas fa-check-circle mr-1"></i>
-                                                                <span class="hidden sm:inline">Procesado</span>
-                                                                <span class="sm:hidden">OK</span>
-                                                            </span>
-                                                        </div>
-                                                    @elseif(isset($repuesto->ubicaciones_detalle) && count($repuesto->ubicaciones_detalle) > 0)
-                                                        <div class="space-y-2 max-w-[180px] sm:max-w-xs">
-                                                            <select name="ubicaciones[{{ $repuesto->idArticulos }}]"
-                                                                class="w-full border border-slate-300 rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                                                                x-model="seleccionesUbicacion[{{ $repuesto->idArticulos }}]"
-                                                                :disabled="seleccionesCeder[{{ $repuesto->idArticulos }}] ||
-                                                                    procesandoIndividual[{{ $repuesto->idArticulos }}]"
-                                                                @change="resetearCeder({{ $repuesto->idArticulos }})">
-                                                                <option value="">
-                                                                    <i
-                                                                        class="fas fa-map-marker-alt mr-2 hidden sm:inline"></i>
-                                                                    <span class="text-xs sm:text-sm">Seleccionar
-                                                                        ubicación</span>
-                                                                </option>
-                                                                @foreach ($repuesto->ubicaciones_detalle as $ubicacion)
-                                                                    <option
-                                                                        value="{{ $ubicacion->rack_ubicacion_id }}"
-                                                                        class="text-xs sm:text-sm">
-                                                                        {{ $ubicacion->ubicacion_codigo }}
-                                                                        <span
-                                                                            class="hidden sm:inline">({{ $ubicacion->stock_ubicacion }}
-                                                                            uds)</span>
-                                                                        <span
-                                                                            class="sm:hidden">({{ $ubicacion->stock_ubicacion }})</span>
-                                                                    </option>
-                                                                @endforeach
-                                                            </select>
+            <!-- Selección de Ubicación -->
+            <td class="px-4 sm:px-6 py-4 sm:py-6">
+                @if ($repuesto->ya_procesado)
+                    <div class="text-center">
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
+                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-purple-100 text-purple-700
+                                @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                                @elseif($esUsado) bg-slate-100 text-slate-700
+                                @elseif($esDevuelto) bg-indigo-100 text-indigo-700
+                                @else bg-emerald-100 text-emerald-700 @endif">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span class="hidden sm:inline">Procesado</span>
+                            <span class="sm:hidden">OK</span>
+                        </span>
+                    </div>
+                @elseif(isset($repuesto->ubicaciones_detalle) && count($repuesto->ubicaciones_detalle) > 0)
+                    <div class="space-y-2 max-w-[180px] sm:max-w-xs">
+                        <select name="ubicaciones[{{ $repuesto->idArticulos }}]"
+                            class="w-full border border-slate-300 rounded-xl px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                            x-model="seleccionesUbicacion[{{ $repuesto->idArticulos }}]"
+                            :disabled="seleccionesCeder[{{ $repuesto->idArticulos }}] ||
+                                procesandoIndividual[{{ $repuesto->idArticulos }}]"
+                            @change="resetearCeder({{ $repuesto->idArticulos }})">
+                            <option value="">
+                                <i
+                                    class="fas fa-map-marker-alt mr-2 hidden sm:inline"></i>
+                                <span class="text-xs sm:text-sm">Seleccionar
+                                    ubicación</span>
+                            </option>
+                            @foreach ($repuesto->ubicaciones_detalle as $ubicacion)
+                                <option
+                                    value="{{ $ubicacion->rack_ubicacion_id }}"
+                                    class="text-xs sm:text-sm">
+                                    {{ $ubicacion->ubicacion_codigo }}
+                                    <span
+                                        class="hidden sm:inline">({{ $ubicacion->stock_ubicacion }}
+                                        uds)</span>
+                                    <span
+                                        class="sm:hidden">({{ $ubicacion->stock_ubicacion }})</span>
+                                </option>
+                            @endforeach
+                        </select>
 
-                                                            <button type="button"
-                                                                @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
-                                                                :disabled="!seleccionesUbicacion[{{ $repuesto->idArticulos }}] ||
-                                                                    seleccionesCeder[{{ $repuesto->idArticulos }}] ||
-                                                                    procesandoIndividual[{{ $repuesto->idArticulos }}]"
-                                                                :class="{
-                                                                    'bg-blue-600 hover:bg-blue-700': seleccionesUbicacion[
-                                                                            {{ $repuesto->idArticulos }}] &&
-                                                                        !seleccionesCeder[
-                                                                            {{ $repuesto->idArticulos }}] &&
-                                                                        !procesandoIndividual[
-                                                                            {{ $repuesto->idArticulos }}],
-                                                                    'bg-gray-400 cursor-not-allowed': !
-                                                                        seleccionesUbicacion[
-                                                                            {{ $repuesto->idArticulos }}] ||
-                                                                        seleccionesCeder[
-                                                                            {{ $repuesto->idArticulos }}] ||
-                                                                        procesandoIndividual[
-                                                                            {{ $repuesto->idArticulos }}]
-                                                                }"
-                                                                class="w-full text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs">
-                                                                <i class="fas fa-map-marker-alt mr-2"></i>
-                                                                Usar ubicación
-                                                            </button>
-                                                        </div>
-                                                    @else
-                                                        <p class="text-xs sm:text-sm text-rose-500 italic font-medium">
-                                                            <i class="fas fa-times-circle mr-1"></i>
-                                                            <span class="hidden sm:inline">Sin ubicaciones</span>
-                                                            <span class="sm:hidden">Sin ubic.</span>
-                                                        </p>
-                                                    @endif
-                                                </td>
+                        <button type="button"
+                            @click="abrirModalDestinatario({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
+                            :disabled="!seleccionesUbicacion[{{ $repuesto->idArticulos }}] ||
+                                seleccionesCeder[{{ $repuesto->idArticulos }}] ||
+                                procesandoIndividual[{{ $repuesto->idArticulos }}]"
+                            :class="{
+                                'bg-blue-600 hover:bg-blue-700': seleccionesUbicacion[
+                                        {{ $repuesto->idArticulos }}] &&
+                                    !seleccionesCeder[
+                                        {{ $repuesto->idArticulos }}] &&
+                                    !procesandoIndividual[
+                                        {{ $repuesto->idArticulos }}],
+                                'bg-gray-400 cursor-not-allowed': !
+                                    seleccionesUbicacion[
+                                        {{ $repuesto->idArticulos }}] ||
+                                    seleccionesCeder[
+                                        {{ $repuesto->idArticulos }}] ||
+                                    procesandoIndividual[
+                                        {{ $repuesto->idArticulos }}]
+                            }"
+                            class="w-full text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Usar ubicación
+                        </button>
+                    </div>
+                @else
+                    <p class="text-xs sm:text-sm text-rose-500 italic font-medium">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        <span class="hidden sm:inline">Sin ubicaciones</span>
+                        <span class="sm:hidden">Sin ubic.</span>
+                    </p>
+                @endif
+            </td>
 
-                                                <!-- NUEVA COLUMNA: Ceder -->
-                                                @if ($mostrarColumnaCeder)
-                                                    <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                        @php
-                                                            $estadosRepuestoSinSelect = [
-                                                                'entregado',
-                                                                'pendiente_entrega',
-                                                                'listo_para_ceder',
-                                                            ];
-                                                            $mostrarSelectRepuesto = !(
-                                                                $repuesto->ya_procesado &&
-                                                                in_array(
-                                                                    $repuesto->estado_actual,
-                                                                    $estadosRepuestoSinSelect,
-                                                                )
-                                                            );
+            <!-- NUEVA COLUMNA: Ceder -->
+            @if ($mostrarColumnaCeder)
+                <td class="px-4 sm:px-6 py-4 sm:py-6">
+                    @php
+                        $estadosRepuestoSinSelect = [
+                            'entregado',
+                            'pendiente_entrega',
+                            'listo_para_ceder',
+                            'usado',
+                            'devuelto',
+                            'pendiente_por_retorno'
+                        ];
+                        $mostrarSelectRepuesto = !(
+                            $repuesto->ya_procesado &&
+                            in_array(
+                                $repuesto->estado_actual,
+                                $estadosRepuestoSinSelect,
+                            )
+                        );
 
-                                                            $repuestosParaCeder = DB::table('repuestos_entregas as re')
-                                                                ->select(
-                                                                    're.id',
-                                                                    're.ubicacion_utilizada',
-                                                                    're.articulo_id',
-                                                                    're.usuario_destino_id',
-                                                                    're.tipo_entrega',
-                                                                    're.cantidad',
-                                                                    're.numero_ticket',
-                                                                    're.estado',
-                                                                    're.solicitud_id',
-                                                                    're.fecha_entrega',
-                                                                    're.fecha_preparacion',
-                                                                    'so.codigo as codigo_solicitud_origen',
-                                                                    'u.Nombre as usuario_nombre',
-                                                                    'u.apellidoPaterno as usuario_apellido',
-                                                                    'a.nombre as articulo_nombre',
-                                                                    'a.codigo_repuesto',
-                                                                )
-                                                                ->leftJoin(
-                                                                    'usuarios as u',
-                                                                    're.usuario_destino_id',
-                                                                    '=',
-                                                                    'u.idUsuario',
-                                                                )
-                                                                ->leftJoin(
-                                                                    'articulos as a',
-                                                                    're.articulo_id',
-                                                                    '=',
-                                                                    'a.idArticulos',
-                                                                )
-                                                                ->leftJoin(
-                                                                    'solicitudesordenes as so',
-                                                                    're.solicitud_id',
-                                                                    '=',
-                                                                    'so.idsolicitudesordenes',
-                                                                )
-                                                                ->where('re.articulo_id', $repuesto->idArticulos)
-                                                                ->where('re.estado', 'pendiente_por_retorno')
-                                                                ->where(
-                                                                    're.solicitud_id',
-                                                                    '!=',
-                                                                    $solicitud->idsolicitudesordenes,
-                                                                )
-                                                                ->orderBy('re.fecha_entrega', 'desc')
-                                                                ->limit(10)
-                                                                ->get();
-                                                        @endphp
+                        $repuestosParaCeder = DB::table('repuestos_entregas as re')
+                            ->select(
+                                're.id',
+                                're.ubicacion_utilizada',
+                                're.articulo_id',
+                                're.usuario_destino_id',
+                                're.tipo_entrega',
+                                're.cantidad',
+                                're.numero_ticket',
+                                're.estado',
+                                're.solicitud_id',
+                                're.fecha_entrega',
+                                're.fecha_preparacion',
+                                'so.codigo as codigo_solicitud_origen',
+                                'u.Nombre as usuario_nombre',
+                                'u.apellidoPaterno as usuario_apellido',
+                                'a.nombre as articulo_nombre',
+                                'a.codigo_repuesto',
+                            )
+                            ->leftJoin(
+                                'usuarios as u',
+                                're.usuario_destino_id',
+                                '=',
+                                'u.idUsuario',
+                            )
+                            ->leftJoin(
+                                'articulos as a',
+                                're.articulo_id',
+                                '=',
+                                'a.idArticulos',
+                            )
+                            ->leftJoin(
+                                'solicitudesordenes as so',
+                                're.solicitud_id',
+                                '=',
+                                'so.idsolicitudesordenes',
+                            )
+                            ->where('re.articulo_id', $repuesto->idArticulos)
+                            ->where('re.estado', 'pendiente_por_retorno')
+                            ->where(
+                                're.solicitud_id',
+                                '!=',
+                                $solicitud->idsolicitudesordenes,
+                            )
+                            ->orderBy('re.fecha_entrega', 'desc')
+                            ->limit(10)
+                            ->get();
+                    @endphp
 
-                                                        @if ($mostrarSelectRepuesto)
-                                                            <div class="space-y-2 max-w-[220px]">
-                                                                @if ($repuestosParaCeder->count() > 0)
-                                                                    <select
-                                                                        class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                                                                        x-model="seleccionesCeder[{{ $repuesto->idArticulos }}]"
-                                                                        :disabled="seleccionesUbicacion[
-                                                                                {{ $repuesto->idArticulos }}] ||
-                                                                            procesandoIndividual[
-                                                                                {{ $repuesto->idArticulos }}]"
-                                                                        @change="resetearUbicacion({{ $repuesto->idArticulos }})">
-                                                                        <option value="">-- Ceder repuesto --
-                                                                        </option>
+                    @if ($mostrarSelectRepuesto)
+                        <div class="space-y-2 max-w-[220px]">
+                            @if ($repuestosParaCeder->count() > 0)
+                                <select
+                                    class="w-full border border-slate-300 rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                                    x-model="seleccionesCeder[{{ $repuesto->idArticulos }}]"
+                                    :disabled="seleccionesUbicacion[
+                                            {{ $repuesto->idArticulos }}] ||
+                                        procesandoIndividual[
+                                            {{ $repuesto->idArticulos }}]"
+                                    @change="resetearUbicacion({{ $repuesto->idArticulos }})">
+                                    <option value="">-- Ceder repuesto --
+                                    </option>
 
-                                                                        @foreach ($repuestosParaCeder as $entrega)
-                                                                            @php
-                                                                                $usuarioInfo = $entrega->usuario_nombre
-                                                                                    ? substr(
-                                                                                            $entrega->usuario_nombre,
-                                                                                            0,
-                                                                                            1,
-                                                                                        ) .
-                                                                                        '. ' .
-                                                                                        $entrega->usuario_apellido
-                                                                                    : 'ID:' .
-                                                                                        $entrega->usuario_destino_id;
+                                    @foreach ($repuestosParaCeder as $entrega)
+                                        @php
+                                            $usuarioInfo = $entrega->usuario_nombre
+                                                ? substr(
+                                                        $entrega->usuario_nombre,
+                                                        0,
+                                                        1,
+                                                    ) .
+                                                    '. ' .
+                                                    $entrega->usuario_apellido
+                                                : 'ID:' .
+                                                    $entrega->usuario_destino_id;
 
-                                                                                $textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utilizada} - {$entrega->cantidad}uds";
-                                                                            @endphp
+                                            $textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utilizada} - {$entrega->cantidad}uds";
+                                        @endphp
 
-                                                                            <option value="{{ $entrega->id }}"
-                                                                                data-ubicacion="{{ $entrega->ubicacion_utilizada }}"
-                                                                                data-cantidad="{{ $entrega->cantidad }}"
-                                                                                data-usuario="{{ $entrega->usuario_destino_id }}"
-                                                                                data-tipo="{{ $entrega->tipo_entrega }}"
-                                                                                data-solicitud-origen="{{ $entrega->codigo_solicitud_origen }}"
-                                                                                data-solicitud-id="{{ $entrega->solicitud_id }}"
-                                                                                data-estado="{{ $entrega->estado }}"
-                                                                                data-articulo-id="{{ $entrega->articulo_id }}"
-                                                                                class="text-xs">
-                                                                                {{ $textoOpcion }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
+                                        <option value="{{ $entrega->id }}"
+                                            data-ubicacion="{{ $entrega->ubicacion_utilizada }}"
+                                            data-cantidad="{{ $entrega->cantidad }}"
+                                            data-usuario="{{ $entrega->usuario_destino_id }}"
+                                            data-tipo="{{ $entrega->tipo_entrega }}"
+                                            data-solicitud-origen="{{ $entrega->codigo_solicitud_origen }}"
+                                            data-solicitud-id="{{ $entrega->solicitud_id }}"
+                                            data-estado="{{ $entrega->estado }}"
+                                            data-articulo-id="{{ $entrega->articulo_id }}"
+                                            class="text-xs">
+                                            {{ $textoOpcion }}
+                                        </option>
+                                    @endforeach
+                                </select>
 
-                                                                    <button type="button"
-                                                                        @click="abrirModalCeder({{ $repuesto->idArticulos }})"
-                                                                        :disabled="!seleccionesCeder[
-                                                                                {{ $repuesto->idArticulos }}] ||
-                                                                            seleccionesUbicacion[
-                                                                                {{ $repuesto->idArticulos }}] ||
-                                                                            procesandoIndividual[
-                                                                                {{ $repuesto->idArticulos }}]"
-                                                                        :class="{
-                                                                            'bg-secondary hover:bg-purple-600': seleccionesCeder[
-                                                                                    {{ $repuesto->idArticulos }}] &&
-                                                                                !seleccionesUbicacion[
-                                                                                    {{ $repuesto->idArticulos }}] &&
-                                                                                !procesandoIndividual[
-                                                                                    {{ $repuesto->idArticulos }}],
-                                                                            'bg-gray-400 cursor-not-allowed': !
-                                                                                seleccionesCeder[
-                                                                                    {{ $repuesto->idArticulos }}] ||
-                                                                                seleccionesUbicacion[
-                                                                                    {{ $repuesto->idArticulos }}] ||
-                                                                                procesandoIndividual[
-                                                                                    {{ $repuesto->idArticulos }}]
-                                                                        }"
-                                                                        class="w-full text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs">
-                                                                        <i class="fas fa-exchange-alt mr-2"></i>
-                                                                        Ceder repuesto
-                                                                    </button>
-                                                                @else
-                                                                    <div
-                                                                        class="text-center p-2 bg-amber-50 rounded-lg border border-amber-200">
-                                                                        <i
-                                                                            class="fas fa-clock text-amber-500 text-sm mb-1"></i>
-                                                                        <p
-                                                                            class="text-[11px] text-amber-700 font-medium">
-                                                                            Sin retornos pendientes</p>
-                                                                        <p class="text-[10px] text-amber-600 mt-1">
-                                                                            {{ $repuesto->codigo_repuesto ?? $repuesto->nombre }}
-                                                                        </p>
-                                                                    </div>
-                                                                @endif
-                                                            </div>
-                                                        @else
-                                                            <div class="text-center">
-                                                                <span class="text-xs text-gray-500 italic">
-                                                                    No aplica
-                                                                </span>
-                                                            </div>
-                                                        @endif
-                                                    </td>
-                                                @endif
+                                <button type="button"
+                                    @click="abrirModalCeder({{ $repuesto->idArticulos }})"
+                                    :disabled="!seleccionesCeder[
+                                            {{ $repuesto->idArticulos }}] ||
+                                        seleccionesUbicacion[
+                                            {{ $repuesto->idArticulos }}] ||
+                                        procesandoIndividual[
+                                            {{ $repuesto->idArticulos }}]"
+                                    :class="{
+                                        'bg-secondary hover:bg-purple-600': seleccionesCeder[
+                                                {{ $repuesto->idArticulos }}] &&
+                                            !seleccionesUbicacion[
+                                                {{ $repuesto->idArticulos }}] &&
+                                            !procesandoIndividual[
+                                                {{ $repuesto->idArticulos }}],
+                                        'bg-gray-400 cursor-not-allowed': !
+                                            seleccionesCeder[
+                                                {{ $repuesto->idArticulos }}] ||
+                                            seleccionesUbicacion[
+                                                {{ $repuesto->idArticulos }}] ||
+                                            procesandoIndividual[
+                                                {{ $repuesto->idArticulos }}]
+                                    }"
+                                    class="w-full text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs">
+                                    <i class="fas fa-exchange-alt mr-2"></i>
+                                    Ceder repuesto
+                                </button>
+                            @else
+                                <div
+                                    class="text-center p-2 bg-amber-50 rounded-lg border border-amber-200">
+                                    <i
+                                        class="fas fa-clock text-amber-500 text-sm mb-1"></i>
+                                    <p
+                                        class="text-[11px] text-amber-700 font-medium">
+                                        Sin retornos pendientes</p>
+                                    <p class="text-[10px] text-amber-600 mt-1">
+                                        {{ $repuesto->codigo_repuesto ?? $repuesto->nombre }}
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="text-center">
+                            <span class="text-xs text-gray-500 italic">
+                                No aplica
+                            </span>
+                        </div>
+                    @endif
+                </td>
+            @endif
 
-                                                <!-- Estado -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    @if ($repuesto->ya_procesado)
+            <!-- Estado -->
+            <td class="px-4 sm:px-6 py-4 sm:py-6">
+                @if ($repuesto->ya_procesado)
+                    @if ($repuesto->estado_actual == 'cedido')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2
+                            rounded-xl text-xs sm:text-sm font-semibold
+                            bg-secondary-light text-secondary border border-purple-500 shadow-sm">
+                            <i class="fas fa-exchange-alt mr-1"></i>
+                            <span class="hidden sm:inline">Cedido</span>
+                            <span class="sm:hidden">Ced.</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'entregado')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-dark text-white
+                            border border-dark shadow-sm">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span class="hidden sm:inline">Entregado</span>
+                            <span class="sm:hidden">Entreg.</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'entregado_cedido')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
+                            border border-purple-500 shadow-sm">
+                            <i class="fas fa-exchange-alt mr-1"></i>
+                            <span class="hidden sm:inline">Entregado Cedido</span>
+                            <span class="sm:hidden">Ent. Cedido</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'pendiente_entrega')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-success text-white
+                            border border-success shadow-sm">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span class="hidden sm:inline">Listo para
+                                Entregar</span>
+                            <span class="sm:hidden">Listo</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'listo_para_ceder')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
+                            border border-purple-500 shadow-sm">
+                            <i class="fas fa-exchange-alt mr-1"></i>
+                            <span class="hidden sm:inline">Listo para Ceder</span>
+                            <span class="sm:hidden">Ceder</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'pendiente_por_retorno')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-warning text-white
+                            border border-warning shadow-sm">
+                            <i class="fas fa-history mr-1"></i>
+                            <span class="hidden sm:inline">Pendiente por Retorno</span>
+                            <span class="sm:hidden">Pend. Retorno</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'usado')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-success-light text-sucess
+                            border border-success shadow-sm">
+                            <i class="fas fa-tools mr-1"></i>
+                            <span class="hidden sm:inline">Usado</span>
+                            <span class="sm:hidden">Usado</span>
+                        </span>
+                    @elseif ($repuesto->estado_actual == 'devuelto')
+                        <span
+                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                            text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700
+                            border border-indigo-300 shadow-sm">
+                            <i class="fas fa-undo-alt mr-1"></i>
+                            <span class="hidden sm:inline">Devuelto</span>
+                            <span class="sm:hidden">Dev.</span>
+                        </span>
+                    @endif
+                @elseif ($repuesto->suficiente_stock)
+                    <span
+                        class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                        text-xs sm:text-sm font-semibold bg-warning text-white
+                        border border-warning shadow-sm">
+                        <i class="fas fa-cog mr-1"></i>
+                        <span class="hidden sm:inline">Pendiente</span>
+                        <span class="sm:hidden">Pend.</span>
+                    </span>
+                @else
+                    <span
+                        class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
+                        text-xs sm:text-sm font-semibold bg-danger text-white
+                        border border-red-200 shadow-sm">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        <span class="hidden sm:inline">Insuficiente</span>
+                        <span class="sm:hidden">Ins.</span>
+                    </span>
+                @endif
+            </td>
 
-                                                        @if ($repuesto->estado_actual == 'cedido')
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2
-                       rounded-xl text-xs sm:text-sm font-semibold
-                       bg-secondary-light text-secondary border border-purple-500 shadow-sm">
-                                                                <i class="fas fa-exchange-alt mr-1"></i>
-                                                                <span class="hidden sm:inline">Cedido</span>
-                                                                <span class="sm:hidden">Ced.</span>
-                                                            </span>
-                                                        @elseif ($repuesto->estado_actual == 'entregado')
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                       text-xs sm:text-sm font-semibold bg-dark text-white
-                       border border-dark shadow-sm">
-                                                                <i class="fas fa-check-circle mr-1"></i>
-                                                                <span class="hidden sm:inline">Entregado</span>
-                                                                <span class="sm:hidden">Entreg.</span>
-                                                            </span>
-                                                        @elseif ($repuesto->estado_actual == 'entregado_cedido')
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                       text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
-                       border border-purple-500 shadow-sm">
-                                                                <i class="fas fa-exchange-alt mr-1"></i>
-                                                                <span class="hidden sm:inline">Entregado Cedido</span>
-                                                                <span class="sm:hidden">Ent. Cedido</span>
-                                                            </span>
-                                                        @elseif ($repuesto->estado_actual == 'pendiente_entrega')
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                       text-xs sm:text-sm font-semibold bg-success text-white
-                       border border-success shadow-sm">
-                                                                <i class="fas fa-clock mr-1"></i>
-                                                                <span class="hidden sm:inline">Listo para
-                                                                    Entregar</span>
-                                                                <span class="sm:hidden">Listo</span>
-                                                            </span>
-                                                        @elseif ($repuesto->estado_actual == 'listo_para_ceder')
-                                                            <span
-                                                                class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                       text-xs sm:text-sm font-semibold bg-secondary-light text-secondary
-                       border border-purple-500 shadow-sm">
-                                                                <i class="fas fa-exchange-alt mr-1"></i>
-                                                                <span class="hidden sm:inline">Listo para Ceder</span>
-                                                                <span class="sm:hidden">Ceder</span>
-                                                            </span>
-                                                        @endif
-                                                    @elseif ($repuesto->suficiente_stock)
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                   text-xs sm:text-sm font-semibold bg-warning text-white
-                   border border-warning shadow-sm">
-                                                            <i class="fas fa-cog mr-1"></i>
-                                                            <span class="hidden sm:inline">Pendiente</span>
-                                                            <span class="sm:hidden">Pend.</span>
-                                                        </span>
-                                                    @else
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                   text-xs sm:text-sm font-semibold bg-danger text-white
-                   border border-red-200 shadow-sm">
-                                                            <i class="fas fa-times-circle mr-1"></i>
-                                                            <span class="hidden sm:inline">Insuficiente</span>
-                                                            <span class="sm:hidden">Ins.</span>
-                                                        </span>
-                                                    @endif
-                                                </td>
-
-
-                                                <!-- Acción -->
-                                                <td class="px-4 sm:px-6 py-4 sm:py-6">
-                                                    @if ($repuesto->ya_procesado)
-                                                        @if ($repuesto->estado_actual == 'entregado' || $repuesto->estado_actual == 'entregado_cedido')
-                                                            <button type="button"
-                                                                @click="abrirModalVerConfirmacion({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
-                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                                                                <i class="fas fa-eye mr-1 sm:mr-2"></i>
-                                                                <span class="hidden sm:inline">Ver Confirmación</span>
-                                                                <span class="sm:hidden">Ver</span>
-                                                            </button>
-                                                        @elseif($repuesto->estado_actual == 'pendiente_entrega')
-                                                            <div class="space-y-2">
-                                                                <!-- Nuevo botón para seleccionar quién entrega -->
-                                                                <button type="button"
-                                                                    @click="abrirModalSeleccionarEntregador({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
-                                                                    class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                                                                    <i class="fas fa-user-check mr-1 sm:mr-2"></i>
-                                                                    <span class="hidden sm:inline">Seleccionar
-                                                                        Entregador</span>
-                                                                    <span class="sm:hidden">Entregar</span>
-                                                                </button>
-                                                            </div>
-                                                        @elseif($repuesto->estado_actual == 'listo_para_ceder')
-                                                            <div class="space-y-2">
-                                                                <button type="button"
-                                                                    @click="confirmarEntregaCedida({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, {{ $repuesto->entrega_info->entrega_id ?? 0 }})"
-                                                                    class="bg-secondary hover:bg-purple-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
-                                                                    <i class="fas fa-exchange-alt mr-1 sm:mr-2"></i>
-                                                                    <span class="hidden sm:inline">Confirmar Entrega
-                                                                        Cedida</span>
-                                                                    <span class="sm:hidden">Entregar Cedido</span>
-                                                                </button>
-                                                            </div>
-                                                        @endif
-                                                    @elseif($repuesto->suficiente_stock)
-                                                        <div class="text-center text-xs text-gray-500">
-                                                            Seleccione una opción
-                                                        </div>
-                                                    @else
-                                                        <button disabled
-                                                            class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
-                                                            <i class="fas fa-ban mr-1 sm:mr-2"></i>
-                                                            <span class="hidden sm:inline">Sin Stock</span>
-                                                            <span class="sm:hidden">Sin</span>
-                                                        </button>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
+            <!-- Acción -->
+            <td class="px-4 sm:px-6 py-4 sm:py-6">
+                @if ($repuesto->ya_procesado)
+                    @if ($repuesto->estado_actual == 'entregado' || $repuesto->estado_actual == 'entregado_cedido')
+                        <button type="button"
+                            @click="abrirModalVerConfirmacion({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }})"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                            <i class="fas fa-eye mr-1 sm:mr-2"></i>
+                            <span class="hidden sm:inline">Ver Confirmación</span>
+                            <span class="sm:hidden">Ver</span>
+                        </button>
+                    @elseif($repuesto->estado_actual == 'pendiente_entrega')
+                        <div class="space-y-2">
+                            <!-- Nuevo botón para seleccionar quién entrega -->
+                            <button type="button"
+                                @click="abrirModalSeleccionarEntregador({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, '{{ $repuesto->nombre }}')"
+                                class="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                <i class="fas fa-user-check mr-1 sm:mr-2"></i>
+                                <span class="hidden sm:inline">Seleccionar
+                                    Entregador</span>
+                                <span class="sm:hidden">Entregar</span>
+                            </button>
+                        </div>
+                    @elseif($repuesto->estado_actual == 'listo_para_ceder')
+                        <div class="space-y-2">
+                            <button type="button"
+                                @click="confirmarEntregaCedida({{ $solicitud->idsolicitudesordenes }}, {{ $repuesto->idArticulos }}, {{ $repuesto->entrega_info->entrega_id ?? 0 }})"
+                                class="bg-secondary hover:bg-purple-700 text-white px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg font-medium transition-all duration-300 flex items-center justify-center text-xs sm:text-sm w-full">
+                                <i class="fas fa-exchange-alt mr-1 sm:mr-2"></i>
+                                <span class="hidden sm:inline">Confirmar Entrega
+                                    Cedida</span>
+                                <span class="sm:hidden">Entregar Cedido</span>
+                            </button>
+                        </div>
+                    @elseif($repuesto->estado_actual == 'pendiente_por_retorno')
+                        <div class="text-center text-xs text-gray-500">
+                            Esperando retorno
+                        </div>
+                    @elseif($repuesto->estado_actual == 'usado' || $repuesto->estado_actual == 'devuelto')
+                        <div class="text-center text-xs text-gray-500">
+                            Proceso completado
+                        </div>
+                    @endif
+                @elseif($repuesto->suficiente_stock)
+                    <div class="text-center text-xs text-gray-500">
+                        Seleccione una opción
+                    </div>
+                @else
+                    <button disabled
+                        class="px-3 sm:px-6 py-1.5 sm:py-3 bg-gray-300 text-gray-600 rounded-xl font-semibold cursor-not-allowed border border-gray-300 text-xs sm:text-sm">
+                        <i class="fas fa-ban mr-1 sm:mr-2"></i>
+                        <span class="hidden sm:inline">Sin Stock</span>
+                        <span class="sm:hidden">Sin</span>
+                    </button>
+                @endif
+            </td>
+        </tr>
+    @endforeach
+</tbody>
                                 </table>
                             </div>
                         </form>
