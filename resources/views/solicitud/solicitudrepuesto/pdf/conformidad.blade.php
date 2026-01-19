@@ -47,15 +47,22 @@
         <!-- TEXTO DEL ACTA -->
         <div class="mb-4 page-break-inside-avoid">
 
-            <!-- QUIEN ENTREGA (ALMACÉN) -->
+            <!-- QUIEN ENTREGA -->
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
                 Por medio de la presente, yo
                 <span class="font-bold uppercase">
-                    {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
-                    {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
-                    {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    @if ($esCesion)
+                        {{ $solicitud->aprobador_nombre }}
+                        {{ $solicitud->aprobador_apellido_paterno }}
+                        {{ $solicitud->aprobador_apellido_materno }}
+                    @else
+                        {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
+                        {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                        {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
+                    @endif
                 </span>,
-                identificado(a) con {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
+                identificado(a) con
+                {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
                 <span class="font-bold uppercase">
                     {{ $solicitud->aprobador_documento ?? 'NÚMERO' }}
                 </span>,
@@ -69,6 +76,7 @@
                     {{ $solicitud->aprobador_area ?? 'N/A' }}
                 </span>.
             </p>
+
 
             <!-- MOTIVO DE LA ENTREGA -->
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">

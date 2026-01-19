@@ -3260,35 +3260,93 @@ class SolicitudrepuestoController extends Controller
         }
     }
 
+
     public function generarConformidad($id)
     {
         try {
 
-            /* =========================
-            * 1. OBTENER SOLICITUD + TICKET + QUIEN ENTREGA
-            * ========================= */
+            Log::info('📄 Generando conformidad', [
+                'solicitud_destino_id' => $id
+            ]);
 
-            $lastEntregaSub = DB::table('repuestos_entregas')
-                ->select('solicitud_id', DB::raw('MAX(id) as last_id'))
-                ->groupBy('solicitud_id');
+            /* =====================================================
+         * 1. OBTENER ENTREGA DESTINO (DESDE SOLICITUD_ID)
+         * ===================================================== */
+            $entregaDestino = DB::table('repuestos_entregas')
+                ->where('solicitud_id', $id)
+                ->orderByDesc('id')
+                ->first();
 
+            if (!$entregaDestino) {
+                Log::warning('❌ No existe entrega para la solicitud destino', [
+                    'solicitud_id' => $id
+                ]);
+                abort(404, 'No existe entrega registrada');
+            }
+
+            Log::info('📦 Entrega DESTINO encontrada', [
+                'entrega_id'          => $entregaDestino->id,
+                'solicitud_destino'   => $entregaDestino->solicitud_id,
+                'articulo_id'         => $entregaDestino->articulo_id,
+                'usuario_recibe_id'   => $entregaDestino->usuario_destino_id,
+                'entrega_origen_id'   => $entregaDestino->entrega_origen_id
+            ]);
+
+            /* =====================================================
+         * 2. DETERMINAR QUIÉN ENTREGA REALMENTE
+         * ===================================================== */
+            $esCesion = false;
+            $usuarioEntregaId = null;
+
+            if (!empty($entregaDestino->entrega_origen_id)) {
+
+                $esCesion = true;
+
+                Log::info('🔁 CESIÓN DETECTADA', [
+                    'entrega_origen_id' => $entregaDestino->entrega_origen_id
+                ]);
+
+                // 👇 ENTREGA ORIGEN (MISMA TABLA)
+                $entregaOrigen = DB::table('repuestos_entregas')
+                    ->where('id', $entregaDestino->entrega_origen_id)
+                    ->first();
+
+                if (!$entregaOrigen || !$entregaOrigen->usuario_destino_id) {
+                    Log::error('❌ Entrega ORIGEN inválida o sin usuario_destino_id', [
+                        'entrega_origen_id' => $entregaDestino->entrega_origen_id
+                    ]);
+                    abort(400, 'Error en cesión de repuesto');
+                }
+
+                // 👉 ESTE ES EL USUARIO QUE CEDE
+                $usuarioEntregaId = $entregaOrigen->usuario_destino_id;
+
+                Log::info('👤 Usuario que CEDE el repuesto', [
+                    'usuario_id' => $usuarioEntregaId
+                ]);
+            } else {
+
+                // 👉 ENTREGA NORMAL DESDE ALMACÉN
+                $usuarioEntregaId = $entregaDestino->usuario_entrego_id;
+
+                Log::info('🏬 Entrega normal desde almacén', [
+                    'usuario_id' => $usuarioEntregaId
+                ]);
+            }
+            
+
+            /* =====================================================
+         * 3. OBTENER DATOS DE SOLICITUD + RECEPTOR + QUIEN ENTREGA
+         * ===================================================== */
             $solicitud = DB::table('solicitudesordenes as so')
                 ->select(
                     'so.idsolicitudesordenes',
                     'so.codigo',
-                    'so.fechacreacion',
-                    'so.fechaaprobacion',
-                    'so.tiposervicio',
-                    'so.niveldeurgencia',
-                    'so.observaciones',
-                    'so.cantidad',
                     'so.totalcantidadproductos',
-                    'so.estado',
-
                     't.numero_ticket',
 
                     // =====================
-                    // SOLICITANTE
+                    // RECEPTOR (QUIEN RECIBE)
                     // =====================
                     'u.idUsuario as solicitante_id',
                     'u.Nombre as solicitante_nombre',
@@ -3300,7 +3358,7 @@ class SolicitudrepuestoController extends Controller
                     'ta.nombre as solicitante_area',
 
                     // =====================
-                    // QUIEN ENTREGA
+                    // QUIEN ENTREGA REAL
                     // =====================
                     'ue.idUsuario as aprobador_id',
                     'ue.Nombre as aprobador_nombre',
@@ -3309,149 +3367,235 @@ class SolicitudrepuestoController extends Controller
                     'ue.documento as aprobador_documento',
                     'tde.nombre as aprobador_tipo_documento',
                     'r2.nombre as aprobador_rol',
-                    'ta_entrega.nombre as aprobador_area'
-
+                    'ta2.nombre as aprobador_area'
                 )
-                ->leftJoin('ordenesarticulos as oa', 'oa.idsolicitudesordenes', '=', 'so.idsolicitudesordenes')
-                ->leftJoin('tickets as t', 'oa.idticket', '=', 't.idTickets')
+                ->leftJoin('tickets as t', 't.idTickets', '=', 'so.idticket')
 
-                // solicitante
+                // receptor
                 ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
                 ->leftJoin('tipodocumento as td', 'u.idTipoDocumento', '=', 'td.idTipoDocumento')
                 ->leftJoin('rol as r', 'u.idRol', '=', 'r.idRol')
                 ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
 
-                // quien entrega
-                ->leftJoinSub($lastEntregaSub, 're_last', function ($join) {
-                    $join->on('re_last.solicitud_id', '=', 'so.idsolicitudesordenes');
-                })
-                ->leftJoin('repuestos_entregas as re', 're.id', '=', 're_last.last_id')
-                ->leftJoin('usuarios as ue', 're.usuario_entrego_id', '=', 'ue.idUsuario')
+                // quien entrega real (almacén o técnico que cede)
+                ->leftJoin('usuarios as ue', 'ue.idUsuario', '=', DB::raw((int)$usuarioEntregaId))
                 ->leftJoin('tipodocumento as tde', 'ue.idTipoDocumento', '=', 'tde.idTipoDocumento')
                 ->leftJoin('rol as r2', 'ue.idRol', '=', 'r2.idRol')
-                ->leftJoin('tipoarea as ta_entrega', 'ue.idTipoArea', '=', 'ta_entrega.idTipoArea')
-
+                ->leftJoin('tipoarea as ta2', 'ue.idTipoArea', '=', 'ta2.idTipoArea')
 
                 ->where('so.idsolicitudesordenes', $id)
-                ->whereIn('so.tipoorden', ['solicitud_articulo', 'solicitud_repuesto'])
                 ->first();
 
             if (!$solicitud) {
+                Log::error('❌ Solicitud no encontrada', ['solicitud_id' => $id]);
                 abort(404, 'Solicitud no encontrada');
             }
 
-            /* =========================
-            * 2. VALIDAR REPUESTOS PENDIENTES
-            * ========================= */
+            Log::info('📑 Solicitud cargada correctamente');
 
-            $pendientes = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('estado', 0)
-                ->count();
+            /* =====================================================
+            * 4. REPUESTOS ENTREGADOS (MODELOS MÚLTIPLES + SUBCATEGORÍA)
+            * ===================================================== */
+            $repuestos = DB::table('ordenesarticulos as oa')
+                ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
 
-            if ($pendientes > 0) {
-                abort(400, 'Aún existen repuestos pendientes de entrega');
+                // 🔹 MODELOS (muchos a muchos)
+                ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
+                ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+
+                // 🔹 TIPO REPUESTO (subcategoría)
+                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+
+                ->where('oa.idSolicitudesOrdenes', $id)
+                ->where('oa.estado', 1)
+
+                ->select(
+                    'oa.cantidad',
+                    'a.codigo_repuesto',
+
+                    // 🔥 varios modelos en una sola celda
+                    DB::raw('COALESCE(GROUP_CONCAT(DISTINCT m.nombre SEPARATOR ", "), "N/A") as modelo'),
+
+                    // 🔥 tipo de repuesto real
+                    DB::raw('COALESCE(sc.nombre, "N/A") as tipo_repuesto')
+                )
+
+                ->groupBy(
+                    'oa.idOrdenesArticulos',
+                    'oa.cantidad',
+                    'a.codigo_repuesto',
+                    'sc.nombre'
+                )
+                ->get();
+
+            if ($repuestos->isEmpty()) {
+                Log::warning('⚠️ No hay repuestos entregados');
+                abort(400, 'No hay repuestos entregados');
             }
 
-       /* =========================
-        * 3. REPUESTOS ENTREGADOS (PARCIAL PERMITIDO)
-        * ========================= */
 
-        $repuestos = DB::table('ordenesarticulos as oa')
-            ->select(
-                'oa.cantidad',
-                'a.codigo_repuesto',
-                'sc.nombre as tipo_repuesto',
-                DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
-            )
-            ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
-            ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
-            ->where('oa.idSolicitudesOrdenes', $id)
-            ->where('oa.estado', 1)
-            ->groupBy(
-                'oa.idOrdenesArticulos',
-                'oa.cantidad',
-                'a.codigo_repuesto',
-                'sc.nombre'
-            )
-            ->get();
-
-        if ($repuestos->count() === 0) {
-            return back()->with('error', 'No existen repuestos entregados para generar la conformidad');
-        }
-
-
-            /* =========================
-            * 4. FIRMAS
-            * ========================= */
-
+            /* =====================================================
+         * 5. FIRMAS
+         * ===================================================== */
             $firmaSolicitante = null;
+            $firmaAprobador   = null;
+
             if ($solicitud->solicitante_id) {
-                $firmaBlob = DB::table('usuarios')
+                $firma = DB::table('usuarios')
                     ->where('idUsuario', $solicitud->solicitante_id)
                     ->value('firma');
-
-                if ($firmaBlob) {
-                    $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firmaBlob);
+                if ($firma) {
+                    $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firma);
                 }
             }
 
-            $firmaAprobador = null;
             if ($solicitud->aprobador_id) {
-                $firmaBlob = DB::table('usuarios')
+                $firma = DB::table('usuarios')
                     ->where('idUsuario', $solicitud->aprobador_id)
                     ->value('firma');
-
-                if ($firmaBlob) {
-                    $firmaAprobador = 'data:image/png;base64,' . base64_encode($firmaBlob);
+                if ($firma) {
+                    $firmaAprobador = 'data:image/png;base64,' . base64_encode($firma);
                 }
             }
 
-            /* =========================
-            * 5. FONDO MEMBRETADO
-            * ========================= */
+            /* =====================================================
+         * 6. GENERAR PDF
+         * ===================================================== */
+            $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(
+                file_get_contents(public_path('assets/images/hojamembretada.jpg'))
+            );
 
-            $bgPath = public_path('assets/images/hojamembretada.jpg');
-            $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($bgPath));
+            $html = view('solicitud.solicitudrepuesto.pdf.conformidad', compact(
+                'solicitud',
+                'repuestos',
+                'bgBase64',
+                'firmaSolicitante',
+                'firmaAprobador',
+                'esCesion'
+            ))->render();
 
-            /* =========================
-            * 6. RENDER HTML
-            * ========================= */
-
-            $html = view('solicitud.solicitudrepuesto.pdf.conformidad', [
-                'solicitud'        => $solicitud,
-                'repuestos'        => $repuestos,
-                'fecha_generacion' => now()->format('d/m/Y H:i'),
-                'bgBase64'         => $bgBase64,
-                'firmaSolicitante' => $firmaSolicitante,
-                'firmaAprobador'   => $firmaAprobador,
-            ])->render();
-
-            /* =========================
-            * 7. GENERAR PDF
-            * ========================= */
-
-            $tempPath = storage_path('app/conformidad_' . uniqid() . '.pdf');
+            $tempPdf = tempnam(sys_get_temp_dir(), 'conformidad_') . '.pdf';
 
             Browsershot::html($html)
                 ->format('A4')
                 ->margins(0, 0, 0, 0)
                 ->showBackground()
                 ->noSandbox()
-                ->setOption('args', ['--disable-dev-shm-usage'])
-                ->savePdf($tempPath);
+                ->savePdf($tempPdf);
 
-            return response()->file($tempPath, [
-                'Content-Type'        => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="ACTA DE CONFORMIDAD REPUESTO - ' . $solicitud->codigo . '.pdf"',
+            Log::info('✅ Conformidad generada correctamente');
+
+            return response()->file($tempPdf, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="ACTA_CONFORMIDAD_' . $solicitud->codigo . '.pdf"'
             ]);
-        } catch (\Exception $e) {
-            Log::error('Error Conformidad Repuesto: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+
+            Log::error('🔥 ERROR CONFORMIDAD', [
+                'mensaje' => $e->getMessage(),
+                'linea'   => $e->getLine(),
+                'archivo' => $e->getFile()
+            ]);
+
             abort(500, 'Error al generar la conformidad');
         }
     }
+
+
+    // public function generarConformidad($solicitudDestinoId)
+    // {
+    //     try {
+
+    //         Log::info('📄 Generando conformidad (PASO 1)', [
+    //             'solicitud_destino_id_input' => $solicitudDestinoId
+    //         ]);
+
+    //         /* =====================================================
+    //          * 1. OBTENER ENTREGA DESTINO DESDE SOLICITUD_ID
+    //          * ===================================================== */
+    //         $entregaDestino = DB::table('repuestos_entregas')
+    //             ->where('solicitud_id', $solicitudDestinoId) // ✅ CLAVE REAL
+    //             ->orderByDesc('id')                           // última entrega válida
+    //             ->first();
+
+    //         if (!$entregaDestino) {
+    //             Log::warning('❌ No existe entrega para la solicitud destino', [
+    //                 'solicitud_destino_id' => $solicitudDestinoId
+    //             ]);
+    //             abort(404, 'No existe entrega registrada para esta solicitud');
+    //         }
+
+    //         Log::info('📦 Entrega DESTINO encontrada', [
+    //             'entrega_destino_id' => $entregaDestino->id,
+    //             'solicitud_destino'  => $entregaDestino->solicitud_id,
+    //             'articulo_id'        => $entregaDestino->articulo_id,
+    //             'entrega_origen_id'  => $entregaDestino->entrega_origen_id,
+    //             'usuario_destino_id' => $entregaDestino->usuario_destino_id
+    //         ]);
+
+    //         /* =====================================================
+    //          * 2. IDENTIFICAR ENTREGA ORIGEN (SI ES CESIÓN)
+    //          * ===================================================== */
+    //         $entregaOrigen = null;
+
+    //         if (!empty($entregaDestino->entrega_origen_id)) {
+
+    //             Log::info('🔁 CESIÓN DETECTADA', [
+    //                 'entrega_origen_id' => $entregaDestino->entrega_origen_id
+    //             ]);
+
+    //             // 🔑 entrega_origen_id APUNTA AL ID DE repuestos_entregas
+    //             $entregaOrigen = DB::table('repuestos_entregas')
+    //                 ->where('id', $entregaDestino->entrega_origen_id)
+    //                 ->first();
+
+    //             if (!$entregaOrigen) {
+    //                 Log::error('❌ Entrega ORIGEN no encontrada', [
+    //                     'entrega_origen_id' => $entregaDestino->entrega_origen_id
+    //                 ]);
+    //                 abort(400, 'Entrega origen inválida');
+    //             }
+
+    //             Log::info('📦 Entrega ORIGEN encontrada', [
+    //                 'entrega_origen_id' => $entregaOrigen->id,
+    //                 'solicitud_origen'  => $entregaOrigen->solicitud_id,
+    //                 'articulo_id'       => $entregaOrigen->articulo_id,
+    //                 'usuario_cede_id'   => $entregaOrigen->usuario_destino_id
+    //             ]);
+
+    //         } else {
+    //             Log::info('🏬 ENTREGA NORMAL (NO CESIÓN)');
+    //         }
+
+    //         /* =====================================================
+    //          * 3. RESPUESTA DEBUG (TEMPORAL)
+    //          * ===================================================== */
+    //         return response()->json([
+    //             'ok' => true,
+    //             'mensaje' => 'IDs de solicitudes detectados correctamente',
+    //             'data' => [
+    //                 'solicitud_destino_id' => $entregaDestino->solicitud_id,
+    //                 'solicitud_origen_id'  => $entregaOrigen ? $entregaOrigen->solicitud_id : null,
+    //                 'entrega_id'           => $entregaDestino->id,
+    //                 'articulo_id'          => $entregaDestino->articulo_id,
+    //                 'usuario_cede_id'      => $entregaOrigen ? $entregaOrigen->usuario_destino_id : null,
+    //                 'usuario_recibe_id'    => $entregaDestino->usuario_destino_id
+    //             ]
+    //         ]);
+
+    //     } catch (\Throwable $e) {
+
+    //         Log::error('🔥 ERROR PASO 1 CONFORMIDAD', [
+    //             'mensaje' => $e->getMessage(),
+    //             'linea'   => $e->getLine(),
+    //             'archivo' => $e->getFile()
+    //         ]);
+
+    //         abort(500, 'Error interno al procesar la conformidad');
+    //     }
+    // }
+
+
 
 
 
