@@ -602,8 +602,7 @@
                                                 : 'ID:' .
                                                     $entrega->usuario_destino_id;
 
-                                            $textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utilizada} - {$entrega->cantidad}uds";
-                                        @endphp
+$textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utilizada} - {$entrega->cantidad}uds - {$usuarioInfo}";                                        @endphp
 
                                         <option value="{{ $entrega->id }}"
                                             data-ubicacion="{{ $entrega->ubicacion_utilizada }}"
