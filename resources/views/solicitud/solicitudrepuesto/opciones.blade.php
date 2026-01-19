@@ -345,17 +345,17 @@
                 <div class="flex items-center space-x-3 sm:space-x-4">
                     <div
                         class="w-8 h-8 sm:w-10 sm:h-10
-                            @if ($esCedido) bg-gradient-to-br from-purple-100 to-indigo-100
-                            @elseif($esPendienteRetorno) bg-gradient-to-br from-amber-100 to-orange-100
-                            @elseif($esUsado) bg-gradient-to-br from-slate-100 to-gray-100
-                            @elseif($esDevuelto) bg-gradient-to-br from-indigo-100 to-blue-100
-                            @else bg-gradient-to-br from-blue-100 to-indigo-100 @endif rounded-xl flex items-center justify-center flex-shrink-0">
+                            @if ($esCedido) bg-secondary-light
+                            @elseif($esPendienteRetorno) bg-warning-light
+                            @elseif($esUsado) bg-success-light
+                            @elseif($esDevuelto) bg-danger-light
+                            @else bg-danger-light @endif rounded-xl flex items-center justify-center flex-shrink-0">
                         <i
                             class="fas fa-cog
                             @if ($esCedido) text-purple-600
                             @elseif($esPendienteRetorno) text-amber-600
-                            @elseif($esUsado) text-slate-600
-                            @elseif($esDevuelto) text-indigo-600
+                            @elseif($esUsado) text-success
+                            @elseif($esDevuelto) text-danger
                             @else text-blue-600 @endif text-sm sm:text-base"></i>
                     </div>
                     <div class="min-w-0">
@@ -371,11 +371,11 @@
                                     (Retorno Pendiente)</span>
                             @endif
                             @if ($esUsado)
-                                <span class="text-xs text-slate-600 font-normal">
+                                <span class="text-xs text-success font-normal">
                                     (Usado)</span>
                             @endif
                             @if ($esDevuelto)
-                                <span class="text-xs text-indigo-600 font-normal">
+                                <span class="text-xs text-danger font-normal">
                                     (Devuelto)</span>
                             @endif
                         </p>
@@ -395,10 +395,10 @@
             <td class="px-4 sm:px-6 py-4 sm:py-6">
                 <span
                     class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
-                        @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-purple-100 text-purple-700
+                        @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
                         @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
-                        @elseif($esUsado) bg-slate-100 text-slate-700
-                        @elseif($esDevuelto) bg-indigo-100 text-indigo-700
+                        @elseif($esUsado) bg-success-light text-success
+                        @elseif($esDevuelto) bg-danger-light text-danger
                         @else bg-blue-100 text-blue-700 @endif">
                     <i class="fas fa-sort-numeric-up mr-1 hidden sm:inline"></i>
                     {{ $repuesto->cantidad_solicitada }} <span
@@ -413,10 +413,10 @@
                     <span
                         class="text-base sm:text-lg font-bold
                             @if ($repuesto->suficiente_stock) 
-                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) text-purple-600
+                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) text-secondary
                                 @elseif($esPendienteRetorno) text-amber-600
-                                @elseif($esUsado) text-slate-600
-                                @elseif($esDevuelto) text-indigo-600
+                                @elseif($esUsado) text-success
+                                @elseif($esDevuelto) text-danger
                                 @else text-emerald-600 @endif
                             @else text-rose-600 @endif">
                         {{ $repuesto->stock_disponible }}
@@ -434,10 +434,10 @@
                     <div class="text-center">
                         <span
                             class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
-                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-purple-100 text-purple-700
+                                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
                                 @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
-                                @elseif($esUsado) bg-slate-100 text-slate-700
-                                @elseif($esDevuelto) bg-indigo-100 text-indigo-700
+                                @elseif($esUsado) bg-success-light text-success
+                                @elseif($esDevuelto) bg-danger-light text-danger
                                 @else bg-emerald-100 text-emerald-700 @endif">
                             <i class="fas fa-check-circle mr-1"></i>
                             <span class="hidden sm:inline">Procesado</span>
@@ -732,7 +732,7 @@
                     @elseif ($repuesto->estado_actual == 'usado')
                         <span
                             class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                            text-xs sm:text-sm font-semibold bg-success-light text-sucess
+                            text-xs sm:text-sm font-semibold bg-success-light text-success
                             border border-success shadow-sm">
                             <i class="fas fa-tools mr-1"></i>
                             <span class="hidden sm:inline">Usado</span>
@@ -741,8 +741,8 @@
                     @elseif ($repuesto->estado_actual == 'devuelto')
                         <span
                             class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl
-                            text-xs sm:text-sm font-semibold bg-indigo-100 text-indigo-700
-                            border border-indigo-300 shadow-sm">
+                            text-xs sm:text-sm font-semibold bg-danger-light text-danger
+                            border border-danger shadow-sm">
                             <i class="fas fa-undo-alt mr-1"></i>
                             <span class="hidden sm:inline">Devuelto</span>
                             <span class="sm:hidden">Dev.</span>

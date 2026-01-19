@@ -2133,7 +2133,7 @@ class SolicitudrepuestoController extends Controller
         });
 
         // Contar repuestos procesados y disponibles
-        $repuestos_procesados = $repuestos->where('ya_procesado', true)->count();
+        $repuestos_procesados = $repuestos->count();
         $repuestos_disponibles = $repuestos->where('suficiente_stock', true)->count();
         $total_repuestos = $repuestos->count();
 
@@ -3353,38 +3353,35 @@ class SolicitudrepuestoController extends Controller
                 abort(400, 'Aún existen repuestos pendientes de entrega');
             }
 
-            /* =========================
-            * 3. REPUESTOS ENTREGADOS
-            * ========================= */
+       /* =========================
+        * 3. REPUESTOS ENTREGADOS (PARCIAL PERMITIDO)
+        * ========================= */
 
-            $repuestos = DB::table('ordenesarticulos as oa')
-                ->select(
-                    'oa.cantidad',
-                    'a.nombre as repuesto_nombre',
-                    'a.codigo_barras',
-                    'a.codigo_repuesto',
-                    'sc.nombre as tipo_repuesto',
-                    DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
-                )
-                ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-                ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-                ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
-                ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
-                ->where('oa.idSolicitudesOrdenes', $id)
-                ->where('oa.estado', 1)
-                ->groupBy(
-                    'oa.idOrdenesArticulos',
-                    'oa.cantidad',
-                    'a.nombre',
-                    'a.codigo_barras',
-                    'a.codigo_repuesto',
-                    'sc.nombre'
-                )
-                ->get();
+        $repuestos = DB::table('ordenesarticulos as oa')
+            ->select(
+                'oa.cantidad',
+                'a.codigo_repuesto',
+                'sc.nombre as tipo_repuesto',
+                DB::raw("COALESCE(GROUP_CONCAT(DISTINCT mo.nombre ORDER BY mo.nombre SEPARATOR ', '), 'N/A') as modelo")
+            )
+            ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
+            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+            ->leftJoin('articulo_modelo as am', 'am.articulo_id', '=', 'a.idArticulos')
+            ->leftJoin('modelo as mo', 'mo.idModelo', '=', 'am.modelo_id')
+            ->where('oa.idSolicitudesOrdenes', $id)
+            ->where('oa.estado', 1)
+            ->groupBy(
+                'oa.idOrdenesArticulos',
+                'oa.cantidad',
+                'a.codigo_repuesto',
+                'sc.nombre'
+            )
+            ->get();
 
-            if ($repuestos->isEmpty()) {
-                abort(400, 'No hay repuestos entregados');
-            }
+        if ($repuestos->count() === 0) {
+            return back()->with('error', 'No existen repuestos entregados para generar la conformidad');
+        }
+
 
             /* =========================
             * 4. FIRMAS

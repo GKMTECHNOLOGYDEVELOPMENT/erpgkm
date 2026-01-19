@@ -47,40 +47,63 @@
         <!-- TEXTO DEL ACTA -->
         <div class="mb-4 page-break-inside-avoid">
 
+            <!-- QUIEN ENTREGA (ALMACÉN) -->
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
                 Por medio de la presente, yo
-                <span class="font-bold">
+                <span class="font-bold uppercase">
                     {{ $solicitud->aprobador_nombre ?? 'NOMBRES' }}
                     {{ $solicitud->aprobador_apellido_paterno ?? 'APELLIDO PATERNO' }}
                     {{ $solicitud->aprobador_apellido_materno ?? 'APELLIDO MATERNO' }}
                 </span>,
                 identificado(a) con {{ $solicitud->aprobador_tipo_documento ?? 'DOCUMENTO' }} N.°
-                <span class="font-bold">
+                <span class="font-bold uppercase">
                     {{ $solicitud->aprobador_documento ?? 'NÚMERO' }}
                 </span>,
-                en mi calidad de {{ $solicitud->aprobador_rol ?? 'RESPONSABLE' }},
-                dejo constancia de haber realizado la entrega por parte del área de
-                {{ $solicitud->aprobador_area ?? 'N/A' }} correspondiente,
-                de los repuestos detallados en el presente documento.
+                en mi calidad de
+                <span class="font-bold uppercase">
+                    {{ $solicitud->aprobador_rol ?? 'RESPONSABLE' }}
+                </span>,
+                dejo constancia de haber realizado la entrega de los repuestos detallados en el presente documento,
+                por parte del área de
+                <span class="font-bold uppercase">
+                    {{ $solicitud->aprobador_area ?? 'N/A' }}
+                </span>.
             </p>
 
-
+            <!-- MOTIVO DE LA ENTREGA -->
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
                 La entrega de los repuestos se realiza en atención al
                 <strong>Ticket N.° {{ $solicitud->numero_ticket ?? 'N/A' }}</strong>,
                 el cual sustenta la necesidad operativa y técnica de los bienes entregados para la ejecución de las
-                labores asignadas. Declaro que los repuestos han sido recibidos en buen estado de conservación, sin
-                observaciones al momento de la entrega.
+                labores asignadas.
             </p>
 
+            <!-- QUIEN RECIBE (TÉCNICO) -->
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
-                Asimismo, asumo plena responsabilidad por la custodia, uso adecuado y conservación de los repuestos
-                entregados, comprometiéndome a destinarlos únicamente para los fines establecidos en el ticket que
-                origina la presente entrega.
+                El receptor de los repuestos,
+                <strong class="uppercase">
+                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
+                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
+                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
+                </strong>,
+                identificado(a) con {{ $solicitud->solicitante_tipo_documento ?? 'DOCUMENTO' }} N.°
+                <strong class="uppercase">{{ $solicitud->solicitante_documento ?? 'NÚMERO' }}</strong>,
+                en su calidad de
+                <strong class="uppercase">{{ $solicitud->solicitante_rol ?? 'TÉCNICO ASIGNADO' }}</strong>,
+                perteneciente al área de
+                <strong class="uppercase">{{ $solicitud->solicitante_area ?? 'N/A' }}</strong>,
+                declara haber recibido los repuestos conforme.
+            </p>
+
+            <!-- RESPONSABILIDADES DEL TÉCNICO -->
+            <p class="mb-3 text-justify text-[12px] leading-[1.5]">
+                Asimismo, el receptor asume plena responsabilidad por la custodia, uso adecuado y conservación de los
+                repuestos entregados, comprometiéndose a destinarlos únicamente para los fines establecidos en el
+                ticket que origina la presente entrega.
             </p>
 
             <p class="mt-2 mb-2 font-bold text-[12px]">
-                Me comprometo expresamente a:
+                El receptor se compromete expresamente a:
             </p>
 
             <ul class="ml-5 mb-4 list-disc space-y-2 text-justify text-[12px] leading-[1.4]">
@@ -94,26 +117,16 @@
             </ul>
 
             <p class="mb-3 text-justify text-[12px] leading-[1.5]">
-                La pérdida, daño o uso indebido de los repuestos entregados será de mi entera responsabilidad,
+                La pérdida, daño o uso indebido de los repuestos entregados será de entera responsabilidad del receptor,
                 conforme a las disposiciones internas de la empresa.
             </p>
 
             <p class="text-justify text-[12px] leading-[1.5]">
-                En señal de conformidad, se firma la presente acta, dejando constancia de la recepción por parte de
-                <strong>
-                    {{ $solicitud->solicitante_nombre ?? 'NOMBRES' }}
-                    {{ $solicitud->solicitante_apellido_paterno ?? 'APELLIDO PATERNO' }}
-                    {{ $solicitud->solicitante_apellido_materno ?? 'APELLIDO MATERNO' }}
-                </strong>,
-                identificado(a) con {{ $solicitud->solicitante_tipo_documento ?? 'DOCUMENTO' }} N.°
-                <strong>{{ $solicitud->solicitante_documento ?? 'NÚMERO' }}</strong>,
-                quien actúa en su calidad de
-                <strong>{{ $solicitud->solicitante_rol ?? 'TÉCNICO ASIGNADO' }}</strong>,
-                perteneciente al área de
-                <strong>{{ $solicitud->solicitante_area ?? 'N/A' }}</strong>.
+                En señal de conformidad, ambas partes firman la presente acta.
             </p>
 
         </div>
+
 
         <!-- TABLA DE REPUESTOS -->
         <div class="mb-4 page-break-inside-avoid">
@@ -175,6 +188,12 @@
                     @endforelse
                 </tbody>
             </table>
+            @if ($repuestos->count() < ($solicitud->totalcantidadproductos ?? 0))
+                <p class="text-center text-[11px] font-bold text-red-600 uppercase mt-2">
+                    ATENCIÓN: EXISTEN REPUESTOS PENDIENTES DE ENTREGA
+                </p>
+            @endif
+
 
         </div>
 
