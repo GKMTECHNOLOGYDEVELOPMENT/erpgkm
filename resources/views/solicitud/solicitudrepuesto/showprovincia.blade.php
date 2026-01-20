@@ -49,6 +49,134 @@
                                         <i class="fas fa-truck mr-1 text-xs"></i>
                                         Solicitud Provincia
                                     </span>
+
+                                    <!-- Indicador de tiempo -->
+                                    @php
+                                        $fechaRequerida = $solicitud->fecharequerida
+                                            ? \Carbon\Carbon::parse($solicitud->fecharequerida)->startOfDay()
+                                            : now()->startOfDay();
+
+                                        $diasRestantes = now()->startOfDay()->diffInDays($fechaRequerida, false);
+
+                                        // Ajustar para mostrar más intuitivamente
+                                        if ($diasRestantes < 0) {
+                                            // Ya pasó la fecha
+                                            $diasMostrar = 'Vencida';
+                                            $diasNumero = $diasRestantes;
+                                            $estadoTiempo = 'vencida';
+                                        } elseif ($diasRestantes == 0) {
+                                            // Es hoy
+                                            $diasMostrar = 'Hoy';
+                                            $diasNumero = 0;
+                                            $estadoTiempo = 'hoy';
+                                        } elseif ($diasRestantes == 1) {
+                                            // Es mañana
+                                            $diasMostrar = 'Mañana';
+                                            $diasNumero = 1;
+                                            $estadoTiempo = 'mañana';
+                                        } elseif ($diasRestantes <= 2) {
+                                            // 2 días
+                                            $diasMostrar = $diasRestantes . ' días';
+                                            $diasNumero = $diasRestantes;
+                                            $estadoTiempo = 'urgente';
+                                        } elseif ($diasRestantes <= 7) {
+                                            // 3-7 días
+                                            $diasMostrar = $diasRestantes . ' días';
+                                            $diasNumero = $diasRestantes;
+                                            $estadoTiempo = 'normal';
+                                        } else {
+                                            // Más de 7 días
+                                            $diasMostrar = $diasRestantes . ' días';
+                                            $diasNumero = $diasRestantes;
+                                            $estadoTiempo = 'lejano';
+                                        }
+
+                                        // Configurar clases y tooltips
+                                        $configTiempo = [
+                                            'vencida' => [
+                                                'class' => 'bg-red-100 text-red-800 border-red-200',
+                                                'icon' => 'fas fa-exclamation-triangle',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vencida: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                            'hoy' => [
+                                                'class' => 'bg-red-100 text-red-800 border-red-200',
+                                                'icon' => 'fas fa-exclamation-circle',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vence hoy: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                            'mañana' => [
+                                                'class' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                'icon' => 'fas fa-clock',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vence mañana: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                            'urgente' => [
+                                                'class' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                'icon' => 'fas fa-clock',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vence en ' .
+                                                    $diasNumero .
+                                                    ' días: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                            'normal' => [
+                                                'class' => 'bg-green-100 text-green-800 border-green-200',
+                                                'icon' => 'fas fa-calendar-check',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vence en ' .
+                                                    $diasNumero .
+                                                    ' días: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                            'lejano' => [
+                                                'class' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                'icon' => 'fas fa-calendar',
+                                                'text' => $diasMostrar,
+                                                'tooltip' =>
+                                                    'Vence en ' .
+                                                    $diasNumero .
+                                                    ' días: ' .
+                                                    ($fechaRequerida
+                                                        ? $fechaRequerida->format('d/m/Y')
+                                                        : 'Fecha no especificada'),
+                                            ],
+                                        ];
+                                    @endphp
+
+                                    <span
+                                        class="px-2 sm:px-3 py-1 {{ $configTiempo[$estadoTiempo]['class'] }} rounded-full text-xs sm:text-sm font-semibold border flex items-center gap-1 whitespace-nowrap group relative"
+                                        title="{{ $configTiempo[$estadoTiempo]['tooltip'] }}">
+                                        <i class="{{ $configTiempo[$estadoTiempo]['icon'] }} mr-1 text-xs"></i>
+                                        {{ $configTiempo[$estadoTiempo]['text'] }}
+
+                                        <!-- Tooltip -->
+                                        <span
+                                            class="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-10">
+                                            {{ $configTiempo[$estadoTiempo]['tooltip'] }}
+                                            <span
+                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+                                        </span>
+                                    </span>
+
                                     @if ($solicitud->cast_nombre)
                                         <span
                                             class="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-semibold border border-green-200 truncate max-w-[200px]">
@@ -78,7 +206,7 @@
                         </div>
 
                         <!-- Información específica de provincia - Responsive -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-4">
                             <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                                 <label
                                     class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide truncate">
@@ -115,6 +243,32 @@
                                         {{ $solicitud->cast_departamento ?? '' }}
                                     @else
                                         No especificada
+                                    @endif
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
+                                <label
+                                    class="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide truncate">
+                                    <i class="fas fa-calendar-day mr-1"></i>
+                                    Fecha Requerida
+                                </label>
+                                <p class="text-base sm:text-lg font-bold text-gray-900">
+                                    @if ($solicitud->fecharequerida)
+                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->startOfDay()->format('d/m/Y') }}
+                                    @else
+                                        <span class="text-gray-400">No definida</span>
+                                    @endif
+                                </p>
+                                <p class="text-xs sm:text-sm text-gray-600 mt-1">
+                                    @if ($solicitud->fecharequerida && $estadoTiempo == 'vencida')
+                                        <i class="fas fa-exclamation-triangle text-red-500 mr-1"></i>
+                                        <span class="text-red-600 font-semibold">Vencida</span>
+                                    @elseif($solicitud->fecharequerida && $estadoTiempo == 'hoy')
+                                        <i class="fas fa-exclamation-circle text-red-500 mr-1"></i>
+                                        <span class="text-red-600 font-semibold">Vence hoy</span>
+                                    @elseif($solicitud->fecharequerida && $diasRestantes > 0)
+                                        <i class="fas fa-clock text-blue-500 mr-1"></i>
+                                        <span class="text-blue-600">en {{ $diasRestantes }} día(s)</span>
                                     @endif
                                 </p>
                             </div>
@@ -632,116 +786,6 @@
                                     {{ $articulos->sum('cantidad') }}
                                 </span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Tiempos Mejorado - Responsive -->
-                    <div
-                        class="bg-gradient-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center space-x-2 sm:space-x-3 mb-3 sm:mb-4 lg:mb-5">
-                            <div
-                                class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                                <i class="fas fa-clock text-white text-sm sm:text-base lg:text-lg"></i>
-                            </div>
-                            <h3 class="text-base sm:text-lg lg:text-xl font-bold text-gray-900 truncate">Tiempos</h3>
-                        </div>
-
-                        <!-- Días Restantes -->
-                        @php
-                            $fechaRequerida = $solicitud->fecharequerida
-                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                                : now();
-
-                            $diasRestantes = (int) now()->diffInDays($fechaRequerida, false);
-
-                            $diasConfig = [
-                                'vencida' => [
-                                    'class' => 'bg-red-100 border-red-200 text-red-800',
-                                    'icon' => 'fa-exclamation-triangle',
-                                    'text' => 'Vencida',
-                                    'textShort' => 'Vencida',
-                                ],
-                                'urgente' => [
-                                    'class' => 'bg-orange-100 border-orange-200 text-orange-800',
-                                    'icon' => 'fa-exclamation-circle',
-                                    'text' => $diasRestantes . ' días',
-                                    'textShort' => $diasRestantes . 'd',
-                                ],
-                                'normal' => [
-                                    'class' => 'bg-green-100 border-green-200 text-green-800',
-                                    'icon' => 'fa-check-circle',
-                                    'text' => $diasRestantes . ' días',
-                                    'textShort' => $diasRestantes . 'd',
-                                ],
-                            ];
-
-                            $diasEstado =
-                                $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
-                        @endphp
-
-                        <div
-                            class="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
-                            <div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                                <div
-                                    class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <i
-                                        class="fas {{ $diasConfig[$diasEstado]['icon'] }} {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }} text-sm"></i>
-                                </div>
-                                <label
-                                    class="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide truncate">
-                                    <i class="fas fa-calendar-alt mr-1 text-xs"></i>
-                                    Días Restantes
-                                </label>
-                            </div>
-
-                            <div
-                                class="flex flex-col sm:flex-row sm:items-center sm:justify-between pl-8 sm:pl-9 lg:pl-11 space-y-2 sm:space-y-0">
-                                <p
-                                    class="text-2xl sm:text-3xl lg:text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }} text-center sm:text-left">
-                                    <span class="hidden sm:inline">{{ $diasConfig[$diasEstado]['text'] }}</span>
-                                    <span class="sm:hidden">{{ $diasConfig[$diasEstado]['textShort'] }}</span>
-                                </p>
-
-                                @if ($diasRestantes > 0 && $diasRestantes <= 7)
-                                    <div class="flex items-center justify-center sm:justify-end space-x-2">
-                                        <div class="w-16 sm:w-20 bg-gray-200 rounded-full h-1.5 sm:h-2">
-                                            <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-1.5 sm:h-2 rounded-full"
-                                                style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
-                                        </div>
-                                        <span class="text-xs text-gray-500 hidden sm:inline">
-                                            {{ $diasRestantes }}/7 días
-                                        </span>
-                                        <span class="text-xs text-gray-500 sm:hidden">
-                                            {{ $diasRestantes }}/7
-                                        </span>
-                                    </div>
-                                @elseif($diasRestantes > 7)
-                                    <div class="text-center sm:text-right">
-                                        <span class="text-xs text-gray-500">
-                                            <i class="fas fa-calendar-plus mr-1"></i>
-                                            <span class="hidden sm:inline">Más de 7 días</span>
-                                            <span class="sm:hidden">+7 días</span>
-                                        </span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Información adicional para móviles -->
-                            @if ($diasRestantes <= 0)
-                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
-                                    <p class="text-xs text-red-600 font-medium sm:hidden">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                                        Solicitud vencida
-                                    </p>
-                                </div>
-                            @elseif($diasRestantes <= 2)
-                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
-                                    <p class="text-xs text-amber-600 font-medium sm:hidden">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Urgente
-                                    </p>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 </div>
