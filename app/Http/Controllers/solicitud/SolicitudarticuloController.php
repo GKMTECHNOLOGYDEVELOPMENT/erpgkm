@@ -69,15 +69,43 @@ class SolicitudarticuloController extends Controller
 
     $solicitudes = $query->orderBy('so.fechacreacion', 'desc')->paginate(10);
 
-    // **CONTADORES SIN FILTRAR POR ESTADO - Cuenta TODAS las solicitudes**
-    $contadores = DB::table('solicitudesordenes')
+    // **CONTADORES CON LOS MISMOS FILTROS** (CORREGIDO)
+    $contadoresQuery = DB::table('solicitudesordenes')
+        ->whereIn('tipoorden', [
+            'solicitud_articulo',
+            'solicitud_repuesto',
+            'solicitud_repuesto_provincia'
+        ])
+        ->where('estado', 'pendiente'); // Siempre filtro por pendiente para el resumen
+
+    // Aplicar los mismos filtros que en la query principal (excepto estado que ya es "pendiente")
+    if (request()->has('tipo') && !empty(request('tipo'))) {
+        $contadoresQuery->where('tipoorden', request('tipo'));
+    }
+
+    // NOTA: No aplicamos filtro por estado porque ya filtramos por 'pendiente'
+    // Pero si quieres que los contadores también respeten el filtro de estado,
+    // quita el ->where('estado', 'pendiente') y aplica el filtro como en la query principal
+
+    if (request()->has('urgencia') && !empty(request('urgencia'))) {
+        $contadoresQuery->where('niveldeurgencia', request('urgencia'));
+    }
+
+    if (request()->has('search') && !empty(request('search'))) {
+        $search = request('search');
+        $contadoresQuery->where(function($q) use ($search) {
+            $q->where('codigo', 'LIKE', "%{$search}%")
+              ->orWhere('numeroticket', 'LIKE', "%{$search}%");
+        });
+    }
+
+    $contadores = $contadoresQuery
         ->selectRaw("
             SUM(CASE WHEN tipoorden = 'solicitud_repuesto' THEN 1 ELSE 0 END) as repuesto_lima,
             SUM(CASE WHEN tipoorden = 'solicitud_repuesto_provincia' THEN 1 ELSE 0 END) as repuesto_provincia,
             SUM(CASE WHEN tipoorden = 'solicitud_articulo' THEN 1 ELSE 0 END) as solicitud_articulo,
             COUNT(*) as total
         ")
-        ->whereIn('tipoorden', ['solicitud_articulo', 'solicitud_repuesto', 'solicitud_repuesto_provincia'])
         ->first();
 
     // Convertir el objeto a array
@@ -90,157 +118,6 @@ class SolicitudarticuloController extends Controller
 
     return view("solicitud.solicitudarticulo.index", compact('solicitudes', 'contadoresArray'));
 }
-
-
-    
-// public function create()
-// {
-//     $usuario = auth()->user()->load('tipoArea');
-
-//     // Consulta principal para artículos (tipos 1, 3, 4)
-//     $articulos = DB::table('articulos as a')
-//         ->select(
-//             'a.idArticulos',
-//             'a.nombre',
-//             'a.codigo_barras',
-//             'a.codigo_repuesto',
-//             'a.precio_compra',
-//             'a.stock_total',
-//             'a.idTipoArticulo',
-//             'a.idModelo',
-//             'a.idsubcategoria',
-//             'ta.nombre as tipo_articulo_nombre',
-//             'm.nombre as nombre_modelo',
-//             'mar.nombre as nombre_marca',
-//             'sc.nombre as nombre_subcategoria'
-//         )
-//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-//         ->leftJoin('modelo as m', 'a.idModelo', '=', 'm.idModelo')
-//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-//         ->where('a.estado', 1)
-//         ->whereIn('a.idTipoArticulo', [1, 3, 4]) // Productos, suministros, herramientas
-//         ->get();
-
-//     // Para los repuestos (tipo 2)
-//     $repuestos = DB::table('articulos as a')
-//         ->select(
-//             'a.idArticulos',
-//             'a.nombre',
-//             'a.codigo_barras',
-//             'a.codigo_repuesto',
-//             'a.precio_compra',
-//             'a.stock_total',
-//             'a.idTipoArticulo',
-//             'a.idModelo',
-//             'a.idsubcategoria',
-//             'ta.nombre as tipo_articulo_nombre',
-//             'm.nombre as nombre_modelo',
-//             'mar.nombre as nombre_marca',
-//             'sc.nombre as nombre_subcategoria'
-//         )
-//         ->leftJoin('tipoarticulos as ta', 'a.idTipoArticulo', '=', 'ta.idTipoArticulo')
-//         ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-//         ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-//         ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
-//         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-//         ->where('a.estado', 1)
-//         ->where('a.idTipoArticulo', 2) // Solo repuestos
-//         ->get();
-
-
-//         // Obtener todas las áreas
-//     $areas = DB::table('tipoarea')
-//         ->orderBy('nombre')
-//         ->get();
-
-//          // Obtener todos los usuarios activos
-//     $usuarios = DB::table('usuarios')
-//         ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'idTipoArea')
-//         ->where('estado', 1)
-//         ->orderBy('Nombre')
-//         ->orderBy('apellidoPaterno')
-//         ->get();
-
-
-//     // Combinar ambos resultados
-//     $articulosCompletos = $articulos->merge($repuestos);
-
-//     // Formatear los datos de manera más simple
-//     $articulosFormateados = $articulosCompletos->map(function ($articulo) {
-//         $infoAdicional = [];
-        
-//         // Información del tipo de artículo
-//         if ($articulo->tipo_articulo_nombre) {
-//             $infoAdicional[] = $articulo->tipo_articulo_nombre;
-//         }
-        
-//         // Información del modelo y marca (si existe)
-//         if ($articulo->nombre_modelo) {
-//             $infoAdicional[] = $articulo->nombre_modelo;
-//         }
-//         if ($articulo->nombre_marca) {
-//             $infoAdicional[] = $articulo->nombre_marca;
-//         }
-        
-//         // Información de subcategoría (especialmente para repuestos)
-//         if ($articulo->nombre_subcategoria) {
-//             $infoAdicional[] = $articulo->nombre_subcategoria;
-//         }
-        
-//         $infoTexto = $infoAdicional ? ' (' . implode(' - ', $infoAdicional) . ')' : '';
-//         $codigo = $articulo->codigo_barras ?: $articulo->codigo_repuesto;
-        
-//         return [
-//             'idArticulos' => $articulo->idArticulos,
-//             'nombre' => $articulo->nombre,
-//             'codigo_barras' => $articulo->codigo_barras,
-//             'codigo_repuesto' => $articulo->codigo_repuesto,
-//             'tipo_articulo' => $articulo->tipo_articulo_nombre,
-//             'modelo' => $articulo->nombre_modelo,
-//             'marca' => $articulo->nombre_marca,
-//             'subcategoria' => $articulo->nombre_subcategoria,
-//             'nombre_completo' => $articulo->nombre . $infoTexto . ' (' . $codigo . ')'
-//         ];
-//     });
-
-//     // Obtener solo cotizaciones aprobadas que NO tengan solicitudes
-//     $cotizacionesAprobadas = DB::table('cotizaciones as c')
-//         ->select(
-//             'c.idCotizaciones',
-//             'c.numero_cotizacion',
-//             'c.fecha_emision',
-//             'c.estado_cotizacion',
-//             'cl.nombre as cliente_nombre'
-//         )
-//         ->leftJoin('cliente as cl', 'c.idCliente', '=', 'cl.idCliente')
-//         ->where('c.estado_cotizacion', 'aprobada')
-//         ->whereNotExists(function ($query) {
-//             $query->select(DB::raw(1))
-//                   ->from('solicitudesordenes as so')
-//                   ->whereRaw('so.codigo_cotizacion = c.numero_cotizacion')
-//                   ->where('so.tipoorden', 'solicitud_articulo');
-//         })
-//         ->orderBy('c.fecha_emision', 'desc')
-//         ->get();
-
-//     // Obtener el próximo número de orden
-//     $lastOrder = DB::table('solicitudesordenes')
-//         ->where('tipoorden', 'solicitud_articulo')
-//         ->orderBy('idsolicitudesordenes', 'desc')
-//         ->first();
-
-//     $nextOrderNumber = $lastOrder ? (intval(substr($lastOrder->codigo, 4)) + 1) : 1;
-
-//     return view("solicitud.solicitudarticulo.create", [
-//         'usuario' => $usuario,
-//         'articulos' => $articulosFormateados,
-//         'cotizacionesAprobadas' => $cotizacionesAprobadas,
-//         'nextOrderNumber' => $nextOrderNumber,
-//         'areas' => $areas,           // Nuevo
-//         'usuarios' => $usuarios      // Nuevo
-//     ]);
-// }
 
 
 
@@ -3312,8 +3189,56 @@ public function enviarAlmacen(Request $request, $solicitudId)
     }
 
 
+// En tu SolicitudarticuloController.php, agrega este método:
+
+public function contadoresFiltrados()
+{
+    $contadoresQuery = DB::table('solicitudesordenes')
+        ->whereIn('tipoorden', [
+            'solicitud_articulo',
+            'solicitud_repuesto',
+            'solicitud_repuesto_provincia'
+        ])
+        ->where('estado', 'pendiente'); // Solo pendientes
+
+    // Aplicar filtros del request
+    if (request()->has('tipo') && !empty(request('tipo'))) {
+        $contadoresQuery->where('tipoorden', request('tipo'));
+    }
+
+    if (request()->has('urgencia') && !empty(request('urgencia'))) {
+        $contadoresQuery->where('niveldeurgencia', request('urgencia'));
+    }
+
+    if (request()->has('search') && !empty(request('search'))) {
+        $search = request('search');
+        $contadoresQuery->where(function($q) use ($search) {
+            $q->where('codigo', 'LIKE', "%{$search}%")
+              ->orWhere('numeroticket', 'LIKE', "%{$search}%");
+        });
+    }
+
+    $contadores = $contadoresQuery
+        ->selectRaw("
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto' THEN 1 ELSE 0 END) as repuesto_lima,
+            SUM(CASE WHEN tipoorden = 'solicitud_repuesto_provincia' THEN 1 ELSE 0 END) as repuesto_provincia,
+            SUM(CASE WHEN tipoorden = 'solicitud_articulo' THEN 1 ELSE 0 END) as solicitud_articulo,
+            COUNT(*) as total
+        ")
+        ->first();
+
+    return response()->json([
+        'repuesto_lima' => $contadores->repuesto_lima ?? 0,
+        'repuesto_provincia' => $contadores->repuesto_provincia ?? 0,
+        'solicitud_articulo' => $contadores->solicitud_articulo ?? 0,
+        'total' => $contadores->total ?? 0
+    ]);
+}
+
+// Mantén tu método contadores() original si lo necesitas para otra cosa:
 public function contadores()
 {
+    // Este sigue siendo el contador general sin filtros
     $contadores = DB::table('solicitudesordenes')
         ->selectRaw("
             SUM(CASE WHEN tipoorden = 'solicitud_repuesto' THEN 1 ELSE 0 END) as repuesto_lima,
@@ -3322,6 +3247,7 @@ public function contadores()
             COUNT(*) as total
         ")
         ->whereIn('tipoorden', ['solicitud_articulo', 'solicitud_repuesto', 'solicitud_repuesto_provincia'])
+        ->where('estado', 'pendiente') // Añade esto si quieres solo pendientes
         ->first();
 
     return response()->json([

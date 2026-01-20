@@ -1785,8 +1785,9 @@ Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [Solicitudingr
 
 Route::get('/solicitudes-ingreso/series/{compraId}/{articuloId}', [SolicitudingresoController::class, 'obtenerSeries']);
 // En web.php
-Route::get('/solicitudes/contadores', [SolicitudArticuloController::class, 'contadores'])->name('solicitudarticulo.contadores');
-
+// Agrega esta ruta junto a tus otras rutas:
+Route::get('/solicitudarticulo/contadores-filtrados', [SolicitudarticuloController::class, 'contadoresFiltrados'])
+    ->name('solicitudarticulo.contadores.filtrados');
 // En web.php
 Route::post('/solicitud-ingreso/cambiar-estado-grupo', [SolicitudIngresoController::class, 'cambiarEstadoGrupo'])->name('solicitud-ingreso.cambiar-estado-grupo');
 
