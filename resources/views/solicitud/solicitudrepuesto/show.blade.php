@@ -26,7 +26,7 @@
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
-                            <div>
+                            <div class="flex-1">
                                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                                     Orden #<span class="text-blue-600">{{ $solicitud->codigo ?? 'N/A' }}</span>
                                 </h1>
@@ -38,6 +38,73 @@
                                     <span
                                         class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold border border-purple-200">
                                         Solicitud de Repuesto
+                                    </span>
+
+                                    <!-- Nuevo: Indicador de tiempo -->
+                                    @php
+                                        $fechaRequerida = $solicitud->fecharequerida
+                                            ? \Carbon\Carbon::parse($solicitud->fecharequerida)->startOfDay()
+                                            : now()->startOfDay();
+
+                                        $diasRestantes = now()->startOfDay()->diffInDays($fechaRequerida, false);
+
+                                        $tiempoConfig = [
+                                            'vencida' => [
+                                                'class' => 'bg-red-100 text-red-800 border-red-200',
+                                                'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                'text' => 'Vencida',
+                                                'tooltip' => 'La solicitud ha vencido',
+                                            ],
+                                            'urgente' => [
+                                                'class' => 'bg-orange-100 text-orange-800 border-orange-200',
+                                                'icon' =>
+                                                    'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+                                                'text' => $diasRestantes . ' días',
+                                                'tooltip' => 'Urgente: vence en ' . $diasRestantes . ' días',
+                                            ],
+                                            'normal' => [
+                                                'class' => 'bg-green-100 text-green-800 border-green-200',
+                                                'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                'text' => $diasRestantes . ' días',
+                                                'tooltip' => 'Vence en ' . $diasRestantes . ' días',
+                                            ],
+                                            'lejano' => [
+                                                'class' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                                                'text' => $diasRestantes . ' días',
+                                                'tooltip' => 'Vence en ' . $diasRestantes . ' días',
+                                            ],
+                                        ];
+
+                                        if ($diasRestantes <= 0) {
+                                            $estadoTiempo = 'vencida';
+                                        } elseif ($diasRestantes <= 2) {
+                                            $estadoTiempo = 'urgente';
+                                        } elseif ($diasRestantes <= 7) {
+                                            $estadoTiempo = 'normal';
+                                        } else {
+                                            $estadoTiempo = 'lejano';
+                                        }
+                                    @endphp
+                                    <span class="text-sm font-medium text-gray-500">
+                                        Fecha para vencer:
+                                    </span>
+                                    <span
+                                        class="px-4 py-2 {{ $tiempoConfig[$estadoTiempo]['class'] }} rounded-full text-sm font-semibold border flex items-center gap-2 group relative"
+                                        title="{{ $tiempoConfig[$estadoTiempo]['tooltip'] }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="{{ $tiempoConfig[$estadoTiempo]['icon'] }}" />
+                                        </svg>
+                                        {{ $tiempoConfig[$estadoTiempo]['text'] }}
+
+                                        <!-- Tooltip para pantallas pequeñas -->
+                                        <span
+                                            class="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-10">
+                                            {{ $tiempoConfig[$estadoTiempo]['tooltip'] }}
+                                            <span
+                                                class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+                                        </span>
                                     </span>
                                 </div>
                             </div>
@@ -436,122 +503,7 @@
                         </div>
                     </div>
 
-                    <!-- Tiempos Mejorado - Responsive -->
-                    <div
-                        class="bg-gradient-to-br from-white to-blue-50 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-5 lg:p-6 border border-blue-200 hover:shadow-xl transition-all duration-300">
-                        <div class="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-5">
-                            <div
-                                class="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-lg sm:text-xl lg:text-xl font-bold text-gray-900 truncate">Tiempos</h3>
-                        </div>
 
-                        <!-- Días Restantes -->
-                        @php
-                            $fechaRequerida = $solicitud->fecharequerida
-                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)
-                                : now();
-
-                            // Redondear a entero sin decimales
-                            $diasRestantes = (int) now()->diffInDays($fechaRequerida, false);
-
-                            $diasConfig = [
-                                'vencida' => [
-                                    'class' => 'bg-red-100 border-red-200 text-red-800',
-                                    'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-                                    'text' => 'Vencida',
-                                    'textShort' => 'Vencida',
-                                ],
-                                'urgente' => [
-                                    'class' => 'bg-orange-100 border-orange-200 text-orange-800',
-                                    'icon' =>
-                                        'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
-                                    'text' => $diasRestantes . ' días',
-                                    'textShort' => $diasRestantes . 'd',
-                                ],
-                                'normal' => [
-                                    'class' => 'bg-green-100 border-green-200 text-green-800',
-                                    'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-                                    'text' => $diasRestantes . ' días',
-                                    'textShort' => $diasRestantes . 'd',
-                                ],
-                            ];
-
-                            $diasEstado =
-                                $diasRestantes <= 0 ? 'vencida' : ($diasRestantes <= 2 ? 'urgente' : 'normal');
-                        @endphp
-
-                        <div
-                            class="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:border-{{ $diasEstado === 'vencida' ? 'red' : ($diasEstado === 'urgente' ? 'orange' : 'green') }}-300 transition-colors duration-200">
-                            <div class="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                                <div
-                                    class="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 {{ $diasEstado === 'vencida' ? 'bg-red-100' : ($diasEstado === 'urgente' ? 'bg-orange-100' : 'bg-green-100') }} rounded-lg flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-3 h-3 sm:w-4 sm:h-4 {{ $diasEstado === 'vencida' ? 'text-red-600' : ($diasEstado === 'urgente' ? 'text-orange-600' : 'text-green-600') }}"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="{{ $diasConfig[$diasEstado]['icon'] }}" />
-                                    </svg>
-                                </div>
-                                <label
-                                    class="text-xs sm:text-sm font-semibold text-gray-700 uppercase tracking-wide truncate">
-                                    Días Restantes
-                                </label>
-                            </div>
-
-                            <div
-                                class="flex flex-col sm:flex-row sm:items-center sm:justify-between pl-8 sm:pl-9 lg:pl-11 space-y-2 sm:space-y-0">
-                                <p
-                                    class="text-2xl sm:text-3xl lg:text-3xl font-extrabold {{ $diasRestantes <= 0 ? 'text-red-600' : ($diasRestantes <= 2 ? 'text-orange-600' : 'text-green-600') }} text-center sm:text-left">
-                                    <span class="hidden sm:inline">{{ $diasConfig[$diasEstado]['text'] }}</span>
-                                    <span class="sm:hidden">{{ $diasConfig[$diasEstado]['textShort'] }}</span>
-                                </p>
-
-                                @if ($diasRestantes > 0 && $diasRestantes <= 7)
-                                    <div class="flex items-center justify-center sm:justify-end space-x-2">
-                                        <div class="w-16 sm:w-20 bg-gray-200 rounded-full h-1.5 sm:h-2">
-                                            <div class="bg-{{ $diasEstado === 'urgente' ? 'orange' : 'green' }}-500 h-1.5 sm:h-2 rounded-full"
-                                                style="width: {{ max(10, ((7 - $diasRestantes) / 7) * 100) }}%"></div>
-                                        </div>
-                                        <span class="text-xs text-gray-500 hidden sm:inline">
-                                            {{ $diasRestantes }}/7 días
-                                        </span>
-                                        <span class="text-xs text-gray-500 sm:hidden">
-                                            {{ $diasRestantes }}/7
-                                        </span>
-                                    </div>
-                                @elseif($diasRestantes > 7)
-                                    <div class="text-center sm:text-right">
-                                        <span class="text-xs text-gray-500">
-                                            <span class="hidden sm:inline">Más de 7 días</span>
-                                            <span class="sm:hidden">+7 días</span>
-                                        </span>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Información adicional para móviles -->
-                            @if ($diasRestantes <= 0)
-                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
-                                    <p class="text-xs text-red-600 font-medium sm:hidden">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i>
-                                        Solicitud vencida
-                                    </p>
-                                </div>
-                            @elseif($diasRestantes <= 2)
-                                <div class="mt-2 sm:mt-0 text-center sm:text-left">
-                                    <p class="text-xs text-amber-600 font-medium sm:hidden">
-                                        <i class="fas fa-clock mr-1"></i>
-                                        Urgente
-                                    </p>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
