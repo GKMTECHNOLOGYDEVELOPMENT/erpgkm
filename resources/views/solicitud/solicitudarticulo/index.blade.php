@@ -35,10 +35,7 @@
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     Resumen de Solicitudes Pendientes
                 </h3>
-                <span class="text-sm text-gray-500 flex items-center">
-                    <i class="fas fa-sync-alt text-gray-400 mr-1"></i>
-                    Actualizado hoy
-                </span>
+               
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -194,7 +194,11 @@
 
                     // Función para actualizar contadores con AJAX
 function actualizarContadores() {
-    fetch('{{ route("solicitudarticulo.contadores") }}', {
+    const formData = new FormData(document.getElementById('filtrosForm'));
+    const params = new URLSearchParams(formData);
+    
+    // Usa la nueva ruta para contadores filtrados
+    fetch(`/solicitudarticulo/contadores-filtrados?${params.toString()}`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'Accept': 'application/json'
