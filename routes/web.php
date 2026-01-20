@@ -63,6 +63,7 @@ use App\Http\Controllers\administracion\permisos\PermisosController as PermisosP
 use App\Http\Controllers\almacen\custodia\CustodiaController;
 use App\Http\Controllers\almacen\despacho\DespachoController;
 use App\Http\Controllers\almacen\devoluciones\DevolucionesController;
+use App\Http\Controllers\almacen\Harvest\HarvestController;
 use App\Http\Controllers\almacen\heramientas\HeramientasController;
 use App\Http\Controllers\almacen\kardex\KardexController;
 use App\Http\Controllers\almacen\productos\ProductoController;
@@ -2015,21 +2016,18 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
     Route::get('/', [RepuestoTransitoController::class, 'index'])->name('index');
     Route::get('/dashboard', [RepuestoTransitoController::class, 'dashboard'])->name('dashboard');
     Route::get('/reporte', [RepuestoTransitoController::class, 'reporte'])->name('reporte');
-    
     // Ruta AJAX para filtrar DEBE estar ANTES de la ruta /{id}
     Route::get('/filtrar', [RepuestoTransitoController::class, 'filtrar'])->name('filtrar');
-    
+
     // Ruta para mostrar detalles (show) - viene DESPUÉS de filtrar
     Route::get('/{id}', [RepuestoTransitoController::class, 'show'])->name('show');
     Route::put('/{id}', [RepuestoTransitoController::class, 'update'])->name('update');
-
     // Rutas para AJAX (detalles y fotos del modal)
     Route::get('/{id}/detalles', [RepuestoTransitoController::class, 'obtenerDetalles'])->name('detalles');
     Route::get('/{id}/evidencias', [RepuestoTransitoController::class, 'obtenerEvidencias'])->name('evidencias');
     Route::get('/{id}/imagen/{tipo}', [RepuestoTransitoController::class, 'mostrarImagen'])->name('imagen');
     Route::get('/{id}/foto/{tipo}', [RepuestoTransitoController::class, 'obtenerFoto'])->name('repuestos-transito.foto');
     Route::get('/{id}/fotos', [RepuestoTransitoController::class, 'obtenerTodasFotos'])->name('repuestos-transito.todas-fotos');
-    
     // Rutas de debug
     Route::get('/{id}/debug-fotos', [RepuestoTransitoController::class, 'debugFotos'])->name('repuestos-transito.debug-fotos');
     Route::get('/{id}/fotos-tabla', [RepuestoTransitoController::class, 'obtenerTodasFotos'])
@@ -2041,3 +2039,22 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
 });
 
 
+// Rutas para Harvest (Retiros de repuestos)
+Route::prefix('almacen')->group(function () {
+    Route::get('/harvest', [HarvestController::class, 'index'])
+        ->name('harvest.index');
+    
+    Route::get('/harvest/{id}', [HarvestController::class, 'show'])
+        ->name('harvest.show');
+    
+    // ✅ Ruta para exportación general (de toda la tabla)
+    Route::get('/harvest/export/excel', [HarvestController::class, 'export'])
+        ->name('harvest.export');
+    
+    // ✅ Ruta para exportación de un repuesto específico (modal)
+    Route::get('/harvest/{id}/export/detail', [HarvestController::class, 'exportDetail'])
+        ->name('harvest.export.detail');
+    
+    Route::get('/harvest/estadisticas/datos', [HarvestController::class, 'estadisticas'])
+        ->name('harvest.estadisticas');
+});

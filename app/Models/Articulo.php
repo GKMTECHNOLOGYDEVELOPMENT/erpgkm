@@ -209,4 +209,26 @@ protected $appends = ['stock_disponible', 'tiene_serie'];
         return $this->stock_disponible >= $cantidad;
     }
 
+
+	public function todosLosModelos()
+    {
+        $modelos = collect();
+        
+        // Agregar modelo principal si existe
+        if ($this->modeloPrincipal) {
+            $modelos->push($this->modeloPrincipal);
+        }
+        
+        // Agregar modelos de la relación muchos a muchos
+        if ($this->modelos) {
+            $modelos = $modelos->merge($this->modelos);
+        }
+        
+        return $modelos->unique('idModelo');
+    }
+
+	  public function modeloPrincipal()
+    {
+        return $this->belongsTo(Modelo::class, 'idModelo', 'idModelo');
+    }
 }
