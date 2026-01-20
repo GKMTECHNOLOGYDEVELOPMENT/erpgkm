@@ -930,6 +930,45 @@
                     </svg>
                     <span>ALMACEN</span>
                 </h2>
+
+                        <li class="menu nav-item">
+    <a href="{{ route('harvest.index') }}" class="nav-link group">
+        <div class="flex items-center">
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 class="group-hover:!text-primary shrink-0"
+                 width="20" height="20"
+                 viewBox="0 0 24 24"
+                 fill="none">
+
+                <!-- Tallo -->
+                <path d="M12 2v20"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"/>
+
+                <!-- Granos de trigo -->
+                <path d="M12 4c-2 1-3 2.5-3 4 2 0 3-1 3-2z"
+                      fill="currentColor"/>
+                <path d="M12 7c2 1 3 2.5 3 4-2 0-3-1-3-2z"
+                      fill="currentColor"/>
+
+                <path d="M12 10c-2 1-3 2.5-3 4 2 0 3-1 3-2z"
+                      fill="currentColor"/>
+                <path d="M12 13c2 1 3 2.5 3 4-2 0-3-1-3-2z"
+                      fill="currentColor"/>
+
+            </svg>
+
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Harvest
+            </span>
+        </div>
+    </a>
+</li>
+
+
+
                 <li class="menu nav-item">
                     <a href="{{ route('asignar-articulos.index') }}" class="nav-link group">
                         <div class="flex items-center">
