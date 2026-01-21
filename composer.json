@@ -24,6 +24,7 @@
         "pusher/pusher-php-server": "^7.2",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/browsershot": "^5.0",
+        "textalk/websocket": "*",
         "yajra/laravel-datatables-oracle": "^11.1"
     },
     "require-dev": {
