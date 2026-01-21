@@ -396,7 +396,7 @@
                 <span
                     class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
                         @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
-                        @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                        @elseif($esPendienteRetorno) bg-warning-light text-warning
                         @elseif($esUsado) bg-success-light text-success
                         @elseif($esDevuelto) bg-danger-light text-danger
                         @else bg-blue-100 text-blue-700 @endif">
@@ -435,7 +435,7 @@
                         <span
                             class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
                                 @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
-                                @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                                @elseif($esPendienteRetorno) bg-warning-light text-warning
                                 @elseif($esUsado) bg-success-light text-success
                                 @elseif($esDevuelto) bg-danger-light text-danger
                                 @else bg-emerald-100 text-emerald-700 @endif">
