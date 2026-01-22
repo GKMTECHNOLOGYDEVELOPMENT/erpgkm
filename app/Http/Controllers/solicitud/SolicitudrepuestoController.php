@@ -3284,6 +3284,17 @@ class SolicitudrepuestoController extends Controller
                 abort(404, 'No existe entrega registrada');
             }
 
+            $esDevuelto = false;
+
+            if (!empty($entregaDestino->estado) && strtolower($entregaDestino->estado) === 'devuelto') {
+                $esDevuelto = true;
+
+                Log::info('🔁 ESTADO DEVUELTO DETECTADO', [
+                    'entrega_id' => $entregaDestino->id,
+                    'estado'     => $entregaDestino->estado
+                ]);
+            }
+
             Log::info('📦 Entrega DESTINO encontrada', [
                 'entrega_id'          => $entregaDestino->id,
                 'solicitud_destino'   => $entregaDestino->solicitud_id,
@@ -3296,6 +3307,7 @@ class SolicitudrepuestoController extends Controller
          * 2. DETERMINAR QUIÉN ENTREGA REALMENTE
          * ===================================================== */
             $esCesion = false;
+            $esAutoCesion = false;
             $usuarioEntregaId = null;
 
             if (!empty($entregaDestino->entrega_origen_id)) {
@@ -3306,34 +3318,58 @@ class SolicitudrepuestoController extends Controller
                     'entrega_origen_id' => $entregaDestino->entrega_origen_id
                 ]);
 
-                // 👇 ENTREGA ORIGEN (MISMA TABLA)
+                // 👇 ENTREGA ORIGEN
                 $entregaOrigen = DB::table('repuestos_entregas')
-                    ->where('id', $entregaDestino->entrega_origen_id)
+                    ->where('id', $entregaDestino->entrega_origen_id) // ✅ PK REAL
                     ->first();
 
+
                 if (!$entregaOrigen || !$entregaOrigen->usuario_destino_id) {
-                    Log::error('❌ Entrega ORIGEN inválida o sin usuario_destino_id', [
+                    Log::error('❌ Entrega ORIGEN inválida', [
                         'entrega_origen_id' => $entregaDestino->entrega_origen_id
                     ]);
                     abort(400, 'Error en cesión de repuesto');
                 }
 
-                // 👉 ESTE ES EL USUARIO QUE CEDE
-                $usuarioEntregaId = $entregaOrigen->usuario_destino_id;
-
-                Log::info('👤 Usuario que CEDE el repuesto', [
-                    'usuario_id' => $usuarioEntregaId
+                Log::info('🔍 VALIDANDO AUTO-CESIÓN', [
+                    'usuario_destino_origen'  => $entregaOrigen->usuario_destino_id,
+                    'usuario_destino_destino' => $entregaDestino->usuario_destino_id
                 ]);
+
+                // ✅ AUTO-CESIÓN
+                if ((int)$entregaOrigen->usuario_destino_id === (int)$entregaDestino->usuario_destino_id) {
+
+                    $esAutoCesion = true;
+
+                    // 👉 EN AUTO-CESIÓN, QUIEN FIGURA ES EL QUE PREPARÓ
+                    $usuarioEntregaId = $entregaDestino->usuario_preparo_id;
+
+                    Log::info('♻️ AUTO-CESIÓN DETECTADA', [
+                        'usuario_destino_id' => $entregaDestino->usuario_destino_id,
+                        'usuario_preparo_id' => $entregaDestino->usuario_preparo_id,
+                        'usuario_pdf'        => $usuarioEntregaId
+                    ]);
+                } else {
+
+                    // 👉 CESIÓN NORMAL
+                    $usuarioEntregaId = $entregaOrigen->usuario_destino_id;
+
+                    Log::info('👤 CESIÓN NORMAL (OTRO USUARIO)', [
+                        'usuario_que_cede'   => $usuarioEntregaId,
+                        'usuario_que_recibe' => $entregaDestino->usuario_destino_id
+                    ]);
+                }
             } else {
 
-                // 👉 ENTREGA NORMAL DESDE ALMACÉN
+                // 👉 ENTREGA NORMAL
                 $usuarioEntregaId = $entregaDestino->usuario_entrego_id;
 
-                Log::info('🏬 Entrega normal desde almacén', [
+                Log::info('🏬 ENTREGA NORMAL DESDE ALMACÉN', [
                     'usuario_id' => $usuarioEntregaId
                 ]);
             }
-            
+
+
 
             /* =====================================================
          * 3. OBTENER DATOS DE SOLICITUD + RECEPTOR + QUIEN ENTREGA
@@ -3343,6 +3379,7 @@ class SolicitudrepuestoController extends Controller
                     'so.idsolicitudesordenes',
                     'so.codigo',
                     'so.totalcantidadproductos',
+                    'so.idticket as ticket_id',
                     't.numero_ticket',
 
                     // =====================
@@ -3394,6 +3431,36 @@ class SolicitudrepuestoController extends Controller
             Log::info('📑 Solicitud cargada correctamente');
 
             /* =====================================================
+            * 3.1 AUTO-CESIÓN: NUEVA VISITA O NUEVO TICKET
+            * ===================================================== */
+            $tipoUsoAutoCesion = null;
+
+            if ($esAutoCesion && !empty($solicitud->ticket_id)) {
+
+                $cantidadVisitas = DB::table('visitas')
+                    ->where('idTickets', (int) $solicitud->ticket_id) // ✅ ID REAL
+                    ->count();
+
+                $tipoUsoAutoCesion = $cantidadVisitas > 1
+                    ? ' una nueva visita'
+                    : ' un nuevo ticket';
+
+                Log::info('🔍 AUTO-CESIÓN | TIPO DE USO', [
+                    'ticket_id'     => (int) $solicitud->ticket_id,
+                    'numero_ticket' => $solicitud->numero_ticket, // solo para referencia
+                    'visitas'       => $cantidadVisitas,
+                    'resultado'     => $tipoUsoAutoCesion
+                ]);
+            } else {
+                Log::warning('⚠️ AUTO-CESIÓN | ticket_id vacío/no disponible para conteo', [
+                    'esAutoCesion'   => $esAutoCesion,
+                    'ticket_id'      => $solicitud->ticket_id ?? null,
+                    'numero_ticket'  => $solicitud->numero_ticket ?? null
+                ]);
+            }
+
+
+            /* =====================================================
             * 4. REPUESTOS ENTREGADOS (MODELOS MÚLTIPLES + SUBCATEGORÍA)
             * ===================================================== */
             $repuestos = DB::table('ordenesarticulos as oa')
@@ -3407,7 +3474,6 @@ class SolicitudrepuestoController extends Controller
                 ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
 
                 ->where('oa.idSolicitudesOrdenes', $id)
-                ->where('oa.estado', 1)
 
                 ->select(
                     'oa.cantidad',
@@ -3439,6 +3505,27 @@ class SolicitudrepuestoController extends Controller
          * ===================================================== */
             $firmaSolicitante = null;
             $firmaAprobador   = null;
+            $firmaPreparo = null;
+            $usuarioPreparo = null;
+
+            if ($esCesion && !empty($entregaDestino->usuario_preparo_id)) {
+
+                $usuarioPreparo = DB::table('usuarios as up')
+                    ->leftJoin('rol as rp', 'up.idRol', '=', 'rp.idRol')
+                    ->select(
+                        'up.Nombre',
+                        'up.apellidoPaterno',
+                        'up.apellidoMaterno',
+                        'up.firma',
+                        'rp.nombre as rol'
+                    )
+                    ->where('up.idUsuario', $entregaDestino->usuario_preparo_id)
+                    ->first();
+
+                if ($usuarioPreparo && $usuarioPreparo->firma) {
+                    $firmaPreparo = 'data:image/png;base64,' . base64_encode($usuarioPreparo->firma);
+                }
+            }
 
             if ($solicitud->solicitante_id) {
                 $firma = DB::table('usuarios')
@@ -3471,7 +3558,12 @@ class SolicitudrepuestoController extends Controller
                 'bgBase64',
                 'firmaSolicitante',
                 'firmaAprobador',
-                'esCesion'
+                'firmaPreparo',
+                'usuarioPreparo',
+                'esCesion',
+                'esAutoCesion',
+                'tipoUsoAutoCesion',
+                'esDevuelto'
             ))->render();
 
             $tempPdf = tempnam(sys_get_temp_dir(), 'conformidad_') . '.pdf';
