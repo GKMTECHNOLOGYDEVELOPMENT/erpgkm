@@ -4901,7 +4901,6 @@ class SolicitudrepuestoController extends Controller
         Log::info("🔄 INICIANDO cederRepuesto");
         Log::info("════════════════════════════════════════════════════════");
 
-        // Validar datos del request
         $articuloId = $request->input('articulo_id');
         $entregaIdOrigen = $request->input('entrega_id');
 
@@ -4920,6 +4919,10 @@ class SolicitudrepuestoController extends Controller
         $articuloId = (int)$articuloId;
         $entregaIdOrigen = (int)$entregaIdOrigen;
 
+        // ✅ IDs de notificaciones creadas (para disparar WS tras commit)
+        $idNotifDestino = null;
+        $idNotifOrigen  = null;
+
         try {
             DB::beginTransaction();
 
@@ -4934,6 +4937,7 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if (!$solicitudDestino) {
+                DB::rollBack();
                 Log::error("❌ Solicitud destino no encontrada");
                 return response()->json([
                     'success' => false,
@@ -4963,6 +4967,7 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if (!$repuestoSolicitudDestino) {
+                DB::rollBack();
                 Log::error("❌ Artículo no encontrado en solicitud destino");
                 return response()->json([
                     'success' => false,
@@ -4970,7 +4975,8 @@ class SolicitudrepuestoController extends Controller
                 ], 404);
             }
 
-            if ($repuestoSolicitudDestino->estado_articulo != 0) {
+            if ((int)$repuestoSolicitudDestino->estado_articulo !== 0) {
+                DB::rollBack();
                 Log::error("❌ Artículo ya procesado en esta solicitud");
                 return response()->json([
                     'success' => false,
@@ -4992,10 +4998,12 @@ class SolicitudrepuestoController extends Controller
                     're.ubicacion_id',
                     're.estado',
                     're.numero_ticket',
-                    're.usuario_destino_id',
+                    're.usuario_destino_id', // ✅ ESTE ES EL ORIGEN (quien entrega)
                     're.tipo_entrega',
                     're.observaciones',
                     'so.codigo as codigo_solicitud_origen',
+                    'so.idTecnico as idTecnicoOrigen',
+                    'so.idUsuario as idUsuarioOrigen',
                     'a.nombre as articulo_nombre'
                 )
                 ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idSolicitudesOrdenes')
@@ -5006,6 +5014,7 @@ class SolicitudrepuestoController extends Controller
                 ->first();
 
             if (!$entregaOrigen) {
+                DB::rollBack();
                 Log::error("❌ Entrega origen no válida");
                 return response()->json([
                     'success' => false,
@@ -5016,7 +5025,8 @@ class SolicitudrepuestoController extends Controller
             // ==========================================
             // 4. COMPARAR ARTÍCULO Y CANTIDAD
             // ==========================================
-            if ($repuestoSolicitudDestino->idArticulos != $entregaOrigen->articulo_id) {
+            if ((int)$repuestoSolicitudDestino->idArticulos !== (int)$entregaOrigen->articulo_id) {
+                DB::rollBack();
                 Log::error("❌ Artículos no coinciden");
                 return response()->json([
                     'success' => false,
@@ -5024,7 +5034,8 @@ class SolicitudrepuestoController extends Controller
                 ], 400);
             }
 
-            if ($entregaOrigen->cantidad < $repuestoSolicitudDestino->cantidad_solicitada) {
+            if ((int)$entregaOrigen->cantidad < (int)$repuestoSolicitudDestino->cantidad_solicitada) {
+                DB::rollBack();
                 Log::error("❌ Cantidad insuficiente");
                 return response()->json([
                     'success' => false,
@@ -5034,7 +5045,7 @@ class SolicitudrepuestoController extends Controller
             }
 
             // ==========================================
-            // 5. OBTENER NÚMERO DE TICKET
+            // 5. OBTENER NÚMERO DE TICKET (para repuestos_entregas; Node igual lo resuelve desde solicitudes)
             // ==========================================
             $ticketInfo = DB::table('tickets')
                 ->select('numero_ticket')
@@ -5074,7 +5085,7 @@ class SolicitudrepuestoController extends Controller
                 'entrega_origen_id' => $entregaOrigen->id,
                 'observaciones' => "Repuesto CEDIDO desde solicitud: " . $entregaOrigen->codigo_solicitud_origen .
                     " | Cantidad: " . $repuestoSolicitudDestino->cantidad_solicitada .
-                    " | Ubicación: " . $entregaOrigen->ubicacion_utilizada .
+                    " | Ubicacion: " . $entregaOrigen->ubicacion_utilizada .
                     " | Preparado por: " . (auth()->user()->name ?? 'Usuario') .
                     " (" . now()->format('d/m/Y H:i:s') . ")",
                 'fecha_preparacion' => now(),
@@ -5089,9 +5100,9 @@ class SolicitudrepuestoController extends Controller
             DB::table('ordenesarticulos')
                 ->where('idOrdenesArticulos', $repuestoSolicitudDestino->idOrdenesArticulos)
                 ->update([
-                    'estado' => 2, // Listo para entregar
+                    'estado' => 2,
                     'observacion' => "Repuesto CEDIDO | Origen: " . $entregaOrigen->codigo_solicitud_origen .
-                        " | Ubicación: " . $entregaOrigen->ubicacion_utilizada .
+                        " | Ubicacion: " . $entregaOrigen->ubicacion_utilizada .
                         " | " . now()->format('d/m/Y H:i:s'),
                     'updated_at' => now()
                 ]);
@@ -5126,18 +5137,80 @@ class SolicitudrepuestoController extends Controller
                 ]);
 
             // ==========================================
-            // 10. NOTIFICACIONES
+            // 10. ✅ NOTIFICACIONES (CON TIPO + REGLA REASIGNACION/TRASLADO)
             // ==========================================
-            DB::table('notificaciones_solicitud')->insert([
-                'idSolicitudesOrdenes' => $idSolicitudDestino,
-                'estado_web' => 1,
-                'estado_app' => 0,
-                'fecha' => now(),
-                'created_at' => now(),
-                'updated_at' => now()
-            ]);
+            $uidOrigenEntrega  = (int)($entregaOrigen->usuario_destino_id ?? 0);   // quien entrega (origen)
+            $uidDestinoRecibe  = (int)($solicitudDestino->idTecnico ?? 0);         // quien recibe (destino)
 
+            $esReasignacion = ($uidOrigenEntrega > 0 && $uidDestinoRecibe > 0 && $uidOrigenEntrega === $uidDestinoRecibe);
+
+            if ($esReasignacion) {
+                // ✅ MISMO USUARIO => REASIGNACION
+                $idNotifDestino = DB::table('notificaciones_solicitud')->insertGetId([
+                    'idSolicitudesOrdenes' => $idSolicitudDestino,
+                    'tipo' => 'PENDIENTE_REASIGNACION_DE_REPUESTOS',
+                    'estado_web' => 1,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                Log::info("🔔 Noti REASIGNACION creada idNotif={$idNotifDestino} idSol={$idSolicitudDestino}");
+            } else {
+                // ✅ DISTINTO USUARIO:
+                // DESTINO (recibe) => RECOJO
+                $idNotifDestino = DB::table('notificaciones_solicitud')->insertGetId([
+                    'idSolicitudesOrdenes' => $idSolicitudDestino,
+                    'tipo' => 'PENDIENTE_TRASLADO_RECOJO',
+                    'estado_web' => 0,
+                    'estado_app' => 0,
+                    'fecha' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+
+                // ORIGEN (entrega) => ENTREGA
+                $idSolOrigen = (int)($entregaOrigen->solicitud_id ?? 0);
+                if ($idSolOrigen > 0) {
+                    $idNotifOrigen = DB::table('notificaciones_solicitud')->insertGetId([
+                        'idSolicitudesOrdenes' => $idSolOrigen,
+                        'tipo' => 'PENDIENTE_TRASLADO_ENTREGA',
+                        'estado_web' => 0,
+                        'estado_app' => 0,
+                        'fecha' => now(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+
+                Log::info("🔔 Noti DESTINO(RECOJO) creada idNotif={$idNotifDestino} idSol={$idSolicitudDestino}");
+                Log::info("🔔 Noti ORIGEN(ENTREGA) creada idNotif=" . ($idNotifOrigen ?? 'NULL') . " idSolOrigen={$idSolOrigen}");
+            }
             DB::commit();
+
+            // ==========================================
+            // 11. ✅ DISPARAR WS (DESPUES DEL COMMIT)
+            // ==========================================
+            try {
+                if ($idNotifDestino) {
+                    WsBridge::emitSolicitudEvento([
+                        'type' => 'solicitud_creada',
+                        'idNotificacionSolicitud' => $idNotifDestino,
+                        'idSolicitudesOrdenes' => $idSolicitudDestino,
+                    ]);
+                }
+
+                if ($idNotifOrigen) {
+                    WsBridge::emitSolicitudEvento([
+                        'type' => 'solicitud_creada',
+                        'idNotificacionSolicitud' => $idNotifOrigen,
+                        'idSolicitudesOrdenes' => (int)($entregaOrigen->solicitud_id ?? 0),
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::warning("⚠️ No se pudo enviar WS: " . $e->getMessage());
+            }
 
             Log::info("✅ cederRepuesto COMPLETADO EXITOSAMENTE");
             Log::info("📋 RESUMEN:");
@@ -5147,6 +5220,8 @@ class SolicitudrepuestoController extends Controller
             Log::info("  - Cantidad cedida: " . $repuestoSolicitudDestino->cantidad_solicitada);
             Log::info("  - Nueva entrega ID: " . $nuevaEntregaId);
             Log::info("  - Nuevo estado solicitud: " . $nuevoEstado);
+            Log::info("  - Noti destino: " . ($idNotifDestino ?? 'NULL'));
+            Log::info("  - Noti origen: " . ($idNotifOrigen ?? 'NULL'));
 
             return response()->json([
                 'success' => true,
@@ -5158,7 +5233,10 @@ class SolicitudrepuestoController extends Controller
                     'cantidad' => $repuestoSolicitudDestino->cantidad_solicitada,
                     'ubicacion' => $entregaOrigen->ubicacion_utilizada,
                     'nueva_entrega_id' => $nuevaEntregaId,
-                    'estado_solicitud' => $nuevoEstado
+                    'estado_solicitud' => $nuevoEstado,
+                    'idNotificacionSolicitud_destino' => $idNotifDestino,
+                    'idNotificacionSolicitud_origen' => $idNotifOrigen,
+                    'es_reasignacion' => $esReasignacion,
                 ]
             ]);
         } catch (\Exception $e) {
