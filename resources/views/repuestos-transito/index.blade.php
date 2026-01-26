@@ -22,8 +22,10 @@
         </div>
 
         <!-- Filtros CON AJAX -->
-        <div class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4"><i class="fas fa-search mr-2"></i>Filtros de Búsqueda</h2>
+        <div
+            class="bg-white dark:bg-[#1b2e4b] rounded-xl shadow-sm p-6 mb-8 border border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4"><i
+                    class="fas fa-search mr-2"></i>Filtros de Búsqueda</h2>
             <div class="space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Estado -->
@@ -91,7 +93,7 @@
                         <i class="fas fa-redo mr-2"></i>
                         Limpiar Filtros
                     </button>
-                    
+
                     <div class="ml-auto flex items-center space-x-2">
                         <div id="loading-indicator" class="hidden">
                             <div class="flex items-center">
@@ -263,13 +265,11 @@
                                 </div>
                                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 viewer-gallery"
                                     id="gallery-original">
-                                    <template x-for="(foto, index) in fotos.fotoRepuesto.fotos"
-                                        :key="index">
+                                    <template x-for="(foto, index) in fotos.fotoRepuesto.fotos" :key="index">
                                         <div class="relative group">
                                             <div
                                                 class="relative h-48 w-full bg-gray-200 dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-                                                <img :src="foto.base64"
-                                                    :alt="foto.nombre || 'Foto ' + (index + 1)"
+                                                <img :src="foto.base64" :alt="foto.nombre || 'Foto ' + (index + 1)"
                                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
                                                     @click="viewImage($event.target)">
 
@@ -492,7 +492,7 @@
     <script src="https://unpkg.com/viewerjs/dist/viewer.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    
+
     <script>
         // Configuración de AJAX
         let ajaxTimeout;
@@ -502,7 +502,7 @@
         // Función para aplicar filtros via AJAX
         function aplicarFiltrosAJAX() {
             clearTimeout(ajaxTimeout);
-            
+
             // Obtener valores de filtros
             const filtros = {
                 estado: $('#estado').val(),
@@ -516,11 +516,11 @@
 
             // Mostrar loading
             $('#loading-indicator').removeClass('hidden');
-            
+
             // Retraso para evitar muchas llamadas mientras se escribe
             ajaxTimeout = setTimeout(() => {
                 $.ajax({
-                    url: '{{ route("repuesto-transito.filtrar") }}',
+                    url: '{{ route('repuesto-transito.filtrar') }}',
                     method: 'GET',
                     data: filtros,
                     dataType: 'json',
@@ -530,13 +530,13 @@
                     success: function(response) {
                         // Actualizar tabla
                         $('#tabla-container').html(response.tabla);
-                        
+
                         // Actualizar tarjetas de resumen
                         $('#summary-cards').html(response.summary);
-                        
+
                         // Actualizar parámetros de paginación
                         setupPaginationEvents();
-                        
+
                         // Restaurar valores de filtros en selects
                         $('#estado').val(filtros.estado);
                     },
@@ -557,14 +557,14 @@
             $('#codigo_repuesto').val('');
             $('#fecha_desde').val('');
             $('#fecha_hasta').val('');
-            
+
             // Limpiar flatpickr
             if (window.flatpickrInstances) {
                 window.flatpickrInstances.forEach(instance => {
                     instance.clear();
                 });
             }
-            
+
             currentPage = 1;
             aplicarFiltrosAJAX();
         }
@@ -573,10 +573,10 @@
         function setupPaginationEvents() {
             $('.pagination a').on('click', function(e) {
                 e.preventDefault();
-                
+
                 const url = $(this).attr('href');
                 const pageMatch = url.match(/page=(\d+)/);
-                
+
                 if (pageMatch) {
                     currentPage = pageMatch[1];
                     aplicarFiltrosAJAX();
@@ -589,7 +589,7 @@
             // Inicializar flatpickr
             const dateInputs = document.querySelectorAll('.flatpickr-date');
             window.flatpickrInstances = [];
-            
+
             if (dateInputs.length > 0) {
                 dateInputs.forEach(input => {
                     const fp = flatpickr(input, {
@@ -648,10 +648,22 @@
                 fotos: {
                     cargandoFotos: false,
                     tieneFotos: false,
-                    fotoRepuesto: { tiene: false, fotos: [] },
-                    foto_articulo_usado: { tiene: false, fotos: [] },
-                    foto_articulo_no_usado: { tiene: false, fotos: [] },
-                    foto_entrega: { tiene: false, fotos: [] }
+                    fotoRepuesto: {
+                        tiene: false,
+                        fotos: []
+                    },
+                    foto_articulo_usado: {
+                        tiene: false,
+                        fotos: []
+                    },
+                    foto_articulo_no_usado: {
+                        tiene: false,
+                        fotos: []
+                    },
+                    foto_entrega: {
+                        tiene: false,
+                        fotos: []
+                    }
                 },
                 viewer: null,
 
@@ -691,10 +703,22 @@
                     this.fotos = {
                         cargandoFotos: false,
                         tieneFotos: false,
-                        fotoRepuesto: { tiene: false, fotos: [] },
-                        foto_articulo_usado: { tiene: false, fotos: [] },
-                        foto_articulo_no_usado: { tiene: false, fotos: [] },
-                        foto_entrega: { tiene: false, fotos: [] }
+                        fotoRepuesto: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_usado: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_articulo_no_usado: {
+                            tiene: false,
+                            fotos: []
+                        },
+                        foto_entrega: {
+                            tiene: false,
+                            fotos: []
+                        }
                     };
                 },
 
@@ -712,7 +736,8 @@
                         if (data.success && data.data) {
                             this.details = data.data;
                             this.modalTitle = data.data.nombre_repuesto || 'Detalles del Repuesto';
-                            this.modalSubtitle = `Código: ${data.data.codigo_repuesto || 'N/A'} | Estado: ${this.getStatusText(data.data.estado)}`;
+                            this.modalSubtitle =
+                                `Código: ${data.data.codigo_repuesto || 'N/A'}`;
 
                             if (data.data.tiene_fotos) {
                                 await this.loadFotos(id);
@@ -750,7 +775,8 @@
 
                             tiposFotos.forEach(tipo => {
                                 const fotoData = data.fotos[tipo];
-                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData.fotos.length > 0) {
+                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
+                                    .fotos.length > 0) {
                                     this.fotos[tipo].tiene = true;
                                     this.fotos[tipo].fotos = fotoData.fotos;
                                     this.fotos.tieneFotos = true;
@@ -771,13 +797,15 @@
                 initViewer() {
                     this.$nextTick(() => {
                         setTimeout(() => {
-                            const images = this.$el.querySelectorAll('img[src*="base64"]');
+                            const images = this.$el.querySelectorAll(
+                                'img[src*="base64"]');
                             if (images.length > 0) {
                                 try {
                                     const imageElements = Array.from(images);
                                     this.viewer = new Viewer(imageElements, {
                                         className: 'viewerjs-modal',
-                                        title: (image, imageData) => image.alt || 'Imagen',
+                                        title: (image, imageData) => image
+                                            .alt || 'Imagen',
                                         toolbar: {
                                             zoomIn: 1,
                                             zoomOut: 1,
@@ -792,7 +820,8 @@
                                         }
                                     });
                                 } catch (error) {
-                                    console.error('Error al inicializar Viewer.js:', error);
+                                    console.error('Error al inicializar Viewer.js:',
+                                        error);
                                 }
                             }
                         }, 500);
@@ -807,7 +836,8 @@
 
                     if (this.viewer) {
                         try {
-                            const allImages = Array.from(this.$el.querySelectorAll('img[src*="base64"]'));
+                            const allImages = Array.from(this.$el.querySelectorAll(
+                                'img[src*="base64"]'));
                             const index = allImages.indexOf(imgElement);
                             if (index !== -1) {
                                 this.viewer.view(index);
@@ -823,61 +853,72 @@
                     }
                 },
 
-             getStatusClass(status) {
-    switch (status) {
-        case 'en_transito':
-            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
-        case 'cedido':
-            return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400';  // NUEVO
-        case 'usado':
-            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
-        case 'devuelto':
-            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
-        case 'pendiente':
-            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
-        default:
-            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
-    }
-},
+                getStatusClass(status) {
+                    switch (status) {
+                        case 'en_transito':
+                        case 'listo_para_ceder': // NUEVO
+                            return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400';
 
-getStatusIcon(status) {
-    switch (status) {
-        case 'en_transito':
-            return 'fas fa-shipping-fast';
-        case 'cedido':
-            return 'fas fa-exchange-alt';  // NUEVO
-        case 'usado':
-            return 'fas fa-check-circle';
-        case 'devuelto':
-            return 'fas fa-undo-alt';
-        case 'pendiente':
-            return 'fas fa-clock';
-        default:
-            return 'fas fa-question-circle';
-    }
-},
+                        case 'cedido':
+                            return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400';
 
-getStatusText(status) {
-    switch (status) {
-        case 'en_transito':
-            return 'En Tránsito';
-        case 'cedido':
-            return 'Cedido';  // NUEVO
-        case 'usado':
-            return 'Usado';
-        case 'devuelto':
-            return 'Devuelto';
-        case 'pendiente':
-            return 'Pendiente';
-        default:
-            return status || 'Sin Estado';
-    }
-},
+                        case 'usado':
+                            return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400';
+
+                        case 'devuelto':
+                            return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400';
+
+                        case 'pendiente':
+                            return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400';
+
+                        case 'pendiente_por_retorno': // opcional, por consistencia
+                            return 'bg-warning-light text-warning border border-warning';
+
+                        default:
+                            return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400';
+                    }
+                },
+
+
+                getStatusIcon(status) {
+                    switch (status) {
+                        case 'en_transito':
+                            return 'fas fa-shipping-fast';
+                        case 'cedido':
+                            return 'fas fa-exchange-alt'; // NUEVO
+                        case 'usado':
+                            return 'fas fa-check-circle';
+                        case 'devuelto':
+                            return 'fas fa-undo-alt';
+                        case 'pendiente':
+                            return 'fas fa-clock';
+                        default:
+                            return 'fas fa-question-circle';
+                    }
+                },
+
+                getStatusText(status) {
+                    switch (status) {
+                        case 'en_transito':
+                            return 'En Tránsito';
+                        case 'cedido':
+                            return 'Cedido'; // NUEVO
+                        case 'usado':
+                            return 'Usado';
+                        case 'devuelto':
+                            return 'Devuelto';
+                        case 'pendiente':
+                            return 'Pendiente';
+                        default:
+                            return status || 'Sin Estado';
+                    }
+                },
                 formatDate(dateString) {
                     if (!dateString) return 'No disponible';
                     try {
                         const date = new Date(dateString);
-                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString('es-PE');
+                        return isNaN(date.getTime()) ? 'Fecha inválida' : date.toLocaleDateString(
+                            'es-PE');
                     } catch {
                         return 'Fecha inválida';
                     }
@@ -888,7 +929,8 @@ getStatusText(status) {
                     try {
                         const date = new Date(dateString);
                         if (isNaN(date.getTime())) return 'Fecha inválida';
-                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString('es-PE');
+                        return date.toLocaleDateString('es-PE') + ' ' + date.toLocaleTimeString(
+                            'es-PE');
                     } catch {
                         return 'Fecha inválida';
                     }
