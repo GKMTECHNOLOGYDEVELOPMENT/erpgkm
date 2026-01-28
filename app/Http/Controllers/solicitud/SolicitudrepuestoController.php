@@ -3463,36 +3463,29 @@ class SolicitudrepuestoController extends Controller
             /* =====================================================
             * 4. REPUESTOS ENTREGADOS (MODELOS MÚLTIPLES + SUBCATEGORÍA)
             * ===================================================== */
-            $repuestos = DB::table('ordenesarticulos as oa')
-                ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-
-                // 🔹 MODELOS (muchos a muchos)
+            $repuestos = DB::table('repuestos_entregas as re')
+                ->join('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
                 ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
                 ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-
-                // 🔹 TIPO REPUESTO (subcategoría)
                 ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
 
-                ->where('oa.idSolicitudesOrdenes', $id)
+                ->where('re.solicitud_id', $id)
+                ->where('re.estado', 'entregado') // 🔑 ESTE ES EL FILTRO REAL
 
                 ->select(
-                    'oa.cantidad',
+                    DB::raw('COUNT(re.articulo_id) as cantidad'),
                     'a.codigo_repuesto',
-
-                    // 🔥 varios modelos en una sola celda
                     DB::raw('COALESCE(GROUP_CONCAT(DISTINCT m.nombre SEPARATOR ", "), "N/A") as modelo'),
-
-                    // 🔥 tipo de repuesto real
                     DB::raw('COALESCE(sc.nombre, "N/A") as tipo_repuesto')
                 )
-
                 ->groupBy(
-                    'oa.idOrdenesArticulos',
-                    'oa.cantidad',
+                    'a.idArticulos',
                     'a.codigo_repuesto',
                     'sc.nombre'
                 )
                 ->get();
+
+
 
             if ($repuestos->isEmpty()) {
                 Log::warning('⚠️ No hay repuestos entregados');
