@@ -250,7 +250,70 @@ class SolicitudrepuestoController extends Controller
 
 
 
+   /**
+     * Comprimir imagen simple sin Intervention Image
+     */
+    private function comprimirImagenSimple($contenidoBinario)
+    {
+        // Si GD no está instalado, devolver original
+        if (!function_exists('imagecreatefromstring')) {
+            return $contenidoBinario;
+        }
 
+        try {
+            // Intentar crear imagen desde string
+            $imagen = @imagecreatefromstring($contenidoBinario);
+            if ($imagen === false) {
+                return $contenidoBinario;
+            }
+
+            // Obtener dimensiones
+            $ancho = imagesx($imagen);
+            $alto = imagesy($imagen);
+
+            // Redimensionar solo si es mayor a 1200px
+            if ($ancho > 1200) {
+                $nuevoAncho = 1200;
+                $nuevoAlto = intval($alto * ($nuevoAncho / $ancho));
+
+                $nuevaImagen = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
+
+                // Preservar transparencia para PNG
+                if (imagecolortransparent($imagen) >= 0) {
+                    imagealphablending($nuevaImagen, false);
+                    imagesavealpha($nuevaImagen, true);
+                }
+
+                imagecopyresampled(
+                    $nuevaImagen,
+                    $imagen,
+                    0,
+                    0,
+                    0,
+                    0,
+                    $nuevoAncho,
+                    $nuevoAlto,
+                    $ancho,
+                    $alto
+                );
+
+                imagedestroy($imagen);
+                $imagen = $nuevaImagen;
+            }
+
+            // Exportar como JPEG con calidad 80%
+            ob_start();
+            imagejpeg($imagen, null, 80);
+            $resultado = ob_get_clean();
+
+            imagedestroy($imagen);
+
+            return $resultado;
+        } catch (\Exception $e) {
+            Log::warning('Error al comprimir imagen: ' . $e->getMessage());
+            return $contenidoBinario;
+        }
+    }
 
 
 
@@ -384,70 +447,7 @@ class SolicitudrepuestoController extends Controller
 
 
 
-    /**
-     * Comprimir imagen simple sin Intervention Image
-     */
-    private function comprimirImagenSimple($contenidoBinario)
-    {
-        // Si GD no está instalado, devolver original
-        if (!function_exists('imagecreatefromstring')) {
-            return $contenidoBinario;
-        }
-
-        try {
-            // Intentar crear imagen desde string
-            $imagen = @imagecreatefromstring($contenidoBinario);
-            if ($imagen === false) {
-                return $contenidoBinario;
-            }
-
-            // Obtener dimensiones
-            $ancho = imagesx($imagen);
-            $alto = imagesy($imagen);
-
-            // Redimensionar solo si es mayor a 1200px
-            if ($ancho > 1200) {
-                $nuevoAncho = 1200;
-                $nuevoAlto = intval($alto * ($nuevoAncho / $ancho));
-
-                $nuevaImagen = imagecreatetruecolor($nuevoAncho, $nuevoAlto);
-
-                // Preservar transparencia para PNG
-                if (imagecolortransparent($imagen) >= 0) {
-                    imagealphablending($nuevaImagen, false);
-                    imagesavealpha($nuevaImagen, true);
-                }
-
-                imagecopyresampled(
-                    $nuevaImagen,
-                    $imagen,
-                    0,
-                    0,
-                    0,
-                    0,
-                    $nuevoAncho,
-                    $nuevoAlto,
-                    $ancho,
-                    $alto
-                );
-
-                imagedestroy($imagen);
-                $imagen = $nuevaImagen;
-            }
-
-            // Exportar como JPEG con calidad 80%
-            ob_start();
-            imagejpeg($imagen, null, 80);
-            $resultado = ob_get_clean();
-
-            imagedestroy($imagen);
-
-            return $resultado;
-        } catch (\Exception $e) {
-            Log::warning('Error al comprimir imagen: ' . $e->getMessage());
-            return $contenidoBinario;
-        }
-    }
+ 
 
 
 
@@ -876,6 +876,7 @@ class SolicitudrepuestoController extends Controller
             Log::debug('Iniciando validación de datos');
             $validated = $request->validate([
                 'ticketId' => 'required|exists:tickets,idTickets',
+                'visitaId' => 'nullable|exists:visitas,idVisitas', // Nuevo campo
                 'orderInfo.tipoServicio' => 'required|string',
                 'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
                 'orderInfo.fechaRequerida' => 'required|date',
@@ -928,6 +929,8 @@ class SolicitudrepuestoController extends Controller
                 'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
                 'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
                 'codigo' => $codigoOrden,
+                'idticket' => $validated['ticketId'],
+                'idVisita' => $validated['visitaId'] ?? null,
                 'niveldeurgencia' => $validated['orderInfo']['urgencia'],
                 'tiposervicio' => $validated['orderInfo']['tipoServicio'],
                 'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
@@ -1317,7 +1320,7 @@ class SolicitudrepuestoController extends Controller
                 'oa.idarticulos',
                 'a.codigo_repuesto',
                 'a.codigo_barras',
-                'a.nombre as nombre_articulo',
+                'a.codigo_repuesto as nombre_articulo',
                 'a.precio_compra',
                 'a.idsubcategoria',
                 'sc.nombre as tipo_articulo',
@@ -5344,4 +5347,69 @@ class SolicitudrepuestoController extends Controller
             ], 500);
         }
     }
+
+public function getVisitasPorTicket($ticketId)
+{
+    $user = auth()->user();
+
+    Log::info('Usuario autenticado', [
+        'idUsuario' => $user->idUsuario,
+        'idRol' => $user->idRol,
+        'idTipoArea' => $user->idTipoArea,
+        'idTipoUsuario' => $user->idTipoUsuario
+    ]);
+
+    $userId = $user->idUsuario;
+
+    $esAdministrador = (
+        $user->idRol == 1 &&
+        $user->idTipoArea == 4 &&
+        $user->idTipoUsuario == 3
+    );
+
+    Log::info('¿Es administrador?', [
+        'esAdministrador' => $esAdministrador
+    ]);
+
+    $query = DB::table('visitas')
+        ->select(
+            'visitas.idVisitas',
+            'visitas.nombre',
+            'visitas.fecha_programada',
+            'visitas.estado',
+            'visitas.estadovisita',
+            'visitas.idUsuario',
+            'usuarios.Nombre as usuario_nombre',
+            'usuarios.apellidoPaterno as usuario_apellido',
+            'usuarios.idRol',
+            'usuarios.idTipoArea',
+            'usuarios.idTipoUsuario'
+        )
+        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+        ->where('visitas.idTickets', $ticketId);
+
+    if (!$esAdministrador) {
+        Log::info('Filtrando visitas por usuario', [
+            'idUsuario' => $userId
+        ]);
+        $query->where('visitas.idUsuario', $userId);
+    }
+
+    // Log del SQL
+    Log::info('SQL generado', [
+        'sql' => $query->toSql(),
+        'bindings' => $query->getBindings()
+    ]);
+
+    $visitas = $query->orderBy('visitas.fecha_programada', 'desc')->get();
+
+    Log::info('Cantidad de visitas encontradas', [
+        'total' => $visitas->count()
+    ]);
+
+    return response()->json($visitas);
+}
+
+
+    
 }

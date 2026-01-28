@@ -304,161 +304,191 @@
 </div>
 
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // Inicializar Select2
-            $('#subcategoriaSelect').select2({
-                placeholder: "Selecciona una subcategoría",
-                allowClear: true,
-                language: "es",
-                width: '100%',
-                dropdownParent: $('#subcategoriaSelect').parent(),
-                theme: 'default'
-            });
-
-            // Establecer valor inicial desde URL
-            @if (request('subcategoria'))
-                $('#subcategoriaSelect').val('{{ request('subcategoria') }}').trigger('change');
-            @endif
-
-            // Escuchar cambios en Select2
-            $('#subcategoriaSelect').on('select2:select', function(e) {
-                applyFilters();
-            });
-
-            $('#subcategoriaSelect').on('select2:clear', function(e) {
-                $(this).val('todas').trigger('change');
-                applyFilters();
-            });
+<script>
+    $(document).ready(function() {
+        // Inicializar Select2
+        $('#subcategoriaSelect').select2({
+            placeholder: "Selecciona una subcategoría",
+            allowClear: true,
+            language: "es",
+            width: '100%',
+            dropdownParent: $('#subcategoriaSelect').parent(),
+            theme: 'default'
         });
 
-        let debounceTimer;
+        // Establecer valor inicial desde URL
+        @if (request('subcategoria'))
+            $('#subcategoriaSelect').val('{{ request('subcategoria') }}').trigger('change');
+        @endif
 
-        function debounceSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearSearch');
-
-            if (searchInput.value.length > 0) {
-                clearBtn.classList.remove('hidden');
-            } else {
-                clearBtn.classList.add('hidden');
-            }
-
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                applyFilters();
-            }, 500);
-        }
-
-        function applyFilters() {
-            const search = document.getElementById('searchInput').value;
-            const subcategoria = $('#subcategoriaSelect').val(); // Usar jQuery para obtener valor de Select2
-            const estado = document.getElementById('estadoSelect').value;
-            const sort = document.getElementById('sortSelect').value;
-
-            // Mostrar loading
-            document.getElementById('loadingIndicator').classList.remove('hidden');
-            document.getElementById('emptyState').classList.add('hidden');
-
-            // Actualizar URL sin recargar
-            updateUrlParams({
-                search,
-                subcategoria,
-                estado,
-                sort
-            });
-
-            // Actualizar enlace de exportación
-            updateExportLink(search, subcategoria, estado, sort);
-
-            // Hacer petición AJAX
-            fetchData(search, subcategoria, estado, sort);
-        }
-
-        function clearFilters() {
-            document.getElementById('searchInput').value = '';
-            $('#subcategoriaSelect').val('todas').trigger('change'); // Resetear Select2
-            document.getElementById('estadoSelect').value = 'todos';
-            document.getElementById('sortSelect').value = 'codigo';
-            document.getElementById('clearSearch').classList.add('hidden');
-
-            // Limpiar URL
-            history.pushState({}, '', '{{ route('harvest.index') }}');
-
-            // Restaurar enlace de exportación original
-            document.getElementById('exportLink').href = '{{ route('harvest.export') }}';
-
+        // Escuchar cambios en Select2
+        $('#subcategoriaSelect').on('select2:select', function(e) {
             applyFilters();
-        }
+        });
 
-        function filterByCategory(category) {
-            // Puedes implementar filtros específicos por categoría aquí
+        $('#subcategoriaSelect').on('select2:clear', function(e) {
+            $(this).val('todas').trigger('change');
             applyFilters();
+        });
+    });
+
+    let debounceTimer;
+
+    function debounceSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearSearch');
+
+        if (searchInput && searchInput.value.length > 0) {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
         }
 
-        function fetchData(search = '', subcategoria = 'todas', estado = 'todos', sort = 'codigo', page = 1) {
-            // Construir URL con parámetros
-            let url = '{{ route('harvest.index') }}?ajax=1';
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            applyFilters();
+        }, 500);
+    }
 
-            if (search) {
-                url += `&search=${encodeURIComponent(search)}`;
-            }
+    function applyFilters() {
+        const searchInput = document.getElementById('searchInput');
+        const subcategoriaSelect = document.getElementById('subcategoriaSelect');
+        
+        if (!searchInput || !subcategoriaSelect) {
+            console.error('Elementos de filtro no encontrados');
+            return;
+        }
+        
+        const search = searchInput.value;
+        const subcategoria = subcategoriaSelect.value;
 
-            if (subcategoria && subcategoria !== 'todas') {
-                url += `&subcategoria=${subcategoria}`;
-            }
+        // Mostrar loading
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const emptyState = document.getElementById('emptyState');
+        
+        if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+        if (emptyState) emptyState.classList.add('hidden');
 
-            if (estado && estado !== 'todos') {
-                url += `&estado=${estado}`;
-            }
+        // Actualizar URL sin recargar
+        updateUrlParams({
+            search,
+            subcategoria
+        });
 
-            if (sort && sort !== 'codigo') {
-                url += `&sort=${sort}`;
-            }
+        // Actualizar enlace de exportación
+        updateExportLink(search, subcategoria);
 
-            if (page > 1) {
-                url += `&page=${page}`;
-            }
+        // Hacer petición AJAX
+        fetchData(search, subcategoria);
+    }
 
-            fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Actualizar tabla
-                    document.getElementById('tableContainer').innerHTML = data.html;
+    function clearFilters() {
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        
+        if (searchInput) searchInput.value = '';
+        if (clearSearch) clearSearch.classList.add('hidden');
+        
+        // Resetear Select2 usando jQuery
+        $('#subcategoriaSelect').val('todas').trigger('change');
 
-                    // Actualizar estadísticas
-                    document.getElementById('totalRepuestos').textContent = data.totalRepuestos;
-                    document.getElementById('totalUnidades').textContent = data.totalUnidades;
+        // Limpiar URL
+        history.pushState({}, '', '{{ route('harvest.index') }}');
 
-                    // Verificar si hay datos
-                    if (data.totalRepuestos == 0) {
-                        document.getElementById('emptyState').classList.remove('hidden');
-                        const message = search || subcategoria !== 'todas' || estado !== 'todos' ?
+        // Restaurar enlace de exportación original
+        const exportLink = document.getElementById('exportLink');
+        if (exportLink) exportLink.href = '{{ route('harvest.export') }}';
+
+        applyFilters();
+    }
+
+    function filterByCategory(category) {
+        // Puedes implementar filtros específicos por categoría aquí
+        console.log('Filtrando por categoría:', category);
+        applyFilters();
+    }
+
+    function fetchData(search = '', subcategoria = 'todas', page = 1) {
+        // Construir URL con parámetros
+        let url = '{{ route('harvest.index') }}?ajax=1';
+
+        if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+        }
+
+        if (subcategoria && subcategoria !== 'todas') {
+            url += `&subcategoria=${subcategoria}`;
+        }
+
+        if (page > 1) {
+            url += `&page=${page}`;
+        }
+
+        fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Actualizar tabla
+                const tableContainer = document.getElementById('tableContainer');
+                if (tableContainer && data.html) {
+                    tableContainer.innerHTML = data.html;
+                }
+
+                // Actualizar estadísticas
+                const totalRepuestos = document.getElementById('totalRepuestos');
+                const totalUnidades = document.getElementById('totalUnidades');
+                
+                if (totalRepuestos && data.totalRepuestos !== undefined) {
+                    totalRepuestos.textContent = data.totalRepuestos;
+                }
+                if (totalUnidades && data.totalUnidades !== undefined) {
+                    totalUnidades.textContent = data.totalUnidades;
+                }
+
+                // Verificar si hay datos
+                const emptyState = document.getElementById('emptyState');
+                const emptyStateMessage = document.getElementById('emptyStateMessage');
+                
+                if (data.totalRepuestos == 0) {
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    if (emptyStateMessage) {
+                        const message = search || subcategoria !== 'todas' ?
                             'No hay repuestos que coincidan con los filtros aplicados' :
                             'No hay repuestos registrados en custodia';
-                        document.getElementById('emptyStateMessage').textContent = message;
+                        emptyStateMessage.textContent = message;
                     }
+                } else {
+                    if (emptyState) emptyState.classList.add('hidden');
+                }
 
-                    // Ocultar loading
-                    document.getElementById('loadingIndicator').classList.add('hidden');
+                // Ocultar loading
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
 
-                    // Agregar event listeners a la paginación
-                    setupPagination();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    document.getElementById('loadingIndicator').classList.add('hidden');
+                // Agregar event listeners a la paginación
+                setupPagination();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
 
-                    // Mostrar error
-                    document.getElementById('tableContainer').innerHTML = `
+                // Mostrar error
+                const tableContainer = document.getElementById('tableContainer');
+                if (tableContainer) {
+                    tableContainer.innerHTML = `
                     <div class="bg-red-50 border-l-4 border-red-400 rounded-lg p-6">
                         <div class="flex items-center">
                             <i class="fas fa-exclamation-triangle text-red-400 text-xl mr-3"></i>
@@ -469,155 +499,136 @@
                         </div>
                     </div>
                 `;
-                });
-        }
-
-        function setupPagination() {
-            // Agregar event listeners a los enlaces de paginación
-            document.querySelectorAll('.pagination a').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    const url = new URL(this.href);
-                    const page = url.searchParams.get('page') || 1;
-                    const search = document.getElementById('searchInput').value;
-                    const subcategoria = $('#subcategoriaSelect').val();
-                    const estado = document.getElementById('estadoSelect').value;
-                    const sort = document.getElementById('sortSelect').value;
-
-                    document.getElementById('loadingIndicator').classList.remove('hidden');
-                    fetchData(search, subcategoria, estado, sort, page);
-                });
+                }
             });
+    }
+
+    function setupPagination() {
+        // Agregar event listeners a los enlaces de paginación
+        document.querySelectorAll('.pagination a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                const url = new URL(this.href);
+                const page = url.searchParams.get('page') || 1;
+                const searchInput = document.getElementById('searchInput');
+                const subcategoriaSelect = document.getElementById('subcategoriaSelect');
+                
+                const search = searchInput ? searchInput.value : '';
+                const subcategoria = subcategoriaSelect ? subcategoriaSelect.value : 'todas';
+
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+                
+                fetchData(search, subcategoria, page);
+            });
+        });
+    }
+
+    function updateUrlParams(params) {
+        const url = new URL(window.location);
+
+        if (params.search) {
+            url.searchParams.set('search', params.search);
+        } else {
+            url.searchParams.delete('search');
         }
 
-        function updateUrlParams(params) {
-            const url = new URL(window.location);
-
-            if (params.search) {
-                url.searchParams.set('search', params.search);
-            } else {
-                url.searchParams.delete('search');
-            }
-
-            if (params.subcategoria && params.subcategoria !== 'todas') {
-                url.searchParams.set('subcategoria', params.subcategoria);
-            } else {
-                url.searchParams.delete('subcategoria');
-            }
-
-            if (params.estado && params.estado !== 'todos') {
-                url.searchParams.set('estado', params.estado);
-            } else {
-                url.searchParams.delete('estado');
-            }
-
-            if (params.sort && params.sort !== 'codigo') {
-                url.searchParams.set('sort', params.sort);
-            } else {
-                url.searchParams.delete('sort');
-            }
-
-            // Actualizar URL sin recargar
-            history.pushState({}, '', url);
+        if (params.subcategoria && params.subcategoria !== 'todas') {
+            url.searchParams.set('subcategoria', params.subcategoria);
+        } else {
+            url.searchParams.delete('subcategoria');
         }
 
-        function updateExportLink(search, subcategoria, estado, sort) {
-            let exportUrl = '{{ route('harvest.export') }}';
-            const params = [];
+        // Actualizar URL sin recargar
+        history.pushState({}, '', url);
+    }
 
-            if (search) {
-                params.push(`search=${encodeURIComponent(search)}`);
-            }
+    function updateExportLink(search, subcategoria) {
+        let exportUrl = '{{ route('harvest.export') }}';
+        const params = [];
 
-            if (subcategoria && subcategoria !== 'todas') {
-                params.push(`subcategoria=${subcategoria}`);
-            }
-
-            if (estado && estado !== 'todos') {
-                params.push(`estado=${estado}`);
-            }
-
-            if (sort && sort !== 'codigo') {
-                params.push(`sort=${sort}`);
-            }
-
-            if (params.length > 0) {
-                exportUrl += '?' + params.join('&');
-            }
-
-            document.getElementById('exportLink').href = exportUrl;
+        if (search) {
+            params.push(`search=${encodeURIComponent(search)}`);
         }
 
-        function verDetalle(idArticulo) {
+        if (subcategoria && subcategoria !== 'todas') {
+            params.push(`subcategoria=${subcategoria}`);
+        }
 
-            // 🔥 abrir modal Alpine
-            window.dispatchEvent(new Event('open-detalle'));
+        if (params.length > 0) {
+            exportUrl += '?' + params.join('&');
+        }
 
-            // loading
-            document.getElementById('modalContent').innerHTML = `
+        const exportLink = document.getElementById('exportLink');
+        if (exportLink) exportLink.href = exportUrl;
+    }
+
+    function verDetalle(idArticulo) {
+        // 🔥 abrir modal Alpine
+        window.dispatchEvent(new Event('open-detalle'));
+
+        // loading
+        const modalContent = document.getElementById('modalContent');
+        if (modalContent) {
+            modalContent.innerHTML = `
         <div class="flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
             <p class="text-gray-600">Cargando detalles del repuesto...</p>
         </div>
     `;
+        }
 
-            fetch(`/almacen/harvest/${idArticulo}`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(r => r.text())
-                .then(html => {
-                    document.getElementById('modalContent').innerHTML = html;
-                })
-                .catch(() => {
-                    document.getElementById('modalContent').innerHTML = `
+        fetch(`/almacen/harvest/${idArticulo}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return r.text();
+            })
+            .then(html => {
+                const modalContent = document.getElementById('modalContent');
+                if (modalContent) modalContent.innerHTML = html;
+            })
+            .catch(() => {
+                const modalContent = document.getElementById('modalContent');
+                if (modalContent) {
+                    modalContent.innerHTML = `
             <div class="text-red-600 text-center p-6">
                 Error al cargar los detalles
             </div>
         `;
-                });
+                }
+            });
+    }
+
+    function closeModal() {
+        window.dispatchEvent(new Event('close-detalle'));
+    }
+
+    // Inicializar filtros desde URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const search = urlParams.get('search');
+        const subcategoria = urlParams.get('subcategoria');
+
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        
+        if (search && searchInput) {
+            searchInput.value = search;
+            if (clearSearch) clearSearch.classList.remove('hidden');
         }
 
-        function closeModal() {
-            window.dispatchEvent(new Event('close-detalle'));
-        }
-
-
-        // Inicializar filtros desde URL
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const search = urlParams.get('search');
-            const subcategoria = urlParams.get('subcategoria');
-            const estado = urlParams.get('estado');
-            const sort = urlParams.get('sort');
-
-            if (search) {
-                document.getElementById('searchInput').value = search;
-                document.getElementById('clearSearch').classList.remove('hidden');
-            }
-
-            if (estado) {
-                document.getElementById('estadoSelect').value = estado;
-            }
-
-            if (sort) {
-                document.getElementById('sortSelect').value = sort;
-            }
-
-            // Nota: El valor de subcategoria se establece en el $(document).ready() de Select2
-
-            // Agregar event listeners a la paginación inicial
-            setupPagination();
-
-            // Configurar el enlace de exportación inicial
-            updateExportLink(
-                document.getElementById('searchInput').value,
-                $('#subcategoriaSelect').val(),
-                document.getElementById('estadoSelect').value,
-                document.getElementById('sortSelect').value
-            );
-        });
-    </script>
+        // Configurar el enlace de exportación inicial
+        updateExportLink(
+            searchInput ? searchInput.value : '',
+            document.getElementById('subcategoriaSelect') ? document.getElementById('subcategoriaSelect').value : 'todas'
+        );
+    });
+</script>
 </x-layout.default>

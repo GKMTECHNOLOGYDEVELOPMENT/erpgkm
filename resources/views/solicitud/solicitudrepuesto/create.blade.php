@@ -26,6 +26,21 @@
             background-color: #f9fafb;
             opacity: 0.6;
         }
+
+        /* Estilos específicos para el select de visitas */
+        #visitaSelect + .select2-container {
+            margin-top: 4px;
+        }
+
+        #visitaSelect + .select2-container .select2-selection--single {
+            border-color: #8b5cf6;
+            background-color: #faf5ff;
+        }
+
+        /* Animación para mostrar/ocultar */
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 
     <div x-data="solicitudRepuesto()" class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
@@ -361,6 +376,50 @@
                                                 <p class="text-xs text-gray-600">Falla Reportada</p>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- NUEVA SECCIÓN: Selección de Visita -->
+                                <div class="mt-6 pt-6 border-t border-blue-100">
+                                    <label class="block text-lg font-semibold text-gray-900 mb-4">
+                                        <i class="fas fa-calendar-check text-purple-500 mr-2"></i>
+                                        Seleccionar Visita
+                                    </label>
+                                    
+                                    <div class="mb-4">
+                                        <select x-ref="visitaSelect" class="w-full" :disabled="loadingVisitas || !selectedTicket">
+                                            <option value="">Seleccione una visita...</option>
+                                            <template x-for="visita in visitas" :key="visita.idVisitas">
+                                                <option :value="visita.idVisitas" 
+                                                        x-text="`${visita.nombre} - ${formatVisitaDate(visita.fecha_programada)} ${visita.usuario_nombre ? ' (' + visita.usuario_nombre + ')' : ''}`">
+                                                </option>
+                                            </template>
+                                        </select>
+                                        <div x-show="loadingVisitas" class="text-sm text-blue-500 mt-2">
+                                            <i class="fas fa-spinner fa-spin mr-2"></i>Cargando visitas...
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información de la visita seleccionada -->
+                                    <div x-show="selectedVisita" class="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <h4 class="font-bold text-purple-700" x-text="selectedVisita.nombre"></h4>
+                                                <p class="text-sm text-purple-600">
+                                                    <i class="far fa-calendar mr-1"></i>
+                                                    <span x-text="formatVisitaDate(selectedVisita.fecha_programada)"></span>
+                                                </p>
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                    
+                                    <div x-show="!loadingVisitas && visitas.length === 0 && selectedTicket" 
+                                         class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                        <p class="text-yellow-700 text-sm">
+                                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                                            Este ticket no tiene visitas registradas.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -757,6 +816,15 @@
                                     x-text="orderInfo.fechaRequerida ? formatDateForDisplay(orderInfo.fechaRequerida) : 'No definida'"></span>
                             </div>
 
+                            <!-- Visita Seleccionada -->
+                            <div
+                                class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3 border-b border-blue-100">
+                                <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Visita</span>
+                                <span class="text-sm font-bold text-purple-600 text-right max-w-[150px] truncate"
+                                    x-text="selectedVisita ? selectedVisita.nombre : 'No seleccionada'"
+                                    :title="selectedVisita ? selectedVisita.nombre : ''"></span>
+                            </div>
+
                             <!-- Estado -->
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 md:py-3">
                                 <span class="text-gray-700 font-medium text-sm sm:text-base mb-1 sm:mb-0">Estado</span>
@@ -966,7 +1034,9 @@
                 orderNumber: {{ $nextOrderNumber ?? 1 }},
                 selectedTicket: '',
                 selectedTicketInfo: null,
+                selectedVisita: null,
                 loadingTicket: false,
+                loadingVisitas: false,
                 showClearModal: false,
                 loadingTipos: false,
                 loadingCodigos: false,
@@ -988,6 +1058,9 @@
 
                 // Tickets desde Laravel
                 tickets: @json($tickets),
+
+                // Visitas
+                visitas: [],
 
                 // Datos para los selects
                 tiposServicio: [{
@@ -1057,8 +1130,12 @@
                         this.selectedTicket;
                 },
                 get canCreateOrder() {
+                    const hasVisitas = this.visitas.length > 0;
+                    const visitaRequired = hasVisitas ? !!this.selectedVisita : true;
+                    
                     return this.products.length > 0 &&
                         this.selectedTicket &&
+                        visitaRequired &&
                         this.orderInfo.tipoServicio &&
                         this.orderInfo.urgencia &&
                         this.orderInfo.fechaRequerida;
@@ -1156,6 +1233,23 @@
                             this.newProduct.codigo = e.target.value;
                         });
                     }
+
+                    // Visita Select
+                    if (this.$refs.visitaSelect) {
+                        $(this.$refs.visitaSelect).select2({
+                            placeholder: 'Seleccione una visita...',
+                            language: 'es',
+                            width: '100%',
+                            disabled: true
+                        }).on('change', (e) => {
+                            const visitaId = e.target.value;
+                            if (visitaId) {
+                                this.selectedVisita = this.visitas.find(v => v.idVisitas == visitaId);
+                            } else {
+                                this.selectedVisita = null;
+                            }
+                        });
+                    }
                 },
 
                 initFlatpickr() {
@@ -1188,7 +1282,6 @@
                     });
                 },
 
-                // REEMPLAZA TU FUNCIÓN formatDateForDisplay CON ESTA:
                 formatDateForDisplay(dateString) {
                     if (!dateString) return '';
 
@@ -1209,7 +1302,7 @@
                     const date = new Date(dateString);
                     // Usar toLocaleDateString con timezone específica
                     return date.toLocaleDateString('es-ES', {
-                        timeZone: 'UTC', // <-- ESTO ES CLAVE
+                        timeZone: 'UTC',
                         year: 'numeric',
                         month: '2-digit',
                         day: '2-digit'
@@ -1219,6 +1312,8 @@
                 async loadTicketInfo(ticketId) {
                     this.loadingTicket = true;
                     this.selectedTicketInfo = null;
+                    this.selectedVisita = null;
+                    this.visitas = [];
 
                     try {
                         const response = await fetch(`/api/ticket-info/${ticketId}`);
@@ -1233,6 +1328,9 @@
                                     .modelo_nombre);
                                 this.loadTiposRepuesto(ticketData.idModelo);
                             }
+                            
+                            // Cargar visitas del ticket
+                            await this.loadVisitasPorTicket(ticketId);
                         }
                     } catch (error) {
                         console.error('Error loading ticket info:', error);
@@ -1240,6 +1338,46 @@
                     } finally {
                         this.loadingTicket = false;
                     }
+                },
+
+                async loadVisitasPorTicket(ticketId) {
+                    this.loadingVisitas = true;
+                    this.visitas = [];
+                    this.selectedVisita = null;
+                    
+                    try {
+                        const response = await fetch(`/api/visitas-por-ticket/${ticketId}`);
+                        const visitasData = await response.json();
+                        
+                        this.visitas = visitasData;
+                        
+                        // Habilitar/deshabilitar select de visitas
+                        if (this.$refs.visitaSelect) {
+                            $(this.$refs.visitaSelect).prop('disabled', this.visitas.length === 0);
+                            if (this.visitas.length === 0) {
+                                $(this.$refs.visitaSelect).val('').trigger('change');
+                            }
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error loading visitas:', error);
+                        toastr.error('Error al cargar las visitas');
+                    } finally {
+                        this.loadingVisitas = false;
+                    }
+                },
+
+                formatVisitaDate(dateString) {
+                    if (!dateString) return 'Sin fecha';
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                 },
 
                 updateModeloSelect(modeloId, modeloNombre) {
@@ -1350,9 +1488,15 @@
                     if (this.$refs.ticketSelect) {
                         $(this.$refs.ticketSelect).val('').trigger('change.select2');
                     }
+                    
+                    if (this.$refs.visitaSelect) {
+                        $(this.$refs.visitaSelect).val('').trigger('change.select2');
+                    }
 
                     this.selectedTicket = '';
                     this.selectedTicketInfo = null;
+                    this.selectedVisita = null;
+                    this.visitas = [];
                     this.clearModeloSelect();
                     this.clearTipoSelect();
                     this.clearCodigoSelect();
@@ -1499,6 +1643,11 @@
 
                 async createOrder() {
                     if (!this.canCreateOrder) {
+                        // Validación específica para visitas
+                        if (this.visitas.length > 0 && !this.selectedVisita) {
+                            toastr.error('Debe seleccionar una visita para este ticket');
+                            return;
+                        }
                         toastr.error('Complete todos los campos requeridos para crear la orden');
                         return;
                     }
@@ -1508,6 +1657,7 @@
                     try {
                         const orderData = {
                             ticketId: this.selectedTicket,
+                            visitaId: this.selectedVisita ? this.selectedVisita.idVisitas : null,
                             orderInfo: this.orderInfo,
                             products: this.products,
                             orderNumber: this.orderNumber

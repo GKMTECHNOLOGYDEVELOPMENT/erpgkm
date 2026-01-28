@@ -50,6 +50,7 @@ class Solicitudesordene extends Model
 		'fechaEntrega',
 		'numeroTicket',
 		'codigo',
+		'idVisita',
 		'idTipoServicio',
 		'idTecnico',
 		'idUsuario',

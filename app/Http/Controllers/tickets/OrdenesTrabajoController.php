@@ -5051,4 +5051,1010 @@ class OrdenesTrabajoController extends Controller
             ], 500);
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
+{
+    Log::info('OrdenesTrabajoController@obtenerSolicitudesRepuestos - Inicio', [
+        'ticketId' => $ticketId,
+        'visitaId' => $visitaId,
+        'multiple_solicitudes' => 'HABILITADO' // Indicador de cambio
+    ]);
+
+    try {
+        // 1️⃣ Obtener TODAS las solicitudes de este ticket/visita
+        $querySolicitud = DB::table('solicitudesordenes as so')
+            ->leftJoin('usuarios as u_tecnico', 'so.idTecnico', '=', 'u_tecnico.idUsuario')
+            ->leftJoin('usuarios as u_destino', 'so.id_usuario_destino', '=', 'u_destino.idUsuario')
+            ->where('so.idticket', $ticketId);
+
+        // Filtro por visita si se proporciona
+        if ($visitaId && $visitaId !== 'null') {
+            Log::info('Aplicando filtro por visita', [
+                'visitaId' => $visitaId
+            ]);
+            $querySolicitud->where('so.idVisita', $visitaId);
+        }
+
+        $querySolicitud->select([
+            'so.idSolicitudesOrdenes',
+            'so.codigo',
+            'so.estado as estado_solicitud',
+            'so.fechaCreacion',
+            'so.fechaEntrega',
+            'so.observaciones',
+            'so.idTecnico',
+            'so.id_usuario_destino',
+            'u_tecnico.Nombre as tecnico_nombre',
+            'u_tecnico.apellidoPaterno as tecnico_apellido',
+            'u_destino.Nombre as destino_nombre',
+        ]);
+
+        $solicitudes = $querySolicitud->get(); // ← CAMBIO AQUÍ: get() en lugar de first()
+
+        Log::info('Solicitudes encontradas', [
+            'total_solicitudes' => $solicitudes->count(),
+            'ids_solicitudes' => $solicitudes->pluck('idSolicitudesOrdenes')->toArray(),
+            'codigos' => $solicitudes->pluck('codigo')->toArray()
+        ]);
+
+        if ($solicitudes->isEmpty()) {
+            Log::info('No se encontraron solicitudes de repuestos para este ticket/visita');
+            return response()->json([
+                'success' => true,
+                'solicitudes' => [],
+                'tiene_entregas' => false
+            ]);
+        }
+
+        $solicitudesData = [];
+        $totalSolicitudesConEntregas = 0;
+
+        // 2️⃣ Procesar CADA solicitud
+        foreach ($solicitudes as $solicitud) {
+            Log::info('Procesando solicitud individual', [
+                'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                'codigo' => $solicitud->codigo
+            ]);
+
+            // Verificar SI EXISTE en repuestos_entregas para ESTA solicitud
+            $tieneEntregas = DB::table('repuestos_entregas')
+                ->where('solicitud_id', $solicitud->idSolicitudesOrdenes)
+                ->exists();
+
+            Log::info('Verificación de entregas para solicitud', [
+                'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                'tiene_entregas' => $tieneEntregas ? 'Sí' : 'No'
+            ]);
+
+            // Si NO tiene entregas, NO incluir esta solicitud
+            if (!$tieneEntregas) {
+                Log::info('La solicitud NO tiene entregas registradas, se omite', [
+                    'solicitud_id' => $solicitud->idSolicitudesOrdenes
+                ]);
+                continue;
+            }
+
+            $totalSolicitudesConEntregas++;
+
+            // 3️⃣ Obtener todas las entregas de ESTA solicitud específica
+            $entregas = DB::table('repuestos_entregas as re')
+                ->leftJoin('usuarios as u_entrego', 're.usuario_entrego_id', '=', 'u_entrego.idUsuario')
+                ->leftJoin('usuarios as u_preparo', 're.usuario_preparo_id', '=', 'u_preparo.idUsuario')
+                ->leftJoin('usuarios as u_destino_re', 're.usuario_destino_id', '=', 'u_destino_re.idUsuario')
+                ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+                ->where('re.solicitud_id', $solicitud->idSolicitudesOrdenes)
+                ->select([
+                    're.id as entrega_id',
+                    're.solicitud_id',
+                    're.articulo_id',
+                    're.cantidad as cantidad_entregada',
+                    're.estado as estado_entrega',
+                    're.tipo_entrega',
+                    're.ubicacion_utilizada',
+                    're.ubicacion_id',
+                    're.numero_ticket',
+                    're.fecha_entrega',
+                    're.fecha_preparacion',
+                    're.usuario_entrego_id',
+                    're.usuario_preparo_id',
+                    're.usuario_destino_id',
+                    're.observaciones as observaciones_entrega',
+                    're.observaciones_entrega as obs_entrega',
+                    're.firma_confirma',
+                    're.firmaReceptor',
+                    're.firmaEmisor',
+                    're.fotoRetorno',
+                    're.obsEntrega',
+                    're.foto_entrega',
+                    're.tipo_archivo_foto',
+                    
+                    'u_entrego.Nombre as entrego_nombre',
+                    'u_entrego.apellidoPaterno as entrego_apellido',
+                    'u_preparo.Nombre as preparo_nombre',
+                    'u_preparo.apellidoPaterno as preparo_apellido',
+                    'u_destino_re.Nombre as destino_re_nombre',
+                    'u_destino_re.apellidoPaterno as destino_re_apellido',
+                    
+                    'a.codigo_repuesto as codigo_articulo',
+                    'a.codigo_barras as codigo_barras_articulo',
+                    'a.nombre as nombre_articulo',
+                    'a.sku as sku_articulo',
+                    'a.stock_total as stock_articulo'
+                ])
+                ->orderBy('re.fecha_entrega', 'desc')
+                ->get();
+
+            Log::info('Entregas encontradas para solicitud', [
+                'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                'total_entregas' => $entregas->count(),
+                'entregas_ids' => $entregas->pluck('entrega_id')->toArray()
+            ]);
+
+            // 4️⃣ Preparar datos de ESTA solicitud
+            $ultimaEntrega = $entregas->first();
+            
+            $solicitudData = [
+                'idSolicitudesOrdenes' => $solicitud->idSolicitudesOrdenes,
+                'codigo' => $solicitud->codigo,
+                'estado_solicitud' => $solicitud->estado_solicitud,
+                'estado_entrega' => $ultimaEntrega->estado_entrega ?? 'pendiente',
+                'fechaCreacion' => $solicitud->fechaCreacion,
+                'fechaCreacion_format' => $solicitud->fechaCreacion 
+                    ? Carbon::parse($solicitud->fechaCreacion)->format('d/m/Y H:i')
+                    : null,
+                'fechaEntrega' => $solicitud->fechaEntrega,
+                'fechaEntrega_format' => $solicitud->fechaEntrega
+                    ? Carbon::parse($solicitud->fechaEntrega)->format('d/m/Y H:i')
+                    : null,
+                'fecha_entrega' => $ultimaEntrega->fecha_entrega ?? null,
+                'fecha_entrega_format' => $ultimaEntrega->fecha_entrega
+                    ? Carbon::parse($ultimaEntrega->fecha_entrega)->format('d/m/Y H:i')
+                    : null,
+                'observaciones' => $solicitud->observaciones,
+                'tecnico_completo' => trim(($solicitud->tecnico_nombre ?? '') . ' ' . ($solicitud->tecnico_apellido ?? '')),
+                'destino_completo' => $solicitud->destino_nombre ?? 'No asignado',
+                'entrego_completo' => trim(($ultimaEntrega->entrego_nombre ?? '') . ' ' . ($ultimaEntrega->entrego_apellido ?? '')) ?: 'No registrado',
+                'preparo_completo' => trim(($ultimaEntrega->preparo_nombre ?? '') . ' ' . ($ultimaEntrega->preparo_apellido ?? '')) ?: 'No registrado',
+                'tipo_entrega' => $ultimaEntrega->tipo_entrega ?? null,
+                'ubicacion_utilizada' => $ultimaEntrega->ubicacion_utilizada ?? null,
+                'numero_ticket' => $ultimaEntrega->numero_ticket ?? null,
+                'ubicacion_id' => $ultimaEntrega->ubicacion_id ?? null,
+                'observaciones_entrega' => $ultimaEntrega->observaciones_entrega ?? null,
+                'entregas' => [],
+                'articulos' => []
+            ];
+
+            // 5️⃣ Preparar el array de entregas y artículos únicos
+            $articulosUnicos = [];
+            foreach ($entregas as $entrega) {
+                // OBTENER EL orden_articulo_id para esta entrega
+                $ordenArticulo = DB::table('ordenesarticulos')
+                    ->where('idSolicitudesOrdenes', $solicitud->idSolicitudesOrdenes)
+                    ->where('idArticulos', $entrega->articulo_id)
+                    ->first();
+                
+                // Si no existe, crearlo automáticamente
+                if (!$ordenArticulo) {
+                    Log::info('Creando registro en ordenesarticulos para entrega', [
+                        'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                        'articulo_id' => $entrega->articulo_id,
+                        'ticket_id' => $ticketId
+                    ]);
+                    
+                    $ordenArticuloId = DB::table('ordenesarticulos')->insertGetId([
+                        'idSolicitudesOrdenes' => $solicitud->idSolicitudesOrdenes,
+                        'idArticulos' => $entrega->articulo_id,
+                        'idticket' => $ticketId,
+                        'cantidad' => $entrega->cantidad_entregada ?? 1,
+                        'estado' => 0,
+                        'observacion' => 'Creado automáticamente desde entrega',
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now()
+                    ]);
+                    
+                    $ordenArticulo = (object) ['idOrdenesArticulos' => $ordenArticuloId];
+                }
+                
+                if (!$ordenArticulo) {
+                    Log::warning('No se pudo obtener/crear orden_articulo_id para', [
+                        'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                        'articulo_id' => $entrega->articulo_id
+                    ]);
+                    continue;
+                }
+
+                // Agregar al array de entregas
+                $solicitudData['entregas'][] = [
+                    'entrega_id' => $entrega->entrega_id,
+                    'fecha_entrega' => $entrega->fecha_entrega,
+                    'fecha_entrega_format' => $entrega->fecha_entrega
+                        ? Carbon::parse($entrega->fecha_entrega)->format('d/m/Y H:i')
+                        : null,
+                    'estado_entrega' => $entrega->estado_entrega,
+                    'tipo_entrega' => $entrega->tipo_entrega,
+                    'ubicacion_utilizada' => $entrega->ubicacion_utilizada,
+                    'observaciones_entrega' => $entrega->observaciones_entrega,
+                    'cantidad_entregada' => $entrega->cantidad_entregada,
+                    'obsEntrega' => $entrega->obsEntrega,
+                    'fotoRetorno' => $entrega->fotoRetorno ? 'Sí' : 'No',
+                    'firma_confirma' => $entrega->firma_confirma ? 'Sí' : 'No'
+                ];
+
+                // Agrupar artículos únicos
+                if (!isset($articulosUnicos[$entrega->articulo_id])) {
+                    $articulosUnicos[$entrega->articulo_id] = [
+                        'articulo_id' => $entrega->articulo_id,
+                        'orden_articulo_id' => $ordenArticulo->idOrdenesArticulos,
+                        'entrega_id' => $entrega->entrega_id,
+                        'cantidad_entregada' => $entrega->cantidad_entregada,
+                        'estado_entrega' => $entrega->estado_entrega,
+                        'fecha_entrega' => $entrega->fecha_entrega,
+                        'codigo_articulo' => $entrega->codigo_articulo,
+                        'codigo_barras_articulo' => $entrega->codigo_barras_articulo,
+                        'nombre_articulo' => $entrega->nombre_articulo,
+                        'sku_articulo' => $entrega->sku_articulo,
+                        'stock_articulo' => $entrega->stock_articulo,
+                        'obsEntrega' => $entrega->obsEntrega,
+                        'fotoRetorno' => $entrega->fotoRetorno
+                    ];
+                }
+            }
+
+            // 6️⃣ Preparar artículos para ESTA solicitud
+            foreach ($articulosUnicos as $articuloId => $articuloData) {
+                // Determinar estado de uso
+                $estadoUso = 'Pendiente';
+                $estadoColor = 'secondary';
+                
+                if ($articuloData['obsEntrega']) {
+                    $obs = strtolower($articuloData['obsEntrega']);
+                    if (strpos($obs, 'usado') !== false || strpos($obs, 'utilizado') !== false) {
+                        $estadoUso = 'Usado';
+                        $estadoColor = 'success';
+                    } elseif (strpos($obs, 'no usado') !== false || strpos($obs, 'sin usar') !== false) {
+                        $estadoUso = 'No Usado';
+                        $estadoColor = 'warning';
+                    } elseif (strpos($obs, 'devuelto') !== false) {
+                        $estadoUso = 'Devuelto';
+                        $estadoColor = 'danger';
+                    }
+                } elseif ($articuloData['estado_entrega'] === 'usado') {
+                    $estadoUso = 'Usado';
+                    $estadoColor = 'success';
+                } elseif ($articuloData['estado_entrega'] === 'pendiente_por_retorno') {
+                    $estadoUso = 'No Usado';
+                    $estadoColor = 'warning';
+                } elseif ($articuloData['estado_entrega'] === 'devuelto') {
+                    $estadoUso = 'Devuelto';
+                    $estadoColor = 'danger';
+                }
+                
+                $solicitudData['articulos'][] = [
+                    'articulo_id' => $articuloData['articulo_id'],
+                    'orden_articulo_id' => $articuloData['orden_articulo_id'],
+                    'entrega_id' => $articuloData['entrega_id'],
+                    'cantidad_entregada' => $articuloData['cantidad_entregada'],
+                    'estado_entrega' => $articuloData['estado_entrega'],
+                    'estado_uso' => $estadoUso,
+                    'estado_uso_color' => $estadoColor,
+                    'fecha_entrega' => $articuloData['fecha_entrega'],
+                    'fecha_entrega_format' => $articuloData['fecha_entrega']
+                        ? Carbon::parse($articuloData['fecha_entrega'])->format('d/m/Y H:i')
+                        : null,
+                    'codigo_articulo' => $articuloData['codigo_articulo'],
+                    'codigo_barras_articulo' => $articuloData['codigo_barras_articulo'],
+                    'nombre_articulo' => $articuloData['nombre_articulo'],
+                    'sku_articulo' => $articuloData['sku_articulo'],
+                    'stock_articulo' => $articuloData['stock_articulo'],
+                    'obsEntrega' => $articuloData['obsEntrega'],
+                    'tiene_foto_retorno' => $articuloData['fotoRetorno'] ? true : false
+                ];
+            }
+
+            // Agregar esta solicitud al array final
+            $solicitudesData[] = $solicitudData;
+
+            Log::info('Solicitud procesada exitosamente', [
+                'solicitud_id' => $solicitud->idSolicitudesOrdenes,
+                'total_articulos' => count($solicitudData['articulos']),
+                'total_entregas' => count($solicitudData['entregas'])
+            ]);
+        }
+
+        Log::info('Respuesta final preparada', [
+            'success' => true,
+            'total_solicitudes_encontradas' => $solicitudes->count(),
+            'total_solicitudes_con_entregas' => $totalSolicitudesConEntregas,
+            'total_solicitudes_devueltas' => count($solicitudesData),
+            'solicitudes_devueltas_ids' => collect($solicitudesData)->pluck('idSolicitudesOrdenes')->toArray()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'solicitudes' => $solicitudesData, // ← AHORA ES UN ARRAY DE MÚLTIPLES SOLICITUDES
+            'tiene_entregas' => count($solicitudesData) > 0,
+            'metadata' => [
+                'total_solicitudes' => count($solicitudesData),
+                'filtro_ticket' => $ticketId,
+                'filtro_visita' => $visitaId
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error en obtenerSolicitudesRepuestos', [
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al obtener solicitudes de repuestos'
+        ], 500);
+    }
+}
+
+public function marcarComoUsado(Request $request)
+{
+    try {
+        DB::beginTransaction();
+        
+        $idUsuario = auth()->id();
+        $items = $request->input('items', []);
+        
+        if (empty($items)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No hay items para procesar'
+            ], 400);
+        }
+        
+        $resultados = [
+            'procesados' => [],
+            'errores' => [],
+            'solicitudes_finalizadas' => []
+        ];
+        
+        // Agrupar por solicitud para optimizar consultas
+        $solicitudesIds = [];
+        
+        foreach ($items as $item) {
+            try {
+                $repuestoEntregaId = $item['repuesto_entrega_id'] ?? null;
+                $estado = $item['estado'] ?? null; // SOLO 'usado' o 'devuelto'
+                $observacion = $item['observacion'] ?? null;
+                $cantidad = $item['cantidad'] ?? null;
+                $foto_usado = $request->hasFile('foto_usado') ? $request->file('foto_usado') : null;
+                $foto_devuelto = $request->hasFile('foto_devuelto') ? $request->file('foto_devuelto') : null;
+                
+                Log::info('Procesando item:', [
+                    'repuesto_entrega_id' => $repuestoEntregaId,
+                    'estado' => $estado,
+                    'observacion' => $observacion,
+                    'cantidad' => $cantidad
+                ]);
+                
+                if (!$repuestoEntregaId || !$estado) {
+                    $resultados['errores'][] = [
+                        'repuesto_entrega_id' => $repuestoEntregaId,
+                        'error' => 'Datos incompletos: falta repuesto_entrega_id o estado'
+                    ];
+                    continue;
+                }
+                
+               // En la consulta de $repuestoEntrega, corregir el JOIN con tickets:
+$repuestoEntrega = DB::table('repuestos_entregas as re')
+    ->select(
+        're.id',
+        're.solicitud_id',
+        're.articulo_id',
+        're.cantidad',
+        're.ubicacion_utilizada',
+        're.estado as estado_actual',
+        're.fecha_entrega',
+        're.usuario_entrego_id',
+        're.fotoRetorno',
+        're.obsEntrega',
+        're.observaciones_entrega',
+        're.firma_confirma',
+        're.firmaReceptor',
+        'so.codigo',
+        'so.estado as estado_solicitud',
+        'so.idusuario',
+        'so.id_usuario_destino',
+        'so.tipoorden',
+        'so.idticket',
+        'a.stock_total',
+        'a.precio_compra',
+        'a.nombre as articulo_nombre',
+        't.idClienteGeneral',
+        't.numero_ticket', // ← AGREGAR ESTE CAMPO
+        'oa.idordenesarticulos',
+        'oa.estado as estado_orden_articulo',
+        'oa.fechaUsado',
+        'oa.fechaSinUsar',
+        'oa.observacion as observacion_orden',
+        'oa.foto_articulo_usado',
+        'oa.foto_articulo_no_usado'
+    )
+    ->join('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
+    ->join('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+    ->leftJoin('ordenesarticulos as oa', function($join) {
+        $join->on('oa.idsolicitudesordenes', '=', 're.solicitud_id')
+             ->on('oa.idarticulos', '=', 're.articulo_id');
+    })
+    ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets') // ← CORREGIR ESTO
+    ->where('re.id', $repuestoEntregaId)
+    ->first();
+                
+                if (!$repuestoEntrega) {
+                    $resultados['errores'][] = [
+                        'repuesto_entrega_id' => $repuestoEntregaId,
+                        'error' => 'Repuesto entrega no encontrado'
+                    ];
+                    continue;
+                }
+                
+                // Verificar que no esté ya procesado
+                $estadosFinales = ['usado', 'devuelto'];
+                if (in_array($repuestoEntrega->estado_actual, $estadosFinales)) {
+                    $resultados['errores'][] = [
+                        'repuesto_entrega_id' => $repuestoEntregaId,
+                        'error' => "Ya fue procesado anteriormente (estado: {$repuestoEntrega->estado_actual})"
+                    ];
+                    continue;
+                }
+                
+                // Validar estado válido
+                $estadosValidos = ['usado', 'devuelto'];
+                if (!in_array($estado, $estadosValidos)) {
+                    $resultados['errores'][] = [
+                        'repuesto_entrega_id' => $repuestoEntregaId,
+                        'error' => "Estado inválido: {$estado}. Válidos: " . implode(', ', $estadosValidos)
+                    ];
+                    continue;
+                }
+                
+                // Verificar que haya ubicación si es 'usado'
+                if ($estado === 'usado' && empty($repuestoEntrega->ubicacion_utilizada)) {
+                    $resultados['errores'][] = [
+                        'repuesto_entrega_id' => $repuestoEntregaId,
+                        'error' => 'No hay ubicación registrada para este repuesto entrega'
+                    ];
+                    continue;
+                }
+                
+                // Agregar a lista de solicitudes para verificación posterior
+                if (!in_array($repuestoEntrega->solicitud_id, $solicitudesIds)) {
+                    $solicitudesIds[] = $repuestoEntrega->solicitud_id;
+                }
+                
+                // Preparar observación final
+                $observacionFinal = '';
+                if ($estado === 'usado') {
+                    $observacionFinal = 'Marcado como USADO' . ($observacion ? ' - ' . $observacion : '');
+                } else {
+                    $observacionFinal = 'Marcado como NO USADO - Devuelto' . ($observacion ? ' - ' . $observacion : '');
+                }
+                
+                // Manejar fotos
+                $fotoUsadoPath = null;
+                $fotoDevueltoPath = null;
+                
+                if ($estado === 'usado' && $foto_usado) {
+                    $fotoUsadoPath = $this->guardarFotousado($foto_usado, 'usado_' . $repuestoEntregaId);
+                } elseif ($estado === 'devuelto' && $foto_devuelto) {
+                    $fotoDevueltoPath = $this->guardarFotousado($foto_devuelto, 'devuelto_' . $repuestoEntregaId);
+                }
+                
+                // Datos para actualizar en repuestos_entregas
+                $updateDataRepuesto = [
+                    'estado' => $estado,
+                    'obsEntrega' => $observacionFinal,
+                    'updated_at' => now()
+                ];
+                
+                // Si es devuelto, agregar firmas
+                if ($estado === 'devuelto') {
+                    $updateDataRepuesto['firma_confirma'] = 1;
+                    $updateDataRepuesto['firmaReceptor'] = 1;
+                }
+                
+                // Si hay foto, actualizar fotoRetorno
+                if ($fotoUsadoPath || $fotoDevueltoPath) {
+                    $fotoPath = $fotoUsadoPath ? $fotoUsadoPath : $fotoDevueltoPath;
+                    $updateDataRepuesto['fotoRetorno'] = $fotoPath;
+                }
+                
+                // 2. Actualizar estado del repuesto entrega
+                DB::table('repuestos_entregas')
+                    ->where('id', $repuestoEntregaId)
+                    ->update($updateDataRepuesto);
+                
+                // 3. Actualizar o crear registro en ordenesarticulos
+                $updateDataOrdenArticulo = [
+                    'estado' => 1, // Marcado como procesado
+                    'observacion' => $observacionFinal,
+                    'updated_at' => now()
+                ];
+                
+                if ($estado === 'usado') {
+                    $updateDataOrdenArticulo['fechaUsado'] = now();
+                    if ($fotoUsadoPath) {
+                        $updateDataOrdenArticulo['foto_articulo_usado'] = $fotoUsadoPath;
+                    }
+                } else {
+                    // Para devuelto
+                    $updateDataOrdenArticulo['fechaSinUsar'] = now();
+                    if ($fotoDevueltoPath) {
+                        $updateDataOrdenArticulo['foto_articulo_no_usado'] = $fotoDevueltoPath;
+                    }
+                }
+                
+                // Verificar si existe el registro en ordenesarticulos
+                if ($repuestoEntrega->idordenesarticulos) {
+                    DB::table('ordenesarticulos')
+                        ->where('idordenesarticulos', $repuestoEntrega->idordenesarticulos)
+                        ->update($updateDataOrdenArticulo);
+                } else {
+                    // Crear nuevo registro
+                    $updateDataOrdenArticulo['idSolicitudesOrdenes'] = $repuestoEntrega->solicitud_id;
+                    $updateDataOrdenArticulo['idArticulos'] = $repuestoEntrega->articulo_id;
+                    $updateDataOrdenArticulo['idticket'] = $repuestoEntrega->idticket ?? 0;
+                    $updateDataOrdenArticulo['cantidad'] = $cantidad ?? $repuestoEntrega->cantidad;
+                    $updateDataOrdenArticulo['created_at'] = now();
+                    
+                    DB::table('ordenesarticulos')->insert($updateDataOrdenArticulo);
+                }
+                
+                // SOLO para estado 'usado' procesar el descuento de inventario
+                if ($estado === 'usado') {
+                    $cantidadUsada = $cantidad ?? $repuestoEntrega->cantidad;
+                    
+                    // Obtener número de ticket para pasarlo al método
+                    $numeroTicketParaInventario = $repuestoEntrega->numero_ticket ?? null;
+                    
+                    $this->procesarSalidaInventario(
+                        $repuestoEntrega->solicitud_id,
+                        $repuestoEntrega->articulo_id,
+                        $cantidadUsada,
+                        $repuestoEntrega->ubicacion_utilizada,
+                        $repuestoEntrega->codigo, // Código de solicitud
+                        $repuestoEntrega->idClienteGeneral ?? 1,
+                        $repuestoEntrega->precio_compra,
+                        $numeroTicketParaInventario, // Número de ticket
+                        $repuestoEntregaId
+                    );
+                }
+                // Si es 'devuelto', NO se procesa inventario, solo se marcan las firmas y estado
+                
+                $resultados['procesados'][] = [
+                    'repuesto_entrega_id' => $repuestoEntregaId,
+                    'estado' => $estado,
+                    'solicitud_id' => $repuestoEntrega->solicitud_id,
+                    'articulo_id' => $repuestoEntrega->articulo_id,
+                    'articulo_nombre' => $repuestoEntrega->articulo_nombre,
+                    'cantidad' => $cantidad ?? $repuestoEntrega->cantidad,
+                    'ubicacion' => $repuestoEntrega->ubicacion_utilizada,
+                    'observacion' => $observacion,
+                    'tiene_foto_usado' => $fotoUsadoPath ? true : false,
+                    'tiene_foto_devuelto' => $fotoDevueltoPath ? true : false,
+                    'codigo_solicitud' => $repuestoEntrega->codigo
+                ];
+                
+                Log::info('Repuesto procesado exitosamente', [
+                    'repuesto_entrega_id' => $repuestoEntregaId,
+                    'estado' => $estado,
+                    'articulo' => $repuestoEntrega->articulo_nombre
+                ]);
+                
+            } catch (\Exception $e) {
+                Log::error('Error procesando repuesto entrega ID ' . ($repuestoEntregaId ?? 'desconocido') . ': ' . $e->getMessage());
+                $resultados['errores'][] = [
+                    'repuesto_entrega_id' => $repuestoEntregaId,
+                    'error' => $e->getMessage()
+                ];
+                continue;
+            }
+        }
+        
+        // 4. Verificar si las solicitudes deben finalizarse
+        foreach ($solicitudesIds as $solicitudId) {
+            if ($this->verificarFinalizacionSolicitud($solicitudId)) {
+                $resultados['solicitudes_finalizadas'][] = $solicitudId;
+            }
+        }
+        
+        DB::commit();
+        
+        // Estadísticas
+        $totalProcesados = count($resultados['procesados']);
+        $totalErrores = count($resultados['errores']);
+        $totalFinalizadas = count($resultados['solicitudes_finalizadas']);
+        
+        $message = "Procesamiento completado: {$totalProcesados} items procesados, {$totalErrores} errores";
+        if ($totalFinalizadas > 0) {
+            $message .= ", {$totalFinalizadas} solicitudes finalizadas";
+        }
+        
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'data' => $resultados
+        ]);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Error general en marcarComoUsado: ' . $e->getMessage());
+        Log::error('Trace: ' . $e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al procesar: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+/**
+ * Guarda la foto de evidencia
+ */
+/**
+ * Guarda la foto de evidencia (versión simplificada)
+ */
+private function guardarFotousado($foto, $nombreBase)
+{
+    try {
+        // Crear nombre único para el archivo
+        $nombreArchivo = $nombreBase . '_' . time() . '.' . $foto->getClientOriginalExtension();
+        
+        // Crear directorio si no existe
+        $directorio = storage_path('app/public/repuestos_evidencias');
+        if (!file_exists($directorio)) {
+            mkdir($directorio, 0777, true);
+        }
+        
+        // Guardar la imagen
+        $path = $foto->storeAs('public/repuestos_evidencias', $nombreArchivo);
+        
+        return 'repuestos_evidencias/' . $nombreArchivo;
+        
+    } catch (\Exception $e) {
+        Log::error('Error al guardar foto: ' . $e->getMessage());
+        return null;
+    }
+}
+/**
+ * Procesa la salida de inventario (versión actualizada con datos completos)
+ */
+private function procesarSalidaInventario(
+    $solicitudId, 
+    $articuloId, 
+    $cantidad, 
+    $ubicacionCodigo,
+    $codigoSolicitud,
+    $clienteGeneralId,
+    $precioCompra,
+    $numeroTicket = null,
+    $repuestoEntregaId = null
+) {
+    Log::info("Procesando salida inventario - Solicitud: {$codigoSolicitud}, Artículo: {$articuloId}, Cantidad: {$cantidad}");
+    
+    // 1. Buscar la ubicación por código con más información
+    $ubicacion = DB::table('rack_ubicaciones as ru')
+        ->select(
+            'ru.idRackUbicacion',
+            'ru.codigo',
+            'r.idRack as rack_id',
+            'r.nombre as rack_nombre'
+        )
+        ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+        ->where('ru.codigo', $ubicacionCodigo)
+        ->first();
+    
+    if (!$ubicacion) {
+        throw new \Exception("Ubicación no encontrada: {$ubicacionCodigo}");
+    }
+    
+    // 2. Verificar stock en rack_ubicacion_articulos
+    $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+        ->select(
+            'rua.idRackUbicacionArticulo',
+            'rua.cantidad',
+            'rua.articulo_id',
+            'rua.cliente_general_id',
+            'rua.created_at'
+        )
+        ->where('rua.rack_ubicacion_id', $ubicacion->idRackUbicacion)
+        ->where('rua.articulo_id', $articuloId)
+        ->where('rua.cliente_general_id', $clienteGeneralId)
+        ->first();
+    
+    if (!$stockUbicacion) {
+        // Intentar buscar sin cliente_general_id (fallback)
+        $stockUbicacion = DB::table('rack_ubicacion_articulos as rua')
+            ->where('rack_ubicacion_id', $ubicacion->idRackUbicacion)
+            ->where('articulo_id', $articuloId)
+            ->first();
+        
+        if (!$stockUbicacion) {
+            throw new \Exception("No hay stock en la ubicación {$ubicacionCodigo} para el artículo ID {$articuloId}");
+        }
+    }
+    
+    if ($stockUbicacion->cantidad < $cantidad) {
+        throw new \Exception("Stock insuficiente en {$ubicacionCodigo}. Disponible: {$stockUbicacion->cantidad}, Requerido: {$cantidad}");
+    }
+    
+    // 3. Descontar de rack_ubicacion_articulos
+    $nuevaCantidadRU = $stockUbicacion->cantidad - $cantidad;
+    DB::table('rack_ubicacion_articulos')
+        ->where('idRackUbicacionArticulo', $stockUbicacion->idRackUbicacionArticulo)
+        ->update([
+            'cantidad' => $nuevaCantidadRU,
+            'updated_at' => now()
+        ]);
+    
+    // 4. Descontar stock total en articulos
+    $articulo = DB::table('articulos')
+        ->where('idArticulos', $articuloId)
+        ->first(['stock_total', 'nombre']);
+    
+    if (!$articulo) {
+        throw new \Exception("Artículo ID {$articuloId} no encontrado");
+    }
+    
+    if ($articulo->stock_total < $cantidad) {
+        throw new \Exception("Stock total insuficiente. Disponible: {$articulo->stock_total}, Requerido: {$cantidad}");
+    }
+    
+    $nuevoStockTotal = $articulo->stock_total - $cantidad;
+    DB::table('articulos')
+        ->where('idArticulos', $articuloId)
+        ->update([
+            'stock_total' => $nuevoStockTotal,
+            'updated_at' => now()
+        ]);
+    
+    // 5. Registrar movimiento en rack_movimientos
+    $observaciones = "Salida por uso - Solicitud: {$codigoSolicitud}";
+    if ($numeroTicket) {
+        $observaciones .= " - Ticket: {$numeroTicket}";
+    }
+    if ($repuestoEntregaId) {
+        $observaciones .= " - RepEntID: {$repuestoEntregaId}";
+    }
+    
+    DB::table('rack_movimientos')->insert([
+        'articulo_id' => $articuloId,
+        'ubicacion_origen_id' => $ubicacion->idRackUbicacion,
+        'ubicacion_destino_id' => null,
+        'rack_origen_id' => $ubicacion->rack_id,
+        'rack_destino_id' => null,
+        'cantidad' => $cantidad,
+        'tipo_movimiento' => 'salida',
+        'usuario_id' => auth()->id(),
+        'observaciones' => $observaciones,
+        'codigo_ubicacion_origen' => $ubicacionCodigo,
+        'codigo_ubicacion_destino' => null,
+        'nombre_rack_origen' => $ubicacion->rack_nombre,
+        'nombre_rack_destino' => null,
+        'custodia_id' => null,
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+    
+    // 6. Obtener el número de ticket desde la tabla tickets si no se proporcionó
+    if (!$numeroTicket) {
+        // Buscar el ticket relacionado con esta solicitud a través de ordenesarticulos
+        $ticketData = DB::table('ordenesarticulos as oa')
+            ->join('tickets as t', 'oa.idticket', '=', 't.idTickets')
+            ->where('oa.idSolicitudesOrdenes', $solicitudId)
+            ->select('t.numero_ticket')
+            ->first();
+        
+        if ($ticketData) {
+            $numeroTicket = $ticketData->numero_ticket;
+            Log::info("✅ Número de ticket obtenido desde BD: {$numeroTicket}");
+        } else {
+            // Si no se encuentra en ordenesarticulos, buscar directo en solicitudesordenes
+            $ticketData = DB::table('solicitudesordenes as so')
+                ->join('tickets as t', 'so.idticket', '=', 't.idTickets')
+                ->where('so.idsolicitudesordenes', $solicitudId)
+                ->select('t.numero_ticket')
+                ->first();
+            
+            if ($ticketData) {
+                $numeroTicket = $ticketData->numero_ticket;
+                Log::info("✅ Número de ticket obtenido desde solicitudesordenes: {$numeroTicket}");
+            } else {
+                $numeroTicket = 'SIN-TICKET';
+                Log::warning("⚠️ No se encontró número de ticket para la solicitud {$solicitudId}");
+            }
+        }
+    }
+    
+    // 7. Registrar en inventario_ingresos_clientes - CON TODOS LOS DATOS
+    DB::table('inventario_ingresos_clientes')->insert([
+        'compra_id' => null,
+        'articulo_id' => $articuloId,
+        'tipo_ingreso' => 'salida',
+        'ingreso_id' => $solicitudId,
+        'cliente_general_id' => $clienteGeneralId,
+        'numero_orden' => $numeroTicket, // ✅ Número de ticket
+        'codigo_solicitud' => $codigoSolicitud, // ✅ Código de la solicitud
+        'cas' => 'CAS AUTORIZADO GKM TECHNOLOGY', // ✅ CAS fijo
+        'cantidad' => -$cantidad, // Negativo para salida
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+    
+    Log::info("✅ Registro en inventario_ingresos_clientes - N° Ticket: {$numeroTicket}, Código: {$codigoSolicitud}, CAS: CAS AUTORIZADO GKM TECHNOLOGY");
+    
+    // 8. Actualizar kardex - Aquí SÍ se necesita precio_compra
+    $this->actualizarKardexSalida($articuloId, $clienteGeneralId, $cantidad, $precioCompra);
+    
+    Log::info("✅ Salida inventario procesada - Artículo: {$articuloId}, Stock restante ubicación: {$nuevaCantidadRU}, Stock total: {$nuevoStockTotal}");
+}
+/**
+ * Verifica si una solicitud debe finalizarse (versión mejorada)
+ */
+private function verificarFinalizacionSolicitud($solicitudId)
+{
+    // Estados que se consideran "procesados"
+    $estadosProcesados = ['usado', 'devuelto'];
+    
+    // Obtener todos los repuestos de la solicitud
+    $repuestos = DB::table('repuestos_entregas')
+        ->where('solicitud_id', $solicitudId)
+        ->get(['id', 'estado']);
+    
+    if ($repuestos->isEmpty()) {
+        return false;
+    }
+    
+    $todosProcesados = true;
+    foreach ($repuestos as $repuesto) {
+        // Si el estado es NULL o no está en la lista de procesados
+        if (!$repuesto->estado || !in_array($repuesto->estado, $estadosProcesados)) {
+            $todosProcesados = false;
+            break;
+        }
+    }
+    
+    if ($todosProcesados) {
+        // Todos los repuestos han sido procesados, finalizar solicitud
+        $fechaFinalizacion = now();
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $solicitudId)
+            ->update([
+                'estado' => 'Finalizado',
+                'fechaEntrega' => $fechaFinalizacion,
+                'updated_at' => $fechaFinalizacion
+            ]);
+        
+        Log::info("Solicitud {$solicitudId} finalizada automáticamente");
+        return true;
+    }
+    
+    return false;
+}
+
+/**
+ * Método para actualizar kardex (Mismo que para repuestos)
+ */
+private function actualizarKardexSalida($articuloId, $clienteGeneralId, $cantidadSalida, $costoUnitario)
+{
+    try {
+        // Obtener el mes y año actual
+        $fechaActual = now();
+        $mesActual = $fechaActual->format('m');
+        $anioActual = $fechaActual->format('Y');
+
+        Log::info("📅 Procesando kardex para artículo - mes: {$mesActual}, año: {$anioActual}");
+
+        // Buscar si existe un registro de kardex para este artículo, cliente y mes actual
+        $kardexMesActual = DB::table('kardex')
+            ->where('idArticulo', $articuloId)
+            ->where('cliente_general_id', $clienteGeneralId)
+            ->whereMonth('fecha', $mesActual)
+            ->whereYear('fecha', $anioActual)
+            ->first();
+
+        if ($kardexMesActual) {
+            Log::info("✅ Kardex del mes actual encontrado - ID: {$kardexMesActual->id}, actualizando...");
+
+            // ACTUALIZAR registro existente del mes
+            $nuevoInventarioActual = $kardexMesActual->inventario_actual - $cantidadSalida;
+            $nuevoCostoInventario = max(0, $kardexMesActual->costo_inventario - ($cantidadSalida * $costoUnitario));
+
+            DB::table('kardex')
+                ->where('id', $kardexMesActual->id)
+                ->update([
+                    'unidades_salida' => $kardexMesActual->unidades_salida + $cantidadSalida,
+                    'costo_unitario_salida' => $costoUnitario,
+                    'inventario_actual' => $nuevoInventarioActual,
+                    'costo_inventario' => $nuevoCostoInventario,
+                    'updated_at' => now()
+                ]);
+
+            Log::info("✅ Kardex actualizado - Salidas: " . ($kardexMesActual->unidades_salida + $cantidadSalida) .
+                ", Inventario: {$nuevoInventarioActual}, Costo: {$nuevoCostoInventario}");
+        } else {
+            Log::info("📝 No hay kardex para este mes, creando nuevo registro...");
+
+            // Obtener el último registro de kardex (de cualquier mes) para calcular inventario inicial
+            $ultimoKardex = DB::table('kardex')
+                ->where('idArticulo', $articuloId)
+                ->where('cliente_general_id', $clienteGeneralId)
+                ->orderBy('fecha', 'desc')
+                ->orderBy('id', 'desc')
+                ->first();
+
+            // Calcular valores iniciales para el nuevo mes
+            $inventarioInicial = $ultimoKardex ? $ultimoKardex->inventario_actual : 0;
+            $inventarioActual = $inventarioInicial - $cantidadSalida;
+
+            // Calcular costo del inventario
+            $costoInventarioAnterior = $ultimoKardex ? $ultimoKardex->costo_inventario : 0;
+            $costoInventarioActual = max(0, $costoInventarioAnterior - ($cantidadSalida * $costoUnitario));
+
+            Log::info("📊 Valores calculados - Inicial: {$inventarioInicial}, Actual: {$inventarioActual}, " .
+                "Costo anterior: {$costoInventarioAnterior}, Costo actual: {$costoInventarioActual}");
+
+            // CREAR nuevo registro de kardex para el nuevo mes
+            DB::table('kardex')->insert([
+                'fecha' => $fechaActual->format('Y-m-d'),
+                'idArticulo' => $articuloId,
+                'cliente_general_id' => $clienteGeneralId,
+                'unidades_entrada' => 0,
+                'costo_unitario_entrada' => 0,
+                'unidades_salida' => $cantidadSalida,
+                'costo_unitario_salida' => $costoUnitario,
+                'inventario_inicial' => $inventarioInicial,
+                'inventario_actual' => $inventarioActual,
+                'costo_inventario' => $costoInventarioActual,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            Log::info("✅ Nuevo kardex creado para el mes - Artículo: {$articuloId}, Cliente: {$clienteGeneralId}");
+        }
+
+        Log::info("✅ Kardex procesado correctamente - Artículo: {$articuloId}, Salida: {$cantidadSalida}");
+    } catch (\Exception $e) {
+        Log::error('❌ Error al actualizar kardex para salida: ' . $e->getMessage());
+        Log::error('File: ' . $e->getFile());
+        Log::error('Line: ' . $e->getLine());
+        throw $e;
+    }
+}
+
+
+
 }

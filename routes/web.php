@@ -2059,3 +2059,15 @@ Route::prefix('almacen')->group(function () {
     Route::get('/harvest/estadisticas/datos', [HarvestController::class, 'estadisticas'])
         ->name('harvest.estadisticas');
 });
+
+
+Route::get('/api/visitas-por-ticket/{ticketId}', [SolicitudrepuestoController::class, 'getVisitasPorTicket'])->name('visitas.por.ticket')->middleware('auth');
+
+
+    Route::get('/api/obtener-solicitudes-repuestos/{ticketId}/{visitaId?}', [OrdenesTrabajoController::class, 'obtenerSolicitudesRepuestos'])->name('obtener.solicitudes.repuestos')->middleware('auth');
+    Route::post('/api/actualizar-estado-articulo', [OrdenesTrabajoController::class, 'actualizarEstadoArticulo'])->name('actualizar.estado.articulo')->middleware('auth');
+Route::get('/api/obtener-info-articulo/{id}', [OrdenesTrabajoController::class, 'obtenerInfoArticulo'])->name('obtener.info.articulo')->middleware('auth');
+Route::get('/api/foto-evidencia/{tipo}/{nombre}', [OrdenesTrabajoController::class, 'obtenerFotoEvidencia'])->name('foto.evidencia')->middleware('auth');
+
+
+    Route::post('/api/actualizar-datos-solicitud', [OrdenesTrabajoController::class, 'marcarComoUsado'])->name('actualizar.datos.solicitud')->middleware('auth');

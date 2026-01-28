@@ -324,7 +324,7 @@ class ClientesController extends Controller
                 'nombre' => 'required|string|max:255',
                 'idTipoDocumento' => 'required|exists:tipodocumento,idTipoDocumento',
                 'documento' => 'required|string|max:255',
-                'telefono' => 'nullable|string|max:15',
+                'telefono' => 'nullable|string|max:90',
                 'email' => 'nullable|email|max:255',
                 'departamento' => 'required|string|max:255',
                 'provincia' => 'required|string|max:255',
