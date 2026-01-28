@@ -1,5 +1,6 @@
 <x-layout.default title="Solicitud Articulos - ERP Solutions Force">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <div class="container mx-auto px-4 py-8">
         <div class="mb-6">
@@ -35,7 +36,7 @@
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     Resumen de Solicitudes Pendientes
                 </h3>
-               
+
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -47,9 +48,9 @@
                             <i class="fas fa-wrench text-green-600 text-xl"></i>
                         </div>
                     </div>
-                 <div class="text-2xl font-bold text-green-700 mb-1" id="contadorRepuestoLima">
-                    {{ $contadoresArray['repuesto_lima'] }}
-                </div>
+                    <div class="text-2xl font-bold text-green-700 mb-1" id="contadorRepuestoLima">
+                        {{ $contadoresArray['repuesto_lima'] }}
+                    </div>
                     <div class="text-sm font-medium text-green-600">Repuesto (Lima)</div>
                     <div class="text-xs text-green-500 mt-1 flex items-center justify-center">
                         <i class="fas fa-clock mr-1"></i>Pendientes
@@ -64,7 +65,7 @@
                             <i class="fas fa-truck text-purple-600 text-xl"></i>
                         </div>
                     </div>
-                   <div class="text-2xl font-bold text-purple-700 mb-1" id="contadorRepuestoProvincia">
+                    <div class="text-2xl font-bold text-purple-700 mb-1" id="contadorRepuestoProvincia">
                         {{ $contadoresArray['repuesto_provincia'] }}
                     </div>
                     <div class="text-sm font-medium text-purple-600">Repuesto (Provincia)</div>
@@ -121,7 +122,7 @@
             </div>
         </div>
 
-         <!-- Primer Modal (tu código original) -->
+        <!-- Primer Modal (tu código original) -->
         <div id="solicitudModal"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
@@ -205,8 +206,10 @@
                 <!-- Header del Modal -->
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center">
-                        <button id="backToFirstModal" class="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="backToFirstModal"
+                            class="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M15 19l-7-7 7-7"></path>
                             </svg>
@@ -292,6 +295,25 @@
             class="bg-white p-4 rounded-lg shadow-sm mb-6">
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+
+                <!-- Fecha Inicio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+                    <input type="text" name="fecha_inicio" id="fechaInicio" value="{{ request('fecha_inicio') }}"
+                        placeholder="dd/mm/yyyy"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500"
+                        data-autosubmit="true">
+                </div>
+
+                <!-- Fecha Fin -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+                    <input type="text" name="fecha_fin" id="fechaFin" value="{{ request('fecha_fin') }}"
+                        placeholder="dd/mm/yyyy"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500"
+                        data-autosubmit="true">
+                </div>
+
                 <!-- Select para Tipo de Solicitud -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Solicitud</label>
@@ -371,75 +393,18 @@
             </div>
 
             <!-- Solo botón Limpiar (cuando hay filtros activos) -->
-            @if (request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
-                <div class="flex justify-end">
-                    <a href="{{ route('solicitudarticulo.index') }}"
-                        class="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 font-medium flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                        Limpiar Filtros
-                    </a>
-                </div>
-            @endif
 
-            <!-- Mostrar filtros activos -->
-            @if (request()->anyFilled(['tipo', 'estado', 'urgencia', 'search']))
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    <div class="flex items-center gap-2 text-sm text-gray-600">
-                        <span class="font-medium">Filtros activos:</span>
-                        <div class="flex flex-wrap gap-2">
-                            @if (request('tipo'))
-                                <span
-                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                                    Tipo:
-                                    @if (request('tipo') == 'solicitud_articulo')
-                                        Artículos
-                                    @elseif(request('tipo') == 'solicitud_repuesto')
-                                        Repuestos (Lima)
-                                    @elseif(request('tipo') == 'solicitud_repuesto_provincia')
-                                        Repuestos (Provincia)
-                                    @else
-                                        {{ request('tipo') }}
-                                    @endif
-                                    <a href="{{ request()->fullUrlWithoutQuery('tipo') }}"
-                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
-                                </span>
-                            @endif
-                            @if (request('estado'))
-                                <span
-                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                                    Estado:
-                                    @if (request('estado') == 'listo_para_entregar')
-                                        Listo para entregar
-                                    @else
-                                        {{ ucfirst(request('estado')) }}
-                                    @endif
-                                    <a href="{{ request()->fullUrlWithoutQuery('estado') }}"
-                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
-                                </span>
-                            @endif
-                            @if (request('urgencia'))
-                                <span
-                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                                    Urgencia: {{ ucfirst(request('urgencia')) }}
-                                    <a href="{{ request()->fullUrlWithoutQuery('urgencia') }}"
-                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
-                                </span>
-                            @endif
-                            @if (request('search'))
-                                <span
-                                    class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">
-                                    Búsqueda: "{{ request('search') }}"
-                                    <a href="{{ request()->fullUrlWithoutQuery('search') }}"
-                                        class="ml-1 text-gray-600 hover:text-gray-800">×</a>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+            <div class="flex justify-end">
+                <a href="{{ route('solicitudarticulo.index') }}" id="btnLimpiarFiltros"
+                    class="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-200 font-medium flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Limpiar Filtros
+                </a>
+            </div>
+
         </form>
 
         <!-- Resto del código permanece igual -->
@@ -541,15 +506,17 @@
                             </p>
                         </div>
 
-                        <!-- Mostrar número de ticket para provincia -->
-                        @if ($solicitud->tipoorden == 'solicitud_repuesto_provincia' && $solicitud->numeroticket)
+                        <!-- Número de Ticket (para todos los tipos) -->
+                        @if (!empty($solicitud->numero_ticket))
                             <div class="mb-3">
                                 <p class="text-sm text-gray-500 font-medium">Número de Ticket</p>
                                 <p class="font-medium text-gray-800 truncate">
-                                    🎫 {{ $solicitud->numeroticket }}
+                                    🎫 {{ $solicitud->numero_ticket }}
                                 </p>
                             </div>
                         @endif
+
+
 
                         <!-- Código de Cotización -->
                         @if ($solicitud->codigo_cotizacion ?? false)
@@ -603,7 +570,7 @@
                                 <p class="text-sm text-gray-500 font-medium">Fecha Creación</p>
                                 <p class="font-medium text-gray-800 text-sm">
                                     @if ($solicitud->fechacreacion)
-                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->format('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($solicitud->fechacreacion)->locale('es')->translatedFormat('d M Y') }}
                                     @else
                                         No especificada
                                     @endif
@@ -615,7 +582,7 @@
                                 <p class="text-sm text-gray-500 font-medium">Fecha Requerida</p>
                                 <p class="font-medium text-gray-800 text-sm">
                                     @if ($solicitud->fecharequerida)
-                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->format('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($solicitud->fecharequerida)->locale('es')->translatedFormat('d M Y') }}
                                     @else
                                         No especificada
                                     @endif
@@ -867,13 +834,15 @@
                     </div>
                 @endforelse
             </div>
+        </div>
 
-            <!-- Paginación con parámetros de filtro -->
-            @if ($solicitudes->hasPages())
-                <div class="mt-8">
-                    {{ $solicitudes->appends(request()->query())->links() }}
-                </div>
-            @endif
-
-    <script src="{{ asset('assets/js/solicitud/solicitudarticulo.js') }}"></script>
+        <!-- Paginación con parámetros de filtro -->
+        @if ($solicitudes->hasPages())
+            <div class="mt-8">
+                {{ $solicitudes->appends(request()->query())->links() }}
+            </div>
+        @endif
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+        <script src="{{ asset('assets/js/solicitud/solicitudarticulo.js') }}"></script>
     </x-layout.default>

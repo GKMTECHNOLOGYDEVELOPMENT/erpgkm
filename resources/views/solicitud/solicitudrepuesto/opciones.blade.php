@@ -101,67 +101,67 @@
 
                             <div
                                 class="flex items-center space-x-3 p-4 rounded-xl
-    @if ($solicitud->estado == 'aprobada') bg-dark/10 border border-dark/20
-    @elseif($solicitud->estado == 'listo_para_entregar')
-        bg-success/10 border border-success/20
-    @elseif($solicitud->estado == 'pendiente')
-        bg-warning/10 border border-warning/20
-    @elseif($solicitud->estado == 'parcial_listo')
-        bg-orange-50 border border-orange-200
-    @else
-        bg-gray-50 border border-gray-200 @endif">
+                                @if ($solicitud->estado == 'aprobada') bg-dark/10 border border-dark/20
+                                @elseif($solicitud->estado == 'listo_para_entregar')
+                                    bg-success/10 border border-success/20
+                                @elseif($solicitud->estado == 'pendiente')
+                                    bg-warning/10 border border-warning/20
+                                @elseif($solicitud->estado == 'parcial_listo')
+                                    bg-orange-50 border border-orange-200
+                                @else
+                                    bg-gray-50 border border-gray-200 @endif">
 
                                 <div
                                     class="w-10 h-10 rounded-lg flex items-center justify-center
-        @if ($solicitud->estado == 'aprobada') bg-dark/20
-        @elseif($solicitud->estado == 'listo_para_entregar')
-            bg-success/20
-        @elseif($solicitud->estado == 'pendiente')
-            bg-warning/20
-        @elseif($solicitud->estado == 'parcial_listo')
-            bg-orange-100
-        @else
-            bg-gray-100 @endif">
+                                @if ($solicitud->estado == 'aprobada') bg-dark/20
+                                @elseif($solicitud->estado == 'listo_para_entregar')
+                                    bg-success/20
+                                @elseif($solicitud->estado == 'pendiente')
+                                    bg-warning/20
+                                @elseif($solicitud->estado == 'parcial_listo')
+                                    bg-orange-100
+                                @else
+                                    bg-gray-100 @endif">
 
                                     <i
                                         class="fas fa-info-circle
-            @if ($solicitud->estado == 'aprobada') text-dark
-            @elseif($solicitud->estado == 'listo_para_entregar')
-                text-success
-            @elseif($solicitud->estado == 'pendiente')
-                text-warning
-            @elseif($solicitud->estado == 'parcial_listo')
-                text-orange-600
-            @else
-                text-gray-600 @endif"></i>
+                                @if ($solicitud->estado == 'aprobada') text-dark
+                                @elseif($solicitud->estado == 'listo_para_entregar')
+                                    text-success
+                                @elseif($solicitud->estado == 'pendiente')
+                                    text-warning
+                                @elseif($solicitud->estado == 'parcial_listo')
+                                    text-orange-600
+                                @else
+                                    text-gray-600 @endif"></i>
                                 </div>
 
                                 <div>
                                     <p
                                         class="text-sm
-            @if ($solicitud->estado == 'aprobada') text-dark/70
-            @elseif($solicitud->estado == 'listo_para_entregar')
-                text-success/70
-            @elseif($solicitud->estado == 'pendiente')
-                text-warning/70
-            @elseif($solicitud->estado == 'parcial_listo')
-                text-orange-600/70
-            @else
-                text-gray-500 @endif">
+                                        @if ($solicitud->estado == 'aprobada') text-dark/70
+                                        @elseif($solicitud->estado == 'listo_para_entregar')
+                                            text-success/70
+                                        @elseif($solicitud->estado == 'pendiente')
+                                            text-warning/70
+                                        @elseif($solicitud->estado == 'parcial_listo')
+                                            text-orange-600/70
+                                        @else
+                                            text-gray-500 @endif">
                                         Estado General
                                     </p>
 
                                     <p
                                         class="font-semibold capitalize
-            @if ($solicitud->estado == 'aprobada') text-dark
-            @elseif($solicitud->estado == 'listo_para_entregar')
-                text-success
-            @elseif($solicitud->estado == 'pendiente')
-                text-warning
-            @elseif($solicitud->estado == 'parcial_listo')
-                text-orange-700
-            @else
-                text-gray-900 @endif">
+                                        @if ($solicitud->estado == 'aprobada') text-dark
+                                        @elseif($solicitud->estado == 'listo_para_entregar')
+                                            text-success
+                                        @elseif($solicitud->estado == 'pendiente')
+                                            text-warning
+                                        @elseif($solicitud->estado == 'parcial_listo')
+                                            text-orange-700
+                                        @else
+                                            text-gray-900 @endif">
                                         @if ($solicitud->estado == 'aprobada')
                                             Entregado
                                         @elseif($solicitud->estado == 'listo_para_entregar')
@@ -396,7 +396,7 @@
                 <span
                     class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
                         @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
-                        @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                        @elseif($esPendienteRetorno) bg-warning-light text-warning
                         @elseif($esUsado) bg-success-light text-success
                         @elseif($esDevuelto) bg-danger-light text-danger
                         @else bg-blue-100 text-blue-700 @endif">
@@ -435,7 +435,7 @@
                         <span
                             class="inline-flex items-center px-2 py-1 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold
                                 @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto) bg-secondary-light text-secondary
-                                @elseif($esPendienteRetorno) bg-amber-100 text-amber-700
+                                @elseif($esPendienteRetorno) bg-warning-light text-warning
                                 @elseif($esUsado) bg-success-light text-success
                                 @elseif($esDevuelto) bg-danger-light text-danger
                                 @else bg-emerald-100 text-emerald-700 @endif">
@@ -946,16 +946,16 @@ $textoOpcion = "[{$entrega->codigo_solicitud_origen}] {$entrega->ubicacion_utili
 
                                 <!-- Botones en fila horizontal -->
                                 <div class="flex flex-row items-center gap-2 sm:gap-3 mt-3 lg:mt-0">
-                                    @if ($puede_generar_pdf)
-                                        <a href="{{ route('solicitudrepuesto.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
-                                            target="_blank"
-                                            class="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-danger text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm whitespace-nowrap">
-                                            <i class="fas fa-file-pdf mr-1 sm:mr-1.5"></i>
-                                            <span class="hidden sm:inline">Descargar Conformidad</span>
-                                            <span class="sm:hidden">Conformidad</span>
-                                        </a>
+                                    @if (in_array(strtolower($solicitud->estado), ['aprobada', 'entregado']) && $puede_generar_pdf)
+                                        <div class="mt-3">
+                                            <a href="{{ route('solicitudrepuesto.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
+                                                target="_blank"
+                                                class="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-danger text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm">
+                                                <i class="fas fa-file-pdf mr-1.5"></i>
+                                                Descargar Conformidad
+                                            </a>
+                                        </div>
                                     @endif
-
                                     <!-- Botón Volver -->
                                     <a href="{{ route('solicitudarticulo.index') }}"
                                         class="inline-flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 bg-dark text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm whitespace-nowrap">
