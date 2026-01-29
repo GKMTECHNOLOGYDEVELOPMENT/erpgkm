@@ -251,7 +251,7 @@ class SolicitudrepuestoController extends Controller
 
 
 
-   /**
+    /**
      * Comprimir imagen simple sin Intervention Image
      */
     private function comprimirImagenSimple($contenidoBinario)
@@ -448,7 +448,7 @@ class SolicitudrepuestoController extends Controller
 
 
 
- 
+
 
 
 
@@ -3290,7 +3290,7 @@ public function store(Request $request)
             ]);
 
             /* =====================================================
-         * 1. OBTENER ENTREGA DESTINO (DESDE SOLICITUD_ID)
+         * 1. OBTENER ENTREGA DESTINO
          * ===================================================== */
             $entregaDestino = DB::table('repuestos_entregas')
                 ->where('solicitud_id', $id)
@@ -3298,33 +3298,14 @@ public function store(Request $request)
                 ->first();
 
             if (!$entregaDestino) {
-                Log::warning('❌ No existe entrega para la solicitud destino', [
-                    'solicitud_id' => $id
-                ]);
                 abort(404, 'No existe entrega registrada');
             }
 
-            $esDevuelto = false;
-
-            if (!empty($entregaDestino->estado) && strtolower($entregaDestino->estado) === 'devuelto') {
-                $esDevuelto = true;
-
-                Log::info('🔁 ESTADO DEVUELTO DETECTADO', [
-                    'entrega_id' => $entregaDestino->id,
-                    'estado'     => $entregaDestino->estado
-                ]);
-            }
-
-            Log::info('📦 Entrega DESTINO encontrada', [
-                'entrega_id'          => $entregaDestino->id,
-                'solicitud_destino'   => $entregaDestino->solicitud_id,
-                'articulo_id'         => $entregaDestino->articulo_id,
-                'usuario_recibe_id'   => $entregaDestino->usuario_destino_id,
-                'entrega_origen_id'   => $entregaDestino->entrega_origen_id
-            ]);
+            $esDevuelto = !empty($entregaDestino->estado)
+                && strtolower($entregaDestino->estado) === 'devuelto';
 
             /* =====================================================
-         * 2. DETERMINAR QUIÉN ENTREGA REALMENTE
+         * 2. DETERMINAR QUIÉN ENTREGA
          * ===================================================== */
             $esCesion = false;
             $esAutoCesion = false;
@@ -3334,64 +3315,26 @@ public function store(Request $request)
 
                 $esCesion = true;
 
-                Log::info('🔁 CESIÓN DETECTADA', [
-                    'entrega_origen_id' => $entregaDestino->entrega_origen_id
-                ]);
-
-                // 👇 ENTREGA ORIGEN
                 $entregaOrigen = DB::table('repuestos_entregas')
-                    ->where('id', $entregaDestino->entrega_origen_id) // ✅ PK REAL
+                    ->where('id', $entregaDestino->entrega_origen_id)
                     ->first();
 
-
                 if (!$entregaOrigen || !$entregaOrigen->usuario_destino_id) {
-                    Log::error('❌ Entrega ORIGEN inválida', [
-                        'entrega_origen_id' => $entregaDestino->entrega_origen_id
-                    ]);
                     abort(400, 'Error en cesión de repuesto');
                 }
 
-                Log::info('🔍 VALIDANDO AUTO-CESIÓN', [
-                    'usuario_destino_origen'  => $entregaOrigen->usuario_destino_id,
-                    'usuario_destino_destino' => $entregaDestino->usuario_destino_id
-                ]);
-
-                // ✅ AUTO-CESIÓN
                 if ((int)$entregaOrigen->usuario_destino_id === (int)$entregaDestino->usuario_destino_id) {
-
                     $esAutoCesion = true;
-
-                    // 👉 EN AUTO-CESIÓN, QUIEN FIGURA ES EL QUE PREPARÓ
                     $usuarioEntregaId = $entregaDestino->usuario_preparo_id;
-
-                    Log::info('♻️ AUTO-CESIÓN DETECTADA', [
-                        'usuario_destino_id' => $entregaDestino->usuario_destino_id,
-                        'usuario_preparo_id' => $entregaDestino->usuario_preparo_id,
-                        'usuario_pdf'        => $usuarioEntregaId
-                    ]);
                 } else {
-
-                    // 👉 CESIÓN NORMAL
                     $usuarioEntregaId = $entregaOrigen->usuario_destino_id;
-
-                    Log::info('👤 CESIÓN NORMAL (OTRO USUARIO)', [
-                        'usuario_que_cede'   => $usuarioEntregaId,
-                        'usuario_que_recibe' => $entregaDestino->usuario_destino_id
-                    ]);
                 }
             } else {
-
-                // 👉 ENTREGA NORMAL
                 $usuarioEntregaId = $entregaDestino->usuario_entrego_id;
-
-                Log::info('🏬 ENTREGA NORMAL DESDE ALMACÉN', [
-                    'usuario_id' => $usuarioEntregaId
-                ]);
             }
 
-
             /* =====================================================
-         * 3. OBTENER DATOS DE SOLICITUD + RECEPTOR + QUIEN ENTREGA
+         * 3. DATOS DE SOLICITUD
          * ===================================================== */
             $solicitud = DB::table('solicitudesordenes as so')
                 ->select(
@@ -3401,9 +3344,6 @@ public function store(Request $request)
                     'so.idticket as ticket_id',
                     't.numero_ticket',
 
-                    // =====================
-                    // RECEPTOR (QUIEN RECIBE)
-                    // =====================
                     'u.idUsuario as solicitante_id',
                     'u.Nombre as solicitante_nombre',
                     'u.apellidoPaterno as solicitante_apellido_paterno',
@@ -3413,9 +3353,6 @@ public function store(Request $request)
                     'r.nombre as solicitante_rol',
                     'ta.nombre as solicitante_area',
 
-                    // =====================
-                    // QUIEN ENTREGA REAL
-                    // =====================
                     'ue.idUsuario as aprobador_id',
                     'ue.Nombre as aprobador_nombre',
                     'ue.apellidoPaterno as aprobador_apellido_paterno',
@@ -3426,75 +3363,50 @@ public function store(Request $request)
                     'ta2.nombre as aprobador_area'
                 )
                 ->leftJoin('tickets as t', 't.idTickets', '=', 'so.idticket')
-
-                // receptor
                 ->leftJoin('usuarios as u', 'so.idusuario', '=', 'u.idUsuario')
                 ->leftJoin('tipodocumento as td', 'u.idTipoDocumento', '=', 'td.idTipoDocumento')
                 ->leftJoin('rol as r', 'u.idRol', '=', 'r.idRol')
                 ->leftJoin('tipoarea as ta', 'u.idTipoArea', '=', 'ta.idTipoArea')
-
-                // quien entrega real (almacén o técnico que cede)
                 ->leftJoin('usuarios as ue', 'ue.idUsuario', '=', DB::raw((int)$usuarioEntregaId))
                 ->leftJoin('tipodocumento as tde', 'ue.idTipoDocumento', '=', 'tde.idTipoDocumento')
                 ->leftJoin('rol as r2', 'ue.idRol', '=', 'r2.idRol')
                 ->leftJoin('tipoarea as ta2', 'ue.idTipoArea', '=', 'ta2.idTipoArea')
-
                 ->where('so.idsolicitudesordenes', $id)
                 ->first();
 
             if (!$solicitud) {
-                Log::error('❌ Solicitud no encontrada', ['solicitud_id' => $id]);
                 abort(404, 'Solicitud no encontrada');
             }
 
-            Log::info('📑 Solicitud cargada correctamente');
+            /* =====================================================
+         * 3.1 MODELO DEL TICKET (CLAVE)
+         * ===================================================== */
+            $modeloTicket = DB::table('tickets as t')
+                ->leftJoin('modelo as mo', 'mo.idModelo', '=', 't.idModelo')
+                ->leftJoin('marca as ma', 'ma.idMarca', '=', 'mo.idMarca')
+                ->where('t.idTickets', $solicitud->ticket_id)
+                ->select(
+                    'mo.nombre as modelo_nombre',
+                    'ma.nombre as marca_nombre'
+                )
+                ->first();
+
+            $modeloLabel = $modeloTicket
+                ? trim($modeloTicket->modelo_nombre . ' - ' . $modeloTicket->marca_nombre)
+                : 'N/A';
 
             /* =====================================================
-            * 3.1 AUTO-CESIÓN: NUEVA VISITA O NUEVO TICKET
-            * ===================================================== */
-            $tipoUsoAutoCesion = null;
-
-            if ($esAutoCesion && !empty($solicitud->ticket_id)) {
-
-                $cantidadVisitas = DB::table('visitas')
-                    ->where('idTickets', (int) $solicitud->ticket_id) // ✅ ID REAL
-                    ->count();
-
-                $tipoUsoAutoCesion = $cantidadVisitas > 1
-                    ? ' una nueva visita'
-                    : ' un nuevo ticket';
-
-                Log::info('🔍 AUTO-CESIÓN | TIPO DE USO', [
-                    'ticket_id'     => (int) $solicitud->ticket_id,
-                    'numero_ticket' => $solicitud->numero_ticket, // solo para referencia
-                    'visitas'       => $cantidadVisitas,
-                    'resultado'     => $tipoUsoAutoCesion
-                ]);
-            } else {
-                Log::warning('⚠️ AUTO-CESIÓN | ticket_id vacío/no disponible para conteo', [
-                    'esAutoCesion'   => $esAutoCesion,
-                    'ticket_id'      => $solicitud->ticket_id ?? null,
-                    'numero_ticket'  => $solicitud->numero_ticket ?? null
-                ]);
-            }
-
-
-            /* =====================================================
-            * 4. REPUESTOS ENTREGADOS (MODELOS MÚLTIPLES + SUBCATEGORÍA)
-            * ===================================================== */
+         * 4. REPUESTOS (DESDE repuestos_entregas)
+         * ===================================================== */
             $repuestos = DB::table('repuestos_entregas as re')
                 ->join('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
-                ->leftJoin('articulo_modelo as am', 'a.idArticulos', '=', 'am.articulo_id')
-                ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
                 ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-
                 ->where('re.solicitud_id', $id)
-                ->where('re.estado', 'entregado') // 🔑 ESTE ES EL FILTRO REAL
-
+                ->where('re.estado', 'entregado')
                 ->select(
                     DB::raw('COUNT(re.articulo_id) as cantidad'),
                     'a.codigo_repuesto',
-                    DB::raw('COALESCE(GROUP_CONCAT(DISTINCT m.nombre SEPARATOR ", "), "N/A") as modelo'),
+                    DB::raw("'" . addslashes($modeloLabel) . "' as modelo"),
                     DB::raw('COALESCE(sc.nombre, "N/A") as tipo_repuesto')
                 )
                 ->groupBy(
@@ -3504,34 +3416,21 @@ public function store(Request $request)
                 )
                 ->get();
 
-
-
             if ($repuestos->isEmpty()) {
-                Log::warning('⚠️ No hay repuestos entregados');
                 abort(400, 'No hay repuestos entregados');
             }
-
 
             /* =====================================================
          * 5. FIRMAS
          * ===================================================== */
             $firmaSolicitante = null;
-            $firmaAprobador   = null;
+            $firmaAprobador = null;
             $firmaPreparo = null;
             $usuarioPreparo = null;
 
-            if ($esCesion && !empty($entregaDestino->usuario_preparo_id)) {
-
-                $usuarioPreparo = DB::table('usuarios as up')
-                    ->leftJoin('rol as rp', 'up.idRol', '=', 'rp.idRol')
-                    ->select(
-                        'up.Nombre',
-                        'up.apellidoPaterno',
-                        'up.apellidoMaterno',
-                        'up.firma',
-                        'rp.nombre as rol'
-                    )
-                    ->where('up.idUsuario', $entregaDestino->usuario_preparo_id)
+            if ($esCesion && $entregaDestino->usuario_preparo_id) {
+                $usuarioPreparo = DB::table('usuarios')
+                    ->where('idUsuario', $entregaDestino->usuario_preparo_id)
                     ->first();
 
                 if ($usuarioPreparo && $usuarioPreparo->firma) {
@@ -3540,25 +3439,17 @@ public function store(Request $request)
             }
 
             if ($solicitud->solicitante_id) {
-                $firma = DB::table('usuarios')
-                    ->where('idUsuario', $solicitud->solicitante_id)
-                    ->value('firma');
-                if ($firma) {
-                    $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firma);
-                }
+                $firma = DB::table('usuarios')->where('idUsuario', $solicitud->solicitante_id)->value('firma');
+                if ($firma) $firmaSolicitante = 'data:image/png;base64,' . base64_encode($firma);
             }
 
             if ($solicitud->aprobador_id) {
-                $firma = DB::table('usuarios')
-                    ->where('idUsuario', $solicitud->aprobador_id)
-                    ->value('firma');
-                if ($firma) {
-                    $firmaAprobador = 'data:image/png;base64,' . base64_encode($firma);
-                }
+                $firma = DB::table('usuarios')->where('idUsuario', $solicitud->aprobador_id)->value('firma');
+                if ($firma) $firmaAprobador = 'data:image/png;base64,' . base64_encode($firma);
             }
 
             /* =====================================================
-         * 6. GENERAR PDF
+         * 6. HTML
          * ===================================================== */
             $bgBase64 = 'data:image/jpeg;base64,' . base64_encode(
                 file_get_contents(public_path('assets/images/hojamembretada.jpg'))
@@ -3574,25 +3465,45 @@ public function store(Request $request)
                 'usuarioPreparo',
                 'esCesion',
                 'esAutoCesion',
-                'tipoUsoAutoCesion',
                 'esDevuelto'
             ))->render();
 
-            $tempPdf = tempnam(sys_get_temp_dir(), 'conformidad_') . '.pdf';
+            /* =====================================================
+         * 7. PDF + COMPRESIÓN
+         * ===================================================== */
+            $tempOriginal = tempnam(sys_get_temp_dir(), 'conformidad_raw_') . '.pdf';
+            $tempCompressed = tempnam(sys_get_temp_dir(), 'conformidad_compressed_') . '.pdf';
 
             Browsershot::html($html)
+                ->setChromePath('/usr/bin/google-chrome-stable')
+                ->noSandbox()
                 ->format('A4')
                 ->margins(0, 0, 0, 0)
                 ->showBackground()
-                ->noSandbox()
-                ->savePdf($tempPdf);
+                ->save($tempOriginal);
 
-            Log::info('✅ Conformidad generada correctamente');
+            exec(
+                "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -dNOPAUSE -dQUIET -dBATCH "
+                    . "-sOutputFile=" . escapeshellarg($tempCompressed) . " "
+                    . escapeshellarg($tempOriginal),
+                $out,
+                $code
+            );
 
-            return response()->file($tempPdf, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="ACTA_CONFORMIDAD_' . $solicitud->codigo . '.pdf"'
-            ]);
+            if ($code !== 0) {
+                abort(500, 'Error al comprimir PDF');
+            }
+
+            $pdf = file_get_contents($tempCompressed);
+            @unlink($tempOriginal);
+            @unlink($tempCompressed);
+
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf')
+                ->header(
+                    'Content-Disposition',
+                    'inline; filename="ACTA_CONFORMIDAD_' . $solicitud->codigo . '.pdf"'
+                );
         } catch (\Throwable $e) {
 
             Log::error('🔥 ERROR CONFORMIDAD', [
@@ -5666,68 +5577,65 @@ public function confirmarEntregaCedidaConFoto(Request $request, $id)
         }
     }
 
-public function getVisitasPorTicket($ticketId)
-{
-    $user = auth()->user();
+    public function getVisitasPorTicket($ticketId)
+    {
+        $user = auth()->user();
 
-    Log::info('Usuario autenticado', [
-        'idUsuario' => $user->idUsuario,
-        'idRol' => $user->idRol,
-        'idTipoArea' => $user->idTipoArea,
-        'idTipoUsuario' => $user->idTipoUsuario
-    ]);
-
-    $userId = $user->idUsuario;
-
-    $esAdministrador = (
-        $user->idRol == 1 &&
-        $user->idTipoArea == 4 &&
-        $user->idTipoUsuario == 3
-    );
-
-    Log::info('¿Es administrador?', [
-        'esAdministrador' => $esAdministrador
-    ]);
-
-    $query = DB::table('visitas')
-        ->select(
-            'visitas.idVisitas',
-            'visitas.nombre',
-            'visitas.fecha_programada',
-            'visitas.estado',
-            'visitas.estadovisita',
-            'visitas.idUsuario',
-            'usuarios.Nombre as usuario_nombre',
-            'usuarios.apellidoPaterno as usuario_apellido',
-            'usuarios.idRol',
-            'usuarios.idTipoArea',
-            'usuarios.idTipoUsuario'
-        )
-        ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
-        ->where('visitas.idTickets', $ticketId);
-
-    if (!$esAdministrador) {
-        Log::info('Filtrando visitas por usuario', [
-            'idUsuario' => $userId
+        Log::info('Usuario autenticado', [
+            'idUsuario' => $user->idUsuario,
+            'idRol' => $user->idRol,
+            'idTipoArea' => $user->idTipoArea,
+            'idTipoUsuario' => $user->idTipoUsuario
         ]);
-        $query->where('visitas.idUsuario', $userId);
+
+        $userId = $user->idUsuario;
+
+        $esAdministrador = (
+            $user->idRol == 1 &&
+            $user->idTipoArea == 4 &&
+            $user->idTipoUsuario == 3
+        );
+
+        Log::info('¿Es administrador?', [
+            'esAdministrador' => $esAdministrador
+        ]);
+
+        $query = DB::table('visitas')
+            ->select(
+                'visitas.idVisitas',
+                'visitas.nombre',
+                'visitas.fecha_programada',
+                'visitas.estado',
+                'visitas.estadovisita',
+                'visitas.idUsuario',
+                'usuarios.Nombre as usuario_nombre',
+                'usuarios.apellidoPaterno as usuario_apellido',
+                'usuarios.idRol',
+                'usuarios.idTipoArea',
+                'usuarios.idTipoUsuario'
+            )
+            ->leftJoin('usuarios', 'visitas.idUsuario', '=', 'usuarios.idUsuario')
+            ->where('visitas.idTickets', $ticketId);
+
+        if (!$esAdministrador) {
+            Log::info('Filtrando visitas por usuario', [
+                'idUsuario' => $userId
+            ]);
+            $query->where('visitas.idUsuario', $userId);
+        }
+
+        // Log del SQL
+        Log::info('SQL generado', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings()
+        ]);
+
+        $visitas = $query->orderBy('visitas.fecha_programada', 'desc')->get();
+
+        Log::info('Cantidad de visitas encontradas', [
+            'total' => $visitas->count()
+        ]);
+
+        return response()->json($visitas);
     }
-
-    // Log del SQL
-    Log::info('SQL generado', [
-        'sql' => $query->toSql(),
-        'bindings' => $query->getBindings()
-    ]);
-
-    $visitas = $query->orderBy('visitas.fecha_programada', 'desc')->get();
-
-    Log::info('Cantidad de visitas encontradas', [
-        'total' => $visitas->count()
-    ]);
-
-    return response()->json($visitas);
-}
-
-
-    
 }
