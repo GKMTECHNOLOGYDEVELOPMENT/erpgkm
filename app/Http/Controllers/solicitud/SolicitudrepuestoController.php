@@ -83,7 +83,7 @@ class SolicitudrepuestoController extends Controller
                                 $flujoQuery->select(DB::raw(1))
                                     ->from('ticketflujo as tf')
                                     ->whereColumn('tf.idTicket', 't.idTickets')
-                                    ->where('tf.idestadflujo', 2);
+                                    ->whereIn('tf.idestadflujo', [2, 11, 18, 10, 23]);
                             });
                     });
                 }
@@ -858,203 +858,219 @@ class SolicitudrepuestoController extends Controller
     }
 
 
+public function store(Request $request)
+{
+    $startTime = microtime(true);
+    Log::info('Iniciando creación de orden', [
+        'user_id' => auth()->id(),
+        'ticket_id' => $request->input('ticketId'),
+        'ip' => $request->ip(),
+        'user_agent' => $request->userAgent()
+    ]);
 
-    public function store(Request $request)
-    {
-        $startTime = microtime(true);
-        Log::info('Iniciando creación de orden', [
-            'user_id' => auth()->id(),
-            'ticket_id' => $request->input('ticketId'),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent()
+    try {
+        DB::beginTransaction();
+        Log::info('Transacción de base de datos iniciada');
+
+        // Validar los datos requeridos
+        Log::debug('Iniciando validación de datos');
+        $validated = $request->validate([
+            'ticketId' => 'required|exists:tickets,idTickets',
+            'visitaId' => 'nullable|exists:visitas,idVisitas', // Nuevo campo
+            'orderInfo.tipoServicio' => 'required|string',
+            'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
+            'orderInfo.fechaRequerida' => 'required|date',
+            'orderInfo.observaciones' => 'nullable|string',
+            'products' => 'required|array|min:1',
+            'products.*.ticketId' => 'required|exists:tickets,idTickets',
+            'products.*.modeloId' => 'required|exists:modelo,idModelo',
+            'products.*.tipoId' => 'required|exists:subcategorias,id',
+            'products.*.codigoId' => 'required',
+            'products.*.cantidad' => 'required|integer|min:1|max:100'
+        ]);
+        Log::info('Validación exitosa', ['campos_validados' => array_keys($validated)]);
+
+        // Obtener información del ticket
+        Log::debug('Buscando ticket en base de datos', ['ticket_id' => $validated['ticketId']]);
+        $ticket = DB::table('tickets')
+            ->where('idTickets', $validated['ticketId'])
+            ->first();
+
+        if (!$ticket) {
+            Log::error('Ticket no encontrado', ['ticket_id' => $validated['ticketId']]);
+            throw new \Exception('Ticket no encontrado');
+        }
+        Log::info('Ticket encontrado', ['ticket_numero' => $ticket->numero_ticket]);
+
+        // Calcular estadísticas de productos
+        Log::debug('Calculando estadísticas de productos');
+        $totalCantidad = collect($validated['products'])->sum('cantidad');
+        $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
+            return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
+        })->count();
+
+        Log::info('Estadísticas calculadas', [
+            'total_cantidad' => $totalCantidad,
+            'productos_unicos' => $totalProductosUnicos,
+            'total_productos' => count($validated['products'])
         ]);
 
-        try {
-            DB::beginTransaction();
-            Log::info('Transacción de base de datos iniciada');
+        // ✅ CORREGIDO: Usar la misma lógica que getNextOrderNumber()
+        Log::debug('Obteniendo último número de orden');
+        $lastOrder = DB::table('solicitudesordenes')
+            ->orderBy('idsolicitudesordenes', 'desc')
+            ->first();
 
-            // Validar los datos requeridos
-            Log::debug('Iniciando validación de datos');
-            $validated = $request->validate([
-                'ticketId' => 'required|exists:tickets,idTickets',
-                'visitaId' => 'nullable|exists:visitas,idVisitas', // Nuevo campo
-                'orderInfo.tipoServicio' => 'required|string',
-                'orderInfo.urgencia' => 'required|string|in:baja,media,alta',
-                'orderInfo.fechaRequerida' => 'required|date',
-                'orderInfo.observaciones' => 'nullable|string',
-                'products' => 'required|array|min:1',
-                'products.*.ticketId' => 'required|exists:tickets,idTickets',
-                'products.*.modeloId' => 'required|exists:modelo,idModelo',
-                'products.*.tipoId' => 'required|exists:subcategorias,id',
-                'products.*.codigoId' => 'required',
-                'products.*.cantidad' => 'required|integer|min:1|max:100'
+        if ($lastOrder && isset($lastOrder->codigo)) {
+            $nextOrderNumber = intval(substr($lastOrder->codigo, 4)) + 1;
+            Log::debug('Última orden encontrada', [
+                'ultimo_codigo' => $lastOrder->codigo,
+                'numero_extraido' => intval(substr($lastOrder->codigo, 4))
             ]);
-            Log::info('Validación exitosa', ['campos_validados' => array_keys($validated)]);
+        } else {
+            $nextOrderNumber = 1;
+            Log::debug('No hay órdenes previas, iniciando desde 1');
+        }
 
-            // Obtener información del ticket
-            Log::debug('Buscando ticket en base de datos', ['ticket_id' => $validated['ticketId']]);
-            $ticket = DB::table('tickets')
-                ->where('idTickets', $validated['ticketId'])
+        $codigoOrden = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
+        Log::info('Código de orden generado', [
+            'codigo_orden' => $codigoOrden,
+            'nextOrderNumber' => $nextOrderNumber
+        ]);
+
+        // 1. Insertar en solicitudesordenes con TODOS los campos
+        Log::debug('Preparando inserción en solicitudesordenes');
+        $solicitudData = [
+            'fechacreacion' => now(),
+            'estado' => 'pendiente',
+            'tipoorden' => 'solicitud_repuesto',
+            'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
+            'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
+            'codigo' => $codigoOrden,
+            'idticket' => $validated['ticketId'],
+            'idVisita' => $validated['visitaId'] ?? null,
+            'niveldeurgencia' => $validated['orderInfo']['urgencia'],
+            'tiposervicio' => $validated['orderInfo']['tipoServicio'],
+            'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
+            'cantidad' => $totalProductosUnicos,
+            'canproduuni' => $totalProductosUnicos,
+            'totalcantidadproductos' => $totalCantidad,
+            'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
+            'idtecnico' => auth()->id(),
+            'idusuario' => auth()->id(),
+            'urgencia' => $validated['orderInfo']['urgencia']
+        ];
+
+        Log::debug('Datos para solicitudesordenes', $solicitudData);
+
+        $solicitudId = DB::table('solicitudesordenes')->insertGetId($solicitudData);
+        Log::info('Solicitud de orden creada exitosamente', ['solicitud_id' => $solicitudId]);
+
+        // 2. Insertar los artículos en ordenesarticulos CON EL IDTICKET
+        Log::debug('Iniciando procesamiento de productos', ['total_productos' => count($validated['products'])]);
+
+        $productosProcesados = 0;
+        $productosConError = 0;
+
+        foreach ($validated['products'] as $index => $product) {
+            Log::debug("Procesando producto {$index}", [
+                'producto_index' => $index,
+                'codigo' => $product['codigoId'],
+                'cantidad' => $product['cantidad']
+            ]);
+
+            // Buscar el idArticulos basado en el código
+            $articulo = DB::table('articulos')
+                ->where('codigo_repuesto', $product['codigoId'])
                 ->first();
 
-            if (!$ticket) {
-                Log::error('Ticket no encontrado', ['ticket_id' => $validated['ticketId']]);
-                throw new \Exception('Ticket no encontrado');
-            }
-            Log::info('Ticket encontrado', ['ticket_numero' => $ticket->numero_ticket]);
-
-            // Calcular estadísticas de productos
-            Log::debug('Calculando estadísticas de productos');
-            $totalCantidad = collect($validated['products'])->sum('cantidad');
-            $totalProductosUnicos = collect($validated['products'])->unique(function ($product) {
-                return $product['modeloId'] . '-' . $product['tipoId'] . '-' . $product['codigoId'];
-            })->count();
-
-            Log::info('Estadísticas calculadas', [
-                'total_cantidad' => $totalCantidad,
-                'productos_unicos' => $totalProductosUnicos,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            // Generar código de orden
-            $nextOrderNumber = DB::table('solicitudesordenes')->count() + 1;
-            $codigoOrden = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
-            Log::info('Código de orden generado', ['codigo_orden' => $codigoOrden]);
-
-            // 1. Insertar en solicitudesordenes con TODOS los campos
-            Log::debug('Preparando inserción en solicitudesordenes');
-            $solicitudData = [
-                'fechacreacion' => now(),
-                'estado' => 'pendiente',
-                'tipoorden' => 'solicitud_repuesto',
-                'fecharequerida' => $validated['orderInfo']['fechaRequerida'],
-                'fechaentrega' => $validated['orderInfo']['fechaRequerida'],
-                'codigo' => $codigoOrden,
-                'idticket' => $validated['ticketId'],
-                'idVisita' => $validated['visitaId'] ?? null,
-                'niveldeurgencia' => $validated['orderInfo']['urgencia'],
-                'tiposervicio' => $validated['orderInfo']['tipoServicio'],
-                'observaciones' => $validated['orderInfo']['observaciones'] ?? null,
-                'cantidad' => $totalProductosUnicos,
-                'canproduuni' => $totalProductosUnicos,
-                'totalcantidadproductos' => $totalCantidad,
-                'idtipoServicio' => $this->getTipoServicioId($validated['orderInfo']['tipoServicio']),
-                'idtecnico' => auth()->id(),
-                'idusuario' => auth()->id(),
-                'urgencia' => $validated['orderInfo']['urgencia']
-            ];
-
-            Log::debug('Datos para solicitudesordenes', $solicitudData);
-
-            $solicitudId = DB::table('solicitudesordenes')->insertGetId($solicitudData);
-            Log::info('Solicitud de orden creada exitosamente', ['solicitud_id' => $solicitudId]);
-
-            // 2. Insertar los artículos en ordenesarticulos CON EL IDTICKET
-            Log::debug('Iniciando procesamiento de productos', ['total_productos' => count($validated['products'])]);
-
-            $productosProcesados = 0;
-            $productosConError = 0;
-
-            foreach ($validated['products'] as $index => $product) {
-                Log::debug("Procesando producto {$index}", [
+            if ($articulo) {
+                DB::table('ordenesarticulos')->insert([
+                    'cantidad' => $product['cantidad'],
+                    'estado' => 0, // 0 = pendiente
+                    'observacion' => null,
+                    'fotorepuesto' => null,
+                    'fechausado' => null,
+                    'fechasinusar' => null,
+                    'idsolicitudesordenes' => $solicitudId,
+                    'idticket' => $product['ticketId'], // Guardar el idticket en cada artículo
+                    'idarticulos' => $articulo->idArticulos,
+                    'idubicacion' => null
+                ]);
+                $productosProcesados++;
+                Log::debug("Producto {$index} insertado exitosamente", [
+                    'articulo_id' => $articulo->idArticulos,
+                    'codigo' => $product['codigoId']
+                ]);
+            } else {
+                $productosConError++;
+                Log::warning("Artículo no encontrado", [
                     'producto_index' => $index,
                     'codigo' => $product['codigoId'],
-                    'cantidad' => $product['cantidad']
+                    'ticket_id' => $product['ticketId']
                 ]);
-
-                // Buscar el idArticulos basado en el código
-                $articulo = DB::table('articulos')
-                    ->where('codigo_repuesto', $product['codigoId'])
-                    ->first();
-
-                if ($articulo) {
-                    DB::table('ordenesarticulos')->insert([
-                        'cantidad' => $product['cantidad'],
-                        'estado' => 0, // 0 = pendiente
-                        'observacion' => null,
-                        'fotorepuesto' => null,
-                        'fechausado' => null,
-                        'fechasinusar' => null,
-                        'idsolicitudesordenes' => $solicitudId,
-                        'idticket' => $product['ticketId'], // Guardar el idticket en cada artículo
-                        'idarticulos' => $articulo->idArticulos,
-                        'idubicacion' => null
-                    ]);
-                    $productosProcesados++;
-                    Log::debug("Producto {$index} insertado exitosamente", [
-                        'articulo_id' => $articulo->idArticulos,
-                        'codigo' => $product['codigoId']
-                    ]);
-                } else {
-                    $productosConError++;
-                    Log::warning("Artículo no encontrado", [
-                        'producto_index' => $index,
-                        'codigo' => $product['codigoId'],
-                        'ticket_id' => $product['ticketId']
-                    ]);
-                }
             }
-
-            Log::info('Procesamiento de productos completado', [
-                'productos_procesados' => $productosProcesados,
-                'productos_con_error' => $productosConError,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            DB::commit();
-            Log::info('Transacción confirmada exitosamente');
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
-            Log::info('Orden creada exitosamente', [
-                'solicitud_id' => $solicitudId,
-                'codigo_orden' => $codigoOrden,
-                'tiempo_ejecucion_ms' => $executionTime,
-                'total_productos' => count($validated['products'])
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Orden creada exitosamente',
-                'solicitud_id' => $solicitudId,
-                'codigo_orden' => $codigoOrden,
-                'numeroticket' => $ticket->numero_ticket,
-                'idticket' => $validated['ticketId'],
-                'estadisticas' => [
-                    'productos_unicos' => $totalProductosUnicos,
-                    'total_cantidad' => $totalCantidad
-                ]
-            ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            DB::rollBack();
-            Log::error('Error de validación al crear orden', [
-                'errors' => $e->errors(),
-                'request_data' => $request->all()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error de validación: ' . implode(', ', array_merge(...array_values($e->errors()))),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
-            Log::error('Error al crear orden', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'ticket_id' => $request->input('ticketId'),
-                'user_id' => auth()->id(),
-                'tiempo_ejecucion_ms' => $executionTime
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear la orden: ' . $e->getMessage()
-            ], 500);
         }
-    }
 
+        Log::info('Procesamiento de productos completado', [
+            'productos_procesados' => $productosProcesados,
+            'productos_con_error' => $productosConError,
+            'total_productos' => count($validated['products'])
+        ]);
+
+        DB::commit();
+        Log::info('Transacción confirmada exitosamente');
+
+        $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+        Log::info('Orden creada exitosamente', [
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'tiempo_ejecucion_ms' => $executionTime,
+            'total_productos' => count($validated['products'])
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Orden creada exitosamente',
+            'solicitud_id' => $solicitudId,
+            'codigo_orden' => $codigoOrden,
+            'numeroticket' => $ticket->numero_ticket,
+            'idticket' => $validated['ticketId'],
+            'estadisticas' => [
+                'productos_unicos' => $totalProductosUnicos,
+                'total_cantidad' => $totalCantidad
+            ]
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        DB::rollBack();
+        Log::error('Error de validación al crear orden', [
+            'errors' => $e->errors(),
+            'request_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error de validación: ' . implode(', ', array_merge(...array_values($e->errors()))),
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+        Log::error('Error al crear orden', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+            'ticket_id' => $request->input('ticketId'),
+            'user_id' => auth()->id(),
+            'tiempo_ejecucion_ms' => $executionTime
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al crear la orden: ' . $e->getMessage()
+        ], 500);
+    }
+}
     public function storeProvincia(Request $request)
     {
         $startTime = microtime(true);
@@ -4369,498 +4385,632 @@ class SolicitudrepuestoController extends Controller
             ], 500);
         }
     }
-    public function confirmarEntregaFisicaConFoto(Request $request, $id)
-    {
-        try {
-            DB::beginTransaction();
+public function confirmarEntregaFisicaConFoto(Request $request, $id)
+{
+    try {
+        DB::beginTransaction();
 
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_repuesto')
-                ->first();
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_repuesto')
+            ->first();
 
-            if (!$solicitud) {
+        if (!$solicitud) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404);
+        }
+
+        $articuloId = (int) $request->input('articulo_id');
+        // Limpiar y validar caracteres UTF-8
+        $observacionesEntrega = $this->sanitizeUTF8($request->input('observaciones', ''));
+        $nombreFirmante = $this->sanitizeUTF8($request->input('nombre_firmante', ''));
+        $fechaFirma = $this->sanitizeUTF8($request->input('fecha_firma', ''));
+
+        if (!$articuloId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'ID de artículo no proporcionado'
+            ], 400);
+        }
+
+        $articulo = DB::table('articulos')
+            ->select('codigo_repuesto')
+            ->where('idArticulos', $articuloId)
+            ->first();
+
+        $codigoRepuesto = $articulo->codigo_repuesto ?? null;
+
+        // Firma confirmada
+        $firmaConfirmadaRaw = $request->input('firma_confirmada');
+        $firmaConfirmada = in_array($firmaConfirmadaRaw, ['true', true, '1', 1], true) ? 1 : 0;
+
+        // Buscar entrega pendiente
+        $entregaPendiente = DB::table('repuestos_entregas')
+            ->where('solicitud_id', $id)
+            ->where('articulo_id', $articuloId)
+            ->where('estado', 'pendiente_entrega')
+            ->first();
+
+        if (!$entregaPendiente) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró el repuesto listo para entregar'
+            ], 404);
+        }
+
+        // Usuario que entrega
+        $usuarioEntregoId = $request->input('usuario_entrego_id') ?: auth()->id();
+
+        // ========================
+        // PROCESAR FOTO
+        // ========================
+        $fotoBlob = null;
+        $tipoArchivo = null;
+        $fotoGuardada = false;
+
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+
+            $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+            $mimeType = $file->getMimeType();
+
+            if (!in_array($mimeType, $validMimeTypes)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
-
-            $articuloId = (int) $request->input('articulo_id');
-            $observacionesEntrega = $request->input('observaciones');
-            $nombreFirmante = $request->input('nombre_firmante');
-            $fechaFirma = $request->input('fecha_firma');
-
-            if (!$articuloId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'ID de artículo no proporcionado'
+                    'message' => 'Formato de imagen no válido'
                 ], 400);
             }
 
-            $articulo = DB::table('articulos')
-                ->select('codigo_repuesto')
-                ->where('idArticulos', $articuloId)
-                ->first();
-
-            $codigoRepuesto = $articulo->codigo_repuesto ?? null;
-
-            // Firma confirmada
-            $firmaConfirmadaRaw = $request->input('firma_confirmada');
-            $firmaConfirmada = in_array($firmaConfirmadaRaw, ['true', true, '1', 1], true) ? 1 : 0;
-
-            // Buscar entrega pendiente
-            $entregaPendiente = DB::table('repuestos_entregas')
-                ->where('solicitud_id', $id)
-                ->where('articulo_id', $articuloId)
-                ->where('estado', 'pendiente_entrega')
-                ->first();
-
-            if (!$entregaPendiente) {
+            if ($file->getSize() > (10 * 1024 * 1024)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se encontró el repuesto listo para entregar'
-                ], 404);
+                    'message' => 'La imagen es demasiado grande (máx. 10MB)'
+                ], 400);
             }
 
-            // Usuario que entrega
-            $usuarioEntregoId = $request->input('usuario_entrego_id') ?: auth()->id();
-
-            // ========================
-            // PROCESAR FOTO
-            // ========================
-            $fotoBlob = null;
-            $tipoArchivo = null;
-
-            if ($request->hasFile('foto')) {
-                $file = $request->file('foto');
-
-                $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-                $mimeType = $file->getMimeType();
-
-                if (!in_array($mimeType, $validMimeTypes)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Formato de imagen no válido'
-                    ], 400);
-                }
-
-                if ($file->getSize() > (10 * 1024 * 1024)) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'La imagen es demasiado grande (máx. 10MB)'
-                    ], 400);
-                }
-
+            try {
                 $fotoBlob = file_get_contents($file->getRealPath());
                 $tipoArchivo = $mimeType;
+                $fotoGuardada = true;
+            } catch (\Exception $e) {
+                // Si hay error al leer la imagen, continuamos sin ella
+                $fotoGuardada = false;
             }
+        }
 
-            // ========================
-            // ACTUALIZAR REPUESTOS_ENTREGAS
-            // ========================
-            $updateData = [
-                'estado' => 'entregado',
-                'usuario_entrego_id' => $usuarioEntregoId,
-                'fecha_entrega' => now(),
-                'firma_confirma' => $firmaConfirmada,
-                'observaciones_entrega' => $observacionesEntrega,
+        // ========================
+        // PREPARAR OBSERVACIONES
+        // ========================
+        $observacionesBase = $this->sanitizeUTF8($entregaPendiente->observaciones ?? '');
+        
+        $observacionesAdicionales = " | ✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+            " | Firmado por: " . $nombreFirmante . " (" . $fechaFirma . ")" .
+            " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO');
+        
+        if (!empty($observacionesEntrega)) {
+            $observacionesAdicionales .= " | Obs. entrega: " . $observacionesEntrega;
+        }
+        
+        if ($fotoGuardada) {
+            $observacionesAdicionales .= " | Foto adjunta";
+        }
+        
+        $observacionesCompletas = $observacionesBase . $observacionesAdicionales;
+        
+        // Limpiar observaciones finales
+        $observacionesCompletas = $this->sanitizeUTF8($observacionesCompletas);
+
+        // ========================
+        // ACTUALIZAR REPUESTOS_ENTREGAS
+        // ========================
+        $updateData = [
+            'estado' => 'entregado',
+            'usuario_entrego_id' => $usuarioEntregoId,
+            'fecha_entrega' => now(),
+            'firma_confirma' => $firmaConfirmada,
+            'observaciones' => $observacionesCompletas,
+            'observaciones_entrega' => $observacionesEntrega,
+            'updated_at' => now()
+        ];
+
+        if ($fotoGuardada && $fotoBlob) {
+            $updateData['foto_entrega'] = $fotoBlob;
+            $updateData['tipo_archivo_foto'] = $tipoArchivo;
+        }
+
+        $affected = DB::table('repuestos_entregas')
+            ->where('id', $entregaPendiente->id)
+            ->update($updateData);
+
+        if ($affected === 0) {
+            throw new \Exception('No se pudo actualizar la entrega');
+        }
+
+        // ========================
+        // PREPARAR OBSERVACIONES PARA ORDENESARTICULOS
+        // ========================
+        $ubicacion = $this->sanitizeUTF8($entregaPendiente->ubicacion_utilizada ?? '');
+        $observacionOrdenArticulo = "✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+            " | Ubicación: " . $ubicacion .
+            " | Firmado por: " . $nombreFirmante .
+            " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA');
+        
+        if ($fotoGuardada) {
+            $observacionOrdenArticulo .= " | Foto adjunta";
+        }
+        
+        $observacionOrdenArticulo = $this->sanitizeUTF8($observacionOrdenArticulo);
+
+        // ========================
+        // ACTUALIZAR ORDENESARTICULOS
+        // ========================
+        DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('idarticulos', $articuloId)
+            ->update([
+                'estado' => 1,
+                'observacion' => $observacionOrdenArticulo,
                 'updated_at' => now()
-            ];
+            ]);
 
-            if ($fotoBlob) {
-                $updateData['foto_entrega'] = $fotoBlob;
-                $updateData['tipo_archivo_foto'] = $tipoArchivo;
-            }
+        // ========================
+        // ACTUALIZAR ESTADO SOLICITUD
+        // ========================
+        $existeEntrega = DB::table('repuestos_entregas')
+            ->where('solicitud_id', $id)
+            ->where('estado', 'entregado')
+            ->exists();
 
-            $observacionesCompletas = $entregaPendiente->observaciones .
-                " | ✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
-                " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
-                ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
-                ($fotoBlob ? " | Foto adjunta" : "");
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'estado' => $existeEntrega ? 'entregado' : $solicitud->estado,
+                'fechaactualizacion' => now(),
+                'updated_at' => now()
+            ]);
 
-            $updateData['observaciones'] = $observacionesCompletas;
+        // ========================
+        // NOTIFICACIONES
+        // ========================
+        $notificacionExistente = DB::table('notificaciones_solicitud')
+            ->where('idSolicitudesOrdenes', $id)
+            ->first();
 
-            $affected = DB::table('repuestos_entregas')
-                ->where('id', $entregaPendiente->id)
-                ->update($updateData);
-
-            if ($affected === 0) {
-                throw new \Exception('No se pudo actualizar la entrega');
-            }
-
-            // ========================
-            // ACTUALIZAR ORDENESARTICULOS
-            // ========================
-            DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('idarticulos', $articuloId)
+        if ($notificacionExistente) {
+            DB::table('notificaciones_solicitud')
+                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
                 ->update([
-                    'estado' => 1,
-                    'observacion' => "✅ ENTREGA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                        " | Ubicación: {$entregaPendiente->ubicacion_utilizada}" .
-                        " | Firmado por: {$nombreFirmante}" .
-                        " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
-                        ($fotoBlob ? " | Foto adjunta" : ""),
-                    'updated_at' => now()
-                ]);
-
-            // ========================
-            // ACTUALIZAR ESTADO SOLICITUD
-            // ========================
-            $existeEntrega = DB::table('repuestos_entregas')
-                ->where('solicitud_id', $id)
-                ->where('estado', 'entregado')
-                ->exists();
-
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'estado' => $existeEntrega ? 'entregado' : $solicitud->estado,
-                    'fechaactualizacion' => now(),
-                    'updated_at' => now()
-                ]);
-
-            // ========================
-            // NOTIFICACIONES
-            // ========================
-            $notificacionExistente = DB::table('notificaciones_solicitud')
-                ->where('idSolicitudesOrdenes', $id)
-                ->first();
-
-            if ($notificacionExistente) {
-                DB::table('notificaciones_solicitud')
-                    ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
-                    ->update([
-                        'estado_web' => 1,
-                        'estado_app' => 0,
-                        'fecha' => now(),
-                        'updated_at' => now()
-                    ]);
-            } else {
-                DB::table('notificaciones_solicitud')->insert([
-                    'idSolicitudesOrdenes' => $id,
                     'estado_web' => 1,
                     'estado_app' => 0,
                     'fecha' => now(),
-                    'created_at' => now(),
                     'updated_at' => now()
                 ]);
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Entrega confirmada exitosamente',
-                'codigo_solicitud' => $solicitud->codigo,
-                'articulo_id' => $articuloId,
-                'codigo_repuesto' => $codigoRepuesto,
-                'foto_guardada' => (bool) $fotoBlob,
-                'firma_confirmada' => (bool) $firmaConfirmada,
-                'observaciones_entrega' => $observacionesEntrega,
-                'estado_solicitud' => $existeEntrega ? 'entregado' : 'sin cambios'
+        } else {
+            DB::table('notificaciones_solicitud')->insert([
+                'idSolicitudesOrdenes' => $id,
+                'estado_web' => 1,
+                'estado_app' => 0,
+                'fecha' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al confirmar la entrega: ' . $e->getMessage()
-            ], 500);
         }
+
+        DB::commit();
+
+        // ========================
+        // PREPARAR RESPUESTA JSON SEGURA
+        // ========================
+        $responseData = [
+            'success' => true,
+            'message' => 'Entrega confirmada exitosamente',
+            'codigo_solicitud' => $this->sanitizeUTF8($solicitud->codigo ?? ''),
+            'articulo_id' => $articuloId,
+            'codigo_repuesto' => $this->sanitizeUTF8($codigoRepuesto ?? ''),
+            'foto_guardada' => $fotoGuardada,
+            'firma_confirmada' => (bool) $firmaConfirmada,
+            'observaciones_entrega' => $observacionesEntrega,
+            'estado_solicitud' => $existeEntrega ? 'entregado' : 'sin cambios'
+        ];
+
+        // Validar que todos los datos sean JSON válidos
+        $responseData = $this->ensureJsonSafe($responseData);
+
+        return response()->json($responseData, 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al confirmar la entrega: ' . $this->sanitizeUTF8($e->getMessage())
+        ], 500, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
+}
+
+/**
+ * Sanitiza una cadena para asegurar que solo tenga caracteres UTF-8 válidos
+ */
+private function sanitizeUTF8($string)
+{
+    if (is_null($string) || is_numeric($string)) {
+        return $string;
+    }
+
+    // Convertir a UTF-8 si no lo está
+    if (!mb_check_encoding($string, 'UTF-8')) {
+        $string = mb_convert_encoding($string, 'UTF-8', 'auto');
+    }
+
+    // Eliminar caracteres no válidos
+    $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+    
+    // Opcional: eliminar caracteres de control excepto tab, newline, carriage return
+    $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $string);
+    
+    return $string;
+}
+
+/**
+ * Asegura que todos los valores en un array sean seguros para JSON
+ */
+private function ensureJsonSafe($data)
+{
+    array_walk_recursive($data, function (&$value) {
+        if (is_string($value)) {
+            $value = $this->sanitizeUTF8($value);
+        }
+    });
+    
+    return $data;
+}
 
 
     /**
      * Confirmar entrega de repuesto cedido con foto
      */
-    public function confirmarEntregaCedidaConFoto(Request $request, $id)
-    {
-        Log::info("════════════════════════════════════════════════════════");
-        Log::info("📦 INICIANDO confirmarEntregaCedidaConFoto");
-        Log::info("════════════════════════════════════════════════════════");
+   /**
+ * Confirmar entrega de repuesto cedido con foto
+ */
+public function confirmarEntregaCedidaConFoto(Request $request, $id)
+{
+    Log::info("════════════════════════════════════════════════════════");
+    Log::info("📦 INICIANDO confirmarEntregaCedidaConFoto");
+    Log::info("════════════════════════════════════════════════════════");
 
-        Log::info("📦 DATOS RECIBIDOS:");
-        Log::info("- Solicitud ID: " . $id);
-        Log::info("- Articulo ID: " . $request->input('articulo_id'));
-        Log::info("- Entrega ID: " . $request->input('entrega_id'));
-        Log::info("- Todos los datos: " . json_encode($request->all()));
+    // Sanitizar el ID recibido
+    $id = $this->sanitizeUTF8($id);
+    
+    Log::info("📦 DATOS RECIBIDOS:");
+    Log::info("- Solicitud ID: " . $id);
+    Log::info("- Articulo ID: " . $request->input('articulo_id'));
+    Log::info("- Entrega ID: " . $request->input('entrega_id'));
+    
+    // Log sanitizado para evitar errores
+    $allData = $this->ensureJsonSafe($request->all());
+    Log::info("- Todos los datos: " . json_encode($allData, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE));
 
-        try {
-            DB::beginTransaction();
+    try {
+        DB::beginTransaction();
 
-            $solicitud = DB::table('solicitudesordenes')
-                ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
-                ->where('idsolicitudesordenes', $id)
-                ->where('tipoorden', 'solicitud_repuesto')
-                ->first();
+        $solicitud = DB::table('solicitudesordenes')
+            ->select('idsolicitudesordenes', 'codigo', 'estado', 'tipoorden', 'idUsuario', 'idTecnico')
+            ->where('idsolicitudesordenes', $id)
+            ->where('tipoorden', 'solicitud_repuesto')
+            ->first();
 
-            if (!$solicitud) {
-                Log::error("❌ Solicitud no encontrada");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Solicitud no encontrada'
-                ], 404);
-            }
+        if (!$solicitud) {
+            Log::error("❌ Solicitud no encontrada");
+            return response()->json([
+                'success' => false,
+                'message' => 'Solicitud no encontrada'
+            ], 404, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        }
 
-            Log::info("✅ Solicitud encontrada: " . $solicitud->codigo);
+        Log::info("✅ Solicitud encontrada: " . $this->sanitizeUTF8($solicitud->codigo));
 
-            $articuloId = (int)$request->input('articulo_id');
-            $entregaId = (int)$request->input('entrega_id');
-            $observacionesEntrega = $request->input('observaciones');
-            $nombreFirmante = $request->input('nombre_firmante');
-            $fechaFirma = $request->input('fecha_firma');
+        $articuloId = (int)$request->input('articulo_id');
+        $entregaId = (int)$request->input('entrega_id');
+        
+        // Sanitizar todos los inputs de texto
+        $observacionesEntrega = $this->sanitizeUTF8($request->input('observaciones', ''));
+        $nombreFirmante = $this->sanitizeUTF8($request->input('nombre_firmante', ''));
+        $fechaFirma = $this->sanitizeUTF8($request->input('fecha_firma', ''));
 
-            // Procesar firma_confirmada
-            $firmaConfirmada = 0;
-            $firmaConfirmadaRaw = $request->input('firma_confirmada');
-            if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
-                $firmaConfirmada = 1;
-            }
+        // Procesar firma_confirmada
+        $firmaConfirmada = 0;
+        $firmaConfirmadaRaw = $request->input('firma_confirmada');
+        if ($firmaConfirmadaRaw === 'true' || $firmaConfirmadaRaw === true || $firmaConfirmadaRaw === '1' || $firmaConfirmadaRaw === 1) {
+            $firmaConfirmada = 1;
+        }
 
-            // ==========================================
-            // 1. VALIDAR ENTREGA CEDIDA
-            // ==========================================
-            Log::info("🔍 Validando entrega cedida...");
-            $entregaCedida = DB::table('repuestos_entregas as re')
-                ->select(
-                    're.id',
-                    're.solicitud_id',
-                    're.articulo_id',
-                    're.cantidad',
-                    're.ubicacion_utilizada',
-                    're.entrega_origen_id',
-                    're.estado',
-                    're.observaciones',
-                    're.numero_ticket',
-                    'so.codigo as codigo_solicitud',
-                    'a.nombre as articulo_nombre'
-                )
-                ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
-                ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
-                ->where('re.id', $entregaId)
-                ->where('re.solicitud_id', $id)
-                ->where('re.articulo_id', $articuloId)
-                ->where('re.estado', 'listo_para_ceder')
-                ->first();
+        // ==========================================
+        // 1. VALIDAR ENTREGA CEDIDA
+        // ==========================================
+        Log::info("🔍 Validando entrega cedida...");
+        $entregaCedida = DB::table('repuestos_entregas as re')
+            ->select(
+                're.id',
+                're.solicitud_id',
+                're.articulo_id',
+                're.cantidad',
+                're.ubicacion_utilizada',
+                're.entrega_origen_id',
+                're.estado',
+                're.observaciones',
+                're.numero_ticket',
+                'so.codigo as codigo_solicitud',
+                'a.nombre as articulo_nombre'
+            )
+            ->leftJoin('solicitudesordenes as so', 're.solicitud_id', '=', 'so.idsolicitudesordenes')
+            ->leftJoin('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
+            ->where('re.id', $entregaId)
+            ->where('re.solicitud_id', $id)
+            ->where('re.articulo_id', $articuloId)
+            ->where('re.estado', 'listo_para_ceder')
+            ->first();
 
-            if (!$entregaCedida) {
-                Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Entrega cedida no encontrada o no está disponible'
-                ], 404);
-            }
+        if (!$entregaCedida) {
+            Log::error("❌ Entrega cedida no encontrada o no está en 'listo_para_ceder'");
+            return response()->json([
+                'success' => false,
+                'message' => 'Entrega cedida no encontrada o no está disponible'
+            ], 404, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        }
 
-            Log::info("✅ Entrega cedida validada:");
-            Log::info("   - ID: " . $entregaCedida->id);
-            Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
-            Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
+        // Sanitizar datos de la entrega
+        $entregaCedida->codigo_solicitud = $this->sanitizeUTF8($entregaCedida->codigo_solicitud ?? '');
+        $entregaCedida->articulo_nombre = $this->sanitizeUTF8($entregaCedida->articulo_nombre ?? '');
+        $entregaCedida->observaciones = $this->sanitizeUTF8($entregaCedida->observaciones ?? '');
+        $entregaCedida->ubicacion_utilizada = $this->sanitizeUTF8($entregaCedida->ubicacion_utilizada ?? '');
 
-            // ==========================================
-            // 2. PROCESAR FOTO
-            // ==========================================
-            $fotoBlob = null;
-            $tipoArchivo = null;
+        Log::info("✅ Entrega cedida validada:");
+        Log::info("   - ID: " . $entregaCedida->id);
+        Log::info("   - Solicitud: " . $entregaCedida->codigo_solicitud);
+        Log::info("   - Artículo: " . $entregaCedida->articulo_nombre);
 
-            Log::info("🖼️ Procesando foto...");
-            if ($request->hasFile('foto')) {
-                try {
-                    $file = $request->file('foto');
+        // ==========================================
+        // 2. PROCESAR FOTO
+        // ==========================================
+        $fotoBlob = null;
+        $tipoArchivo = null;
+        $fotoGuardada = false;
 
-                    // Validaciones
-                    $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
-                    $mimeType = $file->getMimeType();
+        Log::info("🖼️ Procesando foto...");
+        if ($request->hasFile('foto')) {
+            try {
+                $file = $request->file('foto');
 
-                    if (!in_array($mimeType, $validMimeTypes)) {
-                        throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
-                    }
+                // Validaciones
+                $validMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp'];
+                $mimeType = $file->getMimeType();
 
-                    // Tamaño máximo: 10MB
-                    $maxSize = 10 * 1024 * 1024;
-                    $fileSize = $file->getSize();
-
-                    if ($fileSize > $maxSize) {
-                        throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
-                    }
-
-                    // Leer la imagen
-                    $fotoBlob = file_get_contents($file->getRealPath());
-                    $tipoArchivo = $mimeType;
-
-                    Log::info("✅ Foto procesada exitosamente");
-                } catch (\Exception $e) {
-                    Log::error("❌ Error al procesar foto: " . $e->getMessage());
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Error al procesar la foto: ' . $e->getMessage()
-                    ], 400);
+                if (!in_array($mimeType, $validMimeTypes)) {
+                    throw new \Exception('Formato de imagen no válido. Solo se permiten JPG, PNG, GIF, WEBP, BMP');
                 }
+
+                // Tamaño máximo: 10MB
+                $maxSize = 10 * 1024 * 1024;
+                $fileSize = $file->getSize();
+
+                if ($fileSize > $maxSize) {
+                    throw new \Exception("La imagen es demasiado grande. Máximo 10MB");
+                }
+
+                // Leer la imagen
+                $fotoBlob = file_get_contents($file->getRealPath());
+                $tipoArchivo = $mimeType;
+                $fotoGuardada = true;
+
+                Log::info("✅ Foto procesada exitosamente");
+            } catch (\Exception $e) {
+                Log::error("❌ Error al procesar foto: " . $e->getMessage());
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error al procesar la foto: ' . $this->sanitizeUTF8($e->getMessage())
+                ], 400, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             }
+        }
 
-            // ==========================================
-            // 3. ACTUALIZAR ENTREGA CEDIDA
-            // ==========================================
-            Log::info("🔄 Actualizando entrega cedida...");
+        // ==========================================
+        // 3. ACTUALIZAR ENTREGA CEDIDA
+        // ==========================================
+        Log::info("🔄 Actualizando entrega cedida...");
 
-            // Preparar datos de actualización
-            $updateData = [
-                'estado' => 'entregado',
-                'usuario_entrego_id' => auth()->id(),
-                'fecha_entrega' => now(),
-                'firma_confirma' => $firmaConfirmada,
-                'observaciones_entrega' => $observacionesEntrega,
+        // Preparar datos de actualización
+        $updateData = [
+            'estado' => 'entregado',
+            'usuario_entrego_id' => auth()->id(),
+            'fecha_entrega' => now(),
+            'firma_confirma' => $firmaConfirmada,
+            'observaciones_entrega' => $observacionesEntrega,
+            'updated_at' => now()
+        ];
+
+        // Agregar foto si existe
+        if ($fotoGuardada && $fotoBlob) {
+            $updateData['foto_entrega'] = $fotoBlob;
+            $updateData['tipo_archivo_foto'] = $tipoArchivo;
+        }
+
+        // Preparar observaciones generales
+        $observacionesBase = $entregaCedida->observaciones;
+        
+        $observacionesAdicionales = " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+            " | Firmado por: " . $nombreFirmante . " (" . $fechaFirma . ")" .
+            " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO');
+        
+        if (!empty($observacionesEntrega)) {
+            $observacionesAdicionales .= " | Obs. entrega: " . $observacionesEntrega;
+        }
+        
+        if ($fotoGuardada && $tipoArchivo) {
+            $observacionesAdicionales .= " | Foto adjunta: " . $tipoArchivo;
+        }
+        
+        $observacionesCompletas = $observacionesBase . $observacionesAdicionales;
+        $observacionesCompletas = $this->sanitizeUTF8($observacionesCompletas);
+        
+        $updateData['observaciones'] = $observacionesCompletas;
+
+        // Ejecutar actualización
+        $affected = DB::table('repuestos_entregas')
+            ->where('id', $entregaCedida->id)
+            ->update($updateData);
+
+        if ($affected === 0) {
+            throw new \Exception("No se pudo actualizar el registro de entrega cedida");
+        }
+
+        Log::info("✅ Entrega cedida actualizada exitosamente");
+
+        // ==========================================
+        // 4. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
+        // ==========================================
+        if ($entregaCedida->entrega_origen_id) {
+            Log::info("🔄 Actualizando entrega origen...");
+            
+            $observacionOrigen = " | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s');
+            $observacionOrigen = $this->sanitizeUTF8($observacionOrigen);
+            
+            DB::table('repuestos_entregas')
+                ->where('id', $entregaCedida->entrega_origen_id)
+                ->update([
+                    'observaciones' => DB::raw("CONCAT(observaciones, '" . addslashes($observacionOrigen) . "')"),
+                    'updated_at' => now()
+                ]);
+        }
+
+        // ==========================================
+        // 5. ACTUALIZAR ORDENESARTICULOS
+        // ==========================================
+        Log::info("📝 Actualizando ordenesarticulos...");
+        
+        $observacionOrdenArticulo = "✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
+            " | Ubicación: " . $entregaCedida->ubicacion_utilizada .
+            " | Firmado por: " . $nombreFirmante .
+            " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA');
+        
+        if ($fotoGuardada) {
+            $observacionOrdenArticulo .= " | Foto adjunta";
+        }
+        
+        $observacionOrdenArticulo = $this->sanitizeUTF8($observacionOrdenArticulo);
+
+        DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('idarticulos', $articuloId)
+            ->update([
+                'estado' => 1,
+                'observacion' => $observacionOrdenArticulo,
                 'updated_at' => now()
-            ];
+            ]);
 
-            // Agregar foto si existe
-            if ($fotoBlob) {
-                $updateData['foto_entrega'] = $fotoBlob;
-                $updateData['tipo_archivo_foto'] = $tipoArchivo;
-            }
+        // ==========================================
+        // 6. ACTUALIZAR ESTADO SOLICITUD
+        // ==========================================
+        Log::info("🔄 Actualizando estado de solicitud...");
 
-            // Actualizar observaciones generales
-            $observacionesCompletas = $entregaCedida->observaciones .
-                " | ✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                " | Firmado por: {$nombreFirmante} ({$fechaFirma})" .
-                " | Firma confirmada: " . ($firmaConfirmada ? 'SÍ' : 'NO') .
-                ($observacionesEntrega ? " | Obs. entrega: {$observacionesEntrega}" : "") .
-                ($fotoBlob ? " | Foto adjunta: {$tipoArchivo}" : "");
+        $totalRepuestos = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->count();
 
-            $updateData['observaciones'] = $observacionesCompletas;
+        $repuestosEntregados = DB::table('ordenesarticulos')
+            ->where('idsolicitudesordenes', $id)
+            ->where('estado', 1)
+            ->count();
 
-            // Ejecutar actualización
-            $affected = DB::table('repuestos_entregas')
-                ->where('id', $entregaCedida->id)
-                ->update($updateData);
+        Log::info("📊 Estado de repuestos:");
+        Log::info("   - Total: " . $totalRepuestos);
+        Log::info("   - Entregados: " . $repuestosEntregados);
 
-            if ($affected === 0) {
-                throw new \Exception("No se pudo actualizar el registro de entrega cedida");
-            }
+        $nuevoEstado = 'parcial_listo';
+        if ($repuestosEntregados == $totalRepuestos) {
+            $nuevoEstado = 'entregado';
+        }
 
-            Log::info("✅ Entrega cedida actualizada exitosamente");
+        DB::table('solicitudesordenes')
+            ->where('idsolicitudesordenes', $id)
+            ->update([
+                'estado' => $nuevoEstado,
+                'fechaactualizacion' => now(),
+                'updated_at' => now()
+            ]);
 
-            // ==========================================
-            // 4. ACTUALIZAR ENTREGA ORIGEN (OPCIONAL)
-            // ==========================================
-            if ($entregaCedida->entrega_origen_id) {
-                Log::info("🔄 Actualizando entrega origen...");
-                DB::table('repuestos_entregas')
-                    ->where('id', $entregaCedida->entrega_origen_id)
-                    ->update([
-                        'observaciones' => DB::raw("CONCAT(observaciones, ' | 📤 ENTREGA CEDIDA COMPLETADA: " . now()->format('d/m/Y H:i:s') . "')"),
-                        'updated_at' => now()
-                    ]);
-            }
+        Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
 
-            // ==========================================
-            // 5. ACTUALIZAR ORDENESARTICULOS
-            // ==========================================
-            Log::info("📝 Actualizando ordenesarticulos...");
-            DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('idarticulos', $articuloId)
+        // ==========================================
+        // 7. NOTIFICACIONES
+        // ==========================================
+        Log::info("🔔 Procesando notificaciones...");
+        $notificacionExistente = DB::table('notificaciones_solicitud')
+            ->where('idsolicitudesordenes', $id)
+            ->first();
+
+        if ($notificacionExistente) {
+            DB::table('notificaciones_solicitud')
+                ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
                 ->update([
-                    'estado' => 1,
-                    'observacion' => "✅ ENTREGA CEDIDA CONFIRMADA: " . now()->format('d/m/Y H:i:s') .
-                        " | Ubicación: {$entregaCedida->ubicacion_utilizada}" .
-                        " | Firmado por: {$nombreFirmante}" .
-                        " | Firma: " . ($firmaConfirmada ? 'CONFIRMADA' : 'NO CONFIRMADA') .
-                        ($fotoBlob ? " | Foto adjunta" : ""),
-                    'updated_at' => now()
-                ]);
-
-            // ==========================================
-            // 6. ACTUALIZAR ESTADO SOLICITUD
-            // ==========================================
-            Log::info("🔄 Actualizando estado de solicitud...");
-
-            $totalRepuestos = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->count();
-
-            $repuestosEntregados = DB::table('ordenesarticulos')
-                ->where('idsolicitudesordenes', $id)
-                ->where('estado', 1)
-                ->count();
-
-            Log::info("📊 Estado de repuestos:");
-            Log::info("   - Total: " . $totalRepuestos);
-            Log::info("   - Entregados: " . $repuestosEntregados);
-
-            $nuevoEstado = 'parcial_listo';
-            if ($repuestosEntregados == $totalRepuestos) {
-                $nuevoEstado = 'entregado';
-            }
-
-            DB::table('solicitudesordenes')
-                ->where('idsolicitudesordenes', $id)
-                ->update([
-                    'estado' => $nuevoEstado,
-                    'fechaactualizacion' => now(),
-                    'updated_at' => now()
-                ]);
-
-            Log::info("✅ Estado de solicitud actualizado a: " . $nuevoEstado);
-
-            // ==========================================
-            // 7. NOTIFICACIONES
-            // ==========================================
-            Log::info("🔔 Procesando notificaciones...");
-            $notificacionExistente = DB::table('notificaciones_solicitud')
-                ->where('idsolicitudesordenes', $id)
-                ->first();
-
-            if ($notificacionExistente) {
-                DB::table('notificaciones_solicitud')
-                    ->where('idNotificacionSolicitud', $notificacionExistente->idNotificacionSolicitud)
-                    ->update([
-                        'estado_web' => 1,
-                        'estado_app' => 0,
-                        'fecha' => now(),
-                        'updated_at' => now()
-                    ]);
-            } else {
-                DB::table('notificaciones_solicitud')->insert([
-                    'idsolicitudesordenes' => $id,
                     'estado_web' => 1,
                     'estado_app' => 0,
                     'fecha' => now(),
-                    'created_at' => now(),
                     'updated_at' => now()
                 ]);
-            }
-
-            DB::commit();
-
-            Log::info("════════════════════════════════════════════════════════");
-            Log::info("✅ confirmarEntregaCedidaConFoto COMPLETADO EXITOSAMENTE");
-            Log::info("════════════════════════════════════════════════════════");
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Entrega de repuesto cedido confirmada exitosamente',
-                'codigo_solicitud' => $solicitud->codigo,
-                'articulo_nombre' => $entregaCedida->articulo_nombre,
-                'estado_solicitud' => $nuevoEstado,
-                'repuestos_entregados' => $repuestosEntregados,
-                'repuestos_totales' => $totalRepuestos,
-                'foto_guardada' => $fotoBlob ? true : false,
-                'firma_confirmada' => (bool)$firmaConfirmada
+        } else {
+            DB::table('notificaciones_solicitud')->insert([
+                'idsolicitudesordenes' => $id,
+                'estado_web' => 1,
+                'estado_app' => 0,
+                'fecha' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("💥 ERROR en confirmarEntregaCedidaConFoto: " . $e->getMessage());
-            Log::error("Trace: " . $e->getTraceAsString());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al confirmar entrega cedida: ' . $e->getMessage()
-            ], 500);
         }
+
+        DB::commit();
+
+        Log::info("════════════════════════════════════════════════════════");
+        Log::info("✅ confirmarEntregaCedidaConFoto COMPLETADO EXITOSAMENTE");
+        Log::info("════════════════════════════════════════════════════════");
+
+        // Preparar respuesta JSON segura
+        $responseData = [
+            'success' => true,
+            'message' => 'Entrega de repuesto cedido confirmada exitosamente',
+            'codigo_solicitud' => $this->sanitizeUTF8($solicitud->codigo ?? ''),
+            'articulo_nombre' => $entregaCedida->articulo_nombre,
+            'estado_solicitud' => $nuevoEstado,
+            'repuestos_entregados' => $repuestosEntregados,
+            'repuestos_totales' => $totalRepuestos,
+            'foto_guardada' => $fotoGuardada,
+            'firma_confirmada' => (bool)$firmaConfirmada
+        ];
+
+        // Validar que todos los datos sean JSON válidos
+        $responseData = $this->ensureJsonSafe($responseData);
+
+        return response()->json($responseData, 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error("💥 ERROR en confirmarEntregaCedidaConFoto: " . $this->sanitizeUTF8($e->getMessage()));
+        Log::error("Trace: " . $this->sanitizeUTF8($e->getTraceAsString()));
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al confirmar entrega cedida: ' . $this->sanitizeUTF8($e->getMessage())
+        ], 500, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
+}
+
+
+
+/**
+ * Asegura que todos los valores en un array sean seguros para JSON
+ */
 
     public function obtenerInfoEntrega($solicitudId, $articuloId)
     {

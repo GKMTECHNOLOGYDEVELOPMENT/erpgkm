@@ -1064,20 +1064,9 @@
 
                 // Datos para los selects
                 tiposServicio: [{
-                        value: 'mantenimiento',
-                        text: 'Mantenimiento Preventivo'
-                    },
-                    {
-                        value: 'reparacion',
-                        text: 'Reparación Correctiva'
-                    },
-                    {
-                        value: 'instalacion',
-                        text: 'Instalación'
-                    },
-                    {
-                        value: 'garantia',
-                        text: 'Garantía'
+                      
+                        value: 'Mantenimiento correctivo',
+                        text: 'Mantenimiento correctivo'
                     }
                 ],
                 nivelesUrgencia: [{

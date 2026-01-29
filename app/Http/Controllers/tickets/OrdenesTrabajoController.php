@@ -5080,9 +5080,9 @@ class OrdenesTrabajoController extends Controller
 public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
 {
     Log::info('OrdenesTrabajoController@obtenerSolicitudesRepuestos - Inicio', [
-        'ticketId' => $ticketId,
-        'visitaId' => $visitaId,
-        'multiple_solicitudes' => 'HABILITADO' // Indicador de cambio
+        'ticketId' => $this->sanitizeUTF8($ticketId),
+        'visitaId' => $this->sanitizeUTF8($visitaId),
+        'multiple_solicitudes' => 'HABILITADO'
     ]);
 
     try {
@@ -5095,7 +5095,7 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
         // Filtro por visita si se proporciona
         if ($visitaId && $visitaId !== 'null') {
             Log::info('Aplicando filtro por visita', [
-                'visitaId' => $visitaId
+                'visitaId' => $this->sanitizeUTF8($visitaId)
             ]);
             $querySolicitud->where('so.idVisita', $visitaId);
         }
@@ -5114,7 +5114,24 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
             'u_destino.Nombre as destino_nombre',
         ]);
 
-        $solicitudes = $querySolicitud->get(); // ← CAMBIO AQUÍ: get() en lugar de first()
+        $solicitudes = $querySolicitud->get();
+
+        // Sanitizar datos de las solicitudes
+        $solicitudes = $solicitudes->map(function ($solicitud) {
+            return (object) [
+                'idSolicitudesOrdenes' => $solicitud->idSolicitudesOrdenes,
+                'codigo' => $this->sanitizeUTF8($solicitud->codigo),
+                'estado_solicitud' => $this->sanitizeUTF8($solicitud->estado_solicitud),
+                'fechaCreacion' => $solicitud->fechaCreacion,
+                'fechaEntrega' => $solicitud->fechaEntrega,
+                'observaciones' => $this->sanitizeUTF8($solicitud->observaciones),
+                'idTecnico' => $solicitud->idTecnico,
+                'id_usuario_destino' => $solicitud->id_usuario_destino,
+                'tecnico_nombre' => $this->sanitizeUTF8($solicitud->tecnico_nombre),
+                'tecnico_apellido' => $this->sanitizeUTF8($solicitud->tecnico_apellido),
+                'destino_nombre' => $this->sanitizeUTF8($solicitud->destino_nombre),
+            ];
+        });
 
         Log::info('Solicitudes encontradas', [
             'total_solicitudes' => $solicitudes->count(),
@@ -5128,7 +5145,7 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
                 'success' => true,
                 'solicitudes' => [],
                 'tiene_entregas' => false
-            ]);
+            ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         }
 
         $solicitudesData = [];
@@ -5146,9 +5163,12 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
                 ->where('solicitud_id', $solicitud->idSolicitudesOrdenes)
                 ->exists();
 
+            // Usar texto simple en lugar de caracteres especiales para logs
+            $tieneEntregasTexto = $tieneEntregas ? 'Si' : 'No';
+            
             Log::info('Verificación de entregas para solicitud', [
                 'solicitud_id' => $solicitud->idSolicitudesOrdenes,
-                'tiene_entregas' => $tieneEntregas ? 'Sí' : 'No'
+                'tiene_entregas' => $tieneEntregasTexto
             ]);
 
             // Si NO tiene entregas, NO incluir esta solicitud
@@ -5208,6 +5228,48 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
                 ])
                 ->orderBy('re.fecha_entrega', 'desc')
                 ->get();
+
+            // Sanitizar datos de entregas
+            $entregas = $entregas->map(function ($entrega) {
+                return (object) [
+                    'entrega_id' => $entrega->entrega_id,
+                    'solicitud_id' => $entrega->solicitud_id,
+                    'articulo_id' => $entrega->articulo_id,
+                    'cantidad_entregada' => $entrega->cantidad_entregada,
+                    'estado_entrega' => $this->sanitizeUTF8($entrega->estado_entrega),
+                    'tipo_entrega' => $this->sanitizeUTF8($entrega->tipo_entrega),
+                    'ubicacion_utilizada' => $this->sanitizeUTF8($entrega->ubicacion_utilizada),
+                    'ubicacion_id' => $entrega->ubicacion_id,
+                    'numero_ticket' => $this->sanitizeUTF8($entrega->numero_ticket),
+                    'fecha_entrega' => $entrega->fecha_entrega,
+                    'fecha_preparacion' => $entrega->fecha_preparacion,
+                    'usuario_entrego_id' => $entrega->usuario_entrego_id,
+                    'usuario_preparo_id' => $entrega->usuario_preparo_id,
+                    'usuario_destino_id' => $entrega->usuario_destino_id,
+                    'observaciones_entrega' => $this->sanitizeUTF8($entrega->observaciones_entrega),
+                    'obs_entrega' => $this->sanitizeUTF8($entrega->obs_entrega),
+                    'firma_confirma' => $entrega->firma_confirma,
+                    'firmaReceptor' => $entrega->firmaReceptor,
+                    'firmaEmisor' => $entrega->firmaEmisor,
+                    'fotoRetorno' => $entrega->fotoRetorno,
+                    'obsEntrega' => $this->sanitizeUTF8($entrega->obsEntrega),
+                    'foto_entrega' => $entrega->foto_entrega,
+                    'tipo_archivo_foto' => $this->sanitizeUTF8($entrega->tipo_archivo_foto),
+                    
+                    'entrego_nombre' => $this->sanitizeUTF8($entrega->entrego_nombre),
+                    'entrego_apellido' => $this->sanitizeUTF8($entrega->entrego_apellido),
+                    'preparo_nombre' => $this->sanitizeUTF8($entrega->preparo_nombre),
+                    'preparo_apellido' => $this->sanitizeUTF8($entrega->preparo_apellido),
+                    'destino_re_nombre' => $this->sanitizeUTF8($entrega->destino_re_nombre),
+                    'destino_re_apellido' => $this->sanitizeUTF8($entrega->destino_re_apellido),
+                    
+                    'codigo_articulo' => $this->sanitizeUTF8($entrega->codigo_articulo),
+                    'codigo_barras_articulo' => $this->sanitizeUTF8($entrega->codigo_barras_articulo),
+                    'nombre_articulo' => $this->sanitizeUTF8($entrega->nombre_articulo),
+                    'sku_articulo' => $this->sanitizeUTF8($entrega->sku_articulo),
+                    'stock_articulo' => $entrega->stock_articulo
+                ];
+            });
 
             Log::info('Entregas encontradas para solicitud', [
                 'solicitud_id' => $solicitud->idSolicitudesOrdenes,
@@ -5272,7 +5334,7 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
                         'idticket' => $ticketId,
                         'cantidad' => $entrega->cantidad_entregada ?? 1,
                         'estado' => 0,
-                        'observacion' => 'Creado automáticamente desde entrega',
+                        'observacion' => $this->sanitizeUTF8('Creado automáticamente desde entrega'),
                         'created_at' => Carbon::now(),
                         'updated_at' => Carbon::now()
                     ]);
@@ -5301,8 +5363,8 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
                     'observaciones_entrega' => $entrega->observaciones_entrega,
                     'cantidad_entregada' => $entrega->cantidad_entregada,
                     'obsEntrega' => $entrega->obsEntrega,
-                    'fotoRetorno' => $entrega->fotoRetorno ? 'Sí' : 'No',
-                    'firma_confirma' => $entrega->firma_confirma ? 'Sí' : 'No'
+                    'fotoRetorno' => $entrega->fotoRetorno ? 'Si' : 'No', // Cambiar a texto simple
+                    'firma_confirma' => $entrega->firma_confirma ? 'Si' : 'No' // Cambiar a texto simple
                 ];
 
                 // Agrupar artículos únicos
@@ -5327,7 +5389,7 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
 
             // 6️⃣ Preparar artículos para ESTA solicitud
             foreach ($articulosUnicos as $articuloId => $articuloData) {
-                // Determinar estado de uso
+                // Determinar estado de uso con texto simple
                 $estadoUso = 'Pendiente';
                 $estadoColor = 'secondary';
                 
@@ -5394,30 +5456,93 @@ public function obtenerSolicitudesRepuestos($ticketId, $visitaId = null)
             'solicitudes_devueltas_ids' => collect($solicitudesData)->pluck('idSolicitudesOrdenes')->toArray()
         ]);
 
-        return response()->json([
+        // Sanitizar los datos finales antes de retornar
+        $solicitudesData = $this->ensureJsonSafe($solicitudesData);
+
+        $response = [
             'success' => true,
-            'solicitudes' => $solicitudesData, // ← AHORA ES UN ARRAY DE MÚLTIPLES SOLICITUDES
+            'solicitudes' => $solicitudesData,
             'tiene_entregas' => count($solicitudesData) > 0,
             'metadata' => [
                 'total_solicitudes' => count($solicitudesData),
-                'filtro_ticket' => $ticketId,
-                'filtro_visita' => $visitaId
+                'filtro_ticket' => $this->sanitizeUTF8($ticketId),
+                'filtro_visita' => $this->sanitizeUTF8($visitaId)
             ]
-        ]);
+        ];
+
+        // Sanitizar respuesta completa
+        $response = $this->ensureJsonSafe($response);
+
+        return response()->json($response, 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
 
     } catch (\Exception $e) {
         Log::error('Error en obtenerSolicitudesRepuestos', [
-            'message' => $e->getMessage(),
+            'message' => $this->sanitizeUTF8($e->getMessage()),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
+            'trace' => $this->sanitizeUTF8($e->getTraceAsString())
         ]);
 
         return response()->json([
             'success' => false,
-            'message' => 'Error al obtener solicitudes de repuestos'
-        ], 500);
+            'message' => $this->sanitizeUTF8('Error al obtener solicitudes de repuestos')
+        ], 500, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
+}
+
+/**
+ * Sanitiza una cadena para asegurar que solo tenga caracteres UTF-8 válidos
+ */
+private function sanitizeUTF8($string)
+{
+    if (is_null($string) || is_numeric($string) || is_bool($string)) {
+        return $string;
+    }
+
+    if (!is_string($string)) {
+        $string = strval($string);
+    }
+
+    // Verificar si la cadena está vacía
+    if (empty($string)) {
+        return $string;
+    }
+
+    // Intentar detectar y convertir a UTF-8
+    $detectedEncoding = mb_detect_encoding($string, ['UTF-8', 'ISO-8859-1', 'Windows-1252'], true);
+    
+    if ($detectedEncoding && $detectedEncoding !== 'UTF-8') {
+        $string = mb_convert_encoding($string, 'UTF-8', $detectedEncoding);
+    } elseif (!$detectedEncoding) {
+        // Si no se puede detectar, intentar conversión forzada
+        $string = mb_convert_encoding($string, 'UTF-8', 'auto');
+    }
+
+    // Eliminar caracteres de control excepto tab, newline, carriage return
+    $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $string);
+    
+    // Eliminar caracteres UTF-8 no válidos
+    $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+    
+    return $string;
+}
+
+/**
+ * Asegura que todos los valores en un array sean seguros para JSON
+ */
+private function ensureJsonSafe($data)
+{
+    if (is_array($data) || is_object($data)) {
+        array_walk_recursive($data, function (&$value, $key) {
+            if (is_string($value)) {
+                $value = $this->sanitizeUTF8($value);
+            }
+        });
+    } elseif (is_string($data)) {
+        $data = $this->sanitizeUTF8($data);
+    }
+    
+    return $data;
 }
 
 public function marcarComoUsado(Request $request)
