@@ -91,8 +91,9 @@ class RepuestoTransitoController extends Controller
             'so.estado as estado_solicitud',
             'u.Nombre as solicitante',
             'sc.nombre as subcategoria',
-            'm.nombre as modelo',
-            'mar.nombre as marca',
+            // CAMPOS QUE TU VISTA NECESITA
+            DB::raw('COALESCE(mo.nombre, "N/A") as modelo'),
+            DB::raw('COALESCE(ma.nombre, "N/A") as marca'),
             're.estado as estado_entrega',
             're.fecha_entrega',
             're.observaciones as obs_entrega',
@@ -111,12 +112,10 @@ class RepuestoTransitoController extends Controller
         ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
         ->leftJoin('usuarios as u', 'so.idUsuario', '=', 'u.idUsuario')
         ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-        ->leftJoin('articulo_modelo as am', function($join) {
-            $join->on('a.idArticulos', '=', 'am.articulo_id')
-                 ->where('a.idTipoArticulo', 2);
-        })
-        ->leftJoin('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
-        ->leftJoin('marca as mar', 'm.idMarca', '=', 'mar.idMarca')
+        // RELACIÓN CON TICKET PARA OBTENER EL MODELO
+        ->leftJoin('tickets as t', 't.idTickets', '=', 'so.idticket')
+        ->leftJoin('modelo as mo', 'mo.idModelo', '=', 't.idModelo')
+        ->leftJoin('marca as ma', 'ma.idMarca', '=', 'mo.idMarca')
         ->leftJoin('repuestos_entregas as re', function($join) {
             $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
                  ->on('oa.idArticulos', '=', 're.articulo_id');
@@ -158,6 +157,31 @@ class RepuestoTransitoController extends Controller
         $query->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
     }
 
+    if (!empty($filtros['codigo_solicitud'])) {
+        $query->where('so.codigo', 'like', '%' . $filtros['codigo_solicitud'] . '%');
+    }
+
+    if (!empty($filtros['solicitante'])) {
+        $query->where('u.Nombre', 'like', '%' . $filtros['solicitante'] . '%');
+    }
+
+    // Filtro de modelo - buscar tanto en modelo como en marca
+    if (!empty($filtros['modelo'])) {
+        $query->where(function($q) use ($filtros) {
+            $q->where('mo.nombre', 'like', '%' . $filtros['modelo'] . '%')
+              ->orWhere('ma.nombre', 'like', '%' . $filtros['modelo'] . '%');
+        });
+    }
+
+    // Filtro de marca específica
+    if (!empty($filtros['marca'])) {
+        $query->where('ma.nombre', 'like', '%' . $filtros['marca'] . '%');
+    }
+
+    if (!empty($filtros['subcategoria'])) {
+        $query->where('sc.nombre', 'like', '%' . $filtros['subcategoria'] . '%');
+    }
+
     if (!empty($filtros['fecha_desde'])) {
         $query->whereDate('re.fecha_entrega', '>=', $filtros['fecha_desde']);
     }
@@ -166,10 +190,21 @@ class RepuestoTransitoController extends Controller
         $query->whereDate('re.fecha_entrega', '<=', $filtros['fecha_hasta']);
     }
 
+    if (!empty($filtros['numero_ticket'])) {
+        $query->where('re.numero_ticket', 'like', '%' . $filtros['numero_ticket'] . '%');
+    }
+
+    // AGRUPAR PARA EVITAR DUPLICADOS POR MODELOS
+    $query->groupBy(
+        'oa.idOrdenesArticulos',
+        'a.idArticulos',
+        'so.idSolicitudesOrdenes',
+        're.id'
+    );
+
     return $query->orderBy('re.fecha_entrega', 'desc')
                  ->orderBy('oa.created_at', 'desc');
 }
-
     /**
      * Obtiene contadores con filtros aplicados
      */
