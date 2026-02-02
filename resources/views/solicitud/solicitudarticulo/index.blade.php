@@ -592,8 +592,8 @@
 
                         @php
                             $fechaRequerida = $solicitud->fecharequerida
-                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)->startOfDay()
-                                : now()->addDays(7)->startOfDay();
+                                ? \Carbon\Carbon::parse($solicitud->fecharequerida)->addDay()->startOfDay()
+                                : now()->addDays(8)->startOfDay();
 
                             $diasRestantes = now()->startOfDay()->diffInDays($fechaRequerida, false);
                         @endphp
