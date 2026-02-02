@@ -1,23 +1,35 @@
 <x-layout.default>
 
-    @php
-        $estadosSinCeder = ['entregado', 'listo_para_entregar', 'aprobada'];
-        $mostrarColumnaCeder = !in_array($solicitud->estado, $estadosSinCeder);
+   @php
+    // Estados que bloquean la opción de ceder a nivel de solicitud
+    $estadosSolicitudSinCeder = ['entregado', 'listo_para_entregar', 'aprobada'];
+    $bloquearCederPorSolicitud = in_array($solicitud->estado, $estadosSolicitudSinCeder);
+    
+    // Estados que bloquean la opción de ceder a nivel de repuesto
+    $estadosRepuestoSinCeder = [
+        'entregado',
+        'entregado_cedido', 
+        'listo_para_entregar',
+        'listo_para_ceder',
+        'usado',
+        'devuelto',
+        'pendiente_por_retorno'
+    ];
 
-        // Obtener todos los usuarios disponibles para entregar repuestos
-        $usuariosDisponibles = DB::table('usuarios')
-            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'correo')
-            ->where('estado', 1)
-            ->orderBy('Nombre')
-            ->get();
+    // Obtener todos los usuarios disponibles para entregar repuestos
+    $usuariosDisponibles = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'correo')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->get();
 
-        Log::debug('COLUMNA CEDER - Decisión:', [
-            'solicitud_id' => $solicitud->idsolicitudesordenes,
-            'estado_solicitud' => $solicitud->estado,
-            'mostrar_columna_ceder' => $mostrarColumnaCeder ? 'SÍ' : 'NO',
-            'estados_bloqueados' => $estadosSinCeder,
-        ]);
-    @endphp
+    Log::debug('COLUMNA CEDER - Decisión:', [
+        'solicitud_id' => $solicitud->idsolicitudesordenes,
+        'estado_solicitud' => $solicitud->estado,
+        'bloquear_ceder_por_solicitud' => $bloquearCederPorSolicitud ? 'SÍ' : 'NO',
+        'estados_bloqueados' => $estadosSolicitudSinCeder,
+    ]);
+@endphp
 
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
