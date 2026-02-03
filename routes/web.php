@@ -18,6 +18,7 @@ use App\Http\Controllers\administracion\UsuariosController;
 use App\Http\Controllers\administracion\CompraController;
 use App\Http\Controllers\administracion\asistencias\AsistenciaController;
 use App\Http\Controllers\almacen\productos\ArticulosController;
+use App\Http\Controllers\administracion\solicitudasistencia\SolicitudAsistenciaController;
 use App\Http\Controllers\almacen\productos\ModelosController;
 use App\Http\Controllers\almacen\productos\TipoArticuloController;
 use App\Http\Controllers\almacen\productos\MarcaController;
@@ -2071,3 +2072,17 @@ Route::get('/api/foto-evidencia/{tipo}/{nombre}', [OrdenesTrabajoController::cla
 
 
     Route::post('/api/actualizar-datos-solicitud', [OrdenesTrabajoController::class, 'marcarComoUsado'])->name('actualizar.datos.solicitud')->middleware('auth');
+
+
+
+
+
+Route::prefix('administracion')->name('administracion.')->group(function () {
+    Route::resource('solicitud-asistencia', SolicitudAsistenciaController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy', 'show']); // Agrega 'show'
+    
+    // Ruta para cambiar estado
+    Route::post('solicitud-asistencia/{id}/cambiar-estado', 
+        [SolicitudAsistenciaController::class, 'cambiarEstado'])
+        ->name('solicitud-asistencia.cambiar-estado');
+});

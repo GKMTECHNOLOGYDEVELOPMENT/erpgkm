@@ -443,6 +443,21 @@
                     </li>
                 @endif
 
+<li class="menu nav-item">
+    <a href="{{ route('administracion.solicitud-asistencia.index') }}" class="nav-link group">
+        <div class="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 6.75a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-6 12a6 6 0 0 1 12 0m3-7.5h-3m1.5-1.5v3" />
+            </svg>
+
+            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                Solicitud de asistencia
+            </span>
+        </div>
+    </a>
+</li>
 
 
 
