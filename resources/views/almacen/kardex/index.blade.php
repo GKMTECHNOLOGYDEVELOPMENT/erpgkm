@@ -4,7 +4,7 @@
 
         <div class="mb-6">
             <p class="text-gray-700">
-                En el módulo KARDEX puede ver todos los movimientos de entradas - salidas de todos los productos.
+                En el módulo KARDEX puede ver todos los movimientos de entradas y salidas de todos los productos.
                 Además, puede filtrar la información por producto, código, tipo, modelo, marca, categoría, CAS, región o número de orden.
             </p>
         </div>
@@ -13,7 +13,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="bg-blue-100 p-4 rounded-lg shadow">
                 <h3 class="font-semibold text-blue-800">Movimientos Filtrados</h3>
-                <p class="text-2xl font-bold text-blue-600">{{ number_format($movimientosFiltrados) }}</p>
+                <p class="text-2xl font-bold text-blue-600">{{ number_format($estadisticasFiltradas->total_movimientos ?? 0) }}</p>
                 <p class="text-xs text-blue-600 mt-1">
                     @if($search || $startDate || $endDate)
                         <span class="inline-flex items-center">
@@ -30,9 +30,9 @@
             
             <div class="bg-green-100 p-4 rounded-lg shadow">
                 <h3 class="font-semibold text-green-800">Entradas Filtradas</h3>
-                <p class="text-2xl font-bold text-green-600">{{ number_format($totalEntradasFiltradas) }}</p>
+                <p class="text-2xl font-bold text-green-600">{{ number_format($estadisticasFiltradas->total_entradas ?? 0) }}</p>
                 <p class="text-xs text-green-600 mt-1">
-                    @if($totalEntradasFiltradas > 0)
+                    @if(($estadisticasFiltradas->total_entradas ?? 0) > 0)
                         <span class="inline-flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path>
@@ -47,9 +47,9 @@
             
             <div class="bg-red-100 p-4 rounded-lg shadow">
                 <h3 class="font-semibold text-red-800">Salidas Filtradas</h3>
-                <p class="text-2xl font-bold text-red-600">{{ number_format($totalSalidasFiltradas) }}</p>
+                <p class="text-2xl font-bold text-red-600">{{ number_format($estadisticasFiltradas->total_salidas ?? 0) }}</p>
                 <p class="text-xs text-red-600 mt-1">
-                    @if($totalSalidasFiltradas > 0)
+                    @if(($estadisticasFiltradas->total_salidas ?? 0) > 0)
                         <span class="inline-flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 7.414V11a1 1 0 102 0V7.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" transform="rotate(180 10 10)"></path>
@@ -63,10 +63,12 @@
             </div>
             
             <div class="bg-purple-100 p-4 rounded-lg shadow">
-                <h3 class="font-semibold text-purple-800">Inventario Filtrado</h3>
-                <p class="text-2xl font-bold text-purple-600">{{ number_format($totalInventarioActualFiltrado, 0) }}</p>
+                <h3 class="font-semibold text-purple-800">Inventario Actual</h3>
+                <p class="text-2xl font-bold text-purple-600">
+                    {{ number_format($inventarioTotalFiltrado->inventario_total ?? $inventarioTotalGeneral, 0) }}
+                </p>
                 <p class="text-xs text-purple-600 mt-1">
-                    @if($totalInventarioActualFiltrado > 0)
+                    @if(($inventarioTotalFiltrado->inventario_total ?? $inventarioTotalGeneral) > 0)
                         <span class="inline-flex items-center">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z"></path>
@@ -123,9 +125,9 @@
                         <label for="search" class="block text-sm font-medium text-gray-700">Buscar</label>
                         <input type="text" name="search" id="search" value="{{ $search }}"
                             class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Producto, código, CAS, región, modelo, Nº orden...">
+                            placeholder="Producto, código, cliente, orden, CAS...">
                         <p class="mt-1 text-xs text-gray-500">
-                            Buscar por: nombre, código, CAS, región (LIMA/PROVINCIA), modelo, marca, categoría, tipo o número de orden
+                            Buscar por: nombre, código, cliente, número de orden, código de solicitud, CAS, región
                         </p>
                     </div>
                     <div>
@@ -163,24 +165,37 @@
         <!-- Tabla de movimientos -->
         <div class="panel rounded-xl shadow-lg p-6 mb-8 border border-gray-200">
             <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
-                    </svg>
-                    MOVIMIENTOS GENERALES
-                </h2>
-                
-                <!-- Mostrar información del filtro actual -->
-                @if($search || $startDate || $endDate)
-                <div class="text-sm text-gray-600">
-                    <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                        Resultados filtrados
-                    </span>
-                </div>
-                @endif
-            </div>
+    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+        <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+            </path>
+        </svg>
+        MOVIMIENTOS GENERALES
+    </h2>
+    
+    <div class="flex items-center space-x-3">
+        <!-- Mostrar información del filtro actual -->
+        @if($search || $startDate || $endDate)
+        <div class="text-sm text-gray-600">
+            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                Resultados filtrados
+            </span>
+        </div>
+        @endif
+        
+        <!-- Botón para descargar Excel -->
+        <a href="{{ route('kardex.export.excel', request()->query()) }}"
+           class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                </path>
+            </svg>
+            Exportar Excel
+        </a>
+    </div>
+</div>
 
             @if ($movimientos->count() > 0)
                 <!-- Estadísticas RÁPIDAS de los resultados PAGINADOS (solo esta página) -->
@@ -268,6 +283,9 @@
                                     <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         CAS
                                     </th>
+                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        Cliente / Orden
+                                    </th>
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         <div class="flex items-center justify-center space-x-1">
                                             <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
@@ -311,8 +329,8 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($movimientos as $index => $movimiento)
                                     @php
-                                        $tieneSalidas = $movimiento->unidades_salida > 0;
-                                        $tieneEntradas = $movimiento->unidades_entrada > 0;
+                                        $tieneSalidas = $movimiento->cantidad < 0;
+                                        $tieneEntradas = $movimiento->cantidad > 0;
                                     @endphp
                                     <tr class="hover:bg-blue-50 transition-colors duration-200 {{ $index % 2 == 0 ? 'bg-white' : 'bg-gray-50' }}">
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -324,12 +342,9 @@
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="text-sm font-medium text-gray-900">
-                                                        {{ $movimiento->fecha->format('d/m/Y') }}
+                                                        {{ \Carbon\Carbon::parse($movimiento->fecha)->format('d/m/Y') }}
                                                     </div>
-                                                    <div class="text-sm text-gray-500">
-                                                        {{ $movimiento->fecha->format('H:i') }}
-                                                    </div>
-                                                </div>
+                                                                                                   </div>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
@@ -337,14 +352,7 @@
                                                 <div class="text-sm font-medium text-gray-900">
                                                     {{ $movimiento->nombre_producto ?? 'Sin nombre' }}
                                                 </div>
-                                                @if($movimiento->codigo_barras)
-                                                <div class="text-xs text-gray-500 mt-1">
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                                        {{ $movimiento->codigo_barras }}
-                                                    </span>
-                                                </div>
-                                                @endif
-                                            </div>
+                                                                                           </div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <!-- Información del Tipo -->
@@ -408,6 +416,26 @@
                                                 {{ $movimiento->cas ?? 'N/A' }}
                                             </span>
                                         </td>
+                                        <td class="px-6 py-4">
+                                            <div class="space-y-1">
+                                                @if($movimiento->cliente_nombre)
+                                                <div class="text-xs">
+                                                    <span class="font-medium text-gray-700">Cliente:</span>
+                                                    <span class="text-gray-600">{{ $movimiento->cliente_nombre }}</span>
+                                                </div>
+                                                @endif
+                                                @if($movimiento->codigo_solicitud)
+                                                <div class="text-xs">
+                                                    <span class="font-medium text-gray-700">Solicitud:</span>
+                                                    <span class="text-gray-600">{{ $movimiento->codigo_solicitud }}</span>
+                                                </div>
+                                                @endif
+                                                <div class="text-xs">
+                                                    <span class="font-medium text-gray-700">Tipo:</span>
+                                                    <span class="text-gray-600">{{ $movimiento->tipo_ingreso }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             @if(isset($movimiento->region))
                                                 @if($movimiento->region == 'LIMA')
@@ -461,26 +489,16 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            @if ($tieneSalidas && !empty($movimiento->numeros_orden))
-                                                <div class="flex flex-col items-center gap-1">
-                                                    @php
-                                                        $numeros = array_unique(explode(', ', $movimiento->numeros_orden));
-                                                        $primerNumero = $numeros[0];
-                                                        $totalNumeros = count($numeros);
-                                                    @endphp
+                                            @if ($tieneSalidas && !empty($movimiento->numero_orden))
+                                                <div class="flex flex-col items-center">
                                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.2 6.5 10.266a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd" />
                                                         </svg>
-                                                        {{ $primerNumero }}
+                                                        {{ $movimiento->numero_orden }}
                                                     </span>
-                                                    @if ($totalNumeros > 1)
-                                                        <span class="text-xs text-gray-500">
-                                                            +{{ $totalNumeros - 1 }} más
-                                                        </span>
-                                                    @endif
                                                 </div>
-                                            @elseif ($tieneSalidas && empty($movimiento->numeros_orden))
+                                            @elseif ($tieneSalidas && empty($movimiento->numero_orden))
                                                 <span class="text-xs text-yellow-600 italic bg-yellow-50 px-2 py-1 rounded">
                                                     Sin ticket
                                                 </span>
@@ -492,7 +510,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
                                             <span class="text-sm font-medium text-gray-900">
-                                                {{ number_format($movimiento->inventario_inicial, 0) }}
+                                                {{ number_format($movimiento->inventario_inicial ?? 0, 0) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
@@ -564,10 +582,10 @@
             <div class="mt-4 pt-4 border-t border-gray-200">
                 <p class="text-sm text-gray-600">
                     <span class="font-medium">Resumen de filtros aplicados:</span>
-                    Se encontraron <span class="font-bold text-blue-600">{{ number_format($movimientosFiltrados) }}</span> movimientos,
-                    con <span class="font-bold text-green-600">{{ number_format($totalEntradasFiltradas) }}</span> entradas,
-                    <span class="font-bold text-red-600">{{ number_format($totalSalidasFiltradas) }}</span> salidas y
-                    <span class="font-bold text-purple-600">{{ number_format($totalInventarioActualFiltrado, 0) }}</span> unidades en inventario actual.
+                    Se encontraron <span class="font-bold text-blue-600">{{ number_format($estadisticasFiltradas->total_movimientos ?? 0) }}</span> movimientos,
+                    con <span class="font-bold text-green-600">{{ number_format($estadisticasFiltradas->total_entradas ?? 0) }}</span> entradas,
+                    <span class="font-bold text-red-600">{{ number_format($estadisticasFiltradas->total_salidas ?? 0) }}</span> salidas y
+                    <span class="font-bold text-purple-600">{{ number_format($inventarioTotalFiltrado->inventario_total ?? $inventarioTotalGeneral, 0) }}</span> unidades en inventario actual.
                 </p>
             </div>
             @endif

@@ -1990,189 +1990,228 @@ public function store(Request $request)
 
 
 
+public function opciones($id)
+{
+    // Obtener la solicitud
+    $solicitud = DB::table('solicitudesordenes as so')
+        ->select(
+            'so.idsolicitudesordenes',
+            'so.codigo',
+            'so.estado',
+            'so.tiposervicio',
+            'so.niveldeurgencia',
+            'so.fechacreacion',
+            'so.fecharequerida',
+            'so.observaciones',
+            'so.cantidad',
+            'so.totalcantidadproductos',
+            'so.idticket',
+            'so.idUsuario',
+            'so.idTecnico',
+            't.numero_ticket'
+        )
+        ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
+        ->where('so.idsolicitudesordenes', $id)
+        ->where('so.tipoorden', 'solicitud_repuesto')
+        ->first();
 
-    public function opciones($id)
-    {
-        // Obtener la solicitud
-        $solicitud = DB::table('solicitudesordenes as so')
-            ->select(
-                'so.idsolicitudesordenes',
-                'so.codigo',
-                'so.estado',
-                'so.tiposervicio',
-                'so.niveldeurgencia',
-                'so.fechacreacion',
-                'so.fecharequerida',
-                'so.observaciones',
-                'so.cantidad',
-                'so.totalcantidadproductos',
-                'so.idticket',
-                'so.idUsuario',
-                'so.idTecnico',
-                't.numero_ticket'
-            )
-            ->leftJoin('tickets as t', 'so.idticket', '=', 't.idTickets')
-            ->where('so.idsolicitudesordenes', $id)
-            ->where('so.tipoorden', 'solicitud_repuesto')
-            ->first();
+    if (!$solicitud) {
+        abort(404, 'Solicitud no encontrada');
+    }
 
-        if (!$solicitud) {
-            abort(404, 'Solicitud no encontrada');
-        }
+    // Obtener información del solicitante
+    $solicitante = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('idUsuario', $solicitud->idUsuario)
+        ->where('estado', 1)
+        ->first();
 
-        // Obtener información del solicitante
-        $solicitante = DB::table('usuarios')
+    // Obtener información del técnico
+    $tecnico = null;
+    if ($solicitud->idTecnico) {
+        $tecnico = DB::table('usuarios')
             ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
-            ->where('idUsuario', $solicitud->idUsuario)
+            ->where('idUsuario', $solicitud->idTecnico)
             ->where('estado', 1)
             ->first();
+    }
 
-        // Obtener información del técnico
-        $tecnico = null;
-        if ($solicitud->idTecnico) {
-            $tecnico = DB::table('usuarios')
-                ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
-                ->where('idUsuario', $solicitud->idTecnico)
-                ->where('estado', 1)
-                ->first();
-        }
+    // Obtener lista de usuarios
+    $usuarios = DB::table('usuarios')
+        ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->orderBy('apellidoPaterno')
+        ->get();
 
-        // Obtener lista de usuarios
-        $usuarios = DB::table('usuarios')
-            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno', 'correo')
-            ->where('estado', 1)
-            ->orderBy('Nombre')
-            ->orderBy('apellidoPaterno')
-            ->get();
+    // Obtener los repuestos de la solicitud
+    $repuestos = DB::table('ordenesarticulos as oa')
+        ->select(
+            'oa.idordenesarticulos',
+            'oa.cantidad as cantidad_solicitada',
+            'oa.observacion',
+            'oa.estado as estado_orden',
+            'a.idArticulos',
+            'a.nombre',
+            'a.codigo_barras',
+            'a.codigo_repuesto',
+            'a.stock_total',
+            'sc.nombre as tipo_repuesto'
+        )
+        ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
+        ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
+        ->where('oa.idsolicitudesordenes', $id)
+        ->get();
 
-        // Obtener los repuestos de la solicitud
-        $repuestos = DB::table('ordenesarticulos as oa')
+    // Para cada repuesto, obtener información completa
+    foreach ($repuestos as $repuesto) {
+        // 1. Obtener los modelos del artículo desde la tabla pivote
+        $modelosArticulo = DB::table('articulo_modelo as am')
             ->select(
-                'oa.idordenesarticulos',
-                'oa.cantidad as cantidad_solicitada',
-                'oa.observacion',
-                'oa.estado as estado_orden',
-                'a.idArticulos',
-                'a.nombre',
-                'a.codigo_barras',
-                'a.codigo_repuesto',
-                'a.stock_total',
-                'sc.nombre as tipo_repuesto'
+                'm.idModelo',
+                'm.nombre as modelo_nombre',
+                'ma.nombre as marca_nombre' // Opcional: si quieres mostrar la marca
             )
-            ->join('articulos as a', 'oa.idarticulos', '=', 'a.idArticulos')
-            ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
-            ->where('oa.idsolicitudesordenes', $id)
+            ->join('modelo as m', 'am.modelo_id', '=', 'm.idModelo')
+            ->leftJoin('marca as ma', 'm.idMarca', '=', 'ma.idMarca')
+            ->where('am.articulo_id', $repuesto->idArticulos)
+            ->where('m.estado', 1)
+            ->orderBy('m.nombre')
             ->get();
 
-        // Para cada repuesto, obtener información completa
-        foreach ($repuestos as $repuesto) {
-            // Obtener ubicaciones con stock detallado
-            $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
-                ->select(
-                    'rua.idRackUbicacionArticulo',
-                    'rua.rack_ubicacion_id',
-                    'rua.cantidad as stock_ubicacion',
-                    'ru.codigo as ubicacion_codigo',
-                    'r.nombre as rack_nombre'
-                )
-                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
-                ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
-                ->where('rua.articulo_id', $repuesto->idArticulos)
-                ->where('rua.cantidad', '>', 0)
-                ->orderBy('rua.cantidad', 'desc')
-                ->get();
-
-            // Calcular stock total disponible
-            $stockDisponible = $ubicaciones->sum('stock_ubicacion');
-
-            // Agregar información al repuesto
-            $repuesto->stock_disponible = $stockDisponible;
-            $repuesto->ubicaciones_detalle = $ubicaciones;
-            $repuesto->suficiente_stock = $stockDisponible >= $repuesto->cantidad_solicitada;
-            $repuesto->diferencia_stock = $stockDisponible - $repuesto->cantidad_solicitada;
-
-            // Obtener información de entrega (sea normal o cedida)
-            $entregaInfo = DB::table('repuestos_entregas as re')
-                ->select(
-                    're.id as entrega_id',
-                    're.tipo_entrega',
-                    're.usuario_destino_id',
-                    're.estado as estado_entrega',
-                    're.fecha_preparacion',
-                    're.fecha_entrega',
-                    're.entrega_origen_id', // Para saber si es cedido
-                    'u.Nombre',
-                    'u.apellidoPaterno',
-                    'u.apellidoMaterno'
-                )
-                ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
-                ->where('re.solicitud_id', $id)
-                ->where('re.articulo_id', $repuesto->idArticulos)
-                ->orderBy('re.id', 'desc')
-                ->first();
-
-            if ($entregaInfo) {
-                $repuesto->entrega_info = $entregaInfo;
-                $repuesto->ya_procesado = true;
-
-                // 🔥 PRIORIDAD ABSOLUTA: estado CEDIDO desde BD
-                if ($entregaInfo->estado_entrega === 'cedido') {
-                    $repuesto->estado_actual = 'cedido';
-                    $repuesto->es_cedido = true;
-                } else {
-                    $repuesto->es_cedido = !empty($entregaInfo->entrega_origen_id);
-
-                    if ($repuesto->es_cedido) {
-                        // Estados de repuesto cedido
-                        switch ($entregaInfo->estado_entrega) {
-                            case 'listo_para_ceder':
-                                $repuesto->estado_actual = 'listo_para_ceder';
-                                break;
-                            case 'entregado':
-                                $repuesto->estado_actual = 'entregado_cedido';
-                                break;
-                            default:
-                                $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
-                        }
-                    } else {
-                        // Repuesto normal
-                        $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
-                    }
-                }
+        // 2. Crear un string con todos los modelos (o solo el primero)
+        $modelosTexto = '';
+        if ($modelosArticulo->isNotEmpty()) {
+            if ($modelosArticulo->count() == 1) {
+                // Si solo tiene un modelo
+                $modelo = $modelosArticulo->first();
+                $modelosTexto = $modelo->modelo_nombre;
+                // Opcional: agregar marca
+                // $modelosTexto = $modelo->marca_nombre . ' ' . $modelo->modelo_nombre;
             } else {
-                $repuesto->entrega_info = null;
-                $repuesto->ya_procesado = false;
-                $repuesto->es_cedido = false;
-                $repuesto->estado_actual = 'no_procesado';
+                // Si tiene múltiples modelos
+                $modelosArray = $modelosArticulo->pluck('modelo_nombre')->toArray();
+                $modelosTexto = implode(', ', $modelosArray);
+                // Opcional: mostrar solo los primeros 2 y agregar "+X más"
+                if (count($modelosArray) > 2) {
+                    $primerosDos = array_slice($modelosArray, 0, 2);
+                    $restantes = count($modelosArray) - 2;
+                    $modelosTexto = implode(', ', $primerosDos) . ' +' . $restantes . ' más';
+                }
             }
         }
 
-        // Verificar si toda la solicitud puede ser atendida
-        $puede_aceptar = $repuestos->every(function ($repuesto) {
-            return $repuesto->suficiente_stock;
-        });
+        // Agregar información de modelos al repuesto
+        $repuesto->modelos = $modelosArticulo;
+        $repuesto->modelos_texto = $modelosTexto;
+        $repuesto->tiene_modelos = $modelosArticulo->isNotEmpty();
 
-        // Contar repuestos procesados y disponibles
-        $repuestos_procesados = $repuestos->count();
-        $repuestos_disponibles = $repuestos->where('suficiente_stock', true)->count();
-        $total_repuestos = $repuestos->count();
+        // 3. Obtener ubicaciones con stock detallado
+        $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
+            ->select(
+                'rua.idRackUbicacionArticulo',
+                'rua.rack_ubicacion_id',
+                'rua.cantidad as stock_ubicacion',
+                'ru.codigo as ubicacion_codigo',
+                'r.nombre as rack_nombre'
+            )
+            ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+            ->leftJoin('racks as r', 'ru.rack_id', '=', 'r.idRack')
+            ->where('rua.articulo_id', $repuesto->idArticulos)
+            ->where('rua.cantidad', '>', 0)
+            ->orderBy('rua.cantidad', 'desc')
+            ->get();
 
-        $puede_generar_pdf = ($repuestos_procesados == $total_repuestos) && ($total_repuestos > 0);
+        // Calcular stock total disponible
+        $stockDisponible = $ubicaciones->sum('stock_ubicacion');
 
-        return view('solicitud.solicitudrepuesto.opciones', compact(
-            'solicitud',
-            'repuestos',
-            'puede_aceptar',
-            'repuestos_procesados',
-            'repuestos_disponibles',
-            'total_repuestos',
-            'solicitante',
-            'tecnico',
-            'usuarios',
-            'puede_generar_pdf'
-        ));
+        // Agregar información al repuesto
+        $repuesto->stock_disponible = $stockDisponible;
+        $repuesto->ubicaciones_detalle = $ubicaciones;
+        $repuesto->suficiente_stock = $stockDisponible >= $repuesto->cantidad_solicitada;
+        $repuesto->diferencia_stock = $stockDisponible - $repuesto->cantidad_solicitada;
+
+        // 4. Obtener información de entrega (sea normal o cedida)
+        $entregaInfo = DB::table('repuestos_entregas as re')
+            ->select(
+                're.id as entrega_id',
+                're.tipo_entrega',
+                're.usuario_destino_id',
+                're.estado as estado_entrega',
+                're.fecha_preparacion',
+                're.fecha_entrega',
+                're.entrega_origen_id', // Para saber si es cedido
+                'u.Nombre',
+                'u.apellidoPaterno',
+                'u.apellidoMaterno'
+            )
+            ->leftJoin('usuarios as u', 're.usuario_destino_id', '=', 'u.idUsuario')
+            ->where('re.solicitud_id', $id)
+            ->where('re.articulo_id', $repuesto->idArticulos)
+            ->orderBy('re.id', 'desc')
+            ->first();
+
+        if ($entregaInfo) {
+            $repuesto->entrega_info = $entregaInfo;
+            $repuesto->ya_procesado = true;
+
+            // 🔥 PRIORIDAD ABSOLUTA: estado CEDIDO desde BD
+            if ($entregaInfo->estado_entrega === 'cedido') {
+                $repuesto->estado_actual = 'cedido';
+                $repuesto->es_cedido = true;
+            } else {
+                $repuesto->es_cedido = !empty($entregaInfo->entrega_origen_id);
+
+                if ($repuesto->es_cedido) {
+                    // Estados de repuesto cedido
+                    switch ($entregaInfo->estado_entrega) {
+                        case 'listo_para_ceder':
+                            $repuesto->estado_actual = 'listo_para_ceder';
+                            break;
+                        case 'entregado':
+                            $repuesto->estado_actual = 'entregado_cedido';
+                            break;
+                        default:
+                            $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+                    }
+                } else {
+                    // Repuesto normal
+                    $repuesto->estado_actual = $entregaInfo->estado_entrega ?? 'pendiente_entrega';
+                }
+            }
+        } else {
+            $repuesto->entrega_info = null;
+            $repuesto->ya_procesado = false;
+            $repuesto->es_cedido = false;
+            $repuesto->estado_actual = 'no_procesado';
+        }
     }
 
+    // Verificar si toda la solicitud puede ser atendida
+    $puede_aceptar = $repuestos->every(function ($repuesto) {
+        return $repuesto->suficiente_stock;
+    });
+
+    // Contar repuestos procesados y disponibles
+    $repuestos_procesados = $repuestos->count();
+    $repuestos_disponibles = $repuestos->where('suficiente_stock', true)->count();
+    $total_repuestos = $repuestos->count();
+
+    $puede_generar_pdf = ($repuestos_procesados == $total_repuestos) && ($total_repuestos > 0);
+
+    return view('solicitud.solicitudrepuesto.opciones', compact(
+        'solicitud',
+        'repuestos',
+        'puede_aceptar',
+        'repuestos_procesados',
+        'repuestos_disponibles',
+        'total_repuestos',
+        'solicitante',
+        'tecnico',
+        'usuarios',
+        'puede_generar_pdf'
+    ));
+}
 
 
 

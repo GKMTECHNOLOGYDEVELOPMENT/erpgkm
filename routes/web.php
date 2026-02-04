@@ -506,9 +506,8 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
     Route::get('/export-pdf', [RepuestosController::class, 'exportAllPDF'])->name('export.pdf'); // Exportar todos los artículos a PDF
     Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
-    Route::get('/exportar-excel', function () {
-        return Excel::download(new ArticuloExport, 'kardex.xlsx');
-    })->name('exportExcel');
+    Route::get('/export-excel', [KardexController::class, 'exportExcel'])
+    ->name('export.excel');
 });
 /// INICIO DESPACHO ///
 Route::prefix('despacho')->name('despacho.')->group(function () {
