@@ -73,6 +73,37 @@
         .estado-denegado .estado-icon {
             color: #6B7280;
         }
+
+        /* Animaciones para modales */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-content {
+            animation: slideIn 0.3s ease-out;
+        }
     </style>
 
     <div class="min-h-screen">
@@ -385,19 +416,13 @@
                                                 </button>
                                             @endif
 
-                                            <form
-                                                action="{{ route('administracion.solicitud-asistencia.destroy', $s->id_solicitud_asistencia) }}"
-                                                method="POST" class="inline"
-                                                onsubmit="return confirm('¿Estás seguro de eliminar esta solicitud? Esta acción no se puede deshacer.');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="inline-flex items-center px-3 py-2 rounded-lg bg-danger-light text-danger hover:bg-red-100 transition-colors text-sm font-medium group"
-                                                    title="Eliminar">
-                                                    <i class="fas fa-trash-alt mr-1.5 group-hover:text-red-800"></i>
-                                                    Eliminar
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                onclick="mostrarModalEliminar({{ $s->id_solicitud_asistencia }}, '{{ $s->tipoSolicitud?->nombre_tip }}')"
+                                                class="inline-flex items-center px-3 py-2 rounded-lg bg-danger-light text-danger hover:bg-red-100 transition-colors text-sm font-medium group"
+                                                title="Eliminar">
+                                                <i class="fas fa-trash-alt mr-1.5 group-hover:text-red-800"></i>
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -445,10 +470,10 @@
         </div>
     </div>
 
-    <!-- Modal para cambiar estado - Mejorado -->
+    <!-- Modal para cambiar estado -->
     <div id="modalEstado"
         class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all modal-content">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
                     <div>
@@ -539,6 +564,81 @@
                             class="px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm flex items-center">
                             <i class="fas fa-save mr-2"></i>
                             Confirmar Cambio
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div id="modalEliminar"
+        class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all modal-content">
+            <div class="p-6">
+                <!-- Icono de advertencia -->
+                <div class="flex justify-center mb-4">
+                    <div class="h-16 w-16 rounded-full bg-red-100 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
+                    </div>
+                </div>
+
+                <!-- Título y mensaje -->
+                <div class="text-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">
+                        ¿Eliminar solicitud?
+                    </h3>
+                    <p class="text-gray-600 mb-4">
+                        Estás a punto de eliminar la solicitud de <span id="tipoSolicitudEliminar"
+                            class="font-semibold text-gray-800"></span>.
+                        Esta acción <span class="text-red-600 font-semibold">no se puede deshacer</span>.
+                    </p>
+                    <p class="text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Se eliminarán todos los datos asociados a esta solicitud.
+                    </p>
+                </div>
+
+                <!-- Formulario de eliminación -->
+                <form id="formEliminar" method="POST" class="space-y-4">
+                    @csrf
+                    @method('DELETE')
+                    <input type="hidden" name="solicitud_id" id="solicitud_id_eliminar">
+                    <input type="hidden" name="tipo_solicitud_nombre" id="tipo_solicitud_nombre_eliminar">
+                    <!-- NUEVO -->
+
+                    <div>
+                        <label for="confirmacionEliminar" class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-shield-alt mr-1 text-gray-400"></i>
+                            Confirmación de seguridad
+                        </label>
+                        <div class="flex items-center bg-red-50 border border-red-200 rounded-lg p-3">
+                            <div class="flex-shrink-0 mr-3">
+                                <i class="fas fa-lock text-red-500"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-700">
+                                    Escribe <span class="font-bold text-red-600">"ELIMINAR"</span> para confirmar:
+                                </p>
+                                <input type="text" id="confirmacionEliminar" name="confirmacion"
+                                    class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                                    placeholder="Escribe ELIMINAR aquí" oninput="validarConfirmacion(this)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="cerrarModalEliminar()"
+                            class="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors flex items-center">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" id="btnConfirmarEliminar"
+                            class="px-6 py-3 bg-danger to-red-700 text-white font-medium rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-sm flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled>
+                            <i class="fas fa-trash-alt mr-2"></i>
+                            Confirmar Eliminación
                         </button>
                     </div>
                 </form>
@@ -653,6 +753,7 @@
             @endif
         });
 
+        // ========== FUNCIONES PARA MODAL DE ESTADO ==========
         function mostrarModalEstado(solicitudId) {
             document.getElementById('solicitud_id').value = solicitudId;
             document.getElementById('modalEstado').classList.remove('hidden');
@@ -668,43 +769,65 @@
             form.querySelectorAll('input[type="radio"]').forEach(radio => {
                 radio.checked = false;
             });
-
-            // Forzar el reflow para que las animaciones funcionen
-            setTimeout(() => {
-                document.getElementById('modalEstado').style.opacity = '1';
-                document.querySelector('#modalEstado .transform').style.transform = 'scale(1)';
-            }, 10);
         }
 
         function cerrarModalEstado() {
-            document.getElementById('modalEstado').style.opacity = '0';
-            document.querySelector('#modalEstado .transform').style.transform = 'scale(0.95)';
-
-            setTimeout(() => {
-                document.getElementById('modalEstado').classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                // Solo limpiar los radios, mantener el comentario si el usuario quiere
-                document.querySelectorAll('#formEstado input[type="radio"]').forEach(radio => {
-                    radio.checked = false;
-                });
-            }, 300);
+            document.getElementById('modalEstado').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            // Limpiar los radios y comentario
+            document.querySelectorAll('#formEstado input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            document.querySelector('#formEstado textarea[name="comentario"]').value = '';
         }
 
-        // Cerrar modal al hacer clic fuera
-        document.getElementById('modalEstado').addEventListener('click', function(e) {
-            if (e.target.id === 'modalEstado') {
-                cerrarModalEstado();
-            }
-        });
+        // ========== FUNCIONES PARA MODAL DE ELIMINAR ==========
+        function mostrarModalEliminar(solicitudId, tipoSolicitud) {
+            // Actualizar los datos en el modal
+            document.getElementById('solicitud_id_eliminar').value = solicitudId;
+            document.getElementById('tipoSolicitudEliminar').textContent = tipoSolicitud;
 
-        // Cerrar con ESC
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                cerrarModalEstado();
-            }
-        });
+            // Resetear el campo de confirmación
+            document.getElementById('confirmacionEliminar').value = '';
+            document.getElementById('btnConfirmarEliminar').disabled = true;
 
-        // Manejar el envío del formulario del modal (síncrono - sin AJAX)
+            // Mostrar el modal
+            document.getElementById('modalEliminar').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Configurar el action del form con la ruta correcta
+            const form = document.getElementById('formEliminar');
+            const url = "{{ route('administracion.solicitud-asistencia.destroy', ':id') }}".replace(':id',
+                solicitudId);
+            form.action = url;
+        }
+
+        function cerrarModalEliminar() {
+            document.getElementById('modalEliminar').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+
+            // Limpiar el campo de confirmación
+            document.getElementById('confirmacionEliminar').value = '';
+        }
+
+        function validarConfirmacion(input) {
+            const btnConfirmar = document.getElementById('btnConfirmarEliminar');
+            const textoIngresado = input.value.trim().toUpperCase();
+
+            // Habilitar el botón solo si se escribe exactamente "ELIMINAR"
+            if (textoIngresado === 'ELIMINAR') {
+                btnConfirmar.disabled = false;
+                input.classList.remove('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+                input.classList.add('border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+            } else {
+                btnConfirmar.disabled = true;
+                input.classList.remove('border-green-300', 'focus:ring-green-500', 'focus:border-green-500');
+                input.classList.add('border-red-300', 'focus:ring-red-500', 'focus:border-red-500');
+            }
+        }
+
+        // ========== MANEJAR ENVÍO DE FORMULARIOS ==========
+        // Manejar el envío del formulario del modal de estado
         document.getElementById('formEstado').addEventListener('submit', function(e) {
             const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
 
@@ -721,73 +844,81 @@
             submitBtn.disabled = true;
 
             // El formulario se enviará normalmente (síncrono)
-            // El controlador redireccionará con flash message
             return true;
         });
 
-        // Manejar confirmación de eliminación con toastr
-        document.querySelectorAll('form[onsubmit]').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (this.onsubmit && this.onsubmit.toString().includes('confirm')) {
-                    e.preventDefault();
-                    const confirmMessage = this.onsubmit.toString().match(/'([^']+)'/)[1];
+        // Manejar el envío del formulario de eliminación
+        document.getElementById('formEliminar').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-                    // Crear un modal de confirmación personalizado con toastr
-                    const confirmToast = toastr.warning(
-                        `<div class="flex flex-col space-y-3">
-                            <div class="font-semibold text-gray-800">¿Estás seguro?</div>
-                            <div class="text-sm text-gray-600">${confirmMessage}</div>
-                            <div class="flex justify-end space-x-2 mt-2">
-                                <button onclick="document.getElementById('confirm-no').click()" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 text-sm">
-                                    Cancelar
-                                </button>
-                                <button onclick="document.getElementById('confirm-yes').click()" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                    Eliminar
-                                </button>
-                            </div>
-                        </div>`,
-                        null,
-                        {
-                            timeOut: 0,
-                            extendedTimeOut: 0,
-                            closeButton: false,
-                            tapToDismiss: false
-                        }
-                    );
+            // Validar confirmación
+            const confirmacion = document.getElementById('confirmacionEliminar').value.trim().toUpperCase();
+            if (confirmacion !== 'ELIMINAR') {
+                toastr.error('Debes escribir "ELIMINAR" para confirmar');
+                return false;
+            }
 
-                    // Crear botones ocultos para manejar la confirmación
-                    const confirmYes = document.createElement('button');
-                    confirmYes.id = 'confirm-yes';
-                    confirmYes.style.display = 'none';
-                    confirmYes.onclick = () => {
-                        toastr.clear(confirmToast);
-                        this.submit();
-                    };
+            // Mostrar feedback visual durante el envío
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Eliminando...';
+            submitBtn.disabled = true;
 
-                    const confirmNo = document.createElement('button');
-                    confirmNo.id = 'confirm-no';
-                    confirmNo.style.display = 'none';
-                    confirmNo.onclick = () => {
-                        toastr.clear(confirmToast);
-                    };
+            // Enviar el formulario con AJAX para mejor experiencia de usuario
+            const formData = new FormData(this);
+            const url = this.action;
 
-                    document.body.appendChild(confirmYes);
-                    document.body.appendChild(confirmNo);
-                }
-            });
+            fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-HTTP-Method-Override': 'DELETE'
+                    }
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        // Si hay redirección, seguirla
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        // Si la respuesta es OK pero no hay redirección, recargar la página
+                        window.location.reload();
+                    } else {
+                        throw new Error('Error en la eliminación');
+                    }
+                })
+                .catch(error => {
+                    toastr.error('Error al eliminar la solicitud');
+                    submitBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i> Confirmar Eliminación';
+                    submitBtn.disabled = false;
+                    console.error('Error:', error);
+                });
+
+            return false;
         });
 
-        // Estilos iniciales para las animaciones del modal
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('modalEstado');
-            if (modal) {
-                modal.style.opacity = '0';
-                modal.style.transition = 'opacity 0.3s ease';
+        // ========== CERRAR MODALES CON ESC Y CLICK FUERA ==========
+        // Cerrar modales al hacer clic fuera
+        document.getElementById('modalEstado').addEventListener('click', function(e) {
+            if (e.target.id === 'modalEstado') {
+                cerrarModalEstado();
+            }
+        });
 
-                const modalContent = modal.querySelector('.transform');
-                if (modalContent) {
-                    modalContent.style.transform = 'scale(0.95)';
-                    modalContent.style.transition = 'transform 0.3s ease';
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target.id === 'modalEliminar') {
+                cerrarModalEliminar();
+            }
+        });
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (!document.getElementById('modalEstado').classList.contains('hidden')) {
+                    cerrarModalEstado();
+                }
+                if (!document.getElementById('modalEliminar').classList.contains('hidden')) {
+                    cerrarModalEliminar();
                 }
             }
         });
