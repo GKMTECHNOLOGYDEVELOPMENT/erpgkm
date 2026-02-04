@@ -756,43 +756,46 @@
                 },
 
                 async loadFotos(id) {
-                    this.fotos.cargandoFotos = true;
+    this.fotos.cargandoFotos = true;
 
-                    try {
-                        const response = await fetch(`/repuestos-transito/${id}/fotos`);
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    try {
+        // Cambia esta URL si es necesario
+        const response = await fetch(`/repuestos-transito/${id}/fotos`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-                        const data = await response.json();
-                        if (data.success && data.fotos) {
-                            this.resetFotos();
+        const data = await response.json();
+        if (data.success && data.fotos) {
+            this.resetFotos();
 
-                            const tiposFotos = [
-                                'fotoRepuesto',
-                                'foto_articulo_usado',
-                                'foto_articulo_no_usado',
-                                'foto_entrega'
-                            ];
+            // Ahora busca las fotos de repuestos_entregas
+            const tiposFotos = [
+                'foto_entrega',    // De repuestos_entregas
+                'foto_retorno',    // De repuestos_entregas
+                'fotoRepuesto',    // Backup
+                'foto_articulo_usado', // Backup
+                'foto_articulo_no_usado' // Backup
+            ];
 
-                            tiposFotos.forEach(tipo => {
-                                const fotoData = data.fotos[tipo];
-                                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
-                                    .fotos.length > 0) {
-                                    this.fotos[tipo].tiene = true;
-                                    this.fotos[tipo].fotos = fotoData.fotos;
-                                    this.fotos.tieneFotos = true;
-                                }
-                            });
+            tiposFotos.forEach(tipo => {
+                const fotoData = data.fotos[tipo];
+                if (fotoData && fotoData.tiene && fotoData.fotos && fotoData
+                    .fotos.length > 0) {
+                    this.fotos[tipo].tiene = true;
+                    this.fotos[tipo].fotos = fotoData.fotos;
+                    this.fotos.tieneFotos = true;
+                }
+            });
 
-                            this.$nextTick(() => {
-                                this.initViewer();
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error al cargar fotos:', error);
-                    } finally {
-                        this.fotos.cargandoFotos = false;
-                    }
-                },
+            this.$nextTick(() => {
+                this.initViewer();
+            });
+        }
+    } catch (error) {
+        console.error('Error al cargar fotos:', error);
+    } finally {
+        this.fotos.cargandoFotos = false;
+    }
+}
 
                 initViewer() {
                     this.$nextTick(() => {

@@ -465,21 +465,21 @@ private function limpiarCaracteresInvalidos(array $data)
     return $data;
 }
 /**
- * Obtener todas las fotos - VERSIÓN CORREGIDA
+ * Obtener todas las fotos - VERSIÓN CORREGIDA (Desde repuestos_entregas)
  */
 public function obtenerTodasFotos($id)
 {
-    Log::info('=== OBTENER TODAS LAS FOTOS ===');
+    Log::info('=== OBTENER TODAS LAS FOTOS - DESDE repuestos_entregas ===');
     Log::info('ID solicitado: ' . $id);
     
     try {
-        // 1. Primero obtener el ID del artículo y solicitud para poder buscar en repuestos_entregas
+        // 1. Primero obtener el ID del artículo y solicitud para buscar en repuestos_entregas
         $infoBasica = DB::table('ordenesarticulos as oa')
             ->select(
                 'oa.idOrdenesArticulos',
                 'oa.idSolicitudesOrdenes',
                 'oa.idArticulos',
-                'oa.fotoRepuesto',
+                'oa.fotoRepuesto', // Mantenemos estas por si acaso
                 'oa.foto_articulo_usado',
                 'oa.foto_articulo_no_usado'
             )
@@ -501,74 +501,16 @@ public function obtenerTodasFotos($id)
         
         // 2. Inicializar arrays para fotos
         $fotosPorTipo = [
-            'fotoRepuesto' => [],
-            'foto_articulo_usado' => [],
-            'foto_articulo_no_usado' => [],
-            'foto_entrega' => [],
-            'fotoRetorno' => []
+            'foto_entrega' => [],    // De repuestos_entregas
+            'foto_retorno' => [],    // De repuestos_entregas
+            'fotoRepuesto' => [],    // De ordenesarticulos (backup)
+            'foto_articulo_usado' => [], // De ordenesarticulos (backup)
+            'foto_articulo_no_usado' => [] // De ordenesarticulos (backup)
         ];
         
         $totalFotos = 0;
         
-        // 3. Procesar fotos de ordenesarticulos
-        // Foto del repuesto
-        if (!empty($infoBasica->fotoRepuesto)) {
-            try {
-                Log::info('Procesando fotoRepuesto...');
-                $base64 = base64_encode($infoBasica->fotoRepuesto);
-                $fotosPorTipo['fotoRepuesto'][] = [
-                    'id' => $totalFotos + 1,
-                    'base64' => 'data:image/jpeg;base64,' . $base64,
-                    'mime' => 'image/jpeg',
-                    'nombre' => 'foto_repuesto_' . ($totalFotos + 1),
-                    'tipo_foto_db' => 'fotoRepuesto'
-                ];
-                $totalFotos++;
-                Log::info('✅ fotoRepuesto procesada correctamente');
-            } catch (\Exception $e) {
-                Log::error('Error procesando fotoRepuesto: ' . $e->getMessage());
-            }
-        }
-        
-        // Foto artículo usado
-        if (!empty($infoBasica->foto_articulo_usado)) {
-            try {
-                Log::info('Procesando foto_articulo_usado...');
-                $base64 = base64_encode($infoBasica->foto_articulo_usado);
-                $fotosPorTipo['foto_articulo_usado'][] = [
-                    'id' => $totalFotos + 1,
-                    'base64' => 'data:image/jpeg;base64,' . $base64,
-                    'mime' => 'image/jpeg',
-                    'nombre' => 'foto_usado_' . ($totalFotos + 1),
-                    'tipo_foto_db' => 'foto_articulo_usado'
-                ];
-                $totalFotos++;
-                Log::info('✅ foto_articulo_usado procesada correctamente');
-            } catch (\Exception $e) {
-                Log::error('Error procesando foto_articulo_usado: ' . $e->getMessage());
-            }
-        }
-        
-        // Foto artículo no usado
-        if (!empty($infoBasica->foto_articulo_no_usado)) {
-            try {
-                Log::info('Procesando foto_articulo_no_usado...');
-                $base64 = base64_encode($infoBasica->foto_articulo_no_usado);
-                $fotosPorTipo['foto_articulo_no_usado'][] = [
-                    'id' => $totalFotos + 1,
-                    'base64' => 'data:image/jpeg;base64,' . $base64,
-                    'mime' => 'image/jpeg',
-                    'nombre' => 'foto_no_usado_' . ($totalFotos + 1),
-                    'tipo_foto_db' => 'foto_articulo_no_usado'
-                ];
-                $totalFotos++;
-                Log::info('✅ foto_articulo_no_usado procesada correctamente');
-            } catch (\Exception $e) {
-                Log::error('Error procesando foto_articulo_no_usado: ' . $e->getMessage());
-            }
-        }
-        
-        // 4. Buscar fotos en repuestos_entregas usando los IDs correctos
+        // 3. BUSCAR PRIMERO EN repuestos_entregas (prioridad principal)
         if ($infoBasica->idSolicitudesOrdenes && $infoBasica->idArticulos) {
             Log::info('Buscando fotos en repuestos_entregas...', [
                 'solicitud_id' => $infoBasica->idSolicitudesOrdenes,
@@ -576,7 +518,12 @@ public function obtenerTodasFotos($id)
             ]);
             
             $fotosEntrega = DB::table('repuestos_entregas')
-                ->select('foto_entrega', 'fotoRetorno', 'tipo_archivo_foto')
+                ->select(
+                    'foto_entrega', 
+                    'fotoRetorno', 
+                    'tipo_archivo_foto',
+                    'fotoEmisor' // También esta columna
+                )
                 ->where('solicitud_id', $infoBasica->idSolicitudesOrdenes)
                 ->where('articulo_id', $infoBasica->idArticulos)
                 ->first();
@@ -584,10 +531,10 @@ public function obtenerTodasFotos($id)
             if ($fotosEntrega) {
                 Log::info('✅ Registro encontrado en repuestos_entregas');
                 
-                // Foto de entrega
+                // Foto de entrega (columna: foto_entrega)
                 if (!empty($fotosEntrega->foto_entrega)) {
                     try {
-                        Log::info('Procesando foto_entrega...');
+                        Log::info('Procesando foto_entrega de repuestos_entregas...');
                         $base64 = base64_encode($fotosEntrega->foto_entrega);
                         $mimeType = $fotosEntrega->tipo_archivo_foto ?? 'image/jpeg';
                         $fotosPorTipo['foto_entrega'][] = [
@@ -595,7 +542,8 @@ public function obtenerTodasFotos($id)
                             'base64' => 'data:' . $mimeType . ';base64,' . $base64,
                             'mime' => $mimeType,
                             'nombre' => 'foto_entrega_' . ($totalFotos + 1),
-                            'tipo_foto_db' => 'foto_entrega'
+                            'tipo_foto_db' => 'foto_entrega',
+                            'fuente' => 'repuestos_entregas'
                         ];
                         $totalFotos++;
                         Log::info('✅ foto_entrega procesada correctamente');
@@ -606,18 +554,19 @@ public function obtenerTodasFotos($id)
                     Log::info('❌ foto_entrega está vacía o es NULL');
                 }
                 
-                // Foto de retorno
+                // Foto de retorno (columna: fotoRetorno)
                 if (!empty($fotosEntrega->fotoRetorno)) {
                     try {
-                        Log::info('Procesando fotoRetorno...');
+                        Log::info('Procesando fotoRetorno de repuestos_entregas...');
                         $base64 = base64_encode($fotosEntrega->fotoRetorno);
                         $mimeType = $fotosEntrega->tipo_archivo_foto ?? 'image/jpeg';
-                        $fotosPorTipo['fotoRetorno'][] = [
+                        $fotosPorTipo['foto_retorno'][] = [
                             'id' => $totalFotos + 1,
                             'base64' => 'data:' . $mimeType . ';base64,' . $base64,
                             'mime' => $mimeType,
                             'nombre' => 'foto_retorno_' . ($totalFotos + 1),
-                            'tipo_foto_db' => 'fotoRetorno'
+                            'tipo_foto_db' => 'fotoRetorno',
+                            'fuente' => 'repuestos_entregas'
                         ];
                         $totalFotos++;
                         Log::info('✅ fotoRetorno procesada correctamente');
@@ -627,11 +576,95 @@ public function obtenerTodasFotos($id)
                 } else {
                     Log::info('❌ fotoRetorno está vacía o es NULL');
                 }
+                
+                // Foto del emisor (columna: fotoEmisor)
+                if (!empty($fotosEntrega->fotoEmisor)) {
+                    try {
+                        Log::info('Procesando fotoEmisor de repuestos_entregas...');
+                        $base64 = base64_encode($fotosEntrega->fotoEmisor);
+                        $mimeType = $fotosEntrega->tipo_archivo_foto ?? 'image/jpeg';
+                        $fotosPorTipo['foto_entrega'][] = [
+                            'id' => $totalFotos + 1,
+                            'base64' => 'data:' . $mimeType . ';base64,' . $base64,
+                            'mime' => $mimeType,
+                            'nombre' => 'foto_emisor_' . ($totalFotos + 1),
+                            'tipo_foto_db' => 'fotoEmisor',
+                            'fuente' => 'repuestos_entregas'
+                        ];
+                        $totalFotos++;
+                        Log::info('✅ fotoEmisor procesada correctamente');
+                    } catch (\Exception $e) {
+                        Log::error('Error procesando fotoEmisor: ' . $e->getMessage());
+                    }
+                }
             } else {
                 Log::warning('No se encontró registro en repuestos_entregas para:', [
                     'solicitud_id' => $infoBasica->idSolicitudesOrdenes,
                     'articulo_id' => $infoBasica->idArticulos
                 ]);
+                
+                // 4. COMO BACKUP: Buscar fotos en ordenesarticulos solo si no hay en repuestos_entregas
+                Log::info('Buscando fotos de backup en ordenesarticulos...');
+                
+                // Foto del repuesto (backup)
+                if (!empty($infoBasica->fotoRepuesto)) {
+                    try {
+                        Log::info('Procesando fotoRepuesto (backup)...');
+                        $base64 = base64_encode($infoBasica->fotoRepuesto);
+                        $fotosPorTipo['fotoRepuesto'][] = [
+                            'id' => $totalFotos + 1,
+                            'base64' => 'data:image/jpeg;base64,' . $base64,
+                            'mime' => 'image/jpeg',
+                            'nombre' => 'foto_repuesto_' . ($totalFotos + 1),
+                            'tipo_foto_db' => 'fotoRepuesto',
+                            'fuente' => 'ordenesarticulos'
+                        ];
+                        $totalFotos++;
+                        Log::info('✅ fotoRepuesto procesada correctamente (backup)');
+                    } catch (\Exception $e) {
+                        Log::error('Error procesando fotoRepuesto: ' . $e->getMessage());
+                    }
+                }
+                
+                // Foto artículo usado (backup)
+                if (!empty($infoBasica->foto_articulo_usado)) {
+                    try {
+                        Log::info('Procesando foto_articulo_usado (backup)...');
+                        $base64 = base64_encode($infoBasica->foto_articulo_usado);
+                        $fotosPorTipo['foto_articulo_usado'][] = [
+                            'id' => $totalFotos + 1,
+                            'base64' => 'data:image/jpeg;base64,' . $base64,
+                            'mime' => 'image/jpeg',
+                            'nombre' => 'foto_usado_' . ($totalFotos + 1),
+                            'tipo_foto_db' => 'foto_articulo_usado',
+                            'fuente' => 'ordenesarticulos'
+                        ];
+                        $totalFotos++;
+                        Log::info('✅ foto_articulo_usado procesada correctamente (backup)');
+                    } catch (\Exception $e) {
+                        Log::error('Error procesando foto_articulo_usado: ' . $e->getMessage());
+                    }
+                }
+                
+                // Foto artículo no usado (backup)
+                if (!empty($infoBasica->foto_articulo_no_usado)) {
+                    try {
+                        Log::info('Procesando foto_articulo_no_usado (backup)...');
+                        $base64 = base64_encode($infoBasica->foto_articulo_no_usado);
+                        $fotosPorTipo['foto_articulo_no_usado'][] = [
+                            'id' => $totalFotos + 1,
+                            'base64' => 'data:image/jpeg;base64,' . $base64,
+                            'mime' => 'image/jpeg',
+                            'nombre' => 'foto_no_usado_' . ($totalFotos + 1),
+                            'tipo_foto_db' => 'foto_articulo_no_usado',
+                            'fuente' => 'ordenesarticulos'
+                        ];
+                        $totalFotos++;
+                        Log::info('✅ foto_articulo_no_usado procesada correctamente (backup)');
+                    } catch (\Exception $e) {
+                        Log::error('Error procesando foto_articulo_no_usado: ' . $e->getMessage());
+                    }
+                }
             }
         }
         
@@ -640,31 +673,32 @@ public function obtenerTodasFotos($id)
         foreach ($fotosPorTipo as $tipo => $fotos) {
             Log::info("  - $tipo: " . count($fotos) . ' fotos');
             if (count($fotos) > 0) {
-                Log::info("    Ejemplo Base64 (primeros 50 chars): " . substr($fotos[0]['base64'], 0, 50) . '...');
+                $fuente = $fotos[0]['fuente'] ?? 'desconocida';
+                Log::info("    Fuente: $fuente");
             }
         }
         
         // 6. Preparar respuesta estructurada
         $tiposConfig = [
+            'foto_entrega' => [
+                'titulo' => '📦 Fotos de Entrega',
+                'descripcion' => 'Fotos del momento de entrega del repuesto'
+            ],
+            'foto_retorno' => [
+                'titulo' => '🔄 Fotos de Retorno',
+                'descripcion' => 'Fotos del retorno o devolución del repuesto'
+            ],
             'fotoRepuesto' => [
                 'titulo' => '📸 Fotos del Repuesto',
-                'descripcion' => 'Fotos originales del repuesto'
+                'descripcion' => 'Fotos originales del repuesto (backup)'
             ],
             'foto_articulo_usado' => [
                 'titulo' => '✅ Repuesto Usado',
-                'descripcion' => 'Fotos del repuesto utilizado en el equipo'
+                'descripcion' => 'Fotos del repuesto utilizado (backup)'
             ],
             'foto_articulo_no_usado' => [
                 'titulo' => '❌ Repuesto Devuelto',
-                'descripcion' => 'Fotos del repuesto devuelto sin usar'
-            ],
-            'foto_entrega' => [
-                'titulo' => '📦 Entrega',
-                'descripcion' => 'Fotos de la entrega del repuesto'
-            ],
-            'fotoRetorno' => [
-                'titulo' => '🔄 Retorno',
-                'descripcion' => 'Fotos del retorno del repuesto'
+                'descripcion' => 'Fotos del repuesto devuelto sin usar (backup)'
             ]
         ];
         
@@ -679,7 +713,8 @@ public function obtenerTodasFotos($id)
                     'total' => count($fotosDelTipo),
                     'fotos' => $fotosDelTipo,
                     'titulo' => $config['titulo'],
-                    'descripcion' => $config['descripcion']
+                    'descripcion' => $config['descripcion'],
+                    'fuente' => $fotosDelTipo[0]['fuente'] ?? 'desconocida'
                 ];
                 Log::info("✅ $tipoKey tiene " . count($fotosDelTipo) . " fotos");
             } else {
@@ -688,7 +723,8 @@ public function obtenerTodasFotos($id)
                     'total' => 0,
                     'fotos' => [],
                     'titulo' => $config['titulo'],
-                    'descripcion' => 'No hay fotos disponibles'
+                    'descripcion' => 'No hay fotos disponibles',
+                    'fuente' => 'no_disponible'
                 ];
                 Log::info("❌ $tipoKey no tiene fotos");
             }
@@ -701,6 +737,7 @@ public function obtenerTodasFotos($id)
             'fotos' => $respuestaEstructurada,
             'total_fotos' => $totalFotos,
             'info' => 'Fotos obtenidas correctamente',
+            'fuente_principal' => 'repuestos_entregas',
             'debug' => [
                 'ordenesarticulos_id' => $infoBasica->idOrdenesArticulos,
                 'solicitud_id' => $infoBasica->idSolicitudesOrdenes,

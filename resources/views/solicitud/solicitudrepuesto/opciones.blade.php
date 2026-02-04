@@ -353,55 +353,65 @@
                 @endif">
 
             <!-- Información del Repuesto -->
-            <td class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                <div class="flex items-center space-x-3 sm:space-x-4">
-                    <div
-                        class="w-8 h-8 sm:w-10 sm:h-10
-                            @if ($esCedido) bg-secondary-light
-                            @elseif($esPendienteRetorno) bg-warning-light
-                            @elseif($esUsado) bg-success-light
-                            @elseif($esDevuelto) bg-danger-light
-                            @else bg-danger-light @endif rounded-xl flex items-center justify-center flex-shrink-0">
-                        <i
-                            class="fas fa-cog
-                            @if ($esCedido) text-purple-600
-                            @elseif($esPendienteRetorno) text-amber-600
-                            @elseif($esUsado) text-success
-                            @elseif($esDevuelto) text-danger
-                            @else text-blue-600 @endif text-sm sm:text-base"></i>
-                    </div>
-                    <div class="min-w-0">
-                        <p class="font-semibold text-slate-900 text-sm sm:text-base truncate"
-                            title="{{ $repuesto->nombre }}">
-                            {{ $repuesto->nombre }}
-                            @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto)
-                                <span class="text-xs text-purple-600 font-normal">
-                                    (Cedido)</span>
-                            @endif
-                            @if ($esPendienteRetorno)
-                                <span class="text-xs text-amber-600 font-normal">
-                                    (Retorno Pendiente)</span>
-                            @endif
-                            @if ($esUsado)
-                                <span class="text-xs text-success font-normal">
-                                    (Usado)</span>
-                            @endif
-                            @if ($esDevuelto)
-                                <span class="text-xs text-danger font-normal">
-                                    (Devuelto)</span>
-                            @endif
-                        </p>
-                        <p class="text-xs text-slate-500 mt-1 truncate"
-                            title="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}">
-                            {{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}
-                        </p>
-                        <p class="text-xs text-slate-400 font-medium truncate"
-                            title="{{ $repuesto->tipo_repuesto }}">
-                            {{ $repuesto->tipo_repuesto }}
-                        </p>
-                    </div>
-                </div>
-            </td>
+<td class="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+    <div class="flex items-center space-x-3 sm:space-x-4">
+        <div class="w-8 h-8 sm:w-10 sm:h-10
+            @if ($esCedido) bg-secondary-light
+            @elseif($esPendienteRetorno) bg-warning-light
+            @elseif($esUsado) bg-success-light
+            @elseif($esDevuelto) bg-danger-light
+            @else bg-danger-light @endif rounded-xl flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-cog
+                @if ($esCedido) text-purple-600
+                @elseif($esPendienteRetorno) text-amber-600
+                @elseif($esUsado) text-success
+                @elseif($esDevuelto) text-danger
+                @else text-blue-600 @endif text-sm sm:text-base"></i>
+        </div>
+        <div class="min-w-0">
+            <p class="font-semibold text-slate-900 text-sm sm:text-base truncate"
+                title="{{ $repuesto->nombre }}">
+                {{ $repuesto->nombre }}
+                @if ($esCedido && !$esPendienteRetorno && !$esUsado && !$esDevuelto)
+                    <span class="text-xs text-purple-600 font-normal">
+                        (Cedido)</span>
+                @endif
+                @if ($esPendienteRetorno)
+                    <span class="text-xs text-amber-600 font-normal">
+                        (Retorno Pendiente)</span>
+                @endif
+                @if ($esUsado)
+                    <span class="text-xs text-success font-normal">
+                        (Usado)</span>
+                @endif
+                @if ($esDevuelto)
+                    <span class="text-xs text-danger font-normal">
+                        (Devuelto)</span>
+                @endif
+            </p>
+            
+            <!-- Código del repuesto -->
+            <p class="text-xs text-slate-500 mt-1 truncate"
+                title="{{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}">
+                Código: {{ $repuesto->codigo_repuesto ?: $repuesto->codigo_barras }}
+            </p>
+            
+            <!-- Modelo -->
+            <p class="text-xs text-slate-600 font-medium truncate"
+                title="{{ $repuesto->modelo_nombre ?? 'Sin modelo' }}">
+                <i class="fas fa-microchip mr-1"></i>
+                Modelo: {{ $repuesto->modelo_nombre ?? 'N/A' }}
+            </p>
+            
+            <!-- Tipo de repuesto -->
+            <p class="text-xs text-slate-400 font-medium truncate"
+                title="{{ $repuesto->tipo_repuesto }}">
+                <i class="fas fa-tag mr-1"></i>
+                Tipo: {{ $repuesto->tipo_repuesto }}
+            </p>
+        </div>
+    </div>
+</td>
 
             <!-- Cantidad Solicitada -->
             <td class="px-4 sm:px-6 py-4 sm:py-6">

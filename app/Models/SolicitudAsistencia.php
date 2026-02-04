@@ -44,6 +44,17 @@ class SolicitudAsistencia extends Model
     {
         return $this->hasMany(ArchivoSolicitudAsistencia::class, 'id_solicitud_asistencia', 'id_solicitud_asistencia');
     }
+    /**
+     * Relación con notificaciones_solicitud_asistencia
+     */
+    public function notificaciones()
+    {
+        return $this->hasMany(
+            NotificacionSolicitudAsistencia::class,
+            'id_solicitud_asistencia',
+            'id_solicitud_asistencia'
+        );
+    }
 
     public function imagenes(): HasMany
     {
