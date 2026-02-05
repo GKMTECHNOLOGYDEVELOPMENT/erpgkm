@@ -4,7 +4,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
-        /* Solo el CSS necesario para la tabla */
         .table-days {
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -29,7 +28,6 @@
             background-color: #f9fafb;
         }
 
-        /* Estilos para Flatpickr */
         .flatpickr-input {
             background-color: white !important;
             cursor: pointer !important;
@@ -99,7 +97,59 @@
                     </div>
                 @endif
 
-                <!-- Sección 1: Tipo de solicitud -->
+                <!-- Sección: Usuarios -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-user-friends text-blue-500 mr-2"></i>
+                        Información de Usuarios
+                    </h2>
+
+                    <!-- Información del solicitante (usuario autenticado) -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Solicitante</p>
+                                <p class="text-sm text-gray-900">
+                                    {{ $usuarioAutenticado->Nombre }} {{ $usuarioAutenticado->apellidoPaterno }} {{ $usuarioAutenticado->apellidoMaterno }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-id-card mr-1"></i>
+                                    {{ $usuarioAutenticado->documento ?? 'Sin documento' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selector de usuario DESTINO -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user-check text-gray-400 mr-1"></i>
+                            Usuario para quien es la solicitud *
+                        </label>
+                        <select name="id_usuario" 
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                required>
+                            <option value="">Seleccione un usuario...</option>
+                            @foreach ($usuariosDestino as $usuario)
+                                <option value="{{ $usuario->idUsuario }}" {{ old('id_usuario') == $usuario->idUsuario ? 'selected' : '' }}>
+                                    {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }} {{ $usuario->apellidoMaterno }}
+                                    @if($usuario->documento)
+                                        - {{ $usuario->documento }}
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Solo se muestran usuarios de tu mismo tipo de área
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sección: Tipo de solicitud -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-tag text-blue-500 mr-2"></i>
@@ -144,6 +194,7 @@
                     </div>
                 </div>
 
+                <!-- Sección: Rango de Tiempo -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
@@ -151,7 +202,6 @@
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                         <!-- Fecha inicio -->
                         <div>
                             <label for="fechaInicio"
@@ -161,8 +211,7 @@
                             </label>
                             <input type="text" name="rango_inicio_tiempo" id="fechaInicio"
                                 value="{{ old('rango_inicio_tiempo') }}"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3
-                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
                                 placeholder="Selecciona fecha y hora de inicio" required readonly>
                         </div>
 
@@ -175,15 +224,13 @@
                             </label>
                             <input type="text" name="rango_final_tiempo" id="fechaFin"
                                 value="{{ old('rango_final_tiempo') }}"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3
-                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
                                 placeholder="Selecciona fecha y hora de fin" required readonly>
                         </div>
-
                     </div>
                 </div>
 
-                <!-- Sección 3: Observaciones -->
+                <!-- Sección: Observaciones -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-sticky-note text-blue-500 mr-2"></i>
@@ -201,7 +248,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 4: Licencia Médica (condicional) - Mejorada -->
+                <!-- Sección: Licencia Médica (condicional) -->
                 <div id="boxLicenciaMedica"
                     class="hidden border border-red-200 bg-gradient-to-br from-red-50 to-red-50/50 rounded-2xl p-6 space-y-4">
                     <div class="flex items-start">
@@ -226,7 +273,6 @@
                                 Foto de licencia médica <span class="text-red-500">*</span>
                             </label>
 
-                            <!-- Dropzone para subir archivo -->
                             <div class="file-upload-area border-2 border-dashed border-red-300 rounded-xl p-6 text-center hover:border-red-400 hover:bg-red-50 transition-all cursor-pointer"
                                 onclick="document.getElementById('licenciaInput').click()">
                                 <input type="file" id="licenciaInput" name="imagen_licencia" accept="image/*"
@@ -274,7 +320,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 5: Educativo (condicional) - Mejorada -->
+                <!-- Sección: Educativo (condicional) -->
                 <div id="boxEducativo"
                     class="hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50/50 rounded-2xl p-6 space-y-6">
                     <div class="flex items-start">
@@ -400,7 +446,7 @@
                         </div>
                     </div>
 
-                    <!-- Tabla de días - Mejorada -->
+                    <!-- Tabla de días -->
                     <div class="space-y-4">
                         <label class="block text-sm font-semibold text-gray-700">
                             <i class="fas fa-calendar-check text-blue-400 mr-1"></i>
@@ -522,7 +568,6 @@
 
         // Configuración de Flatpickr
         document.addEventListener('DOMContentLoaded', function() {
-            // Configuración común
             const flatpickrConfig = {
                 locale: "es",
                 enableTime: true,
@@ -541,11 +586,9 @@
             const fechaInicioPicker = flatpickr("#fechaInicio", {
                 ...flatpickrConfig,
                 onChange: function(selectedDates, dateStr) {
-                    // Cuando se selecciona una fecha de inicio, actualizar el mínimo de la fecha final
                     if (dateStr && fechaFinPicker) {
                         fechaFinPicker.set('minDate', selectedDates[0]);
 
-                        // Si la fecha final actual es anterior a la nueva fecha de inicio, limpiarla
                         const fechaFinValue = document.getElementById('fechaFin').value;
                         if (fechaFinValue && new Date(fechaFinValue) < selectedDates[0]) {
                             fechaFinPicker.clear();
@@ -560,11 +603,9 @@
                 minDate: "null"
             });
 
-            // Inicializar drag & drop para archivos
             initFileUploads();
         });
 
-        // Función para formatear tamaño de archivo
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -573,7 +614,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Manejar subida de licencia médica
         function handleLicenciaUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -583,7 +623,7 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB
+            if (file.size > 5 * 1024 * 1024) {
                 toastr.error('El archivo es demasiado grande. Máximo 5MB');
                 return;
             }
@@ -603,7 +643,6 @@
             reader.readAsDataURL(file);
         }
 
-        // Manejar subida de archivo educativo
         function handleArchivoUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -616,7 +655,7 @@
                 return;
             }
 
-            if (file.size > 10 * 1024 * 1024) { // 10MB
+            if (file.size > 10 * 1024 * 1024) {
                 toastr.error('El archivo es demasiado grande. Máximo 10MB');
                 return;
             }
@@ -630,7 +669,6 @@
             previewDiv.classList.remove('hidden');
         }
 
-        // Manejar subida de imagen opcional
         function handleImagenUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -640,7 +678,7 @@
                 return;
             }
 
-            if (file.size > 3 * 1024 * 1024) { // 3MB
+            if (file.size > 3 * 1024 * 1024) {
                 toastr.error('La imagen es demasiado grande. Máximo 3MB');
                 return;
             }
@@ -660,11 +698,9 @@
             reader.readAsDataURL(file);
         }
 
-        // Funciones para remover previews
         function removeLicenciaPreview() {
             const previewDiv = document.getElementById('licenciaPreview');
             const input = document.getElementById('licenciaInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
@@ -672,7 +708,6 @@
         function removeArchivoPreview() {
             const previewDiv = document.getElementById('archivoPreview');
             const input = document.getElementById('archivoInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
@@ -680,15 +715,12 @@
         function removeImagenPreview() {
             const previewDiv = document.getElementById('imagenPreview');
             const input = document.getElementById('imagenInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
 
-        // Arrastrar y soltar archivos
         function initFileUploads() {
             const uploadAreas = document.querySelectorAll('.file-upload-area');
-
             uploadAreas.forEach(area => {
                 area.addEventListener('dragover', function(e) {
                     e.preventDefault();
@@ -711,19 +743,14 @@
                         dataTransfer.items.add(files[0]);
                         input.files = dataTransfer.files;
 
-                        // Disparar el evento change
-                        const event = new Event('change', {
-                            bubbles: true
-                        });
+                        const event = new Event('change', { bubbles: true });
                         input.dispatchEvent(event);
                     }
                 });
             });
         }
 
-        // Validación antes de enviar
         document.querySelector('form').addEventListener('submit', function(e) {
-            // Validar que la fecha final sea mayor que la fecha de inicio
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;
 
@@ -738,27 +765,22 @@
                 }
             }
 
-            // Validar licencia médica si está visible
             const boxLicencia = document.getElementById('boxLicenciaMedica');
             if (!boxLicencia.classList.contains('hidden')) {
                 const licenciaInput = document.getElementById('licenciaInput');
                 if (!licenciaInput || !licenciaInput.files.length) {
                     e.preventDefault();
                     toastr.error('Debe adjuntar la licencia médica para este tipo de solicitud');
-                    boxLicencia.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    boxLicencia.scrollIntoView({ behavior: 'smooth' });
                     return false;
                 }
             }
 
-            // Mostrar loader en el botón
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Procesando...';
             submitBtn.disabled = true;
 
-            // El formulario se enviará normalmente
             return true;
         });
     </script>

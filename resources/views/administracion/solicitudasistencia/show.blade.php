@@ -57,7 +57,7 @@
                             Volver
                         </a>
 
-                        @if ($solicitud->estado == 'pendiente')
+                        @if ($solicitud->estado == 'pendiente' && Auth::id() == $solicitud->id_usuario_solicitante)
                             <a href="{{ route('administracion.solicitud-asistencia.edit', $solicitud->id_solicitud_asistencia) }}"
                                 class="px-5 py-2.5 bg-primary-light text-primary font-medium rounded-xl hover:bg-primary hover:text-white transition-colors shadow-sm flex items-center">
                                 <i class="fas fa-edit mr-2"></i>
@@ -80,6 +80,7 @@
                     </div>
 
                     <div class="space-y-3">
+                        <!-- Fecha de solicitud -->
                         <div class="flex justify-between items-center pb-2 border-b border-gray-100">
                             <span class="text-sm text-gray-600 flex items-center">
                                 <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
@@ -90,22 +91,41 @@
                             </span>
                         </div>
 
+                        <!-- SOLICITANTE (usuario que crea la solicitud) -->
                         <div class="flex justify-between items-center pb-2 border-b border-gray-100">
                             <span class="text-sm text-gray-600 flex items-center">
-                                <i class="fas fa-user-clock mr-2 text-gray-400"></i>
+                                <i class="fas fa-user-tie mr-2 text-blue-400"></i>
                                 Solicitante
                             </span>
                             <span class="font-medium text-gray-900">
-                                {{ $solicitud->usuario
-                                    ? $solicitud->usuario->Nombre .
-                                        ' ' .
-                                        $solicitud->usuario->apellidoPaterno .
-                                        ' ' .
-                                        $solicitud->usuario->apellidoMaterno
-                                    : 'Usuario no disponible' }}
+                                @if($solicitud->usuarioSolicitante)
+                                    {{ $solicitud->usuarioSolicitante->Nombre }} 
+                                    {{ $solicitud->usuarioSolicitante->apellidoPaterno }} 
+                                    {{ $solicitud->usuarioSolicitante->apellidoMaterno }}
+                                @else
+                                    Usuario no disponible
+                                @endif
                             </span>
                         </div>
 
+                        <!-- DESTINATARIO (usuario para quien es la solicitud) -->
+                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-600 flex items-center">
+                                <i class="fas fa-user mr-2 text-green-400"></i>
+                                Destinatario
+                            </span>
+                            <span class="font-medium text-gray-900">
+                                @if($solicitud->usuarioDestino)
+                                    {{ $solicitud->usuarioDestino->Nombre }} 
+                                    {{ $solicitud->usuarioDestino->apellidoPaterno }} 
+                                    {{ $solicitud->usuarioDestino->apellidoMaterno }}
+                                @else
+                                    Usuario no disponible
+                                @endif
+                            </span>
+                        </div>
+
+                        <!-- Tipo de solicitud -->
                         <div class="flex justify-between items-center pb-2 border-b border-gray-100">
                             <span class="text-sm text-gray-600 flex items-center">
                                 <i class="fas fa-tag mr-2 text-gray-400"></i>
@@ -116,6 +136,7 @@
                             </span>
                         </div>
 
+                        <!-- Tipo de educación (si aplica) -->
                         @if ($solicitud->tipoEducacion)
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-gray-600 flex items-center">
@@ -187,7 +208,6 @@
                     </div>
                 </div>
 
-
                 <!-- Tarjeta 3: Archivos -->
                 @if ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0)
                     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
@@ -199,7 +219,6 @@
                         </div>
 
                         <div class="space-y-3">
-
                             {{-- ARCHIVOS --}}
                             @foreach ($solicitud->archivos as $archivo)
                                 <div
@@ -218,6 +237,20 @@
                                             </p>
                                             <p class="text-xs text-gray-500 capitalize">
                                                 {{ str_replace('_', ' ', $archivo->tipo_archivo) }}
+                                            </p>
+                                            <!-- Tamaño del archivo -->
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                @php
+                                                    $bytes = $archivo->espacio_archivo ?? 0;
+                                                    if ($bytes == 0) {
+                                                        echo '0 Bytes';
+                                                    } else {
+                                                        $k = 1024;
+                                                        $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                                                        $i = floor(log($bytes) / log($k));
+                                                        echo number_format($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+                                                    }
+                                                @endphp
                                             </p>
                                         </div>
                                     </div>
@@ -257,11 +290,9 @@
                                     </a>
                                 </div>
                             @endforeach
-
                         </div>
                     </div>
                 @endif
-
             </div>
 
             <!-- MATRÍCULA DE DÍAS PROGRAMADOS -->
@@ -296,7 +327,6 @@
                                 <tr>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-calendar-day mb-1"></i>
                                             <span>DÍA</span>
@@ -304,7 +334,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-calendar mb-1"></i>
                                             <span>FECHA</span>
@@ -312,7 +341,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-clock mb-1"></i>
                                             <span>JORNADA</span>
@@ -320,7 +348,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-sign-in-alt mb-1"></i>
                                             <span>HORA ENTRADA</span>
@@ -328,7 +355,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-sign-out-alt mb-1"></i>
                                             <span>HORA SALIDA</span>
@@ -336,7 +362,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-briefcase mb-1"></i>
                                             <span>LLEGADA TRABAJO</span>
@@ -344,7 +369,6 @@
                                     </th>
                                     <th
                                         class="bg-primary px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider border-r border-white/10">
-
                                         <div class="flex flex-col items-center">
                                             <i class="fas fa-comment-alt mb-1"></i>
                                             <span>OBSERVACIONES</span>

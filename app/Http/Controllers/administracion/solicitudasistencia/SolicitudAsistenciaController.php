@@ -11,6 +11,7 @@ use App\Models\SolicitudAsistencia;
 use App\Models\SolicitudAsistenciaDia;
 use App\Models\TipoEducacion;
 use App\Models\TipoSolicitudAsistencia;
+use App\Models\Usuario; // Asegúrate de tener este modelo
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -41,7 +42,7 @@ class SolicitudAsistenciaController extends Controller
     {
         $tipos = TipoSolicitudAsistencia::orderBy('nombre_tip')->get();
 
-        $query = SolicitudAsistencia::with(['tipoSolicitud', 'tipoEducacion'])
+        $query = SolicitudAsistencia::with(['tipoSolicitud', 'tipoEducacion', 'usuarioDestino', 'usuarioSolicitante'])
             ->orderByDesc('id_solicitud_asistencia');
 
         if ($request->filled('tipo')) {
@@ -50,6 +51,15 @@ class SolicitudAsistenciaController extends Controller
 
         if ($request->filled('estado')) {
             $query->where('estado', $request->estado);
+        }
+
+        // Filtrar por usuario autenticado
+        $usuarioAutenticado = Auth::user();
+        if ($usuarioAutenticado->idRol != 1) { // Si no es admin
+            $query->where(function($q) use ($usuarioAutenticado) {
+                $q->where('id_usuario_solicitante', $usuarioAutenticado->idUsuario) // Es solicitante
+                  ->orWhere('id_usuario', $usuarioAutenticado->idUsuario); // Es destinatario
+            });
         }
 
         $solicitudes = $query->paginate(12)->withQueryString();
@@ -62,9 +72,19 @@ class SolicitudAsistenciaController extends Controller
      * ========================= */
     public function create()
     {
+        $usuarioAutenticado = Auth::user();
+        
+        // Obtener usuarios DESTINO según el tipo de área del usuario autenticado
+        $usuariosDestino = Usuario::where('idTipoArea', $usuarioAutenticado->idTipoArea)
+            ->where('estado', 1) // Solo usuarios activos
+            ->orderBy('Nombre')
+            ->get();
+
         return view('administracion.solicitudasistencia.create', [
             'tipos' => TipoSolicitudAsistencia::orderBy('nombre_tip')->get(),
             'tiposEducacion' => TipoEducacion::orderBy('nombre')->get(),
+            'usuariosDestino' => $usuariosDestino,
+            'usuarioAutenticado' => $usuarioAutenticado,
         ]);
     }
 
@@ -79,36 +99,61 @@ class SolicitudAsistenciaController extends Controller
     /* =========================
      * EDIT
      * ========================= */
-    public function edit($id)
-    {
-        $solicitud = SolicitudAsistencia::with(['tipoSolicitud', 'tipoEducacion', 'dias'])
-            ->findOrFail($id);
+public function edit($id)
+{
+    $solicitud = SolicitudAsistencia::with(['tipoSolicitud', 'tipoEducacion', 'dias', 'usuarioDestino'])
+        ->findOrFail($id);
 
-        $diasEdit = [];
-
-        foreach ($solicitud->dias as $d) {
-            $fecha = Carbon::parse($d->fecha);
-            $diaNombre = $fecha->locale('es')->dayName;
-            $diaNormalizado = $this->normalizarNombreDia($diaNombre);
-
-            $diasEdit[$diaNormalizado] = [
-                'id_solicitud_dia' => $d->id_solicitud_dia,
-                'es_todo_el_dia' => $d->es_todo_el_dia,
-                'hora_entrada' => $d->hora_entrada,
-                'hora_salida' => $d->hora_salida,
-                'hora_llegada_trabajo' => $d->hora_llegada_trabajo,
-                'observacion' => $d->observacion,
-                'fecha' => $d->fecha,
-            ];
-        }
-
-        return view('administracion.solicitudasistencia.edit', [
-            'solicitud' => $solicitud,
-            'tipos' => TipoSolicitudAsistencia::orderBy('nombre_tip')->get(),
-            'tiposEducacion' => TipoEducacion::orderBy('nombre')->get(),
-            'diasEdit' => $diasEdit,
-        ]);
+    // Verificar permisos
+    $usuarioAutenticado = Auth::user();
+    if ($usuarioAutenticado->idRol != 1 && 
+        $solicitud->id_usuario_solicitante != $usuarioAutenticado->idUsuario) {
+        abort(403, 'No tienes permiso para editar esta solicitud');
     }
+
+    $diasEdit = [];
+
+    foreach ($solicitud->dias as $d) {
+        $fecha = Carbon::parse($d->fecha);
+        $diaNombre = $fecha->locale('es')->dayName;
+        $diaNormalizado = $this->normalizarNombreDia($diaNombre);
+
+        $diasEdit[$diaNormalizado] = [
+            'id_solicitud_dia' => $d->id_solicitud_dia,
+            'es_todo_el_dia' => $d->es_todo_el_dia,
+            'hora_entrada' => $d->hora_entrada,
+            'hora_salida' => $d->hora_salida,
+            'hora_llegada_trabajo' => $d->hora_llegada_trabajo,
+            'observacion' => $d->observacion,
+            'fecha' => $d->fecha,
+        ];
+    }
+
+    // Obtener usuarios DESTINO según el tipo de área
+    $usuariosDestino = Usuario::where('idTipoArea', $usuarioAutenticado->idTipoArea)
+        ->where('estado', 1)
+        ->orderBy('Nombre')
+        ->get();
+
+    // Función para formatear tamaño de archivo
+    $formatFileSize = function($bytes) {
+        if ($bytes == 0) return '0 Bytes';
+        $k = 1024;
+        $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        $i = floor(log($bytes) / log($k));
+        return number_format($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+    };
+
+    return view('administracion.solicitudasistencia.edit', [
+        'solicitud' => $solicitud,
+        'tipos' => TipoSolicitudAsistencia::orderBy('nombre_tip')->get(),
+        'tiposEducacion' => TipoEducacion::orderBy('nombre')->get(),
+        'diasEdit' => $diasEdit,
+        'usuariosDestino' => $usuariosDestino,
+        'usuarioAutenticado' => $usuarioAutenticado,
+        'formatFileSize' => $formatFileSize, // Pasamos la función a la vista
+    ]);
+}
 
     /* =========================
      * UPDATE
@@ -116,6 +161,13 @@ class SolicitudAsistenciaController extends Controller
     public function update(Request $request, $id)
     {
         $solicitud = SolicitudAsistencia::findOrFail($id);
+
+        // Verificar permisos
+        $usuarioAutenticado = Auth::user();
+        if ($usuarioAutenticado->idRol != 1 && 
+            $solicitud->id_usuario_solicitante != $usuarioAutenticado->idUsuario) {
+            abort(403, 'No tienes permiso para actualizar esta solicitud');
+        }
 
         if (!$request->filled('id_tipo_solicitud')) {
             $request->merge(['id_tipo_solicitud' => $solicitud->id_tipo_solicitud]);
@@ -130,6 +182,13 @@ class SolicitudAsistenciaController extends Controller
     public function destroy($id)
     {
         $solicitud = SolicitudAsistencia::findOrFail($id);
+
+        // Verificar permisos
+        $usuarioAutenticado = Auth::user();
+        if ($usuarioAutenticado->idRol != 1 && 
+            $solicitud->id_usuario_solicitante != $usuarioAutenticado->idUsuario) {
+            abort(403, 'No tienes permiso para eliminar esta solicitud');
+        }
 
         DB::transaction(function () use ($solicitud) {
             // Eliminar archivos físicos
@@ -212,7 +271,8 @@ class SolicitudAsistenciaController extends Controller
             'dias',
             'archivos',
             'imagenes',
-            'usuario',
+            'usuarioDestino', // Relación con usuario DESTINO (id_usuario)
+            'usuarioSolicitante', // Relación con usuario SOLICITANTE (id_usuario_solicitante)
             'evaluaciones' => fn($q) => $q->orderBy('fecha', 'desc'),
             'evaluaciones.usuario',
             'notificaciones' => fn($q) => $q->orderBy('fecha', 'desc'),
@@ -233,10 +293,21 @@ class SolicitudAsistenciaController extends Controller
     }
 
     /* =====================================================
-     * MÉTODO PRINCIPAL - CORREGIDO PARA EL ERROR DE getSize()
+     * MÉTODO PRINCIPAL ACTUALIZADO
      * ===================================================== */
     private function saveSolicitud(Request $request, SolicitudAsistencia $solicitud = null)
     {
+        // Obtener usuario autenticado (solicitante)
+        $usuarioAutenticado = Auth::user();
+        
+        // Validar que el usuario destino pertenezca al mismo tipo de área
+        if ($request->filled('id_usuario')) {
+            $usuarioDestino = Usuario::find($request->id_usuario);
+            if ($usuarioDestino && $usuarioDestino->idTipoArea != $usuarioAutenticado->idTipoArea) {
+                return back()->with('error', 'El usuario seleccionado no pertenece a tu área')->withInput();
+            }
+        }
+
         // 1. Obtener el tipo de solicitud
         $tipo = TipoSolicitudAsistencia::findOrFail($request->id_tipo_solicitud);
         $tipoNombre = mb_strtolower(trim($tipo->nombre_tip));
@@ -254,13 +325,13 @@ class SolicitudAsistenciaController extends Controller
             'esUpdate' => $esUpdate
         ]);
 
-        /* ========= VALIDACIÓN BASE ========= */
+        /* ========= VALIDACIÓN BASE ACTUALIZADA ========= */
         $rules = [
             'id_tipo_solicitud'   => ['required', Rule::exists('tipo_solicitud_asistencia', 'id_tipo_solicitud')],
+            'id_usuario'          => ['required', 'exists:usuarios,idUsuario'], // Usuario DESTINO
             'observacion'         => ['nullable', 'string'],
             'rango_inicio_tiempo' => ['required', 'date_format:Y-m-d H:i'],
             'rango_final_tiempo'  => ['required', 'date_format:Y-m-d H:i', 'after:rango_inicio_tiempo'],
-
         ];
 
         // Reglas específicas para licencia médica
@@ -375,14 +446,15 @@ class SolicitudAsistenciaController extends Controller
             if (!$solicitud) {
                 // Crear nueva solicitud
                 $solicitud = SolicitudAsistencia::create([
-                    'id_tipo_solicitud'   => $data['id_tipo_solicitud'],
-                    'observacion'         => $data['observacion'] ?? null,
-                    'fecha_solicitud'     => now(),
-                    'rango_inicio_tiempo' => Carbon::parse($data['rango_inicio_tiempo']),
-                    'rango_final_tiempo'  => Carbon::parse($data['rango_final_tiempo']),
-                    'id_tipo_educacion'   => $esEducativo ? $data['id_tipo_educacion'] : null,
-                    'estado'              => 'pendiente',
-                    'id_usuario'          => Auth::id(),
+                    'id_tipo_solicitud'      => $data['id_tipo_solicitud'],
+                    'id_usuario'             => $data['id_usuario'], // Usuario DESTINO
+                    'id_usuario_solicitante' => Auth::id(), // Usuario SOLICITANTE (autenticado)
+                    'observacion'            => $data['observacion'] ?? null,
+                    'fecha_solicitud'        => now(),
+                    'rango_inicio_tiempo'    => Carbon::parse($data['rango_inicio_tiempo']),
+                    'rango_final_tiempo'     => Carbon::parse($data['rango_final_tiempo']),
+                    'id_tipo_educacion'      => $esEducativo ? $data['id_tipo_educacion'] : null,
+                    'estado'                 => 'pendiente',
                 ]);
 
                 // Crear registro en evaluar_solicitud_asistencia
@@ -399,10 +471,11 @@ class SolicitudAsistenciaController extends Controller
             } else {
                 // Actualizar solicitud existente
                 $solicitud->update([
+                    'id_usuario'          => $data['id_usuario'] ?? $solicitud->id_usuario,
                     'observacion'         => $data['observacion'] ?? $solicitud->observacion,
                     'rango_inicio_tiempo' => Carbon::parse($data['rango_inicio_tiempo']),
                     'rango_final_tiempo'  => Carbon::parse($data['rango_final_tiempo']),
-                    'id_tipo_educacion'   => $esEducativo ? $data['id_tipo_educacion'] : null,
+                    'id_tipo_educacion'   => $esEducativo ? $data['id_tipo_educacion'] : $solicitud->id_tipo_educacion,
                 ]);
 
                 // Crear notificación de actualización
@@ -764,4 +837,13 @@ class SolicitudAsistenciaController extends Controller
 
         return response()->json($notificaciones);
     }
+
+    private function formatFileSizePHP($bytes)
+{
+    if ($bytes == 0) return '0 Bytes';
+    $k = 1024;
+    $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    $i = floor(log($bytes) / log($k));
+    return number_format($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+}
 }

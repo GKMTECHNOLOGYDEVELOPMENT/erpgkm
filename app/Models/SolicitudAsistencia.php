@@ -22,6 +22,7 @@ class SolicitudAsistencia extends Model
         'id_tipo_educacion',
         'estado',
         'id_usuario',
+        'id_usuario_solicitante'
     ];
 
     protected $casts = [
@@ -76,4 +77,16 @@ class SolicitudAsistencia extends Model
     {
         return $this->belongsTo(Usuario::class, 'id_usuario', 'idUsuario');
     }
+       // Relación con usuario DESTINO (id_usuario = usuario para quien es la solicitud)
+    public function usuarioDestino()
+    {
+        return $this->belongsTo(Usuario::class, 'id_usuario');
+    }
+    
+    // Relación con usuario SOLICITANTE (id_usuario_solicitante = quien crea la solicitud)
+    public function usuarioSolicitante()
+    {
+        return $this->belongsTo(Usuario::class, 'id_usuario_solicitante');
+    }
+    
 }
