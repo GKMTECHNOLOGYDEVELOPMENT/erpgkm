@@ -199,21 +199,22 @@
                         </div>
 
                         <div class="space-y-3">
+
+                            {{-- ARCHIVOS --}}
                             @foreach ($solicitud->archivos as $archivo)
                                 <div
                                     class="flex flex-col sm:flex-row sm:items-center sm:justify-between
-                       bg-gray-50 border border-gray-200 rounded-lg p-3
-                       hover:bg-gray-100 transition-colors gap-3">
+                           bg-gray-50 border border-gray-200 rounded-lg p-3
+                           hover:bg-gray-100 transition-colors gap-3">
 
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="p-2 rounded-lg bg-primary-light text-primary shrink-0">
                                             <i class="fas fa-file-pdf"></i>
                                         </div>
 
-                                        <!-- ESTE DIV ES LA CLAVE -->
                                         <div class="min-w-0 flex-1">
                                             <p class="font-medium text-gray-900 text-sm truncate">
-                                                {{ $archivo->archivo_solicitud }}
+                                                {{ basename($archivo->archivo_solicitud) }}
                                             </p>
                                             <p class="text-xs text-gray-500 capitalize">
                                                 {{ str_replace('_', ' ', $archivo->tipo_archivo) }}
@@ -221,8 +222,7 @@
                                         </div>
                                     </div>
 
-
-                                    <a href="{{ Storage::url($archivo->archivo_solicitud) }}" target="_blank"
+                                    <a href="{{ asset($archivo->archivo_solicitud) }}"  target="_blank"
                                         class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
                                         title="Ver archivo">
                                         <i class="fas fa-external-link-alt"></i>
@@ -230,36 +230,38 @@
                                 </div>
                             @endforeach
 
+                            {{-- IMÁGENES --}}
                             @foreach ($solicitud->imagenes as $imagen)
                                 <div
                                     class="flex flex-col sm:flex-row sm:items-center sm:justify-between
-                       bg-gray-50 border border-gray-200 rounded-lg p-3
-                       hover:bg-gray-100 transition-colors gap-3">
+                           bg-gray-50 border border-gray-200 rounded-lg p-3
+                           hover:bg-gray-100 transition-colors gap-3">
 
                                     <div class="flex items-center gap-3 min-w-0">
                                         <div class="p-2 rounded-lg bg-success-light text-success shrink-0">
                                             <i class="fas fa-image"></i>
                                         </div>
 
-                                        <div class="min-w-0">
+                                        <div class="min-w-0 flex-1">
                                             <p class="font-medium text-gray-900 text-sm truncate">
-                                                {{ $imagen->archivo_solicitud }}
+                                                {{ basename($imagen->imagen) }}
                                             </p>
                                             <p class="text-xs text-gray-500">Imagen adjunta</p>
                                         </div>
                                     </div>
 
-                                    <a href="{{ Storage::url($imagen->archivo_solicitud) }}" target="_blank"
+                                    <a href="{{ asset($imagen->imagen) }}" target="_blank"
                                         class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
                                         title="Ver imagen">
                                         <i class="fas fa-external-link-alt"></i>
                                     </a>
                                 </div>
                             @endforeach
+
                         </div>
                     </div>
-
                 @endif
+
             </div>
 
             <!-- MATRÍCULA DE DÍAS PROGRAMADOS -->

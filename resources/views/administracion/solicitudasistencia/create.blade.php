@@ -531,7 +531,7 @@
                 altInput: true,
                 altFormat: "d/m/Y H:i",
                 allowInput: true,
-                minDate: "today",
+                minDate: "null",
                 minuteIncrement: 15,
                 defaultHour: 8,
                 defaultMinute: 0
@@ -557,7 +557,7 @@
             // Configurar fecha final
             const fechaFinPicker = flatpickr("#fechaFin", {
                 ...flatpickrConfig,
-                minDate: "today"
+                minDate: "null"
             });
 
             // Inicializar drag & drop para archivos
