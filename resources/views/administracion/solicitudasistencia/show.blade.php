@@ -96,7 +96,13 @@
                                 Solicitante
                             </span>
                             <span class="font-medium text-gray-900">
-                                {{ $solicitud->usuario->name ?? 'Usuario no disponible' }}
+                                {{ $solicitud->usuario
+                                    ? $solicitud->usuario->Nombre .
+                                        ' ' .
+                                        $solicitud->usuario->apellidoPaterno .
+                                        ' ' .
+                                        $solicitud->usuario->apellidoMaterno
+                                    : 'Usuario no disponible' }}
                             </span>
                         </div>
 
@@ -134,6 +140,7 @@
                     </div>
 
                     <div class="space-y-4">
+                        <!-- INICIO -->
                         <div class="bg-primary-light border border-primary rounded-xl p-4">
                             <div class="flex items-center mb-2">
                                 <div class="p-1.5 rounded-lg bg-primary text-white mr-3">
@@ -142,15 +149,16 @@
                                 <div>
                                     <p class="text-xs text-primary font-semibold">INICIO</p>
                                     <p class="text-lg font-bold text-gray-900">
-                                        {{ $solicitud->rango_inicio_tiempo->format('d/m/Y') }}
+                                        {{ $solicitud->rango_inicio_tiempo?->format('d/m/Y') ?? '-' }}
                                     </p>
                                     <p class="text-sm text-gray-600">
-                                        {{ $solicitud->rango_inicio_tiempo->format('H:i') }} horas
+                                        {{ $solicitud->rango_inicio_tiempo?->format('H:i') ?? '--:--' }} horas
                                     </p>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- FINAL -->
                         <div class="bg-danger-light border border-danger rounded-xl p-4">
                             <div class="flex items-center mb-2">
                                 <div class="p-1.5 rounded-lg bg-danger text-white mr-3">
@@ -159,16 +167,26 @@
                                 <div>
                                     <p class="text-xs text-danger font-semibold">FINAL</p>
                                     <p class="text-lg font-bold text-gray-900">
-                                        {{ $solicitud->rango_final_tiempo->format('d/m/Y') }}
+                                        {{ $solicitud->rango_final_tiempo?->format('d/m/Y') ?? '-' }}
                                     </p>
                                     <p class="text-sm text-gray-600">
-                                        {{ $solicitud->rango_final_tiempo->format('H:i') }} horas
+                                        {{ $solicitud->rango_final_tiempo?->format('H:i') ?? '--:--' }} horas
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- CONTADOR DE DÍAS -->
+                    <div class="mt-5 text-center">
+                        <span
+                            class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-800 text-sm font-semibold">
+                            <i class="fas fa-clock mr-2 text-gray-500"></i>
+                            {{ $diasDuracion }} día{{ $diasDuracion !== 1 ? 's' : '' }} de duración
+                        </span>
+                    </div>
                 </div>
+
 
                 <!-- Tarjeta 3: Archivos -->
                 @if ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0)

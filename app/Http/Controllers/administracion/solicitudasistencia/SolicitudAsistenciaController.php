@@ -201,7 +201,7 @@ class SolicitudAsistenciaController extends Controller
             ->with('success', "Solicitud {$estadoTexto} correctamente");
     }
 
-    /* =========================
+   /* =========================
      * VER DETALLES
      * ========================= */
     public function show($id)
@@ -212,16 +212,24 @@ class SolicitudAsistenciaController extends Controller
             'dias',
             'archivos',
             'imagenes',
-            'evaluaciones' => function ($query) {
-                $query->orderBy('fecha', 'desc');
-            },
+            'usuario',
+            'evaluaciones' => fn($q) => $q->orderBy('fecha', 'desc'),
             'evaluaciones.usuario',
-            'notificaciones' => function ($query) {
-                $query->orderBy('fecha', 'desc');
-            }
+            'notificaciones' => fn($q) => $q->orderBy('fecha', 'desc'),
         ])->findOrFail($id);
 
-        return view('administracion.solicitudasistencia.show', compact('solicitud'));
+        $diasDuracion = 0;
+
+        if ($solicitud->rango_inicio_tiempo && $solicitud->rango_final_tiempo) {
+            $diasDuracion = $solicitud->rango_inicio_tiempo
+                ->startOfDay()
+                ->diffInDays($solicitud->rango_final_tiempo->startOfDay()) + 1;
+        }
+
+        return view(
+            'administracion.solicitudasistencia.show',
+            compact('solicitud', 'diasDuracion')
+        );
     }
 
     /* =====================================================
@@ -405,14 +413,14 @@ class SolicitudAsistenciaController extends Controller
             if ($esLicenciaMedica && $request->hasFile('imagen_licencia')) {
                 // Eliminar imágenes existentes de la BD y archivos físicos
                 $imagenesExistentes = ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
-                
+
                 // Eliminar archivos físicos
                 foreach ($imagenesExistentes as $img) {
                     if ($img->imagen && file_exists(public_path($img->imagen))) {
                         unlink(public_path($img->imagen));
                     }
                 }
-                
+
                 // Eliminar registros de BD
                 ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
@@ -422,10 +430,10 @@ class SolicitudAsistenciaController extends Controller
                 $tamanoArchivo = $file->getSize();
                 $nombreArchivo = $this->generarNombreArchivo($file, 'licencia_' . $solicitud->id_solicitud_asistencia);
                 $rutaRelativa = $this->rutaBaseImagenes . $nombreArchivo;
-                
+
                 // Mover el archivo
                 $file->move(public_path($this->rutaBaseImagenes), $nombreArchivo);
-                
+
                 // Guardar en BD
                 ImagenSolicitudAsistencia::create([
                     'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
@@ -439,14 +447,14 @@ class SolicitudAsistenciaController extends Controller
                 if ($request->hasFile('archivo')) {
                     // Eliminar archivos existentes
                     $archivosExistentes = ArchivoSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
-                    
+
                     // Eliminar archivos físicos
                     foreach ($archivosExistentes as $archivo) {
                         if ($archivo->archivo_solicitud && file_exists(public_path($archivo->archivo_solicitud))) {
                             unlink(public_path($archivo->archivo_solicitud));
                         }
                     }
-                    
+
                     // Eliminar registros de BD
                     ArchivoSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
@@ -456,10 +464,10 @@ class SolicitudAsistenciaController extends Controller
                     $tamanoArchivo = $file->getSize();
                     $nombreArchivo = $this->generarNombreArchivo($file, 'educativo_' . $solicitud->id_solicitud_asistencia);
                     $rutaRelativa = $this->rutaBaseArchivos . $nombreArchivo;
-                    
+
                     // Mover el archivo
                     $file->move(public_path($this->rutaBaseArchivos), $nombreArchivo);
-                    
+
                     // Guardar en BD con los datos obtenidos ANTES de mover
                     ArchivoSolicitudAsistencia::create([
                         'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
@@ -473,23 +481,23 @@ class SolicitudAsistenciaController extends Controller
                 if ($request->hasFile('imagen_opcional')) {
                     // Eliminar imágenes existentes (solo las opcionales)
                     $imagenesExistentes = ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
-                    
+
                     foreach ($imagenesExistentes as $img) {
                         if ($img->imagen && file_exists(public_path($img->imagen))) {
                             unlink(public_path($img->imagen));
                         }
                     }
-                    
+
                     ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
                     // OBTENER DATOS ANTES DE MOVER EL ARCHIVO
                     $file = $request->file('imagen_opcional');
                     $nombreArchivo = $this->generarNombreArchivo($file, 'opcional_' . $solicitud->id_solicitud_asistencia);
                     $rutaRelativa = $this->rutaBaseImagenes . $nombreArchivo;
-                    
+
                     // Mover el archivo
                     $file->move(public_path($this->rutaBaseImagenes), $nombreArchivo);
-                    
+
                     // Guardar en BD
                     ImagenSolicitudAsistencia::create([
                         'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
@@ -669,15 +677,15 @@ class SolicitudAsistenciaController extends Controller
         $extension = $file->getClientOriginalExtension();
         $nombreBase = Str::slug($prefijo) . '_' . time() . '_' . Str::random(8);
         $nombre = $nombreBase . '.' . $extension;
-        
+
         // Verificar si ya existe
         $contador = 1;
-        while (file_exists(public_path($this->rutaBaseArchivos . $nombre)) || 
+        while (file_exists(public_path($this->rutaBaseArchivos . $nombre)) ||
                file_exists(public_path($this->rutaBaseImagenes . $nombre))) {
             $nombre = $nombreBase . '_' . $contador . '.' . $extension;
             $contador++;
         }
-        
+
         return $nombre;
     }
 
