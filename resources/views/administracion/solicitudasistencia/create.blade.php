@@ -2,6 +2,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 
     <style>
         .table-days {
@@ -31,6 +33,24 @@
         .flatpickr-input {
             background-color: white !important;
             cursor: pointer !important;
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 44px;
+            /* ajusta: 44–48px queda perfecto */
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 44px;
+            /* igual a la altura */
+            padding-left: 1rem;
+            padding-right: 2.5rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px;
         }
     </style>
 
@@ -113,7 +133,8 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-700">Solicitante</p>
                                 <p class="text-sm text-gray-900">
-                                    {{ $usuarioAutenticado->Nombre }} {{ $usuarioAutenticado->apellidoPaterno }} {{ $usuarioAutenticado->apellidoMaterno }}
+                                    {{ $usuarioAutenticado->Nombre }} {{ $usuarioAutenticado->apellidoPaterno }}
+                                    {{ $usuarioAutenticado->apellidoMaterno }}
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1">
                                     <i class="fas fa-id-card mr-1"></i>
@@ -129,19 +150,20 @@
                             <i class="fas fa-user-check text-gray-400 mr-1"></i>
                             Usuario para quien es la solicitud *
                         </label>
-                        <select name="id_usuario" 
-                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                required>
+                        <select id="usuarioDestinoSelect" name="id_usuario" class="w-full" required>
                             <option value="">Seleccione un usuario...</option>
                             @foreach ($usuariosDestino as $usuario)
-                                <option value="{{ $usuario->idUsuario }}" {{ old('id_usuario') == $usuario->idUsuario ? 'selected' : '' }}>
-                                    {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }} {{ $usuario->apellidoMaterno }}
-                                    @if($usuario->documento)
+                                <option value="{{ $usuario->idUsuario }}"
+                                    {{ old('id_usuario') == $usuario->idUsuario ? 'selected' : '' }}>
+                                    {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }}
+                                    {{ $usuario->apellidoMaterno }}
+                                    @if ($usuario->documento)
                                         - {{ $usuario->documento }}
                                     @endif
                                 </option>
                             @endforeach
                         </select>
+
                         <p class="text-xs text-gray-500 mt-2">
                             <i class="fas fa-info-circle mr-1"></i>
                             Solo se muestran usuarios de tu mismo tipo de área
@@ -545,6 +567,7 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
     <script>
@@ -743,7 +766,9 @@
                         dataTransfer.items.add(files[0]);
                         input.files = dataTransfer.files;
 
-                        const event = new Event('change', { bubbles: true });
+                        const event = new Event('change', {
+                            bubbles: true
+                        });
                         input.dispatchEvent(event);
                     }
                 });
@@ -771,7 +796,9 @@
                 if (!licenciaInput || !licenciaInput.files.length) {
                     e.preventDefault();
                     toastr.error('Debe adjuntar la licencia médica para este tipo de solicitud');
-                    boxLicencia.scrollIntoView({ behavior: 'smooth' });
+                    boxLicencia.scrollIntoView({
+                        behavior: 'smooth'
+                    });
                     return false;
                 }
             }
@@ -782,6 +809,14 @@
             submitBtn.disabled = true;
 
             return true;
+        });
+
+        $(document).ready(function() {
+            $('#usuarioDestinoSelect').select2({
+                placeholder: 'Seleccione un usuario...',
+                allowClear: true,
+                width: '100%'
+            });
         });
     </script>
 

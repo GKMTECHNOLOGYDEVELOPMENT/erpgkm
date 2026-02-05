@@ -68,232 +68,244 @@
                 </div>
             </div>
 
-            <!-- Información principal -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <!-- Tarjeta 1: Información General -->
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                    <div class="flex items-center mb-4">
-                        <div class="p-2 rounded-lg bg-primary-light text-primary mr-3">
-                            <i class="fas fa-info-circle text-lg"></i>
-                        </div>
-                        <h2 class="text-lg font-semibold text-gray-800">Información General</h2>
-                    </div>
-
-                    <div class="space-y-3">
-                        <!-- Fecha de solicitud -->
-                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                            <span class="text-sm text-gray-600 flex items-center">
-                                <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
-                                Fecha de solicitud
-                            </span>
-                            <span class="font-medium text-gray-900">
-                                {{ $solicitud->fecha_solicitud->format('d/m/Y H:i') }}
-                            </span>
-                        </div>
-
-                        <!-- SOLICITANTE (usuario que crea la solicitud) -->
-                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                            <span class="text-sm text-gray-600 flex items-center">
-                                <i class="fas fa-user-tie mr-2 text-blue-400"></i>
-                                Solicitante
-                            </span>
-                            <span class="font-medium text-gray-900">
-                                @if($solicitud->usuarioSolicitante)
-                                    {{ $solicitud->usuarioSolicitante->Nombre }} 
-                                    {{ $solicitud->usuarioSolicitante->apellidoPaterno }} 
-                                    {{ $solicitud->usuarioSolicitante->apellidoMaterno }}
-                                @else
-                                    Usuario no disponible
-                                @endif
-                            </span>
-                        </div>
-
-                        <!-- DESTINATARIO (usuario para quien es la solicitud) -->
-                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                            <span class="text-sm text-gray-600 flex items-center">
-                                <i class="fas fa-user mr-2 text-green-400"></i>
-                                Destinatario
-                            </span>
-                            <span class="font-medium text-gray-900">
-                                @if($solicitud->usuarioDestino)
-                                    {{ $solicitud->usuarioDestino->Nombre }} 
-                                    {{ $solicitud->usuarioDestino->apellidoPaterno }} 
-                                    {{ $solicitud->usuarioDestino->apellidoMaterno }}
-                                @else
-                                    Usuario no disponible
-                                @endif
-                            </span>
-                        </div>
-
-                        <!-- Tipo de solicitud -->
-                        <div class="flex justify-between items-center pb-2 border-b border-gray-100">
-                            <span class="text-sm text-gray-600 flex items-center">
-                                <i class="fas fa-tag mr-2 text-gray-400"></i>
-                                Tipo de solicitud
-                            </span>
-                            <span class="font-medium text-gray-900">
-                                {{ $solicitud->tipoSolicitud->nombre_tip }}
-                            </span>
-                        </div>
-
-                        <!-- Tipo de educación (si aplica) -->
-                        @if ($solicitud->tipoEducacion)
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-600 flex items-center">
-                                    <i class="fas fa-graduation-cap mr-2 text-gray-400"></i>
-                                    Tipo de educación
-                                </span>
-                                <span class="font-medium text-gray-900">
-                                    {{ $solicitud->tipoEducacion->nombre }}
-                                </span>
-                            </div>
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Tarjeta 2: Rango de Tiempo -->
-                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                    <div class="flex items-center mb-4">
-                        <div class="p-2 rounded-lg bg-success-light text-success mr-3">
-                            <i class="fas fa-calendar-alt text-lg"></i>
-                        </div>
-                        <h2 class="text-lg font-semibold text-gray-800">Rango de Tiempo</h2>
-                    </div>
-
-                    <div class="space-y-4">
-                        <!-- INICIO -->
-                        <div class="bg-primary-light border border-primary rounded-xl p-4">
-                            <div class="flex items-center mb-2">
-                                <div class="p-1.5 rounded-lg bg-primary text-white mr-3">
-                                    <i class="fas fa-play-circle"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-primary font-semibold">INICIO</p>
-                                    <p class="text-lg font-bold text-gray-900">
-                                        {{ $solicitud->rango_inicio_tiempo?->format('d/m/Y') ?? '-' }}
-                                    </p>
-                                    <p class="text-sm text-gray-600">
-                                        {{ $solicitud->rango_inicio_tiempo?->format('H:i') ?? '--:--' }} horas
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- FINAL -->
-                        <div class="bg-danger-light border border-danger rounded-xl p-4">
-                            <div class="flex items-center mb-2">
-                                <div class="p-1.5 rounded-lg bg-danger text-white mr-3">
-                                    <i class="fas fa-stop-circle"></i>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-danger font-semibold">FINAL</p>
-                                    <p class="text-lg font-bold text-gray-900">
-                                        {{ $solicitud->rango_final_tiempo?->format('d/m/Y') ?? '-' }}
-                                    </p>
-                                    <p class="text-sm text-gray-600">
-                                        {{ $solicitud->rango_final_tiempo?->format('H:i') ?? '--:--' }} horas
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- CONTADOR DE DÍAS -->
-                    <div class="mt-5 text-center">
-                        <span
-                            class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-800 text-sm font-semibold">
-                            <i class="fas fa-clock mr-2 text-gray-500"></i>
-                            {{ $diasDuracion }} día{{ $diasDuracion !== 1 ? 's' : '' }} de duración
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Tarjeta 3: Archivos -->
-                @if ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0)
-                    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                        <div class="flex items-center mb-4">
-                            <div class="p-2 rounded-lg bg-info-light text-info mr-3">
-                                <i class="fas fa-paperclip text-lg"></i>
-                            </div>
-                            <h2 class="text-lg font-semibold text-gray-800">Documentos Adjuntos</h2>
-                        </div>
-
-                        <div class="space-y-3">
-                            {{-- ARCHIVOS --}}
-                            @foreach ($solicitud->archivos as $archivo)
-                                <div
-                                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between
-                           bg-gray-50 border border-gray-200 rounded-lg p-3
-                           hover:bg-gray-100 transition-colors gap-3">
-
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="p-2 rounded-lg bg-primary-light text-primary shrink-0">
-                                            <i class="fas fa-file-pdf"></i>
-                                        </div>
-
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-medium text-gray-900 text-sm truncate">
-                                                {{ basename($archivo->archivo_solicitud) }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 capitalize">
-                                                {{ str_replace('_', ' ', $archivo->tipo_archivo) }}
-                                            </p>
-                                            <!-- Tamaño del archivo -->
-                                            <p class="text-xs text-gray-400 mt-1">
-                                                @php
-                                                    $bytes = $archivo->espacio_archivo ?? 0;
-                                                    if ($bytes == 0) {
-                                                        echo '0 Bytes';
-                                                    } else {
-                                                        $k = 1024;
-                                                        $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                                                        $i = floor(log($bytes) / log($k));
-                                                        echo number_format($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
-                                                    }
-                                                @endphp
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ asset($archivo->archivo_solicitud) }}"  target="_blank"
-                                        class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
-                                        title="Ver archivo">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
-                            @endforeach
-
-                            {{-- IMÁGENES --}}
-                            @foreach ($solicitud->imagenes as $imagen)
-                                <div
-                                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between
-                           bg-gray-50 border border-gray-200 rounded-lg p-3
-                           hover:bg-gray-100 transition-colors gap-3">
-
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="p-2 rounded-lg bg-success-light text-success shrink-0">
-                                            <i class="fas fa-image"></i>
-                                        </div>
-
-                                        <div class="min-w-0 flex-1">
-                                            <p class="font-medium text-gray-900 text-sm truncate">
-                                                {{ basename($imagen->imagen) }}
-                                            </p>
-                                            <p class="text-xs text-gray-500">Imagen adjunta</p>
-                                        </div>
-                                    </div>
-
-                                    <a href="{{ asset($imagen->imagen) }}" target="_blank"
-                                        class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
-                                        title="Ver imagen">
-                                        <i class="fas fa-external-link-alt"></i>
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
+<!-- Información principal -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Tarjeta 1: Información General -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <div class="flex items-center mb-4">
+            <div class="p-2 rounded-lg bg-primary-light text-primary mr-3">
+                <i class="fas fa-info-circle text-lg"></i>
             </div>
+            <h2 class="text-lg font-semibold text-gray-800">Información General</h2>
+        </div>
+
+        <div class="space-y-3">
+            <!-- Fecha de solicitud -->
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span class="text-sm text-gray-600 flex items-center">
+                    <i class="fas fa-calendar-plus mr-2 text-gray-400"></i>
+                    Fecha de solicitud
+                </span>
+                <span class="font-medium text-gray-900">
+                    {{ $solicitud->fecha_solicitud->format('d/m/Y H:i') }}
+                </span>
+            </div>
+
+            <!-- SOLICITANTE (usuario que crea la solicitud) -->
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span class="text-sm text-gray-600 flex items-center">
+                    <i class="fas fa-user-tie mr-2 text-blue-400"></i>
+                    Solicitante
+                </span>
+                <span class="font-medium text-gray-900">
+                    @if($solicitud->usuarioSolicitante)
+                        {{ $solicitud->usuarioSolicitante->Nombre }}
+                        {{ $solicitud->usuarioSolicitante->apellidoPaterno }}
+                        {{ $solicitud->usuarioSolicitante->apellidoMaterno }}
+                    @else
+                        Usuario no disponible
+                    @endif
+                </span>
+            </div>
+
+            <!-- DESTINATARIO (usuario para quien es la solicitud) -->
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span class="text-sm text-gray-600 flex items-center">
+                    <i class="fas fa-user mr-2 text-green-400"></i>
+                    Destinatario
+                </span>
+                <span class="font-medium text-gray-900">
+                    @if($solicitud->usuarioDestino)
+                        {{ $solicitud->usuarioDestino->Nombre }}
+                        {{ $solicitud->usuarioDestino->apellidoPaterno }}
+                        {{ $solicitud->usuarioDestino->apellidoMaterno }}
+                    @else
+                        Usuario no disponible
+                    @endif
+                </span>
+            </div>
+
+            <!-- Tipo de solicitud -->
+            <div class="flex justify-between items-center pb-2 border-b border-gray-100">
+                <span class="text-sm text-gray-600 flex items-center">
+                    <i class="fas fa-tag mr-2 text-gray-400"></i>
+                    Tipo de solicitud
+                </span>
+                <span class="font-medium text-gray-900">
+                    {{ $solicitud->tipoSolicitud->nombre_tip }}
+                </span>
+            </div>
+
+            <!-- Tipo de educación (si aplica) -->
+            @if ($solicitud->tipoEducacion)
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600 flex items-center">
+                        <i class="fas fa-graduation-cap mr-2 text-gray-400"></i>
+                        Tipo de educación
+                    </span>
+                    <span class="font-medium text-gray-900">
+                        {{ $solicitud->tipoEducacion->nombre }}
+                    </span>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Tarjeta 2: Rango de Tiempo -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <div class="flex items-center mb-4">
+            <div class="p-2 rounded-lg bg-success-light text-success mr-3">
+                <i class="fas fa-calendar-alt text-lg"></i>
+            </div>
+            <h2 class="text-lg font-semibold text-gray-800">Rango de Tiempo</h2>
+        </div>
+
+        <div class="space-y-4">
+            <!-- INICIO -->
+            <div class="bg-primary-light border border-primary rounded-xl p-4">
+                <div class="flex items-center mb-2">
+                    <div class="p-1.5 rounded-lg bg-primary text-white mr-3">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-primary font-semibold">INICIO</p>
+                        <p class="text-lg font-bold text-gray-900">
+                            {{ $solicitud->rango_inicio_tiempo?->format('d/m/Y') ?? '-' }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            {{ $solicitud->rango_inicio_tiempo?->format('H:i') ?? '--:--' }} horas
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINAL -->
+            <div class="bg-danger-light border border-danger rounded-xl p-4">
+                <div class="flex items-center mb-2">
+                    <div class="p-1.5 rounded-lg bg-danger text-white mr-3">
+                        <i class="fas fa-stop-circle"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-danger font-semibold">FINAL</p>
+                        <p class="text-lg font-bold text-gray-900">
+                            {{ $solicitud->rango_final_tiempo?->format('d/m/Y') ?? '-' }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                            {{ $solicitud->rango_final_tiempo?->format('H:i') ?? '--:--' }} horas
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTADOR DE DÍAS -->
+        <div class="mt-5 text-center">
+            <span
+                class="inline-flex items-center px-4 py-2 rounded-full bg-gray-100 text-gray-800 text-sm font-semibold">
+                <i class="fas fa-clock mr-2 text-gray-500"></i>
+                {{ $diasDuracion }} día{{ $diasDuracion !== 1 ? 's' : '' }} de duración
+            </span>
+        </div>
+    </div>
+
+    <!-- Tarjeta 3: Archivos - SIEMPRE VISIBLE -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <div class="flex items-center mb-4">
+            <div class="p-2 rounded-lg {{ ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0) ? 'bg-info-light text-info' : 'bg-gray-100 text-gray-400' }} mr-3">
+                <i class="fas fa-paperclip text-lg"></i>
+            </div>
+            <h2 class="text-lg font-semibold {{ ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0) ? 'text-gray-800' : 'text-gray-400' }}">
+                Documentos Adjuntos
+            </h2>
+        </div>
+
+        @if ($solicitud->archivos->count() > 0 || $solicitud->imagenes->count() > 0)
+            <!-- Si hay archivos o imágenes -->
+            <div class="space-y-3">
+                {{-- ARCHIVOS --}}
+                @foreach ($solicitud->archivos as $archivo)
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                               bg-gray-50 border border-gray-200 rounded-lg p-3
+                               hover:bg-gray-100 transition-colors gap-3">
+
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="p-2 rounded-lg bg-primary-light text-primary shrink-0">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="font-medium text-gray-900 text-sm truncate">
+                                    {{ basename($archivo->archivo_solicitud) }}
+                                </p>
+                                <p class="text-xs text-gray-500 capitalize">
+                                    {{ str_replace('_', ' ', $archivo->tipo_archivo) }}
+                                </p>
+                                <!-- Tamaño del archivo -->
+                                <p class="text-xs text-gray-400 mt-1">
+                                    @php
+                                        $bytes = $archivo->espacio_archivo ?? 0;
+                                        if ($bytes == 0) {
+                                            echo '0 Bytes';
+                                        } else {
+                                            $k = 1024;
+                                            $sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                                            $i = floor(log($bytes) / log($k));
+                                            echo number_format($bytes / pow($k, $i), 2) . ' ' . $sizes[$i];
+                                        }
+                                    @endphp
+                                </p>
+                            </div>
+                        </div>
+
+                        <a href="{{ asset($archivo->archivo_solicitud) }}"  target="_blank"
+                            class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
+                            title="Ver archivo">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                @endforeach
+
+                {{-- IMÁGENES --}}
+                @foreach ($solicitud->imagenes as $imagen)
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between
+                               bg-gray-50 border border-gray-200 rounded-lg p-3
+                               hover:bg-gray-100 transition-colors gap-3">
+
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="p-2 rounded-lg bg-success-light text-success shrink-0">
+                                <i class="fas fa-image"></i>
+                            </div>
+
+                            <div class="min-w-0 flex-1">
+                                <p class="font-medium text-gray-900 text-sm truncate">
+                                    {{ basename($imagen->imagen) }}
+                                </p>
+                                <p class="text-xs text-gray-500">Imagen adjunta</p>
+                            </div>
+                        </div>
+
+                        <a href="{{ asset($imagen->imagen) }}" target="_blank"
+                            class="self-start sm:self-auto p-2 text-primary hover:text-primary-dark transition-colors"
+                            title="Ver imagen">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <!-- Estado: Sin archivos ni imágenes -->
+            <div class="text-center py-8">
+                <div class="mb-4">
+                    <i class="fas fa-folder-open text-4xl text-gray-300"></i>
+                </div>
+                <p class="text-gray-500 font-medium mb-2">Sin archivos ni imágenes</p>
+                <p class="text-sm text-gray-400">Esta solicitud no requiere documentos adjuntos</p>
+            </div>
+        @endif
+    </div>
+</div>
 
             <!-- MATRÍCULA DE DÍAS PROGRAMADOS -->
             @if ($solicitud->dias->count() > 0)
