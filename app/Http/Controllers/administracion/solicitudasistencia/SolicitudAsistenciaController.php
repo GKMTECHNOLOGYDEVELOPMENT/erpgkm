@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Str;
 
 class SolicitudAsistenciaController extends Controller
 {
@@ -28,6 +29,10 @@ class SolicitudAsistenciaController extends Controller
     const TIPO_APROBADA = 'SOLICITUD_ASISTENCIA_APROBADA';
     const TIPO_DENEGADA = 'SOLICITUD_ASISTENCIA_DENEGADA';
     const TIPO_ELIMINADA = 'SOLICITUD_ASISTENCIA_ELIMINADA';
+
+    // Rutas base para archivos
+    private $rutaBaseImagenes = 'assets/images/solicitudes/imagenes/';
+    private $rutaBaseArchivos = 'assets/images/solicitudes/archivos/';
 
     /* =========================
      * INDEX
@@ -87,13 +92,13 @@ class SolicitudAsistenciaController extends Controller
             $diaNormalizado = $this->normalizarNombreDia($diaNombre);
 
             $diasEdit[$diaNormalizado] = [
-                'id_solicitud_dia' => $d->id_solicitud_dia, // IMPORTANTE: para updates
-                'es_todo_el_dia' => $d->es_todo_el_dia,    // Cambié 'todo' por 'es_todo_el_dia'
-                'hora_entrada' => $d->hora_entrada,        // Cambié 'entrada' por 'hora_entrada'
-                'hora_salida' => $d->hora_salida,          // Cambié 'salida' por 'hora_salida'
-                'hora_llegada_trabajo' => $d->hora_llegada_trabajo, // Cambié 'llegada' por 'hora_llegada_trabajo'
+                'id_solicitud_dia' => $d->id_solicitud_dia,
+                'es_todo_el_dia' => $d->es_todo_el_dia,
+                'hora_entrada' => $d->hora_entrada,
+                'hora_salida' => $d->hora_salida,
+                'hora_llegada_trabajo' => $d->hora_llegada_trabajo,
                 'observacion' => $d->observacion,
-                'fecha' => $d->fecha,                      // Mantener la fecha original
+                'fecha' => $d->fecha,
             ];
         }
 
@@ -127,6 +132,9 @@ class SolicitudAsistenciaController extends Controller
         $solicitud = SolicitudAsistencia::findOrFail($id);
 
         DB::transaction(function () use ($solicitud) {
+            // Eliminar archivos físicos
+            $this->eliminarArchivosFisicos($solicitud);
+
             // Eliminar días relacionados
             SolicitudAsistenciaDia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
@@ -142,7 +150,7 @@ class SolicitudAsistenciaController extends Controller
             // Crear notificación de eliminación
             $this->crearNotificacion($solicitud->id_solicitud_asistencia, self::TIPO_ELIMINADA);
 
-            // Eliminar la solicitud (esto eliminará las notificaciones por cascade)
+            // Eliminar la solicitud
             $solicitud->delete();
         });
 
@@ -217,7 +225,7 @@ class SolicitudAsistenciaController extends Controller
     }
 
     /* =====================================================
-     * MÉTODO PRINCIPAL - Actualizado con notificaciones
+     * MÉTODO PRINCIPAL - CORREGIDO PARA EL ERROR DE getSize()
      * ===================================================== */
     private function saveSolicitud(Request $request, SolicitudAsistencia $solicitud = null)
     {
@@ -265,7 +273,6 @@ class SolicitudAsistenciaController extends Controller
                 'dias.*.hora_entrada' => ['nullable', 'regex:/^(\d{1,2}:\d{2})(\s?(AM|PM))?$/i'],
                 'dias.*.hora_salida'  => ['nullable', 'regex:/^(\d{1,2}:\d{2})(\s?(AM|PM))?$/i'],
                 'dias.*.hora_llegada_trabajo' => ['nullable', 'regex:/^(\d{1,2}:\d{2})(\s?(AM|PM))?$/i'],
-
                 'dias.*.observacion' => ['nullable', 'string', 'max:255'],
             ];
 
@@ -328,8 +335,6 @@ class SolicitudAsistenciaController extends Controller
                                 }
                             }
                         }
-                        // Si NO es "todo el día" y NO tiene ninguna hora completada
-                        // → Está bien, simplemente no se guardará ese día
                     }
                 }
             });
@@ -348,7 +353,7 @@ class SolicitudAsistenciaController extends Controller
             $rules['imagen_opcional'] = ['nullable', 'image', 'max:4096'];
         }
 
-        // Validar los datos (si no es educativo, usar validate normal)
+        // Validar los datos
         if (!$esEducativo) {
             $data = $request->validate($rules);
         } else {
@@ -372,7 +377,7 @@ class SolicitudAsistenciaController extends Controller
                     'id_usuario'          => Auth::id(),
                 ]);
 
-                // Crear registro en evaluar_solicitud_asistencia (igual que tu app)
+                // Crear registro en evaluar_solicitud_asistencia
                 EvaluarSolicitudAsistencia::create([
                     'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
                     'id_tipo_solicitud'       => $solicitud->id_tipo_solicitud,
@@ -398,14 +403,33 @@ class SolicitudAsistenciaController extends Controller
 
             /* ========= MANEJO DE LICENCIA MÉDICA ========= */
             if ($esLicenciaMedica && $request->hasFile('imagen_licencia')) {
-                // Eliminar imágenes existentes
+                // Eliminar imágenes existentes de la BD y archivos físicos
+                $imagenesExistentes = ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
+                
+                // Eliminar archivos físicos
+                foreach ($imagenesExistentes as $img) {
+                    if ($img->imagen && file_exists(public_path($img->imagen))) {
+                        unlink(public_path($img->imagen));
+                    }
+                }
+                
+                // Eliminar registros de BD
                 ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
-                // Guardar nueva imagen
+                // OBTENER DATOS ANTES DE MOVER EL ARCHIVO
+                $file = $request->file('imagen_licencia');
+                $tipoArchivo = $file->getClientMimeType();
+                $tamanoArchivo = $file->getSize();
+                $nombreArchivo = $this->generarNombreArchivo($file, 'licencia_' . $solicitud->id_solicitud_asistencia);
+                $rutaRelativa = $this->rutaBaseImagenes . $nombreArchivo;
+                
+                // Mover el archivo
+                $file->move(public_path($this->rutaBaseImagenes), $nombreArchivo);
+                
+                // Guardar en BD
                 ImagenSolicitudAsistencia::create([
                     'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
-                    'imagen' => $request->file('imagen_licencia')
-                        ->store("solicitudes/{$solicitud->id_solicitud_asistencia}/imagenes", 'public'),
+                    'imagen' => $rutaRelativa,
                 ]);
             }
 
@@ -414,26 +438,62 @@ class SolicitudAsistenciaController extends Controller
                 // 1. Archivo educativo
                 if ($request->hasFile('archivo')) {
                     // Eliminar archivos existentes
+                    $archivosExistentes = ArchivoSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
+                    
+                    // Eliminar archivos físicos
+                    foreach ($archivosExistentes as $archivo) {
+                        if ($archivo->archivo_solicitud && file_exists(public_path($archivo->archivo_solicitud))) {
+                            unlink(public_path($archivo->archivo_solicitud));
+                        }
+                    }
+                    
+                    // Eliminar registros de BD
                     ArchivoSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
-                    // Guardar nuevo archivo
-                    $archivo = $request->file('archivo');
+                    // OBTENER DATOS ANTES DE MOVER EL ARCHIVO
+                    $file = $request->file('archivo');
+                    $tipoArchivo = $file->getClientMimeType();
+                    $tamanoArchivo = $file->getSize();
+                    $nombreArchivo = $this->generarNombreArchivo($file, 'educativo_' . $solicitud->id_solicitud_asistencia);
+                    $rutaRelativa = $this->rutaBaseArchivos . $nombreArchivo;
+                    
+                    // Mover el archivo
+                    $file->move(public_path($this->rutaBaseArchivos), $nombreArchivo);
+                    
+                    // Guardar en BD con los datos obtenidos ANTES de mover
                     ArchivoSolicitudAsistencia::create([
                         'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
-                        'archivo_solicitud' => $archivo->store("solicitudes/{$solicitud->id_solicitud_asistencia}/archivos", 'public'),
-                        'tipo_archivo' => $archivo->getClientMimeType(),
-                        'espacio_archivo' => $archivo->getSize(),
+                        'archivo_solicitud' => $rutaRelativa,
+                        'tipo_archivo' => $tipoArchivo,
+                        'espacio_archivo' => $tamanoArchivo,
                     ]);
                 }
 
                 // 2. Imagen opcional
                 if ($request->hasFile('imagen_opcional')) {
+                    // Eliminar imágenes existentes (solo las opcionales)
+                    $imagenesExistentes = ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
+                    
+                    foreach ($imagenesExistentes as $img) {
+                        if ($img->imagen && file_exists(public_path($img->imagen))) {
+                            unlink(public_path($img->imagen));
+                        }
+                    }
+                    
                     ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->delete();
 
+                    // OBTENER DATOS ANTES DE MOVER EL ARCHIVO
+                    $file = $request->file('imagen_opcional');
+                    $nombreArchivo = $this->generarNombreArchivo($file, 'opcional_' . $solicitud->id_solicitud_asistencia);
+                    $rutaRelativa = $this->rutaBaseImagenes . $nombreArchivo;
+                    
+                    // Mover el archivo
+                    $file->move(public_path($this->rutaBaseImagenes), $nombreArchivo);
+                    
+                    // Guardar en BD
                     ImagenSolicitudAsistencia::create([
                         'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
-                        'imagen' => $request->file('imagen_opcional')
-                            ->store("solicitudes/{$solicitud->id_solicitud_asistencia}/imagenes", 'public'),
+                        'imagen' => $rutaRelativa,
                     ]);
                 }
 
@@ -452,7 +512,6 @@ class SolicitudAsistenciaController extends Controller
                 $diasValidos = 0;
 
                 foreach ($data['dias'] as $diaData) {
-
                     $todo = isset($diaData['es_todo_el_dia']) && $diaData['es_todo_el_dia'] == '1';
 
                     $horaEntrada = $this->normalizarHora($diaData['hora_entrada'] ?? null);
@@ -502,8 +561,6 @@ class SolicitudAsistenciaController extends Controller
                     }
                 }
 
-
-
                 // Validar que al menos haya un día válido
                 if ($diasValidos === 0) {
                     throw new Exception('Debe especificar al menos un día de estudio (todo el día o con horario).');
@@ -522,6 +579,7 @@ class SolicitudAsistenciaController extends Controller
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Error al guardar solicitud: ' . $e->getMessage());
+            Log::error('Trace: ' . $e->getTraceAsString());
 
             return back()
                 ->with('error', 'Error al procesar la solicitud: ' . $e->getMessage())
@@ -545,6 +603,9 @@ class SolicitudAsistenciaController extends Controller
         );
     }
 
+    /**
+     * Parsear hora
+     */
     private function parseHora(string $hora): Carbon
     {
         $hora = trim($hora);
@@ -561,7 +622,6 @@ class SolicitudAsistenciaController extends Controller
 
         throw new \InvalidArgumentException("Hora inválida: {$hora}");
     }
-
 
     /**
      * Normaliza hora a formato HH:mm:ss
@@ -602,7 +662,49 @@ class SolicitudAsistenciaController extends Controller
     }
 
     /**
-     * Métodos para manejar notificaciones (opcionales)
+     * Genera nombre único para archivo
+     */
+    private function generarNombreArchivo($file, $prefijo)
+    {
+        $extension = $file->getClientOriginalExtension();
+        $nombreBase = Str::slug($prefijo) . '_' . time() . '_' . Str::random(8);
+        $nombre = $nombreBase . '.' . $extension;
+        
+        // Verificar si ya existe
+        $contador = 1;
+        while (file_exists(public_path($this->rutaBaseArchivos . $nombre)) || 
+               file_exists(public_path($this->rutaBaseImagenes . $nombre))) {
+            $nombre = $nombreBase . '_' . $contador . '.' . $extension;
+            $contador++;
+        }
+        
+        return $nombre;
+    }
+
+    /**
+     * Eliminar archivos físicos de una solicitud
+     */
+    private function eliminarArchivosFisicos($solicitud)
+    {
+        // Eliminar archivos educativos
+        $archivos = ArchivoSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
+        foreach ($archivos as $archivo) {
+            if ($archivo->archivo_solicitud && file_exists(public_path($archivo->archivo_solicitud))) {
+                @unlink(public_path($archivo->archivo_solicitud));
+            }
+        }
+
+        // Eliminar imágenes
+        $imagenes = ImagenSolicitudAsistencia::where('id_solicitud_asistencia', $solicitud->id_solicitud_asistencia)->get();
+        foreach ($imagenes as $imagen) {
+            if ($imagen->imagen && file_exists(public_path($imagen->imagen))) {
+                @unlink(public_path($imagen->imagen));
+            }
+        }
+    }
+
+    /**
+     * Métodos para manejar notificaciones
      */
 
     /**
