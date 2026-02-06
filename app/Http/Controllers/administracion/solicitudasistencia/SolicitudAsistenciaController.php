@@ -21,6 +21,7 @@ use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Str;
+use App\Services\WsBridge;
 
 class SolicitudAsistenciaController extends Controller
 {
@@ -230,13 +231,20 @@ public function edit($id)
 
         $solicitud = SolicitudAsistencia::findOrFail($id);
 
-        DB::transaction(function () use ($request, $solicitud) {
-            // Actualizar estado de la solicitud
+        // (opcional) para mejorar UX / fallback
+        $nombreUsuario = trim((string)($solicitud->usuario->nombreCompleto ?? '')); // ajusta relación
+        $tipoPermiso   = trim((string)($solicitud->tipoSolicitud->nombre_tip ?? '')); // ajusta relación
+
+        $idNotifNew = 0;
+        $tipoNotificacion = '';
+
+        DB::transaction(function () use ($request, $solicitud, &$idNotifNew, &$tipoNotificacion) {
+            // 1) Actualizar estado
             $solicitud->update([
                 'estado' => $request->estado,
             ]);
 
-            // Registrar en el historial de evaluación
+            // 2) Historial
             EvaluarSolicitudAsistencia::create([
                 'id_solicitud_asistencia' => $solicitud->id_solicitud_asistencia,
                 'id_tipo_solicitud' => $solicitud->id_tipo_solicitud,
@@ -246,21 +254,44 @@ public function edit($id)
                 'fecha' => now(),
             ]);
 
-            // Crear notificación según el estado
-            $tipoNotificacion = $request->estado == 'aprobado'
+            // 3) Notificación
+            $tipoNotificacion = $request->estado === 'aprobado'
                 ? self::TIPO_APROBADA
                 : self::TIPO_DENEGADA;
 
-            $this->crearNotificacion($solicitud->id_solicitud_asistencia, $tipoNotificacion);
+            $notif = $this->crearNotificacion($solicitud->id_solicitud_asistencia, $tipoNotificacion);
+
+            // ✅ tu log muestra que el campo se llama id_notificacion_solicitud
+            $idNotifNew = (int) ($notif->id_notificacion_solicitud ?? 0);
+
+
+            // ✅ SOLO SI COMMIT OK
+            DB::afterCommit(function () use ($solicitud, $idNotifNew, $tipoNotificacion) {
+                try {
+                    WsBridge::emitSolicitudEvento([
+                        'type' => 'solicitud_asistencia_evento',
+                        'source' => 'laravel',
+                        'idUsuario' => Auth::id(), // quien aprobó/denegó (admin)
+                        'id_solicitud_asistencia' => (int)$solicitud->id_solicitud_asistencia,
+                        'idNotificacionSolicitud' => $idNotifNew > 0 ? $idNotifNew : null,
+
+                        'tipoNotificacionForzada' => $tipoNotificacion,
+                        'ts' => now()->toIso8601String(),
+                    ]);
+                } catch (\Throwable $e) {
+                    \Log::warning("⚠️ No se pudo enviar WS solicitud_asistencia_evento idNotif={$idNotifNew}: " . $e->getMessage());
+                }
+            });
         });
 
         $estadoTexto = $request->estado == 'aprobado' ? 'aprobada' : 'denegada';
+
         return redirect()
             ->route('administracion.solicitud-asistencia.index')
             ->with('success', "Solicitud {$estadoTexto} correctamente");
     }
 
-   /* =========================
+    /* =========================
      * VER DETALLES
      * ========================= */
     public function show($id)
@@ -753,8 +784,10 @@ public function edit($id)
 
         // Verificar si ya existe
         $contador = 1;
-        while (file_exists(public_path($this->rutaBaseArchivos . $nombre)) ||
-               file_exists(public_path($this->rutaBaseImagenes . $nombre))) {
+        while (
+            file_exists(public_path($this->rutaBaseArchivos . $nombre)) ||
+            file_exists(public_path($this->rutaBaseImagenes . $nombre))
+        ) {
             $nombre = $nombreBase . '_' . $contador . '.' . $extension;
             $contador++;
         }

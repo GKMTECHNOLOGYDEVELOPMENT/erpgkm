@@ -19,13 +19,14 @@ class EvaluarSolicitudAsistencia extends Model
         'id_tipo_solicitud',
         'estado',
         'id_usuario',
+        'comentario',
         'fecha',
         'created_at',
     ];
 
     protected $casts = [
         'fecha'     => 'datetime',
-        'created_at'=> 'datetime',
+        'created_at' => 'datetime',
     ];
 
     public function solicitud(): BelongsTo
