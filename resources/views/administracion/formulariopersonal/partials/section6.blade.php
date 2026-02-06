@@ -153,7 +153,8 @@
             @endphp
 
             @foreach ($documentos as $documento)
-                <div class="documento-card bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 hover:border-{{ $documento['color'] }}-300">
+                <div class="documento-card bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-lg transition-all duration-300 hover:border-{{ $documento['color'] }}-300 group"
+                     id="card-{{ $documento['id'] }}">
                     <div class="flex items-start justify-between mb-3">
                         <div class="flex items-center">
                             <div class="w-10 h-10 rounded-lg bg-{{ $documento['color'] }}-100 flex items-center justify-center mr-3">
@@ -190,16 +191,21 @@
                             </div>
                         </div>
                         
-                        <!-- Checkbox personalizado -->
-                        <div class="relative">
+                        <!-- Checkbox personalizado CORREGIDO -->
+                        <div class="flex items-center">
                             <input type="checkbox" 
                                    id="{{ $documento['id'] }}" 
                                    name="{{ $documento['name'] }}" 
                                    value="{{ $documento['value'] }}"
-                                   class="documento-checkbox absolute opacity-0 w-0 h-0">
+                                   class="documento-checkbox hidden"
+                                   onchange="toggleDocumento('{{ $documento['id'] }}', '{{ $documento['color'] }}')">
                             <label for="{{ $documento['id'] }}" 
-                                   class="custom-checkbox w-8 h-8 rounded-lg border-2 border-gray-300 flex items-center justify-center cursor-pointer transition-all duration-200 hover:border-{{ $documento['color'] }}-400 hover:bg-{{ $documento['color'] }}-50">
-                                <i class="fas fa-check text-white text-sm check-icon opacity-0"></i>
+                                   class="custom-checkbox cursor-pointer w-10 h-10 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 hover:border-{{ $documento['color'] }}-400 hover:bg-{{ $documento['color'] }}-50 group-hover:scale-110">
+                                <!-- Check icon (inicialmente oculto) -->
+                                <svg class="check-icon w-6 h-6 text-{{ $documento['color'] }}-600 opacity-0 transition-opacity duration-200" 
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
                             </label>
                         </div>
                     </div>
@@ -210,10 +216,10 @@
                     <!-- Estado del documento -->
                     <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                         <div class="flex items-center">
-                            <div class="w-2 h-2 rounded-full bg-gray-300 mr-2 documento-status-indicator" id="status-{{ $documento['id'] }}"></div>
-                            <span class="text-xs text-gray-500 documento-status-text" id="text-{{ $documento['id'] }}">Pendiente</span>
+                            <div class="w-2 h-2 rounded-full bg-gray-300 mr-2" id="status-{{ $documento['id'] }}"></div>
+                            <span class="text-xs text-gray-500" id="text-{{ $documento['id'] }}">Pendiente</span>
                         </div>
-                        <span class="text-xs font-medium text-gray-400 documento-number">#{{ $loop->iteration }}</span>
+                        <span class="text-xs font-medium text-gray-400">#{{ $loop->iteration }}</span>
                     </div>
                 </div>
             @endforeach
@@ -351,96 +357,124 @@
 </div>
 
 <script>
-    // Inicializar funcionalidad de documentos
-    document.addEventListener('DOMContentLoaded', function() {
-        // Variables para documentos adicionales
-        let documentosAdicionales = [];
-        const maxAdicionales = 10;
-
-        // Función para actualizar contadores y progreso
-        function actualizarContadores() {
-            const checkboxes = document.querySelectorAll('.documento-checkbox:checked');
-            const totalCheckboxes = document.querySelectorAll('.documento-checkbox').length;
-            const porcentaje = Math.round((checkboxes.length / totalCheckboxes) * 100);
+    // Función para alternar el estado del documento
+    function toggleDocumento(id, color) {
+        const checkbox = document.getElementById(id);
+        const checkIcon = checkbox.parentElement.querySelector('.check-icon');
+        const statusIndicator = document.getElementById(`status-${id}`);
+        const statusText = document.getElementById(`text-${id}`);
+        const card = document.getElementById(`card-${id}`);
+        const customCheckbox = checkbox.parentElement.querySelector('.custom-checkbox');
+        
+        if (checkbox.checked) {
+            // Marcar como entregado
+            customCheckbox.classList.remove('border-gray-300');
+            customCheckbox.classList.add(`border-${color}-500`, `bg-${color}-100`);
+            checkIcon.classList.remove('opacity-0');
+            checkIcon.classList.add('opacity-100');
             
-            // Actualizar barra de progreso principal
-            document.getElementById('documentos-progress').style.width = `${porcentaje}%`;
-            document.getElementById('documentos-percentage').textContent = `${porcentaje}%`;
-            document.getElementById('documentos-count').textContent = `${checkboxes.length} de ${totalCheckboxes} documentos marcados`;
+            statusIndicator.classList.remove('bg-gray-300');
+            statusIndicator.classList.add(`bg-${color}-500`);
+            statusText.textContent = 'Entregado';
+            statusText.classList.remove('text-gray-500');
+            statusText.classList.add(`text-${color}-600`);
             
-            // Actualizar resumen
-            document.getElementById('entregados-count').textContent = checkboxes.length;
-            document.getElementById('pendientes-count').textContent = totalCheckboxes - checkboxes.length;
-            document.getElementById('adicionales-count').textContent = documentosAdicionales.length;
+            // Efecto de animación
+            customCheckbox.style.transform = 'scale(1.15)';
+            setTimeout(() => {
+                customCheckbox.style.transform = 'scale(1)';
+            }, 200);
+        } else {
+            // Marcar como pendiente
+            customCheckbox.classList.remove(`border-${color}-500`, `bg-${color}-100`);
+            customCheckbox.classList.add('border-gray-300');
+            checkIcon.classList.remove('opacity-100');
+            checkIcon.classList.add('opacity-0');
             
-            // Actualizar progreso final (incluyendo adicionales)
-            const totalRequeridos = totalCheckboxes + documentosAdicionales.length;
-            const completados = checkboxes.length + documentosAdicionales.length;
-            const porcentajeFinal = totalRequeridos > 0 ? Math.round((completados / totalRequeridos) * 100) : 0;
+            statusIndicator.classList.remove(`bg-${color}-500`);
+            statusIndicator.classList.add('bg-gray-300');
+            statusText.textContent = 'Pendiente';
+            statusText.classList.remove(`text-${color}-600`);
+            statusText.classList.add('text-gray-500');
             
-            document.getElementById('documentos-final-progress').style.width = `${porcentajeFinal}%`;
-            document.getElementById('documentos-final-percentage').textContent = `${porcentajeFinal}%`;
+            customCheckbox.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                customCheckbox.style.transform = 'scale(1)';
+            }, 200);
         }
+        
+        // Actualizar contadores
+        actualizarContadores();
+    }
 
-        // Función para actualizar estado visual de un documento
-        function actualizarEstadoDocumento(checkbox) {
-            const label = checkbox.closest('.relative').querySelector('.custom-checkbox');
-            const checkIcon = label.querySelector('.check-icon');
+    // Función para actualizar contadores
+    function actualizarContadores() {
+        const checkboxes = document.querySelectorAll('.documento-checkbox:checked');
+        const totalCheckboxes = document.querySelectorAll('.documento-checkbox').length;
+        const porcentaje = Math.round((checkboxes.length / totalCheckboxes) * 100);
+        
+        // Actualizar barra de progreso
+        document.getElementById('documentos-progress').style.width = `${porcentaje}%`;
+        document.getElementById('documentos-percentage').textContent = `${porcentaje}%`;
+        document.getElementById('documentos-count').textContent = `${checkboxes.length} de ${totalCheckboxes} documentos marcados`;
+        
+        // Actualizar resumen
+        document.getElementById('entregados-count').textContent = checkboxes.length;
+        document.getElementById('pendientes-count').textContent = totalCheckboxes - checkboxes.length;
+        
+        // Actualizar progreso final
+        const porcentajeFinal = totalCheckboxes > 0 ? Math.round((checkboxes.length / totalCheckboxes) * 100) : 0;
+        document.getElementById('documentos-final-progress').style.width = `${porcentajeFinal}%`;
+        document.getElementById('documentos-final-percentage').textContent = `${porcentajeFinal}%`;
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar todos los checkboxes
+        document.querySelectorAll('.documento-checkbox').forEach(checkbox => {
+            // Obtener color del checkbox
+            const card = checkbox.closest('.documento-card');
+            const colorClass = Array.from(card.classList).find(cls => cls.includes('hover:border-'));
+            const color = colorClass ? colorClass.split('-')[2] : 'emerald';
+            
+            // Configurar estado inicial
+            const checkIcon = checkbox.parentElement.querySelector('.check-icon');
             const statusIndicator = document.getElementById(`status-${checkbox.id}`);
             const statusText = document.getElementById(`text-${checkbox.id}`);
-            const card = checkbox.closest('.documento-card');
+            const customCheckbox = checkbox.parentElement.querySelector('.custom-checkbox');
             
             if (checkbox.checked) {
-                // Obtener color del documento
-                const colorClass = Array.from(card.classList).find(cls => cls.includes('hover:border-'))?.split('-')[2];
-                const color = colorClass || 'emerald';
-                
-                label.classList.remove('border-gray-300', 'hover:border-gray-400', 'hover:bg-gray-50');
-                label.classList.add(`border-${color}-500`, `bg-${color}-500`);
+                customCheckbox.classList.add(`border-${color}-500`, `bg-${color}-100`);
                 checkIcon.classList.remove('opacity-0');
                 checkIcon.classList.add('opacity-100');
-                
-                statusIndicator.classList.remove('bg-gray-300');
                 statusIndicator.classList.add(`bg-${color}-500`);
                 statusText.textContent = 'Entregado';
-                statusText.classList.remove('text-gray-500');
                 statusText.classList.add(`text-${color}-600`);
-                
-                // Efecto de animación
-                label.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    label.style.transform = 'scale(1)';
-                }, 200);
-            } else {
-                const colorClass = Array.from(card.classList).find(cls => cls.includes('hover:border-'))?.split('-')[2];
-                const color = colorClass || 'emerald';
-                
-                label.classList.remove(`border-${color}-500`, `bg-${color}-500`);
-                label.classList.add('border-gray-300', 'hover:border-gray-400', 'hover:bg-gray-50');
-                checkIcon.classList.remove('opacity-100');
-                checkIcon.classList.add('opacity-0');
-                
-                statusIndicator.classList.remove(`bg-${color}-500`);
-                statusIndicator.classList.add('bg-gray-300');
-                statusText.textContent = 'Pendiente';
-                statusText.classList.remove(`text-${color}-600`);
-                statusText.classList.add('text-gray-500');
             }
-        }
-
-        // Inicializar eventos para checkboxes existentes
-        document.querySelectorAll('.documento-checkbox').forEach(checkbox => {
-            // Configurar estado inicial
-            actualizarEstadoDocumento(checkbox);
             
-            // Agregar evento change
-            checkbox.addEventListener('change', function() {
-                actualizarEstadoDocumento(this);
-                actualizarContadores();
+            // Agregar evento de clic al label personalizado
+            const label = checkbox.parentElement.querySelector('.custom-checkbox');
+            label.addEventListener('click', function(e) {
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+                toggleDocumento(checkbox.id, color);
+            });
+            
+            // Permitir clic en toda la tarjeta para marcar
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.custom-checkbox') && !e.target.closest('input')) {
+                    checkbox.checked = !checkbox.checked;
+                    toggleDocumento(checkbox.id, color);
+                }
             });
         });
-
-        // Función para agregar documento adicional
+        
+        // Inicializar contadores
+        actualizarContadores();
+        
+        // Funcionalidad para documentos adicionales
+        let documentosAdicionales = [];
+        
         document.getElementById('agregar-documento-btn').addEventListener('click', function() {
             const input = document.getElementById('nuevo-documento');
             const nombreDocumento = input.value.trim();
@@ -451,19 +485,19 @@
                 return;
             }
             
-            if (documentosAdicionales.length >= maxAdicionales) {
-                alert(`Máximo ${maxAdicionales} documentos adicionales permitidos.`);
+            if (documentosAdicionales.length >= 10) {
+                alert('Máximo 10 documentos adicionales permitidos.');
                 return;
             }
             
-            // Agregar a la lista
             documentosAdicionales.push(nombreDocumento);
             
-            // Crear elemento de documento adicional
             const nuevoId = `doc_adicional_${documentosAdicionales.length}`;
-            const documentoElement = document.createElement('div');
-            documentoElement.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
-            documentoElement.innerHTML = `
+            const container = document.getElementById('documentos-adicionales-container');
+            
+            const elemento = document.createElement('div');
+            elemento.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg';
+            elemento.innerHTML = `
                 <div class="flex items-center">
                     <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
                         <i class="fas fa-file text-indigo-600 text-sm"></i>
@@ -476,141 +510,78 @@
                 <div class="flex items-center space-x-2">
                     <div class="flex items-center">
                         <input type="checkbox" id="${nuevoId}" name="documentos_adicionales[]" value="${nombreDocumento}"
-                            class="documento-adicional-checkbox h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500">
+                            class="h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500" onchange="actualizarContadoresAdicionales()">
                         <label for="${nuevoId}" class="ml-2 text-sm text-gray-700 cursor-pointer">Entregado</label>
                     </div>
-                    <button type="button" class="eliminar-documento-btn text-red-500 hover:text-red-700" data-nombre="${nombreDocumento}">
+                    <button type="button" class="text-red-500 hover:text-red-700" onclick="eliminarDocumentoAdicional('${nombreDocumento}')">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
             `;
             
-            // Agregar al contenedor
-            const container = document.getElementById('documentos-adicionales-container');
-            container.appendChild(documentoElement);
-            
-            // Agregar eventos al nuevo documento
-            const nuevoCheckbox = documentoElement.querySelector('.documento-adicional-checkbox');
-            nuevoCheckbox.addEventListener('change', actualizarContadores);
-            
-            const eliminarBtn = documentoElement.querySelector('.eliminar-documento-btn');
-            eliminarBtn.addEventListener('click', function() {
-                const nombre = this.getAttribute('data-nombre');
-                eliminarDocumentoAdicional(nombre);
-            });
-            
-            // Limpiar input
+            container.appendChild(elemento);
             input.value = '';
             input.focus();
             
-            // Actualizar contadores
-            actualizarContadores();
-            
-            // Deshabilitar botón si se alcanza el límite
-            if (documentosAdicionales.length >= maxAdicionales) {
-                document.getElementById('agregar-documento-btn').disabled = true;
-                document.getElementById('agregar-documento-btn').classList.add('opacity-50', 'cursor-not-allowed');
-            }
+            actualizarContadoresAdicionales();
         });
-
-        // Función para eliminar documento adicional
-        function eliminarDocumentoAdicional(nombre) {
-            if (confirm('¿Está seguro de eliminar este documento adicional?')) {
-                documentosAdicionales = documentosAdicionales.filter(doc => doc !== nombre);
-                
-                // Eliminar elemento del DOM
-                const elementos = document.querySelectorAll('.eliminar-documento-btn');
-                elementos.forEach(btn => {
-                    if (btn.getAttribute('data-nombre') === nombre) {
-                        btn.closest('.flex.items-center.justify-between').remove();
-                    }
-                });
-                
-                // Habilitar botón de agregar si estaba deshabilitado
-                if (documentosAdicionales.length < maxAdicionales) {
-                    document.getElementById('agregar-documento-btn').disabled = false;
-                    document.getElementById('agregar-documento-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-                }
-                
-                // Actualizar contadores
-                actualizarContadores();
-            }
-        }
-
-        // Permitir agregar documento con Enter
+        
+        // Permitir Enter para agregar documento
         document.getElementById('nuevo-documento').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 document.getElementById('agregar-documento-btn').click();
             }
         });
-
-        // Inicializar contadores
-        actualizarContadores();
     });
+
+    function actualizarContadoresAdicionales() {
+        const adicionalesCheckboxes = document.querySelectorAll('input[name="documentos_adicionales[]"]');
+        const marcados = document.querySelectorAll('input[name="documentos_adicionales[]"]:checked').length;
+        document.getElementById('adicionales-count').textContent = adicionalesCheckboxes.length;
+    }
+
+    function eliminarDocumentoAdicional(nombre) {
+        if (confirm('¿Está seguro de eliminar este documento adicional?')) {
+            const elementos = document.querySelectorAll('input[value="' + nombre + '"]');
+            elementos.forEach(input => {
+                input.closest('.flex.items-center.justify-between').remove();
+            });
+            actualizarContadoresAdicionales();
+        }
+    }
 </script>
 
 <style>
-    /* Estilos para checkboxes personalizados */
-    .documento-checkbox:checked + .custom-checkbox {
-        animation: checkmark 0.3s ease;
-    }
-    
-    @keyframes checkmark {
-        0% { transform: scale(0.8); }
-        50% { transform: scale(1.2); }
-        100% { transform: scale(1); }
-    }
-    
-    /* Estilos para tarjetas de documentos */
     .documento-card {
+        cursor: pointer;
         transition: all 0.3s ease;
     }
     
     .documento-card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
-    /* Estilos para el estado de documentos */
-    .documento-status-indicator {
+    .custom-checkbox {
         transition: all 0.3s ease;
     }
     
-    /* Estilos para documentos adicionales */
-    .documento-adicional-checkbox:checked {
-        background-color: #4f46e5;
-        border-color: #4f46e5;
-    }
-    
-    .eliminar-documento-btn {
-        transition: all 0.2s ease;
-    }
-    
-    .eliminar-documento-btn:hover {
+    .custom-checkbox:hover {
         transform: scale(1.1);
     }
     
-    /* Estilos para barras de progreso */
-    #documentos-progress {
-        transition: width 0.5s ease-in-out;
+    .check-icon {
+        transition: all 0.3s ease;
     }
     
-    #documentos-final-progress {
-        transition: width 0.5s ease-in-out;
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
     }
     
-    @media (max-width: 768px) {
-        .documento-card {
-            padding: 1rem;
-        }
-        
-        .custom-checkbox {
-            width: 28px;
-            height: 28px;
-        }
-        
-        .check-icon {
-            font-size: 0.75rem;
-        }
+    .custom-checkbox:active {
+        animation: pulse 0.2s ease;
     }
 </style>
