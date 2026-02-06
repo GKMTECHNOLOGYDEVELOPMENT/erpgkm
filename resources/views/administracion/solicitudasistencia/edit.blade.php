@@ -4,7 +4,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
-        /* Solo el CSS necesario para la tabla */
         .table-days {
             border: 1px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -29,7 +28,6 @@
             background-color: #f9fafb;
         }
 
-        /* Estilos para Flatpickr */
         .flatpickr-input {
             background-color: white !important;
             cursor: pointer !important;
@@ -107,7 +105,60 @@
                     </div>
                 @endif
 
-                <!-- Sección 1: Tipo de solicitud -->
+                <!-- Sección: Usuarios -->
+                <div class="space-y-4">
+                    <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-user-friends text-blue-500 mr-2"></i>
+                        Información de Usuarios
+                    </h2>
+
+                    <!-- Información del solicitante -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700">Solicitante</p>
+                                <p class="text-sm text-gray-900">
+                                    {{ $usuarioAutenticado->Nombre }} {{ $usuarioAutenticado->apellidoPaterno }} {{ $usuarioAutenticado->apellidoMaterno }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-id-card mr-1"></i>
+                                    {{ $usuarioAutenticado->documento ?? 'Sin documento' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selector de usuario DESTINO -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user-check text-gray-400 mr-1"></i>
+                            Usuario para quien es la solicitud *
+                        </label>
+                        <select name="id_usuario" 
+                                class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                required>
+                            <option value="">Seleccione un usuario...</option>
+                            @foreach ($usuariosDestino as $usuario)
+                                <option value="{{ $usuario->idUsuario }}" 
+                                        {{ old('id_usuario', $solicitud->id_usuario) == $usuario->idUsuario ? 'selected' : '' }}>
+                                    {{ $usuario->Nombre }} {{ $usuario->apellidoPaterno }} {{ $usuario->apellidoMaterno }}
+                                    @if($usuario->documento)
+                                        - {{ $usuario->documento }}
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Solo se muestran usuarios de tu mismo tipo de área
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sección: Tipo de solicitud -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-tag text-blue-500 mr-2"></i>
@@ -152,7 +203,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 2: Rango de Tiempo -->
+                <!-- Sección: Rango de Tiempo -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
@@ -169,8 +220,7 @@
                             </label>
                             <input type="text" name="rango_inicio_tiempo" id="fechaInicio"
                                 value="{{ old('rango_inicio_tiempo', \Carbon\Carbon::parse($solicitud->rango_inicio_tiempo)->format('Y-m-d H:i')) }}"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3
-                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
                                 placeholder="Selecciona fecha y hora de inicio" required readonly>
                         </div>
 
@@ -183,14 +233,13 @@
                             </label>
                             <input type="text" name="rango_final_tiempo" id="fechaFin"
                                 value="{{ old('rango_final_tiempo', \Carbon\Carbon::parse($solicitud->rango_final_tiempo)->format('Y-m-d H:i')) }}"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3
-                          focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
+                                class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors flatpickr-input"
                                 placeholder="Selecciona fecha y hora de fin" required readonly>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección 3: Observaciones -->
+                <!-- Sección: Observaciones -->
                 <div class="space-y-4">
                     <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                         <i class="fas fa-sticky-note text-blue-500 mr-2"></i>
@@ -208,7 +257,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 4: Licencia Médica (condicional) - Mejorada -->
+                <!-- Sección: Licencia Médica (condicional) -->
                 <div id="boxLicenciaMedica"
                     class="hidden border border-red-200 bg-gradient-to-br from-red-50 to-red-50/50 rounded-2xl p-6 space-y-4">
                     <div class="flex items-start">
@@ -226,8 +275,7 @@
                         </div>
                     </div>
 
-                    <!-- Mostrar licencia actual si existe -->
-                    @if($solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first())
+                    @if($solicitud->imagenes->count() > 0)
                         <div class="bg-white border border-green-200 rounded-xl p-4">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
@@ -237,7 +285,7 @@
                                     <div>
                                         <p class="font-medium text-gray-900">Licencia médica actual:</p>
                                         <p class="text-sm text-gray-600 mt-1">
-                                            {{ $solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first()->archivo_solicitud }}
+                                            {{ basename($solicitud->imagenes->first()->imagen) }}
                                         </p>
                                     </div>
                                 </div>
@@ -249,8 +297,8 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-camera text-red-400 mr-1"></i>
-                                {{ $solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first() ? 'Reemplazar licencia médica' : 'Foto de licencia médica' }}
-                                @if(!$solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first())
+                                {{ $solicitud->imagenes->count() > 0 ? 'Reemplazar licencia médica' : 'Foto de licencia médica' }}
+                                @if(!$solicitud->imagenes->count() > 0)
                                     <span class="text-red-500">*</span>
                                 @endif
                             </label>
@@ -267,11 +315,11 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-700">
-                                            {{ $solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first() ? 'Subir nueva licencia' : 'Subir licencia médica' }}
+                                            {{ $solicitud->imagenes->count() > 0 ? 'Subir nueva licencia' : 'Subir licencia médica' }}
                                         </p>
                                         <p class="text-sm text-gray-500 mt-1">Haz clic o arrastra la imagen aquí</p>
                                         <p class="text-xs text-gray-400 mt-1">Formatos: JPG, PNG, GIF • Máx. 5MB</p>
-                                        @if($solicitud->archivos->where('tipo_archivo', 'licencia_medica')->first())
+                                        @if($solicitud->imagenes->count() > 0)
                                             <p class="text-xs text-green-600 mt-2">
                                                 <i class="fas fa-info-circle mr-1"></i>
                                                 Dejar vacío para mantener la licencia actual
@@ -310,7 +358,7 @@
                     </div>
                 </div>
 
-                <!-- Sección 5: Educativo (condicional) - Mejorada -->
+                <!-- Sección: Educativo (condicional) -->
                 <div id="boxEducativo"
                     class="hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-50/50 rounded-2xl p-6 space-y-6">
                     <div class="flex items-start">
@@ -329,37 +377,33 @@
                     </div>
 
                     <!-- Archivos existentes -->
-                    @if($solicitud->archivos->where('tipo_archivo', '!=', 'licencia_medica')->count() > 0)
-                        <div class="space-y-3">
-                            <h3 class="font-semibold text-gray-700 flex items-center">
-                                <i class="fas fa-folder-open text-blue-400 mr-2"></i>
-                                Archivos actuales
-                            </h3>
-                            @foreach($solicitud->archivos->where('tipo_archivo', '!=', 'licencia_medica') as $archivo)
-                                <div class="bg-white border border-gray-200 rounded-xl p-3">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-3">
-                                            <div class="p-2 rounded-lg bg-blue-50">
-                                                @if($archivo->tipo_archivo == 'archivo_educativo')
-                                                    <i class="fas fa-file-pdf text-blue-500"></i>
-                                                @elseif($archivo->tipo_archivo == 'imagen_opcional')
-                                                    <i class="fas fa-image text-green-500"></i>
-                                                @else
-                                                    <i class="fas fa-file text-gray-500"></i>
-                                                @endif
-                                            </div>
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $archivo->archivo_solicitud }}</p>
-                                                <p class="text-xs text-gray-500 capitalize">
-                                                    {{ str_replace('_', ' ', $archivo->tipo_archivo) }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
+
+                    @if($solicitud->archivos->count() > 0)
+    <div class="space-y-3">
+        <h3 class="font-semibold text-gray-700 flex items-center">
+            <i class="fas fa-folder-open text-blue-400 mr-2"></i>
+            Archivos actuales
+        </h3>
+        @foreach($solicitud->archivos as $archivo)
+            <div class="bg-white border border-gray-200 rounded-xl p-3">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2 rounded-lg bg-blue-50">
+                            <i class="fas fa-file-pdf text-blue-500"></i>
                         </div>
-                    @endif
+                        <div>
+                            <p class="font-medium text-gray-900">{{ basename($archivo->archivo_solicitud) }}</p>
+                            {{-- USAR LA FUNCIÓN PASADA DESDE EL CONTROLADOR --}}
+                            <p class="text-xs text-gray-500">
+                                {{ $formatFileSize($archivo->espacio_archivo ?? 0) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@endif
 
                     <!-- Archivos con preview -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -367,7 +411,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-file-pdf text-blue-400 mr-1"></i>
-                                {{ $solicitud->archivos->where('tipo_archivo', 'archivo_educativo')->first() ? 'Reemplazar archivo educativo' : 'Archivo educativo (PDF, Word, Excel)' }}
+                                {{ $solicitud->archivos->count() > 0 ? 'Reemplazar archivo educativo' : 'Archivo educativo (PDF, Word, Excel)' }}
                             </label>
 
                             <div class="file-upload-area border-2 border-dashed border-blue-300 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
@@ -383,10 +427,10 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-700">
-                                            {{ $solicitud->archivos->where('tipo_archivo', 'archivo_educativo')->first() ? 'Subir nuevo archivo' : 'Subir archivo' }}
+                                            {{ $solicitud->archivos->count() > 0 ? 'Subir nuevo archivo' : 'Subir archivo' }}
                                         </p>
                                         <p class="text-xs text-gray-500">Formatos: PDF, DOC, XLS</p>
-                                        @if($solicitud->archivos->where('tipo_archivo', 'archivo_educativo')->first())
+                                        @if($solicitud->archivos->count() > 0)
                                             <p class="text-xs text-green-600 mt-1">
                                                 <i class="fas fa-info-circle mr-1"></i>
                                                 Dejar vacío para mantener el archivo actual
@@ -429,7 +473,7 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-image text-blue-400 mr-1"></i>
-                                {{ $solicitud->archivos->where('tipo_archivo', 'imagen_opcional')->first() ? 'Reemplazar imagen opcional' : 'Imagen opcional' }}
+                                {{ $solicitud->imagenes->where('tipo_archivo', 'imagen_opcional')->count() > 0 ? 'Reemplazar imagen opcional' : 'Imagen opcional' }}
                             </label>
 
                             <div class="file-upload-area border-2 border-dashed border-blue-300 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer"
@@ -444,10 +488,10 @@
                                     </div>
                                     <div>
                                         <p class="font-medium text-gray-700">
-                                            {{ $solicitud->archivos->where('tipo_archivo', 'imagen_opcional')->first() ? 'Subir nueva imagen' : 'Subir imagen' }}
+                                            {{ $solicitud->imagenes->where('tipo_archivo', 'imagen_opcional')->count() > 0 ? 'Subir nueva imagen' : 'Subir imagen' }}
                                         </p>
                                         <p class="text-xs text-gray-500">Formatos: JPG, PNG, GIF</p>
-                                        @if($solicitud->archivos->where('tipo_archivo', 'imagen_opcional')->first())
+                                        @if($solicitud->imagenes->where('tipo_archivo', 'imagen_opcional')->count() > 0)
                                             <p class="text-xs text-green-600 mt-1">
                                                 <i class="fas fa-info-circle mr-1"></i>
                                                 Dejar vacío para mantener la imagen actual
@@ -485,7 +529,7 @@
                         </div>
                     </div>
 
-                    <!-- Tabla de días - Mejorada -->
+                    <!-- Tabla de días -->
                     <div class="space-y-4">
                         <label class="block text-sm font-semibold text-gray-700">
                             <i class="fas fa-calendar-check text-blue-400 mr-1"></i>
@@ -613,7 +657,6 @@
 
         // Configuración de Flatpickr
         document.addEventListener('DOMContentLoaded', function() {
-            // Configuración común
             const flatpickrConfig = {
                 locale: "es",
                 enableTime: true,
@@ -628,15 +671,12 @@
                 defaultMinute: 0
             };
 
-            // Configurar fecha de inicio
             const fechaInicioPicker = flatpickr("#fechaInicio", {
                 ...flatpickrConfig,
                 onChange: function(selectedDates, dateStr) {
-                    // Cuando se selecciona una fecha de inicio, actualizar el mínimo de la fecha final
                     if (dateStr && fechaFinPicker) {
                         fechaFinPicker.set('minDate', selectedDates[0]);
 
-                        // Si la fecha final actual es anterior a la nueva fecha de inicio, limpiarla
                         const fechaFinValue = document.getElementById('fechaFin').value;
                         if (fechaFinValue && new Date(fechaFinValue) < selectedDates[0]) {
                             fechaFinPicker.clear();
@@ -645,17 +685,14 @@
                 }
             });
 
-            // Configurar fecha final
             const fechaFinPicker = flatpickr("#fechaFin", {
                 ...flatpickrConfig,
                 minDate: "today"
             });
 
-            // Inicializar drag & drop para archivos
             initFileUploads();
         });
 
-        // Función para formatear tamaño de archivo
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -664,7 +701,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Manejar subida de licencia médica
         function handleLicenciaUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -674,7 +710,7 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB
+            if (file.size > 5 * 1024 * 1024) {
                 toastr.error('El archivo es demasiado grande. Máximo 5MB');
                 return;
             }
@@ -694,7 +730,6 @@
             reader.readAsDataURL(file);
         }
 
-        // Manejar subida de archivo educativo
         function handleArchivoUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -707,7 +742,7 @@
                 return;
             }
 
-            if (file.size > 10 * 1024 * 1024) { // 10MB
+            if (file.size > 10 * 1024 * 1024) {
                 toastr.error('El archivo es demasiado grande. Máximo 10MB');
                 return;
             }
@@ -721,7 +756,6 @@
             previewDiv.classList.remove('hidden');
         }
 
-        // Manejar subida de imagen opcional
         function handleImagenUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -731,7 +765,7 @@
                 return;
             }
 
-            if (file.size > 3 * 1024 * 1024) { // 3MB
+            if (file.size > 3 * 1024 * 1024) {
                 toastr.error('La imagen es demasiado grande. Máximo 3MB');
                 return;
             }
@@ -751,11 +785,9 @@
             reader.readAsDataURL(file);
         }
 
-        // Funciones para remover previews
         function removeLicenciaPreview() {
             const previewDiv = document.getElementById('licenciaPreview');
             const input = document.getElementById('licenciaInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
@@ -763,7 +795,6 @@
         function removeArchivoPreview() {
             const previewDiv = document.getElementById('archivoPreview');
             const input = document.getElementById('archivoInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
@@ -771,15 +802,12 @@
         function removeImagenPreview() {
             const previewDiv = document.getElementById('imagenPreview');
             const input = document.getElementById('imagenInput');
-
             previewDiv.classList.add('hidden');
             input.value = '';
         }
 
-        // Arrastrar y soltar archivos
         function initFileUploads() {
             const uploadAreas = document.querySelectorAll('.file-upload-area');
-
             uploadAreas.forEach(area => {
                 area.addEventListener('dragover', function(e) {
                     e.preventDefault();
@@ -802,19 +830,14 @@
                         dataTransfer.items.add(files[0]);
                         input.files = dataTransfer.files;
 
-                        // Disparar el evento change
-                        const event = new Event('change', {
-                            bubbles: true
-                        });
+                        const event = new Event('change', { bubbles: true });
                         input.dispatchEvent(event);
                     }
                 });
             });
         }
 
-        // Validación antes de enviar
         document.querySelector('form').addEventListener('submit', function(e) {
-            // Validar que la fecha final sea mayor que la fecha de inicio
             const fechaInicio = document.getElementById('fechaInicio').value;
             const fechaFin = document.getElementById('fechaFin').value;
 
@@ -829,29 +852,24 @@
                 }
             }
 
-            // Validar licencia médica si está visible y no hay licencia actual
             const boxLicencia = document.getElementById('boxLicenciaMedica');
-            const tieneLicenciaActual = {{ $solicitud->archivos->where('tipo_archivo', 'licencia_medica')->count() > 0 ? 'true' : 'false' }};
+            const tieneLicenciaActual = {{ $solicitud->imagenes->count() > 0 ? 'true' : 'false' }};
 
             if (!boxLicencia.classList.contains('hidden') && !tieneLicenciaActual) {
                 const licenciaInput = document.getElementById('licenciaInput');
                 if (!licenciaInput || !licenciaInput.files.length) {
                     e.preventDefault();
                     toastr.error('Debe adjuntar la licencia médica para este tipo de solicitud');
-                    boxLicencia.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    boxLicencia.scrollIntoView({ behavior: 'smooth' });
                     return false;
                 }
             }
 
-            // Mostrar loader en el botón
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Actualizando...';
             submitBtn.disabled = true;
 
-            // El formulario se enviará normalmente
             return true;
         });
     </script>
