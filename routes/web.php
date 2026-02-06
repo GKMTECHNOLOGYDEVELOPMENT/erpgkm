@@ -14,6 +14,8 @@ use App\Http\Controllers\dashboard\AdministracionController;
 use App\Http\Controllers\dashboard\AlmacenController;
 use App\Http\Controllers\dashboard\ComercialController;
 use App\Http\Controllers\dashboard\TicketsController;
+use App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController;
+
 use App\Http\Controllers\administracion\UsuariosController;
 use App\Http\Controllers\administracion\CompraController;
 use App\Http\Controllers\administracion\asistencias\AsistenciaController;
@@ -2085,3 +2087,9 @@ Route::prefix('administracion')->name('administracion.')->group(function () {
         [SolicitudAsistenciaController::class, 'cambiarEstado'])
         ->name('solicitud-asistencia.cambiar-estado');
 });
+
+
+Route::get(
+    '/administracion/formulario-personal',
+    [FormularioPersonalEmpleadoController::class, 'create']
+)->name('formulariopersonal.create');
