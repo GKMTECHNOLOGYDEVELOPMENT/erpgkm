@@ -69,7 +69,7 @@ class RepuestoTransitoController extends Controller
     return back()->withInput();
 }
 
-  private function buildQuery($filtros = [])
+ private function buildQuery($filtros = [])
 {
     $query = DB::table('ordenesarticulos as oa')
         ->select(
@@ -126,7 +126,7 @@ class RepuestoTransitoController extends Controller
               ->orWhereIn('oa.estado', [0, 1]);
         });
 
-    // Aplicar filtros BASADOS EN REPUESTOS_ENTREGAS - AGREGADO CEDIDO
+    // Aplicar filtros BASADOS EN REPUESTOS_ENTREGAS
     if (!empty($filtros['estado'])) {
         $query->where(function($q) use ($filtros) {
             switch ($filtros['estado']) {
@@ -152,17 +152,32 @@ class RepuestoTransitoController extends Controller
         });
     }
 
-    // Mantener otros filtros existentes
+    // Filtro por código de repuesto
     if (!empty($filtros['codigo_repuesto'])) {
         $query->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
     }
 
-    if (!empty($filtros['codigo_solicitud'])) {
-        $query->where('so.codigo', 'like', '%' . $filtros['codigo_solicitud'] . '%');
+    // Filtro por número de ticket (desde repuestos_entregas)
+    if (!empty($filtros['numero_ticket'])) {
+        $query->where('re.numero_ticket', 'like', '%' . $filtros['numero_ticket'] . '%');
     }
 
-    if (!empty($filtros['solicitante'])) {
-        $query->where('u.Nombre', 'like', '%' . $filtros['solicitante'] . '%');
+    // Filtro por número de solicitud (desde solicitudesordenes)
+    if (!empty($filtros['numero_solicitud'])) {
+        $query->where('so.codigo', 'like', '%' . $filtros['numero_solicitud'] . '%');
+    }
+
+    // Búsqueda general (busca en múltiples campos)
+    if (!empty($filtros['busqueda_general'])) {
+        $searchTerm = $filtros['busqueda_general'];
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('a.codigo_repuesto', 'like', '%' . $searchTerm . '%')
+              ->orWhere('a.nombre', 'like', '%' . $searchTerm . '%')
+              ->orWhere('re.numero_ticket', 'like', '%' . $searchTerm . '%')
+              ->orWhere('so.codigo', 'like', '%' . $searchTerm . '%')
+              ->orWhere('u.Nombre', 'like', '%' . $searchTerm . '%')
+              ->orWhere('sc.nombre', 'like', '%' . $searchTerm . '%');
+        });
     }
 
     // Filtro de modelo - buscar tanto en modelo como en marca
@@ -182,16 +197,13 @@ class RepuestoTransitoController extends Controller
         $query->where('sc.nombre', 'like', '%' . $filtros['subcategoria'] . '%');
     }
 
+    // Filtros de fecha
     if (!empty($filtros['fecha_desde'])) {
         $query->whereDate('re.fecha_entrega', '>=', $filtros['fecha_desde']);
     }
 
     if (!empty($filtros['fecha_hasta'])) {
         $query->whereDate('re.fecha_entrega', '<=', $filtros['fecha_hasta']);
-    }
-
-    if (!empty($filtros['numero_ticket'])) {
-        $query->where('re.numero_ticket', 'like', '%' . $filtros['numero_ticket'] . '%');
     }
 
     // AGRUPAR PARA EVITAR DUPLICADOS POR MODELOS
@@ -208,11 +220,12 @@ class RepuestoTransitoController extends Controller
     /**
      * Obtiene contadores con filtros aplicados
      */
-   private function getContadores($filtros = [])
+ private function getContadores($filtros = [])
 {
     // Base query para contadores
     $baseQuery = DB::table('ordenesarticulos as oa')
         ->join('solicitudesordenes as so', 'oa.idSolicitudesOrdenes', '=', 'so.idSolicitudesOrdenes')
+        ->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
         ->leftJoin('repuestos_entregas as re', function($join) {
             $join->on('oa.idSolicitudesOrdenes', '=', 're.solicitud_id')
                  ->on('oa.idArticulos', '=', 're.articulo_id');
@@ -222,8 +235,25 @@ class RepuestoTransitoController extends Controller
 
     // Aplicar mismos filtros a contadores
     if (!empty($filtros['codigo_repuesto'])) {
-        $baseQuery->join('articulos as a', 'oa.idArticulos', '=', 'a.idArticulos')
-                  ->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
+        $baseQuery->where('a.codigo_repuesto', 'like', '%' . $filtros['codigo_repuesto'] . '%');
+    }
+
+    if (!empty($filtros['numero_ticket'])) {
+        $baseQuery->where('re.numero_ticket', 'like', '%' . $filtros['numero_ticket'] . '%');
+    }
+
+    if (!empty($filtros['numero_solicitud'])) {
+        $baseQuery->where('so.codigo', 'like', '%' . $filtros['numero_solicitud'] . '%');
+    }
+
+    if (!empty($filtros['busqueda_general'])) {
+        $searchTerm = $filtros['busqueda_general'];
+        $baseQuery->where(function($q) use ($searchTerm) {
+            $q->where('a.codigo_repuesto', 'like', '%' . $searchTerm . '%')
+              ->orWhere('a.nombre', 'like', '%' . $searchTerm . '%')
+              ->orWhere('re.numero_ticket', 'like', '%' . $searchTerm . '%')
+              ->orWhere('so.codigo', 'like', '%' . $searchTerm . '%');
+        });
     }
 
     if (!empty($filtros['fecha_desde'])) {
@@ -241,7 +271,7 @@ class RepuestoTransitoController extends Controller
             ->where('re.estado', 'entregado')
             ->count(),
             
-        'cedidos' => (clone $baseQuery)  // NUEVO CONTADOR PARA CEDIDOS
+        'cedidos' => (clone $baseQuery)
             ->where('re.estado', 'cedido')
             ->count(),
             
