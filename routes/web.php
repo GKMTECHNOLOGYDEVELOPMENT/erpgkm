@@ -2013,6 +2013,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+
 // Repuestos en Tránsito
 Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function () {
     // Rutas principales
@@ -2040,6 +2041,7 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
     Route::get('/{id}/fotos-tipo/{tipo}', [RepuestoTransitoController::class, 'obtenerFotosPorTipo'])
         ->name('repuestos.transito.fotos.tipo');
 });
+
 
 
 // Rutas para Harvest (Retiros de repuestos)
