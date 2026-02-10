@@ -3441,7 +3441,7 @@ public function opciones($id)
                 ->join('articulos as a', 're.articulo_id', '=', 'a.idArticulos')
                 ->leftJoin('subcategorias as sc', 'a.idsubcategoria', '=', 'sc.id')
                 ->where('re.solicitud_id', $id)
-                ->where('re.estado', 'entregado')
+                ->where('re.estado', 'entregado', 'usado', 'devuelto')
                 ->select(
                     DB::raw('COUNT(re.articulo_id) as cantidad'),
                     'a.codigo_repuesto',

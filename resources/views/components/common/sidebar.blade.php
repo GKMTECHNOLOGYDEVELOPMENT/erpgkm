@@ -443,21 +443,22 @@
                     </li>
                 @endif
 
-<li class="menu nav-item">
-    <a href="{{ route('administracion.solicitud-asistencia.index') }}" class="nav-link group">
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 6.75a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-6 12a6 6 0 0 1 12 0m3-7.5h-3m1.5-1.5v3" />
-            </svg>
+                <li class="menu nav-item">
+                    <a href="{{ route('administracion.solicitud-asistencia.index') }}" class="nav-link group">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 6.75a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-6 12a6 6 0 0 1 12 0m3-7.5h-3m1.5-1.5v3" />
+                            </svg>
 
-            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                Solicitud de asistencia
-            </span>
-        </div>
-    </a>
-</li>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Solicitud de asistencia
+                            </span>
+                        </div>
+                    </a>
+                </li>
 
 
 
@@ -595,52 +596,6 @@
                         </ul>
                     </li>
                 @endif
-
-
-                @if (PermisoHelper::tienePermiso('VER COMPRAS'))
-                    <li class="menu nav-item">
-                        <button type="button" class="nav-link group"
-                            :class="{ 'active': activeDropdown === 'entrada_proveedores' }"
-                            @click="activeDropdown === 'entrada_proveedores' ? activeDropdown = null : activeDropdown = 'entrada_proveedores'">
-                            <div class="flex items-center">
-
-                                <!-- ÍCONO DE ENTRADA DE PROVEEDORES -->
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor"
-                                    class="w-6 h-6 group-hover:!text-primary">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 3v8m0 0l3-3m-3 3L9 8" />
-                                </svg>
-
-                                <span
-                                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                                    Entrada Proveedores
-                                </span>
-                            </div>
-
-                            <div class="rtl:rotate-180"
-                                :class="{ '!rotate-90': activeDropdown === 'entrada_proveedores' }">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </div>
-                        </button>
-
-                        <ul x-cloak x-show="activeDropdown === 'entrada_proveedores'" x-collapse
-                            class="sub-menu text-gray-500">
-                            @if (PermisoHelper::tienePermiso('VER ENTRADAS PROVEEDORES'))
-                                <li>
-                                    <a href="{{ route('entradasproveedores.index') }}">Entradas de proveedores</a>
-                                </li>
-                            @endif
-                        </ul>
-                    </li>
-                @endif
-
-
 
 
                 @if (PermisoHelper::tienePermiso('VER ASISTENCIAS'))
@@ -946,43 +901,32 @@
                     <span>ALMACEN</span>
                 </h2>
 
-                        <li class="menu nav-item">
-    <a href="{{ route('harvest.index') }}" class="nav-link group">
-        <div class="flex items-center">
+                <li class="menu nav-item">
+                    <a href="{{ route('harvest.index') }}" class="nav-link group">
+                        <div class="flex items-center">
 
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="group-hover:!text-primary shrink-0"
-                 width="20" height="20"
-                 viewBox="0 0 24 24"
-                 fill="none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                                width="20" height="20" viewBox="0 0 24 24" fill="none">
 
-                <!-- Tallo -->
-                <path d="M12 2v20"
-                      stroke="currentColor"
-                      stroke-width="1.8"
-                      stroke-linecap="round"/>
+                                <!-- Tallo -->
+                                <path d="M12 2v20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
 
-                <!-- Granos de trigo -->
-                <path d="M12 4c-2 1-3 2.5-3 4 2 0 3-1 3-2z"
-                      fill="currentColor"/>
-                <path d="M12 7c2 1 3 2.5 3 4-2 0-3-1-3-2z"
-                      fill="currentColor"/>
+                                <!-- Granos de trigo -->
+                                <path d="M12 4c-2 1-3 2.5-3 4 2 0 3-1 3-2z" fill="currentColor" />
+                                <path d="M12 7c2 1 3 2.5 3 4-2 0-3-1-3-2z" fill="currentColor" />
 
-                <path d="M12 10c-2 1-3 2.5-3 4 2 0 3-1 3-2z"
-                      fill="currentColor"/>
-                <path d="M12 13c2 1 3 2.5 3 4-2 0-3-1-3-2z"
-                      fill="currentColor"/>
+                                <path d="M12 10c-2 1-3 2.5-3 4 2 0 3-1 3-2z" fill="currentColor" />
+                                <path d="M12 13c2 1 3 2.5 3 4-2 0-3-1-3-2z" fill="currentColor" />
 
-            </svg>
+                            </svg>
 
-            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                Harvest
-            </span>
-        </div>
-    </a>
-</li>
-
-
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Harvest
+                            </span>
+                        </div>
+                    </a>
+                </li>
 
                 <li class="menu nav-item">
                     <a href="{{ route('asignar-articulos.index') }}" class="nav-link group">
@@ -1009,33 +953,32 @@
                         </div>
                     </a>
                 </li>
-<li class="menu nav-item">
-    <a href="{{ route('repuesto-transito.index') }}" class="nav-link group">
-        <div class="flex items-center">
+                <li class="menu nav-item">
+                    <a href="{{ route('repuesto-transito.index') }}" class="nav-link group">
+                        <div class="flex items-center">
 
-            <svg xmlns="http://www.w3.org/2000/svg"
-                class="group-hover:!text-primary shrink-0"
-                width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                                width="20" height="20" viewBox="0 0 24 24" fill="none">
 
-                <!-- Caja -->
-                <path d="M3 7h11v7H3z" fill="currentColor" opacity="0.8"/>
+                                <!-- Caja -->
+                                <path d="M3 7h11v7H3z" fill="currentColor" opacity="0.8" />
 
-                <!-- Camión -->
-                <path d="M14 9h3l3 3v2h-6V9z" fill="currentColor"/>
+                                <!-- Camión -->
+                                <path d="M14 9h3l3 3v2h-6V9z" fill="currentColor" />
 
-                <!-- Ruedas -->
-                <circle cx="7" cy="17" r="2" fill="currentColor"/>
-                <circle cx="17" cy="17" r="2" fill="currentColor"/>
+                                <!-- Ruedas -->
+                                <circle cx="7" cy="17" r="2" fill="currentColor" />
+                                <circle cx="17" cy="17" r="2" fill="currentColor" />
 
-            </svg>
+                            </svg>
 
-            <span
-                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                Repuesto en Tránsito
-            </span>
-        </div>
-    </a>
-</li>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Repuesto en Tránsito
+                            </span>
+                        </div>
+                    </a>
+                </li>
 
                 {{--
                 <li class="menu nav-item">
@@ -1616,11 +1559,48 @@
 
 
 
+                @if (PermisoHelper::tienePermiso('VER COMPRAS'))
+                    <li class="menu nav-item">
+                        <button type="button" class="nav-link group"
+                            :class="{ 'active': activeDropdown === 'entrada_proveedores' }"
+                            @click="activeDropdown === 'entrada_proveedores' ? activeDropdown = null : activeDropdown = 'entrada_proveedores'">
+                            <div class="flex items-center">
 
+                                <!-- ÍCONO DE ENTRADA DE PROVEEDORES -->
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor"
+                                    class="w-6 h-6 group-hover:!text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 3v8m0 0l3-3m-3 3L9 8" />
+                                </svg>
 
+                                <span
+                                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                    Entrada Proveedores
+                                </span>
+                            </div>
 
+                            <div class="rtl:rotate-180"
+                                :class="{ '!rotate-90': activeDropdown === 'entrada_proveedores' }">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                        </button>
 
-
+                        <ul x-cloak x-show="activeDropdown === 'entrada_proveedores'" x-collapse
+                            class="sub-menu text-gray-500">
+                            @if (PermisoHelper::tienePermiso('VER ENTRADAS PROVEEDORES'))
+                                <li>
+                                    <a href="{{ route('entradasproveedores.index') }}">Entradas de proveedores</a>
+                                </li>
+                            @endif
+                        </ul>
+                    </li>
+                @endif
 
 
 
