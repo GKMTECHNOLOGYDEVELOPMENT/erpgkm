@@ -1,7 +1,9 @@
 <x-layout.default>
-    <!-- Font Awesome CDN -->
+    <!-- CSS en el HEAD -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    <!-- SweetAlert2 - Reemplaza Toastr -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div x-data="solicitudRepuestoProvinciaOpciones()" class="min-h-screen py-8">
         <div class="mx-auto w-full px-4">
@@ -583,103 +585,7 @@
                                 </div>
                             </div>
 
-                            <!-- Procesamiento Grupal para Provincia - Responsive -->
-                            <div
-                                class="group bg-white rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border border-green-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                                <div class="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4 lg:mb-6">
-                                    <div
-                                        class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-green-100 to-green-50 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner flex-shrink-0">
-                                        <i
-                                            class="fas fa-truck-loading text-green-600 text-sm sm:text-base lg:text-lg"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h3
-                                            class="text-base sm:text-lg lg:text-xl font-bold text-slate-800 tracking-tight mb-1">
-                                            Procesamiento Grupal
-                                        </h3>
-                                        <p class="text-slate-600 text-xs sm:text-sm mt-1 truncate">
-                                            Prepare todos los repuestos para envío en una sola acción.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <ul class="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4 lg:mb-6">
-                                    <li class="flex items-start text-xs sm:text-sm text-slate-700">
-                                        <i
-                                            class="fas fa-check-circle text-green-500 mt-0.5 mr-1.5 sm:mr-2 flex-shrink-0"></i>
-                                        <span>Seleccione ubicaciones para todos los repuestos.</span>
-                                    </li>
-                                    <li class="flex items-start text-xs sm:text-sm text-slate-700">
-                                        <i
-                                            class="fas fa-check-circle text-green-500 mt-0.5 mr-1.5 sm:mr-2 flex-shrink-0"></i>
-                                        <span>Procese todo el lote con un solo comprobante.</span>
-                                    </li>
-                                    <li class="flex items-start text-xs sm:text-sm text-slate-700">
-                                        <i
-                                            class="fas fa-check-circle text-green-500 mt-0.5 mr-1.5 sm:mr-2 flex-shrink-0"></i>
-                                        <span>Requiere stock completo en todos los repuestos.</span>
-                                    </li>
-                                </ul>
-
-                                <div class="space-y-3 sm:space-y-4">
-                                    @if (App\Helpers\PermisoHelper::tienePermiso('PROCESAR REPUESTO GRUPAL'))
-                                        @if ($repuestos_procesados == $total_repuestos)
-                                            <button disabled
-                                                class="w-full flex items-center justify-center px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 lg:py-4 bg-gray-300 text-gray-600 rounded-lg sm:rounded-xl font-semibold cursor-not-allowed text-xs sm:text-sm lg:text-base">
-                                                <i class="fas fa-check-circle mr-1 sm:mr-1.5 lg:mr-3"></i>
-                                                <span class="hidden sm:inline">Todos los repuestos ya están
-                                                    procesados</span>
-                                                <span class="sm:hidden">Completado</span>
-                                            </button>
-                                        @else
-                                            <button
-                                                @click="abrirModalEnvioProvinciaGrupal({{ $solicitud->idsolicitudesordenes }})"
-                                                :disabled="isLoadingGrupal || !todasUbicacionesSeleccionadas || !todosDisponibles"
-                                                :class="{
-                                                    'opacity-50 cursor-not-allowed': isLoadingGrupal || !
-                                                        todasUbicacionesSeleccionadas || !todosDisponibles,
-                                                    'bg-success hover:bg-green-600 shadow-md hover:shadow-lg': todasUbicacionesSeleccionadas &&
-                                                        todosDisponibles,
-                                                    'bg-primary': !todasUbicacionesSeleccionadas || !todosDisponibles
-                                                }"
-                                                class="w-full flex items-center justify-center px-3 sm:px-4 lg:px-8 py-2 sm:py-2.5 lg:py-4 text-white rounded-lg sm:rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm lg:text-base">
-                                                <i x-show="!isLoadingGrupal"
-                                                    class="fas fa-truck-loading mr-1 sm:mr-1.5 lg:mr-3"></i>
-                                                <i x-show="isLoadingGrupal"
-                                                    class="fas fa-spinner fa-spin mr-1 sm:mr-1.5 lg:mr-3"></i>
-                                                <span
-                                                    x-text="isLoadingGrupal ? 'Procesando...' : 'Preparar Todo para Envío'"></span>
-                                            </button>
-                                        @endif
-                                    @endif
-
-                                    <div
-                                        class="text-center text-xs sm:text-sm font-semibold @if ($puede_aceptar) text-success @else text-danger @endif">
-                                        @if ($repuestos_procesados == $total_repuestos)
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-check-double text-success"></i>
-                                                <span class="hidden sm:inline">Todos los repuestos ya fueron
-                                                    procesados</span>
-                                                <span class="sm:hidden">Completamente procesado</span>
-                                            </div>
-                                        @elseif($puede_aceptar)
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-check-circle"></i>
-                                                <span class="hidden sm:inline">Condiciones óptimas para envío
-                                                    grupal</span>
-                                                <span class="sm:hidden">Óptimo para grupal</span>
-                                            </div>
-                                        @else
-                                            <div class="flex items-center justify-center gap-1">
-                                                <i class="fas fa-exclamation-triangle"></i>
-                                                <span class="hidden sm:inline">Algunos repuestos no cumplen las
-                                                    condiciones</span>
-                                                <span class="sm:hidden">No óptimo para grupal</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
+                            
                         </div>
 
                         <!-- Barra de Estado Mejorada - Responsive -->
@@ -729,15 +635,7 @@
 
                                 <!-- Botones en fila horizontal -->
                                 <div class="flex flex-row items-center gap-2 sm:gap-3 mt-3 lg:mt-0">
-                                    @if ($puede_generar_pdf)
-                                        <a href="{{ route('solicitudrepuestoprovincia.conformidad-pdf', $solicitud->idsolicitudesordenes) }}"
-                                            target="_blank"
-                                            class="inline-flex items-center justify-center px-2 sm:px-3 lg:px-5 py-1.5 sm:py-2 lg:py-2.5 bg-danger text-white rounded-lg font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] active:scale-95 text-xs sm:text-sm whitespace-nowrap">
-                                            <i class="fas fa-file-pdf mr-1 sm:mr-1.5"></i>
-                                            <span class="hidden sm:inline">Conformidad</span>
-                                            <span class="sm:hidden">PDF</span>
-                                        </a>
-                                    @endif
+                                 
 
                                     <!-- Botón Volver -->
                                     <a href="{{ route('solicitudarticulo.index') }}"
@@ -1136,27 +1034,54 @@
 
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
+    <!-- Script principal con Alpine.js -->
     <script>
-        // Configurar Toastr
-        toastr.options = {
-            "closeButton": true,
-            "debug": false,
-            "newestOnTop": true,
-            "progressBar": true,
-            "positionClass": "toast-top-right",
-            "preventDuplicates": false,
-            "onclick": null,
-            "showDuration": "300",
-            "hideDuration": "1000",
-            "timeOut": "5000",
-            "extendedTimeOut": "1000",
-            "showEasing": "swing",
-            "hideEasing": "linear",
-            "showMethod": "fadeIn",
-            "hideMethod": "fadeOut"
-        };
+        // Función para mostrar mensajes (reemplaza toastr)
+        function showAlert(type, message) {
+            if (typeof Swal !== 'undefined') {
+                const Toast = Swal.mixin({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+
+                switch(type) {
+                    case 'success':
+                        Toast.fire({
+                            icon: 'success',
+                            title: message
+                        });
+                        break;
+                    case 'error':
+                        Toast.fire({
+                            icon: 'error',
+                            title: message
+                        });
+                        break;
+                    case 'info':
+                        Toast.fire({
+                            icon: 'info',
+                            title: message
+                        });
+                        break;
+                    case 'warning':
+                        Toast.fire({
+                            icon: 'warning',
+                            title: message
+                        });
+                        break;
+                }
+            } else {
+                // Fallback si SweetAlert2 no está cargado
+                alert(message);
+            }
+        }
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('solicitudRepuestoProvinciaOpciones', () => ({
@@ -1185,8 +1110,8 @@
                     fecha_entrega_transporte: new Date().toISOString().slice(0, 16),
                     observaciones: ''
                 },
-                fotosGrupal: [], // CAMBIO: Ahora es un array
-                previsualizacionFotoGrupal: null, // Mantener para compatibilidad
+                fotosGrupal: [],
+                previsualizacionFotoGrupal: null,
 
                 // Computadas
                 get datosEnvioValidos() {
@@ -1221,7 +1146,7 @@
                     const ubicacionId = this.selecciones[articuloId];
 
                     if (!ubicacionId) {
-                        toastr.error('Seleccione una ubicación para este repuesto');
+                        showAlert('error', 'Seleccione una ubicación para este repuesto');
                         return;
                     }
 
@@ -1262,25 +1187,21 @@
                     document.getElementById('fotoComprobante').value = '';
                 },
 
-                // Métodos para modal grupal - ACTUALIZADOS PARA MÚLTIPLES FOTOS
+                // Métodos para modal grupal
                 abrirModalEnvioProvinciaGrupal(solicitudId) {
                     // Verificar si ya están todos procesados
                     if (@json($repuestos_procesados) == @json($total_repuestos)) {
-                        toastr.info('Todos los repuestos ya fueron procesados');
+                        showAlert('info', 'Todos los repuestos ya fueron procesados');
                         return;
                     }
 
                     if (!this.todasUbicacionesSeleccionadas) {
-                        toastr.error(
-                            'Debe seleccionar una ubicación para todos los repuestos disponibles'
-                        );
+                        showAlert('error', 'Debe seleccionar una ubicación para todos los repuestos disponibles');
                         return;
                     }
 
                     if (!this.todosDisponibles) {
-                        toastr.error(
-                            'No todos los repuestos tienen stock suficiente para procesamiento grupal'
-                        );
+                        showAlert('error', 'No todos los repuestos tienen stock suficiente para procesamiento grupal');
                         return;
                     }
 
@@ -1293,7 +1214,7 @@
                         fecha_entrega_transporte: new Date().toISOString().slice(0, 16),
                         observaciones: ''
                     };
-                    this.fotosGrupal = []; // LIMPIAR FOTOS ANTERIORES
+                    this.fotosGrupal = [];
                     this.previsualizacionFotoGrupal = null;
 
                     this.mostrarModalEnvioGrupal = true;
@@ -1311,7 +1232,7 @@
 
                     // Verificar límite de archivos
                     if (this.fotosGrupal.length + files.length > 20) {
-                        toastr.warning('Máximo 20 fotos permitidas');
+                        showAlert('warning', 'Máximo 20 fotos permitidas');
                         return;
                     }
 
@@ -1319,13 +1240,13 @@
                     files.forEach(file => {
                         // Validar tipo de archivo
                         if (!file.type.startsWith('image/')) {
-                            toastr.error(`El archivo "${file.name}" no es una imagen válida`);
+                            showAlert('error', `El archivo "${file.name}" no es una imagen válida`);
                             return;
                         }
 
                         // Validar tamaño (max 5MB)
                         if (file.size > 5 * 1024 * 1024) {
-                            toastr.error(`La imagen "${file.name}" excede los 5MB permitidos`);
+                            showAlert('error', `La imagen "${file.name}" excede los 5MB permitidos`);
                             return;
                         }
 
@@ -1349,7 +1270,7 @@
                 // MÉTODO NUEVO: Eliminar foto específica
                 eliminarFotoGrupal(index) {
                     this.fotosGrupal.splice(index, 1);
-                    toastr.info('Foto eliminada');
+                    showAlert('info', 'Foto eliminada');
                 },
 
                 // MÉTODO NUEVO: Eliminar todas las fotos
@@ -1358,106 +1279,51 @@
                         if (confirm(`¿Eliminar todas las ${this.fotosGrupal.length} fotos?`)) {
                             this.fotosGrupal = [];
                             document.getElementById('fotoComprobanteGrupal').value = '';
-                            toastr.info('Todas las fotos han sido eliminadas');
+                            showAlert('info', 'Todas las fotos han sido eliminadas');
                         }
                     }
-                },
-
-                // MÉTODO NUEVO: Manejar arrastrar y soltar
-                handleDropGrupal(event) {
-                    event.preventDefault();
-
-                    // Remover clase de hover
-                    event.target.classList.remove('border-green-400', 'bg-green-50');
-
-                    const files = Array.from(event.dataTransfer.files);
-
-                    // Verificar límite de archivos
-                    if (this.fotosGrupal.length + files.length > 20) {
-                        toastr.warning('Máximo 20 fotos permitidas');
-                        return;
-                    }
-
-                    let archivosProcesados = 0;
-
-                    files.forEach(file => {
-                        // Validar tipo de archivo
-                        if (!file.type.startsWith('image/')) {
-                            return;
-                        }
-
-                        // Validar tamaño
-                        if (file.size > 5 * 1024 * 1024) {
-                            return;
-                        }
-
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.fotosGrupal.push({
-                                file: file,
-                                preview: e.target.result,
-                                name: file.name,
-                                size: file.size,
-                                type: file.type
-                            });
-                            archivosProcesados++;
-
-                            // Mostrar mensaje final
-                            if (archivosProcesados === files.filter(f => f.type.startsWith(
-                                    'image/')).length) {
-                                toastr.success(
-                                    `${archivosProcesados} foto(s) cargada(s) correctamente`
-                                );
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    });
-                },
-
-                // MÉTODO NUEVO: Drag over effect
-                handleDragOverGrupal(event) {
-                    event.preventDefault();
-                    event.target.classList.add('border-green-400', 'bg-green-50');
-                },
-
-                // MÉTODO NUEVO: Drag leave effect
-                handleDragLeaveGrupal(event) {
-                    event.preventDefault();
-                    event.target.classList.remove('border-green-400', 'bg-green-50');
-                },
-
-                // MÉTODO COMPATIBILIDAD: Para mantener el antiguo
-                eliminarPrevisualizacionGrupal() {
-                    this.fotosGrupal = [];
-                    document.getElementById('fotoComprobanteGrupal').value = '';
                 },
 
                 // Procesamiento individual
                 async confirmarEnvioIndividual() {
                     if (!this.datosEnvioValidos) {
-                        toastr.error('Complete todos los campos requeridos');
+                        showAlert('error', 'Complete todos los campos requeridos');
                         return;
                     }
 
                     const ubicacionId = this.selecciones[this.articuloIdSeleccionado];
                     const fotoComprobante = document.getElementById('fotoComprobante').files[0];
 
-                    if (!confirm(
-                            `¿Confirmar envío a provincia?\n\nRepuesto: ${this.repuestoSeleccionadoNombre}\nTransportista: ${this.datosEnvio.transportista}\nVehículo: ${this.datosEnvio.placa_vehiculo}`
-                        )) {
-                        return;
-                    }
-
-                    this.procesandoIndividual[this.articuloIdSeleccionado] = true;
-
                     try {
+                        const result = await Swal.fire({
+                            title: '¿Confirmar envío a provincia?',
+                            html: `
+                                <div class="text-left">
+                                    <p><strong>Repuesto:</strong> ${this.repuestoSeleccionadoNombre}</p>
+                                    <p><strong>Transportista:</strong> ${this.datosEnvio.transportista}</p>
+                                    <p><strong>Vehículo:</strong> ${this.datosEnvio.placa_vehiculo}</p>
+                                </div>
+                            `,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Sí, confirmar',
+                            cancelButtonText: 'Cancelar'
+                        });
+
+                        if (!result.isConfirmed) {
+                            return;
+                        }
+
+                        this.procesandoIndividual[this.articuloIdSeleccionado] = true;
+
                         const formData = new FormData();
                         formData.append('articulo_id', this.articuloIdSeleccionado);
                         formData.append('ubicacion_id', ubicacionId);
                         formData.append('transportista', this.datosEnvio.transportista);
                         formData.append('placa_vehiculo', this.datosEnvio.placa_vehiculo);
-                        formData.append('fecha_entrega_transporte', this.datosEnvio
-                            .fecha_entrega_transporte);
+                        formData.append('fecha_entrega_transporte', this.datosEnvio.fecha_entrega_transporte);
                         formData.append('observaciones', this.datosEnvio.observaciones);
 
                         if (fotoComprobante) {
@@ -1468,8 +1334,7 @@
                             `/solicitudrepuestoprovincia/${this.solicitudIdSeleccionada}/aceptar-provincia-individual`, {
                                 method: 'POST',
                                 headers: {
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 },
                                 body: formData
                             });
@@ -1477,7 +1342,7 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            toastr.success(data.message);
+                            showAlert('success', data.message);
                             this.cerrarModalEnvio();
 
                             if (data.todos_procesados) {
@@ -1490,43 +1355,58 @@
                                 }, 1000);
                             }
                         } else {
-                            toastr.error(data.message);
+                            showAlert('error', data.message);
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        toastr.error('Error al procesar el envío');
+                        showAlert('error', 'Error al procesar el envío');
                     } finally {
                         this.procesandoIndividual[this.articuloIdSeleccionado] = false;
                     }
                 },
 
-                // Procesamiento grupal - ACTUALIZADO PARA MÚLTIPLES FOTOS
+                // Procesamiento grupal
                 async confirmarEnvioGrupal() {
                     if (!this.datosEnvioGrupalValidos) {
-                        toastr.error('Complete todos los campos requeridos');
+                        showAlert('error', 'Complete todos los campos requeridos');
                         return;
                     }
 
                     if (this.fotosGrupal.length > 20) {
-                        toastr.error('Máximo 20 fotos permitidas');
+                        showAlert('error', 'Máximo 20 fotos permitidas');
                         return;
                     }
-
-                    if (!confirm(
-                            `¿Confirmar envío grupal a provincia?\n\nTransportista: ${this.datosEnvioGrupal.transportista}\nVehículo: ${this.datosEnvioGrupal.placa_vehiculo}\n\n${this.fotosGrupal.length} foto(s) adjunta(s)\nTodos los repuestos serán procesados.`
-                        )) {
-                        return;
-                    }
-
-                    this.isLoadingGrupal = true;
 
                     try {
+                        const result = await Swal.fire({
+                            title: '¿Confirmar envío grupal a provincia?',
+                            html: `
+                                <div class="text-left">
+                                    <p><strong>Transportista:</strong> ${this.datosEnvioGrupal.transportista}</p>
+                                    <p><strong>Vehículo:</strong> ${this.datosEnvioGrupal.placa_vehiculo}</p>
+                                    <p><strong>Fotos adjuntas:</strong> ${this.fotosGrupal.length}</p>
+                                    <p class="text-sm text-gray-600 mt-2">Todos los repuestos serán procesados juntos.</p>
+                                </div>
+                            `,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Sí, confirmar',
+                            cancelButtonText: 'Cancelar'
+                        });
+
+                        if (!result.isConfirmed) {
+                            return;
+                        }
+
+                        this.isLoadingGrupal = true;
+
                         const formData = new FormData();
                         formData.append('ubicaciones', JSON.stringify(this.selecciones));
                         formData.append('transportista', this.datosEnvioGrupal.transportista);
                         formData.append('placa_vehiculo', this.datosEnvioGrupal.placa_vehiculo);
-                        formData.append('fecha_entrega_transporte', this.datosEnvioGrupal
-                            .fecha_entrega_transporte);
+                        formData.append('fecha_entrega_transporte', this.datosEnvioGrupal.fecha_entrega_transporte);
                         formData.append('observaciones', this.datosEnvioGrupal.observaciones);
 
                         // Agregar múltiples fotos
@@ -1534,21 +1414,11 @@
                             formData.append(`fotos_comprobante[]`, foto.file);
                         });
 
-                        // Opcional: agregar nombres de archivos
-                        formData.append('fotos_info', JSON.stringify(
-                            this.fotosGrupal.map(foto => ({
-                                name: foto.name,
-                                size: foto.size,
-                                type: foto.type
-                            }))
-                        ));
-
                         const response = await fetch(
                             `/solicitudrepuestoprovincia/${this.solicitudIdSeleccionada}/aceptar-provincia`, {
                                 method: 'POST',
                                 headers: {
-                                    'X-CSRF-TOKEN': document.querySelector(
-                                        'meta[name="csrf-token"]').getAttribute('content')
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 },
                                 body: formData
                             });
@@ -1556,18 +1426,18 @@
                         const data = await response.json();
 
                         if (data.success) {
-                            toastr.success(data.message);
+                            showAlert('success', data.message);
                             this.cerrarModalEnvioGrupal();
 
                             setTimeout(() => {
                                 location.reload();
                             }, 2000);
                         } else {
-                            toastr.error(data.message);
+                            showAlert('error', data.message);
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        toastr.error('Error al procesar el envío grupal');
+                        showAlert('error', 'Error al procesar el envío grupal');
                     } finally {
                         this.isLoadingGrupal = false;
                     }

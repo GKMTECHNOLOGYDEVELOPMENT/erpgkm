@@ -12,16 +12,250 @@
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             padding-right: 1.5rem;
-            /* Ajusta espacio a la derecha para que el texto no se corte */
             background-image: none;
-            /* Opcional, elimina cualquier ícono */
         }
 
         .select-cliente-general {
             min-width: 180px !important;
             max-width: 180px !important;
         }
+        
+        /* Estilos para el modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+        
+        .modal-close:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .date-input-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .date-input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+        
+        .date-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
+        }
+        
+        .date-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .loading-spinner {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+        
+        .loading-spinner.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .btn-export {
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
+
+    <!-- Modal para filtros de fecha -->
+    <div id="modalFechas" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-calendar-alt mr-2"></i> Configurar Fechas del Reporte
+                </h3>
+                <button type="button" class="modal-close" onclick="closeModal()">
+                    &times;
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600 mb-4 text-sm">
+                    Selecciona el rango de fechas para generar el reporte de inventario. 
+                    El reporte incluirá el stock actual y los movimientos dentro del período seleccionado.
+                </p>
+                
+                <div class="date-input-group">
+                    <label for="fecha_inicio_modal">
+                        <i class="fas fa-calendar-plus mr-1"></i> Fecha de Inicio
+                    </label>
+                    <input type="date" 
+                           id="fecha_inicio_modal" 
+                           class="date-input"
+                           value="{{ date('Y-m-01') }}">
+                </div>
+                
+                <div class="date-input-group">
+                    <label for="fecha_fin_modal">
+                        <i class="fas fa-calendar-minus mr-1"></i> Fecha de Fin
+                    </label>
+                    <input type="date" 
+                           id="fecha_fin_modal" 
+                           class="date-input"
+                           value="{{ date('Y-m-d') }}">
+                </div>
+                
+                <!-- Opciones rápidas -->
+                <div class="mb-4">
+                    <p class="text-gray-600 mb-2 text-sm font-medium">Períodos rápidos:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="setDateRange('today')" 
+                                class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+                            Hoy
+                        </button>
+                        <button type="button" onclick="setDateRange('yesterday')" 
+                                class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+                            Ayer
+                        </button>
+                        <button type="button" onclick="setDateRange('this_week')" 
+                                class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+                            Esta Semana
+                        </button>
+                        <button type="button" onclick="setDateRange('this_month')" 
+                                class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+                            Este Mes
+                        </button>
+                        <button type="button" onclick="setDateRange('last_month')" 
+                                class="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded">
+                            Mes Anterior
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <span>Generando reporte...</span>
+                </div>
+                
+                <div id="errorMessage" class="text-red-600 text-sm mt-2 hidden">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    <span id="errorText"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeModal()" 
+                        class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Cancelar
+                </button>
+                <button type="button" onclick="exportReport()" 
+                        class="px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-dark flex items-center gap-2">
+                    <i class="fas fa-file-excel"></i>
+                    <span>Generar Excel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div x-data="multipleTable">
         <div>
             <ul class="flex space-x-2 rtl:space-x-reverse">
@@ -67,6 +301,17 @@
                         <span>PDF</span>
                     </button>
                     @endif
+
+                    <!-- Botón Exportar Reporte de Inventario General CON MODAL -->
+                    <button type="button" class="btn btn-info btn-sm flex items-center gap-2 btn-export"
+                        onclick="openModal()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <span>Reporte Inventario</span>
+                    </button>
 
                     @if(\App\Helpers\PermisoHelper::tienePermiso('AGREGAR REPUESTO'))
                     <!-- Botón Agregar -->
@@ -156,20 +401,173 @@
                 clearBtn.classList.add('hidden');
                 $('#myTable1').DataTable().search('').draw();
             });
+            
+            // Cerrar modal con Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
         });
+
+        // Funciones para el modal
+        function openModal() {
+            document.getElementById('modalFechas').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Establecer valores por defecto
+            const today = new Date().toISOString().split('T')[0];
+            const firstDayOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 2)
+                .toISOString().split('T')[0];
+            
+            document.getElementById('fecha_inicio_modal').value = firstDayOfMonth;
+            document.getElementById('fecha_fin_modal').value = today;
+        }
+
+        function closeModal() {
+            document.getElementById('modalFechas').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            hideError();
+            hideLoading();
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.remove('active');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function setDateRange(rangeType) {
+            const today = new Date();
+            let startDate, endDate;
+
+            switch(rangeType) {
+                case 'today':
+                    startDate = today;
+                    endDate = today;
+                    break;
+                    
+                case 'yesterday':
+                    const yesterday = new Date(today);
+                    yesterday.setDate(today.getDate() - 1);
+                    startDate = yesterday;
+                    endDate = yesterday;
+                    break;
+                    
+                case 'this_week':
+                    startDate = new Date(today.setDate(today.getDate() - today.getDay()));
+                    endDate = new Date(today.setDate(today.getDate() - today.getDay() + 6));
+                    break;
+                    
+                case 'this_month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                    
+                case 'last_month':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                    
+                default:
+                    return;
+            }
+
+            // Formatear fechas como YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            document.getElementById('fecha_inicio_modal').value = formatDate(startDate);
+            document.getElementById('fecha_fin_modal').value = formatDate(endDate);
+        }
+
+        function exportReport() {
+            const fechaInicio = document.getElementById('fecha_inicio_modal').value;
+            const fechaFin = document.getElementById('fecha_fin_modal').value;
+            
+            // Validar fechas
+            if (!fechaInicio || !fechaFin) {
+                showError('Por favor, selecciona ambas fechas');
+                return;
+            }
+            
+            if (new Date(fechaInicio) > new Date(fechaFin)) {
+                showError('La fecha de inicio no puede ser mayor a la fecha de fin');
+                return;
+            }
+            
+            // Mostrar loading
+            showLoading();
+            hideError();
+            
+            // Crear URL con parámetros
+            const url = new URL('{{ route("repuestos.export.inventario.general") }}');
+            url.searchParams.append('fecha_inicio', fechaInicio);
+            url.searchParams.append('fecha_fin', fechaFin);
+            
+            // Crear formulario temporal para la descarga
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = url.toString();
+            form.target = '_blank';
+            
+            // Agregar token CSRF si es necesario
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                form.appendChild(csrfInput);
+            }
+            
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+            
+            // Cerrar modal después de un breve retraso
+            setTimeout(() => {
+                hideLoading();
+                closeModal();
+                
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Reporte generado',
+                    text: 'El reporte se está descargando. Si no inicia automáticamente, revisa la barra de descargas.',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }, 1000);
+        }
     </script>
 
-
- <script>
-    window.permisos = {
-        puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR REPUESTO') ? 'true' : 'false' }},
-        puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR REPUESTO') ? 'true' : 'false' }},
-        puedeVerdetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES REPUESTO') ? 'true' : 'false' }},
-        puedeVerseries: {{ \App\Helpers\PermisoHelper::tienePermiso('VER SERIES REPUESTO') ? 'true' : 'false' }},
-        puedeSeleccionarCliente: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR CLIENTE REPUESTO') ? 'true' : 'false' }},
-    };
-</script>
-
+    <script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR REPUESTO') ? 'true' : 'false' }},
+            puedeEliminar: {{ \App\Helpers\PermisoHelper::tienePermiso('ELIMINAR REPUESTO') ? 'true' : 'false' }},
+            puedeVerdetalles: {{ \App\Helpers\PermisoHelper::tienePermiso('VER DETALLES REPUESTO') ? 'true' : 'false' }},
+            puedeVerseries: {{ \App\Helpers\PermisoHelper::tienePermiso('VER SERIES REPUESTO') ? 'true' : 'false' }},
+            puedeSeleccionarCliente: {{ \App\Helpers\PermisoHelper::tienePermiso('SELECCIONAR CLIENTE REPUESTO') ? 'true' : 'false' }},
+        };
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -179,5 +577,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- SweetAlert2 para notificaciones -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </x-layout.default>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\almacen\repuestos;
 
+use App\Exports\ReporteInventarioGeneralExport;
 use App\Http\Controllers\Controller;
 use App\Models\Articulo;
 use App\Models\ArticuloModelo;
@@ -19,6 +20,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Excel;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
 class RepuestosController extends Controller
@@ -581,16 +588,21 @@ public function getAll(Request $request)
     $articuloIds = $articulos->pluck('idArticulos')->toArray();
 
     // Consulta para CONTAR movimientos (no sumar cantidades)
-    $movimientos = DB::table('inventario_ingresos_clientes')
-        ->select(
-            'articulo_id',
-            DB::raw("COUNT(CASE WHEN tipo_ingreso IN ('compra', 'ajuste', 'entrada_proveedor') THEN 1 END) as total_entradas"),
-            DB::raw("COUNT(CASE WHEN tipo_ingreso = 'salida' THEN 1 END) as total_salidas")
-        )
-        ->whereIn('articulo_id', $articuloIds)
-        ->groupBy('articulo_id')
-        ->get()
-        ->keyBy('articulo_id');
+   $movimientos = DB::table('inventario_ingresos_clientes')
+    ->select(
+        'articulo_id',
+        DB::raw("COUNT(CASE 
+            WHEN tipo_ingreso IN ('compra', 'ajuste', 'entrada_proveedor') 
+            THEN 1 END) as total_entradas"),
+        DB::raw("COUNT(CASE 
+            WHEN tipo_ingreso IN ('salida', 'salida_provincia') 
+            THEN 1 END) as total_salidas")
+    )
+    ->whereIn('articulo_id', $articuloIds)
+    ->groupBy('articulo_id')
+    ->get()
+    ->keyBy('articulo_id');
+
 
     $data = $articulos->map(function ($articulo) use ($movimientos) {
         $modeloNombres = $articulo->modelos->pluck('nombre')->join(' / ');
@@ -674,4 +686,188 @@ public function getAll(Request $request)
     {
         return view('almacen.repuestos.entrada');
     }
+
+
+
+
+
+public function exportReporteInventarioGeneral()
+{
+    try {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Título
+        $sheet->setCellValue('A1', 'REPORTE DE INVENTARIO GENERAL - REPUESTOS');
+        $sheet->mergeCells('A1:F1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('4CAF50');
+        $sheet->getStyle('A1')->getFont()->getColor()->setRGB('FFFFFF');
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        
+        // Fecha
+        $sheet->setCellValue('A2', 'Generado: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('A2:F2');
+        $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(9);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        
+        // Cabeceras - 6 COLUMNAS (con Entradas y Salidas)
+        $sheet->setCellValue('A4', 'CÓDIGO');
+        $sheet->setCellValue('B4', 'CATEGORÍA');
+        $sheet->setCellValue('C4', 'MODELO');
+        $sheet->setCellValue('D4', 'STOCK');
+        $sheet->setCellValue('E4', 'ENTRADAS');
+        $sheet->setCellValue('F4', 'SALIDAS');
+        $sheet->setCellValue('G4', 'UBICACIÓN');
+        
+        // Estilo cabeceras
+        $sheet->getStyle('A4:G4')->getFont()->setBold(true);
+        $sheet->getStyle('A4:G4')->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('2C3E50');
+        $sheet->getStyle('A4:G4')->getFont()->getColor()->setRGB('FFFFFF');
+        $sheet->getStyle('A4:G4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getRowDimension(4)->setRowHeight(25);
+        
+        // Obtener datos
+        $articulos = Articulo::with(['modelos.categoria'])
+            ->where('idTipoArticulo', 2)
+            ->where('estado', 1)
+            ->orderBy('codigo_repuesto')
+            ->get();
+        
+        $row = 5;
+        $totalStock = 0;
+        $totalEntradas = 0;
+        $totalSalidas = 0;
+        
+        foreach ($articulos as $articulo) {
+            // Modelos y categorías
+            $modelos = $articulo->modelos;
+            $modeloNombres = $modelos->pluck('nombre')->join(' / ') ?: 'Sin Modelo';
+            $categorias = $modelos->pluck('categoria.nombre')
+                ->filter()
+                ->unique()
+                ->join(' / ') ?: 'Sin Categoría';
+            
+            // Estadísticas de movimientos
+            $movimientos = DB::table('inventario_ingresos_clientes')
+            ->select(
+                DB::raw("COUNT(CASE 
+                    WHEN tipo_ingreso IN ('compra', 'ajuste', 'entrada_proveedor') 
+                    THEN 1 END) as total_entradas"),
+                DB::raw("COUNT(CASE 
+                    WHEN tipo_ingreso IN ('salida', 'salida_provincia') 
+                    THEN 1 END) as total_salidas")
+            )
+            ->where('articulo_id', $articulo->idArticulos)
+            ->first();
+
+            
+            $entradas = $movimientos->total_entradas ?? 0;
+            $salidas = $movimientos->total_salidas ?? 0;
+            
+            // Totales
+            $totalStock += $articulo->stock_total;
+            $totalEntradas += $entradas;
+            $totalSalidas += $salidas;
+            
+            // Ubicaciones AGRUPADAS (SOLO CÓDIGO)
+            $ubicaciones = DB::table('rack_ubicacion_articulos as rua')
+                ->join('rack_ubicaciones as ru', 'rua.rack_ubicacion_id', '=', 'ru.idRackUbicacion')
+                ->where('rua.articulo_id', $articulo->idArticulos)
+                ->where('rua.cantidad', '>', 0)
+                ->orderBy('ru.codigo')
+                ->pluck('ru.codigo') // 👈 SOLO EL CÓDIGO
+                ->toArray();
+
+            
+            // Formatear ubicaciones
+            if (empty($ubicaciones)) {
+                $ubicacionTexto = 'SIN UBICACIÓN';
+            } elseif (count($ubicaciones) > 1) {
+                // Si tiene múltiples: UBICACIÓN 1 - UBICACIÓN 2 - UBICACIÓN 3
+                $ubicacionTexto = implode(' - ', $ubicaciones);
+            } else {
+                // Si solo tiene una
+                $ubicacionTexto = $ubicaciones[0];
+            }
+            
+            // Escribir fila
+            $sheet->setCellValue('A' . $row, $articulo->codigo_repuesto);
+            $sheet->setCellValue('B' . $row, $categorias);
+            $sheet->setCellValue('C' . $row, $modeloNombres);
+            $sheet->setCellValue('D' . $row, $articulo->stock_total);
+            $sheet->setCellValue('E' . $row, $entradas);
+            $sheet->setCellValue('F' . $row, $salidas);
+            $sheet->setCellValue('G' . $row, $ubicacionTexto);
+            
+            // Habilitar wrap text para ubicaciones
+            $sheet->getStyle('G' . $row)->getAlignment()->setWrapText(true);
+            
+            // Color para sin ubicación
+            if ($ubicacionTexto == 'SIN UBICACIÓN') {
+                $sheet->getStyle('G' . $row)->getFont()->getColor()->setRGB('FF0000');
+            }
+            
+            $row++;
+        }
+        
+        // Ajustar columnas
+        $sheet->getColumnDimension('A')->setWidth(18);  // Código
+        $sheet->getColumnDimension('B')->setWidth(20);  // Categoría
+        $sheet->getColumnDimension('C')->setWidth(25);  // Modelo
+        $sheet->getColumnDimension('D')->setWidth(10);  // Stock
+        $sheet->getColumnDimension('E')->setWidth(10);  // Entradas
+        $sheet->getColumnDimension('F')->setWidth(10);  // Salidas
+        $sheet->getColumnDimension('G')->setWidth(40);  // Ubicación
+        
+        // Centrar columnas numéricas
+        $sheet->getStyle('D5:F' . ($row-1))
+            ->getAlignment()
+            ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        
+        // Bordes
+        $lastRow = $row > 5 ? $row-1 : 5;
+        $sheet->getStyle('A4:G' . $lastRow)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+        
+        // Totales
+        $totalRow = $row;
+        $sheet->setCellValue('B' . $totalRow, 'TOTALES:');
+        $sheet->setCellValue('D' . $totalRow, $totalStock);
+        $sheet->setCellValue('E' . $totalRow, $totalEntradas);
+        $sheet->setCellValue('F' . $totalRow, $totalSalidas);
+        
+        $sheet->getStyle('B' . $totalRow . ':F' . $totalRow)->getFont()->setBold(true);
+        $sheet->getStyle('B' . $totalRow . ':F' . $totalRow)->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E8F5E8');
+        
+        // Congelar cabecera
+        $sheet->freezePane('A5');
+        
+        // Auto-filtros
+        $sheet->setAutoFilter('A4:G' . ($row-1));
+        
+        // Preparar descarga
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'inventario-repuestos-' . date('Y-m-d') . '.xlsx';
+        
+        if (ob_get_length()) ob_end_clean();
+        
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+        
+        $writer->save('php://output');
+        exit;
+        
+    } catch (\Exception $e) {
+        Log::error('Error al exportar: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+    }
+}
 }

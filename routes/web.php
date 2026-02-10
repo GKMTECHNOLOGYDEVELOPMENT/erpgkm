@@ -2095,3 +2095,6 @@ Route::get(
     '/administracion/formulario-personal',
     [FormularioPersonalEmpleadoController::class, 'create']
 )->name('formulariopersonal.create');
+
+Route::get('/repuestos/export/reporte-inventario-general', [RepuestosController::class, 'exportReporteInventarioGeneral'])
+    ->name('repuestos.export.inventario.general');
