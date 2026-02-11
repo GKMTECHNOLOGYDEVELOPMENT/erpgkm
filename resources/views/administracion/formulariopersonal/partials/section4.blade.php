@@ -4,12 +4,14 @@
     <div class="section-header mb-8 pb-6 border-b border-gray-200">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center">
-                <div class="bg-gradient-to-r from-red-500 to-red-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                <div
+                    class="bg-gradient-to-r from-red-500 to-red-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 shadow-md">
                     <i class="fas fa-heartbeat text-white text-xl"></i>
                 </div>
                 <div>
                     <h3 class="text-xl md:text-2xl font-bold text-gray-800">Información de Salud</h3>
-                    <p class="text-gray-500 mt-1 text-sm md:text-base">Complete sus datos de salud importantes para emergencias</p>
+                    <p class="text-gray-500 mt-1 text-sm md:text-base">Complete sus datos de salud importantes para
+                        emergencias</p>
                 </div>
             </div>
             <span class="bg-red-50 text-red-700 px-4 py-2 rounded-full text-sm font-semibold border border-red-100">
@@ -25,7 +27,8 @@
             <div>
                 <h4 class="font-medium text-red-800 mb-1">Información importante</h4>
                 <p class="text-red-700 text-sm">
-                    Esta información es vital en caso de emergencias médicas. Complete con precisión todos los campos requeridos.
+                    Esta información es vital en caso de emergencias médicas. Complete con precisión todos los campos
+                    requeridos.
                 </p>
             </div>
         </div>
@@ -37,7 +40,7 @@
             <i class="fas fa-clipboard-check text-red-500 mr-2 text-sm"></i>
             Estado de Salud
         </h4>
-        
+
         <div class="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
             <!-- Encabezados para desktop -->
             <div class="hidden md:grid md:grid-cols-3 bg-gradient-to-r from-red-50 to-red-100 border-b border-red-200">
@@ -52,7 +55,7 @@
                 </div>
             </div>
 
-            <!-- Vacuna COVID-19 -->
+            <!-- Vacuna COVID-19 (3 DOSIS) -->
             <div class="grid md:grid-cols-3 border-b border-gray-200">
                 <!-- Pregunta - Mobile y Desktop -->
                 <div class="p-6 bg-white border-r border-gray-200">
@@ -70,12 +73,14 @@
                 <!-- Opciones SI/NO -->
                 <div class="p-6 bg-white border-r border-gray-200">
                     <div class="flex space-x-8">
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors flex-1">
                             <input type="radio" id="covid_si" name="vacuna_covid" value="SI"
                                 class="h-5 w-5 text-red-600 focus:ring-red-500">
                             <label for="covid_si" class="ml-3 text-gray-700 cursor-pointer flex-1">Sí</label>
                         </div>
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors flex-1">
                             <input type="radio" id="covid_no" name="vacuna_covid" value="NO"
                                 class="h-5 w-5 text-red-600 focus:ring-red-500">
                             <label for="covid_no" class="ml-3 text-gray-700 cursor-pointer flex-1">No</label>
@@ -83,28 +88,86 @@
                     </div>
                 </div>
 
-                <!-- Especificaciones -->
+                <!-- Especificaciones - 3 DOSIS -->
                 <div class="p-6 bg-white">
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">1° Dosis</label>
                             <div class="relative">
-                                <input type="text" 
-                                       name="covid_dosis1"
-                                       class="flatpickr-salud w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
-                                       placeholder="Seleccione fecha">
-                                <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                                <input type="text" name="covid_dosis1"
+                                    class="flatpickr-salud w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
+                                    placeholder="Seleccione fecha">
+                                <i
+                                    class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                             </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">2° Dosis</label>
                             <div class="relative">
-                                <input type="text" 
-                                       name="covid_dosis2"
-                                       class="flatpickr-salud w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
-                                       placeholder="Seleccione fecha">
-                                <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                                <input type="text" name="covid_dosis2"
+                                    class="flatpickr-salud w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
+                                    placeholder="Seleccione fecha">
+                                <i
+                                    class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                             </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">3° Dosis (Refuerzo)</label>
+                            <div class="relative">
+                                <input type="text" name="covid_dosis3"
+                                    class="flatpickr-salud w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
+                                    placeholder="Seleccione fecha">
+                                <i
+                                    class="fas fa-syringe text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPERACIONES - NUEVO CAMPO -->
+            <div class="grid md:grid-cols-3 border-b border-gray-200">
+                <!-- Pregunta -->
+                <div class="p-6 border-r border-gray-200">
+                    <div class="flex items-start">
+                        <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                            <i class="fas fa-procedures text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Operaciones Quirúrgicas</h4>
+                            <p class="text-gray-600 text-sm">¿Ha tenido alguna operación?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opciones SI/NO -->
+                <div class="p-6 border-r border-gray-200">
+                    <div class="flex space-x-8">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                            <input type="radio" id="operacion_si" name="tiene_operacion" value="SI"
+                                class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <label for="operacion_si" class="ml-3 text-gray-700 cursor-pointer flex-1">Sí</label>
+                        </div>
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                            <input type="radio" id="operacion_no" name="tiene_operacion" value="NO"
+                                class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <label for="operacion_no" class="ml-3 text-gray-700 cursor-pointer flex-1">No</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Especificaciones -->
+                <div class="p-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Especificar operación(es)</label>
+                        <div class="relative">
+                            <input type="text" name="operacion_especificar"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white"
+                                placeholder="Ej: Apendicectomía, Cesárea, Amígdalas">
+                            <i
+                                class="fas fa-notes-medical text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
                 </div>
@@ -120,7 +183,8 @@
                         </div>
                         <div>
                             <h4 class="font-semibold text-gray-800 mb-2">Dolencias Crónicas</h4>
-                            <p class="text-gray-600 text-sm">¿Padece de alguna dolencia crónica? (asma, diabetes, hipertensión, etc.)</p>
+                            <p class="text-gray-600 text-sm">¿Padece de alguna dolencia crónica? (asma, diabetes,
+                                hipertensión, etc.)</p>
                         </div>
                     </div>
                 </div>
@@ -128,12 +192,14 @@
                 <!-- Opciones SI/NO -->
                 <div class="p-6 border-r border-gray-200">
                     <div class="flex space-x-8">
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-orange-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-orange-50 transition-colors flex-1">
                             <input type="radio" id="dolencia_si" name="dolencia_cronica" value="SI"
                                 class="h-5 w-5 text-orange-600 focus:ring-orange-500">
                             <label for="dolencia_si" class="ml-3 text-gray-700 cursor-pointer flex-1">Sí</label>
                         </div>
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-orange-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-orange-50 transition-colors flex-1">
                             <input type="radio" id="dolencia_no" name="dolencia_cronica" value="NO"
                                 class="h-5 w-5 text-orange-600 focus:ring-orange-500">
                             <label for="dolencia_no" class="ml-3 text-gray-700 cursor-pointer flex-1">No</label>
@@ -149,7 +215,8 @@
                             <input type="text" name="dolencia_especificar"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white"
                                 placeholder="Ej: Diabetes tipo 2, Hipertensión arterial">
-                            <i class="fas fa-file-medical text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-file-medical text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
                 </div>
@@ -173,12 +240,14 @@
                 <!-- Opciones SI/NO -->
                 <div class="p-6 bg-white border-r border-gray-200">
                     <div class="flex space-x-8">
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-blue-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-blue-50 transition-colors flex-1">
                             <input type="radio" id="discapacidad_si" name="discapacidad" value="SI"
                                 class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                             <label for="discapacidad_si" class="ml-3 text-gray-700 cursor-pointer flex-1">Sí</label>
                         </div>
-                        <div class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-blue-50 transition-colors flex-1">
+                        <div
+                            class="flex items-center p-3 border border-gray-300 rounded-xl hover:bg-blue-50 transition-colors flex-1">
                             <input type="radio" id="discapacidad_no" name="discapacidad" value="NO"
                                 class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                             <label for="discapacidad_no" class="ml-3 text-gray-700 cursor-pointer flex-1">No</label>
@@ -194,7 +263,8 @@
                             <input type="text" name="discapacidad_especificar"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                                 placeholder="Ej: Discapacidad visual, motora, auditiva">
-                            <i class="fas fa-hearing text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-hearing text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
                 </div>
@@ -208,10 +278,10 @@
             <i class="fas fa-tint text-red-500 mr-2 text-sm"></i>
             Tipo de Sangre
         </h4>
-        
+
         <div class="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-2xl p-6">
             <p class="text-gray-600 mb-6 text-sm">Seleccione su tipo de sangre para emergencias médicas:</p>
-            
+
             <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
                 @php
                     $tiposSangre = [
@@ -225,13 +295,15 @@
                         ['id' => 'sangre_o_neg', 'value' => 'O-', 'label' => 'O-'],
                     ];
                 @endphp
-                
+
                 @foreach ($tiposSangre as $tipo)
-                    <div class="flex items-center justify-center p-4 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors cursor-pointer grupo-sangre">
-                        <input type="radio" id="{{ $tipo['id'] }}" name="tipo_sangre" value="{{ $tipo['value'] }}"
-                            class="h-5 w-5 text-red-600 focus:ring-red-500 hidden">
+                    <div
+                        class="flex items-center justify-center p-4 border border-gray-300 rounded-xl hover:bg-red-50 transition-colors cursor-pointer grupo-sangre">
+                        <input type="radio" id="{{ $tipo['id'] }}" name="tipo_sangre"
+                            value="{{ $tipo['value'] }}" class="h-5 w-5 text-red-600 focus:ring-red-500 hidden">
                         <label for="{{ $tipo['id'] }}" class="flex items-center cursor-pointer">
-                            <div class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-2 grupo-sangre-icono">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center mr-2 grupo-sangre-icono">
                                 <span class="font-bold text-red-600">{{ $tipo['label'] }}</span>
                             </div>
                             <span class="text-gray-700 font-medium">{{ $tipo['label'] }}</span>
@@ -239,11 +311,12 @@
                     </div>
                 @endforeach
             </div>
-            
+
             <div class="mt-6 pt-6 border-t border-gray-200">
                 <div class="flex items-center text-sm text-gray-600">
                     <i class="fas fa-info-circle text-red-500 mr-2"></i>
-                    <span>Esta información es crucial en caso de emergencias médicas que requieran transfusión de sangre</span>
+                    <span>Esta información es crucial en caso de emergencias médicas que requieran transfusión de
+                        sangre</span>
                 </div>
             </div>
         </div>
@@ -255,7 +328,7 @@
             <i class="fas fa-phone-alt text-red-500 mr-2 text-sm"></i>
             Contactos de Emergencia
         </h4>
-        
+
         <div class="bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-2xl p-6 mb-4">
             <div class="flex items-center">
                 <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3"></i>
@@ -277,7 +350,8 @@
                     <span class="text-sm font-semibold text-red-800 uppercase tracking-wide">Parentesco</span>
                 </div>
                 <div class="px-6 py-4">
-                    <span class="text-sm font-semibold text-red-800 uppercase tracking-wide">Dirección y Teléfono</span>
+                    <span class="text-sm font-semibold text-red-800 uppercase tracking-wide">Dirección y
+                        Teléfono</span>
                 </div>
             </div>
 
@@ -292,7 +366,8 @@
                             <input type="text" name="emergencia1_nombres"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
                                 placeholder="Nombre completo del contacto">
-                            <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
 
@@ -303,7 +378,8 @@
                             <input type="text" name="emergencia1_parentesco"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
                                 placeholder="Ej: Padre, Madre, Hermano">
-                            <i class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
 
@@ -328,7 +404,8 @@
                             <input type="text" name="emergencia2_nombres"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
                                 placeholder="Nombre completo del contacto">
-                            <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
 
@@ -339,7 +416,8 @@
                             <input type="text" name="emergencia2_parentesco"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
                                 placeholder="Ej: Esposo/a, Hijo/a">
-                            <i class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
 
@@ -359,7 +437,7 @@
 
         <!-- Botón para agregar más contactos -->
         <div class="mt-4 flex justify-end">
-            <button type="button" id="add-contacto-btn" 
+            <button type="button" id="add-contacto-btn"
                 class="inline-flex items-center px-4 py-2 text-sm bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg">
                 <i class="fas fa-plus mr-2"></i>
                 <span>Agregar otro contacto</span>
@@ -376,7 +454,7 @@
             <div>
                 <h4 class="font-medium text-gray-800 mb-1">Seguridad y confidencialidad</h4>
                 <p class="text-gray-600 text-sm">
-                    Su información de salud es tratada con estricta confidencialidad y solo será utilizada 
+                    Su información de salud es tratada con estricta confidencialidad y solo será utilizada
                     en caso de emergencias médicas durante su permanencia en la empresa.
                 </p>
             </div>
@@ -404,6 +482,26 @@
     // Inicializar Flatpickr para fechas de salud
     document.addEventListener('DOMContentLoaded', function() {
         // Configuración para Flatpickr salud
+
+// Configuración global de Toastr - VERSIÓN NORMAL
+if (typeof toastr !== 'undefined') {
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 3000,
+        extendedTimeOut: 1000,
+        showEasing: "swing",
+        hideEasing: "linear",
+        showMethod: "fadeIn",
+        hideMethod: "fadeOut",
+        showDuration: 300,
+        hideDuration: 300,
+        toastClass: '', // QUITADO: rounded-xl shadow-lg font-medium
+        iconClass: 'toast-success', // QUITADO: bg-gradient-to-r from-green-500 to-green-600 border-0
+        preventDuplicates: true
+    };
+}
         const flatpickrSaludOptions = {
             locale: "es",
             dateFormat: "Y-m-d",
@@ -433,15 +531,16 @@
                     const radio = this.querySelector('input[type="radio"]');
                     if (radio) {
                         radio.checked = true;
-                        
+
                         // Resetear todos los iconos
-                        document.querySelectorAll('.grupo-sangre-icono').forEach(function(icono) {
+                        document.querySelectorAll('.grupo-sangre-icono').forEach(function(
+                        icono) {
                             icono.classList.remove('bg-red-600');
                             icono.classList.add('bg-red-100');
                             icono.querySelector('span').classList.remove('text-white');
                             icono.querySelector('span').classList.add('text-red-600');
                         });
-                        
+
                         // Resaltar el seleccionado
                         const icono = this.querySelector('.grupo-sangre-icono');
                         if (icono) {
@@ -450,7 +549,7 @@
                             icono.querySelector('span').classList.remove('text-red-600');
                             icono.querySelector('span').classList.add('text-white');
                         }
-                        
+
                         calculateSaludProgress();
                     }
                 }
@@ -467,7 +566,7 @@
                     icono.querySelector('span').classList.remove('text-white');
                     icono.querySelector('span').classList.add('text-red-600');
                 });
-                
+
                 // Resaltar el seleccionado
                 const label = document.querySelector(`label[for="${this.id}"]`);
                 if (label) {
@@ -479,7 +578,7 @@
                         icono.querySelector('span').classList.add('text-white');
                     }
                 }
-                
+
                 calculateSaludProgress();
             });
         });
@@ -491,7 +590,22 @@
         // Función para agregar contacto de emergencia
         document.getElementById('add-contacto-btn').addEventListener('click', function() {
             if (currentContactoCount >= maxContactos) {
-                alert(`Máximo ${maxContactos} contactos de emergencia permitidos`);
+                // SweetAlert para límite alcanzado
+                Swal.fire({
+                    title: '⚠️ Límite alcanzado',
+                    html: `Máximo <strong>${maxContactos} contactos</strong> de emergencia permitidos`,
+                    icon: 'info',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Entendido',
+                    background: 'white',
+                    backdrop: 'rgba(239, 68, 68, 0.1)',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 border-0',
+                        title: 'text-lg font-bold',
+                        htmlContainer: 'text-gray-600'
+                    }
+                });
                 return;
             }
 
@@ -499,10 +613,11 @@
             const contactoIndex = currentContactoCount;
             const isEven = contactoIndex % 2 === 0;
             const tieneBordeInferior = contactoIndex < maxContactos;
-            
+
             // Crear nueva fila de contacto
             const contactoRow = document.createElement('div');
-            contactoRow.className = `grid md:grid-cols-3 ${tieneBordeInferior ? 'border-b border-gray-200' : ''}`;
+            contactoRow.className =
+                `grid md:grid-cols-3 ${tieneBordeInferior ? 'border-b border-gray-200' : ''}`;
             contactoRow.setAttribute('data-contacto-index', contactoIndex);
             contactoRow.innerHTML = `
                 <!-- Nombres -->
@@ -550,7 +665,8 @@
 
             // Quitar borde inferior del contacto anterior si existe
             if (contactoIndex > 2) {
-                const anteriorRow = document.querySelector(`[data-contacto-index="${contactoIndex - 1}"]`);
+                const anteriorRow = document.querySelector(
+                    `[data-contacto-index="${contactoIndex - 1}"]`);
                 if (anteriorRow) {
                     anteriorRow.classList.remove('border-b');
                     anteriorRow.classList.add('border-b');
@@ -568,58 +684,121 @@
             // Actualizar botón si es necesario
             if (currentContactoCount >= maxContactos) {
                 document.getElementById('add-contacto-btn').disabled = true;
-                document.getElementById('add-contacto-btn').classList.add('opacity-50', 'cursor-not-allowed');
-                document.getElementById('add-contacto-btn').innerHTML = '<i class="fas fa-ban mr-2"></i><span>Límite alcanzado</span>';
+                document.getElementById('add-contacto-btn').classList.add('opacity-50',
+                    'cursor-not-allowed');
+                document.getElementById('add-contacto-btn').innerHTML =
+                    '<i class="fas fa-ban mr-2"></i><span>Límite alcanzado</span>';
             }
 
             // Animación suave
             contactoRow.style.opacity = '0';
             contactoRow.style.transform = 'translateY(10px)';
-            contactosContainer.appendChild(contactoRow);
-            
+
             setTimeout(() => {
                 contactoRow.style.transition = 'all 0.3s ease';
                 contactoRow.style.opacity = '1';
                 contactoRow.style.transform = 'translateY(0)';
             }, 10);
 
+            // Toastr para éxito al agregar
+            toastr.success(
+                `Contacto #${contactoIndex} agregado correctamente`,
+                'Contacto agregado', {
+                    timeOut: 3000,
+                    progressBar: true,
+                    closeButton: true,
+                    positionClass: "toast-top-right",
+                    toastClass: 'rounded-xl shadow-lg font-medium',
+                    iconClass: 'toast-success bg-gradient-to-r from-green-500 to-green-600 border-0'
+                }
+            );
+
             calculateSaludProgress();
         });
 
-        // Función para eliminar contacto
+        // Función para eliminar contacto con SweetAlert2 y Toastr
         function removeContacto(index) {
             if (index <= 2) {
-                alert('No puede eliminar los primeros 2 contactos obligatorios.');
+                Swal.fire({
+                    title: '⚠️ Contacto obligatorio',
+                    html: 'Los primeros <strong>2 contactos</strong> son obligatorios y no pueden eliminarse.',
+                    icon: 'warning',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Entendido',
+                    background: 'white',
+                    backdrop: 'rgba(239, 68, 68, 0.1)',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 border-0',
+                        title: 'text-lg font-bold',
+                        htmlContainer: 'text-gray-600'
+                    }
+                });
                 return;
             }
 
-            if (confirm('¿Está seguro de eliminar este contacto de emergencia?')) {
-                // Buscar y eliminar el contacto
-                const contactoRow = document.querySelector(`[data-contacto-index="${index}"]`);
-                if (contactoRow) {
-                    // Animación de eliminación
-                    contactoRow.style.opacity = '0';
-                    contactoRow.style.transform = 'translateY(-10px)';
-                    contactoRow.style.height = contactoRow.offsetHeight + 'px';
-                    
-                    setTimeout(() => {
-                        contactoRow.remove();
-                        currentContactoCount--;
-                        
-                        // Reorganizar bordes
-                        reorganizarBordesContactos();
-                        
-                        // Habilitar botón de agregar si estaba deshabilitado
-                        if (currentContactoCount < maxContactos) {
-                            document.getElementById('add-contacto-btn').disabled = false;
-                            document.getElementById('add-contacto-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-                            document.getElementById('add-contacto-btn').innerHTML = '<i class="fas fa-plus mr-2"></i><span>Agregar otro contacto</span>';
-                        }
-                        
-                        calculateSaludProgress();
-                    }, 300);
+            Swal.fire({
+                title: '¿Eliminar contacto?',
+                html: `Esta acción no se puede deshacer.<br><span class="text-red-500 font-medium">Contacto #${index}</span> será eliminado.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                background: 'white',
+                backdrop: 'rgba(0, 0, 0, 0.1)',
+                customClass: {
+                    popup: 'rounded-2xl',
+                    confirmButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 border-0',
+                    cancelButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-gray-500 to-gray-600 border-0',
+                    title: 'text-lg font-bold',
+                    htmlContainer: 'text-gray-600'
                 }
-            }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const contactoRow = document.querySelector(`[data-contacto-index="${index}"]`);
+                    if (contactoRow) {
+                        // Animación de eliminación
+                        contactoRow.style.transition = 'all 0.3s ease';
+                        contactoRow.style.opacity = '0';
+                        contactoRow.style.transform = 'translateY(-10px)';
+                        contactoRow.style.height = contactoRow.offsetHeight + 'px';
+
+                        setTimeout(() => {
+                            contactoRow.remove();
+                            currentContactoCount--;
+
+                            // Reorganizar bordes
+                            reorganizarBordesContactos();
+
+                            // Habilitar botón de agregar si estaba deshabilitado
+                            if (currentContactoCount < maxContactos) {
+                                const addBtn = document.getElementById('add-contacto-btn');
+                                addBtn.disabled = false;
+                                addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                addBtn.innerHTML =
+                                    '<i class="fas fa-plus mr-2"></i><span>Agregar otro contacto</span>';
+                            }
+
+                            // Toastr para éxito al eliminar
+                            toastr.success(
+                                `Contacto #${index} eliminado correctamente`,
+                                'Contacto eliminado', {
+                                    timeOut: 3000,
+                                    progressBar: true,
+                                    closeButton: true,
+                                    positionClass: "toast-top-right",
+                                    toastClass: 'rounded-xl shadow-lg font-medium',
+                                    iconClass: 'toast-success bg-gradient-to-r from-green-500 to-green-600 border-0'
+                                }
+                            );
+
+                            calculateSaludProgress();
+                        }, 300);
+                    }
+                }
+            });
         }
 
         // Función para reorganizar bordes después de eliminar
@@ -628,7 +807,7 @@
             contactos.forEach((contacto, index) => {
                 contacto.classList.remove('border-b');
                 if (index < contactos.length - 1) {
-                    contacto.classList.add('border-b');
+                    contacto.classList.add('border-b', 'border-gray-200');
                 }
             });
         }
@@ -651,18 +830,42 @@
             if (vacunaCovid) {
                 completed++;
                 total++;
-                
+
                 // Si es SI, verificar fechas
                 if (vacunaCovid.value === 'SI') {
-                    const dosis1 = document.querySelector('input[name="covid_dosis1"]').value;
-                    const dosis2 = document.querySelector('input[name="covid_dosis2"]').value;
-                    
+                    const dosis1 = document.querySelector('input[name="covid_dosis1"]')?.value;
+                    const dosis2 = document.querySelector('input[name="covid_dosis2"]')?.value;
+                    const dosis3 = document.querySelector('input[name="covid_dosis3"]')?.value;
+
                     if (dosis1 && dosis1.trim() !== '') {
-                        completed += 0.5;
+                        completed += 0.33;
                     }
-                    total += 0.5;
-                    
+                    total += 0.33;
+
                     if (dosis2 && dosis2.trim() !== '') {
+                        completed += 0.33;
+                    }
+                    total += 0.33;
+
+                    if (dosis3 && dosis3.trim() !== '') {
+                        completed += 0.34;
+                    }
+                    total += 0.34;
+                }
+            } else {
+                total++;
+            }
+
+            // Verificar operaciones - NUEVO
+            const operacion = document.querySelector('input[name="tiene_operacion"]:checked');
+            if (operacion) {
+                completed++;
+                total++;
+
+                // Si es SI, verificar especificación
+                if (operacion.value === 'SI') {
+                    const especificar = document.querySelector('input[name="operacion_especificar"]')?.value;
+                    if (especificar && especificar.trim() !== '') {
                         completed += 0.5;
                     }
                     total += 0.5;
@@ -676,10 +879,10 @@
             if (dolencia) {
                 completed++;
                 total++;
-                
+
                 // Si es SI, verificar especificación
                 if (dolencia.value === 'SI') {
-                    const especificar = document.querySelector('input[name="dolencia_especificar"]').value;
+                    const especificar = document.querySelector('input[name="dolencia_especificar"]')?.value;
                     if (especificar && especificar.trim() !== '') {
                         completed += 0.5;
                     }
@@ -694,10 +897,10 @@
             if (discapacidad) {
                 completed++;
                 total++;
-                
+
                 // Si es SI, verificar especificación
                 if (discapacidad.value === 'SI') {
-                    const especificar = document.querySelector('input[name="discapacidad_especificar"]').value;
+                    const especificar = document.querySelector('input[name="discapacidad_especificar"]')?.value;
                     if (especificar && especificar.trim() !== '') {
                         completed += 0.5;
                     }
@@ -710,7 +913,7 @@
             // Verificar tipo de sangre
             const tipoSangre = document.querySelector('input[name="tipo_sangre"]:checked');
             if (tipoSangre) {
-                completed += 2; // Peso extra por importancia
+                completed += 2;
                 total += 2;
             } else {
                 total += 2;
@@ -721,17 +924,17 @@
                 const nombre = document.querySelector(`input[name="emergencia${i}_nombres"]`)?.value;
                 const parentesco = document.querySelector(`input[name="emergencia${i}_parentesco"]`)?.value;
                 const direccion = document.querySelector(`textarea[name="emergencia${i}_direccion"]`)?.value;
-                
+
                 if (nombre && nombre.trim() !== '') {
                     completed += 0.5;
                 }
                 total += 0.5;
-                
+
                 if (parentesco && parentesco.trim() !== '') {
                     completed += 0.3;
                 }
                 total += 0.3;
-                
+
                 if (direccion && direccion.trim() !== '') {
                     completed += 0.2;
                 }
@@ -741,9 +944,16 @@
             // Calcular porcentaje
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
             const displayPercentage = Math.min(percentage, 100);
-            
-            document.getElementById('salud-percentage').textContent = `${displayPercentage}%`;
-            document.getElementById('salud-progress').style.width = `${displayPercentage}%`;
+
+            const percentageElement = document.getElementById('salud-percentage');
+            const progressElement = document.getElementById('salud-progress');
+
+            if (percentageElement) {
+                percentageElement.textContent = `${displayPercentage}%`;
+            }
+            if (progressElement) {
+                progressElement.style.width = `${displayPercentage}%`;
+            }
         }
 
         // Agregar event listeners a todos los campos
@@ -767,7 +977,7 @@
                 `emergencia${index}_parentesco`,
                 `emergencia${index}_direccion`
             ];
-            
+
             fields.forEach(fieldName => {
                 const field = document.querySelector(`[name="${fieldName}"]`);
                 if (field) {
@@ -782,7 +992,7 @@
         for (let i = 1; i <= 2; i++) {
             setupContactoEventListeners(i);
         }
-        
+
         // Calcular progreso inicial
         calculateSaludProgress();
     });
@@ -793,56 +1003,56 @@
     .grupo-sangre {
         transition: all 0.2s ease;
     }
-    
+
     .grupo-sangre:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
-    
+
     .grupo-sangre-icono {
         transition: all 0.2s ease;
     }
-    
+
     /* Estilos para animaciones de contactos */
     [data-contacto-index] {
         transition: all 0.3s ease;
     }
-    
+
     /* Estilos para campos de emergencia */
     textarea {
         min-height: 80px;
     }
-    
+
     .remove-contacto-btn {
         transition: all 0.2s ease;
     }
-    
+
     .remove-contacto-btn:hover {
         transform: scale(1.05);
     }
-    
+
     @media (max-width: 768px) {
         .grupo-sangre {
             padding: 12px 8px;
         }
-        
+
         .grupo-sangre-icono {
             width: 36px;
             height: 36px;
             margin-right: 6px;
         }
-        
+
         /* En móvil, mostrar contactos en columnas */
         #contactos-table .grid {
             grid-template-columns: 1fr !important;
             border-right: none !important;
         }
-        
+
         #contactos-table .border-r {
             border-right: none !important;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         #contactos-table .p-6:last-child {
             border-bottom: none;
         }
