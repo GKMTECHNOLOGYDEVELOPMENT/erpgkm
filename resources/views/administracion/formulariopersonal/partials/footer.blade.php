@@ -359,7 +359,7 @@
 </div>
 
 <script>
-    // Inicializar funcionalidad de declaración jurada
+    // Inicializar funcionalidad de declaración jurada - VERSIÓN SIN ALERTS
     document.addEventListener('DOMContentLoaded', function() {
         // Elementos importantes
         const aceptarCheckbox = document.getElementById('acepto_declaracion');
@@ -400,6 +400,11 @@
             
             actualizarFechaDisplay();
             actualizarEstadoEnvio();
+            
+            // Toastr de éxito
+            if (typeof toastr !== 'undefined') {
+                toastr.success('Fecha actual aplicada', '✅ Éxito');
+            }
         }
 
         // Función para actualizar display de fecha
@@ -469,6 +474,11 @@
                     // Cambiar estilo del contenedor
                     firmaContainer.classList.remove('border-dashed', 'border-gray-300');
                     firmaContainer.classList.add('border-solid', 'border-green-400', 'bg-green-50');
+                    
+                    // Toastr de éxito
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success('Firma cargada correctamente', '✅ Éxito');
+                    }
                 };
                 reader.readAsDataURL(file);
             }
@@ -476,48 +486,136 @@
 
         // Función para limpiar firma
         function limpiarFirma() {
-            firmaInput.value = '';
-            firmaPlaceholder.classList.remove('hidden');
-            firmaPreview.classList.add('hidden');
-            firmaActions.classList.add('hidden');
-            
-            // Restaurar estilo del contenedor
-            firmaContainer.classList.remove('border-solid', 'border-green-400', 'bg-green-50');
-            firmaContainer.classList.add('border-dashed', 'border-gray-300');
-            
-            actualizarEstadoEnvio();
+            Swal.fire({
+                title: '¿Limpiar firma?',
+                text: 'Se eliminará la firma actual',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, limpiar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    firmaInput.value = '';
+                    firmaPlaceholder.classList.remove('hidden');
+                    firmaPreview.classList.add('hidden');
+                    firmaActions.classList.add('hidden');
+                    
+                    // Restaurar estilo del contenedor
+                    firmaContainer.classList.remove('border-solid', 'border-green-400', 'bg-green-50');
+                    firmaContainer.classList.add('border-dashed', 'border-gray-300');
+                    
+                    actualizarEstadoEnvio();
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.warning('Firma eliminada', '⚠️ Eliminado');
+                    }
+                }
+            });
         }
 
         // Función para simular firma digital (canvas)
         function iniciarFirmaDigital() {
-            // En un sistema real, aquí se implementaría un canvas para firma digital
-            alert('Función de firma digital - En un sistema real, aquí aparecería un canvas para firmar con mouse/touch.');
-            
-            // Simulación: crear firma digital falsa
-            const firmaTexto = document.createElement('div');
-            firmaTexto.id = 'firma-preview-text';
-            firmaTexto.className = 'text-2xl font-signature text-gray-800 p-4';
-            firmaTexto.textContent = 'Firma Digital';
-            firmaTexto.style.fontFamily = "'Dancing Script', cursive";
-            
-            firmaPreview.innerHTML = '';
-            firmaPreview.appendChild(firmaTexto);
-            firmaPlaceholder.classList.add('hidden');
-            firmaPreview.classList.remove('hidden');
-            firmaActions.classList.remove('hidden');
-            firmaPreviewText.classList.remove('hidden');
-            
-            // Cambiar estilo
-            firmaContainer.classList.remove('border-dashed', 'border-gray-300');
-            firmaContainer.classList.add('border-solid', 'border-blue-400', 'bg-blue-50');
-            
-            // Simular que se cargó un archivo
-            const fakeFile = new File([''], 'firma-digital.png', { type: 'image/png' });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(fakeFile);
-            firmaInput.files = dataTransfer.files;
-            
-            actualizarEstadoEnvio();
+            Swal.fire({
+                title: '🖊️ Firma Digital',
+                html: `
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <canvas id="firmaCanvas" width="400" height="200" 
+                                style="border: 2px dashed #6366f1; border-radius: 10px; background: white; cursor: crosshair;">
+                        </canvas>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 10px;">
+                        <button id="limpiarCanvasBtn" class="swal2-cancel swal2-styled" style="background: #6b7280;">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
+                        <button id="guardarFirmaBtn" class="swal2-confirm swal2-styled" style="background: #4f46e5;">
+                            <i class="fas fa-check"></i> Guardar Firma
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                cancelButtonColor: '#6b7280',
+                didOpen: () => {
+                    // Configurar canvas para firma
+                    const canvas = document.getElementById('firmaCanvas');
+                    const ctx = canvas.getContext('2d');
+                    let drawing = false;
+                    
+                    ctx.strokeStyle = '#4f46e5';
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    
+                    canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
+                    canvas.addEventListener('mouseup', () => { drawing = false; });
+                    canvas.addEventListener('mousemove', draw);
+                    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); drawing = true; ctx.beginPath(); });
+                    canvas.addEventListener('touchend', () => { drawing = false; });
+                    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); drawTouch(e); });
+                    
+                    function draw(e) {
+                        if (!drawing) return;
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                    }
+                    
+                    function drawTouch(e) {
+                        if (!drawing) return;
+                        const rect = canvas.getBoundingClientRect();
+                        const touch = e.touches[0];
+                        const x = touch.clientX - rect.left;
+                        const y = touch.clientY - rect.top;
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                    }
+                    
+                    document.getElementById('limpiarCanvasBtn').addEventListener('click', () => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    });
+                    
+                    document.getElementById('guardarFirmaBtn').addEventListener('click', () => {
+                        // Convertir canvas a imagen
+                        const dataURL = canvas.toDataURL('image/png');
+                        
+                        // Crear archivo simulado
+                        fetch(dataURL)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const file = new File([blob], 'firma-digital.png', { type: 'image/png' });
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                firmaInput.files = dataTransfer.files;
+                                
+                                // Mostrar vista previa
+                                firmaPreview.innerHTML = `<img id="firma-preview-img" class="max-w-full max-h-48 object-contain" src="${dataURL}" alt="Firma cargada">`;
+                                firmaPlaceholder.classList.add('hidden');
+                                firmaPreview.classList.remove('hidden');
+                                firmaActions.classList.remove('hidden');
+                                
+                                // Cambiar estilo
+                                firmaContainer.classList.remove('border-dashed', 'border-gray-300');
+                                firmaContainer.classList.add('border-solid', 'border-green-400', 'bg-green-50');
+                                
+                                actualizarEstadoEnvio();
+                                
+                                Swal.close();
+                                
+                                if (typeof toastr !== 'undefined') {
+                                    toastr.success('Firma digital guardada', '✅ Éxito');
+                                }
+                            });
+                    });
+                }
+            });
         }
 
         // Función para simular huella digital
@@ -547,6 +645,10 @@
                     setTimeout(() => {
                         huellaContainer.style.transform = 'scale(1)';
                     }, 300);
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success('Huella registrada correctamente', '✅ Éxito');
+                    }
                 } else {
                     huellaStatus.classList.remove('bg-yellow-400');
                     huellaStatus.classList.add('bg-red-400');
@@ -559,6 +661,10 @@
                     setTimeout(() => {
                         huellaContainer.style.borderColor = '';
                     }, 1000);
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('Error al leer huella', '❌ Error');
+                    }
                 }
             }, 1500);
         }
@@ -640,48 +746,98 @@
 
         // Limpiar formulario
         clearFormBtn.addEventListener('click', function() {
-            if (confirm('¿Está seguro de que desea limpiar todo el formulario? Se perderán todos los datos ingresados.')) {
-                document.getElementById('personal-data-form').reset();
-                limpiarFirma();
-                actualizarFechaActual();
-                actualizarEstadoEnvio();
-                alert('Formulario limpiado exitosamente.');
-            }
+            Swal.fire({
+                title: '¿Limpiar formulario?',
+                text: 'Se perderán todos los datos ingresados',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, limpiar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('personal-data-form').reset();
+                    limpiarFirma();
+                    actualizarFechaActual();
+                    actualizarEstadoEnvio();
+                    
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success('Formulario limpiado exitosamente', '✅ Éxito');
+                    }
+                }
+            });
         });
 
         // Guardar borrador
         saveDraftBtn.addEventListener('click', function() {
-            // En un sistema real, aquí se enviaría una petición AJAX para guardar
             const puedeGuardar = actualizarEstadoEnvio();
             
             if (puedeGuardar) {
-                alert('✅ Borrador guardado exitosamente.\n\nPuede continuar más tarde desde donde lo dejó.');
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Borrador guardado exitosamente', '✅ Éxito');
+                }
+                
+                // Aquí puedes agregar la lógica AJAX para guardar realmente
+                console.log('Borrador guardado');
             } else {
-                alert('⚠️ Complete los campos requeridos antes de guardar:\n\n• Fecha de declaración\n• Número de DNI\n• Aceptación de declaración');
+                Swal.fire({
+                    title: '⚠️ Campos incompletos',
+                    html: 'Complete los campos requeridos antes de guardar:<br><br>• Fecha de declaración<br>• Número de DNI<br>• Aceptación de declaración',
+                    icon: 'warning',
+                    confirmButtonColor: '#4f46e5',
+                    confirmButtonText: 'Entendido'
+                });
             }
         });
 
-        // Envío del formulario
+        // Envío del formulario - IMPORTANTE: Este submit handler debe ser EL ÚNICO en todo el formulario
+        // Por eso está comentado - La lógica de envío real está en create.blade.php
+        /*
         document.getElementById('personal-data-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             if (!actualizarEstadoEnvio()) {
-                alert('❌ Complete todos los campos requeridos de la declaración jurada antes de enviar.');
+                Swal.fire({
+                    title: '❌ Campos obligatorios',
+                    text: 'Complete todos los campos requeridos de la declaración jurada antes de enviar.',
+                    icon: 'error',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
             
-            if (confirm('¿Está seguro de enviar el formulario? Una vez enviado, no podrá modificar la información.')) {
-                // Simulación de envío
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Enviando...</span>';
-                
-                setTimeout(() => {
-                    alert('✅ Formulario enviado exitosamente.\n\nSu información ha sido registrada correctamente en el sistema.');
-                    // En un sistema real, aquí se enviaría el formulario
+            Swal.fire({
+                title: '¿Enviar formulario?',
+                text: 'Una vez enviado, no podrá modificar la información.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Enviando...</span>';
+                    
+                    // Aquí iría el envío real del formulario
                     // this.submit();
-                }, 1500);
-            }
+                    
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: '✅ ¡Éxito!',
+                            text: 'Formulario enviado exitosamente. Su información ha sido registrada correctamente.',
+                            icon: 'success',
+                            confirmButtonColor: '#4f46e5',
+                            confirmButtonText: 'Aceptar'
+                        });
+                    }, 1500);
+                }
+            });
         });
+        */
 
         // Inicialización
         actualizarFechaActual();

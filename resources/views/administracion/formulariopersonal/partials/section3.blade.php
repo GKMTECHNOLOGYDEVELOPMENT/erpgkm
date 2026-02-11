@@ -118,7 +118,7 @@
     </div>
 </div>
 
-<!-- Template para familiar (oculto) - SOLO 3 OPCIONES -->
+<!-- Template para familiar (oculto) - VERSIÓN CORREGIDA CON NAMES -->
 <template id="familiar-template">
     <!-- Fila para desktop -->
     <div class="familiar-row hidden md:grid md:grid-cols-8 items-center p-4 hover:bg-gray-50 transition-colors duration-200 bg-white">
@@ -129,7 +129,9 @@
                     <i class="fas fa-user text-pink-600"></i>
                 </div>
                 <div class="relative w-full">
-                    <select class="parentesco-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
+                    <select name="familiares[ID][parentesco]" 
+                            class="parentesco-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
+                        <option value="">Seleccione parentesco</option>
                         <option value="conyuge">Cónyuge</option>
                         <option value="concubino">Concubin@</option>
                         <option value="hijo">Hijo</option>
@@ -142,28 +144,38 @@
         <!-- Apellidos y Nombres -->
         <div class="px-4 py-4">
             <div class="relative">
-                <input type="text" name="" class="campo-familiar nombres-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Nombre completo">
+                <input type="text" 
+                       name="familiares[ID][nombres]"
+                       class="campo-familiar nombres-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                       placeholder="Nombre completo">
             </div>
         </div>
 
         <!-- N° Documento -->
         <div class="px-4 py-4">
             <div class="relative">
-                <input type="text" name="" class="campo-familiar documento-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="N° de documento">
+                <input type="text" 
+                       name="familiares[ID][documento]"
+                       class="campo-familiar documento-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                       placeholder="N° de documento">
             </div>
         </div>
 
         <!-- Ocupación -->
         <div class="px-4 py-4">
             <div class="relative">
-                <input type="text" name="" class="campo-familiar ocupacion-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Ocupación actual">
+                <input type="text" 
+                       name="familiares[ID][ocupacion]"
+                       class="campo-familiar ocupacion-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                       placeholder="Ocupación actual">
             </div>
         </div>
 
         <!-- Sexo -->
         <div class="px-4 py-4">
             <div class="relative">
-                <select class="sexo-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
+                <select name="familiares[ID][sexo]"
+                        class="sexo-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
                     <option value="">Seleccione</option>
                     <option value="M">Masculino</option>
                     <option value="F">Femenino</option>
@@ -175,7 +187,10 @@
         <!-- Fecha Nacimiento -->
         <div class="px-4 py-4">
             <div class="relative">
-                <input type="text" class="flatpickr-familia campo-familiar fecha-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Seleccione fecha">
+                <input type="text" 
+                       name="familiares[ID][fecha_nacimiento]"
+                       class="flatpickr-familia campo-familiar fecha-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                       placeholder="Seleccione fecha">
                 <i class="fas fa-birthday-cake text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
             </div>
         </div>
@@ -183,7 +198,10 @@
         <!-- Domicilio Actual -->
         <div class="px-4 py-4">
             <div class="relative">
-                <input type="text" name="" class="campo-familiar domicilio-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Dirección actual">
+                <input type="text" 
+                       name="familiares[ID][domicilio]"
+                       class="campo-familiar domicilio-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                       placeholder="Dirección actual">
             </div>
         </div>
 
@@ -205,7 +223,9 @@
                     <i class="fas fa-user text-pink-600"></i>
                 </div>
                 <div class="relative w-full">
-                    <select class="parentesco-select-mobile w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
+                    <select name="familiares[ID][parentesco]" 
+                            class="parentesco-select-mobile w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
+                        <option value="">Seleccione parentesco</option>
                         <option value="conyuge">Cónyuge</option>
                         <option value="concubino">Concubin@</option>
                         <option value="hijo">Hijo</option>
@@ -223,7 +243,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos y Nombres</label>
                 <div class="relative">
-                    <input type="text" class="campo-familiar nombres-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Nombre completo">
+                    <input type="text" 
+                           name="familiares[ID][nombres]"
+                           class="campo-familiar nombres-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                           placeholder="Nombre completo">
                     <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                 </div>
             </div>
@@ -233,7 +256,10 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">N° Documento</label>
                     <div class="relative">
-                        <input type="text" class="campo-familiar documento-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="N° DNI">
+                        <input type="text" 
+                               name="familiares[ID][documento]"
+                               class="campo-familiar documento-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                               placeholder="N° DNI">
                         <i class="fas fa-id-card text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                     </div>
                 </div>
@@ -242,7 +268,8 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
                     <div class="relative">
-                        <select class="sexo-select-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
+                        <select name="familiares[ID][sexo]"
+                                class="sexo-select-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
                             <option value="">Seleccionar</option>
                             <option value="M">Masculino</option>
                             <option value="F">Femenino</option>
@@ -256,7 +283,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
                 <div class="relative">
-                    <input type="text" class="campo-familiar ocupacion-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Profesión u oficio">
+                    <input type="text" 
+                           name="familiares[ID][ocupacion]"
+                           class="campo-familiar ocupacion-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                           placeholder="Profesión u oficio">
                     <i class="fas fa-briefcase text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                 </div>
             </div>
@@ -265,7 +295,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento</label>
                 <div class="relative">
-                    <input type="text" class="flatpickr-familia-mobile campo-familiar fecha-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Seleccione fecha">
+                    <input type="text" 
+                           name="familiares[ID][fecha_nacimiento]"
+                           class="flatpickr-familia-mobile campo-familiar fecha-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                           placeholder="Seleccione fecha">
                     <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                 </div>
             </div>
@@ -274,7 +307,10 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Domicilio Actual</label>
                 <div class="relative">
-                    <input type="text" class="campo-familiar domicilio-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" placeholder="Dirección donde vive">
+                    <input type="text" 
+                           name="familiares[ID][domicilio]"
+                           class="campo-familiar domicilio-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
+                           placeholder="Dirección donde vive">
                     <i class="fas fa-home text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                 </div>
             </div>
@@ -339,7 +375,7 @@
             iconElement.className = `w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center mr-3`;
         }
 
-        // Función para agregar un nuevo familiar
+        // Función para agregar un nuevo familiar - VERSIÓN CORREGIDA
         function addFamiliar() {
             const template = document.getElementById('familiar-template');
             const familiaContainer = document.getElementById('familia-container');
@@ -350,75 +386,39 @@
             const mobileCard = template.content.querySelector('.familiar-card').cloneNode(true);
             
             // Asignar ID único
-            const familiarId = `familiar_${familiarCount}`;
-            desktopRow.setAttribute('data-familiar-id', familiarId);
-            mobileCard.setAttribute('data-familiar-id', familiarId);
+            const familiarId = familiarCount;
+            desktopRow.setAttribute('data-familiar-id', `familiar_${familiarId}`);
+            mobileCard.setAttribute('data-familiar-id', `familiar_${familiarId}`);
             
-            // Configurar nombres de campos
-            desktopRow.querySelectorAll('.nombres-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][nombres]`;
-            });
-            desktopRow.querySelectorAll('.documento-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][documento]`;
-            });
-            desktopRow.querySelectorAll('.ocupacion-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][ocupacion]`;
-            });
-            desktopRow.querySelectorAll('.domicilio-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][domicilio]`;
-            });
-            desktopRow.querySelectorAll('.fecha-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][fecha_nacimiento]`;
-            });
-            desktopRow.querySelectorAll('.parentesco-select').forEach(select => {
-                select.name = `familiares[${familiarCount}][parentesco]`;
-            });
-            desktopRow.querySelectorAll('.sexo-select').forEach(select => {
-                select.name = `familiares[${familiarCount}][sexo]`;
-            });
-            
-            // Configurar nombres para mobile
-            mobileCard.querySelectorAll('.nombres-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][nombres]`;
-            });
-            mobileCard.querySelectorAll('.documento-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][documento]`;
-            });
-            mobileCard.querySelectorAll('.ocupacion-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][ocupacion]`;
-            });
-            mobileCard.querySelectorAll('.domicilio-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][domicilio]`;
-            });
-            mobileCard.querySelectorAll('.fecha-input').forEach(input => {
-                input.name = `familiares[${familiarCount}][fecha_nacimiento]`;
-            });
-            mobileCard.querySelectorAll('.parentesco-select-mobile').forEach(select => {
-                select.name = `familiares[${familiarCount}][parentesco]`;
-            });
-            mobileCard.querySelectorAll('.sexo-select-mobile').forEach(select => {
-                select.name = `familiares[${familiarCount}][sexo]`;
-            });
+            // Reemplazar [ID] en TODOS los campos con el índice real
+            desktopRow.innerHTML = desktopRow.innerHTML.replace(/\[ID\]/g, `[${familiarId}]`);
+            mobileCard.innerHTML = mobileCard.innerHTML.replace(/\[ID\]/g, `[${familiarId}]`);
             
             // Configurar event listeners para el ícono del parentesco (desktop)
-            const parentescoSelect = desktopRow.querySelector('.parentesco-select');
+            const parentescoSelect = desktopRow.querySelector(`select[name="familiares[${familiarId}][parentesco]"]`);
             const iconContainer = desktopRow.querySelector('.parentesco-icon');
-            updateParentescoIcon(parentescoSelect, iconContainer);
             
-            parentescoSelect.addEventListener('change', function() {
-                updateParentescoIcon(this, iconContainer);
-                calculateFamiliaProgress();
-            });
+            if (parentescoSelect && iconContainer) {
+                updateParentescoIcon(parentescoSelect, iconContainer);
+                
+                parentescoSelect.addEventListener('change', function() {
+                    updateParentescoIcon(this, iconContainer);
+                    calculateFamiliaProgress();
+                });
+            }
             
             // Configurar event listeners para el ícono del parentesco (mobile)
-            const parentescoSelectMobile = mobileCard.querySelector('.parentesco-select-mobile');
+            const parentescoSelectMobile = mobileCard.querySelector(`select[name="familiares[${familiarId}][parentesco]"]`);
             const iconContainerMobile = mobileCard.querySelector('.parentesco-icon-mobile');
-            updateParentescoIcon(parentescoSelectMobile, iconContainerMobile);
             
-            parentescoSelectMobile.addEventListener('change', function() {
-                updateParentescoIcon(this, iconContainerMobile);
-                calculateFamiliaProgress();
-            });
+            if (parentescoSelectMobile && iconContainerMobile) {
+                updateParentescoIcon(parentescoSelectMobile, iconContainerMobile);
+                
+                parentescoSelectMobile.addEventListener('change', function() {
+                    updateParentescoIcon(this, iconContainerMobile);
+                    calculateFamiliaProgress();
+                });
+            }
             
             // Configurar event listeners para campos
             desktopRow.querySelectorAll('.campo-familiar, select').forEach(field => {
@@ -433,16 +433,23 @@
             
             // Configurar botón eliminar con SweetAlert
             desktopRow.querySelector('.remove-familiar-btn').addEventListener('click', function() {
-                eliminarFamiliarConSweetAlert(familiarId);
+                eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
             });
             
             mobileCard.querySelector('.remove-familiar-btn').addEventListener('click', function() {
-                eliminarFamiliarConSweetAlert(familiarId);
+                eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
             });
             
             // Inicializar Flatpickr
-            flatpickr(desktopRow.querySelector('.flatpickr-familia'), flatpickrFamiliaOptions);
-            flatpickr(mobileCard.querySelector('.flatpickr-familia-mobile'), flatpickrFamiliaOptions);
+            const fechaInput = desktopRow.querySelector(`input[name="familiares[${familiarId}][fecha_nacimiento]"]`);
+            if (fechaInput) {
+                flatpickr(fechaInput, flatpickrFamiliaOptions);
+            }
+            
+            const fechaInputMobile = mobileCard.querySelector(`input[name="familiares[${familiarId}][fecha_nacimiento]"]`);
+            if (fechaInputMobile) {
+                flatpickr(fechaInputMobile, flatpickrFamiliaOptions);
+            }
             
             // Agregar al DOM
             familiaContainer.appendChild(desktopRow);
@@ -464,7 +471,9 @@
             calculateFamiliaProgress();
             
             // Toastr de éxito al agregar
-            toastr.success('Familiar agregado correctamente', 'Éxito');
+            if (typeof toastr !== 'undefined') {
+                toastr.success('Familiar agregado correctamente', '✅ Éxito');
+            }
         }
 
         // Función para eliminar familiar con SweetAlert y Toastr
@@ -501,7 +510,9 @@
                     calculateFamiliaProgress();
                     
                     // Toastr de éxito al eliminar
-                    toastr.success('Familiar eliminado correctamente', 'Eliminado');
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success('Familiar eliminado correctamente', '✅ Eliminado');
+                    }
                 }
             });
         }
@@ -523,18 +534,17 @@
             let totalCompletos = 0;
             
             desktopRows.forEach(row => {
-                const camposRequeridos = [
-                    row.querySelector('.nombres-input'),
-                    row.querySelector('.documento-input'),
-                    row.querySelector('.parentesco-select')
-                ];
+                const nombre = row.querySelector('.nombres-input');
+                const parentesco = row.querySelector('.parentesco-select');
                 
                 let camposLlenos = 0;
-                camposRequeridos.forEach(campo => {
-                    if (campo && campo.value && campo.value.trim() !== '') {
-                        camposLlenos++;
-                    }
-                });
+                
+                if (nombre && nombre.value && nombre.value.trim() !== '') {
+                    camposLlenos++;
+                }
+                if (parentesco && parentesco.value && parentesco.value !== '') {
+                    camposLlenos++;
+                }
                 
                 // Considerar completo si tiene al menos nombre y parentesco
                 if (camposLlenos >= 2) {
@@ -619,4 +629,4 @@ select {
 .familiar-card {
     animation: fadeIn 0.3s ease;
 }
-</style>    
+</style>

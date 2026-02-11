@@ -96,10 +96,10 @@ class FormularioPersonalEmpleadoController extends Controller
                 'estudios.*.inicio' => 'nullable|date',
                 'estudios.*.fin' => 'nullable|date|after_or_equal:estudios.*.inicio',
                 
-                // SECCIÓN 3 - INFORMACIÓN FAMILIAR
+                // SECCIÓN 3 - INFORMACIÓN FAMILIAR (OPCIONAL)
                 'familiares' => 'nullable|array',
-                'familiares.*.parentesco' => 'required_with:familiares|in:conyuge,concubino,hijo',
-                'familiares.*.nombres' => 'required_with:familiares|string|max:255',
+                'familiares.*.parentesco' => 'nullable|required_with:familiares.*.nombres|in:conyuge,concubino,hijo',
+                'familiares.*.nombres' => 'nullable|string|max:255',
                 'familiares.*.documento' => 'nullable|string|max:20',
                 'familiares.*.ocupacion' => 'nullable|string|max:255',
                 'familiares.*.sexo' => 'nullable|in:M,F',
@@ -242,12 +242,14 @@ class FormularioPersonalEmpleadoController extends Controller
             }
 
             // ========== 5. GUARDAR FAMILIARES ==========
+           // ========== 5. GUARDAR FAMILIARES ==========
             if ($request->has('familiares')) {
                 // Eliminar familiares anteriores
                 UsuarioFamilia::where('idUsuario', $usuario->idUsuario)->delete();
                 
                 foreach ($request->familiares as $familiar) {
-                    if (isset($familiar['nombres']) && $familiar['nombres']) {
+                    // SOLO guardar si tiene nombre Y parentesco
+                    if (!empty($familiar['nombres']) && !empty($familiar['parentesco'])) {
                         UsuarioFamilia::create([
                             'idUsuario' => $usuario->idUsuario,
                             'parentesco' => $this->mapParentesco($familiar['parentesco']),
