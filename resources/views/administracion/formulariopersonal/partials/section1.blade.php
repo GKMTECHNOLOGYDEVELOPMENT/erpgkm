@@ -4,7 +4,8 @@
     <div class="section-header mb-8 pb-6 border-b border-gray-200">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center">
-                <div class="bg-gradient-to-r from-blue-500 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 shadow-md">
+                <div
+                    class="bg-gradient-to-r from-blue-500 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mr-4 shadow-md">
                     <i class="fas fa-user-circle text-white text-xl"></i>
                 </div>
                 <div>
@@ -70,21 +71,27 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Fecha de nacimiento -->
             <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
-                <label class="block text-gray-700 font-medium mb-4 required flex items-center">
+                <label class="block text-gray-700 font-medium mb-4 required flex flex-wrap items-center">
                     Fecha de Nacimiento
                     <span class="ml-1 text-xs text-gray-400">(obligatorio)</span>
                 </label>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
+
+                <!-- Mobile: vertical stack, Tablet: 2 columns, Desktop: 3 columns -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Día -->
+                    <div class="w-full">
                         <label for="dia" class="block text-sm text-gray-600 mb-2 font-medium">Día</label>
                         <div class="relative">
                             <input type="number" id="dia" name="dia" min="1" max="31"
                                 class="campo-general fecha-nacimiento w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                                 placeholder="DD">
-                            <i class="fas fa-calendar-day text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-calendar-day text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
-                    <div>
+
+                    <!-- Mes -->
+                    <div class="w-full">
                         <label for="mes" class="block text-sm text-gray-600 mb-2 font-medium">Mes</label>
                         <div class="relative">
                             <select id="mes" name="mes"
@@ -103,16 +110,20 @@
                                 <option value="11">Noviembre</option>
                                 <option value="12">Diciembre</option>
                             </select>
-                            <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                            <i
+                                class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                         </div>
                     </div>
-                    <div>
+
+                    <!-- Año -->
+                    <div class="w-full sm:col-span-2 lg:col-span-1">
                         <label for="anio" class="block text-sm text-gray-600 mb-2 font-medium">Año</label>
                         <div class="relative">
                             <input type="number" id="anio" name="anio" min="1900" max="{{ date('Y') }}"
                                 class="campo-general fecha-nacimiento w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                                 placeholder="AAAA">
-                            <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
                 </div>
@@ -124,7 +135,7 @@
             <!-- Lugar de nacimiento (UBIGEO) -->
             <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl border border-blue-100">
                 <label class="block text-gray-700 font-medium mb-4">Lugar de Nacimiento</label>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div>
                         <label for="nacimientoDepartamento" class="block text-sm text-gray-600 mb-2 font-medium">Departamento</label>
                         <select id="nacimientoDepartamento" name="nacimientoDepartamento"
@@ -166,7 +177,8 @@
         </h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             <div>
-                <label for="idTipoDocumento" class="block text-gray-700 font-medium mb-2 required">Tipo de Documento</label>
+                <label for="tipo_documento" class="block text-gray-700 font-medium mb-2 required">Tipo de
+                    Documento</label>
                 <div class="relative">
                     <select id="idTipoDocumento" name="idTipoDocumento"
                         class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white"
@@ -176,7 +188,8 @@
                             <option value="{{ $tipo->idTipoDocumento }}">{{ $tipo->nombre }}</option>
                         @endforeach
                     </select>
-                    <i class="fas fa-file-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                    <i
+                        class="fas fa-file-alt text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                 </div>
             </div>
             <div>
@@ -212,7 +225,8 @@
                             <option value="{{ $sexo->idSexo }}">{{ $sexo->nombre }}</option>
                         @endforeach
                     </select>
-                    <i class="fas fa-venus-mars text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                    <i
+                        class="fas fa-venus-mars text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                 </div>
             </div>
             <div>
@@ -237,24 +251,28 @@
             <div class="lg:col-span-1">
                 <label class="block text-gray-700 font-medium mb-4">Estado Civil</label>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
-                        <input type="radio" id="soltero" name="estadoCivil" value="1"
-                            class="radio-estado-civil h-5 w-5 text-blue-600 focus:ring-blue-500">
+                    <div
+                        class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
+                        <input type="radio" id="soltero" name="estado_civil" value="S"
+                            class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                         <label for="soltero" class="ml-3 text-gray-700 cursor-pointer flex-1">Soltero(a)</label>
                     </div>
-                    <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
-                        <input type="radio" id="casado" name="estadoCivil" value="2"
-                            class="radio-estado-civil h-5 w-5 text-blue-600 focus:ring-blue-500">
+                    <div
+                        class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
+                        <input type="radio" id="casado" name="estado_civil" value="C"
+                            class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                         <label for="casado" class="ml-3 text-gray-700 cursor-pointer flex-1">Casado(a)</label>
                     </div>
-                    <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
-                        <input type="radio" id="viudo" name="estadoCivil" value="3"
-                            class="radio-estado-civil h-5 w-5 text-blue-600 focus:ring-blue-500">
+                    <div
+                        class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
+                        <input type="radio" id="viudo" name="estado_civil" value="V"
+                            class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                         <label for="viudo" class="ml-3 text-gray-700 cursor-pointer flex-1">Viudo(a)</label>
                     </div>
-                    <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
-                        <input type="radio" id="divorciado" name="estadoCivil" value="4"
-                            class="radio-estado-civil h-5 w-5 text-blue-600 focus:ring-blue-500">
+                    <div
+                        class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-blue-50 transition-colors">
+                        <input type="radio" id="divorciado" name="estado_civil" value="D"
+                            class="h-5 w-5 text-blue-600 focus:ring-blue-500">
                         <label for="divorciado" class="ml-3 text-gray-700 cursor-pointer flex-1">Divorciado(a)</label>
                     </div>
                 </div>
@@ -264,22 +282,26 @@
             <div class="lg:col-span-2">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="email" class="block text-gray-700 font-medium mb-2 required">Correo Electrónico</label>
+                        <label for="email" class="block text-gray-700 font-medium mb-2 required">Correo
+                            Electrónico</label>
                         <div class="relative">
                             <input type="email" id="email" name="email"
                                 class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-gray-50"
                                 placeholder="ejemplo@correo.com" required>
-                            <i class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-envelope text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                         <p class="text-xs text-gray-500 mt-1">Ingrese un correo válido</p>
                     </div>
                     <div>
-                        <label for="telefono" class="block text-gray-700 font-medium mb-2 required">Teléfono / Celular</label>
+                        <label for="telefono" class="block text-gray-700 font-medium mb-2 required">Teléfono /
+                            Celular</label>
                         <div class="relative">
                             <input type="tel" id="telefono" name="telefono"
                                 class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-gray-50"
                                 placeholder="Ej: 987654321" required>
-                            <i class="fas fa-phone text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                            <i
+                                class="fas fa-phone text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                         <p class="text-xs text-gray-500 mt-1">Incluya código de área si aplica</p>
                     </div>
@@ -295,35 +317,15 @@
             Domicilio Actual
         </h4>
         <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-200">
-            <!-- Dirección -->
-            <div class="mb-6">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="sm:col-span-2">
-                        <label for="domicilioVia" class="block text-sm text-gray-600 mb-2 font-medium">Jr/Calle/Paseo/Av</label>
-                        <div class="relative">
-                            <input type="text" id="domicilioVia" name="domicilioVia"
-                                class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                                placeholder="Nombre de la vía">
-                            <i class="fas fa-road text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="domicilioMzLt" class="block text-sm text-gray-600 mb-2 font-medium">Nº/Mz/Lt</label>
-                        <div class="relative">
-                            <input type="text" id="domicilioMzLt" name="domicilioMzLt"
-                                class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                                placeholder="Número">
-                            <i class="fas fa-hashtag text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label for="domicilioUrb" class="block text-sm text-gray-600 mb-2 font-medium">Urb. o Localidad</label>
-                        <div class="relative">
-                            <input type="text" id="domicilioUrb" name="domicilioUrb"
-                                class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                                placeholder="Urbanización">
-                            <i class="fas fa-city text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                <div class="sm:col-span-2 lg:col-span-2">
+                    <label for="direccion"
+                        class="block text-sm text-gray-600 mb-2 font-medium">Jr/Calle/Paseo/Av</label>
+                    <div class="relative">
+                        <input type="text" id="direccion" name="direccion"
+                            class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                            placeholder="Nombre de la vía">
+                        <i class="fas fa-road text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                     </div>
                 </div>
             </div>
@@ -371,16 +373,19 @@
         <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-200">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="lg:col-span-1">
-                    <label for="entidadBancaria" class="block text-sm text-gray-600 mb-2 font-medium">Entidad Bancaria</label>
+                    <label for="entidad_bancaria" class="block text-sm text-gray-600 mb-2 font-medium">Entidad
+                        Bancaria</label>
                     <div class="relative">
                         <input type="text" id="entidadBancaria" name="entidadBancaria"
                             class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                             placeholder="Ej: BCP">
-                        <i class="fas fa-building text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <i
+                            class="fas fa-building text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                     </div>
                 </div>
                 <div class="lg:col-span-1">
-                    <label for="tipoCuenta" class="block text-sm text-gray-600 mb-2 font-medium">Tipo de Cuenta</label>
+                    <label for="tipo_cuenta" class="block text-sm text-gray-600 mb-2 font-medium">Tipo de
+                        Cuenta</label>
                     <div class="relative">
                         <select id="tipoCuenta" name="tipoCuenta"
                             class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
@@ -389,7 +394,8 @@
                             <option value="Corriente">Corriente</option>
                             <option value="CTS">CTS</option>
                         </select>
-                        <i class="fas fa-wallet text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                        <i
+                            class="fas fa-wallet text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                     </div>
                 </div>
                 <div class="lg:col-span-1">
@@ -401,16 +407,19 @@
                             <option value="PEN">Soles</option>
                             <option value="USD">Dólares</option>
                         </select>
-                        <i class="fas fa-money-bill-wave text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                        <i
+                            class="fas fa-money-bill-wave text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
                     </div>
                 </div>
                 <div class="lg:col-span-1">
-                    <label for="numeroCuenta" class="block text-sm text-gray-600 mb-2 font-medium">Número de Cuenta</label>
+                    <label for="numero_cuenta" class="block text-sm text-gray-600 mb-2 font-medium">Número de
+                        Cuenta</label>
                     <div class="relative">
                         <input type="text" id="numeroCuenta" name="numeroCuenta"
                             class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
                             placeholder="Ej: 001-123456789">
-                        <i class="fas fa-credit-card text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
+                        <i
+                            class="fas fa-credit-card text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
                     </div>
                 </div>
                 <div class="lg:col-span-1">
@@ -448,10 +457,13 @@
                         ];
                     @endphp
                     @foreach ($seguros as $seguro)
-                        <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-green-50 transition-colors">
-                            <input type="radio" id="seguro_{{ $seguro['id'] }}" name="seguroSalud" value="{{ $seguro['id'] }}"
-                                class="radio-seguro h-5 w-5 text-green-600 focus:ring-green-500">
-                            <label for="seguro_{{ $seguro['id'] }}" class="ml-3 text-gray-700 cursor-pointer flex-1">{{ $seguro['label'] }}</label>
+                        <div
+                            class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-green-50 transition-colors">
+                            <input type="checkbox" id="{{ $seguro['id'] }}" name="seguro_salud[]"
+                                value="{{ $seguro['value'] }}"
+                                class="h-5 w-5 text-green-600 rounded focus:ring-green-500">
+                            <label for="{{ $seguro['id'] }}"
+                                class="ml-3 text-gray-700 cursor-pointer flex-1">{{ $seguro['label'] }}</label>
                         </div>
                     @endforeach
                 </div>
@@ -463,45 +475,24 @@
                     <i class="fas fa-piggy-bank text-purple-500 mr-2"></i>
                     Sistema de Pensiones
                 </label>
-                <div class="space-y-4">
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
-                            <input type="radio" id="onp" name="sistemaPensiones" value="ONP"
-                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
-                            <label for="onp" class="ml-3 text-gray-700 cursor-pointer flex-1">
-                                <span class="font-medium">ONP</span>
-                                <p class="text-sm text-gray-500 mt-1">Oficina de Normalización Previsional</p>
-                            </label>
-                        </div>
-                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
-                            <input type="radio" id="afp" name="sistemaPensiones" value="AFP"
-                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
-                            <label for="afp" class="ml-3 text-gray-700 cursor-pointer flex-1">
-                                <span class="font-medium">AFP</span>
-                                <p class="text-sm text-gray-500 mt-1">Administradora de Fondos de Pensiones</p>
-                            </label>
-                        </div>
-                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
-                            <input type="radio" id="na" name="sistemaPensiones" value="NA"
-                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
-                            <label for="na" class="ml-3 text-gray-700 cursor-pointer flex-1">
-                                <span class="font-medium">No Aplica</span>
-                                <p class="text-sm text-gray-500 mt-1">No tiene sistema de pensiones</p>
-                            </label>
-                        </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div
+                        class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                        <input type="radio" id="onp" name="sistema_pensiones" value="ONP"
+                            class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                        <label for="onp" class="ml-3 text-gray-700 cursor-pointer flex-1">
+                            <span class="font-medium">ONP</span>
+                            <p class="text-sm text-gray-500 mt-1">Oficina de Normalización Previsional</p>
+                        </label>
                     </div>
-                    
-                    <!-- AFP compañía (solo visible si selecciona AFP) -->
-                    <div id="afpCompaniaContainer" class="hidden">
-                        <label for="afpCompania" class="block text-sm text-gray-600 mb-2 font-medium">Compañía AFP</label>
-                        <select id="afpCompania" name="afpCompania"
-                            class="campo-general w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
-                            <option value="" disabled selected>Seleccione AFP</option>
-                            <option value="Integra">Integra</option>
-                            <option value="Horizonte">Horizonte</option>
-                            <option value="Profuturo">Profuturo</option>
-                            <option value="Prima">Prima</option>
-                        </select>
+                    <div
+                        class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                        <input type="radio" id="afp" name="sistema_pensiones" value="AFP"
+                            class="h-5 w-5 text-purple-600 focus:ring-purple-500">
+                        <label for="afp" class="ml-3 text-gray-700 cursor-pointer flex-1">
+                            <span class="font-medium">AFP</span>
+                            <p class="text-sm text-gray-500 mt-1">Administradora de Fondos de Pensiones</p>
+                        </label>
                     </div>
                 </div>
             </div>

@@ -2099,3 +2099,5 @@ Route::get(
 // Rutas para ubigeo en formulario personal
 Route::get('/formulario-personal/provincias/{departamento}', [FormularioPersonalEmpleadoController::class, 'getProvincias']);
 Route::get('/formulario-personal/distritos/{provincia}', [FormularioPersonalEmpleadoController::class, 'getDistritos']);
+Route::get('/repuestos/export/reporte-inventario-general', [RepuestosController::class, 'exportReporteInventarioGeneral'])
+    ->name('repuestos.export.inventario.general');

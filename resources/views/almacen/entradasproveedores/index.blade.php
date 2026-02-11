@@ -155,14 +155,14 @@
                              </div>
                          </div>
 
-                        @if(\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO ENTRADA PROVEEDOR'))
-                         <!-- Botón fijo -->
-                         <button
-                             class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
-                             @click="abrirModalVerificacion">
-                             <i class="fas fa-check-circle"></i>
-                             BUSCAR PRODUCTO
-                         </button>
+                         @if (\App\Helpers\PermisoHelper::tienePermiso('BUSCAR PRODUCTO ENTRADA PROVEEDOR'))
+                             <!-- Botón fijo -->
+                             <button
+                                 class="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition"
+                                 @click="abrirModalVerificacion">
+                                 <i class="fas fa-check-circle"></i>
+                                 BUSCAR PRODUCTO
+                             </button>
                          @endif
                      </div>
 
@@ -305,7 +305,7 @@
                          <!-- Observaciones -->
                          <div>
                              <label class="block text-sm font-medium text-gray-700 mb-1">
-                                 
+
                                  Observaciones
                              </label>
                              <div class="relative">
@@ -383,28 +383,29 @@
 
                          <!-- Botón Guardar Entrada -->
                          <div class="pt-4">
-                            @if(\App\Helpers\PermisoHelper::tienePermiso('GUARDAR ENTRADA PROVEEDOR'))
-                             <button
-                                 class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                                 :disabled="guardandoEntrada" @click="guardarEntrada">
-                                 <template x-if="guardandoEntrada">
-                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
-                                         fill="none" viewBox="0 0 24 24">
-                                         <circle class="opacity-25" cx="12" cy="12" r="10"
-                                             stroke="currentColor" stroke-width="4"></circle>
-                                         <path class="opacity-75" fill="currentColor"
-                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                         </path>
-                                     </svg>
-                                 </template>
-                                 <template x-if="!guardandoEntrada">
-                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                             d="M5 13l4 4L19 7"></path>
-                                     </svg>
-                                 </template>
-                                 <span x-text="guardandoEntrada ? 'GUARDANDO...' : 'GUARDAR ENTRADA'"></span>
-                             </button>
+                             @if (\App\Helpers\PermisoHelper::tienePermiso('GUARDAR ENTRADA PROVEEDOR'))
+                                 <button
+                                     class="w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                                     :disabled="guardandoEntrada" @click="guardarEntrada">
+                                     <template x-if="guardandoEntrada">
+                                         <svg class="animate-spin h-5 w-5 text-white"
+                                             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                             <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                 stroke="currentColor" stroke-width="4"></circle>
+                                             <path class="opacity-75" fill="currentColor"
+                                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                             </path>
+                                         </svg>
+                                     </template>
+                                     <template x-if="!guardandoEntrada">
+                                         <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                             viewBox="0 0 24 24">
+                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                 d="M5 13l4 4L19 7"></path>
+                                         </svg>
+                                     </template>
+                                     <span x-text="guardandoEntrada ? 'GUARDANDO...' : 'GUARDAR ENTRADA'"></span>
+                                 </button>
                              @endif
                          </div>
                      </div>
@@ -465,7 +466,9 @@
 
                                          <!-- Lista de productos -->
                                          <div class="max-h-96 overflow-y-auto space-y-2">
-                                             <template x-for="producto in productosEncontrados" :key="producto.id">
+                                             <template x-for="(producto, index) in productosEncontrados"
+                                                 :key="producto.id + '-' + producto.modelo">
+
                                                  <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors cursor-pointer"
                                                      :class="estaSeleccionado(producto) ? 'border-blue-500 bg-blue-50' : ''"
                                                      @click="seleccionarProducto(producto)">

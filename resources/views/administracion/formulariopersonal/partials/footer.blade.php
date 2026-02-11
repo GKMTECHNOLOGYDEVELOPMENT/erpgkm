@@ -13,7 +13,7 @@
                 </div>
             </div>
             <span class="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold border border-indigo-100">
-                Sección 7
+                Sección 5
             </span>
         </div>
     </div>
