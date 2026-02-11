@@ -477,31 +477,29 @@
         </div>
     </div>
 </div>
-
 <script>
     // Inicializar Flatpickr para fechas de salud
     document.addEventListener('DOMContentLoaded', function() {
         // Configuración para Flatpickr salud
+        if (typeof toastr !== 'undefined') {
+            toastr.options = {
+                closeButton: true,
+                progressBar: true,
+                positionClass: "toast-top-right",
+                timeOut: 3000,
+                extendedTimeOut: 1000,
+                showEasing: "swing",
+                hideEasing: "linear",
+                showMethod: "fadeIn",
+                hideMethod: "fadeOut",
+                showDuration: 300,
+                hideDuration: 300,
+                toastClass: '',
+                iconClass: 'toast-success',
+                preventDuplicates: true
+            };
+        }
 
-// Configuración global de Toastr - VERSIÓN NORMAL
-if (typeof toastr !== 'undefined') {
-    toastr.options = {
-        closeButton: true,
-        progressBar: true,
-        positionClass: "toast-top-right",
-        timeOut: 3000,
-        extendedTimeOut: 1000,
-        showEasing: "swing",
-        hideEasing: "linear",
-        showMethod: "fadeIn",
-        hideMethod: "fadeOut",
-        showDuration: 300,
-        hideDuration: 300,
-        toastClass: '', // QUITADO: rounded-xl shadow-lg font-medium
-        iconClass: 'toast-success', // QUITADO: bg-gradient-to-r from-green-500 to-green-600 border-0
-        preventDuplicates: true
-    };
-}
         const flatpickrSaludOptions = {
             locale: "es",
             dateFormat: "Y-m-d",
@@ -518,48 +516,265 @@ if (typeof toastr !== 'undefined') {
             }
         };
 
-        // Inicializar Flatpickr para fechas de salud
+        // Inicializar Flatpickr para fechas de salud y guardar instancia
         document.querySelectorAll('.flatpickr-salud').forEach(function(element) {
-            flatpickr(element, flatpickrSaludOptions);
+            element._flatpickr = flatpickr(element, flatpickrSaludOptions);
         });
 
-        // Mejorar interacción de tipos de sangre
+        // ========== FUNCIÓN PARA MANEJAR CAMPOS CONDICIONALES DE SALUD ==========
+        function handleCondicionalSalud(radioSeleccionado) {
+            const nombreRadio = radioSeleccionado.getAttribute('name');
+            const valor = radioSeleccionado.value;
+            
+            // Mapeo de campos condicionales según el radio button
+            const configuracionCampos = {
+                'vacuna_covid': {
+                    campos: [
+                        'input[name="covid_dosis1"]',
+                        'input[name="covid_dosis2"]',
+                        'input[name="covid_dosis3"]'
+                    ],
+                    requerido: true,
+                    placeholder: 'Seleccione fecha'
+                },
+                'tiene_operacion': {
+                    campos: [
+                        'input[name="operacion_especificar"]'
+                    ],
+                    requerido: true,
+                    placeholder: 'Ej: Apendicectomía, Cesárea, Amígdalas'
+                },
+                'dolencia_cronica': {
+                    campos: [
+                        'input[name="dolencia_especificar"]'
+                    ],
+                    requerido: true,
+                    placeholder: 'Ej: Diabetes tipo 2, Hipertensión arterial'
+                },
+                'discapacidad': {
+                    campos: [
+                        'input[name="discapacidad_especificar"]'
+                    ],
+                    requerido: true,
+                    placeholder: 'Ej: Discapacidad visual, motora, auditiva'
+                }
+            };
+
+            const config = configuracionCampos[nombreRadio];
+            if (!config) return;
+
+            if (valor === 'SI') {
+                // HABILITAR campos y hacerlos REQUERIDOS
+                config.campos.forEach(selector => {
+                    const campo = document.querySelector(selector);
+                    if (campo) {
+                        campo.disabled = false;
+                        campo.readOnly = false;
+                        campo.required = config.requerido;
+                        
+                        campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400', 'opacity-60');
+                        campo.classList.add('bg-white');
+                        campo.placeholder = config.placeholder;
+                        
+                        if (campo.classList.contains('flatpickr-salud') && campo._flatpickr) {
+                            if (campo._flatpickr.altInput) {
+                                campo._flatpickr.altInput.disabled = false;
+                                campo._flatpickr.altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                                campo._flatpickr.altInput.placeholder = 'Seleccione fecha';
+                                campo._flatpickr.altInput.value = '';
+                            }
+                            campo._flatpickr.input.disabled = false;
+                            campo._flatpickr.altInput.readOnly = false;
+                        }
+                    }
+                });
+            } else if (valor === 'NO') {
+                // DESHABILITAR campos y LIMPIAR valores
+                config.campos.forEach(selector => {
+                    const campo = document.querySelector(selector);
+                    if (campo) {
+                        campo.disabled = true;
+                        campo.readOnly = true;
+                        campo.required = false;
+                        campo.value = '';
+                        
+                        campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400', 'opacity-60');
+                        campo.classList.remove('bg-white');
+                        campo.placeholder = 'No aplica';
+                        
+                        if (campo.classList.contains('flatpickr-salud') && campo._flatpickr) {
+                            if (campo._flatpickr.altInput) {
+                                campo._flatpickr.altInput.disabled = true;
+                                campo._flatpickr.altInput.value = '';
+                                campo._flatpickr.altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                                campo._flatpickr.altInput.placeholder = 'No aplica';
+                                campo._flatpickr.altInput.readOnly = true;
+                            }
+                            campo._flatpickr.input.disabled = true;
+                        }
+                    }
+                });
+            }
+            
+            calculateSaludProgress();
+        }
+
+        // ========== EVENT LISTENERS PARA RADIOS CONDICIONALES ==========
+        document.querySelectorAll('input[name="vacuna_covid"], input[name="tiene_operacion"], input[name="dolencia_cronica"], input[name="discapacidad"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                handleCondicionalSalud(this);
+            });
+            
+            // Verificar estado inicial
+            if (radio.checked) {
+                setTimeout(() => handleCondicionalSalud(radio), 100);
+            }
+        });
+
+        // ========== FUNCIÓN PARA CALCULAR PROGRESO ==========
+        function calculateSaludProgress() {
+            let completed = 0;
+            let total = 0;
+
+            // VACUNA COVID
+            const vacunaCovid = document.querySelector('input[name="vacuna_covid"]:checked');
+            total += 1;
+            if (vacunaCovid) {
+                completed += 1;
+                
+                if (vacunaCovid.value === 'SI') {
+                    const dosis1 = document.querySelector('input[name="covid_dosis1"]');
+                    const dosis2 = document.querySelector('input[name="covid_dosis2"]');
+                    const dosis3 = document.querySelector('input[name="covid_dosis3"]');
+                    
+                    total += 3;
+                    
+                    if (dosis1 && !dosis1.disabled && dosis1.value && dosis1.value.trim() !== '') completed += 1;
+                    if (dosis2 && !dosis2.disabled && dosis2.value && dosis2.value.trim() !== '') completed += 1;
+                    if (dosis3 && !dosis3.disabled && dosis3.value && dosis3.value.trim() !== '') completed += 1;
+                }
+            }
+
+            // OPERACIONES
+            const operacion = document.querySelector('input[name="tiene_operacion"]:checked');
+            total += 1;
+            if (operacion) {
+                completed += 1;
+                
+                if (operacion.value === 'SI') {
+                    const especificar = document.querySelector('input[name="operacion_especificar"]');
+                    total += 1;
+                    if (especificar && !especificar.disabled && especificar.value && especificar.value.trim() !== '') {
+                        completed += 1;
+                    }
+                }
+            }
+
+            // DOLENCIA CRÓNICA
+            const dolencia = document.querySelector('input[name="dolencia_cronica"]:checked');
+            total += 1;
+            if (dolencia) {
+                completed += 1;
+                
+                if (dolencia.value === 'SI') {
+                    const especificar = document.querySelector('input[name="dolencia_especificar"]');
+                    total += 1;
+                    if (especificar && !especificar.disabled && especificar.value && especificar.value.trim() !== '') {
+                        completed += 1;
+                    }
+                }
+            }
+
+            // DISCAPACIDAD
+            const discapacidad = document.querySelector('input[name="discapacidad"]:checked');
+            total += 1;
+            if (discapacidad) {
+                completed += 1;
+                
+                if (discapacidad.value === 'SI') {
+                    const especificar = document.querySelector('input[name="discapacidad_especificar"]');
+                    total += 1;
+                    if (especificar && !especificar.disabled && especificar.value && especificar.value.trim() !== '') {
+                        completed += 1;
+                    }
+                }
+            }
+
+            // TIPO DE SANGRE
+            const tipoSangre = document.querySelector('input[name="tipo_sangre"]:checked');
+            total += 2;
+            if (tipoSangre) {
+                completed += 2;
+            }
+
+            // CONTACTOS DE EMERGENCIA
+            const contactosVisibles = document.querySelectorAll('[data-contacto-index]');
+            
+            contactosVisibles.forEach((contacto) => {
+                const index = contacto.getAttribute('data-contacto-index');
+                const nombre = document.querySelector(`input[name="emergencia${index}_nombres"]`);
+                const parentesco = document.querySelector(`input[name="emergencia${index}_parentesco"]`);
+                const direccion = document.querySelector(`textarea[name="emergencia${index}_direccion"]`);
+                
+                total += 1;
+                
+                if (nombre && !nombre.disabled && nombre.value && nombre.value.trim() !== '') {
+                    completed += 0.5;
+                }
+                if (parentesco && !parentesco.disabled && parentesco.value && parentesco.value.trim() !== '') {
+                    completed += 0.3;
+                }
+                if (direccion && !direccion.disabled && direccion.value && direccion.value.trim() !== '') {
+                    completed += 0.2;
+                }
+            });
+
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+            const displayPercentage = Math.min(percentage, 100);
+
+            const percentageElement = document.getElementById('salud-percentage');
+            const progressElement = document.getElementById('salud-progress');
+
+            if (percentageElement) {
+                percentageElement.textContent = `${displayPercentage}%`;
+            }
+            if (progressElement) {
+                progressElement.style.width = `${displayPercentage}%`;
+                
+                progressElement.classList.remove('bg-green-500', 'bg-green-400', 'bg-yellow-500', 'bg-yellow-400', 'bg-red-500', 'bg-gray-300');
+                if (displayPercentage >= 100) {
+                    progressElement.classList.add('bg-green-500');
+                } else if (displayPercentage >= 80) {
+                    progressElement.classList.add('bg-green-400');
+                } else if (displayPercentage >= 60) {
+                    progressElement.classList.add('bg-yellow-500');
+                } else if (displayPercentage >= 40) {
+                    progressElement.classList.add('bg-yellow-400');
+                } else if (displayPercentage > 0) {
+                    progressElement.classList.add('bg-red-500');
+                } else {
+                    progressElement.classList.add('bg-gray-300');
+                }
+            }
+            
+            return displayPercentage;
+        }
+
+        // ========== TIPO DE SANGRE ==========
         document.querySelectorAll('.grupo-sangre').forEach(function(element) {
             element.addEventListener('click', function(e) {
-                // Si el click no fue directamente en el radio button
                 if (!e.target.classList.contains('hidden')) {
                     const radio = this.querySelector('input[type="radio"]');
                     if (radio) {
                         radio.checked = true;
-
-                        // Resetear todos los iconos
-                        document.querySelectorAll('.grupo-sangre-icono').forEach(function(
-                        icono) {
-                            icono.classList.remove('bg-red-600');
-                            icono.classList.add('bg-red-100');
-                            icono.querySelector('span').classList.remove('text-white');
-                            icono.querySelector('span').classList.add('text-red-600');
-                        });
-
-                        // Resaltar el seleccionado
-                        const icono = this.querySelector('.grupo-sangre-icono');
-                        if (icono) {
-                            icono.classList.remove('bg-red-100');
-                            icono.classList.add('bg-red-600');
-                            icono.querySelector('span').classList.remove('text-red-600');
-                            icono.querySelector('span').classList.add('text-white');
-                        }
-
-                        calculateSaludProgress();
+                        radio.dispatchEvent(new Event('change'));
                     }
                 }
             });
         });
 
-        // Manejar selección de radio buttons de grupo sanguíneo
         document.querySelectorAll('input[name="tipo_sangre"]').forEach(function(radio) {
             radio.addEventListener('change', function() {
-                // Resetear todos los iconos
                 document.querySelectorAll('.grupo-sangre-icono').forEach(function(icono) {
                     icono.classList.remove('bg-red-600');
                     icono.classList.add('bg-red-100');
@@ -567,7 +782,6 @@ if (typeof toastr !== 'undefined') {
                     icono.querySelector('span').classList.add('text-red-600');
                 });
 
-                // Resaltar el seleccionado
                 const label = document.querySelector(`label[for="${this.id}"]`);
                 if (label) {
                     const icono = label.querySelector('.grupo-sangre-icono');
@@ -578,145 +792,40 @@ if (typeof toastr !== 'undefined') {
                         icono.querySelector('span').classList.add('text-white');
                     }
                 }
-
                 calculateSaludProgress();
             });
         });
 
-        // Variables para contactos de emergencia
+        // ========== CONTACTOS DE EMERGENCIA ==========
         let currentContactoCount = 2;
         const maxContactos = 5;
 
-        // Función para agregar contacto de emergencia
-        document.getElementById('add-contacto-btn').addEventListener('click', function() {
-            if (currentContactoCount >= maxContactos) {
-                // SweetAlert para límite alcanzado
-                Swal.fire({
-                    title: '⚠️ Límite alcanzado',
-                    html: `Máximo <strong>${maxContactos} contactos</strong> de emergencia permitidos`,
-                    icon: 'info',
-                    confirmButtonColor: '#ef4444',
-                    confirmButtonText: 'Entendido',
-                    background: 'white',
-                    backdrop: 'rgba(239, 68, 68, 0.1)',
-                    customClass: {
-                        popup: 'rounded-2xl',
-                        confirmButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 border-0',
-                        title: 'text-lg font-bold',
-                        htmlContainer: 'text-gray-600'
-                    }
-                });
-                return;
-            }
+        function setupContactoEventListeners(index) {
+            const fields = [
+                `emergencia${index}_nombres`,
+                `emergencia${index}_parentesco`,
+                `emergencia${index}_direccion`
+            ];
 
-            currentContactoCount++;
-            const contactoIndex = currentContactoCount;
-            const isEven = contactoIndex % 2 === 0;
-            const tieneBordeInferior = contactoIndex < maxContactos;
-
-            // Crear nueva fila de contacto
-            const contactoRow = document.createElement('div');
-            contactoRow.className =
-                `grid md:grid-cols-3 ${tieneBordeInferior ? 'border-b border-gray-200' : ''}`;
-            contactoRow.setAttribute('data-contacto-index', contactoIndex);
-            contactoRow.innerHTML = `
-                <!-- Nombres -->
-                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'} border-r border-gray-200">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Contacto de Emergencia #${contactoIndex}</label>
-                    <div class="relative">
-                        <input type="text" name="emergencia${contactoIndex}_nombres"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all ${isEven ? 'bg-white' : 'bg-white'}"
-                            placeholder="Nombre completo del contacto">
-                        <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
-                    </div>
-                </div>
-
-                <!-- Parentesco -->
-                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'} border-r border-gray-200">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Parentesco</label>
-                    <div class="relative">
-                        <input type="text" name="emergencia${contactoIndex}_parentesco"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all ${isEven ? 'bg-white' : 'bg-white'}"
-                            placeholder="Ej: Amigo/a, Vecino/a">
-                        <i class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
-                    </div>
-                </div>
-
-                <!-- Dirección y Teléfono -->
-                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'}">
-                    <div class="relative">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Contacto</label>
-                        <textarea name="emergencia${contactoIndex}_direccion" rows="3"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all ${isEven ? 'bg-white' : 'bg-white'} resize-none"
-                            placeholder="Dirección completa y número de teléfono"></textarea>
-                        <i class="fas fa-map-marker-alt text-gray-400 absolute right-3 top-4"></i>
-                    </div>
-                    <div class="mt-2 text-right">
-                        <button type="button" class="remove-contacto-btn text-sm text-red-500 hover:text-red-700" data-index="${contactoIndex}">
-                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Agregar al DOM dentro del contenedor dinámico
-            const contactosContainer = document.getElementById('contactos-dynamic-container');
-            contactosContainer.appendChild(contactoRow);
-
-            // Quitar borde inferior del contacto anterior si existe
-            if (contactoIndex > 2) {
-                const anteriorRow = document.querySelector(
-                    `[data-contacto-index="${contactoIndex - 1}"]`);
-                if (anteriorRow) {
-                    anteriorRow.classList.remove('border-b');
-                    anteriorRow.classList.add('border-b');
+            fields.forEach(fieldName => {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    field.addEventListener('input', calculateSaludProgress);
+                    field.addEventListener('change', calculateSaludProgress);
                 }
-            }
-
-            // Agregar event listeners a los nuevos campos
-            setupContactoEventListeners(contactoIndex);
-
-            // Agregar listener para eliminar
-            contactoRow.querySelector('.remove-contacto-btn').addEventListener('click', function() {
-                removeContacto(contactoIndex);
             });
+        }
 
-            // Actualizar botón si es necesario
-            if (currentContactoCount >= maxContactos) {
-                document.getElementById('add-contacto-btn').disabled = true;
-                document.getElementById('add-contacto-btn').classList.add('opacity-50',
-                    'cursor-not-allowed');
-                document.getElementById('add-contacto-btn').innerHTML =
-                    '<i class="fas fa-ban mr-2"></i><span>Límite alcanzado</span>';
-            }
-
-            // Animación suave
-            contactoRow.style.opacity = '0';
-            contactoRow.style.transform = 'translateY(10px)';
-
-            setTimeout(() => {
-                contactoRow.style.transition = 'all 0.3s ease';
-                contactoRow.style.opacity = '1';
-                contactoRow.style.transform = 'translateY(0)';
-            }, 10);
-
-            // Toastr para éxito al agregar
-            toastr.success(
-                `Contacto #${contactoIndex} agregado correctamente`,
-                'Contacto agregado', {
-                    timeOut: 3000,
-                    progressBar: true,
-                    closeButton: true,
-                    positionClass: "toast-top-right",
-                    toastClass: 'rounded-xl shadow-lg font-medium',
-                    iconClass: 'toast-success bg-gradient-to-r from-green-500 to-green-600 border-0'
+        function reorganizarBordesContactos() {
+            const contactos = document.querySelectorAll('[data-contacto-index]');
+            contactos.forEach((contacto, index) => {
+                contacto.classList.remove('border-b');
+                if (index < contactos.length - 1) {
+                    contacto.classList.add('border-b', 'border-gray-200');
                 }
-            );
+            });
+        }
 
-            calculateSaludProgress();
-        });
-
-        // Función para eliminar contacto con SweetAlert2 y Toastr
         function removeContacto(index) {
             if (index <= 2) {
                 Swal.fire({
@@ -759,7 +868,6 @@ if (typeof toastr !== 'undefined') {
                 if (result.isConfirmed) {
                     const contactoRow = document.querySelector(`[data-contacto-index="${index}"]`);
                     if (contactoRow) {
-                        // Animación de eliminación
                         contactoRow.style.transition = 'all 0.3s ease';
                         contactoRow.style.opacity = '0';
                         contactoRow.style.transform = 'translateY(-10px)';
@@ -769,30 +877,26 @@ if (typeof toastr !== 'undefined') {
                             contactoRow.remove();
                             currentContactoCount--;
 
-                            // Reorganizar bordes
                             reorganizarBordesContactos();
 
-                            // Habilitar botón de agregar si estaba deshabilitado
                             if (currentContactoCount < maxContactos) {
                                 const addBtn = document.getElementById('add-contacto-btn');
                                 addBtn.disabled = false;
                                 addBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                                addBtn.innerHTML =
-                                    '<i class="fas fa-plus mr-2"></i><span>Agregar otro contacto</span>';
+                                addBtn.innerHTML = '<i class="fas fa-plus mr-2"></i><span>Agregar otro contacto</span>';
                             }
 
-                            // Toastr para éxito al eliminar
-                            toastr.success(
-                                `Contacto #${index} eliminado correctamente`,
-                                'Contacto eliminado', {
-                                    timeOut: 3000,
-                                    progressBar: true,
-                                    closeButton: true,
-                                    positionClass: "toast-top-right",
-                                    toastClass: 'rounded-xl shadow-lg font-medium',
-                                    iconClass: 'toast-success bg-gradient-to-r from-green-500 to-green-600 border-0'
-                                }
-                            );
+                            if (typeof toastr !== 'undefined') {
+                                toastr.success(
+                                    `Contacto #${index} eliminado correctamente`,
+                                    'Contacto eliminado', {
+                                        timeOut: 3000,
+                                        progressBar: true,
+                                        closeButton: true,
+                                        positionClass: "toast-top-right"
+                                    }
+                                );
+                            }
 
                             calculateSaludProgress();
                         }, 300);
@@ -801,18 +905,100 @@ if (typeof toastr !== 'undefined') {
             });
         }
 
-        // Función para reorganizar bordes después de eliminar
-        function reorganizarBordesContactos() {
-            const contactos = document.querySelectorAll('[data-contacto-index]');
-            contactos.forEach((contacto, index) => {
-                contacto.classList.remove('border-b');
-                if (index < contactos.length - 1) {
-                    contacto.classList.add('border-b', 'border-gray-200');
-                }
-            });
-        }
+        document.getElementById('add-contacto-btn').addEventListener('click', function() {
+            if (currentContactoCount >= maxContactos) {
+                Swal.fire({
+                    title: '⚠️ Límite alcanzado',
+                    html: `Máximo <strong>${maxContactos} contactos</strong> de emergencia permitidos`,
+                    icon: 'info',
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: 'Entendido',
+                    background: 'white',
+                    backdrop: 'rgba(239, 68, 68, 0.1)',
+                    customClass: {
+                        popup: 'rounded-2xl',
+                        confirmButton: 'rounded-xl px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 border-0',
+                        title: 'text-lg font-bold',
+                        htmlContainer: 'text-gray-600'
+                    }
+                });
+                return;
+            }
 
-        // Agregar event listeners a los botones de eliminar existentes
+            currentContactoCount++;
+            const contactoIndex = currentContactoCount;
+            const isEven = contactoIndex % 2 === 0;
+            const tieneBordeInferior = contactoIndex < maxContactos;
+
+            const contactoRow = document.createElement('div');
+            contactoRow.className = `grid md:grid-cols-3 ${tieneBordeInferior ? 'border-b border-gray-200' : ''}`;
+            contactoRow.setAttribute('data-contacto-index', contactoIndex);
+            contactoRow.innerHTML = `
+                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'} border-r border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Contacto de Emergencia #${contactoIndex}</label>
+                    <div class="relative">
+                        <input type="text" name="emergencia${contactoIndex}_nombres"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
+                            placeholder="Nombre completo del contacto">
+                        <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                    </div>
+                </div>
+                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'} border-r border-gray-200">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Parentesco</label>
+                    <div class="relative">
+                        <input type="text" name="emergencia${contactoIndex}_parentesco"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white"
+                            placeholder="Ej: Amigo/a, Vecino/a">
+                        <i class="fas fa-users text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
+                    </div>
+                </div>
+                <div class="p-6 ${isEven ? 'bg-gray-50' : 'bg-white'}">
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Contacto</label>
+                        <textarea name="emergencia${contactoIndex}_direccion" rows="3"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all bg-white resize-none"
+                            placeholder="Dirección completa y número de teléfono"></textarea>
+                        <i class="fas fa-map-marker-alt text-gray-400 absolute right-3 top-4"></i>
+                    </div>
+                    <div class="mt-2 text-right">
+                        <button type="button" class="remove-contacto-btn text-sm text-red-500 hover:text-red-700" data-index="${contactoIndex}">
+                            <i class="fas fa-trash-alt mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('contactos-dynamic-container').appendChild(contactoRow);
+            
+            setupContactoEventListeners(contactoIndex);
+
+            contactoRow.querySelector('.remove-contacto-btn').addEventListener('click', function() {
+                removeContacto(contactoIndex);
+            });
+
+            if (currentContactoCount >= maxContactos) {
+                this.disabled = true;
+                this.classList.add('opacity-50', 'cursor-not-allowed');
+                this.innerHTML = '<i class="fas fa-ban mr-2"></i><span>Límite alcanzado</span>';
+            }
+
+            contactoRow.style.opacity = '0';
+            contactoRow.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                contactoRow.style.transition = 'all 0.3s ease';
+                contactoRow.style.opacity = '1';
+                contactoRow.style.transform = 'translateY(0)';
+            }, 10);
+
+            if (typeof toastr !== 'undefined') {
+                toastr.success(`Contacto #${contactoIndex} agregado correctamente`, 'Contacto agregado');
+            }
+
+            calculateSaludProgress();
+        });
+
+        // Event listeners para botones de eliminar existentes
         document.querySelectorAll('.remove-contacto-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const index = this.getAttribute('data-index');
@@ -820,241 +1006,29 @@ if (typeof toastr !== 'undefined') {
             });
         });
 
-        // Función para calcular progreso de sección de salud
-        function calculateSaludProgress() {
-            let completed = 0;
-            let total = 0;
-
-            // Verificar vacuna COVID
-            const vacunaCovid = document.querySelector('input[name="vacuna_covid"]:checked');
-            if (vacunaCovid) {
-                completed++;
-                total++;
-
-                // Si es SI, verificar fechas
-                if (vacunaCovid.value === 'SI') {
-                    const dosis1 = document.querySelector('input[name="covid_dosis1"]')?.value;
-                    const dosis2 = document.querySelector('input[name="covid_dosis2"]')?.value;
-                    const dosis3 = document.querySelector('input[name="covid_dosis3"]')?.value;
-
-                    if (dosis1 && dosis1.trim() !== '') {
-                        completed += 0.33;
-                    }
-                    total += 0.33;
-
-                    if (dosis2 && dosis2.trim() !== '') {
-                        completed += 0.33;
-                    }
-                    total += 0.33;
-
-                    if (dosis3 && dosis3.trim() !== '') {
-                        completed += 0.34;
-                    }
-                    total += 0.34;
-                }
-            } else {
-                total++;
-            }
-
-            // Verificar operaciones - NUEVO
-            const operacion = document.querySelector('input[name="tiene_operacion"]:checked');
-            if (operacion) {
-                completed++;
-                total++;
-
-                // Si es SI, verificar especificación
-                if (operacion.value === 'SI') {
-                    const especificar = document.querySelector('input[name="operacion_especificar"]')?.value;
-                    if (especificar && especificar.trim() !== '') {
-                        completed += 0.5;
-                    }
-                    total += 0.5;
-                }
-            } else {
-                total++;
-            }
-
-            // Verificar dolencia crónica
-            const dolencia = document.querySelector('input[name="dolencia_cronica"]:checked');
-            if (dolencia) {
-                completed++;
-                total++;
-
-                // Si es SI, verificar especificación
-                if (dolencia.value === 'SI') {
-                    const especificar = document.querySelector('input[name="dolencia_especificar"]')?.value;
-                    if (especificar && especificar.trim() !== '') {
-                        completed += 0.5;
-                    }
-                    total += 0.5;
-                }
-            } else {
-                total++;
-            }
-
-            // Verificar discapacidad
-            const discapacidad = document.querySelector('input[name="discapacidad"]:checked');
-            if (discapacidad) {
-                completed++;
-                total++;
-
-                // Si es SI, verificar especificación
-                if (discapacidad.value === 'SI') {
-                    const especificar = document.querySelector('input[name="discapacidad_especificar"]')?.value;
-                    if (especificar && especificar.trim() !== '') {
-                        completed += 0.5;
-                    }
-                    total += 0.5;
-                }
-            } else {
-                total++;
-            }
-
-            // Verificar tipo de sangre
-            const tipoSangre = document.querySelector('input[name="tipo_sangre"]:checked');
-            if (tipoSangre) {
-                completed += 2;
-                total += 2;
-            } else {
-                total += 2;
-            }
-
-            // Verificar contactos de emergencia
-            for (let i = 1; i <= currentContactoCount; i++) {
-                const nombre = document.querySelector(`input[name="emergencia${i}_nombres"]`)?.value;
-                const parentesco = document.querySelector(`input[name="emergencia${i}_parentesco"]`)?.value;
-                const direccion = document.querySelector(`textarea[name="emergencia${i}_direccion"]`)?.value;
-
-                if (nombre && nombre.trim() !== '') {
-                    completed += 0.5;
-                }
-                total += 0.5;
-
-                if (parentesco && parentesco.trim() !== '') {
-                    completed += 0.3;
-                }
-                total += 0.3;
-
-                if (direccion && direccion.trim() !== '') {
-                    completed += 0.2;
-                }
-                total += 0.2;
-            }
-
-            // Calcular porcentaje
-            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-            const displayPercentage = Math.min(percentage, 100);
-
-            const percentageElement = document.getElementById('salud-percentage');
-            const progressElement = document.getElementById('salud-progress');
-
-            if (percentageElement) {
-                percentageElement.textContent = `${displayPercentage}%`;
-            }
-            if (progressElement) {
-                progressElement.style.width = `${displayPercentage}%`;
-            }
-        }
-
-        // Agregar event listeners a todos los campos
+        // ========== SETUP INICIAL ==========
         function setupEventListeners() {
-            // Radio buttons
             document.querySelectorAll('input[type="radio"]').forEach(field => {
                 field.addEventListener('change', calculateSaludProgress);
             });
 
-            // Campos de texto
             document.querySelectorAll('input[type="text"], textarea, .flatpickr-salud').forEach(field => {
                 field.addEventListener('input', calculateSaludProgress);
                 field.addEventListener('change', calculateSaludProgress);
             });
         }
 
-        // Inicializar event listeners para contactos existentes
-        function setupContactoEventListeners(index) {
-            const fields = [
-                `emergencia${index}_nombres`,
-                `emergencia${index}_parentesco`,
-                `emergencia${index}_direccion`
-            ];
-
-            fields.forEach(fieldName => {
-                const field = document.querySelector(`[name="${fieldName}"]`);
-                if (field) {
-                    field.addEventListener('input', calculateSaludProgress);
-                    field.addEventListener('change', calculateSaludProgress);
-                }
-            });
-        }
-
-        // Inicializar event listeners
         setupEventListeners();
         for (let i = 1; i <= 2; i++) {
             setupContactoEventListeners(i);
         }
 
-        // Calcular progreso inicial
-        calculateSaludProgress();
+        // Estado inicial de campos condicionales
+        setTimeout(() => {
+            document.querySelectorAll('input[name="vacuna_covid"]:checked, input[name="tiene_operacion"]:checked, input[name="dolencia_cronica"]:checked, input[name="discapacidad"]:checked').forEach(radio => {
+                handleCondicionalSalud(radio);
+            });
+            calculateSaludProgress();
+        }, 200);
     });
 </script>
-
-<style>
-    /* Estilos para selección de tipo de sangre */
-    .grupo-sangre {
-        transition: all 0.2s ease;
-    }
-
-    .grupo-sangre:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    }
-
-    .grupo-sangre-icono {
-        transition: all 0.2s ease;
-    }
-
-    /* Estilos para animaciones de contactos */
-    [data-contacto-index] {
-        transition: all 0.3s ease;
-    }
-
-    /* Estilos para campos de emergencia */
-    textarea {
-        min-height: 80px;
-    }
-
-    .remove-contacto-btn {
-        transition: all 0.2s ease;
-    }
-
-    .remove-contacto-btn:hover {
-        transform: scale(1.05);
-    }
-
-    @media (max-width: 768px) {
-        .grupo-sangre {
-            padding: 12px 8px;
-        }
-
-        .grupo-sangre-icono {
-            width: 36px;
-            height: 36px;
-            margin-right: 6px;
-        }
-
-        /* En móvil, mostrar contactos en columnas */
-        #contactos-table .grid {
-            grid-template-columns: 1fr !important;
-            border-right: none !important;
-        }
-
-        #contactos-table .border-r {
-            border-right: none !important;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        #contactos-table .p-6:last-child {
-            border-bottom: none;
-        }
-    }
-</style>

@@ -551,148 +551,146 @@ function loadjQuery(callback) {
 loadjQuery(function() {
     $(document).ready(function() {
         // ========== CÁLCULO DEL PROGRESO DE LA SECCIÓN ==========
-        function calculateGeneralProgress() {
-            const campos = [
-                // Campos obligatorios (valen más puntos)
-                { selector: '#paterno', required: true, weight: 2 },
-                { selector: '#nombres', required: true, weight: 2 },
-                { selector: '#dia', required: true, weight: 1 },
-                { selector: '#mes', required: true, weight: 1 },
-                { selector: '#anio', required: true, weight: 1 },
-                { selector: '#idTipoDocumento', required: true, weight: 2 },
-                { selector: '#num_documento', required: true, weight: 2 },
-                { selector: '#email', required: true, weight: 2 },
-                { selector: '#telefono', required: true, weight: 2 },
-                
-                // Campos opcionales (valen menos puntos)
-                { selector: '#materno', required: false, weight: 1 },
-                { selector: '#nacimientoDepartamento', required: false, weight: 1 },
-                { selector: '#nacimientoProvincia', required: false, weight: 1 },
-                { selector: '#nacimientoDistrito', required: false, weight: 1 },
-                { selector: '#idSexo', required: false, weight: 1 },
-                { selector: '#nacionalidad', required: false, weight: 1 },
-                { selector: '#domicilioVia', required: false, weight: 1 },
-                { selector: '#domicilioMzLt', required: false, weight: 1 },
-                { selector: '#domicilioUrb', required: false, weight: 1 },
-                { selector: '#domicilioDepartamento', required: false, weight: 1 },
-                { selector: '#domicilioProvincia', required: false, weight: 1 },
-                { selector: '#domicilioDistrito', required: false, weight: 1 },
-                { selector: '#entidadBancaria', required: false, weight: 1 },
-                { selector: '#tipoCuenta', required: false, weight: 1 },
-                { selector: '#moneda', required: false, weight: 1 },
-                { selector: '#numeroCuenta', required: false, weight: 1 },
-                { selector: '#numeroCCI', required: false, weight: 1 }
-            ];
+        // ========== CÁLCULO DEL PROGRESO DE LA SECCIÓN - CORREGIDO ==========
+function calculateGeneralProgress() {
+    const campos = [
+        // Campos obligatorios (valen más puntos)
+        { selector: '#paterno', required: true, weight: 2 },
+        { selector: '#nombres', required: true, weight: 2 },
+        { selector: '#dia', required: true, weight: 1 },
+        { selector: '#mes', required: true, weight: 1 },
+        { selector: '#anio', required: true, weight: 1 },
+        { selector: '#idTipoDocumento', required: true, weight: 2 },
+        { selector: '#num_documento', required: true, weight: 2 },
+        { selector: '#email', required: true, weight: 2 },
+        { selector: '#telefono', required: true, weight: 2 },
+        
+        // Campos opcionales (valen menos puntos)
+        { selector: '#materno', required: false, weight: 1 },
+        { selector: '#nacimientoDepartamento', required: false, weight: 1 },
+        { selector: '#nacimientoProvincia', required: false, weight: 1 },
+        { selector: '#nacimientoDistrito', required: false, weight: 1 },
+        { selector: '#idSexo', required: false, weight: 1 },
+        { selector: '#nacionalidad', required: false, weight: 1 },
+        { selector: '#direccion', required: false, weight: 1 }, // CORREGIDO: antes era domicilioVia
+        { selector: '#domicilioDepartamento', required: false, weight: 1 },
+        { selector: '#domicilioProvincia', required: false, weight: 1 },
+        { selector: '#domicilioDistrito', required: false, weight: 1 },
+        { selector: '#entidadBancaria', required: false, weight: 1 },
+        { selector: '#tipoCuenta', required: false, weight: 1 },
+        { selector: '#moneda', required: false, weight: 1 },
+        { selector: '#numeroCuenta', required: false, weight: 1 },
+        { selector: '#numeroCCI', required: false, weight: 1 }
+    ];
 
-            let puntosObtenidos = 0;
-            let puntosTotales = 0;
-            let camposRequeridosCompletados = 0;
-            let totalCamposRequeridos = 0;
+    let puntosObtenidos = 0;
+    let puntosTotales = 0;
+    let camposRequeridosCompletados = 0;
+    let totalCamposRequeridos = 0;
 
-            // Verificar campos de texto y selects
-            campos.forEach(campo => {
-                if (campo.required) {
-                    totalCamposRequeridos += campo.weight;
-                }
-                
-                const element = $(campo.selector);
-                if (element.length > 0) {
-                    puntosTotales += campo.weight;
-                    
-                    if (element.is('input[type="text"], input[type="email"], input[type="tel"], input[type="number"]')) {
-                        if (element.val() && element.val().trim() !== '') {
-                            puntosObtenidos += campo.weight;
-                            if (campo.required) {
-                                camposRequeridosCompletados += campo.weight;
-                            }
-                        }
-                    } else if (element.is('select')) {
-                        if (element.val() && element.val() !== '') {
-                            puntosObtenidos += campo.weight;
-                            if (campo.required) {
-                                camposRequeridosCompletados += campo.weight;
-                            }
-                        }
+    // Verificar campos de texto y selects
+    campos.forEach(campo => {
+        const element = $(campo.selector);
+        
+        // Solo contar si el elemento existe en la página
+        if (element.length > 0) {
+            if (campo.required) {
+                totalCamposRequeridos += campo.weight;
+            }
+            
+            puntosTotales += campo.weight;
+            
+            if (element.is('input[type="text"], input[type="email"], input[type="tel"], input[type="number"]')) {
+                if (element.val() && element.val().trim() !== '') {
+                    puntosObtenidos += campo.weight;
+                    if (campo.required) {
+                        camposRequeridosCompletados += campo.weight;
                     }
                 }
-            });
-
-            // Verificar radios de estado civil (al menos uno debe estar seleccionado)
-            const estadoCivilSeleccionado = $('input[name="estadoCivil"]:checked').length > 0;
-            if (estadoCivilSeleccionado) {
-                puntosObtenidos += 2; // Puntos por tener estado civil
-                puntosTotales += 2;
-            } else {
-                puntosTotales += 2;
-            }
-
-            // Verificar radios de seguro de salud (al menos uno debe estar seleccionado)
-            const seguroSaludSeleccionado = $('input[name="seguroSalud"]:checked').length > 0;
-            if (seguroSaludSeleccionado) {
-                puntosObtenidos += 2; // Puntos por tener seguro
-                puntosTotales += 2;
-            } else {
-                puntosTotales += 2;
-            }
-
-            // Verificar radios de sistema de pensiones (al menos uno debe estar seleccionado)
-            const sistemaPensionesSeleccionado = $('input[name="sistemaPensiones"]:checked').length > 0;
-            if (sistemaPensionesSeleccionado) {
-                puntosObtenidos += 2; // Puntos por tener sistema de pensiones
-                puntosTotales += 2;
-                
-                // Si seleccionó AFP, verificar que también seleccionó compañía
-                if ($('input[name="sistemaPensiones"]:checked').val() === 'AFP') {
-                    const afpCompaniaSeleccionada = $('#afpCompania').val() && $('#afpCompania').val() !== '';
-                    if (afpCompaniaSeleccionada) {
-                        puntosObtenidos += 1;
-                        puntosTotales += 1;
-                    } else {
-                        puntosTotales += 1;
+            } else if (element.is('select')) {
+                if (element.val() && element.val() !== '') {
+                    puntosObtenidos += campo.weight;
+                    if (campo.required) {
+                        camposRequeridosCompletados += campo.weight;
                     }
                 }
-            } else {
-                puntosTotales += 2;
             }
-
-            // Calcular porcentaje
-            let porcentaje = 0;
-            if (puntosTotales > 0) {
-                porcentaje = Math.round((puntosObtenidos / puntosTotales) * 100);
-            }
-
-            // Asegurarnos de que si todos los campos requeridos están llenos, sea 100%
-            if (camposRequeridosCompletados === totalCamposRequeridos && 
-                estadoCivilSeleccionado && 
-                seguroSaludSeleccionado && 
-                sistemaPensionesSeleccionado) {
-                porcentaje = 100;
-            }
-
-            // Actualizar la barra de progreso
-            $('#general-percentage').text(`${porcentaje}%`);
-            $('#general-progress').css('width', `${porcentaje}%`);
-            
-            // Cambiar color según el porcentaje
-            const progressBar = $('#general-progress');
-            progressBar.removeClass('bg-green-500 bg-yellow-500 bg-red-500 bg-green-400 bg-yellow-400 bg-gray-300');
-            
-            if (porcentaje >= 100) {
-                progressBar.addClass('bg-green-500');
-            } else if (porcentaje >= 80) {
-                progressBar.addClass('bg-green-400');
-            } else if (porcentaje >= 60) {
-                progressBar.addClass('bg-yellow-500');
-            } else if (porcentaje >= 40) {
-                progressBar.addClass('bg-yellow-400');
-            } else if (porcentaje > 0) {
-                progressBar.addClass('bg-red-500');
-            } else {
-                progressBar.addClass('bg-gray-300');
-            }
-
-            return porcentaje;
         }
+    });
+
+    // CORREGIDO: Verificar radios de estado civil (name correcto: 'estado_civil')
+    const estadoCivilSeleccionado = $('input[name="estado_civil"]:checked').length > 0;
+    puntosTotales += 2;
+    if (estadoCivilSeleccionado) {
+        puntosObtenidos += 2;
+    }
+
+    // Verificar radios de seguro de salud
+    const seguroSaludSeleccionado = $('input[name="seguroSalud"]:checked').length > 0;
+    puntosTotales += 2;
+    if (seguroSaludSeleccionado) {
+        puntosObtenidos += 2;
+    }
+
+    // Verificar radios de sistema de pensiones
+    const sistemaPensionesSeleccionado = $('input[name="sistemaPensiones"]:checked').length > 0;
+    puntosTotales += 2;
+    if (sistemaPensionesSeleccionado) {
+        puntosObtenidos += 2;
+        
+        // Si seleccionó AFP, verificar compañía
+        if ($('input[name="sistemaPensiones"]:checked').val() === 'AFP') {
+            puntosTotales += 1;
+            const afpCompaniaSeleccionada = $('#afpCompania').val() && $('#afpCompania').val() !== '';
+            if (afpCompaniaSeleccionada) {
+                puntosObtenidos += 1;
+            }
+        }
+    }
+
+    // Calcular porcentaje
+    let porcentaje = 0;
+    if (puntosTotales > 0) {
+        porcentaje = Math.round((puntosObtenidos / puntosTotales) * 100);
+        
+        // Si todos los campos requeridos están completos, mínimo 85%
+        if (camposRequeridosCompletados === totalCamposRequeridos) {
+            porcentaje = Math.max(porcentaje, 85);
+        }
+        
+        // Solo 100% si TODO está perfecto (requeridos + opcionales clave)
+        if (camposRequeridosCompletados === totalCamposRequeridos && 
+            estadoCivilSeleccionado && 
+            seguroSaludSeleccionado && 
+            sistemaPensionesSeleccionado) {
+            porcentaje = 100;
+        }
+    }
+
+    // Actualizar la barra de progreso
+    $('#general-percentage').text(`${porcentaje}%`);
+    $('#general-progress').css('width', `${porcentaje}%`);
+    
+    // Cambiar color según el porcentaje
+    const progressBar = $('#general-progress');
+    progressBar.removeClass('bg-green-500 bg-yellow-500 bg-red-500 bg-green-400 bg-yellow-400 bg-gray-300');
+    
+    if (porcentaje >= 100) {
+        progressBar.addClass('bg-green-500');
+    } else if (porcentaje >= 80) {
+        progressBar.addClass('bg-green-400');
+    } else if (porcentaje >= 60) {
+        progressBar.addClass('bg-yellow-500');
+    } else if (porcentaje >= 40) {
+        progressBar.addClass('bg-yellow-400');
+    } else if (porcentaje > 0) {
+        progressBar.addClass('bg-red-500');
+    } else {
+        progressBar.addClass('bg-gray-300');
+    }
+
+    return porcentaje;
+}
 
         // ========== UBIGEO LUGAR DE NACIMIENTO ==========
         

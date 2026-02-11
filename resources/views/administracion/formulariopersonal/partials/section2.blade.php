@@ -400,115 +400,98 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Función para manejar el cambio en los radio buttons
-    function handleTerminoChange(event) {
-        const nivel = event.target.getAttribute('data-nivel');
-        const value = event.target.value;
-        const isMobile = event.target.id.includes('_mobile');
+  // Función para manejar el cambio en los radio buttons - VERSIÓN CORREGIDA
+function handleTerminoChange(event) {
+    const nivel = event.target.getAttribute('data-nivel');
+    const value = event.target.value;
+    const isMobile = event.target.id.includes('_mobile');
+    
+    // Obtener todos los campos de este nivel (desktop y mobile)
+    const desktopCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico:not([id$="_mobile"])`);
+    const mobileCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico[id$="_mobile"]`);
+    const allCampos = [...desktopCampos, ...mobileCampos];
+    
+    // Obtener los contenedores de los datepickers
+    const desktopDateContainers = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date:not([id$="_mobile"])`);
+    const mobileDateContainers = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date-mobile`);
+    const allDateContainers = [...desktopDateContainers, ...mobileDateContainers];
+    
+    if (value === 'NO') {
+        // Deshabilitar y limpiar todos los campos
+        allCampos.forEach(campo => {
+            campo.disabled = true;
+            campo.value = '';
+            campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+            campo.classList.remove('bg-white');
+            campo.placeholder = 'No aplica';
+        });
         
-        // Obtener todos los campos de este nivel (desktop y mobile)
-        const desktopCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico:not([id$="_mobile"])`);
-        const mobileCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico[id$="_mobile"]`);
-        const allCampos = [...desktopCampos, ...mobileCampos];
+        // Deshabilitar los datepickers sin destruirlos
+        allDateContainers.forEach(container => {
+            if (container._flatpickr) {
+                // Solo deshabilitar visualmente, NO destruir
+                container.disabled = true;
+                
+                // Deshabilitar el altInput si existe
+                if (container._flatpickr.altInput) {
+                    container._flatpickr.altInput.disabled = true;
+                    container._flatpickr.altInput.value = '';
+                    container._flatpickr.altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                    container._flatpickr.altInput.placeholder = 'No aplica';
+                }
+                
+                // También deshabilitar el input principal
+                container.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                container.classList.remove('bg-white');
+                container.placeholder = 'No aplica';
+            }
+        });
         
-        // Obtener datepickers
-        const desktopFlatpickrs = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date:not([id$="_mobile"])`);
-        const mobileFlatpickrs = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date-mobile`);
-        const allFlatpickrs = [...desktopFlatpickrs, ...mobileFlatpickrs];
-        
-        if (value === 'NO') {
-            // Deshabilitar y limpiar todos los campos
-            allCampos.forEach(campo => {
-                campo.disabled = true;
-                campo.value = '';
-                campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                campo.classList.remove('bg-white');
-                campo.placeholder = 'No aplica';
-            });
+    } else if (value === 'SI') {
+        // Habilitar todos los campos
+        allCampos.forEach(campo => {
+            campo.disabled = false;
+            campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+            campo.classList.add('bg-white');
             
-            // Deshabilitar Flatpickr
-            allFlatpickrs.forEach(fpElement => {
-                const instance = fpElement._flatpickr;
-                if (instance) {
-                    instance.destroy();
-                }
-                fpElement.disabled = true;
-                fpElement.value = '';
-                fpElement.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                fpElement.classList.remove('bg-white');
-                fpElement.placeholder = 'No aplica';
-                
-                // Limpiar también el input alternativo de flatpickr
-                const altInput = fpElement.nextElementSibling;
-                if (altInput && altInput.classList.contains('flatpickr-alt-input')) {
-                    altInput.disabled = true;
-                    altInput.value = '';
-                    altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                }
-            });
-        } else if (value === 'SI') {
-            // Habilitar todos los campos
-            allCampos.forEach(campo => {
-                campo.disabled = false;
-                campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                campo.classList.add('bg-white');
-                
-                // Restaurar placeholders según el tipo de campo
-                if (campo.name.includes('_centro')) {
-                    campo.placeholder = isMobile ? 'Ej: Colegio Nacional' : 'Nombre del centro';
-                } else if (campo.name.includes('_especialidad')) {
-                    campo.placeholder = isMobile ? 'Ej: Ciencias' : 'Especialidad o carrera';
-                } else if (campo.name.includes('_grado')) {
-                    campo.placeholder = isMobile ? 'Ej: Bachiller' : 'Ej: Bachiller, Titulado';
-                }
-            });
-            
-            // Re-inicializar Flatpickr
-            allFlatpickrs.forEach(fpElement => {
-                fpElement.disabled = false;
-                fpElement.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                fpElement.classList.add('bg-white');
-                fpElement.placeholder = 'Seleccione fecha';
-                
-                // Solo inicializar si no tiene instancia
-                if (!fpElement._flatpickr) {
-                    const options = fpElement.classList.contains('flatpickr-date-mobile') 
-                        ? { ...flatpickrOptions, disableMobile: false }
-                        : flatpickrOptions;
-                    
-                    // Configuración especial para fechas
-                    const customOptions = {
-                        ...options,
-                        onChange: function(selectedDates, dateStr, instance) {
-                            const nivel = fpElement.getAttribute('data-nivel');
-                            const isFin = fpElement.name.includes('_fin');
-                            
-                            if (isFin) {
-                                const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
-                                if (inicioInput && inicioInput.value) {
-                                    instance.set('minDate', inicioInput.value);
-                                }
-                            }
-                            
-                            calculateAcademicProgress();
-                        }
-                    };
-                    
-                    flatpickr(fpElement, customOptions);
-                }
-                
-                // Habilitar también el input alternativo
-                const altInput = fpElement.nextElementSibling;
-                if (altInput && altInput.classList.contains('flatpickr-alt-input')) {
-                    altInput.disabled = false;
-                    altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                }
-            });
-        }
+            // Restaurar placeholders según el tipo de campo
+            if (campo.name.includes('_centro')) {
+                campo.placeholder = isMobile ? 'Ej: Colegio Nacional' : 'Nombre del centro';
+            } else if (campo.name.includes('_especialidad')) {
+                campo.placeholder = isMobile ? 'Ej: Ciencias' : 'Especialidad o carrera';
+            } else if (campo.name.includes('_grado')) {
+                campo.placeholder = isMobile ? 'Ej: Bachiller' : 'Ej: Bachiller, Titulado';
+            } else if (campo.name.includes('_inicio') || campo.name.includes('_fin')) {
+                campo.placeholder = 'Seleccione fecha';
+            }
+        });
         
-        // Recalcular progreso
-        calculateAcademicProgress();
+        // Habilitar los datepickers sin re-inicializar
+        allDateContainers.forEach(container => {
+            container.disabled = false;
+            container.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+            container.classList.add('bg-white');
+            container.placeholder = 'Seleccione fecha';
+            
+            // Habilitar y limpiar estilos del altInput
+            if (container._flatpickr) {
+                if (container._flatpickr.altInput) {
+                    container._flatpickr.altInput.disabled = false;
+                    container._flatpickr.altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                    container._flatpickr.altInput.placeholder = 'Seleccione fecha';
+                    
+                    // Limpiar valores previos
+                    if (!container._flatpickr.altInput.value) {
+                        container._flatpickr.altInput.value = '';
+                    }
+                }
+            }
+        });
     }
+    
+    // Recalcular progreso
+    calculateAcademicProgress();
+}
 
     // Función para calcular el progreso correctamente
     function calculateAcademicProgress() {
