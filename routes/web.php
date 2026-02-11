@@ -2095,3 +2095,7 @@ Route::get(
     '/administracion/formulario-personal',
     [FormularioPersonalEmpleadoController::class, 'create']
 )->name('formulariopersonal.create');
+
+// Rutas para ubigeo en formulario personal
+Route::get('/formulario-personal/provincias/{departamento}', [FormularioPersonalEmpleadoController::class, 'getProvincias']);
+Route::get('/formulario-personal/distritos/{provincia}', [FormularioPersonalEmpleadoController::class, 'getDistritos']);

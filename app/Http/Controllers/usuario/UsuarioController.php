@@ -442,6 +442,10 @@ public function guardarCuenta(Request $request)
     // Devolver una respuesta JSON indicando que todo salió bien
     return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
 }
+
+
+
+
 public function update(Request $request, $id)
 {
     // Validación de los datos

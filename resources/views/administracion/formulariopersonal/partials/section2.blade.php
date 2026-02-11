@@ -99,13 +99,23 @@
                     <div class="px-4 py-4">
                         <div class="flex space-x-6">
                             <div class="flex items-center">
-                                <input type="radio" id="{{ $nivel['id'] }}_si" name="{{ $nivel['id'] }}_termino" value="SI"
-                                    class="h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500">
+                                <input type="radio" 
+                                       id="{{ $nivel['id'] }}_si" 
+                                       name="{{ $nivel['id'] }}_termino" 
+                                       value="SI"
+                                       class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
+                                       data-nivel="{{ $nivel['id'] }}"
+                                       data-value="SI">
                                 <label for="{{ $nivel['id'] }}_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" id="{{ $nivel['id'] }}_no" name="{{ $nivel['id'] }}_termino" value="NO"
-                                    class="h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500">
+                                <input type="radio" 
+                                       id="{{ $nivel['id'] }}_no" 
+                                       name="{{ $nivel['id'] }}_termino" 
+                                       value="NO"
+                                       class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
+                                       data-nivel="{{ $nivel['id'] }}"
+                                       data-value="NO">
                                 <label for="{{ $nivel['id'] }}_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
                             </div>
                         </div>
@@ -114,27 +124,36 @@
                     <!-- Centro de Estudios -->
                     <div class="px-4 py-4">
                         <div class="relative">
-                            <input type="text" name="{{ $nivel['id'] }}_centro"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                placeholder="Nombre del centro">
+                            <input type="text" 
+                                   name="{{ $nivel['id'] }}_centro"
+                                   id="{{ $nivel['id'] }}_centro"
+                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                   placeholder="Nombre del centro"
+                                   data-nivel="{{ $nivel['id'] }}">
                         </div>
                     </div>
 
                     <!-- Especialidad -->
                     <div class="px-4 py-4">
                         <div class="relative">
-                            <input type="text" name="{{ $nivel['id'] }}_especialidad"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                placeholder="Especialidad o carrera">
+                            <input type="text" 
+                                   name="{{ $nivel['id'] }}_especialidad"
+                                   id="{{ $nivel['id'] }}_especialidad"
+                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                   placeholder="Especialidad o carrera"
+                                   data-nivel="{{ $nivel['id'] }}">
                         </div>
                     </div>
 
                     <!-- Nivel / Grado -->
                     <div class="px-4 py-4">
                         <div class="relative">
-                            <input type="text" name="{{ $nivel['id'] }}_grado"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                placeholder="Ej: Bachiller, Titulado">
+                            <input type="text" 
+                                   name="{{ $nivel['id'] }}_grado"
+                                   id="{{ $nivel['id'] }}_grado"
+                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                   placeholder="Ej: Bachiller, Titulado"
+                                   data-nivel="{{ $nivel['id'] }}">
                         </div>
                     </div>
 
@@ -143,7 +162,8 @@
                         <div class="relative">
                             <input type="text" 
                                    name="{{ $nivel['id'] }}_inicio"
-                                   class="flatpickr-date w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                   id="{{ $nivel['id'] }}_inicio"
+                                   class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
                                    placeholder="Seleccione fecha"
                                    data-nivel="{{ $nivel['id'] }}">
                             <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -155,7 +175,8 @@
                         <div class="relative">
                             <input type="text" 
                                    name="{{ $nivel['id'] }}_fin"
-                                   class="flatpickr-date w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                   id="{{ $nivel['id'] }}_fin"
+                                   class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
                                    placeholder="Seleccione fecha"
                                    data-nivel="{{ $nivel['id'] }}">
                             <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -188,13 +209,23 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">¿Terminó este nivel?</label>
                             <div class="grid grid-cols-2 gap-3">
                                 <div class="flex items-center justify-center p-3 border border-gray-300 rounded-lg hover:bg-{{ $nivel['color'] }}-50 transition-colors">
-                                    <input type="radio" id="{{ $nivel['id'] }}_si_mobile" name="{{ $nivel['id'] }}_termino" value="SI"
-                                        class="h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500">
+                                    <input type="radio" 
+                                           id="{{ $nivel['id'] }}_si_mobile" 
+                                           name="{{ $nivel['id'] }}_termino" 
+                                           value="SI"
+                                           class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
+                                           data-nivel="{{ $nivel['id'] }}"
+                                           data-value="SI">
                                     <label for="{{ $nivel['id'] }}_si_mobile" class="ml-2 text-gray-700 cursor-pointer">Sí, terminé</label>
                                 </div>
                                 <div class="flex items-center justify-center p-3 border border-gray-300 rounded-lg hover:bg-{{ $nivel['color'] }}-50 transition-colors">
-                                    <input type="radio" id="{{ $nivel['id'] }}_no_mobile" name="{{ $nivel['id'] }}_termino" value="NO"
-                                        class="h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500">
+                                    <input type="radio" 
+                                           id="{{ $nivel['id'] }}_no_mobile" 
+                                           name="{{ $nivel['id'] }}_termino" 
+                                           value="NO"
+                                           class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
+                                           data-nivel="{{ $nivel['id'] }}"
+                                           data-value="NO">
                                     <label for="{{ $nivel['id'] }}_no_mobile" class="ml-2 text-gray-700 cursor-pointer">No, no terminé</label>
                                 </div>
                             </div>
@@ -204,9 +235,12 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Centro de Estudios</label>
                             <div class="relative">
-                                <input type="text" name="{{ $nivel['id'] }}_centro"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                    placeholder="Ej: Colegio Nacional">
+                                <input type="text" 
+                                       name="{{ $nivel['id'] }}_centro"
+                                       id="{{ $nivel['id'] }}_centro_mobile"
+                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                       placeholder="Ej: Colegio Nacional"
+                                       data-nivel="{{ $nivel['id'] }}">
                                 <i class="fas fa-school text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -215,9 +249,12 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Especialidad</label>
                             <div class="relative">
-                                <input type="text" name="{{ $nivel['id'] }}_especialidad"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                    placeholder="Ej: Ciencias">
+                                <input type="text" 
+                                       name="{{ $nivel['id'] }}_especialidad"
+                                       id="{{ $nivel['id'] }}_especialidad_mobile"
+                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                       placeholder="Ej: Ciencias"
+                                       data-nivel="{{ $nivel['id'] }}">
                                 <i class="fas fa-book text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -226,9 +263,12 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Nivel / Grado Académico</label>
                             <div class="relative">
-                                <input type="text" name="{{ $nivel['id'] }}_grado"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                    placeholder="Ej: Bachiller">
+                                <input type="text" 
+                                       name="{{ $nivel['id'] }}_grado"
+                                       id="{{ $nivel['id'] }}_grado_mobile"
+                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                       placeholder="Ej: Bachiller"
+                                       data-nivel="{{ $nivel['id'] }}">
                                 <i class="fas fa-award text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -240,7 +280,8 @@
                                 <div class="relative">
                                     <input type="text" 
                                            name="{{ $nivel['id'] }}_inicio"
-                                           class="flatpickr-date-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                           id="{{ $nivel['id'] }}_inicio_mobile"
+                                           class="flatpickr-date-mobile campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
                                            placeholder="Seleccione"
                                            data-nivel="{{ $nivel['id'] }}">
                                     <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -251,7 +292,8 @@
                                 <div class="relative">
                                     <input type="text" 
                                            name="{{ $nivel['id'] }}_fin"
-                                           class="flatpickr-date-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
+                                           id="{{ $nivel['id'] }}_fin_mobile"
+                                           class="flatpickr-date-mobile campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
                                            placeholder="Seleccione"
                                            data-nivel="{{ $nivel['id'] }}">
                                     <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -289,7 +331,7 @@
             </div>
             <div class="flex items-center">
                 <div class="w-32 bg-gray-200 rounded-full h-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="academic-progress"></div>
+                    <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%" id="academic-progress"></div>
                 </div>
                 <span class="ml-3 text-sm font-medium text-gray-700" id="academic-percentage">0%</span>
             </div>
@@ -298,108 +340,359 @@
 </div>
 
 <script>
-    // Inicializar Flatpickr cuando el DOM esté cargado
-    document.addEventListener('DOMContentLoaded', function() {
-        // Configuración común para Flatpickr
-        const flatpickrOptions = {
-            locale: "es",
-            dateFormat: "Y-m-d",
-            altFormat: "d/m/Y",
-            altInput: true,
-            altInputClass: "flatpickr-alt-input",
-            theme: "airbnb",
-            maxDate: "today",
-            disableMobile: false, // Habilitar en móviles
-            allowInput: true, // Permitir entrada manual
-            clickOpens: true,
-            // Opciones específicas por nivel
-            onValueUpdate: function(selectedDates, dateStr, instance) {
+// Inicializar Flatpickr cuando el DOM esté cargado
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración común para Flatpickr
+    const flatpickrOptions = {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        altFormat: "d/m/Y",
+        altInput: true,
+        altInputClass: "flatpickr-alt-input",
+        theme: "airbnb",
+        maxDate: "today",
+        disableMobile: false,
+        allowInput: true,
+        clickOpens: true,
+        onValueUpdate: function(selectedDates, dateStr, instance) {
+            calculateAcademicProgress();
+        }
+    };
+
+    // Inicializar Flatpickr para desktop
+    document.querySelectorAll('.flatpickr-date').forEach(function(element) {
+        flatpickr(element, {
+            ...flatpickrOptions,
+            onChange: function(selectedDates, dateStr, instance) {
+                const nivel = element.getAttribute('data-nivel');
+                const isFin = element.name.includes('_fin');
+                
+                if (isFin) {
+                    const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
+                    if (inicioInput && inicioInput.value) {
+                        instance.set('minDate', inicioInput.value);
+                    }
+                }
+                
                 calculateAcademicProgress();
             }
-        };
-
-        // Inicializar Flatpickr para desktop
-        document.querySelectorAll('.flatpickr-date').forEach(function(element) {
-            flatpickr(element, {
-                ...flatpickrOptions,
-                // Si es fecha de fin, establecer fecha mínima basada en fecha de inicio
-                onChange: function(selectedDates, dateStr, instance) {
-                    const nivel = element.getAttribute('data-nivel');
-                    const isFin = element.name.includes('_fin');
-                    
-                    if (isFin) {
-                        const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
-                        if (inicioInput && inicioInput.value) {
-                            instance.set('minDate', inicioInput.value);
-                        }
-                    }
-                    
-                    calculateAcademicProgress();
-                }
-            });
         });
+    });
 
-        // Inicializar Flatpickr para móvil (configuración diferente si es necesario)
-        document.querySelectorAll('.flatpickr-date-mobile').forEach(function(element) {
-            flatpickr(element, {
-                ...flatpickrOptions,
-                // En móvil, usar modal para mejor experiencia
-                disableMobile: false,
-                // Si es fecha de fin, establecer fecha mínima basada en fecha de inicio
-                onChange: function(selectedDates, dateStr, instance) {
-                    const nivel = element.getAttribute('data-nivel');
-                    const isFin = element.name.includes('_fin');
-                    
-                    if (isFin) {
-                        const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
-                        if (inicioInput && inicioInput.value) {
-                            instance.set('minDate', inicioInput.value);
-                        }
+    // Inicializar Flatpickr para móvil
+    document.querySelectorAll('.flatpickr-date-mobile').forEach(function(element) {
+        flatpickr(element, {
+            ...flatpickrOptions,
+            disableMobile: false,
+            onChange: function(selectedDates, dateStr, instance) {
+                const nivel = element.getAttribute('data-nivel');
+                const isFin = element.name.includes('_fin');
+                
+                if (isFin) {
+                    const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
+                    if (inicioInput && inicioInput.value) {
+                        instance.set('minDate', inicioInput.value);
                     }
-                    
-                    calculateAcademicProgress();
                 }
-            });
+                
+                calculateAcademicProgress();
+            }
         });
+    });
 
-        // Calcular progreso de sección académica
-        function calculateAcademicProgress() {
-            const academicFields = document.querySelectorAll('[name$="_centro"], [name$="_termino"], .flatpickr-date, .flatpickr-date-mobile');
-            let completed = 0;
-            let total = 0;
-            
-            academicFields.forEach(field => {
-                if (field.type === 'radio') {
-                    const name = field.name;
-                    const checked = document.querySelector(`[name="${name}"]:checked`);
-                    if (checked && checked.value === 'SI') {
-                        completed++;
-                    }
-                    total++;
-                } else if (field.type === 'text' || field.classList.contains('flatpickr-date') || field.classList.contains('flatpickr-date-mobile')) {
-                    // Verificar si tiene valor (incluyendo Flatpickr)
-                    if (field.value && field.value.trim() !== '') {
-                        completed++;
-                    }
-                    total++;
-                }
+    // Función para manejar el cambio en los radio buttons
+    function handleTerminoChange(event) {
+        const nivel = event.target.getAttribute('data-nivel');
+        const value = event.target.value;
+        const isMobile = event.target.id.includes('_mobile');
+        
+        // Obtener todos los campos de este nivel (desktop y mobile)
+        const desktopCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico:not([id$="_mobile"])`);
+        const mobileCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico[id$="_mobile"]`);
+        const allCampos = [...desktopCampos, ...mobileCampos];
+        
+        // Obtener datepickers
+        const desktopFlatpickrs = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date:not([id$="_mobile"])`);
+        const mobileFlatpickrs = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date-mobile`);
+        const allFlatpickrs = [...desktopFlatpickrs, ...mobileFlatpickrs];
+        
+        if (value === 'NO') {
+            // Deshabilitar y limpiar todos los campos
+            allCampos.forEach(campo => {
+                campo.disabled = true;
+                campo.value = '';
+                campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                campo.classList.remove('bg-white');
+                campo.placeholder = 'No aplica';
             });
             
-            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-            document.getElementById('academic-percentage').textContent = `${percentage}%`;
-            document.getElementById('academic-progress').style.width = `${percentage}%`;
+            // Deshabilitar Flatpickr
+            allFlatpickrs.forEach(fpElement => {
+                const instance = fpElement._flatpickr;
+                if (instance) {
+                    instance.destroy();
+                }
+                fpElement.disabled = true;
+                fpElement.value = '';
+                fpElement.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                fpElement.classList.remove('bg-white');
+                fpElement.placeholder = 'No aplica';
+                
+                // Limpiar también el input alternativo de flatpickr
+                const altInput = fpElement.nextElementSibling;
+                if (altInput && altInput.classList.contains('flatpickr-alt-input')) {
+                    altInput.disabled = true;
+                    altInput.value = '';
+                    altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                }
+            });
+        } else if (value === 'SI') {
+            // Habilitar todos los campos
+            allCampos.forEach(campo => {
+                campo.disabled = false;
+                campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                campo.classList.add('bg-white');
+                
+                // Restaurar placeholders según el tipo de campo
+                if (campo.name.includes('_centro')) {
+                    campo.placeholder = isMobile ? 'Ej: Colegio Nacional' : 'Nombre del centro';
+                } else if (campo.name.includes('_especialidad')) {
+                    campo.placeholder = isMobile ? 'Ej: Ciencias' : 'Especialidad o carrera';
+                } else if (campo.name.includes('_grado')) {
+                    campo.placeholder = isMobile ? 'Ej: Bachiller' : 'Ej: Bachiller, Titulado';
+                }
+            });
+            
+            // Re-inicializar Flatpickr
+            allFlatpickrs.forEach(fpElement => {
+                fpElement.disabled = false;
+                fpElement.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                fpElement.classList.add('bg-white');
+                fpElement.placeholder = 'Seleccione fecha';
+                
+                // Solo inicializar si no tiene instancia
+                if (!fpElement._flatpickr) {
+                    const options = fpElement.classList.contains('flatpickr-date-mobile') 
+                        ? { ...flatpickrOptions, disableMobile: false }
+                        : flatpickrOptions;
+                    
+                    // Configuración especial para fechas
+                    const customOptions = {
+                        ...options,
+                        onChange: function(selectedDates, dateStr, instance) {
+                            const nivel = fpElement.getAttribute('data-nivel');
+                            const isFin = fpElement.name.includes('_fin');
+                            
+                            if (isFin) {
+                                const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
+                                if (inicioInput && inicioInput.value) {
+                                    instance.set('minDate', inicioInput.value);
+                                }
+                            }
+                            
+                            calculateAcademicProgress();
+                        }
+                    };
+                    
+                    flatpickr(fpElement, customOptions);
+                }
+                
+                // Habilitar también el input alternativo
+                const altInput = fpElement.nextElementSibling;
+                if (altInput && altInput.classList.contains('flatpickr-alt-input')) {
+                    altInput.disabled = false;
+                    altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                }
+            });
         }
         
-        // Escuchar cambios en campos académicos
-        document.querySelectorAll('[name$="_centro"], [name$="_termino"], [name$="_especialidad"], [name$="_grado"], .flatpickr-date, .flatpickr-date-mobile').forEach(field => {
-            field.addEventListener('input', calculateAcademicProgress);
-            field.addEventListener('change', calculateAcademicProgress);
+        // Recalcular progreso
+        calculateAcademicProgress();
+    }
+
+    // Función para calcular el progreso correctamente
+    function calculateAcademicProgress() {
+        const niveles = ['secundaria', 'tecnico', 'universitario', 'postgrado'];
+        let nivelesCompletados = 0;
+        let totalNiveles = niveles.length;
+        
+        niveles.forEach(nivel => {
+            // Buscar radio button seleccionado (desktop o mobile)
+            const radioTerminadoDesktop = document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"]):checked`);
+            const radioTerminadoMobile = document.querySelector(`[name="${nivel}_termino"][id$="_mobile"]:checked`);
+            const radioTerminado = radioTerminadoDesktop || radioTerminadoMobile;
+            
+            if (radioTerminado) {
+                if (radioTerminado.value === 'SI') {
+                    // Verificar que todos los campos requeridos estén llenos
+                    const camposRequeridos = [
+                        `${nivel}_centro`,
+                        `${nivel}_especialidad`,
+                        `${nivel}_grado`,
+                        `${nivel}_inicio`,
+                        `${nivel}_fin`
+                    ];
+                    
+                    let camposLlenos = 0;
+                    let totalCampos = camposRequeridos.length;
+                    
+                    camposRequeridos.forEach(campoName => {
+                        // Buscar campo en desktop
+                        const campoDesktop = document.querySelector(`[name="${campoName}"]:not([id$="_mobile"])`);
+                        // Buscar campo en mobile
+                        const campoMobile = document.querySelector(`[name="${campoName}"][id$="_mobile"]`);
+                        
+                        // Verificar si alguno de los dos está lleno
+                        const desktopValue = campoDesktop ? campoDesktop.value.trim() : '';
+                        const mobileValue = campoMobile ? campoMobile.value.trim() : '';
+                        
+                        if (desktopValue !== '' || mobileValue !== '') {
+                            camposLlenos++;
+                        }
+                    });
+                    
+                    // Si todos los campos están llenos, cuenta como nivel completado
+                    if (camposLlenos === totalCampos) {
+                        nivelesCompletados++;
+                    }
+                } else if (radioTerminado.value === 'NO') {
+                    // Si seleccionó NO, cuenta como completado (porque respondió)
+                    nivelesCompletados++;
+                }
+            }
         });
         
-        // También escuchar eventos de Flatpickr
-        document.addEventListener('flatpickr.change', calculateAcademicProgress);
+        // Calcular porcentaje
+        const percentage = Math.round((nivelesCompletados / totalNiveles) * 100);
+        document.getElementById('academic-percentage').textContent = `${percentage}%`;
+        document.getElementById('academic-progress').style.width = `${percentage}%`;
         
-        calculateAcademicProgress();
+        // Cambiar color según porcentaje
+        const progressBar = document.getElementById('academic-progress');
+        progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-gray-500');
+        
+        if (percentage >= 100) {
+            progressBar.classList.add('bg-green-500');
+        } else if (percentage >= 75) {
+            progressBar.classList.add('bg-green-400');
+        } else if (percentage >= 50) {
+            progressBar.classList.add('bg-yellow-500');
+        } else if (percentage >= 25) {
+            progressBar.classList.add('bg-yellow-400');
+        } else if (percentage > 0) {
+            progressBar.classList.add('bg-red-500');
+        } else {
+            progressBar.classList.add('bg-gray-300');
+        }
+    }
+
+    // Agregar event listeners a los radio buttons
+    document.querySelectorAll('.termino-radio').forEach(radio => {
+        radio.addEventListener('change', handleTerminoChange);
     });
+
+    // Agregar event listeners a los campos de texto
+    document.querySelectorAll('.campo-academico').forEach(campo => {
+        campo.addEventListener('input', calculateAcademicProgress);
+        campo.addEventListener('change', calculateAcademicProgress);
+        campo.addEventListener('blur', calculateAcademicProgress);
+    });
+
+    // Escuchar eventos de Flatpickr
+    document.addEventListener('flatpickr.change', calculateAcademicProgress);
+
+    // Función para sincronizar campos entre desktop y mobile
+    function sincronizarCampos() {
+        const niveles = ['secundaria', 'tecnico', 'universitario', 'postgrado'];
+        
+        niveles.forEach(nivel => {
+            // Sincronizar radio buttons
+            const radioDesktop = document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"]):checked`);
+            const radioMobile = document.querySelector(`[name="${nivel}_termino"][id$="_mobile"]:checked`);
+            
+            if (radioDesktop && !radioMobile) {
+                document.querySelector(`[name="${nivel}_termino"][id$="_mobile"][value="${radioDesktop.value}"]`).checked = true;
+            }
+            if (radioMobile && !radioDesktop) {
+                document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"])[value="${radioMobile.value}"]`).checked = true;
+            }
+            
+            // Sincronizar campos de texto
+            const campos = ['centro', 'especialidad', 'grado', 'inicio', 'fin'];
+            campos.forEach(campo => {
+                const desktopField = document.querySelector(`[name="${nivel}_${campo}"]:not([id$="_mobile"])`);
+                const mobileField = document.querySelector(`[name="${nivel}_${campo}"][id$="_mobile"]`);
+                
+                if (desktopField && mobileField) {
+                    // Desktop a Mobile
+                    desktopField.addEventListener('input', function() {
+                        mobileField.value = this.value;
+                        // Disparar evento para recalcular progreso
+                        const event = new Event('input', { bubbles: true });
+                        mobileField.dispatchEvent(event);
+                    });
+                    
+                    // Mobile a Desktop
+                    mobileField.addEventListener('input', function() {
+                        desktopField.value = this.value;
+                        // Disparar evento para recalcular progreso
+                        const event = new Event('input', { bubbles: true });
+                        desktopField.dispatchEvent(event);
+                    });
+                }
+            });
+        });
+    }
+
+    // Inicializar sincronización
+    sincronizarCampos();
+
+    // Inicializar estado de los campos basado en selecciones existentes
+    document.querySelectorAll('.termino-radio:checked').forEach(radio => {
+        // Disparar el evento change para aplicar estado inicial
+        const event = new Event('change', { bubbles: true });
+        radio.dispatchEvent(event);
+    });
+
+    // Calcular progreso inicial
+    calculateAcademicProgress();
+});
 </script>
 
+<style>
+/* Estilos para campos deshabilitados */
+.campo-academico:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    border-color: #d1d5db !important;
+}
+
+.flatpickr-alt-input:disabled {
+    background-color: #f3f4f6 !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    border-color: #d1d5db !important;
+}
+
+/* Estilos para campos habilitados */
+.campo-academico:enabled {
+    background-color: white !important;
+    color: #374151 !important;
+}
+
+/* Estilos para inputs de flatpickr */
+.flatpickr-input:disabled {
+    background-color: #f3f4f6 !important;
+}
+
+/* Transiciones suaves */
+.campo-academico, .flatpickr-input, .flatpickr-alt-input {
+    transition: all 0.3s ease;
+}
+
+/* Estilos para la barra de progreso */
+#academic-progress {
+    transition: width 0.5s ease-in-out, background-color 0.5s ease;
+}
+</style>

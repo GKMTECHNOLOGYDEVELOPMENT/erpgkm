@@ -9,7 +9,7 @@
                 </div>
                 <div>
                     <h3 class="text-xl md:text-2xl font-bold text-gray-800">Información Familiar</h3>
-                    <p class="text-gray-500 mt-1 text-sm md:text-base">Complete los datos de sus familiares directos</p>
+                    <p class="text-gray-500 mt-1 text-sm md:text-base">Complete los datos de sus familiares directos (opcional)</p>
                 </div>
             </div>
             <span class="bg-pink-50 text-pink-700 px-4 py-2 rounded-full text-sm font-semibold border border-pink-100">
@@ -25,7 +25,7 @@
                 <i class="fas fa-info-circle text-pink-500 text-lg mt-1 mr-3"></i>
                 <div>
                     <h4 class="font-medium text-pink-800 mb-1">Instrucciones</h4>
-                    <p class="text-pink-700 text-sm">Complete los datos de su familia inmediata. Agregue hijos según sea necesario.</p>
+                    <p class="text-pink-700 text-sm">Esta sección es <span class="font-bold">opcional</span>. Complete solo si tiene familiares directos.</p>
                 </div>
             </div>
         </div>
@@ -71,7 +71,7 @@
                         'color' => 'pink',
                         'icon' => 'fas fa-ring',
                         'required' => false,
-                        'placeholder_nombres' => 'Nombre completo del cónyuge'
+                        'placeholder_nombres' => 'Nombre completo del cónyuge (opcional)'
                     ],
                     [
                         'id' => 'concubino',
@@ -79,7 +79,7 @@
                         'color' => 'rose',
                         'icon' => 'fas fa-heart',
                         'required' => false,
-                        'placeholder_nombres' => 'Nombre completo'
+                        'placeholder_nombres' => 'Nombre completo (opcional)'
                     ]
                 ];
             @endphp
@@ -94,6 +94,7 @@
                                 <i class="{{ $familiar['icon'] }} text-{{ $familiar['color'] }}-600"></i>
                             </div>
                             <span class="font-semibold text-gray-800">{{ $familiar['nombre'] }}</span>
+                            <span class="ml-2 text-xs text-gray-500">(opcional)</span>
                         </div>
                     </div>
 
@@ -101,8 +102,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="{{ $familiar['id'] }}_nombres"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                placeholder="{{ $familiar['placeholder_nombres'] }}">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                placeholder="{{ $familiar['placeholder_nombres'] }}"
+                                data-tipo="{{ $familiar['id'] }}">
                         </div>
                     </div>
 
@@ -110,8 +112,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="{{ $familiar['id'] }}_documento"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                placeholder="N° de documento">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                placeholder="N° de documento"
+                                data-tipo="{{ $familiar['id'] }}">
                         </div>
                     </div>
 
@@ -119,8 +122,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="{{ $familiar['id'] }}_ocupacion"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                placeholder="Ocupación actual">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                placeholder="Ocupación actual"
+                                data-tipo="{{ $familiar['id'] }}">
                         </div>
                     </div>
 
@@ -128,7 +132,8 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <select name="{{ $familiar['id'] }}_sexo"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all appearance-none bg-white">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all appearance-none bg-white"
+                                data-tipo="{{ $familiar['id'] }}">
                                 <option value="">Seleccione</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Femenino</option>
@@ -142,7 +147,7 @@
                         <div class="relative">
                             <input type="text" 
                                    name="{{ $familiar['id'] }}_nacimiento"
-                                   class="flatpickr-familia w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                   class="flatpickr-familia campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
                                    placeholder="Seleccione fecha"
                                    data-tipo="{{ $familiar['id'] }}">
                             <i class="fas fa-birthday-cake text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -153,8 +158,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="{{ $familiar['id'] }}_domicilio"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                placeholder="Dirección actual">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                placeholder="Dirección actual"
+                                data-tipo="{{ $familiar['id'] }}">
                         </div>
                     </div>
                 </div>
@@ -168,7 +174,7 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-gray-800">{{ $familiar['nombre'] }}</h4>
-                                <p class="text-sm text-gray-500">Familiar directo</p>
+                                <p class="text-sm text-gray-500">Familiar directo (opcional)</p>
                             </div>
                         </div>
                     </div>
@@ -179,8 +185,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos y Nombres</label>
                             <div class="relative">
                                 <input type="text" name="{{ $familiar['id'] }}_nombres"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                    placeholder="Nombre completo">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                    placeholder="Nombre completo (opcional)"
+                                    data-tipo="{{ $familiar['id'] }}">
                                 <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -191,8 +198,9 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">N° Documento</label>
                                 <div class="relative">
                                     <input type="text" name="{{ $familiar['id'] }}_documento"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                        placeholder="N° DNI">
+                                        class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                        placeholder="N° DNI"
+                                        data-tipo="{{ $familiar['id'] }}">
                                     <i class="fas fa-id-card text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                                 </div>
                             </div>
@@ -202,7 +210,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
                                 <div class="relative">
                                     <select name="{{ $familiar['id'] }}_sexo"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all appearance-none bg-white">
+                                        class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all appearance-none bg-white"
+                                        data-tipo="{{ $familiar['id'] }}">
                                         <option value="">Seleccionar</option>
                                         <option value="M">Masculino</option>
                                         <option value="F">Femenino</option>
@@ -217,8 +226,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
                             <div class="relative">
                                 <input type="text" name="{{ $familiar['id'] }}_ocupacion"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                    placeholder="Profesión u oficio">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                    placeholder="Profesión u oficio"
+                                    data-tipo="{{ $familiar['id'] }}">
                                 <i class="fas fa-briefcase text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -229,7 +239,7 @@
                             <div class="relative">
                                 <input type="text" 
                                        name="{{ $familiar['id'] }}_nacimiento"
-                                       class="flatpickr-familia-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                       class="flatpickr-familia-mobile campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
                                        placeholder="Seleccione fecha"
                                        data-tipo="{{ $familiar['id'] }}">
                                 <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -241,8 +251,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Domicilio Actual</label>
                             <div class="relative">
                                 <input type="text" name="{{ $familiar['id'] }}_domicilio"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
-                                    placeholder="Dirección donde vive">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $familiar['color'] }}-500 focus:ring-2 focus:ring-{{ $familiar['color'] }}-200 transition-all bg-white"
+                                    placeholder="Dirección donde vive"
+                                    data-tipo="{{ $familiar['id'] }}">
                                 <i class="fas fa-home text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -270,6 +281,7 @@
                                 <span class="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full mt-1 inline-block">
                                     #{{ $hijoIndex }}
                                 </span>
+                                <span class="ml-2 text-xs text-gray-500">(opcional)</span>
                             </div>
                         </div>
                     </div>
@@ -278,8 +290,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="hijo{{ $hijoIndex }}_nombres"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Nombre completo del hijo">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Nombre completo del hijo (opcional)"
+                                data-tipo="hijo{{ $hijoIndex }}">
                         </div>
                     </div>
 
@@ -287,8 +300,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="hijo{{ $hijoIndex }}_documento"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="N° de documento">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="N° de documento"
+                                data-tipo="hijo{{ $hijoIndex }}">
                         </div>
                     </div>
 
@@ -296,8 +310,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="hijo{{ $hijoIndex }}_ocupacion"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Ocupación actual">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Ocupación actual"
+                                data-tipo="hijo{{ $hijoIndex }}">
                         </div>
                     </div>
 
@@ -305,7 +320,8 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <select name="hijo{{ $hijoIndex }}_sexo"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white"
+                                data-tipo="hijo{{ $hijoIndex }}">
                                 <option value="">Seleccione</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Femenino</option>
@@ -319,7 +335,7 @@
                         <div class="relative">
                             <input type="text" 
                                    name="hijo{{ $hijoIndex }}_nacimiento"
-                                   class="flatpickr-familia w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                   class="flatpickr-familia campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                                    placeholder="Seleccione fecha"
                                    data-tipo="hijo{{ $hijoIndex }}">
                             <i class="fas fa-baby text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -330,8 +346,9 @@
                     <div class="px-4 py-4">
                         <div class="relative">
                             <input type="text" name="hijo{{ $hijoIndex }}_domicilio"
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Dirección actual">
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Dirección actual"
+                                data-tipo="hijo{{ $hijoIndex }}">
                         </div>
                     </div>
                 </div>
@@ -345,7 +362,7 @@
                             </div>
                             <div>
                                 <h4 class="font-bold text-gray-800">Hijo #{{ $hijoIndex }}</h4>
-                                <p class="text-sm text-gray-500">Familiar directo</p>
+                                <p class="text-sm text-gray-500">Familiar directo (opcional)</p>
                             </div>
                         </div>
                         @if($hijoIndex > 1)
@@ -361,8 +378,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos y Nombres</label>
                             <div class="relative">
                                 <input type="text" name="hijo{{ $hijoIndex }}_nombres"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                    placeholder="Nombre completo del hijo">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                    placeholder="Nombre completo (opcional)"
+                                    data-tipo="hijo{{ $hijoIndex }}">
                                 <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -373,8 +391,9 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">N° Documento</label>
                                 <div class="relative">
                                     <input type="text" name="hijo{{ $hijoIndex }}_documento"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                        placeholder="N° DNI">
+                                        class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                        placeholder="N° DNI"
+                                        data-tipo="hijo{{ $hijoIndex }}">
                                         <i class="fas fa-id-card text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                                 </div>
                             </div>
@@ -384,7 +403,8 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
                                 <div class="relative">
                                     <select name="hijo{{ $hijoIndex }}_sexo"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
+                                        class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white"
+                                        data-tipo="hijo{{ $hijoIndex }}">
                                         <option value="">Seleccionar</option>
                                         <option value="M">Masculino</option>
                                         <option value="F">Femenino</option>
@@ -399,8 +419,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
                             <div class="relative">
                                 <input type="text" name="hijo{{ $hijoIndex }}_ocupacion"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                    placeholder="Profesión u oficio">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                    placeholder="Profesión u oficio"
+                                    data-tipo="hijo{{ $hijoIndex }}">
                                 <i class="fas fa-briefcase text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -411,7 +432,7 @@
                             <div class="relative">
                                 <input type="text" 
                                        name="hijo{{ $hijoIndex }}_nacimiento"
-                                       class="flatpickr-familia-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                       class="flatpickr-familia-mobile campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                                        placeholder="Seleccione fecha"
                                        data-tipo="hijo{{ $hijoIndex }}">
                                 <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -423,8 +444,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Domicilio Actual</label>
                             <div class="relative">
                                 <input type="text" name="hijo{{ $hijoIndex }}_domicilio"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                    placeholder="Dirección donde vive">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                    placeholder="Dirección donde vive"
+                                    data-tipo="hijo{{ $hijoIndex }}">
                                 <i class="fas fa-home text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -437,14 +459,15 @@
     <!-- Nota informativa -->
     <div class="mt-8 bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-5">
         <div class="flex items-start">
-            <div class="bg-pink-100 rounded-lg p-3 mr-4">
-                <i class="fas fa-lightbulb text-pink-600 text-lg"></i>
+            <div class="bg-green-100 rounded-lg p-3 mr-4">
+                <i class="fas fa-check-circle text-green-600 text-lg"></i>
             </div>
             <div>
-                <h4 class="font-medium text-gray-800 mb-1">Información familiar completa</h4>
+                <h4 class="font-medium text-gray-800 mb-1">Importante</h4>
                 <p class="text-gray-600 text-sm">
-                    Complete los datos de sus familiares directos (cónyuge/concubino e hijos). 
-                    Los hijos adicionales pueden ser agregados usando el botón "Agregar Hijo".
+                    Esta sección es <span class="font-bold text-green-600">COMPLETAMENTE OPCIONAL</span>. 
+                    La barra de progreso mostrará 100% automáticamente si no tiene familiares directos. 
+                    Complete solo si desea registrar información familiar.
                 </p>
             </div>
         </div>
@@ -455,13 +478,13 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center">
                 <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                <span class="text-sm text-gray-600">Complete al menos un familiar</span>
+                <span class="text-sm text-gray-600">Sección opcional - 100% si no tiene familiares</span>
             </div>
             <div class="flex items-center">
                 <div class="w-32 bg-gray-200 rounded-full h-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 0%" id="familia-progress"></div>
+                    <div class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 100%" id="familia-progress"></div>
                 </div>
-                <span class="ml-3 text-sm font-medium text-gray-700" id="familia-percentage">0%</span>
+                <span class="ml-3 text-sm font-medium text-gray-700" id="familia-percentage">100%</span>
             </div>
         </div>
     </div>
@@ -527,6 +550,7 @@
                             <span class="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full mt-1 inline-block">
                                 #${hijoIndex}
                             </span>
+                            <span class="ml-2 text-xs text-gray-500">(opcional)</span>
                         </div>
                     </div>
                 </div>
@@ -535,8 +559,9 @@
                 <div class="px-4 py-4">
                     <div class="relative">
                         <input type="text" name="hijo${hijoIndex}_nombres"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                            placeholder="Nombre completo del hijo">
+                            class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                            placeholder="Nombre completo del hijo (opcional)"
+                            data-tipo="hijo${hijoIndex}">
                     </div>
                 </div>
 
@@ -544,8 +569,9 @@
                 <div class="px-4 py-4">
                     <div class="relative">
                         <input type="text" name="hijo${hijoIndex}_documento"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                            placeholder="N° de documento">
+                            class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                            placeholder="N° de documento"
+                            data-tipo="hijo${hijoIndex}">
                     </div>
                 </div>
 
@@ -553,30 +579,32 @@
                 <div class="px-4 py-4">
                     <div class="relative">
                         <input type="text" name="hijo${hijoIndex}_ocupacion"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                            placeholder="Ocupación actual">
+                            class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                            placeholder="Ocupación actual"
+                            data-tipo="hijo${hijoIndex}">
                     </div>
                 </div>
 
                 <!-- Sexo -->
-                <div class="px-4 py-4">
-                    <div class="relative">
-                        <select name="hijo${hijoIndex}_sexo"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
-                            <option value="">Seleccione</option>
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                        </select>
-                        <i class="fas fa-venus-mars text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                    <div class="px-4 py-4">
+                        <div class="relative">
+                            <select name="hijo${hijoIndex}_sexo"
+                                class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white"
+                                data-tipo="hijo${hijoIndex}">
+                                <option value="">Seleccione</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                            <i class="fas fa-venus-mars text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                        </div>
                     </div>
-                </div>
 
                 <!-- Fecha Nacimiento -->
                 <div class="px-4 py-4">
                     <div class="relative">
                         <input type="text" 
                                name="hijo${hijoIndex}_nacimiento"
-                               class="flatpickr-familia w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                               class="flatpickr-familia campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                                placeholder="Seleccione fecha"
                                data-tipo="hijo${hijoIndex}">
                         <i class="fas fa-baby text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -587,8 +615,9 @@
                 <div class="px-4 py-4">
                     <div class="relative">
                         <input type="text" name="hijo${hijoIndex}_domicilio"
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                            placeholder="Dirección actual">
+                            class="campo-familiar w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                            placeholder="Dirección actual"
+                            data-tipo="hijo${hijoIndex}">
                     </div>
                 </div>
             `;
@@ -605,7 +634,7 @@
                         </div>
                         <div>
                             <h4 class="font-bold text-gray-800">Hijo #${hijoIndex}</h4>
-                            <p class="text-sm text-gray-500">Familiar directo</p>
+                            <p class="text-sm text-gray-500">Familiar directo (opcional)</p>
                         </div>
                     </div>
                     <button type="button" class="remove-hijo-btn text-red-500 hover:text-red-700" data-index="${hijoIndex}">
@@ -619,8 +648,9 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos y Nombres</label>
                         <div class="relative">
                             <input type="text" name="hijo${hijoIndex}_nombres"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Nombre completo del hijo">
+                                class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Nombre completo (opcional)"
+                                data-tipo="hijo${hijoIndex}">
                             <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
@@ -631,8 +661,9 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">N° Documento</label>
                             <div class="relative">
                                 <input type="text" name="hijo${hijoIndex}_documento"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                    placeholder="N° DNI">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                    placeholder="N° DNI"
+                                    data-tipo="hijo${hijoIndex}">
                                     <i class="fas fa-id-card text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                             </div>
                         </div>
@@ -642,7 +673,8 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
                             <div class="relative">
                                 <select name="hijo${hijoIndex}_sexo"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
+                                    class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white"
+                                    data-tipo="hijo${hijoIndex}">
                                     <option value="">Seleccionar</option>
                                     <option value="M">Masculino</option>
                                     <option value="F">Femenino</option>
@@ -657,8 +689,9 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
                         <div class="relative">
                             <input type="text" name="hijo${hijoIndex}_ocupacion"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Profesión u oficio">
+                                class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Profesión u oficio"
+                                data-tipo="hijo${hijoIndex}">
                             <i class="fas fa-briefcase text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
@@ -669,7 +702,7 @@
                         <div class="relative">
                             <input type="text" 
                                    name="hijo${hijoIndex}_nacimiento"
-                                   class="flatpickr-familia-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                   class="flatpickr-familia-mobile campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
                                    placeholder="Seleccione fecha"
                                    data-tipo="hijo${hijoIndex}">
                             <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -681,8 +714,9 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">Domicilio Actual</label>
                         <div class="relative">
                             <input type="text" name="hijo${hijoIndex}_domicilio"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
-                                placeholder="Dirección donde vive">
+                                class="campo-familiar w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white"
+                                placeholder="Dirección donde vive"
+                                data-tipo="hijo${hijoIndex}">
                             <i class="fas fa-home text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
                         </div>
                     </div>
@@ -750,54 +784,103 @@
             });
         });
 
-        // Función para calcular progreso de sección familiar
+        // Función para calcular progreso de sección familiar (NUEVA LÓGICA)
         function calculateFamiliaProgress() {
-            const familiaFields = document.querySelectorAll('[name$="_nombres"], [name$="_documento"], .flatpickr-familia, .flatpickr-familia-mobile');
-            let completed = 0;
+            const camposFamiliares = document.querySelectorAll('.campo-familiar[data-tipo]');
             
-            // Contar solo los campos que tienen al menos un dato
-            const familiasConDatos = new Set();
+            // Agrupar campos por tipo de familiar
+            const familias = {};
             
-            familiaFields.forEach(field => {
-                const fieldName = field.name;
-                const tipo = fieldName.split('_')[0]; // 'conyuge', 'concubino', 'hijo1', etc.
+            camposFamiliares.forEach(campo => {
+                const tipo = campo.getAttribute('data-tipo');
+                if (!familias[tipo]) {
+                    familias[tipo] = [];
+                }
+                familias[tipo].push(campo);
+            });
+            
+            let familiasCompletas = 0;
+            let totalFamiliasConsideradas = 0;
+            
+            // Verificar cada tipo de familiar
+            Object.keys(familias).forEach(tipo => {
+                const campos = familias[tipo];
+                let tieneDatos = false;
                 
-                if (field.value && field.value.trim() !== '') {
-                    familiasConDatos.add(tipo);
+                // Verificar si ALGÚN campo de este familiar tiene datos
+                campos.forEach(campo => {
+                    if (campo.value && campo.value.trim() !== '') {
+                        tieneDatos = true;
+                    }
+                });
+                
+                // Si el familiar tiene datos, considerar si está completo
+                if (tieneDatos) {
+                    totalFamiliasConsideradas++;
+                    
+                    // Contar campos completados para este familiar
+                    let camposCompletados = 0;
+                    campos.forEach(campo => {
+                        if (campo.value && campo.value.trim() !== '') {
+                            camposCompletados++;
+                        }
+                    });
+                    
+                    // Si tiene al menos 3 campos completados (nombre, documento, algo más), considerar completo
+                    if (camposCompletados >= 3) {
+                        familiasCompletas++;
+                    }
                 }
             });
             
-            // Consideramos que una familia está "completada" si tiene al menos el nombre
-            const nombresFields = document.querySelectorAll('[name$="_nombres"]');
-            let familiasConNombres = 0;
-            
-            nombresFields.forEach(field => {
-                if (field.value && field.value.trim() !== '') {
-                    familiasConNombres++;
+            // NUEVA LÓGICA: Si no hay familias con datos, se considera 100%
+            let porcentaje;
+            if (totalFamiliasConsideradas === 0) {
+                porcentaje = 100; // No hay familiares, sección opcional completada
+            } else {
+                // Si hay familiares, calcular porcentaje basado en cuántos están completos
+                porcentaje = Math.round((familiasCompletas / totalFamiliasConsideradas) * 100);
+                
+                // Si el usuario empezó a llenar pero no completó, dar algo de progreso
+                if (familiasCompletas === 0 && totalFamiliasConsideradas > 0) {
+                    porcentaje = 25; // Al menos empezó a llenar
                 }
-            });
+            }
             
-            // Calcular porcentaje basado en familias con nombres
-            const totalFamilias = 2 + currentHijoCount; // cónyuge + concubino + hijos
-            const percentage = totalFamilias > 0 ? Math.round((familiasConNombres / totalFamilias) * 100) : 0;
+            // Asegurar que el porcentaje esté entre 0 y 100
+            porcentaje = Math.min(100, Math.max(0, porcentaje));
             
-            document.getElementById('familia-percentage').textContent = `${percentage}%`;
-            document.getElementById('familia-progress').style.width = `${percentage}%`;
+            // Actualizar la barra de progreso
+            document.getElementById('familia-percentage').textContent = `${porcentaje}%`;
+            document.getElementById('familia-progress').style.width = `${porcentaje}%`;
+            
+            // Cambiar color de la barra
+            const progressBar = document.getElementById('familia-progress');
+            progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-green-400', 'bg-yellow-400', 'bg-gray-300');
+            
+            if (porcentaje === 100) {
+                progressBar.classList.add('bg-green-500');
+                document.querySelector('#familia-progress + .ml-3').textContent = '100%';
+            } else if (porcentaje >= 75) {
+                progressBar.classList.add('bg-green-400');
+            } else if (porcentaje >= 50) {
+                progressBar.classList.add('bg-yellow-500');
+            } else if (porcentaje >= 25) {
+                progressBar.classList.add('bg-yellow-400');
+            } else {
+                progressBar.classList.add('bg-red-500');
+            }
         }
 
-        // Agregar event listeners a todos los campos
+        // Agregar event listeners a todos los campos familiares
         function setupEventListeners() {
-            document.querySelectorAll('[name$="_nombres"], [name$="_documento"], [name$="_ocupacion"], [name$="_sexo"], [name$="_domicilio"], .flatpickr-familia, .flatpickr-familia-mobile').forEach(field => {
+            document.querySelectorAll('.campo-familiar').forEach(field => {
                 field.addEventListener('input', calculateFamiliaProgress);
                 field.addEventListener('change', calculateFamiliaProgress);
             });
         }
 
         // Inicializar event listeners para hijos existentes
-        for (let i = 1; i <= 4; i++) {
-            setupHijoEventListeners(i);
-        }
-
         function setupHijoEventListeners(index) {
             const fields = [
                 `hijo${index}_nombres`,
@@ -817,7 +900,38 @@
             });
         }
 
+        // Configurar event listeners para todos los campos existentes
+        for (let i = 1; i <= 4; i++) {
+            setupHijoEventListeners(i);
+        }
+
+        // Agregar listeners a los campos de cónyuge y concubino
+        const familiaresBase = ['conyuge', 'concubino'];
+        familiaresBase.forEach(tipo => {
+            const campos = document.querySelectorAll(`[data-tipo="${tipo}"]`);
+            campos.forEach(campo => {
+                campo.addEventListener('input', calculateFamiliaProgress);
+                campo.addEventListener('change', calculateFamiliaProgress);
+            });
+        });
+
+        // Inicializar el progreso
         setupEventListeners();
         calculateFamiliaProgress();
     });
 </script>
+
+<style>
+.campo-familiar {
+    transition: all 0.3s ease;
+}
+
+#familia-progress {
+    transition: width 0.5s ease-in-out, background-color 0.5s ease;
+}
+
+/* Estilos para indicar que es opcional */
+.text-gray-500 {
+    font-size: 0.75rem;
+}
+</style>

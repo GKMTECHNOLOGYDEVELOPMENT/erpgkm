@@ -16,7 +16,7 @@
     </div>
     
     <!-- Barra de progreso -->
-    <div class="mt-6">
+    <!-- <div class="mt-6">
         <div class="flex items-center justify-between text-sm text-gray-600 mb-2">
             <span>Progreso del formulario</span>
             <span id="progress-percentage">0%</span>
@@ -24,5 +24,5 @@
         <div class="w-full bg-gray-200 rounded-full h-2.5">
             <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full w-0 transition-all duration-500"></div>
         </div>
-    </div>
+    </div> -->
 </div>

@@ -424,5 +424,53 @@ public function getMenuDashboards()
     return $menuItems;
 }
 
+
+
+// Relaciones
+    public function fichaGeneral()
+    {
+        return $this->hasOne(UsuarioFichaGeneral::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function estudios()
+    {
+        return $this->hasMany(UsuarioEstudio::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function cursos()
+    {
+        return $this->hasMany(UsuarioCurso::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function familiares()
+    {
+        return $this->hasMany(UsuarioFamilia::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function salud()
+    {
+        return $this->hasOne(UsuarioSalud::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function contactosEmergencia()
+    {
+        return $this->hasMany(UsuarioEmergenciaContacto::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function laboral()
+    {
+        return $this->hasOne(UsuarioLaboral::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function documentosCheck()
+    {
+        return $this->hasOne(UsuarioDocumentoCheck::class, 'idUsuario', 'idUsuario');
+    }
+
+    public function documentosArchivos()
+    {
+        return $this->hasMany(UsuarioDocumentoArchivo::class, 'idUsuario', 'idUsuario');
+    }
+
   
 }
