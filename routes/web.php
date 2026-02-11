@@ -2101,3 +2101,12 @@ Route::get('/formulario-personal/provincias/{departamento}', [FormularioPersonal
 Route::get('/formulario-personal/distritos/{provincia}', [FormularioPersonalEmpleadoController::class, 'getDistritos']);
 Route::get('/repuestos/export/reporte-inventario-general', [RepuestosController::class, 'exportReporteInventarioGeneral'])
     ->name('repuestos.export.inventario.general');
+
+
+    // Rutas para formulario de personal
+Route::prefix('admin/formulario-personal')->name('admin.formulario-personal.')->group(function () {
+    Route::get('/create', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'create'])->name('create');
+    Route::post('/store', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'store'])->name('store');
+    Route::post('/draft', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'saveDraft'])->name('draft');
+    Route::get('/{id}', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'show'])->name('show');
+});

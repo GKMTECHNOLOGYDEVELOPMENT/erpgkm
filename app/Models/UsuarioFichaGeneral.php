@@ -9,6 +9,10 @@ class UsuarioFichaGeneral extends Model
 {
     use HasFactory;
 
+         public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
+
     protected $table = 'usuarios_ficha_general';
     protected $primaryKey = 'idUsuario';
     public $incrementing = false;

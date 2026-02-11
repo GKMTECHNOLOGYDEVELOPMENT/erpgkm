@@ -619,4 +619,4 @@ select {
 .familiar-card {
     animation: fadeIn 0.3s ease;
 }
-</style>
+</style>    

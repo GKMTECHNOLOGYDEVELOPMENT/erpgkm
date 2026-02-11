@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class UsuarioFamilia extends Model
 {
+         public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
     use HasFactory;
 
     protected $table = 'usuarios_familia';

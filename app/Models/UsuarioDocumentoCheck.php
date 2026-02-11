@@ -9,6 +9,10 @@ class UsuarioDocumentoCheck extends Model
 {
     use HasFactory;
 
+         public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
+
     protected $table = 'usuarios_documentos_check';
     protected $primaryKey = 'idUsuario';
     public $incrementing = false;

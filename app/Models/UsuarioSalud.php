@@ -9,6 +9,10 @@ class UsuarioSalud extends Model
 {
     use HasFactory;
 
+         public $timestamps = false;
+    const CREATED_AT = 'createdAt';
+    const UPDATED_AT = 'updatedAt';
+
     protected $table = 'usuarios_salud';
     protected $primaryKey = 'idUsuario';
     public $incrementing = false;
