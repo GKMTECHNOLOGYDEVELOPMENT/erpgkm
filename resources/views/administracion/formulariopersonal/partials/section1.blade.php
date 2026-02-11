@@ -457,13 +457,10 @@
                         ];
                     @endphp
                     @foreach ($seguros as $seguro)
-                        <div
-                            class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-green-50 transition-colors">
-                            <input type="checkbox" id="{{ $seguro['id'] }}" name="seguro_salud[]"
-                                value="{{ $seguro['value'] }}"
-                                class="h-5 w-5 text-green-600 rounded focus:ring-green-500">
-                            <label for="{{ $seguro['id'] }}"
-                                class="ml-3 text-gray-700 cursor-pointer flex-1">{{ $seguro['label'] }}</label>
+                        <div class="flex items-center p-3 border border-gray-200 rounded-xl hover:bg-green-50 transition-colors">
+                            <input type="radio" id="seguro_{{ $seguro['id'] }}" name="seguroSalud" value="{{ $seguro['id'] }}"
+                                class="radio-seguro h-5 w-5 text-green-600 focus:ring-green-500">
+                            <label for="seguro_{{ $seguro['id'] }}" class="ml-3 text-gray-700 cursor-pointer flex-1">{{ $seguro['label'] }}</label>
                         </div>
                     @endforeach
                 </div>
@@ -475,24 +472,45 @@
                     <i class="fas fa-piggy-bank text-purple-500 mr-2"></i>
                     Sistema de Pensiones
                 </label>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <div
-                        class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
-                        <input type="radio" id="onp" name="sistema_pensiones" value="ONP"
-                            class="h-5 w-5 text-purple-600 focus:ring-purple-500">
-                        <label for="onp" class="ml-3 text-gray-700 cursor-pointer flex-1">
-                            <span class="font-medium">ONP</span>
-                            <p class="text-sm text-gray-500 mt-1">Oficina de Normalización Previsional</p>
-                        </label>
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                            <input type="radio" id="onp" name="sistemaPensiones" value="ONP"
+                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <label for="onp" class="ml-3 text-gray-700 cursor-pointer flex-1">
+                                <span class="font-medium">ONP</span>
+                                <p class="text-sm text-gray-500 mt-1">Oficina de Normalización Previsional</p>
+                            </label>
+                        </div>
+                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                            <input type="radio" id="afp" name="sistemaPensiones" value="AFP"
+                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <label for="afp" class="ml-3 text-gray-700 cursor-pointer flex-1">
+                                <span class="font-medium">AFP</span>
+                                <p class="text-sm text-gray-500 mt-1">Administradora de Fondos de Pensiones</p>
+                            </label>
+                        </div>
+                        <div class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
+                            <input type="radio" id="na" name="sistemaPensiones" value="NA"
+                                class="radio-pension h-5 w-5 text-purple-600 focus:ring-purple-500">
+                            <label for="na" class="ml-3 text-gray-700 cursor-pointer flex-1">
+                                <span class="font-medium">No Aplica</span>
+                                <p class="text-sm text-gray-500 mt-1">No tiene sistema de pensiones</p>
+                            </label>
+                        </div>
                     </div>
-                    <div
-                        class="flex items-center p-4 border border-purple-200 rounded-xl hover:bg-purple-50 transition-colors flex-1">
-                        <input type="radio" id="afp" name="sistema_pensiones" value="AFP"
-                            class="h-5 w-5 text-purple-600 focus:ring-purple-500">
-                        <label for="afp" class="ml-3 text-gray-700 cursor-pointer flex-1">
-                            <span class="font-medium">AFP</span>
-                            <p class="text-sm text-gray-500 mt-1">Administradora de Fondos de Pensiones</p>
-                        </label>
+                    
+                    <!-- AFP compañía (solo visible si selecciona AFP) -->
+                    <div id="afpCompaniaContainer" class="hidden">
+                        <label for="afpCompania" class="block text-sm text-gray-600 mb-2 font-medium">Compañía AFP</label>
+                        <select id="afpCompania" name="afpCompania"
+                            class="campo-general w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
+                            <option value="" disabled selected>Seleccione AFP</option>
+                            <option value="Integra">Integra</option>
+                            <option value="Horizonte">Horizonte</option>
+                            <option value="Profuturo">Profuturo</option>
+                            <option value="Prima">Prima</option>
+                        </select>
                     </div>
                 </div>
             </div>
