@@ -17,6 +17,7 @@ use App\Models\UsuarioFamilia;
 use App\Models\UsuarioSalud;
 use App\Models\UsuarioEmergenciaContacto;
 use App\Models\UsuarioDocumentoArchivo;
+use App\Models\UsuarioNotificacion;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -320,11 +321,9 @@ class FormularioPersonalEmpleadoController extends Controller
                 if (strpos($key, 'nombres_') === 0 && !strpos($key, 'mobile')) {
                     $index = str_replace('nombres_', '', $key);
                     
-                    // Verificar que sea numérico y no esté duplicado
                     if (is_numeric($index) && !in_array($index, $indicesEncontrados)) {
                         $indicesEncontrados[] = $index;
                         
-                        // Solo procesar si tiene nombre y parentesco
                         $nombres = $request->input("nombres_{$index}");
                         $parentesco = $request->input("parentesco_{$index}");
                         
@@ -333,7 +332,6 @@ class FormularioPersonalEmpleadoController extends Controller
                         Log::channel('single')->info("Parentesco: " . ($parentesco ?? 'VACÍO'));
                         
                         if (!empty($nombres) && !empty($parentesco)) {
-                            
                             $dataToInsert = [
                                 'idUsuario' => $usuario->idUsuario,
                                 'parentesco' => $this->mapParentesco($parentesco),
@@ -445,6 +443,31 @@ class FormularioPersonalEmpleadoController extends Controller
 
             DB::commit();
 
+            // ========== 10. CREAR NOTIFICACIÓN DE USUARIO CREADO ==========
+            try {
+                Log::channel('single')->info('========== CREANDO NOTIFICACIÓN ==========');
+                Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
+                
+                // Crear UNA SOLA notificación con estado 0
+                UsuarioNotificacion::create([
+                    'idUsuario' => $usuario->idUsuario,
+                    'estado_web' => '0',
+                    'estado_app' => '0',
+                    'fecha' => now(),
+                    'tipo' => 'USUARIO_CREADO',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                
+                Log::channel('single')->info('✅ NOTIFICACIÓN CREADA: Usuario creado exitosamente');
+                Log::channel('single')->info('========== FIN NOTIFICACIÓN ==========');
+                
+            } catch (\Exception $e) {
+                Log::channel('single')->error('❌ ERROR CREANDO NOTIFICACIÓN: ' . $e->getMessage());
+                // No hacer rollback, solo loguear el error
+            }
+
+            // ========== 11. RESPUESTA DE ÉXITO ==========
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -572,6 +595,25 @@ class FormularioPersonalEmpleadoController extends Controller
             }
             
             DB::commit();
+
+            // ========== CREAR NOTIFICACIÓN DE BORRADOR ==========
+            try {
+                if ($usuario->estado == 0) {
+                    UsuarioNotificacion::create([
+                        'idUsuario' => $usuario->idUsuario,
+                        'estado_web' => '0',
+                        'estado_app' => '0',
+                        'fecha' => now(),
+                        'tipo' => 'BORRADOR_GUARDADO',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                    
+                    Log::channel('single')->info('✅ NOTIFICACIÓN DE BORRADOR CREADA');
+                }
+            } catch (\Exception $e) {
+                Log::channel('single')->error('❌ ERROR EN NOTIFICACIÓN DE BORRADOR: ' . $e->getMessage());
+            }
             
             return response()->json([
                 'success' => true,
@@ -599,7 +641,8 @@ class FormularioPersonalEmpleadoController extends Controller
             'estudios',
             'familiares',
             'salud',
-            'emergenciaContactos'
+            'emergenciaContactos',
+            'notificaciones'
         ])->findOrFail($id);
         
         return response()->json([
