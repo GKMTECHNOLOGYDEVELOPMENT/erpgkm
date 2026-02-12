@@ -1,394 +1,289 @@
 <template x-if="tab === 'payment-details'">
-    <div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-            <div class="panel">
-                <h5 class="font-semibold text-lg mb-2">Firma Digital</h5>
-                <p>Por favor, firme en el área de abajo para completar el proceso de validación.</p>
-                <div class="mb-5 text-center">
-                    <!-- Contenedor del Canvas centrado -->
-                    <div class="flex justify-center">
-                        <div class="w-full max-w-[700px]">
-                            <canvas id="signature-pad" class="border border-black mx-auto"></canvas>
-                        </div>
+    <div class="space-y-6">
+        <!-- ============================================ -->
+        <!-- SECCIÓN 1: MIS CUENTAS BANCARIAS -->
+        <!-- ============================================ -->
+        <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-5 bg-white dark:bg-[#0e1726]">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-7 bg-green-500 rounded-full"></div>
+                    <div>
+                        <h5 class="text-lg font-bold text-gray-800 dark:text-white">Mis Cuentas Bancarias</h5>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Cuentas registradas para recibir pagos
+                        </p>
                     </div>
-
-                    <!-- Botones centrados -->
-                    <div class="mt-4 flex flex-col md:flex-row justify-center gap-3">
-                        <button id="clear-btn" class="px-4 py-2 w-full md:w-auto btn btn-warning">
-                            Limpiar
-                        </button>
-                        <button id="save-btn" class="px-4 py-2 w-full md:w-auto btn btn-success">
-                            Guardar
-                        </button>
-                        <button id="refresh-btn" class="px-4 py-2 w-full md:w-auto btn btn-secondary">
-                            Refrescar
-                        </button>
-                    </div>
-
-                    <!-- Mensaje de error también centrado -->
-                    <p id="no-signature-message" class="text-red-500 mt-2"></p>
                 </div>
+
             </div>
 
+            <div x-data x-init="$nextTick(() => initPaymentDetails({{ $usuario->idUsuario }}))">
+                <div id="cuentas-bancarias" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Columna 1: Lista de cuentas bancarias -->
-                <div class="panel">
-                    <div x-data x-init="$nextTick(() => initPaymentDetails({{ $usuario->idUsuario }}))">
-                        <h5 class="font-semibold text-lg mb-4">Cuentas Bancarias</h5>
-                        <!-- <p>Changes to your <span class="text-primary">Payment Method</span> information
-                will take effect starting with scheduled payment and will be reflected on your
-                next invoice.</p> -->
-                    </div>
-                    <div class="mb-5" id="cuentas-bancarias">
-                        <!-- Aquí se cargarán las cuentas bancarias dinámicamente con JS -->
-                    </div>
-                </div>
-
-                <!-- Columna 2: Formulario de nueva cuenta -->
-                <div class="panel">
-                    <div class="mb-5">
-                        <h5 class="font-semibold text-lg mb-4">Número de cuenta</h5>
-                    </div>
-                    <div class="mb-5">
-                        <form>
-                            <div class="mb-5 grid grid-cols-1 gap-4">
-                                <!-- Fila 1: Banco -->
-                                <div>
-                                    <label for="banco">Banco</label>
-                                    <select id="banco" class="form-select text-white-dark">
-                                        <option selected>Seleccione una Opción</option>
-                                        <option value="1">Banco de Crédito del Perú</option>
-                                        <option value="2">BBVA Perú</option>
-                                        <option value="3">Scotiabank Perú</option>
-                                        <option value="4">Interbank</option>
-                                        <option value="5">Banco de la Nación</option>
-                                        <option value="6">Banco de Comercio</option>
-                                        <option value="7">BanBif</option>
-                                        <option value="8">Banco Pichincha</option>
-                                        <option value="9">Citibank Perú</option>
-                                        <option value="10">MiBanco</option>
-                                        <option value="11">Banco GNB Perú</option>
-                                        <option value="12">Banco Falabella</option>
-                                        <option value="13">Banco Ripley</option>
-                                        <option value="14">Banco Santander Perú</option>
-                                        <option value="15">Alfin Banco</option>
-                                        <option value="16">Bank of China</option>
-                                        <option value="17">Bci Perú</option>
-                                        <option value="18">ICBC Perú Bank</option>
-                                    </select>
-                                </div>
-
-                                <!-- Fila 2: Tipo de cuenta -->
-                                <div>
-                                    <label for="payBrand">Tipo de Cuenta Bancaria</label>
-                                    <select id="payBrand" class="form-select text-white-dark">
-                                        <option selected>Seleccione una Opción</option>
-                                        <option value="1">Cuenta número interbancario</option>
-                                        <option value="2">Número de cuenta</option>
-                                    </select>
-                                </div>
-
-                                <!-- Fila 3: Número de cuenta -->
-                                <div>
-                                    <label for="payNumber">Número de cuenta</label>
-                                    <input id="payNumber" type="text" placeholder="Número de cuenta"
-                                        class="form-input" />
-                                </div>
-                            </div>
-
-                            <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
-                        </form>
-
-
-
-                        <script>
-                            document.getElementById('payBrand').addEventListener('change', function() {
-                                const tipoCuenta = this.value;
-                                const numeroCuentaInput = document.getElementById('payNumber');
-
-                                // Limpiar campo de número de cuenta antes de validar
-                                numeroCuentaInput.value = '';
-                                numeroCuentaInput.removeAttribute('maxlength');
-                                numeroCuentaInput.setAttribute('placeholder', 'Número de cuenta');
-
-                                if (tipoCuenta == "1") {
-                                    numeroCuentaInput.setAttribute('maxlength', '20');
-                                    numeroCuentaInput.setAttribute('placeholder', 'Número interbancario (20 dígitos)');
-                                } else if (tipoCuenta == "2") {
-                                    numeroCuentaInput.setAttribute('maxlength', '24');
-                                    numeroCuentaInput.setAttribute('placeholder', 'Número de cuenta (13-24 dígitos)');
-                                }
-                            });
-
-                            document.getElementById('saveBtn').addEventListener('click', function() {
-                                const tipoCuenta = document.getElementById('payBrand').value;
-                                const numeroCuenta = document.getElementById('payNumber').value;
-
-                                if (tipoCuenta == "1" && numeroCuenta.length !== 20) {
-                                    toastr.error('El número interbancario debe tener exactamente 20 dígitos.');
-                                    return;
-                                }
-
-                                if (tipoCuenta == "2" && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
-                                    toastr.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
-                                    return;
-                                }
-
-                                if (tipoCuenta && numeroCuenta) {
-                                    const usuarioId = @json($usuario->idUsuario);
-
-                                    fetch('/api/guardar-cuenta', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                                    'content'),
-                                            },
-                                            body: JSON.stringify({
-                                                tipoCuenta: tipoCuenta,
-                                                numeroCuenta: numeroCuenta,
-                                                usuarioId: usuarioId,
-                                            })
-                                        })
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.success) {
-                                                toastr.success('Cuenta bancaria guardada con éxito');
-                                            } else {
-                                                toastr.error('Hubo un error al guardar la cuenta bancaria');
-                                            }
-                                        })
-                                        .catch(error => {
-                                            console.error('Error al guardar la cuenta:', error);
-                                            toastr.error('Error al guardar la cuenta bancaria');
-                                        });
-                                } else {
-                                    toastr.error('Por favor, complete todos los campos');
-                                }
-                            });
-                        </script>
-                    </div>
                 </div>
             </div>
-
-
-
-
-
-
-
-            <script>
-                // Recibe el `customUserId` pasado desde Alpine.js
-                function cargarCuentasBancarias(customUserId) {
-                    console.log("Cargando cuentas bancarias para el usuario con ID:", customUserId);
-
-                    // Hacer una solicitud AJAX a la API de cuentas bancarias
-                    fetch(`/api/cuentas-bancarias/${customUserId}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                console.error("Error en la solicitud de cuentas bancarias:", response.status);
-                            }
-                            return response.json(); // Parsear la respuesta JSON
-                        })
-                        .then(cuentasBancarias => {
-                            console.log("Cuentas bancarias obtenidas:",
-                                cuentasBancarias); // Ver los datos de las cuentas bancarias
-
-                            const container = document.getElementById('cuentas-bancarias');
-                            container.innerHTML = ''; // Limpiar contenido previo
-
-                            if (cuentasBancarias.length === 0) {
-                                console.log("No se encontraron cuentas bancarias para este usuario.");
-                            }
-
-                            cuentasBancarias.forEach(cuenta => {
-                                console.log("Procesando cuenta bancaria:",
-                                    cuenta); // Ver cada cuenta que estamos procesando
-
-                                // Crear un nuevo elemento para cada cuenta bancaria
-                                const cuentaElement = document.createElement('div');
-                                cuentaElement.classList.add('border-b', 'border-[#ebedf2]', 'dark:border-[#1b2e4b]');
-                                cuentaElement.innerHTML = `
-                    <div class="flex items-start justify-between py-3">
-                        <div class="flex-none ltr:mr-4 rtl:ml-4">
-                            <!-- Aquí puedes agregar una imagen del tipo de tarjeta si es necesario -->
-                            <img src="/assets/images/card-visa.svg" alt="image" />
-                        </div>
-                        <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                            ${cuenta.tipodecuenta === 1 ? 'Mastercard' : 'Visa'} 
-                            <span class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">
-                                XXXX XXXX XXXX ${cuenta.numerocuenta.slice(-4)}
-                            </span>
-                        </h6>
-                        <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto gap-2">
-                            <button class="btn btn-primary">Ver</button>
-                            <button class="btn btn-dark">Edit</button>
-                        </div>
-
-                    </div>
-                `;
-                                container.appendChild(cuentaElement);
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error al cargar las cuentas bancarias:',
-                                error); // Mostrar cualquier error que ocurra
-                        });
-                }
-
-                // Cargar las cuentas bancarias cuando la página esté lista
-                document.addEventListener('DOMContentLoaded', function() {
-                    const customUserId = @json($usuario->idUsuario);
-                    cargarCuentasBancarias(customUserId);
-                });
-            </script>
-
-
-
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-1 gap-5">
-            <!-- Tabla de pagos de quincena -->
-            <div class="bg-white shadow rounded-lg p-4">
-                <h5 class="text-lg font-semibold mb-4">Pagos de Quincena</h5>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100">
-                            <tr>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Empleado</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">DNI</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Cargo</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Fecha</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Monto (S/)</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Estado</th>
-                                <th class="text-left px-4 py-2 text-sm font-medium text-gray-700">Opciones</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 text-sm text-gray-800">
-                            <!-- Pagado -->
-                            <tr>
-                                <td class="px-4 py-2">STUAR</td>
-                                <td class="px-4 py-2">12345678</td>
-                                <td class="px-4 py-2">Programador Junior</td>
-                                <td class="px-4 py-2">15/04/2025</td>
-                                <td class="px-4 py-2">1,200.00</td>
-                                <td class="px-4 py-2">
-                                    <span class="badge badge-outline-success">Pagado</span>
-                                </td>
-                                <!-- Opciones con solo iconos -->
-                                <td class="px-4 py-2 space-x-2 text-lg">
-                                    <a href="#" class="text-info" title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="text-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="text-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    <a href="#" class="text-success" title="Generar Reporte">
-                                        <i class="fas fa-file-alt"></i>
-                                    </a>
-                                </td>
-
-                            </tr>
-
-                            <!-- No Pagado -->
-                            <tr class="bg-gray-50">
-                                <td class="px-4 py-2">STUAR</td>
-                                <td class="px-4 py-2">87654321</td>
-                                <td class="px-4 py-2">Programador Junior</td>
-                                <td class="px-4 py-2">15/04/2025</td>
-                                <td class="px-4 py-2">1,500.00</td>
-                                <td class="px-4 py-2">
-                                    <span class="badge badge-outline-danger">No Pagado</span>
-                                </td>
-                                <!-- Opciones con solo iconos -->
-                                <td class="px-4 py-2 space-x-2 text-lg">
-                                    <a href="#" class="text-info" title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="text-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="text-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    <a href="#" class="text-success" title="Generar Reporte">
-                                        <i class="fas fa-file-alt"></i>
-                                    </a>
-                                </td>
-
-                            </tr>
-
-                            <!-- Pendiente -->
-                            <tr>
-                                <td class="px-4 py-2">STUAR</td>
-                                <td class="px-4 py-2">45678912</td>
-                                <td class="px-4 py-2">Programador Junior</td>
-                                <td class="px-4 py-2">15/04/2025</td>
-                                <td class="px-4 py-2">2,300.00</td>
-                                <td class="px-4 py-2">
-                                    <span class="badge badge-outline-warning">Pendiente</span>
-                                </td>
-                                <!-- Opciones con solo iconos -->
-                                <td class="px-4 py-2 space-x-2 text-lg">
-                                    <a href="#" class="text-info" title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="text-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="text-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    <a href="#" class="text-success" title="Generar Reporte">
-                                        <i class="fas fa-file-alt"></i>
-                                    </a>
-                                </td>
-
-                            </tr>
-
-                            <!-- Por Realizar -->
-                            <tr class="bg-gray-50">
-                                <td class="px-4 py-2">STUAR</td>
-                                <td class="px-4 py-2">11223344</td>
-                                <td class="px-4 py-2">Programador Junior</td>
-                                <td class="px-4 py-2">15/04/2025</td>
-                                <td class="px-4 py-2">900.00</td>
-                                <td class="px-4 py-2">
-                                    <span class="badge badge-outline-info">Por Realizar</span>
-                                </td>
-                                <!-- Opciones con solo iconos -->
-                                <td class="px-4 py-2 space-x-2 text-lg">
-                                    <a href="#" class="text-info" title="Ver Detalles">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="text-warning" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="#" class="text-danger" title="Eliminar">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                    <a href="#" class="text-success" title="Generar Reporte">
-                                        <i class="fas fa-file-alt"></i>
-                                    </a>
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
+        <!-- ============================================ -->
+        <!-- SECCIÓN 2: AGREGAR NUEVA CUENTA BANCARIA -->
+        <!-- ============================================ -->
+        <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-5 bg-white dark:bg-[#0e1726]">
+            <div class="flex items-center gap-2 mb-6">
+                <div class="w-1 h-7 bg-secondary rounded-full"></div>
+                <div>
+                    <h5 class="text-lg font-bold text-gray-800 dark:text-white">Agregar Nueva Cuenta Bancaria</h5>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Complete todos los campos para registrar
+                        una nueva cuenta</p>
                 </div>
             </div>
 
+            <form class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Banco -->
+                    <div>
+                        <label for="banco"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-university text-purple-500"></i>
+                            Banco <span class="text-red-500">*</span>
+                        </label>
+                        <select id="banco"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                            <option>Seleccione una Opción</option>
+                            <option value="1">Banco de Crédito del Perú</option>
+                            <option value="2">BBVA Perú</option>
+                            <option value="3">Scotiabank Perú</option>
+                            <option value="4">Interbank</option>
+                            <option value="5">Banco de la Nación</option>
+                            <option value="6">Banco de Comercio</option>
+                            <option value="7">BanBif</option>
+                            <option value="8">Banco Pichincha</option>
+                            <option value="9">Citibank Perú</option>
+                            <option value="10">MiBanco</option>
+                            <option value="11">Banco GNB Perú</option>
+                            <option value="12">Banco Falabella</option>
+                            <option value="13">Banco Ripley</option>
+                            <option value="14">Banco Santander Perú</option>
+                            <option value="15">Alfin Banco</option>
+                            <option value="16">Bank of China</option>
+                            <option value="17">Bci Perú</option>
+                            <option value="18">ICBC Perú Bank</option>
+                        </select>
+                    </div>
 
+                    <!-- Moneda -->
+                    <div>
+                        <label for="moneda"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-coins text-purple-500"></i>
+                            Moneda <span class="text-red-500">*</span>
+                        </label>
+                        <select id="moneda"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                            <option>Seleccione Moneda</option>
+                            <option value="PEN">Soles (PEN)</option>
+                            <option value="USD">Dólares (USD)</option>
+                            <option value="EUR">Euros (EUR)</option>
+                        </select>
+                    </div>
 
-            <!-- Otro contenido, si lo deseas -->
-            <div id="displayArea" class="mt-4"></div>
+                    <!-- Tipo de cuenta -->
+                    <div>
+                        <label for="payBrand"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-wallet text-purple-500"></i>
+                            Tipo de Cuenta <span class="text-red-500">*</span>
+                        </label>
+                        <select id="payBrand"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                            <option>Seleccione una Opción</option>
+                            <option value="1">Cuenta de Ahorros</option>
+                            <option value="2">Cuenta Corriente</option>
+                            <option value="3">Cuenta a Plazo Fijo</option>
+                        </select>
+                    </div>
+
+                    <!-- Número de cuenta -->
+                    <div>
+                        <label for="payNumber"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-hashtag text-purple-500"></i>
+                            Número de Cuenta <span class="text-red-500">*</span>
+                        </label>
+                        <input id="payNumber" type="text" placeholder="Ej: 191-12345678-0-12"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                    </div>
+
+                    <!-- Número de CCI -->
+                    <div>
+                        <label for="cci"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-qrcode text-purple-500"></i>
+                            Número de CCI <span class="text-red-500">*</span>
+                        </label>
+                        <input id="cci" type="text" placeholder="Ej: 00219112345678901234"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                    </div>
+
+                    <!-- Cuenta principal -->
+                    <div>
+                        <label for="principal"
+                            class="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5 mb-1.5">
+                            <i class="fas fa-star text-purple-500"></i>
+                            Cuenta Principal
+                        </label>
+                        <select id="principal"
+                            class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-purple-500">
+                            <option value="0">No</option>
+                            <option value="1">Sí</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button type="button" id="saveBtn"
+                        class="btn bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-none px-8 py-2.5 flex items-center gap-2 rounded-lg shadow-md hover:shadow-lg transition-all">
+                        <i class="fas fa-save"></i>
+                        Guardar Cuenta Bancaria
+                    </button>
+                </div>
+            </form>
         </div>
 
+        <!-- ============================================ -->
+        <!-- SECCIÓN 3: HISTORIAL DE PAGOS - QUINCENAS -->
+        <!-- ============================================ -->
+        <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-5 bg-white dark:bg-[#0e1726]">
+            <!-- Header simple -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div class="flex items-center gap-2">
+                    <div class="w-1 h-7 bg-amber-500 rounded-full"></div>
+                    <h5 class="text-lg font-bold text-gray-800 dark:text-white">Historial de Pagos</h5>
+                </div>
+
+                <!-- Filtro por período - SIMPLE -->
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar-alt text-gray-400"></i>
+                    <select class="form-input text-sm py-1.5 w-40">
+                        <option>Seleccionar mes</option>
+                        <option>Enero 2025</option>
+                        <option>Febrero 2025</option>
+                        <option>Marzo 2025</option>
+                        <option selected>Abril 2025</option>
+                        <option>Mayo 2025</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Tabla de pagos - SOLO DATOS DEL USUARIO -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 dark:bg-[#1a1f2e]">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Período</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Fecha</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Concepto</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Monto</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Estado</th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Boleta</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <!-- PAGADO -->
+                        <tr>
+                            <td class="px-4 py-3 font-medium">Quincena 1</td>
+                            <td class="px-4 py-3 text-gray-600">15/04/2025</td>
+                            <td class="px-4 py-3 text-gray-600">Abril - Primera quincena</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">S/ 1,200.00</td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Pagado
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="#" class="text-blue-600 hover:text-blue-800" title="Descargar PDF">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <!-- PENDIENTE -->
+                        <tr class="bg-gray-50/50 dark:bg-[#1a1f2e]/50">
+                            <td class="px-4 py-3 font-medium">Quincena 2</td>
+                            <td class="px-4 py-3 text-gray-600">30/04/2025</td>
+                            <td class="px-4 py-3 text-gray-600">Abril - Segunda quincena</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">S/ 1,200.00</td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Pendiente
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-gray-400 text-xs">—</span>
+                            </td>
+                        </tr>
+                        <!-- PAGADO - MES ANTERIOR -->
+                        <tr>
+                            <td class="px-4 py-3 font-medium">Quincena 2</td>
+                            <td class="px-4 py-3 text-gray-600">30/03/2025</td>
+                            <td class="px-4 py-3 text-gray-600">Marzo - Segunda quincena</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">S/ 1,200.00</td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Pagado
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="#" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <!-- PAGADO - MES ANTERIOR -->
+                        <tr class="bg-gray-50/50 dark:bg-[#1a1f2e]/50">
+                            <td class="px-4 py-3 font-medium">Quincena 1</td>
+                            <td class="px-4 py-3 text-gray-600">15/03/2025</td>
+                            <td class="px-4 py-3 text-gray-600">Marzo - Primera quincena</td>
+                            <td class="px-4 py-3 font-medium text-gray-900">S/ 1,200.00</td>
+                            <td class="px-4 py-3">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Pagado
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="#" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-file-pdf"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Resumen simple y navegación -->
+            <div
+                class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div class="text-xs text-gray-500">
+                    Mostrando <span class="font-medium">4</span> de <span class="font-medium">12</span> pagos
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn btn-sm btn-outline-secondary px-3 py-1" disabled>
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <span class="text-sm px-2">Página 1 de 3</span>
+                    <button class="btn btn-sm btn-outline-secondary px-3 py-1">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>

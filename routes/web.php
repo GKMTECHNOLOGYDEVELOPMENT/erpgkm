@@ -1176,6 +1176,7 @@ Route::get('/asistencias', [AsistenciaController::class, 'index'])
 Route::get('/create/usuario', [UsuarioController::class, 'create'])->name('usuario.create');
 Route::get('/usuario/{usuario}/edit', [UsuarioController::class, 'edit'])->name('usuario.edit');
 Route::get('/usuario/{id}/tab/{tab}', [UsuarioController::class, 'loadTab']);
+Route::get('/usuario/documentos/{id}/view', [UsuarioController::class, 'view']);
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
 Route::put('config/{id}', [UsuarioController::class, 'config'])->name('usuario.config');
 Route::put('/usuario/direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');

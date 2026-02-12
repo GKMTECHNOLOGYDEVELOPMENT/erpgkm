@@ -373,6 +373,9 @@ class UsuarioController extends Controller
                     'distritoSeleccionado'
                 ));
 
+            case 'info-salud':
+                return view('usuario.tabs.info-salud.index', compact('usuario'));
+
 
             case 'payment-details':
 
