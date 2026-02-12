@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <!-- Instrucciones -->
+    <!-- Instrucciones y botón -->
     <div class="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-100 rounded-xl p-5">
             <div class="flex items-start">
@@ -118,18 +118,18 @@
     </div>
 </div>
 
-<!-- Template para familiar (oculto) - VERSIÓN CORREGIDA CON NAMES -->
+<!-- Template para familiar (oculto) - VERSIÓN NAMES SIMPLES -->
 <template id="familiar-template">
-    <!-- Fila para desktop -->
+    <!-- Fila para desktop - NAMES SIMPLES -->
     <div class="familiar-row hidden md:grid md:grid-cols-8 items-center p-4 hover:bg-gray-50 transition-colors duration-200 bg-white">
-        <!-- Parentesco con Select - SOLO 3 OPCIONES -->
+        <!-- Parentesco -->
         <div class="px-4 py-4">
             <div class="flex items-center">
                 <div class="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center mr-3 parentesco-icon">
                     <i class="fas fa-user text-pink-600"></i>
                 </div>
                 <div class="relative w-full">
-                    <select name="familiares[ID][parentesco]" 
+                    <select name="parentesco_INDEX" 
                             class="parentesco-select w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
                         <option value="">Seleccione parentesco</option>
                         <option value="conyuge">Cónyuge</option>
@@ -145,7 +145,7 @@
         <div class="px-4 py-4">
             <div class="relative">
                 <input type="text" 
-                       name="familiares[ID][nombres]"
+                       name="nombres_INDEX"
                        class="campo-familiar nombres-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                        placeholder="Nombre completo">
             </div>
@@ -155,7 +155,7 @@
         <div class="px-4 py-4">
             <div class="relative">
                 <input type="text" 
-                       name="familiares[ID][documento]"
+                       name="documento_INDEX"
                        class="campo-familiar documento-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                        placeholder="N° de documento">
             </div>
@@ -165,7 +165,7 @@
         <div class="px-4 py-4">
             <div class="relative">
                 <input type="text" 
-                       name="familiares[ID][ocupacion]"
+                       name="ocupacion_INDEX"
                        class="campo-familiar ocupacion-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                        placeholder="Ocupación actual">
             </div>
@@ -174,7 +174,7 @@
         <!-- Sexo -->
         <div class="px-4 py-4">
             <div class="relative">
-                <select name="familiares[ID][sexo]"
+                <select name="sexo_INDEX"
                         class="sexo-select w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
                     <option value="">Seleccione</option>
                     <option value="M">Masculino</option>
@@ -188,7 +188,7 @@
         <div class="px-4 py-4">
             <div class="relative">
                 <input type="text" 
-                       name="familiares[ID][fecha_nacimiento]"
+                       name="fecha_nacimiento_INDEX"
                        class="flatpickr-familia campo-familiar fecha-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                        placeholder="Seleccione fecha">
                 <i class="fas fa-birthday-cake text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -199,7 +199,7 @@
         <div class="px-4 py-4">
             <div class="relative">
                 <input type="text" 
-                       name="familiares[ID][domicilio]"
+                       name="domicilio_INDEX"
                        class="campo-familiar domicilio-input w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                        placeholder="Dirección actual">
             </div>
@@ -215,7 +215,7 @@
         </div>
     </div>
 
-    <!-- Tarjeta para móvil -->
+    <!-- Tarjeta para móvil - CON NAMES DIFERENTES -->
     <div class="familiar-card md:hidden bg-white border border-gray-200 rounded-xl p-5 mb-4 shadow-sm">
         <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
             <div class="flex items-center">
@@ -223,7 +223,7 @@
                     <i class="fas fa-user text-pink-600"></i>
                 </div>
                 <div class="relative w-full">
-                    <select name="familiares[ID][parentesco]" 
+                    <select name="parentesco_mobile_INDEX" 
                             class="parentesco-select-mobile w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white text-sm">
                         <option value="">Seleccione parentesco</option>
                         <option value="conyuge">Cónyuge</option>
@@ -244,7 +244,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Apellidos y Nombres</label>
                 <div class="relative">
                     <input type="text" 
-                           name="familiares[ID][nombres]"
+                           name="nombres_mobile_INDEX"
                            class="campo-familiar nombres-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                            placeholder="Nombre completo">
                     <i class="fas fa-user text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
@@ -257,7 +257,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">N° Documento</label>
                     <div class="relative">
                         <input type="text" 
-                               name="familiares[ID][documento]"
+                               name="documento_mobile_INDEX"
                                class="campo-familiar documento-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                                placeholder="N° DNI">
                         <i class="fas fa-id-card text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
@@ -268,7 +268,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
                     <div class="relative">
-                        <select name="familiares[ID][sexo]"
+                        <select name="sexo_mobile_INDEX"
                                 class="sexo-select-mobile w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all appearance-none bg-white">
                             <option value="">Seleccionar</option>
                             <option value="M">Masculino</option>
@@ -284,7 +284,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Ocupación</label>
                 <div class="relative">
                     <input type="text" 
-                           name="familiares[ID][ocupacion]"
+                           name="ocupacion_mobile_INDEX"
                            class="campo-familiar ocupacion-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                            placeholder="Profesión u oficio">
                     <i class="fas fa-briefcase text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
@@ -296,7 +296,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento</label>
                 <div class="relative">
                     <input type="text" 
-                           name="familiares[ID][fecha_nacimiento]"
+                           name="fecha_nacimiento_mobile_INDEX"
                            class="flatpickr-familia-mobile campo-familiar fecha-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                            placeholder="Seleccione fecha">
                     <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -308,7 +308,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Domicilio Actual</label>
                 <div class="relative">
                     <input type="text" 
-                           name="familiares[ID][domicilio]"
+                           name="domicilio_mobile_INDEX"
                            class="campo-familiar domicilio-input w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all bg-white" 
                            placeholder="Dirección donde vive">
                     <i class="fas fa-home text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
@@ -319,272 +319,250 @@
 </template>
 
 <script>
-    // Inicializar Flatpickr para fechas de familiares
-    document.addEventListener('DOMContentLoaded', function() {
-        // Configuración para Flatpickr familiar
-        const flatpickrFamiliaOptions = {
-            locale: "es",
-            dateFormat: "Y-m-d",
-            altFormat: "d/m/Y",
-            altInput: true,
-            altInputClass: "flatpickr-alt-input",
-            theme: "airbnb",
-            maxDate: "today",
-            disableMobile: false,
-            allowInput: true,
-            clickOpens: true,
-            onValueUpdate: function(selectedDates, dateStr, instance) {
-                calculateFamiliaProgress();
-            }
-        };
-
-        // Variables
-        let familiarCount = 0;
-        const maxFamiliares = 20;
-
-        // Función para actualizar el ícono según el parentesco - SOLO 3 OPCIONES
-        function updateParentescoIcon(selectElement, iconElement) {
-            const value = selectElement.value;
-            let icon = 'fa-user';
-            let bgColor = 'bg-pink-100';
-            let textColor = 'text-pink-600';
-            
-            switch(value) {
-                case 'conyuge':
-                    icon = 'fa-ring';
-                    bgColor = 'bg-pink-100';
-                    textColor = 'text-pink-600';
-                    break;
-                case 'concubino':
-                    icon = 'fa-heart';
-                    bgColor = 'bg-rose-100';
-                    textColor = 'text-rose-600';
-                    break;
-                case 'hijo':
-                    icon = 'fa-child';
-                    bgColor = 'bg-blue-100';
-                    textColor = 'text-blue-600';
-                    break;
-                default:
-                    icon = 'fa-user';
-                    bgColor = 'bg-pink-100';
-                    textColor = 'text-pink-600';
-            }
-            
-            iconElement.innerHTML = `<i class="fas ${icon} ${textColor}"></i>`;
-            iconElement.className = `w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center mr-3`;
-        }
-
-        // Función para agregar un nuevo familiar - VERSIÓN CORREGIDA
-        function addFamiliar() {
-            const template = document.getElementById('familiar-template');
-            const familiaContainer = document.getElementById('familia-container');
-            const noFamiliaresMsg = document.getElementById('no-familiares-message');
-            
-            // Clonar el template
-            const desktopRow = template.content.querySelector('.familiar-row').cloneNode(true);
-            const mobileCard = template.content.querySelector('.familiar-card').cloneNode(true);
-            
-            // Asignar ID único
-            const familiarId = familiarCount;
-            desktopRow.setAttribute('data-familiar-id', `familiar_${familiarId}`);
-            mobileCard.setAttribute('data-familiar-id', `familiar_${familiarId}`);
-            
-            // Reemplazar [ID] en TODOS los campos con el índice real
-            desktopRow.innerHTML = desktopRow.innerHTML.replace(/\[ID\]/g, `[${familiarId}]`);
-            mobileCard.innerHTML = mobileCard.innerHTML.replace(/\[ID\]/g, `[${familiarId}]`);
-            
-            // Configurar event listeners para el ícono del parentesco (desktop)
-            const parentescoSelect = desktopRow.querySelector(`select[name="familiares[${familiarId}][parentesco]"]`);
-            const iconContainer = desktopRow.querySelector('.parentesco-icon');
-            
-            if (parentescoSelect && iconContainer) {
-                updateParentescoIcon(parentescoSelect, iconContainer);
-                
-                parentescoSelect.addEventListener('change', function() {
-                    updateParentescoIcon(this, iconContainer);
-                    calculateFamiliaProgress();
-                });
-            }
-            
-            // Configurar event listeners para el ícono del parentesco (mobile)
-            const parentescoSelectMobile = mobileCard.querySelector(`select[name="familiares[${familiarId}][parentesco]"]`);
-            const iconContainerMobile = mobileCard.querySelector('.parentesco-icon-mobile');
-            
-            if (parentescoSelectMobile && iconContainerMobile) {
-                updateParentescoIcon(parentescoSelectMobile, iconContainerMobile);
-                
-                parentescoSelectMobile.addEventListener('change', function() {
-                    updateParentescoIcon(this, iconContainerMobile);
-                    calculateFamiliaProgress();
-                });
-            }
-            
-            // Configurar event listeners para campos
-            desktopRow.querySelectorAll('.campo-familiar, select').forEach(field => {
-                field.addEventListener('input', calculateFamiliaProgress);
-                field.addEventListener('change', calculateFamiliaProgress);
-            });
-            
-            mobileCard.querySelectorAll('.campo-familiar, select').forEach(field => {
-                field.addEventListener('input', calculateFamiliaProgress);
-                field.addEventListener('change', calculateFamiliaProgress);
-            });
-            
-            // Configurar botón eliminar con SweetAlert
-            desktopRow.querySelector('.remove-familiar-btn').addEventListener('click', function() {
-                eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
-            });
-            
-            mobileCard.querySelector('.remove-familiar-btn').addEventListener('click', function() {
-                eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
-            });
-            
-            // Inicializar Flatpickr
-            const fechaInput = desktopRow.querySelector(`input[name="familiares[${familiarId}][fecha_nacimiento]"]`);
-            if (fechaInput) {
-                flatpickr(fechaInput, flatpickrFamiliaOptions);
-            }
-            
-            const fechaInputMobile = mobileCard.querySelector(`input[name="familiares[${familiarId}][fecha_nacimiento]"]`);
-            if (fechaInputMobile) {
-                flatpickr(fechaInputMobile, flatpickrFamiliaOptions);
-            }
-            
-            // Agregar al DOM
-            familiaContainer.appendChild(desktopRow);
-            familiaContainer.appendChild(mobileCard);
-            
-            familiarCount++;
-            
-            // Ocultar mensaje de no familiares
-            if (noFamiliaresMsg) {
-                noFamiliaresMsg.style.display = 'none';
-            }
-            
-            // Deshabilitar botón si se alcanza el máximo
-            if (familiarCount >= maxFamiliares) {
-                document.getElementById('add-familiar-btn').disabled = true;
-                document.getElementById('add-familiar-btn').classList.add('opacity-50', 'cursor-not-allowed');
-            }
-            
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración para Flatpickr familiar
+    const flatpickrFamiliaOptions = {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        altFormat: "d/m/Y",
+        altInput: true,
+        altInputClass: "flatpickr-alt-input",
+        theme: "airbnb",
+        maxDate: "today",
+        disableMobile: false,
+        allowInput: true,
+        clickOpens: true,
+        onValueUpdate: function(selectedDates, dateStr, instance) {
             calculateFamiliaProgress();
-            
-            // Toastr de éxito al agregar
-            if (typeof toastr !== 'undefined') {
-                toastr.success('Familiar agregado correctamente', '✅ Éxito');
-            }
         }
+    };
 
-        // Función para eliminar familiar con SweetAlert y Toastr
-        function eliminarFamiliarConSweetAlert(familiarId) {
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: 'Esta acción eliminará al familiar de la lista',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Proceder con la eliminación
-                    const desktopRow = document.querySelector(`[data-familiar-id="${familiarId}"]`);
-                    const mobileCard = document.querySelector(`.familiar-card[data-familiar-id="${familiarId}"]`);
-                    
-                    if (desktopRow) desktopRow.remove();
-                    if (mobileCard) mobileCard.remove();
-                    
-                    familiarCount--;
-                    
-                    // Habilitar botón de agregar
-                    document.getElementById('add-familiar-btn').disabled = false;
-                    document.getElementById('add-familiar-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-                    
-                    // Mostrar mensaje de no familiares si está vacío
-                    if (familiarCount === 0) {
-                        document.getElementById('no-familiares-message').style.display = 'block';
-                    }
-                    
-                    calculateFamiliaProgress();
-                    
-                    // Toastr de éxito al eliminar
-                    if (typeof toastr !== 'undefined') {
-                        toastr.success('Familiar eliminado correctamente', '✅ Eliminado');
-                    }
-                }
-            });
-        }
+    // Variables
+    let familiarCount = 0;
+    const maxFamiliares = 20;
 
-        // Función para calcular progreso de sección familiar
-        function calculateFamiliaProgress() {
-            const desktopRows = document.querySelectorAll('.familiar-row');
-            const mobileCards = document.querySelectorAll('.familiar-card');
-            
-            if (desktopRows.length === 0) {
-                // No hay familiares
-                document.getElementById('familia-percentage').textContent = '100%';
-                document.getElementById('familia-progress').style.width = '100%';
-                document.getElementById('familia-progress').classList.remove('bg-yellow-500', 'bg-red-500', 'bg-yellow-400');
-                document.getElementById('familia-progress').classList.add('bg-green-500');
-                return;
-            }
-            
-            let totalCompletos = 0;
-            
-            desktopRows.forEach(row => {
-                const nombre = row.querySelector('.nombres-input');
-                const parentesco = row.querySelector('.parentesco-select');
-                
-                let camposLlenos = 0;
-                
-                if (nombre && nombre.value && nombre.value.trim() !== '') {
-                    camposLlenos++;
-                }
-                if (parentesco && parentesco.value && parentesco.value !== '') {
-                    camposLlenos++;
-                }
-                
-                // Considerar completo si tiene al menos nombre y parentesco
-                if (camposLlenos >= 2) {
-                    totalCompletos++;
-                }
-            });
-            
-            let porcentaje = desktopRows.length > 0 ? Math.round((totalCompletos / desktopRows.length) * 100) : 100;
-            
-            // Actualizar barra de progreso
-            document.getElementById('familia-percentage').textContent = `${porcentaje}%`;
-            document.getElementById('familia-progress').style.width = `${porcentaje}%`;
-            
-            const progressBar = document.getElementById('familia-progress');
-            progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-green-400', 'bg-yellow-400', 'bg-gray-300');
-            
-            if (porcentaje === 100) {
-                progressBar.classList.add('bg-green-500');
-            } else if (porcentaje >= 75) {
-                progressBar.classList.add('bg-green-400');
-            } else if (porcentaje >= 50) {
-                progressBar.classList.add('bg-yellow-500');
-            } else if (porcentaje >= 25) {
-                progressBar.classList.add('bg-yellow-400');
-            } else {
-                progressBar.classList.add('bg-red-500');
-            }
-        }
-
-        // Event listeners para botones de agregar
-        document.getElementById('add-familiar-btn').addEventListener('click', addFamiliar);
+    // Función para actualizar el ícono según el parentesco
+    function updateParentescoIcon(selectElement, iconElement) {
+        const value = selectElement.value;
+        let icon = 'fa-user';
+        let bgColor = 'bg-pink-100';
+        let textColor = 'text-pink-600';
         
-        const emptyAddBtn = document.getElementById('empty-add-btn');
-        if (emptyAddBtn) {
-            emptyAddBtn.addEventListener('click', addFamiliar);
+        switch(value) {
+            case 'conyuge':
+                icon = 'fa-ring';
+                bgColor = 'bg-pink-100';
+                textColor = 'text-pink-600';
+                break;
+            case 'concubino':
+                icon = 'fa-heart';
+                bgColor = 'bg-rose-100';
+                textColor = 'text-rose-600';
+                break;
+            case 'hijo':
+                icon = 'fa-child';
+                bgColor = 'bg-blue-100';
+                textColor = 'text-blue-600';
+                break;
         }
+        
+        iconElement.innerHTML = `<i class="fas ${icon} ${textColor}"></i>`;
+        iconElement.className = `w-10 h-10 rounded-lg ${bgColor} flex items-center justify-center mr-3`;
+    }
 
-        // Inicializar el progreso (100% al inicio porque no hay familiares)
+    // Función para agregar un nuevo familiar - VERSIÓN NAMES SIMPLES
+    window.addFamiliar = function() {
+        const template = document.getElementById('familiar-template');
+        const familiaContainer = document.getElementById('familia-container');
+        const noFamiliaresMsg = document.getElementById('no-familiares-message');
+        
+        // Clonar el template
+        const desktopRow = template.content.querySelector('.familiar-row').cloneNode(true);
+        const mobileCard = template.content.querySelector('.familiar-card').cloneNode(true);
+        
+        // Asignar ID único
+        const familiarId = familiarCount;
+        desktopRow.setAttribute('data-familiar-id', `familiar_${familiarId}`);
+        mobileCard.setAttribute('data-familiar-id', `familiar_${familiarId}`);
+        
+        // Reemplazar INDEX con el número real
+        desktopRow.innerHTML = desktopRow.innerHTML.replace(/INDEX/g, familiarId);
+        mobileCard.innerHTML = mobileCard.innerHTML.replace(/INDEX/g, familiarId);
+        
+        // Configurar event listeners para el ícono del parentesco (desktop)
+        const parentescoSelect = desktopRow.querySelector(`.parentesco-select`);
+        const iconContainer = desktopRow.querySelector('.parentesco-icon');
+        
+        if (parentescoSelect && iconContainer) {
+            updateParentescoIcon(parentescoSelect, iconContainer);
+            
+            parentescoSelect.addEventListener('change', function() {
+                updateParentescoIcon(this, iconContainer);
+                calculateFamiliaProgress();
+            });
+        }
+        
+        // Configurar event listeners para el ícono del parentesco (mobile)
+        const parentescoSelectMobile = mobileCard.querySelector(`.parentesco-select-mobile`);
+        const iconContainerMobile = mobileCard.querySelector('.parentesco-icon-mobile');
+        
+        if (parentescoSelectMobile && iconContainerMobile) {
+            updateParentescoIcon(parentescoSelectMobile, iconContainerMobile);
+            
+            parentescoSelectMobile.addEventListener('change', function() {
+                updateParentescoIcon(this, iconContainerMobile);
+                calculateFamiliaProgress();
+            });
+        }
+        
+        // Configurar event listeners para campos
+        desktopRow.querySelectorAll('.campo-familiar, select').forEach(field => {
+            field.addEventListener('input', calculateFamiliaProgress);
+            field.addEventListener('change', calculateFamiliaProgress);
+        });
+        
+        mobileCard.querySelectorAll('.campo-familiar, select').forEach(field => {
+            field.addEventListener('input', calculateFamiliaProgress);
+            field.addEventListener('change', calculateFamiliaProgress);
+        });
+        
+        // Configurar botón eliminar
+        desktopRow.querySelector('.remove-familiar-btn').addEventListener('click', function() {
+            eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
+        });
+        
+        mobileCard.querySelector('.remove-familiar-btn').addEventListener('click', function() {
+            eliminarFamiliarConSweetAlert(`familiar_${familiarId}`);
+        });
+        
+        // Inicializar Flatpickr
+        const fechaInput = desktopRow.querySelector(`.flatpickr-familia`);
+        if (fechaInput) {
+            flatpickr(fechaInput, flatpickrFamiliaOptions);
+        }
+        
+        const fechaInputMobile = mobileCard.querySelector(`.flatpickr-familia-mobile`);
+        if (fechaInputMobile) {
+            flatpickr(fechaInputMobile, flatpickrFamiliaOptions);
+        }
+        
+        // Agregar al DOM
+        familiaContainer.appendChild(desktopRow);
+        familiaContainer.appendChild(mobileCard);
+        
+        familiarCount++;
+        
+        // Ocultar mensaje de no familiares
+        if (noFamiliaresMsg) {
+            noFamiliaresMsg.style.display = 'none';
+        }
+        
+        // Deshabilitar botón si se alcanza el máximo
+        if (familiarCount >= maxFamiliares) {
+            document.getElementById('add-familiar-btn').disabled = true;
+            document.getElementById('add-familiar-btn').classList.add('opacity-50', 'cursor-not-allowed');
+        }
+        
         calculateFamiliaProgress();
-    });
+        
+        if (typeof toastr !== 'undefined') {
+            toastr.success('Familiar agregado correctamente', '✅ Éxito');
+        }
+    };
+
+    // Función para eliminar familiar
+    window.eliminarFamiliarConSweetAlert = function(familiarId) {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción eliminará al familiar de la lista',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const desktopRow = document.querySelector(`.familiar-row[data-familiar-id="${familiarId}"]`);
+                const mobileCard = document.querySelector(`.familiar-card[data-familiar-id="${familiarId}"]`);
+                
+                if (desktopRow) desktopRow.remove();
+                if (mobileCard) mobileCard.remove();
+                
+                familiarCount--;
+                
+                document.getElementById('add-familiar-btn').disabled = false;
+                document.getElementById('add-familiar-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                if (familiarCount === 0) {
+                    document.getElementById('no-familiares-message').style.display = 'block';
+                }
+                
+                calculateFamiliaProgress();
+                
+                if (typeof toastr !== 'undefined') {
+                    toastr.success('Familiar eliminado correctamente', '✅ Eliminado');
+                }
+            }
+        });
+    };
+
+    // Función para calcular progreso de sección familiar
+    window.calculateFamiliaProgress = function() {
+        const desktopRows = document.querySelectorAll('.familiar-row');
+        
+        if (desktopRows.length === 0) {
+            document.getElementById('familia-percentage').textContent = '100%';
+            document.getElementById('familia-progress').style.width = '100%';
+            document.getElementById('familia-progress').classList.remove('bg-yellow-500', 'bg-red-500', 'bg-yellow-400');
+            document.getElementById('familia-progress').classList.add('bg-green-500');
+            return;
+        }
+        
+        let totalCompletos = 0;
+        
+        desktopRows.forEach(row => {
+            const nombre = row.querySelector('.nombres-input');
+            const parentesco = row.querySelector('.parentesco-select');
+            
+            if (nombre && nombre.value && nombre.value.trim() !== '' && 
+                parentesco && parentesco.value && parentesco.value !== '') {
+                totalCompletos++;
+            }
+        });
+        
+        let porcentaje = desktopRows.length > 0 ? Math.round((totalCompletos / desktopRows.length) * 100) : 100;
+        
+        document.getElementById('familia-percentage').textContent = `${porcentaje}%`;
+        document.getElementById('familia-progress').style.width = `${porcentaje}%`;
+        
+        const progressBar = document.getElementById('familia-progress');
+        progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-green-400', 'bg-yellow-400', 'bg-gray-300');
+        
+        if (porcentaje === 100) {
+            progressBar.classList.add('bg-green-500');
+        } else if (porcentaje >= 75) {
+            progressBar.classList.add('bg-green-400');
+        } else if (porcentaje >= 50) {
+            progressBar.classList.add('bg-yellow-500');
+        } else if (porcentaje >= 25) {
+            progressBar.classList.add('bg-yellow-400');
+        } else {
+            progressBar.classList.add('bg-red-500');
+        }
+    };
+
+    // Event listeners para botones de agregar
+    document.getElementById('add-familiar-btn').addEventListener('click', addFamiliar);
+    
+    const emptyAddBtn = document.getElementById('empty-add-btn');
+    if (emptyAddBtn) {
+        emptyAddBtn.addEventListener('click', addFamiliar);
+    }
+
+    // Inicializar el progreso
+    calculateFamiliaProgress();
+});
 </script>
 
 <style>
@@ -598,7 +576,7 @@
 
 .familiar-row,
 .familiar-card {
-    transition: all 0.3s ease;
+    animation: fadeIn 0.3s ease;
 }
 
 /* Estilos para los selects */
@@ -613,7 +591,6 @@ select {
     appearance: none;
 }
 
-/* Animaciones */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -623,10 +600,5 @@ select {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-.familiar-row,
-.familiar-card {
-    animation: fadeIn 0.3s ease;
 }
 </style>

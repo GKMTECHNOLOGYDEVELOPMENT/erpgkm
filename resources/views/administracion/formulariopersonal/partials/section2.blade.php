@@ -29,280 +29,263 @@
         </div>
     </div>
 
-    <!-- Tabla de estudios - Versión responsive -->
+    <!-- Tabla de estudios - SOLO UNA VERSIÓN RESPONSIVE -->
     <div class="overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
-        <!-- Encabezados de tabla para desktop -->
+        <!-- Encabezados de tabla (visible en desktop) -->
         <div class="hidden md:grid md:grid-cols-7 bg-gradient-to-r from-purple-50 to-purple-100 border-b border-purple-200">
-            @php
-                $headers = [
-                    'Nivel Educativo',
-                    '¿Terminó?',
-                    'Centro de Estudios',
-                    'Especialidad',
-                    'Nivel / Grado',
-                    'Fecha Inicio',
-                    'Fecha Fin'
-                ];
-            @endphp
-            @foreach ($headers as $header)
-                <div class="px-4 py-4 text-left">
-                    <span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">{{ $header }}</span>
-                </div>
-            @endforeach
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Nivel Educativo</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">¿Terminó?</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Centro de Estudios</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Especialidad</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Nivel / Grado</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Fecha Inicio</span></div>
+            <div class="px-4 py-4 text-left"><span class="text-sm font-semibold text-purple-800 uppercase tracking-wide">Fecha Fin</span></div>
         </div>
 
-        <!-- Contenido de tabla -->
-        <div class="divide-y divide-gray-100">
-            @php
-                $niveles = [
-                    [
-                        'id' => 'secundaria',
-                        'nombre' => 'Secundaria',
-                        'color' => 'blue',
-                        'icon' => 'fas fa-school'
-                    ],
-                    [
-                        'id' => 'tecnico',
-                        'nombre' => 'Técnico / Instituto',
-                        'color' => 'green',
-                        'icon' => 'fas fa-tools'
-                    ],
-                    [
-                        'id' => 'universitario',
-                        'nombre' => 'Universitario',
-                        'color' => 'indigo',
-                        'icon' => 'fas fa-university'
-                    ],
-                    [
-                        'id' => 'postgrado',
-                        'nombre' => 'Post Grado',
-                        'color' => 'purple',
-                        'icon' => 'fas fa-user-graduate'
-                    ]
-                ];
-            @endphp
-
-            @foreach ($niveles as $index => $nivel)
-                <!-- Fila para desktop -->
-                <div class="hidden md:grid md:grid-cols-7 items-center p-4 hover:bg-gray-50 transition-colors duration-200 {{ $index % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
-                    <!-- Nivel Educativo -->
-                    <div class="px-4 py-4">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-{{ $nivel['color'] }}-100 flex items-center justify-center mr-3">
-                                <i class="{{ $nivel['icon'] }} text-{{ $nivel['color'] }}-600"></i>
-                            </div>
-                            <span class="font-semibold text-gray-800">{{ $nivel['nombre'] }}</span>
-                        </div>
+        <!-- Contenido de tabla - NIVEL SECUNDARIA (0) -->
+        <div class="grid grid-cols-1 md:grid-cols-7 items-start gap-3 p-4 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+            <!-- Nivel Educativo (oculto) -->
+            <input type="hidden" name="nivel_0" value="SECUNDARIA">
+            
+            <!-- Nivel Educativo (visual) -->
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-school text-blue-600"></i>
                     </div>
+                    <span class="font-semibold text-gray-800">Secundaria</span>
+                </div>
+            </div>
 
-                    <!-- ¿Terminó? -->
-                    <div class="px-4 py-4">
-                        <div class="flex space-x-6">
-                            <div class="flex items-center">
-                                <input type="radio" 
-                                       id="{{ $nivel['id'] }}_si" 
-                                       name="{{ $nivel['id'] }}_termino" 
-                                       value="SI"
-                                       class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
-                                       data-nivel="{{ $nivel['id'] }}"
-                                       data-value="SI">
-                                <label for="{{ $nivel['id'] }}_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" 
-                                       id="{{ $nivel['id'] }}_no" 
-                                       name="{{ $nivel['id'] }}_termino" 
-                                       value="NO"
-                                       class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
-                                       data-nivel="{{ $nivel['id'] }}"
-                                       data-value="NO">
-                                <label for="{{ $nivel['id'] }}_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
-                            </div>
-                        </div>
+            <!-- ¿Terminó? -->
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0">
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_0_si" name="termino_0" value="SI" class="termino-radio h-5 w-5 text-blue-600 focus:ring-blue-500" data-nivel="0">
+                        <label for="termino_0_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
                     </div>
-
-                    <!-- Centro de Estudios -->
-                    <div class="px-4 py-4">
-                        <div class="relative">
-                            <input type="text" 
-                                   name="{{ $nivel['id'] }}_centro"
-                                   id="{{ $nivel['id'] }}_centro"
-                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                   placeholder="Nombre del centro"
-                                   data-nivel="{{ $nivel['id'] }}">
-                        </div>
-                    </div>
-
-                    <!-- Especialidad -->
-                    <div class="px-4 py-4">
-                        <div class="relative">
-                            <input type="text" 
-                                   name="{{ $nivel['id'] }}_especialidad"
-                                   id="{{ $nivel['id'] }}_especialidad"
-                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                   placeholder="Especialidad o carrera"
-                                   data-nivel="{{ $nivel['id'] }}">
-                        </div>
-                    </div>
-
-                    <!-- Nivel / Grado -->
-                    <div class="px-4 py-4">
-                        <div class="relative">
-                            <input type="text" 
-                                   name="{{ $nivel['id'] }}_grado"
-                                   id="{{ $nivel['id'] }}_grado"
-                                   class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                   placeholder="Ej: Bachiller, Titulado"
-                                   data-nivel="{{ $nivel['id'] }}">
-                        </div>
-                    </div>
-
-                    <!-- Fecha Inicio -->
-                    <div class="px-4 py-4">
-                        <div class="relative">
-                            <input type="text" 
-                                   name="{{ $nivel['id'] }}_inicio"
-                                   id="{{ $nivel['id'] }}_inicio"
-                                   class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                   placeholder="Seleccione fecha"
-                                   data-nivel="{{ $nivel['id'] }}">
-                            <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
-                        </div>
-                    </div>
-
-                    <!-- Fecha Fin -->
-                    <div class="px-4 py-4">
-                        <div class="relative">
-                            <input type="text" 
-                                   name="{{ $nivel['id'] }}_fin"
-                                   id="{{ $nivel['id'] }}_fin"
-                                   class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                   placeholder="Seleccione fecha"
-                                   data-nivel="{{ $nivel['id'] }}">
-                            <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
-                        </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_0_no" name="termino_0" value="NO" class="termino-radio h-5 w-5 text-blue-600 focus:ring-blue-500" data-nivel="0">
+                        <label for="termino_0_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
                     </div>
                 </div>
+            </div>
 
-                <!-- Tarjeta para móvil -->
-                <div class="md:hidden bg-white border border-gray-200 rounded-xl p-5 mb-4 shadow-sm">
-                    <!-- Encabezado de la tarjeta -->
-                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 rounded-lg bg-{{ $nivel['color'] }}-100 flex items-center justify-center mr-3">
-                                <i class="{{ $nivel['icon'] }} text-{{ $nivel['color'] }}-600"></i>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-800">{{ $nivel['nombre'] }}</h4>
-                                <p class="text-sm text-gray-500">Nivel educativo</p>
-                            </div>
-                        </div>
-                        <span class="bg-{{ $nivel['color'] }}-100 text-{{ $nivel['color'] }}-800 text-xs font-semibold px-3 py-1 rounded-full">
-                            {{ $index + 1 }}/4
-                        </span>
+            <!-- Centro de Estudios -->
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Centro de Estudios</label>
+                <div class="relative">
+                    <input type="text" name="centro_0" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white" placeholder="Nombre del centro" data-nivel="0">
+                </div>
+            </div>
+
+            <!-- Especialidad -->
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                <div class="relative">
+                    <input type="text" name="especialidad_0" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white" placeholder="Especialidad o carrera" data-nivel="0">
+                </div>
+            </div>
+
+            <!-- Nivel / Grado -->
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Nivel / Grado</label>
+                <div class="relative">
+                    <input type="text" name="grado_0" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white" placeholder="Ej: Bachiller, Titulado" data-nivel="0">
+                </div>
+            </div>
+
+            <!-- Fecha Inicio -->
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <div class="relative">
+                    <input type="text" name="inicio_0" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white" placeholder="Seleccione fecha" data-nivel="0">
+                    <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <!-- Fecha Fin -->
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <div class="relative">
+                    <input type="text" name="fin_0" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white" placeholder="Seleccione fecha" data-nivel="0">
+                    <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- NIVEL TECNICO (1) -->
+        <div class="grid grid-cols-1 md:grid-cols-7 items-start gap-3 p-4 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+            <input type="hidden" name="nivel_1" value="TECNICO">
+            
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-tools text-green-600"></i>
                     </div>
+                    <span class="font-semibold text-gray-800">Técnico / Instituto</span>
+                </div>
+            </div>
 
-                    <!-- Campos para móvil -->
-                    <div class="space-y-4">
-                        <!-- ¿Terminó? -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">¿Terminó este nivel?</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="flex items-center justify-center p-3 border border-gray-300 rounded-lg hover:bg-{{ $nivel['color'] }}-50 transition-colors">
-                                    <input type="radio" 
-                                           id="{{ $nivel['id'] }}_si_mobile" 
-                                           name="{{ $nivel['id'] }}_termino" 
-                                           value="SI"
-                                           class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
-                                           data-nivel="{{ $nivel['id'] }}"
-                                           data-value="SI">
-                                    <label for="{{ $nivel['id'] }}_si_mobile" class="ml-2 text-gray-700 cursor-pointer">Sí, terminé</label>
-                                </div>
-                                <div class="flex items-center justify-center p-3 border border-gray-300 rounded-lg hover:bg-{{ $nivel['color'] }}-50 transition-colors">
-                                    <input type="radio" 
-                                           id="{{ $nivel['id'] }}_no_mobile" 
-                                           name="{{ $nivel['id'] }}_termino" 
-                                           value="NO"
-                                           class="termino-radio h-5 w-5 text-{{ $nivel['color'] }}-600 focus:ring-{{ $nivel['color'] }}-500"
-                                           data-nivel="{{ $nivel['id'] }}"
-                                           data-value="NO">
-                                    <label for="{{ $nivel['id'] }}_no_mobile" class="ml-2 text-gray-700 cursor-pointer">No, no terminé</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Centro de Estudios -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Centro de Estudios</label>
-                            <div class="relative">
-                                <input type="text" 
-                                       name="{{ $nivel['id'] }}_centro"
-                                       id="{{ $nivel['id'] }}_centro_mobile"
-                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                       placeholder="Ej: Colegio Nacional"
-                                       data-nivel="{{ $nivel['id'] }}">
-                                <i class="fas fa-school text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
-                            </div>
-                        </div>
-
-                        <!-- Especialidad -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Especialidad</label>
-                            <div class="relative">
-                                <input type="text" 
-                                       name="{{ $nivel['id'] }}_especialidad"
-                                       id="{{ $nivel['id'] }}_especialidad_mobile"
-                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                       placeholder="Ej: Ciencias"
-                                       data-nivel="{{ $nivel['id'] }}">
-                                <i class="fas fa-book text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
-                            </div>
-                        </div>
-
-                        <!-- Nivel / Grado -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nivel / Grado Académico</label>
-                            <div class="relative">
-                                <input type="text" 
-                                       name="{{ $nivel['id'] }}_grado"
-                                       id="{{ $nivel['id'] }}_grado_mobile"
-                                       class="campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                       placeholder="Ej: Bachiller"
-                                       data-nivel="{{ $nivel['id'] }}">
-                                <i class="fas fa-award text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2"></i>
-                            </div>
-                        </div>
-
-                        <!-- Fechas -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-                                <div class="relative">
-                                    <input type="text" 
-                                           name="{{ $nivel['id'] }}_inicio"
-                                           id="{{ $nivel['id'] }}_inicio_mobile"
-                                           class="flatpickr-date-mobile campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                           placeholder="Seleccione"
-                                           data-nivel="{{ $nivel['id'] }}">
-                                    <i class="fas fa-calendar text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-                                <div class="relative">
-                                    <input type="text" 
-                                           name="{{ $nivel['id'] }}_fin"
-                                           id="{{ $nivel['id'] }}_fin_mobile"
-                                           class="flatpickr-date-mobile campo-academico w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-{{ $nivel['color'] }}-500 focus:ring-2 focus:ring-{{ $nivel['color'] }}-200 transition-all bg-white"
-                                           placeholder="Seleccione"
-                                           data-nivel="{{ $nivel['id'] }}">
-                                    <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
-                                </div>
-                            </div>
-                        </div>
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0">
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_1_si" name="termino_1" value="SI" class="termino-radio h-5 w-5 text-green-600 focus:ring-green-500" data-nivel="1">
+                        <label for="termino_1_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_1_no" name="termino_1" value="NO" class="termino-radio h-5 w-5 text-green-600 focus:ring-green-500" data-nivel="1">
+                        <label for="termino_1_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
                     </div>
                 </div>
-            @endforeach
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Centro de Estudios</label>
+                <input type="text" name="centro_1" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200" placeholder="Nombre del centro" data-nivel="1">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                <input type="text" name="especialidad_1" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200" placeholder="Especialidad o carrera" data-nivel="1">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Nivel / Grado</label>
+                <input type="text" name="grado_1" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200" placeholder="Ej: Técnico, Profesional" data-nivel="1">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <div class="relative">
+                    <input type="text" name="inicio_1" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200" placeholder="Seleccione fecha" data-nivel="1">
+                    <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <div class="relative">
+                    <input type="text" name="fin_1" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200" placeholder="Seleccione fecha" data-nivel="1">
+                    <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- NIVEL UNIVERSITARIO (2) -->
+        <div class="grid grid-cols-1 md:grid-cols-7 items-start gap-3 p-4 hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+            <input type="hidden" name="nivel_2" value="UNIVERSITARIO">
+            
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-university text-indigo-600"></i>
+                    </div>
+                    <span class="font-semibold text-gray-800">Universitario</span>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0">
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_2_si" name="termino_2" value="SI" class="termino-radio h-5 w-5 text-indigo-600 focus:ring-indigo-500" data-nivel="2">
+                        <label for="termino_2_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_2_no" name="termino_2" value="NO" class="termino-radio h-5 w-5 text-indigo-600 focus:ring-indigo-500" data-nivel="2">
+                        <label for="termino_2_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Centro de Estudios</label>
+                <input type="text" name="centro_2" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Nombre del centro" data-nivel="2">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                <input type="text" name="especialidad_2" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Carrera" data-nivel="2">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Nivel / Grado</label>
+                <input type="text" name="grado_2" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Ej: Bachiller, Titulado" data-nivel="2">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <div class="relative">
+                    <input type="text" name="inicio_2" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Seleccione fecha" data-nivel="2">
+                    <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <div class="relative">
+                    <input type="text" name="fin_2" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" placeholder="Seleccione fecha" data-nivel="2">
+                    <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- NIVEL POSTGRADO (3) -->
+        <div class="grid grid-cols-1 md:grid-cols-7 items-start gap-3 p-4 hover:bg-gray-50 transition-colors duration-200">
+            <input type="hidden" name="nivel_3" value="POSTGRADO">
+            
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center mr-3">
+                        <i class="fas fa-user-graduate text-purple-600"></i>
+                    </div>
+                    <span class="font-semibold text-gray-800">Post Grado</span>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <div class="flex flex-col md:flex-row md:space-x-6 space-y-2 md:space-y-0">
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_3_si" name="termino_3" value="SI" class="termino-radio h-5 w-5 text-purple-600 focus:ring-purple-500" data-nivel="3">
+                        <label for="termino_3_si" class="ml-2 text-gray-700 cursor-pointer">SI</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="termino_3_no" name="termino_3" value="NO" class="termino-radio h-5 w-5 text-purple-600 focus:ring-purple-500" data-nivel="3">
+                        <label for="termino_3_no" class="ml-2 text-gray-700 cursor-pointer">NO</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Centro de Estudios</label>
+                <input type="text" name="centro_3" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Nombre del centro" data-nivel="3">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Especialidad</label>
+                <input type="text" name="especialidad_3" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Especialidad" data-nivel="3">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Nivel / Grado</label>
+                <input type="text" name="grado_3" class="campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Ej: Maestría, Doctorado" data-nivel="3">
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Inicio</label>
+                <div class="relative">
+                    <input type="text" name="inicio_3" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Seleccione fecha" data-nivel="3">
+                    <i class="fas fa-calendar-alt text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
+
+            <div class="px-4 py-2 md:py-4">
+                <label class="md:hidden block text-sm font-medium text-gray-700 mb-1">Fecha Fin</label>
+                <div class="relative">
+                    <input type="text" name="fin_3" class="flatpickr-date campo-academico w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200" placeholder="Seleccione fecha" data-nivel="3">
+                    <i class="fas fa-calendar-check text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -359,16 +342,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Inicializar Flatpickr para desktop
+    // Inicializar Flatpickr
     document.querySelectorAll('.flatpickr-date').forEach(function(element) {
-        flatpickr(element, {
+        element._flatpickr = flatpickr(element, {
             ...flatpickrOptions,
             onChange: function(selectedDates, dateStr, instance) {
-                const nivel = element.getAttribute('data-nivel');
-                const isFin = element.name.includes('_fin');
+                const nivelId = element.getAttribute('data-nivel');
+                const isFin = element.name.includes('fin');
                 
                 if (isFin) {
-                    const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
+                    const inicioInput = document.querySelector(`[name="inicio_${nivelId}"]`);
                     if (inicioInput && inicioInput.value) {
                         instance.set('minDate', inicioInput.value);
                     }
@@ -379,193 +362,118 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Inicializar Flatpickr para móvil
-    document.querySelectorAll('.flatpickr-date-mobile').forEach(function(element) {
-        flatpickr(element, {
-            ...flatpickrOptions,
-            disableMobile: false,
-            onChange: function(selectedDates, dateStr, instance) {
-                const nivel = element.getAttribute('data-nivel');
-                const isFin = element.name.includes('_fin');
-                
-                if (isFin) {
-                    const inicioInput = document.querySelector(`[name="${nivel}_inicio"]`);
-                    if (inicioInput && inicioInput.value) {
-                        instance.set('minDate', inicioInput.value);
-                    }
-                }
-                
-                calculateAcademicProgress();
-            }
-        });
-    });
-
-  // Función para manejar el cambio en los radio buttons - VERSIÓN CORREGIDA
-function handleTerminoChange(event) {
-    const nivel = event.target.getAttribute('data-nivel');
-    const value = event.target.value;
-    const isMobile = event.target.id.includes('_mobile');
-    
-    // Obtener todos los campos de este nivel (desktop y mobile)
-    const desktopCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico:not([id$="_mobile"])`);
-    const mobileCampos = document.querySelectorAll(`[data-nivel="${nivel}"].campo-academico[id$="_mobile"]`);
-    const allCampos = [...desktopCampos, ...mobileCampos];
-    
-    // Obtener los contenedores de los datepickers
-    const desktopDateContainers = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date:not([id$="_mobile"])`);
-    const mobileDateContainers = document.querySelectorAll(`[data-nivel="${nivel}"].flatpickr-date-mobile`);
-    const allDateContainers = [...desktopDateContainers, ...mobileDateContainers];
-    
-    if (value === 'NO') {
-        // Deshabilitar y limpiar todos los campos
-        allCampos.forEach(campo => {
-            campo.disabled = true;
-            campo.value = '';
-            campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-            campo.classList.remove('bg-white');
-            campo.placeholder = 'No aplica';
-        });
+    // Función para manejar el cambio en los radio buttons - NAMES SIMPLES
+    function handleTerminoChange(event) {
+        const nivelId = event.target.getAttribute('data-nivel');
+        const value = event.target.value;
         
-        // Deshabilitar los datepickers sin destruirlos
-        allDateContainers.forEach(container => {
-            if (container._flatpickr) {
-                // Solo deshabilitar visualmente, NO destruir
-                container.disabled = true;
-                
-                // Deshabilitar el altInput si existe
-                if (container._flatpickr.altInput) {
-                    container._flatpickr.altInput.disabled = true;
-                    container._flatpickr.altInput.value = '';
-                    container._flatpickr.altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                    container._flatpickr.altInput.placeholder = 'No aplica';
-                }
-                
-                // También deshabilitar el input principal
-                container.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                container.classList.remove('bg-white');
-                container.placeholder = 'No aplica';
-            }
-        });
+        console.log(`Cambio en nivel ${nivelId}: ${value}`);
         
-    } else if (value === 'SI') {
-        // Habilitar todos los campos
-        allCampos.forEach(campo => {
-            campo.disabled = false;
-            campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-            campo.classList.add('bg-white');
-            
-            // Restaurar placeholders según el tipo de campo
-            if (campo.name.includes('_centro')) {
-                campo.placeholder = isMobile ? 'Ej: Colegio Nacional' : 'Nombre del centro';
-            } else if (campo.name.includes('_especialidad')) {
-                campo.placeholder = isMobile ? 'Ej: Ciencias' : 'Especialidad o carrera';
-            } else if (campo.name.includes('_grado')) {
-                campo.placeholder = isMobile ? 'Ej: Bachiller' : 'Ej: Bachiller, Titulado';
-            } else if (campo.name.includes('_inicio') || campo.name.includes('_fin')) {
-                campo.placeholder = 'Seleccione fecha';
-            }
-        });
+        // SELECCIONAR TODOS LOS CAMPOS POR NAME SIMPLE
+        const selectores = [
+            `[name="centro_${nivelId}"]`,
+            `[name="especialidad_${nivelId}"]`,
+            `[name="grado_${nivelId}"]`,
+            `[name="inicio_${nivelId}"]`,
+            `[name="fin_${nivelId}"]`
+        ];
         
-        // Habilitar los datepickers sin re-inicializar
-        allDateContainers.forEach(container => {
-            container.disabled = false;
-            container.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-            container.classList.add('bg-white');
-            container.placeholder = 'Seleccione fecha';
-            
-            // Habilitar y limpiar estilos del altInput
-            if (container._flatpickr) {
-                if (container._flatpickr.altInput) {
-                    container._flatpickr.altInput.disabled = false;
-                    container._flatpickr.altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
-                    container._flatpickr.altInput.placeholder = 'Seleccione fecha';
+        if (value === 'NO') {
+            // Deshabilitar campos
+            selectores.forEach(selector => {
+                document.querySelectorAll(selector).forEach(campo => {
+                    campo.disabled = true;
+                    campo.value = '';
+                    campo.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                    campo.classList.remove('bg-white');
+                    campo.placeholder = 'No aplica';
                     
-                    // Limpiar valores previos
-                    if (!container._flatpickr.altInput.value) {
-                        container._flatpickr.altInput.value = '';
+                    if (campo._flatpickr) {
+                        campo._flatpickr.altInput.disabled = true;
+                        campo._flatpickr.altInput.value = '';
+                        campo._flatpickr.altInput.classList.add('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                        campo._flatpickr.altInput.placeholder = 'No aplica';
                     }
-                }
-            }
-        });
+                });
+            });
+            
+        } else if (value === 'SI') {
+            // Habilitar campos
+            selectores.forEach(selector => {
+                document.querySelectorAll(selector).forEach(campo => {
+                    campo.disabled = false;
+                    campo.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                    campo.classList.add('bg-white');
+                    
+                    if (selector.includes('centro')) {
+                        campo.placeholder = 'Nombre del centro';
+                    } else if (selector.includes('especialidad')) {
+                        campo.placeholder = 'Especialidad o carrera';
+                    } else if (selector.includes('grado')) {
+                        campo.placeholder = 'Ej: Bachiller, Titulado';
+                    } else if (selector.includes('inicio') || selector.includes('fin')) {
+                        campo.placeholder = 'Seleccione fecha';
+                        
+                        if (campo._flatpickr) {
+                            campo._flatpickr.altInput.disabled = false;
+                            campo._flatpickr.altInput.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-400');
+                            campo._flatpickr.altInput.placeholder = 'Seleccione fecha';
+                        }
+                    }
+                });
+            });
+        }
+        
+        calculateAcademicProgress();
     }
-    
-    // Recalcular progreso
-    calculateAcademicProgress();
-}
 
-    // Función para calcular el progreso correctamente
+    // Función para calcular el progreso
     function calculateAcademicProgress() {
-        const niveles = ['secundaria', 'tecnico', 'universitario', 'postgrado'];
+        const niveles = [0, 1, 2, 3];
         let nivelesCompletados = 0;
         let totalNiveles = niveles.length;
         
-        niveles.forEach(nivel => {
-            // Buscar radio button seleccionado (desktop o mobile)
-            const radioTerminadoDesktop = document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"]):checked`);
-            const radioTerminadoMobile = document.querySelector(`[name="${nivel}_termino"][id$="_mobile"]:checked`);
-            const radioTerminado = radioTerminadoDesktop || radioTerminadoMobile;
+        niveles.forEach(nivelId => {
+            const radioTerminado = document.querySelector(`[name="termino_${nivelId}"]:checked`);
             
             if (radioTerminado) {
                 if (radioTerminado.value === 'SI') {
-                    // Verificar que todos los campos requeridos estén llenos
-                    const camposRequeridos = [
-                        `${nivel}_centro`,
-                        `${nivel}_especialidad`,
-                        `${nivel}_grado`,
-                        `${nivel}_inicio`,
-                        `${nivel}_fin`
-                    ];
+                    const centro = document.querySelector(`[name="centro_${nivelId}"]`);
+                    const especialidad = document.querySelector(`[name="especialidad_${nivelId}"]`);
+                    const grado = document.querySelector(`[name="grado_${nivelId}"]`);
+                    const inicio = document.querySelector(`[name="inicio_${nivelId}"]`);
+                    const fin = document.querySelector(`[name="fin_${nivelId}"]`);
                     
-                    let camposLlenos = 0;
-                    let totalCampos = camposRequeridos.length;
+                    const centroValor = (centro && !centro.disabled) ? centro.value.trim() : '';
+                    const especialidadValor = (especialidad && !especialidad.disabled) ? especialidad.value.trim() : '';
+                    const gradoValor = (grado && !grado.disabled) ? grado.value.trim() : '';
+                    const inicioValor = (inicio && !inicio.disabled) ? inicio.value.trim() : '';
+                    const finValor = (fin && !fin.disabled) ? fin.value.trim() : '';
                     
-                    camposRequeridos.forEach(campoName => {
-                        // Buscar campo en desktop
-                        const campoDesktop = document.querySelector(`[name="${campoName}"]:not([id$="_mobile"])`);
-                        // Buscar campo en mobile
-                        const campoMobile = document.querySelector(`[name="${campoName}"][id$="_mobile"]`);
-                        
-                        // Verificar si alguno de los dos está lleno
-                        const desktopValue = campoDesktop ? campoDesktop.value.trim() : '';
-                        const mobileValue = campoMobile ? campoMobile.value.trim() : '';
-                        
-                        if (desktopValue !== '' || mobileValue !== '') {
-                            camposLlenos++;
-                        }
-                    });
-                    
-                    // Si todos los campos están llenos, cuenta como nivel completado
-                    if (camposLlenos === totalCampos) {
+                    if (centroValor !== '' && inicioValor !== '') {
                         nivelesCompletados++;
                     }
                 } else if (radioTerminado.value === 'NO') {
-                    // Si seleccionó NO, cuenta como completado (porque respondió)
                     nivelesCompletados++;
                 }
             }
         });
         
-        // Calcular porcentaje
-        const percentage = Math.round((nivelesCompletados / totalNiveles) * 100);
-        document.getElementById('academic-percentage').textContent = `${percentage}%`;
-        document.getElementById('academic-progress').style.width = `${percentage}%`;
-        
-        // Cambiar color según porcentaje
+        const percentage = totalNiveles > 0 ? Math.round((nivelesCompletados / totalNiveles) * 100) : 0;
+        const progressElement = document.getElementById('academic-percentage');
         const progressBar = document.getElementById('academic-progress');
-        progressBar.classList.remove('bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-gray-500');
         
-        if (percentage >= 100) {
-            progressBar.classList.add('bg-green-500');
-        } else if (percentage >= 75) {
-            progressBar.classList.add('bg-green-400');
-        } else if (percentage >= 50) {
-            progressBar.classList.add('bg-yellow-500');
-        } else if (percentage >= 25) {
-            progressBar.classList.add('bg-yellow-400');
-        } else if (percentage > 0) {
-            progressBar.classList.add('bg-red-500');
-        } else {
-            progressBar.classList.add('bg-gray-300');
+        if (progressElement) progressElement.textContent = `${percentage}%`;
+        if (progressBar) progressBar.style.width = `${percentage}%`;
+        
+        if (progressBar) {
+            progressBar.classList.remove('bg-green-500', 'bg-green-400', 'bg-yellow-500', 'bg-yellow-400', 'bg-red-500', 'bg-gray-300');
+            if (percentage >= 100) progressBar.classList.add('bg-green-500');
+            else if (percentage >= 75) progressBar.classList.add('bg-green-400');
+            else if (percentage >= 50) progressBar.classList.add('bg-yellow-500');
+            else if (percentage >= 25) progressBar.classList.add('bg-yellow-400');
+            else if (percentage > 0) progressBar.classList.add('bg-red-500');
+            else progressBar.classList.add('bg-gray-300');
         }
     }
 
@@ -575,82 +483,49 @@ function handleTerminoChange(event) {
     });
 
     // Agregar event listeners a los campos de texto
-    document.querySelectorAll('.campo-academico').forEach(campo => {
+    document.querySelectorAll('[name^="centro_"], [name^="especialidad_"], [name^="grado_"], [name^="inicio_"], [name^="fin_"]').forEach(campo => {
         campo.addEventListener('input', calculateAcademicProgress);
         campo.addEventListener('change', calculateAcademicProgress);
-        campo.addEventListener('blur', calculateAcademicProgress);
     });
 
-    // Escuchar eventos de Flatpickr
-    document.addEventListener('flatpickr.change', calculateAcademicProgress);
-
-    // Función para sincronizar campos entre desktop y mobile
-    function sincronizarCampos() {
-        const niveles = ['secundaria', 'tecnico', 'universitario', 'postgrado'];
-        
-        niveles.forEach(nivel => {
-            // Sincronizar radio buttons
-            const radioDesktop = document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"]):checked`);
-            const radioMobile = document.querySelector(`[name="${nivel}_termino"][id$="_mobile"]:checked`);
-            
-            if (radioDesktop && !radioMobile) {
-                document.querySelector(`[name="${nivel}_termino"][id$="_mobile"][value="${radioDesktop.value}"]`).checked = true;
-            }
-            if (radioMobile && !radioDesktop) {
-                document.querySelector(`[name="${nivel}_termino"]:not([id$="_mobile"])[value="${radioMobile.value}"]`).checked = true;
-            }
-            
-            // Sincronizar campos de texto
-            const campos = ['centro', 'especialidad', 'grado', 'inicio', 'fin'];
-            campos.forEach(campo => {
-                const desktopField = document.querySelector(`[name="${nivel}_${campo}"]:not([id$="_mobile"])`);
-                const mobileField = document.querySelector(`[name="${nivel}_${campo}"][id$="_mobile"]`);
-                
-                if (desktopField && mobileField) {
-                    // Desktop a Mobile
-                    desktopField.addEventListener('input', function() {
-                        mobileField.value = this.value;
-                        // Disparar evento para recalcular progreso
-                        const event = new Event('input', { bubbles: true });
-                        mobileField.dispatchEvent(event);
-                    });
-                    
-                    // Mobile a Desktop
-                    mobileField.addEventListener('input', function() {
-                        desktopField.value = this.value;
-                        // Disparar evento para recalcular progreso
-                        const event = new Event('input', { bubbles: true });
-                        desktopField.dispatchEvent(event);
-                    });
-                }
-            });
-        });
-    }
-
-    // Inicializar sincronización
-    sincronizarCampos();
-
-    // Inicializar estado de los campos basado en selecciones existentes
+    // Inicializar estado de los campos
     document.querySelectorAll('.termino-radio:checked').forEach(radio => {
-        // Disparar el evento change para aplicar estado inicial
         const event = new Event('change', { bubbles: true });
         radio.dispatchEvent(event);
     });
 
-    // Calcular progreso inicial
     calculateAcademicProgress();
+});
+
+// DEBUG: Ver qué se envía al servidor
+document.getElementById('formularioPersonal')?.addEventListener('submit', function(e) {
+    console.log('=== VERIFICANDO CAMPOS DE ESTUDIOS ===');
+    
+    for (let i = 0; i <= 3; i++) {
+        const radioSI = document.querySelector(`[name="termino_${i}"][value="SI"]`);
+        const radioNO = document.querySelector(`[name="termino_${i}"][value="NO"]`);
+        
+        console.log(`Nivel ${i}:`, {
+            'SI checked': radioSI ? radioSI.checked : false,
+            'NO checked': radioNO ? radioNO.checked : false,
+        });
+        
+        if (radioSI && radioSI.checked) {
+            ['centro', 'especialidad', 'grado', 'inicio', 'fin'].forEach(campo => {
+                const elemento = document.querySelector(`[name="${campo}_${i}"]`);
+                if (elemento) {
+                    console.log(`  ${campo}_${i} = ${elemento.value}`, `(disabled: ${elemento.disabled})`);
+                }
+            });
+        }
+    }
 });
 </script>
 
 <style>
 /* Estilos para campos deshabilitados */
-.campo-academico:disabled {
-    background-color: #f3f4f6 !important;
-    color: #9ca3af !important;
-    cursor: not-allowed !important;
-    border-color: #d1d5db !important;
-}
-
+.campo-academico:disabled,
+.flatpickr-date:disabled,
 .flatpickr-alt-input:disabled {
     background-color: #f3f4f6 !important;
     color: #9ca3af !important;
@@ -659,22 +534,31 @@ function handleTerminoChange(event) {
 }
 
 /* Estilos para campos habilitados */
-.campo-academico:enabled {
+.campo-academico:enabled,
+.flatpickr-date:enabled,
+.flatpickr-alt-input:enabled {
     background-color: white !important;
     color: #374151 !important;
 }
 
-/* Estilos para inputs de flatpickr */
-.flatpickr-input:disabled {
-    background-color: #f3f4f6 !important;
-}
-
 /* Transiciones suaves */
-.campo-academico, .flatpickr-input, .flatpickr-alt-input {
+.campo-academico, 
+.flatpickr-date, 
+.flatpickr-alt-input {
     transition: all 0.3s ease;
 }
 
-/* Estilos para la barra de progreso */
+/* Estilos responsive */
+@media (max-width: 768px) {
+    .md\:grid-cols-7 > * {
+        padding: 0.5rem 1rem;
+    }
+    
+    .md\:hidden {
+        display: block !important;
+    }
+}
+
 #academic-progress {
     transition: width 0.5s ease-in-out, background-color 0.5s ease;
 }

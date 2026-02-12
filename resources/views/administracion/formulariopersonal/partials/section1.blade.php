@@ -372,17 +372,36 @@
         </h4>
         <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-200">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="lg:col-span-1">
-                    <label for="entidad_bancaria" class="block text-sm text-gray-600 mb-2 font-medium">Entidad
-                        Bancaria</label>
-                    <div class="relative">
-                        <input type="text" id="entidadBancaria" name="entidadBancaria"
-                            class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
-                            placeholder="Ej: BCP">
-                        <i
-                            class="fas fa-building text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"></i>
-                    </div>
-                </div>
+             <div class="lg:col-span-1">
+    <label for="entidadBancaria" class="block text-sm text-gray-600 mb-2 font-medium">Entidad Bancaria</label>
+    <div class="relative">
+        <select id="entidadBancaria" 
+                name="entidadBancaria"
+                class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white cursor-pointer">
+            <option value="" selected disabled>Seleccione una entidad bancaria</option>
+            <option value="BCP">Banco de Crédito del Perú (BCP)</option>
+            <option value="BBVA">BBVA Perú</option>
+            <option value="Scotiabank">Scotiabank Perú</option>
+            <option value="Interbank">Interbank</option>
+            <option value="Banco Nacion">Banco de la Nación</option>
+            <option value="Banco Comercio">Banco de Comercio</option>
+            <option value="BanBif">BanBif</option>
+            <option value="Pichincha">Banco Pichincha</option>
+            <option value="Citibank">Citibank Perú</option>
+            <option value="MiBanco">MiBanco</option>
+            <option value="GNB">Banco GNB Perú</option>
+            <option value="Falabella">Banco Falabella</option>
+            <option value="Ripley">Banco Ripley</option>
+            <option value="Santander">Banco Santander Perú</option>
+            <option value="Alfin">Alfin Banco</option>
+            <option value="Bank of China">Bank of China</option>
+            <option value="Bci">Bci Perú</option>
+            <option value="ICBC">ICBC Perú Bank</option>
+        </select>
+        <i class="fas fa-building text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+        <i class="fas fa-chevron-down text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
+    </div>
+</div>
                 <div class="lg:col-span-1">
                     <label for="tipo_cuenta" class="block text-sm text-gray-600 mb-2 font-medium">Tipo de
                         Cuenta</label>

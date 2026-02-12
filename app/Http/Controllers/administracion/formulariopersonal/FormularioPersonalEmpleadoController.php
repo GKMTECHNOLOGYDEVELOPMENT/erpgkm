@@ -18,6 +18,7 @@ use App\Models\UsuarioSalud;
 use App\Models\UsuarioEmergenciaContacto;
 use App\Models\UsuarioDocumentoArchivo;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class FormularioPersonalEmpleadoController extends Controller
 {
@@ -86,25 +87,50 @@ class FormularioPersonalEmpleadoController extends Controller
                 'sistemaPensiones' => 'nullable|in:ONP,AFP,NA',
                 'afpCompania' => 'required_if:sistemaPensiones,AFP|nullable|in:Integra,Horizonte,Profuturo,Prima',
                 
-                // SECCIÓN 2 - INFORMACIÓN ACADÉMICA
-                'estudios' => 'nullable|array',
-                'estudios.*.nivel' => 'required_with:estudios|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
-                'estudios.*.termino' => 'nullable|in:SI,NO',
-                'estudios.*.centro' => 'nullable|string|max:255',
-                'estudios.*.especialidad' => 'nullable|string|max:255',
-                'estudios.*.grado' => 'nullable|string|max:255',
-                'estudios.*.inicio' => 'nullable|date',
-                'estudios.*.fin' => 'nullable|date|after_or_equal:estudios.*.inicio',
+                // SECCIÓN 2 - INFORMACIÓN ACADÉMICA (NAMES SIMPLES)
+                'nivel_0' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
+                'nivel_1' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
+                'nivel_2' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
+                'nivel_3' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 
-                // SECCIÓN 3 - INFORMACIÓN FAMILIAR (OPCIONAL)
-                'familiares' => 'nullable|array',
-                'familiares.*.parentesco' => 'nullable|required_with:familiares.*.nombres|in:conyuge,concubino,hijo',
-                'familiares.*.nombres' => 'nullable|string|max:255',
-                'familiares.*.documento' => 'nullable|string|max:20',
-                'familiares.*.ocupacion' => 'nullable|string|max:255',
-                'familiares.*.sexo' => 'nullable|in:M,F',
-                'familiares.*.fecha_nacimiento' => 'nullable|date',
-                'familiares.*.domicilio' => 'nullable|string|max:255',
+                'termino_0' => 'nullable|in:SI,NO',
+                'termino_1' => 'nullable|in:SI,NO',
+                'termino_2' => 'nullable|in:SI,NO',
+                'termino_3' => 'nullable|in:SI,NO',
+                
+                'centro_0' => 'nullable|string|max:255',
+                'centro_1' => 'nullable|string|max:255',
+                'centro_2' => 'nullable|string|max:255',
+                'centro_3' => 'nullable|string|max:255',
+                
+                'especialidad_0' => 'nullable|string|max:255',
+                'especialidad_1' => 'nullable|string|max:255',
+                'especialidad_2' => 'nullable|string|max:255',
+                'especialidad_3' => 'nullable|string|max:255',
+                
+                'grado_0' => 'nullable|string|max:255',
+                'grado_1' => 'nullable|string|max:255',
+                'grado_2' => 'nullable|string|max:255',
+                'grado_3' => 'nullable|string|max:255',
+                
+                'inicio_0' => 'nullable|date',
+                'inicio_1' => 'nullable|date',
+                'inicio_2' => 'nullable|date',
+                'inicio_3' => 'nullable|date',
+                
+                'fin_0' => 'nullable|date|after_or_equal:inicio_0',
+                'fin_1' => 'nullable|date|after_or_equal:inicio_1',
+                'fin_2' => 'nullable|date|after_or_equal:inicio_2',
+                'fin_3' => 'nullable|date|after_or_equal:inicio_3',
+                
+                // SECCIÓN 3 - INFORMACIÓN FAMILIAR (NAMES SIMPLES)
+                'parentesco_*' => 'nullable|in:conyuge,concubino,hijo',
+                'nombres_*' => 'nullable|string|max:255',
+                'documento_*' => 'nullable|string|max:20',
+                'ocupacion_*' => 'nullable|string|max:255',
+                'sexo_*' => 'nullable|in:M,F',
+                'fecha_nacimiento_*' => 'nullable|date',
+                'domicilio_*' => 'nullable|string|max:255',
                 
                 // SECCIÓN 4 - INFORMACIÓN DE SALUD
                 'vacuna_covid' => 'nullable|in:SI,NO',
@@ -149,6 +175,10 @@ class FormularioPersonalEmpleadoController extends Controller
                 'emergencia2_nombres.required' => 'El segundo contacto de emergencia es obligatorio.',
                 'dni_declaracion.size' => 'El DNI debe tener 8 dígitos.',
                 'acepto_declaracion.accepted' => 'Debe aceptar la declaración jurada para enviar el formulario.',
+                'fin_0.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+                'fin_1.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+                'fin_2.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
+                'fin_3.after_or_equal' => 'La fecha de fin debe ser posterior o igual a la fecha de inicio.',
             ]);
 
             if ($validator->fails()) {
@@ -163,7 +193,7 @@ class FormularioPersonalEmpleadoController extends Controller
             
             // Generar usuario y clave por defecto
             $username = strtolower(substr($request->nombres, 0, 1) . $request->paterno . substr($request->num_documento, -4));
-            $defaultPassword = bcrypt($request->num_documento); // Clave = número de documento
+            $defaultPassword = bcrypt($request->num_documento);
             
             $usuario = Usuario::updateOrCreate(
                 ['documento' => $request->num_documento],
@@ -184,11 +214,11 @@ class FormularioPersonalEmpleadoController extends Controller
                     'direccion' => $request->direccion,
                     'documento' => $request->num_documento,
                     'idTipoDocumento' => $request->idTipoDocumento,
-                    'idTipoUsuario' => 2, // Por defecto empleado
+                    'idTipoUsuario' => 2,
                     'idSexo' => $request->idSexo,
-                    'idRol' => 2, // Por defecto rol empleado
+                    'idRol' => 2,
                     'estadocivil' => $this->mapEstadoCivil($request->estado_civil),
-                    'estado' => 1, // Activo
+                    'estado' => 1,
                 ]
             );
 
@@ -220,49 +250,119 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]
             );
 
-            // ========== 4. GUARDAR ESTUDIOS ==========
-            if ($request->has('estudios')) {
-                // Eliminar estudios anteriores
-                UsuarioEstudio::where('idUsuario', $usuario->idUsuario)->delete();
+            // ========== 4. GUARDAR ESTUDIOS (NAMES SIMPLES) ==========
+            Log::channel('single')->info('========== DEBUG ESTUDIOS ==========');
+            Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
+            
+            // Eliminar estudios anteriores
+            UsuarioEstudio::where('idUsuario', $usuario->idUsuario)->delete();
+            Log::channel('single')->info('Estudios anteriores eliminados');
+            
+            $estudiosGuardados = 0;
+            $niveles = [0, 1, 2, 3];
+            $nombresNiveles = [
+                0 => 'SECUNDARIA',
+                1 => 'TECNICO',
+                2 => 'UNIVERSITARIO',
+                3 => 'POSTGRADO'
+            ];
+            
+            foreach ($niveles as $nivelId) {
+                $termino = $request->input("termino_{$nivelId}");
+                $nivel = $request->input("nivel_{$nivelId}", $nombresNiveles[$nivelId]);
                 
-                foreach ($request->estudios as $estudio) {
-                    if (isset($estudio['nivel']) && $estudio['nivel']) {
-                        UsuarioEstudio::create([
+                Log::channel('single')->info("--- Procesando nivel {$nivelId}: {$nivel} ---");
+                Log::channel('single')->info("Termino: " . ($termino ?? 'NO DEFINIDO'));
+                
+                if ($termino === 'SI') {
+                    $centro = $request->input("centro_{$nivelId}");
+                    $inicio = $request->input("inicio_{$nivelId}");
+                    
+                    if (!empty($centro) && !empty($inicio)) {
+                        $dataToInsert = [
                             'idUsuario' => $usuario->idUsuario,
-                            'nivel' => $estudio['nivel'],
-                            'termino' => isset($estudio['termino']) ? ($estudio['termino'] === 'SI' ? 1 : 0) : null,
-                            'centroEstudios' => $estudio['centro'] ?? null,
-                            'especialidad' => $estudio['especialidad'] ?? null,
-                            'gradoAcademico' => $estudio['grado'] ?? null,
-                            'fechaInicio' => $estudio['inicio'] ?? null,
-                            'fechaFin' => $estudio['fin'] ?? null,
-                        ]);
+                            'nivel' => $nivel,
+                            'termino' => 1,
+                            'centroEstudios' => $centro,
+                            'especialidad' => $request->input("especialidad_{$nivelId}"),
+                            'gradoAcademico' => $request->input("grado_{$nivelId}"),
+                            'fechaInicio' => $inicio,
+                            'fechaFin' => $request->input("fin_{$nivelId}"),
+                        ];
+                        
+                        try {
+                            UsuarioEstudio::create($dataToInsert);
+                            $estudiosGuardados++;
+                            Log::channel('single')->info('✅ ESTUDIO GUARDADO');
+                        } catch (\Exception $e) {
+                            Log::channel('single')->error('❌ ERROR: ' . $e->getMessage());
+                        }
                     }
                 }
             }
+            
+            Log::channel('single')->info("📊 TOTAL: {$estudiosGuardados} estudios guardados");
+            Log::channel('single')->info('========== FIN DEBUG ESTUDIOS ==========');
 
-            // ========== 5. GUARDAR FAMILIARES ==========
-           // ========== 5. GUARDAR FAMILIARES ==========
-            if ($request->has('familiares')) {
-                // Eliminar familiares anteriores
-                UsuarioFamilia::where('idUsuario', $usuario->idUsuario)->delete();
-                
-                foreach ($request->familiares as $familiar) {
-                    // SOLO guardar si tiene nombre Y parentesco
-                    if (!empty($familiar['nombres']) && !empty($familiar['parentesco'])) {
-                        UsuarioFamilia::create([
-                            'idUsuario' => $usuario->idUsuario,
-                            'parentesco' => $this->mapParentesco($familiar['parentesco']),
-                            'apellidosNombres' => $familiar['nombres'],
-                            'nroDocumento' => $familiar['documento'] ?? null,
-                            'ocupacion' => $familiar['ocupacion'] ?? null,
-                            'sexo' => $familiar['sexo'] ?? null,
-                            'fechaNacimiento' => $familiar['fecha_nacimiento'] ?? null,
-                            'domicilioActual' => $familiar['domicilio'] ?? null,
-                        ]);
+            // ========== 5. GUARDAR FAMILIARES (NAMES SIMPLES) ==========
+            Log::channel('single')->info('========== DEBUG FAMILIARES ==========');
+            Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
+            
+            // Eliminar familiares anteriores
+            UsuarioFamilia::where('idUsuario', $usuario->idUsuario)->delete();
+            Log::channel('single')->info('Familiares anteriores eliminados');
+            
+            $familiaresGuardados = 0;
+            $indicesEncontrados = [];
+            
+            // Buscar todos los índices de nombres (solo desktop, no mobile)
+            foreach ($request->all() as $key => $value) {
+                if (strpos($key, 'nombres_') === 0 && !strpos($key, 'mobile')) {
+                    $index = str_replace('nombres_', '', $key);
+                    
+                    // Verificar que sea numérico y no esté duplicado
+                    if (is_numeric($index) && !in_array($index, $indicesEncontrados)) {
+                        $indicesEncontrados[] = $index;
+                        
+                        // Solo procesar si tiene nombre y parentesco
+                        $nombres = $request->input("nombres_{$index}");
+                        $parentesco = $request->input("parentesco_{$index}");
+                        
+                        Log::channel('single')->info("--- Procesando familiar índice {$index} ---");
+                        Log::channel('single')->info("Nombres: " . ($nombres ?? 'VACÍO'));
+                        Log::channel('single')->info("Parentesco: " . ($parentesco ?? 'VACÍO'));
+                        
+                        if (!empty($nombres) && !empty($parentesco)) {
+                            
+                            $dataToInsert = [
+                                'idUsuario' => $usuario->idUsuario,
+                                'parentesco' => $this->mapParentesco($parentesco),
+                                'apellidosNombres' => $nombres,
+                                'nroDocumento' => $request->input("documento_{$index}"),
+                                'ocupacion' => $request->input("ocupacion_{$index}"),
+                                'sexo' => $request->input("sexo_{$index}"),
+                                'fechaNacimiento' => $request->input("fecha_nacimiento_{$index}"),
+                                'domicilioActual' => $request->input("domicilio_{$index}"),
+                            ];
+                            
+                            Log::channel('single')->info('Datos a insertar:', $dataToInsert);
+                            
+                            try {
+                                UsuarioFamilia::create($dataToInsert);
+                                $familiaresGuardados++;
+                                Log::channel('single')->info('✅ FAMILIAR GUARDADO');
+                            } catch (\Exception $e) {
+                                Log::channel('single')->error('❌ ERROR guardando familiar: ' . $e->getMessage());
+                            }
+                        } else {
+                            Log::channel('single')->info('⏭️ Familiar incompleto (faltan nombres o parentesco)');
+                        }
                     }
                 }
             }
+            
+            Log::channel('single')->info("📊 TOTAL: {$familiaresGuardados} familiares guardados");
+            Log::channel('single')->info('========== FIN DEBUG FAMILIARES ==========');
 
             // ========== 6. GUARDAR SALUD ==========
             UsuarioSalud::updateOrCreate(
@@ -281,10 +381,8 @@ class FormularioPersonalEmpleadoController extends Controller
             );
 
             // ========== 7. GUARDAR CONTACTOS DE EMERGENCIA ==========
-            // Eliminar contactos anteriores
             UsuarioEmergenciaContacto::where('idUsuario', $usuario->idUsuario)->delete();
             
-            // Contacto 1
             if ($request->emergencia1_nombres) {
                 UsuarioEmergenciaContacto::create([
                     'idUsuario' => $usuario->idUsuario,
@@ -294,7 +392,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]);
             }
             
-            // Contacto 2
             if ($request->emergencia2_nombres) {
                 UsuarioEmergenciaContacto::create([
                     'idUsuario' => $usuario->idUsuario,
@@ -304,7 +401,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]);
             }
             
-            // Contactos adicionales
             for ($i = 3; $i <= 5; $i++) {
                 $nombres = $request->input("emergencia{$i}_nombres");
                 if ($nombres) {
@@ -317,13 +413,12 @@ class FormularioPersonalEmpleadoController extends Controller
                 }
             }
 
-            // ========== 8. GUARDAR FIRMA (si existe) ==========
+            // ========== 8. GUARDAR FIRMA ==========
             if ($request->hasFile('firma')) {
                 $firma = $request->file('firma');
                 $usuario->firma = file_get_contents($firma->getRealPath());
                 $usuario->save();
                 
-                // También guardar en documentos_archivos
                 UsuarioDocumentoArchivo::updateOrCreate(
                     [
                         'idUsuario' => $usuario->idUsuario,
@@ -342,7 +437,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 ['idUsuario' => $usuario->idUsuario],
                 [
                     'cv' => $request->has('doc_cv') ? 1 : 0,
-                    'dniVigente' => 1, // Siempre tiene DNI vigente por el registro
+                    'dniVigente' => 1,
                     'carnetVacunacion' => $request->vacuna_covid === 'SI' ? 1 : 0,
                     'declaracionJuradaDomicilio' => $request->acepto_declaracion ? 1 : 0,
                 ]
@@ -350,7 +445,6 @@ class FormularioPersonalEmpleadoController extends Controller
 
             DB::commit();
 
-            // ========== 10. RESPUESTA DE ÉXITO ==========
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -370,6 +464,10 @@ class FormularioPersonalEmpleadoController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            Log::channel('single')->error('ERROR EN FORMULARIO: ' . $e->getMessage());
+            Log::channel('single')->error('LINE: ' . $e->getLine());
+            Log::channel('single')->error('FILE: ' . $e->getFile());
             
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -393,14 +491,12 @@ class FormularioPersonalEmpleadoController extends Controller
         try {
             DB::beginTransaction();
             
-            // Buscar o crear usuario por documento
             $usuario = null;
             if ($request->num_documento) {
                 $usuario = Usuario::where('documento', $request->num_documento)->first();
             }
             
             if (!$usuario && $request->num_documento) {
-                // Crear usuario temporal si no existe
                 $fechaNacimiento = $request->anio && $request->mes && $request->dia 
                     ? $request->anio . '-' . $request->mes . '-' . str_pad($request->dia, 2, '0', STR_PAD_LEFT)
                     : null;
@@ -417,7 +513,7 @@ class FormularioPersonalEmpleadoController extends Controller
                     'documento' => $request->num_documento,
                     'idTipoDocumento' => $request->idTipoDocumento ?? 1,
                     'idTipoUsuario' => 2,
-                    'estado' => 0, // Inactivo hasta completar
+                    'estado' => 0,
                 ]);
             }
             
@@ -425,7 +521,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 throw new \Exception('No se pudo identificar al usuario para guardar el borrador');
             }
             
-            // Guardar ficha general (solo campos que vienen en el request)
             $fichaData = array_filter([
                 'nacimientoDepartamento' => $request->nacimientoDepartamento,
                 'nacimientoProvincia' => $request->nacimientoProvincia,
@@ -455,7 +550,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 );
             }
             
-            // Guardar salud (solo campos que vienen)
             $saludData = array_filter([
                 'vacunaCovid' => $request->vacuna_covid === 'SI' ? 1 : ($request->vacuna_covid ? 0 : null),
                 'covidDosis1' => $request->covid_dosis1,
@@ -520,10 +614,10 @@ class FormularioPersonalEmpleadoController extends Controller
     private function mapEstadoCivil($estado)
     {
         $map = [
-            'S' => 1, // Soltero
-            'C' => 2, // Casado
-            'V' => 3, // Viudo
-            'D' => 4, // Divorciado
+            'S' => 1,
+            'C' => 2,
+            'V' => 3,
+            'D' => 4,
         ];
         
         return $map[$estado] ?? null;

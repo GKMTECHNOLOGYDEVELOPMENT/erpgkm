@@ -23,12 +23,13 @@ class UsuarioSalud extends Model
         'vacunaCovid',
         'covidDosis1',
         'covidDosis2',
+        'covidDosis3',
         'dolenciaCronica',
         'dolenciaDetalle',
         'discapacidad',
         'discapacidadDetalle',
         'tipoSangre',
-    ];
+    ];  
 
     protected $casts = [
         'vacunaCovid' => 'boolean',
