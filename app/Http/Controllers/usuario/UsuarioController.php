@@ -36,7 +36,7 @@ class UsuarioController extends Controller
 
         $usuario = Usuario::all();
 
-   
+
 
         return view('usuario.index', compact('usuario'));
     }
@@ -68,79 +68,79 @@ class UsuarioController extends Controller
         return view('usuario.create', compact('tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos'));
     }
 
-//     public function store(Request $request)
-// {
-//     try {
-//         Log::info('Inicio del proceso de creación de usuario.');
+    //     public function store(Request $request)
+    // {
+    //     try {
+    //         Log::info('Inicio del proceso de creación de usuario.');
 
-//         // Validación
-//         $request->validate([
-//             'Nombre' => 'required|string|max:255',
-//             'apellidoPaterno' => 'required|string|max:255',
-//             'apellidoMaterno' => 'required|string|max:255',
-//             'idTipoDocumento' => 'required|integer',
-//             'documento' => 'required|string|max:255|unique:usuarios,documento',
-//             'telefono' => 'required|string|max:255|unique:usuarios,telefono',
-//             'correo' => 'required|email|max:255|unique:usuarios,correo',
-//             'profile-image' => 'nullable|image|max:1024',
-//         ]);
-//         Log::info('Formulario validado con éxito.');
+    //         // Validación
+    //         $request->validate([
+    //             'Nombre' => 'required|string|max:255',
+    //             'apellidoPaterno' => 'required|string|max:255',
+    //             'apellidoMaterno' => 'required|string|max:255',
+    //             'idTipoDocumento' => 'required|integer',
+    //             'documento' => 'required|string|max:255|unique:usuarios,documento',
+    //             'telefono' => 'required|string|max:255|unique:usuarios,telefono',
+    //             'correo' => 'required|email|max:255|unique:usuarios,correo',
+    //             'profile-image' => 'nullable|image|max:1024',
+    //         ]);
+    //         Log::info('Formulario validado con éxito.');
 
-//         // Procesamiento de la imagen
-//         $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
-//         Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
+    //         // Procesamiento de la imagen
+    //         $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
+    //         Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
 
-//         // Generación de usuario y clave
-//         $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
-//         $usuario = str_replace(' ', '', $usuario);
-//         $clave = Str::random(8);
-//         $claveEncriptada = bcrypt($clave);
+    //         // Generación de usuario y clave
+    //         $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
+    //         $usuario = str_replace(' ', '', $usuario);
+    //         $clave = Str::random(8);
+    //         $claveEncriptada = bcrypt($clave);
 
-//         Log::info('Datos generados para el nuevo usuario:', [
-//             'usuario' => $usuario,
-//             'clave' => $clave
-//         ]);
+    //         Log::info('Datos generados para el nuevo usuario:', [
+    //             'usuario' => $usuario,
+    //             'clave' => $clave
+    //         ]);
 
-//         // Creación del usuario
-//         $usuarioNuevo = new Usuario();
-//         $usuarioNuevo->Nombre = $request->Nombre;
-//         $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
-//         $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
-//         $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
-//         $usuarioNuevo->documento = $request->documento;
-//         $usuarioNuevo->telefono = $request->telefono;
-//         $usuarioNuevo->correo = $request->correo;
-//         $usuarioNuevo->avatar = $imageData;
-//         $usuarioNuevo->usuario = $usuario;
-//         $usuarioNuevo->clave = $claveEncriptada;
-//         $usuarioNuevo->estado = 1;
-//         $usuarioNuevo->save();
-//         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
+    //         // Creación del usuario
+    //         $usuarioNuevo = new Usuario();
+    //         $usuarioNuevo->Nombre = $request->Nombre;
+    //         $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
+    //         $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
+    //         $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
+    //         $usuarioNuevo->documento = $request->documento;
+    //         $usuarioNuevo->telefono = $request->telefono;
+    //         $usuarioNuevo->correo = $request->correo;
+    //         $usuarioNuevo->avatar = $imageData;
+    //         $usuarioNuevo->usuario = $usuario;
+    //         $usuarioNuevo->clave = $claveEncriptada;
+    //         $usuarioNuevo->estado = 1;
+    //         $usuarioNuevo->save();
+    //         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
 
-//         // Enviar correo
-//         Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
-//         Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
+    //         // Enviar correo
+    //         Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
+    //         Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
 
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Usuario creado y datos enviados al correo.',
-//             'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Usuario creado y datos enviados al correo.',
+    //             'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
 
-//         ]);
-//     } catch (\Illuminate\Validation\ValidationException $e) {
-//         Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
-//         return response()->json(['success' => false, 'errors' => $e->errors()], 422);
-//     } catch (\Exception $e) {
-//         Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
-//         return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
-//     }
-// }
+    //         ]);
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
+    //         return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
+    //         return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
+    //     }
+    // }
 
 
-public function getUsuariostecnico()
+    public function getUsuariostecnico()
     {
         Log::debug('Iniciando la obtención de usuarios con relaciones');
-    
+
         // Filtramos los usuarios por tipoUsuario, tipoArea y estado
         $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
             ->where('estado', 1) // Estado activo
@@ -164,371 +164,385 @@ public function getUsuariostecnico()
                     'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
                 ];
             });
-    
+
         Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
-    
+
         return response()->json($usuarios);
     }
 
 
 
-    
-public function getUsuariostecnicohelp()
-{
-    Log::debug('Iniciando la obtención de usuarios con relaciones');
 
-    // Filtramos los usuarios por tipoUsuario, tipoArea y estado
-    $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
-        ->where('estado', 1) // Estado activo
-        ->where('idTipoUsuario', 1) // Tipo de usuario igual a 1
-        ->where('idTipoArea', 6) // Tipo de área igual a 4
-        ->get()
-        ->map(function ($usuario) {
-            return [
-                'idUsuario' => $usuario->idUsuario,
-                'Nombre' => $usuario->Nombre,
-                'apellidoPaterno' => $usuario->apellidoPaterno,
-                'telefono' => $usuario->telefono ?? 'N/A',
-                'correo' => $usuario->correo ?? 'N/A',
-                'documento' => $usuario->documento ?? 'N/A',
-                'estado' => $usuario->estado,
-                'tipoDocumento' => $usuario->tipoDocumento ? $usuario->tipoDocumento->nombre : 'N/A',
-                'tipoUsuario' => $usuario->tipoUsuario ? $usuario->tipoUsuario->nombre : 'N/A',
-                'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
-                'tipoArea' => $usuario->tipoArea ? $usuario->tipoArea->nombre : 'N/A',
-                'avatar' => !empty($usuario->avatar) ? 'data:image/png;base64,' . base64_encode($usuario->avatar) : null,
-                'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
+    public function getUsuariostecnicohelp()
+    {
+        Log::debug('Iniciando la obtención de usuarios con relaciones');
+
+        // Filtramos los usuarios por tipoUsuario, tipoArea y estado
+        $usuarios = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
+            ->where('estado', 1) // Estado activo
+            ->where('idTipoUsuario', 1) // Tipo de usuario igual a 1
+            ->where('idTipoArea', 6) // Tipo de área igual a 4
+            ->get()
+            ->map(function ($usuario) {
+                return [
+                    'idUsuario' => $usuario->idUsuario,
+                    'Nombre' => $usuario->Nombre,
+                    'apellidoPaterno' => $usuario->apellidoPaterno,
+                    'telefono' => $usuario->telefono ?? 'N/A',
+                    'correo' => $usuario->correo ?? 'N/A',
+                    'documento' => $usuario->documento ?? 'N/A',
+                    'estado' => $usuario->estado,
+                    'tipoDocumento' => $usuario->tipoDocumento ? $usuario->tipoDocumento->nombre : 'N/A',
+                    'tipoUsuario' => $usuario->tipoUsuario ? $usuario->tipoUsuario->nombre : 'N/A',
+                    'rol' => $usuario->rol ? $usuario->rol->nombre : 'N/A',
+                    'tipoArea' => $usuario->tipoArea ? $usuario->tipoArea->nombre : 'N/A',
+                    'avatar' => !empty($usuario->avatar) ? 'data:image/png;base64,' . base64_encode($usuario->avatar) : null,
+                    'tieneFirma' => !empty($usuario->firma), // 🔥 Solo enviamos `true` o `false`
+                ];
+            });
+
+        Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
+
+        return response()->json($usuarios);
+    }
+
+
+
+
+    public function store(Request $request)
+    {
+        try {
+            Log::info('Inicio del proceso de creación de usuario.');
+
+            // Validación personalizada para el documento según el tipo
+            $documentoReglas = [
+                'DNI' => 'required|digits:8', // 8 dígitos para DNI
+                'RUC' => 'required|digits:11', // 11 dígitos para RUC
+                'PASAPORTE' => 'required|digits:12', // 12 dígitos para PASAPORTE
+                'CPP' => 'required|digits:12', // 12 dígitos para CPP
+                'CARNET DE EXTRANJERIA' => 'required|digits:20', // 20 dígitos para CARNET DE EXTRANJERIA
             ];
-        });
 
-    Log::debug('Usuarios obtenidos con relaciones:', ['usuarios' => $usuarios]);
+            // Recuperamos el tipo de documento
+            $tipoDocumentoId = $request->idTipoDocumento;
 
-    return response()->json($usuarios);
-}
-    
+            // Aquí asumo que tienes un modelo `TipoDocumento` para obtener el nombre del tipo
+            $tipoDocumento = \App\Models\Tipodocumento::findOrFail($tipoDocumentoId);
+            $tipoDocumentoNombre = $tipoDocumento->nombre;
+
+            // Validamos según el tipo de documento seleccionado
+            $request->validate([
+                'Nombre' => 'required|string|max:255',
+                'apellidoPaterno' => 'required|string|max:255',
+                'apellidoMaterno' => 'required|string|max:255',
+                'idTipoDocumento' => 'required|integer',
+                'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
+                'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
+                'correo' => 'required|email|max:255|unique:usuarios,correo',
+                'correo_personal' => 'required|email|max:255|unique:usuarios,correo_personal',
+
+                'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
+                'profile-image' => 'nullable|image|max:1024',
+            ]);
+
+            Log::info('Formulario validado con éxito.');
+
+            // Procesamiento de la imagen
+            $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
+            Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
+
+            // Generación de usuario y clave
+            $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
+            $usuario = str_replace(' ', '', $usuario);
+            $clave = Str::random(8);
+            $claveEncriptada = bcrypt($clave);
+
+            Log::info('Datos generados para el nuevo usuario:', [
+                'usuario' => $usuario,
+                'clave' => $clave
+            ]);
+
+            // Creación del usuario
+            $usuarioNuevo = new Usuario();
+            $usuarioNuevo->Nombre = $request->Nombre;
+            $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
+            $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
+            $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
+            $usuarioNuevo->documento = $request->documento;
+            $usuarioNuevo->telefono = $request->telefono;
+            $usuarioNuevo->correo = $request->correo;
+            $usuarioNuevo->correo_personal = $request->correo_personal;
+            $usuarioNuevo->avatar = $imageData;
+            $usuarioNuevo->usuario = $usuario;
+            $usuarioNuevo->estadocivil = $request->estadocivil; // Aquí asignamos el estado civil
+            $usuarioNuevo->clave = $claveEncriptada;
+            $usuarioNuevo->estado = 1;
+            $usuarioNuevo->save();
+            Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
+
+            // Enviar correo
+            // Enviar correo con todos los datos
+            Mail::to($request->correo)->send(new UsuarioCreado(
+                $request->Nombre,
+                $request->apellidoPaterno,
+                $request->apellidoMaterno,
+                $usuario, // El nombre de usuario generado automáticamente
+                $clave // La clave generada aleatoriamente
+            ));
+            Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Usuario creado y datos enviados al correo.',
+                'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
+
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
+            return response()->json(['success' => false, 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
+        }
+    }
 
 
 
-public function store(Request $request)
-{
-    try {
-        Log::info('Inicio del proceso de creación de usuario.');
 
-        // Validación personalizada para el documento según el tipo
-        $documentoReglas = [
-            'DNI' => 'required|digits:8', // 8 dígitos para DNI
-            'RUC' => 'required|digits:11', // 11 dígitos para RUC
-            'PASAPORTE' => 'required|digits:12', // 12 dígitos para PASAPORTE
-            'CPP' => 'required|digits:12', // 12 dígitos para CPP
-            'CARNET DE EXTRANJERIA' => 'required|digits:20', // 20 dígitos para CARNET DE EXTRANJERIA
-        ];
 
-        // Recuperamos el tipo de documento
-        $tipoDocumentoId = $request->idTipoDocumento;
 
-        // Aquí asumo que tienes un modelo `TipoDocumento` para obtener el nombre del tipo
-        $tipoDocumento = \App\Models\Tipodocumento::findOrFail($tipoDocumentoId);
-        $tipoDocumentoNombre = $tipoDocumento->nombre;
+    public function edit($id)
+    {
+        $usuario = Usuario::findOrFail($id);
 
-        // Validamos según el tipo de documento seleccionado
+        return view('usuario.edit', compact('usuario'));
+    }
+
+    public function loadTab($id, $tab)
+    {
+        $usuario = Usuario::findOrFail($id);
+
+        switch ($tab) {
+
+            case 'perfil':
+
+                $tiposDocumento = Tipodocumento::all();
+
+                // JSON ubigeo
+                $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
+                $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
+                $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
+
+                // Departamento seleccionado
+                $departamentoSeleccionado = collect($departamentos)
+                    ->firstWhere('id_ubigeo', $usuario->departamento);
+
+                // Provincias del departamento
+                $provinciasDelDepartamento = [];
+                if ($departamentoSeleccionado) {
+                    foreach ($provincias as $provincia) {
+                        if (($provincia['id_padre_ubigeo'] ?? null) == $departamentoSeleccionado['id_ubigeo']) {
+                            $provinciasDelDepartamento[] = $provincia;
+                        }
+                    }
+                }
+
+                // Provincia seleccionada
+                $provinciaSeleccionada = collect($provinciasDelDepartamento)
+                    ->firstWhere('id_ubigeo', $usuario->provincia);
+
+                // Distritos de la provincia
+                $distritosDeLaProvincia = [];
+                if ($provinciaSeleccionada) {
+                    foreach ($distritos as $distrito) {
+                        if (($distrito['id_padre_ubigeo'] ?? null) == $provinciaSeleccionada['id_ubigeo']) {
+                            $distritosDeLaProvincia[] = $distrito;
+                        }
+                    }
+                }
+
+                $distritoSeleccionado = null;
+
+                return view('usuario.tabs.perfil.index', compact(
+                    'usuario',
+                    'tiposDocumento',
+                    'departamentos',
+                    'provinciasDelDepartamento',
+                    'provinciaSeleccionada',
+                    'distritosDeLaProvincia',
+                    'distritoSeleccionado'
+                ));
+
+
+            case 'payment-details':
+
+                $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get();
+
+                return view('usuario.tabs.detalles-pago.index', compact(
+                    'usuario',
+                    'cuentasBancarias'
+                ));
+
+            case 'informacion':
+
+                $sucursales = Sucursal::all();
+                $tiposUsuario = Tipousuario::all();
+                $sexos = Sexo::all();
+                $roles = Rol::all();
+                $tiposArea = Tipoarea::all();
+
+                return view('usuario.tabs.informacion.index', compact(
+                    'usuario',
+                    'sucursales',
+                    'tiposUsuario',
+                    'sexos',
+                    'roles',
+                    'tiposArea'
+                ));
+
+
+            case 'asignado':
+
+                return view('usuario.tabs.asignado.index', compact('usuario'));
+
+            case 'preferences':
+
+                $roles = Rol::all();
+                $tiposArea = Tipoarea::all();
+                $tiposUsuario = Tipousuario::all();
+                $sexos = Sexo::all();
+
+                return view('usuario.tabs.configuracion.index', compact(
+                    'usuario',
+                    'roles',
+                    'tiposArea',
+                    'tiposUsuario',
+                    'sexos'
+                ));
+
+            case 'danger-zone':
+
+                return view('usuario.tabs.detalles.index', compact('usuario'));
+
+            default:
+                abort(404);
+        }
+    }
+
+
+
+
+
+    public function guardarCuenta(Request $request)
+    {
+        // Validar los datos recibidos
         $request->validate([
+            'tipoCuenta' => 'required|integer|in:1,2', // 1 = Numero interbancario, 2 = Numero de cuenta
+            'banco' => 'required|int',
+            'numeroCuenta' => 'required|int',
+            'usuarioId' => 'required|integer|exists:usuarios,idUsuario', // Asegurarse de que el usuario existe
+        ]);
+
+        // Crear la cuenta bancaria
+        $cuentaBancaria = new CuentasBancarias();
+        $cuentaBancaria->tipodecuenta = $request->tipoCuenta;
+        $cuentaBancaria->banco = $request->banco;
+        $cuentaBancaria->numerocuenta = $request->numeroCuenta;
+        $cuentaBancaria->idUsuario = $request->usuarioId;
+
+        // Guardar en la base de datos
+        $cuentaBancaria->save();
+
+        // Devolver una respuesta JSON indicando que todo salió bien
+        return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
+    }
+
+
+
+
+    public function update(Request $request, $id)
+    {
+        // Validación de los datos
+        $validated = $request->validate([
             'Nombre' => 'required|string|max:255',
             'apellidoPaterno' => 'required|string|max:255',
             'apellidoMaterno' => 'required|string|max:255',
             'idTipoDocumento' => 'required|integer',
-            'documento' => $documentoReglas[$tipoDocumentoNombre] ?? 'required|string|max:255|unique:usuarios,documento', // Valida según el tipo
-            'telefono' => 'required|string|digits:9|unique:usuarios,telefono',
-            'correo' => 'required|email|max:255|unique:usuarios,correo',
-            'correo_personal' => 'required|email|max:255|unique:usuarios,correo_personal',
-
-            'estadocivil' => 'required|integer|in:1,2,3,4', // Validación para el estado civil
-            'profile-image' => 'nullable|image|max:1024',
+            'documento' => 'required|string|max:255',
+            'telefono' => 'required|string|max:255',
+            'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario', // Excluye al usuario actual
+            'correo_personal' => 'nullable|email|max:255|unique:usuarios,correo_personal,' . $id . ',idUsuario', // Validación para correo personal
+            'estadocivil' => 'required|integer|in:1,2,3,4',
+            'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        Log::info('Formulario validado con éxito.');
+        // Obtener el usuario por su id
+        $usuario = Usuario::findOrFail($id);
 
-        // Procesamiento de la imagen
-        $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
-        Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
+        // Actualizar los datos del usuario
+        $usuario->Nombre = $request->input('Nombre');
+        $usuario->apellidoPaterno = $request->input('apellidoPaterno');
+        $usuario->apellidoMaterno = $request->input('apellidoMaterno');
+        $usuario->idTipoDocumento = $request->input('idTipoDocumento');
+        $usuario->documento = $request->input('documento');
+        $usuario->telefono = $request->input('telefono');
+        $usuario->correo = $request->input('correo');
+        $usuario->correo_personal = $request->input('correo_personal'); // Nuevo campo
+        $usuario->estadocivil = $request->input('estadocivil');
 
-        // Generación de usuario y clave
-        $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
-        $usuario = str_replace(' ', '', $usuario);
-        $clave = Str::random(8);
-        $claveEncriptada = bcrypt($clave);
+        // Verificar si se subió una nueva imagen
+        if ($request->hasFile('profile-image')) {
+            $image = $request->file('profile-image');
+            $imageData = file_get_contents($image->getRealPath());
+            $usuario->avatar = $imageData;
+        }
 
-        Log::info('Datos generados para el nuevo usuario:', [
-            'usuario' => $usuario,
-            'clave' => $clave
+        // Guardar los cambios
+        $usuario->save();
+
+        return response()->json(['success' => 'Datos actualizados correctamente']);
+    }
+
+    public function config(Request $request, $id)
+    {
+        // Validación de los campos
+        $request->validate([
+            'sueldoPorHora' => 'required|numeric|min:0', // Asegura que el sueldoPorHora sea >= 0        'idSucursal' => 'integer|exists:sucursal,idSucursal',
+            'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
+            'idSexo' => 'required|integer|exists:sexo,idSexo',
+            'idRol' => 'required|integer|exists:rol,idRol',
+            'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',
         ]);
 
-        // Creación del usuario
-        $usuarioNuevo = new Usuario();
-        $usuarioNuevo->Nombre = $request->Nombre;
-        $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
-        $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
-        $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
-        $usuarioNuevo->documento = $request->documento;
-        $usuarioNuevo->telefono = $request->telefono;
-        $usuarioNuevo->correo = $request->correo;
-        $usuarioNuevo->correo_personal = $request->correo_personal;
-        $usuarioNuevo->avatar = $imageData;
-        $usuarioNuevo->usuario = $usuario;
-        $usuarioNuevo->estadocivil = $request->estadocivil; // Aquí asignamos el estado civil
-        $usuarioNuevo->clave = $claveEncriptada;
-        $usuarioNuevo->estado = 1;
-        $usuarioNuevo->save();
-        Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
+        Log::info('Validación completada', ['request_data' => $request->all()]);
 
-        // Enviar correo
-// Enviar correo con todos los datos
-Mail::to($request->correo)->send(new UsuarioCreado(
-    $request->Nombre, 
-    $request->apellidoPaterno, 
-    $request->apellidoMaterno, 
-    $usuario, // El nombre de usuario generado automáticamente
-    $clave // La clave generada aleatoriamente
-));
-        Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
+        // Obtener el usuario
+        $usuario = Usuario::findOrFail($id);
+        Log::info('Usuario encontrado', ['usuario' => $usuario]);
 
+        // Actualizar los campos básicos
+        $usuario->sueldoPorHora = $request->sueldoPorHora;
+        $usuario->idSucursal = $request->idSucursal;
+        $usuario->idTipoUsuario = $request->idTipoUsuario;
+        $usuario->idSexo = $request->idSexo;
+        $usuario->idRol = $request->idRol;
+        $usuario->idTipoArea = $request->idTipoArea;
+
+        Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
+
+
+
+        // Guardar los cambios
+        $usuario->save();
+        Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
+
+        // Respuesta exitosa en formato JSON con Base64 para firma y avatar
         return response()->json([
             'success' => true,
-            'message' => 'Usuario creado y datos enviados al correo.',
-            'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
-
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
-        return response()->json(['success' => false, 'errors' => $e->errors()], 422);
-    } catch (\Exception $e) {
-        Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
-        return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
+            'message' => 'Usuario actualizado correctamente',
+            'usuario' => $usuario->only(['idUsuario', 'sueldoPorHora', 'idSucursal', 'idTipoUsuario', 'idSexo', 'idRol', 'idTipoArea']) // Excluyendo avatar y firma
+        ], 200);
     }
-}
-    
-
-
-
-
-
-public function edit($id)
-{
-    // Intentamos obtener el usuario por su id
-    $usuario = Usuario::findOrFail($id); // Buscar al usuario por id
-    Log::info('Usuario encontrado:', ['usuario' => $usuario]);
-
-       // Obtener las cuentas bancarias del usuario
-       $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get(); // Asumiendo que Cuentasbancarias es el modelo para la tabla cuentasbancarias
-       Log::info('Cuentas bancarias del usuario:', ['cuentasBancarias' => $cuentasBancarias]);
-
-
-        // Convertir la firma y la imagen del usuario a Base64
-    $firmaBase64 = null;
-    $avatarBase64 = null;
-
-    // Verificar si la firma está en formato binario, si es así convertirla
-    if ($usuario->firma) {
-        $firmaBase64 = base64_encode($usuario->firma); // Convertir la firma a base64
-        $firmaBase64 = "data:image/png;base64," . $firmaBase64; // Prependiendo el encabezado necesario para mostrar como imagen
-    }
-
-    // Verificar si el avatar (imagen) está en formato binario, si es así convertirla
-    if ($usuario->avatar) {
-        $avatarBase64 = base64_encode($usuario->avatar); // Convertir el avatar a base64
-        $avatarBase64 = "data:image/png;base64," . $avatarBase64; // Prependiendo el encabezado necesario para mostrar como imagen
-    }
-
-
-
-    // Obtener los datos para los selectores
-    $tiposDocumento = TipoDocumento::all(); // Si es necesario obtener tipos de documento
-    $sucursales = Sucursal::all(); // Obtener todas las sucursales
-    $tiposUsuario = Tipousuario::all(); // Obtener todos los tipos de usuario
-    $sexos = Sexo::all(); // Obtener todos los sexos
-    $roles = Rol::all(); // Obtener todos los roles
-    $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
-    Log::info('Datos de selección obtenidos:', [
-        'tiposDocumento' => $tiposDocumento,
-        'sucursales' => $sucursales,
-        'tiposUsuario' => $tiposUsuario,
-        'sexos' => $sexos,
-        'roles' => $roles,
-        'tiposArea' => $tiposArea
-    ]);
-
-
-    Log::info('Departamento del usuario:', ['departamento' => $usuario->departamento]);
-    Log::info('Provincia del usuario:', ['provincia' => $usuario->provincia]);
-    Log::info('Distrito del usuario:', ['distrito' => $usuario->distrito]);
-
-
-    // Obtener los datos de los archivos JSON
-    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-    $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
-    $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
-    Log::info('Datos de archivos JSON cargados:', [
-        'departamentos' => count($departamentos),
-        'provincias' => count($provincias),
-        'distritos' => count($distritos)
-    ]);
-
-    Log::info('Departamento cargado del archivo JSON:', ['departamentos' => $departamentos]);
-
-
-    // Buscar el departamento correspondiente al usuario
-    $departamentoSeleccionado = array_filter($departamentos, function ($departamento) use ($usuario) {
-        return $departamento['id_ubigeo'] == $usuario->departamento;
-    });
-    $departamentoSeleccionado = reset($departamentoSeleccionado);  // Obtener el primer valor del array filtrado
-    Log::info('Departamento seleccionado:', ['departamento' => $departamentoSeleccionado]);
-
-    // Obtener provincias del departamento seleccionado
-    $provinciasDelDepartamento = [];
-    foreach ($provincias as $provincia) {
-        if (isset($provincia['id_padre_ubigeo']) && $provincia['id_padre_ubigeo'] == $departamentoSeleccionado['id_ubigeo']) {
-            $provinciasDelDepartamento[] = $provincia;
-        }
-    }
-    Log::info('Provincias del departamento seleccionado:', ['provincias' => count($provinciasDelDepartamento)]);
-
-    // Buscar la provincia seleccionada
-    $provinciaSeleccionada = null;
-    foreach ($provinciasDelDepartamento as $provincia) {
-        if (isset($provincia['id_ubigeo']) && $provincia['id_ubigeo'] == $usuario->provincia) {
-            $provinciaSeleccionada = $provincia;
-            break;
-        }
-    }
-    Log::info('Provincia seleccionada:', ['provincia' => $provinciaSeleccionada]);
-
-    // Obtener los distritos correspondientes a la provincia seleccionada
-    $distritosDeLaProvincia = [];
-    foreach ($distritos as $distrito) {
-        if (isset($distrito['id_padre_ubigeo']) && $distrito['id_padre_ubigeo'] == $provinciaSeleccionada['id_ubigeo']) {
-            $distritosDeLaProvincia[] = $distrito;
-        }
-    }
-    Log::info('Distritos de la provincia seleccionada:', ['distritos' => count($distritosDeLaProvincia)]);
-
-    // Definir distritoSeleccionado como null si no es necesario
-    $distritoSeleccionado = null;
-
-    // Devolver la vista con los datos requeridos
-    return view('usuario.edit', compact('usuario', 'tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos', 'provinciasDelDepartamento', 'provinciaSeleccionada', 'distritosDeLaProvincia', 'distritoSeleccionado', 'cuentasBancarias'));
-}
-
-
-
-public function guardarCuenta(Request $request)
-{
-    // Validar los datos recibidos
-    $request->validate([
-        'tipoCuenta' => 'required|integer|in:1,2', // 1 = Numero interbancario, 2 = Numero de cuenta
-        'banco' => 'required|int', 
-        'numeroCuenta' => 'required|int',
-        'usuarioId' => 'required|integer|exists:usuarios,idUsuario', // Asegurarse de que el usuario existe
-    ]);
-
-    // Crear la cuenta bancaria
-    $cuentaBancaria = new CuentasBancarias();
-    $cuentaBancaria->tipodecuenta = $request->tipoCuenta;
-    $cuentaBancaria->banco = $request->banco;
-    $cuentaBancaria->numerocuenta = $request->numeroCuenta;
-    $cuentaBancaria->idUsuario = $request->usuarioId;
-
-    // Guardar en la base de datos
-    $cuentaBancaria->save();
-
-    // Devolver una respuesta JSON indicando que todo salió bien
-    return response()->json(['success' => true, 'message' => 'Cuenta bancaria guardada con éxito']);
-}
-
-
-
-
-public function update(Request $request, $id)
-{
-    // Validación de los datos
-    $validated = $request->validate([
-        'Nombre' => 'required|string|max:255',
-        'apellidoPaterno' => 'required|string|max:255',
-        'apellidoMaterno' => 'required|string|max:255',
-        'idTipoDocumento' => 'required|integer',
-        'documento' => 'required|string|max:255',
-        'telefono' => 'required|string|max:255',
-        'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario', // Excluye al usuario actual
-        'correo_personal' => 'nullable|email|max:255|unique:usuarios,correo_personal,' . $id . ',idUsuario', // Validación para correo personal
-        'estadocivil' => 'required|integer|in:1,2,3,4',
-        'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    ]);
-
-    // Obtener el usuario por su id
-    $usuario = Usuario::findOrFail($id);
-
-    // Actualizar los datos del usuario
-    $usuario->Nombre = $request->input('Nombre');
-    $usuario->apellidoPaterno = $request->input('apellidoPaterno');
-    $usuario->apellidoMaterno = $request->input('apellidoMaterno');
-    $usuario->idTipoDocumento = $request->input('idTipoDocumento');
-    $usuario->documento = $request->input('documento');
-    $usuario->telefono = $request->input('telefono');
-    $usuario->correo = $request->input('correo');
-    $usuario->correo_personal = $request->input('correo_personal'); // Nuevo campo
-    $usuario->estadocivil = $request->input('estadocivil');
-
-    // Verificar si se subió una nueva imagen
-    if ($request->hasFile('profile-image')) {
-        $image = $request->file('profile-image');
-        $imageData = file_get_contents($image->getRealPath());
-        $usuario->avatar = $imageData;
-    }
-
-    // Guardar los cambios
-    $usuario->save();
-
-    return response()->json(['success' => 'Datos actualizados correctamente']);
-}
-
-public function config(Request $request, $id)
-{
-    // Validación de los campos
-    $request->validate([
-        'sueldoPorHora' => 'required|numeric|min:0', // Asegura que el sueldoPorHora sea >= 0        'idSucursal' => 'integer|exists:sucursal,idSucursal',
-        'idTipoUsuario' => 'required|integer|exists:tipousuario,idTipoUsuario',
-        'idSexo' => 'required|integer|exists:sexo,idSexo',
-        'idRol' => 'required|integer|exists:rol,idRol',
-        'idTipoArea' => 'required|integer|exists:tipoarea,idTipoArea',
-    ]);
-
-    Log::info('Validación completada', ['request_data' => $request->all()]);
-
-    // Obtener el usuario
-    $usuario = Usuario::findOrFail($id);
-    Log::info('Usuario encontrado', ['usuario' => $usuario]);
-
-    // Actualizar los campos básicos
-    $usuario->sueldoPorHora = $request->sueldoPorHora;
-    $usuario->idSucursal = $request->idSucursal;
-    $usuario->idTipoUsuario = $request->idTipoUsuario;
-    $usuario->idSexo = $request->idSexo;
-    $usuario->idRol = $request->idRol;
-    $usuario->idTipoArea = $request->idTipoArea;
-
-    Log::info('Campos del usuario actualizados', ['usuario_data' => $usuario->toArray()]);
-
-    
-
-    // Guardar los cambios
-    $usuario->save();
-    Log::info('Usuario guardado exitosamente', ['usuario_id' => $usuario->idUsuario]);
-
-    // Respuesta exitosa en formato JSON con Base64 para firma y avatar
-    return response()->json([
-        'success' => true,
-        'message' => 'Usuario actualizado correctamente',
-        'usuario' => $usuario->only(['idUsuario', 'sueldoPorHora', 'idSucursal', 'idTipoUsuario', 'idSexo', 'idRol', 'idTipoArea']) // Excluyendo avatar y firma
-    ], 200);
-}
 
 
 
@@ -633,42 +647,42 @@ public function config(Request $request, $id)
 
     // use Illuminate\Support\Facades\Log;
 
-public function getUsuarios(Request $request)
+    public function getUsuarios(Request $request)
     {
         Log::debug('Iniciando obtención paginada de usuarios');
-    
+
         $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
-    
+
         $total = $query->count();
-    
+
         if ($search = $request->input('search.value')) {
             $query->where(function ($q) use ($search) {
                 $q->where('Nombre', 'like', "%$search%")
-                  ->orWhere('apellidoPaterno', 'like', "%$search%")
-                  ->orWhere('documento', 'like', "%$search%")
-                  ->orWhere('telefono', 'like', "%$search%")
-                  ->orWhere('correo', 'like', "%$search%")
-                  ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
-                      $q2->where('nombre', 'like', "%$search%");
-                  })
-                  ->orWhereHas('rol', function ($q3) use ($search) {
-                      $q3->where('nombre', 'like', "%$search%");
-                  })
-                  ->orWhereHas('tipoArea', function ($q4) use ($search) {
-                      $q4->where('nombre', 'like', "%$search%");
-                  });
+                    ->orWhere('apellidoPaterno', 'like', "%$search%")
+                    ->orWhere('documento', 'like', "%$search%")
+                    ->orWhere('telefono', 'like', "%$search%")
+                    ->orWhere('correo', 'like', "%$search%")
+                    ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
+                        $q2->where('nombre', 'like', "%$search%");
+                    })
+                    ->orWhereHas('rol', function ($q3) use ($search) {
+                        $q3->where('nombre', 'like', "%$search%");
+                    })
+                    ->orWhereHas('tipoArea', function ($q4) use ($search) {
+                        $q4->where('nombre', 'like', "%$search%");
+                    });
             });
         }
-        
-        
-    
+
+
+
         $filtered = $query->count();
-    
+
         $usuarios = $query
             ->skip($request->start)
             ->take($request->length)
             ->get();
-    
+
         $data = $usuarios->map(function ($u) {
             return [
                 'idUsuario' => $u->idUsuario,
@@ -686,7 +700,7 @@ public function getUsuarios(Request $request)
                 'tieneFirma' => !empty($u->firma),
             ];
         });
-    
+
         return response()->json([
             'draw' => intval($request->draw),
             'recordsTotal' => $total,
@@ -694,11 +708,11 @@ public function getUsuarios(Request $request)
             'data' => $data,
         ]);
     }
-    
-    
-    
-    
-    
+
+
+
+
+
 
 
 
@@ -801,7 +815,7 @@ public function getUsuarios(Request $request)
 
             // Generar nombre único para el archivo
             $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
-            
+
             // Guardar en storage (público)
             $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
 
@@ -826,7 +840,6 @@ public function getUsuarios(Request $request)
                 'message' => 'Documento subido exitosamente',
                 'documento' => $documento
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => 'Error al subir documento'], 500);
@@ -848,7 +861,6 @@ public function getUsuarios(Request $request)
             }
 
             return response()->download($rutaCompleta, $documento->nombre_archivo);
-
         } catch (\Exception $e) {
             Log::error('Error al descargar documento:', ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => 'Error al descargar documento'], 500);
@@ -878,7 +890,6 @@ public function getUsuarios(Request $request)
                 'success' => true,
                 'message' => 'Documento eliminado exitosamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al eliminar documento:', ['error' => $e->getMessage()]);
             return response()->json(['success' => false, 'message' => 'Error al eliminar documento'], 500);
@@ -887,63 +898,62 @@ public function getUsuarios(Request $request)
 
 
 
-/**
- * Cambiar contraseña del usuario usando bcrypt
- */
-public function cambiarPassword(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'current_password' => 'required',
-            'new_password' => 'required|min:8|confirmed',
-            'new_password_confirmation' => 'required'
-        ]);
+    /**
+     * Cambiar contraseña del usuario usando bcrypt
+     */
+    public function cambiarPassword(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'current_password' => 'required',
+                'new_password' => 'required|min:8|confirmed',
+                'new_password_confirmation' => 'required'
+            ]);
 
-        $usuario = Usuario::findOrFail($id);
+            $usuario = Usuario::findOrFail($id);
 
-        // Verificar contraseña actual usando bcrypt
-        if (!password_verify($request->current_password, $usuario->clave)) {
+            // Verificar contraseña actual usando bcrypt
+            if (!password_verify($request->current_password, $usuario->clave)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La contraseña actual es incorrecta'
+                ], 422);
+            }
+
+            // Verificar que la nueva contraseña no sea igual a la actual
+            if (password_verify($request->new_password, $usuario->clave)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'La nueva contraseña no puede ser igual a la actual'
+                ], 422);
+            }
+
+            // Actualizar contraseña con bcrypt (igual que en el store)
+            $usuario->clave = bcrypt($request->new_password);
+            $usuario->save();
+
+            Log::info('Contraseña cambiada exitosamente para usuario:', [
+                'usuario_id' => $id,
+                'email' => $usuario->correo
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contraseña cambiada exitosamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'La contraseña actual es incorrecta'
+                'errors' => $e->errors()
             ], 422);
-        }
-
-        // Verificar que la nueva contraseña no sea igual a la actual
-        if (password_verify($request->new_password, $usuario->clave)) {
+        } catch (\Exception $e) {
+            Log::error('Error al cambiar contraseña:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'La nueva contraseña no puede ser igual a la actual'
-            ], 422);
+                'message' => 'Error al cambiar contraseña'
+            ], 500);
         }
-
-        // Actualizar contraseña con bcrypt (igual que en el store)
-        $usuario->clave = bcrypt($request->new_password);
-        $usuario->save();
-
-        Log::info('Contraseña cambiada exitosamente para usuario:', [
-            'usuario_id' => $id,
-            'email' => $usuario->correo
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Contraseña cambiada exitosamente'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Error al cambiar contraseña:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al cambiar contraseña'
-        ], 500);
     }
-}
 
     /**
      * Desactivar cuenta de usuario
@@ -961,7 +971,6 @@ public function cambiarPassword(Request $request, $id)
                 'success' => true,
                 'message' => 'Cuenta desactivada exitosamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al desactivar cuenta:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -987,7 +996,6 @@ public function cambiarPassword(Request $request, $id)
                 'success' => true,
                 'message' => 'Cuenta activada exitosamente'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al activar cuenta:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -1025,7 +1033,6 @@ public function cambiarPassword(Request $request, $id)
                 'success' => true,
                 'message' => 'Enlace de recuperación enviado a tu correo'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Error al enviar enlace de recuperación:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -1042,10 +1049,10 @@ public function cambiarPassword(Request $request, $id)
     {
         try {
             $usuario = Usuario::with([
-                'tipoDocumento', 
-                'tipoUsuario', 
-                'sexo', 
-                'rol', 
+                'tipoDocumento',
+                'tipoUsuario',
+                'sexo',
+                'rol',
                 'tipoArea',
                 'sucursal'
             ])->findOrFail($id);
@@ -1064,11 +1071,10 @@ public function cambiarPassword(Request $request, $id)
             ];
 
             $pdf = Pdf::loadView('pdf.usuario-info', $data);
-            
-            $nombreArchivo = 'informacion_usuario_' . $usuario->documento . '_' . date('Ymd_His') . '.pdf';
-            
-            return $pdf->download($nombreArchivo);
 
+            $nombreArchivo = 'informacion_usuario_' . $usuario->documento . '_' . date('Ymd_His') . '.pdf';
+
+            return $pdf->download($nombreArchivo);
         } catch (\Exception $e) {
             Log::error('Error al generar PDF:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -1114,7 +1120,6 @@ public function cambiarPassword(Request $request, $id)
             }
 
             return response()->download($zipPath)->deleteFileAfterSend(true);
-
         } catch (\Exception $e) {
             Log::error('Error al descargar documentos:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -1123,268 +1128,263 @@ public function cambiarPassword(Request $request, $id)
             ], 500);
         }
     }
-/**
- * Obtener artículos activos asignados al usuario
- */
-/**
- * Obtener TODOS los artículos asignados al usuario (sin filtrar por estado)
- */
-public function getArticulosAsignados($idUsuario)
-{
-    try {
-        Log::info('=== INICIANDO CONSULTA DE ARTÍCULOS ASIGNADOS ===');
-        Log::info('Usuario ID:', ['id' => $idUsuario]);
-        
-        // 1. Verificar si el usuario existe
-        $usuarioExiste = DB::table('usuarios')
-            ->where('idUsuario', $idUsuario)
-            ->exists();
-            
-        if (!$usuarioExiste) {
-            Log::warning('Usuario no existe en la base de datos');
-            return response()->json([
-                'success' => true,
-                'articulos' => [],
-                'message' => 'Usuario no encontrado'
+    /**
+     * Obtener artículos activos asignados al usuario
+     */
+    /**
+     * Obtener TODOS los artículos asignados al usuario (sin filtrar por estado)
+     */
+    public function getArticulosAsignados($idUsuario)
+    {
+        try {
+            Log::info('=== INICIANDO CONSULTA DE ARTÍCULOS ASIGNADOS ===');
+            Log::info('Usuario ID:', ['id' => $idUsuario]);
+
+            // 1. Verificar si el usuario existe
+            $usuarioExiste = DB::table('usuarios')
+                ->where('idUsuario', $idUsuario)
+                ->exists();
+
+            if (!$usuarioExiste) {
+                Log::warning('Usuario no existe en la base de datos');
+                return response()->json([
+                    'success' => true,
+                    'articulos' => [],
+                    'message' => 'Usuario no encontrado'
+                ]);
+            }
+
+            Log::info('Usuario existe en la base de datos');
+
+            // 2. Obtener asignaciones del usuario (filtrando por estado si es necesario)
+            $asignaciones = DB::table('asignaciones')
+                ->where('idUsuario', $idUsuario)
+                ->whereIn('estado', ['pendiente', 'activo', 'vencido']) // Solo asignaciones vigentes
+                ->get();
+
+            Log::info('Asignaciones encontradas:', [
+                'count' => $asignaciones->count(),
+                'ids' => $asignaciones->pluck('id')->toArray()
             ]);
-        }
-        
-        Log::info('Usuario existe en la base de datos');
-        
-        // 2. Obtener asignaciones del usuario (filtrando por estado si es necesario)
-        $asignaciones = DB::table('asignaciones')
-            ->where('idUsuario', $idUsuario)
-            ->whereIn('estado', ['pendiente', 'activo', 'vencido']) // Solo asignaciones vigentes
-            ->get();
-            
-        Log::info('Asignaciones encontradas:', [
-            'count' => $asignaciones->count(),
-            'ids' => $asignaciones->pluck('id')->toArray()
-        ]);
-        
-        if ($asignaciones->isEmpty()) {
-            Log::info('El usuario no tiene asignaciones vigentes');
-            return response()->json([
-                'success' => true,
-                'articulos' => [],
-                'message' => 'El usuario no tiene asignaciones vigentes'
+
+            if ($asignaciones->isEmpty()) {
+                Log::info('El usuario no tiene asignaciones vigentes');
+                return response()->json([
+                    'success' => true,
+                    'articulos' => [],
+                    'message' => 'El usuario no tiene asignaciones vigentes'
+                ]);
+            }
+
+            // 3. Obtener IDs de asignaciones
+            $asignacionIds = $asignaciones->pluck('id')->toArray();
+
+            // 4. Obtener detalles de asignaciones (con las nuevas columnas)
+            $detalles = DB::table('detalle_asignaciones')
+                ->whereIn('asignacion_id', $asignacionIds)
+                ->whereIn('estado_articulo', ['pendiente', 'activo', 'entregado']) // Estados que muestran artículos asignados
+                ->get();
+
+            Log::info('Detalles de asignaciones encontrados:', [
+                'count' => $detalles->count(),
+                'detalles_ids' => $detalles->pluck('id')->toArray()
             ]);
-        }
-        
-        // 3. Obtener IDs de asignaciones
-        $asignacionIds = $asignaciones->pluck('id')->toArray();
-        
-        // 4. Obtener detalles de asignaciones (con las nuevas columnas)
-        $detalles = DB::table('detalle_asignaciones')
-            ->whereIn('asignacion_id', $asignacionIds)
-            ->whereIn('estado_articulo', ['pendiente', 'activo', 'entregado']) // Estados que muestran artículos asignados
-            ->get();
-            
-        Log::info('Detalles de asignaciones encontrados:', [
-            'count' => $detalles->count(),
-            'detalles_ids' => $detalles->pluck('id')->toArray()
-        ]);
-        
-        if ($detalles->isEmpty()) {
-            Log::info('Las asignaciones no tienen detalles/artículos');
-            return response()->json([
-                'success' => true,
-                'articulos' => [],
-                'message' => 'Las asignaciones no tienen artículos detallados'
+
+            if ($detalles->isEmpty()) {
+                Log::info('Las asignaciones no tienen detalles/artículos');
+                return response()->json([
+                    'success' => true,
+                    'articulos' => [],
+                    'message' => 'Las asignaciones no tienen artículos detallados'
+                ]);
+            }
+
+            // 5. Obtener IDs de artículos
+            $articuloIds = $detalles->pluck('articulo_id')->filter()->unique()->values()->toArray();
+
+            Log::info('IDs de artículos a buscar:', ['articulo_ids' => $articuloIds]);
+
+            // 6. Buscar artículos
+            $articulos = DB::table('articulos')
+                ->whereIn('idArticulos', $articuloIds)
+                ->get();
+
+            Log::info('Artículos encontrados en BD:', [
+                'count' => $articulos->count()
             ]);
-        }
-        
-        // 5. Obtener IDs de artículos
-        $articuloIds = $detalles->pluck('articulo_id')->filter()->unique()->values()->toArray();
-        
-        Log::info('IDs de artículos a buscar:', ['articulo_ids' => $articuloIds]);
-        
-        // 6. Buscar artículos
-        $articulos = DB::table('articulos')
-            ->whereIn('idArticulos', $articuloIds)
-            ->get();
-            
-        Log::info('Artículos encontrados en BD:', [
-            'count' => $articulos->count()
-        ]);
-        
-        // 7. Combinar toda la información con las NUEVAS columnas
-        $resultado = [];
-        
-        foreach ($detalles as $detalle) {
-            // Buscar el artículo correspondiente
-            $articulo = $articulos->firstWhere('idArticulos', $detalle->articulo_id);
-            
-            // Buscar la asignación correspondiente
-            $asignacion = $asignaciones->firstWhere('id', $detalle->asignacion_id);
-            
-            // Determinar nombre a mostrar - USAR NUEVAS COLUMNAS
-            $nombreMostrar = $detalle->nombre_articulo ?? 'Artículo ID ' . $detalle->articulo_id;
-            if (empty($nombreMostrar) || $nombreMostrar == 'Artículo ID ' . $detalle->articulo_id) {
-                // Fallback a nombre del artículo si no hay en detalle
-                if ($articulo) {
-                    if ($articulo->idTipoArticulo == 2 && !empty($articulo->codigo_repuesto)) {
-                        $nombreMostrar = $articulo->codigo_repuesto;
-                    } elseif (!empty($articulo->nombre)) {
-                        $nombreMostrar = $articulo->nombre;
+
+            // 7. Combinar toda la información con las NUEVAS columnas
+            $resultado = [];
+
+            foreach ($detalles as $detalle) {
+                // Buscar el artículo correspondiente
+                $articulo = $articulos->firstWhere('idArticulos', $detalle->articulo_id);
+
+                // Buscar la asignación correspondiente
+                $asignacion = $asignaciones->firstWhere('id', $detalle->asignacion_id);
+
+                // Determinar nombre a mostrar - USAR NUEVAS COLUMNAS
+                $nombreMostrar = $detalle->nombre_articulo ?? 'Artículo ID ' . $detalle->articulo_id;
+                if (empty($nombreMostrar) || $nombreMostrar == 'Artículo ID ' . $detalle->articulo_id) {
+                    // Fallback a nombre del artículo si no hay en detalle
+                    if ($articulo) {
+                        if ($articulo->idTipoArticulo == 2 && !empty($articulo->codigo_repuesto)) {
+                            $nombreMostrar = $articulo->codigo_repuesto;
+                        } elseif (!empty($articulo->nombre)) {
+                            $nombreMostrar = $articulo->nombre;
+                        }
                     }
                 }
+
+                // Determinar tipo de asignación (uso diario o préstamo)
+                $tipoAsignacion = $detalle->tipo ?? ($asignacion->tipo_asignacion ?? 'prestamo');
+                $requiereDevolucion = $detalle->requiere_devolucion ?? 0;
+
+                // Determinar fechas importantes
+                $fechaAsignacion = $asignacion->fecha_asignacion ?? null;
+                $fechaDevolucion = $detalle->fecha_devolucion_real ?? $detalle->fecha_devolucion_esperada ?? $asignacion->fecha_devolucion ?? null;
+                $fechaEntregaReal = $detalle->fecha_entrega_real ?? $asignacion->fecha_entrega_real ?? null;
+
+                $resultado[] = [
+                    'id' => $detalle->id,
+                    'articulo_id' => $detalle->articulo_id,
+                    'cantidad' => (int)$detalle->cantidad,
+                    'numero_serie' => $detalle->numero_serie ?: null,
+                    'estado_articulo' => $detalle->estado_articulo ?? 'pendiente',
+                    'nombre' => $nombreMostrar,
+                    'codigo_articulo' => $detalle->codigo_articulo ?? ($articulo->codigo ?? null),
+                    'nombre_articulo' => $detalle->nombre_articulo ?? ($articulo->nombre ?? null),
+                    'codigo_barras' => $articulo->codigo_barras ?? null,
+                    'sku' => $articulo->sku ?? null,
+                    'idTipoArticulo' => $articulo->idTipoArticulo ?? 0,
+                    'codigo_repuesto' => $articulo->codigo_repuesto ?? null,
+                    'fecha_asignacion' => $fechaAsignacion,
+                    'fecha_devolucion' => $fechaDevolucion,
+                    'fecha_entrega_real' => $fechaEntregaReal,
+                    'fecha_entrega_esperada' => $detalle->fecha_entrega_esperada ?? null,
+                    'fecha_devolucion_esperada' => $detalle->fecha_devolucion_esperada ?? null,
+                    'observaciones' => $detalle->observaciones ?? ($asignacion->observaciones ?? null),
+                    'estado_asignacion' => $asignacion->estado ?? null,
+                    'tipo_asignacion' => $tipoAsignacion,
+                    'requiere_devolucion' => $requiereDevolucion,
+                    'codigo_asignacion' => $asignacion->codigo_asignacion ?? null,
+                    'codigo_solicitud' => $asignacion->codigo_solicitud ?? null,
+                    'nombre_mostrar' => $nombreMostrar
+                ];
             }
-            
-            // Determinar tipo de asignación (uso diario o préstamo)
-            $tipoAsignacion = $detalle->tipo ?? ($asignacion->tipo_asignacion ?? 'prestamo');
-            $requiereDevolucion = $detalle->requiere_devolucion ?? 0;
-            
-            // Determinar fechas importantes
-            $fechaAsignacion = $asignacion->fecha_asignacion ?? null;
-            $fechaDevolucion = $detalle->fecha_devolucion_real ?? $detalle->fecha_devolucion_esperada ?? $asignacion->fecha_devolucion ?? null;
-            $fechaEntregaReal = $detalle->fecha_entrega_real ?? $asignacion->fecha_entrega_real ?? null;
-            
-            $resultado[] = [
-                'id' => $detalle->id,
-                'articulo_id' => $detalle->articulo_id,
-                'cantidad' => (int)$detalle->cantidad,
-                'numero_serie' => $detalle->numero_serie ?: null,
-                'estado_articulo' => $detalle->estado_articulo ?? 'pendiente',
-                'nombre' => $nombreMostrar,
-                'codigo_articulo' => $detalle->codigo_articulo ?? ($articulo->codigo ?? null),
-                'nombre_articulo' => $detalle->nombre_articulo ?? ($articulo->nombre ?? null),
-                'codigo_barras' => $articulo->codigo_barras ?? null,
-                'sku' => $articulo->sku ?? null,
-                'idTipoArticulo' => $articulo->idTipoArticulo ?? 0,
-                'codigo_repuesto' => $articulo->codigo_repuesto ?? null,
-                'fecha_asignacion' => $fechaAsignacion,
-                'fecha_devolucion' => $fechaDevolucion,
-                'fecha_entrega_real' => $fechaEntregaReal,
-                'fecha_entrega_esperada' => $detalle->fecha_entrega_esperada ?? null,
-                'fecha_devolucion_esperada' => $detalle->fecha_devolucion_esperada ?? null,
-                'observaciones' => $detalle->observaciones ?? ($asignacion->observaciones ?? null),
-                'estado_asignacion' => $asignacion->estado ?? null,
-                'tipo_asignacion' => $tipoAsignacion,
-                'requiere_devolucion' => $requiereDevolucion,
-                'codigo_asignacion' => $asignacion->codigo_asignacion ?? null,
-                'codigo_solicitud' => $asignacion->codigo_solicitud ?? null,
-                'nombre_mostrar' => $nombreMostrar
-            ];
+
+            Log::info('=== RESULTADO FINAL ===');
+            Log::info('Total artículos procesados:', ['count' => count($resultado)]);
+            Log::info('Estados encontrados:', array_count_values(array_column($resultado, 'estado_articulo')));
+
+            return response()->json([
+                'success' => true,
+                'articulos' => $resultado,
+                'total' => count($resultado),
+                // En el array de estadísticas, línea ~80 del controlador:
+                'estadisticas' => [
+                    'activos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'activo')),
+                    'pendientes' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'pendiente')),
+                    'entregados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'entregado')),
+                    'dañados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'dañado')),
+                    'perdidos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'perdido')),
+                    'devueltos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'devuelto')),
+                    'uso_diario' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'uso_diario')),
+                    'prestamo' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'prestamo')),
+                    'reposicion' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'reposicion')),
+                    'trabajo_a_realizar' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'trabajo_a_realizar')), // NUEVO
+                    'con_devolucion' => count(array_filter($resultado, fn($a) => $a['requiere_devolucion'] == 1))
+                ],
+                'debug_info' => [
+                    'usuario_existe' => $usuarioExiste,
+                    'asignaciones_count' => $asignaciones->count(),
+                    'detalles_count' => $detalles->count(),
+                    'articulos_count' => $articulos->count()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('ERROR EN CONSULTA:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en el servidor',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-        Log::info('=== RESULTADO FINAL ===');
-        Log::info('Total artículos procesados:', ['count' => count($resultado)]);
-        Log::info('Estados encontrados:', array_count_values(array_column($resultado, 'estado_articulo')));
-        
-        return response()->json([
-            'success' => true,
-            'articulos' => $resultado,
-            'total' => count($resultado),
-          // En el array de estadísticas, línea ~80 del controlador:
-'estadisticas' => [
-    'activos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'activo')),
-    'pendientes' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'pendiente')),
-    'entregados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'entregado')),
-    'dañados' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'dañado')),
-    'perdidos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'perdido')),
-    'devueltos' => count(array_filter($resultado, fn($a) => $a['estado_articulo'] === 'devuelto')),
-    'uso_diario' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'uso_diario')),
-    'prestamo' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'prestamo')),
-    'reposicion' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'reposicion')),
-    'trabajo_a_realizar' => count(array_filter($resultado, fn($a) => $a['tipo_asignacion'] === 'trabajo_a_realizar')), // NUEVO
-    'con_devolucion' => count(array_filter($resultado, fn($a) => $a['requiere_devolucion'] == 1))
-],
-            'debug_info' => [
-                'usuario_existe' => $usuarioExiste,
-                'asignaciones_count' => $asignaciones->count(),
-                'detalles_count' => $detalles->count(),
-                'articulos_count' => $articulos->count()
-            ]
+    }
+    /**
+     * Limpiar string de caracteres no UTF-8
+     */
+    private function cleanString($string)
+    {
+        if (is_null($string)) {
+            return '';
+        }
+
+        // Convertir a string si no lo es
+        $string = (string) $string;
+
+        // Primero intentar con mb_convert_encoding
+        $cleaned = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+
+        // Si aún hay problemas, usar iconv
+        $cleaned = @iconv('UTF-8', 'UTF-8//IGNORE', $cleaned);
+
+        if ($cleaned === false) {
+            // Si falla, usar una aproximación más agresiva
+            $cleaned = preg_replace('/[^\x{0000}-\x{007F}]/u', '', $string);
+        }
+
+        return $cleaned ?: '';
+    }
+
+
+
+
+
+    /**
+     * Mostrar formulario para restablecer contraseña
+     */
+    public function showResetForm($token)
+    {
+        $usuario = Usuario::where('token', $token)->first();
+
+        if (!$usuario) {
+            return redirect('/')->with('error', 'El enlace de recuperación es inválido o ha expirado');
+        }
+
+        return view('auth.reset-password', compact('token'));
+    }
+
+    /**
+     * Procesar restablecimiento de contraseña usando bcrypt
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|min:8|confirmed',
+            'password_confirmation' => 'required'
         ]);
-        
-    } catch (\Exception $e) {
-        Log::error('ERROR EN CONSULTA:', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
+
+        $usuario = Usuario::where('token', $request->token)->first();
+
+        if (!$usuario) {
+            return back()->with('error', 'El enlace de recuperación es inválido o ha expirado');
+        }
+
+        // Actualizar contraseña con bcrypt
+        $usuario->clave = bcrypt($request->password);
+        $usuario->token = null; // Limpiar token
+        $usuario->save();
+
+        Log::info('Contraseña restablecida exitosamente:', [
+            'usuario_id' => $usuario->idUsuario,
+            'email' => $usuario->correo
         ]);
-        return response()->json([
-            'success' => false, 
-            'message' => 'Error en el servidor',
-            'error' => $e->getMessage()
-        ], 500);
+
+        return redirect('/login')->with('success', 'Contraseña restablecida exitosamente');
     }
-}
-/**
- * Limpiar string de caracteres no UTF-8
- */
-private function cleanString($string)
-{
-    if (is_null($string)) {
-        return '';
-    }
-    
-    // Convertir a string si no lo es
-    $string = (string) $string;
-    
-    // Primero intentar con mb_convert_encoding
-    $cleaned = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
-    
-    // Si aún hay problemas, usar iconv
-    $cleaned = @iconv('UTF-8', 'UTF-8//IGNORE', $cleaned);
-    
-    if ($cleaned === false) {
-        // Si falla, usar una aproximación más agresiva
-        $cleaned = preg_replace('/[^\x{0000}-\x{007F}]/u', '', $string);
-    }
-    
-    return $cleaned ?: '';
-}
-
-
-
-
-
-/**
- * Mostrar formulario para restablecer contraseña
- */
-public function showResetForm($token)
-{
-    $usuario = Usuario::where('token', $token)->first();
-    
-    if (!$usuario) {
-        return redirect('/')->with('error', 'El enlace de recuperación es inválido o ha expirado');
-    }
-
-    return view('auth.reset-password', compact('token'));
-}
-
-/**
- * Procesar restablecimiento de contraseña usando bcrypt
- */
-public function resetPassword(Request $request)
-{
-    $request->validate([
-        'token' => 'required',
-        'password' => 'required|min:8|confirmed',
-        'password_confirmation' => 'required'
-    ]);
-
-    $usuario = Usuario::where('token', $request->token)->first();
-
-    if (!$usuario) {
-        return back()->with('error', 'El enlace de recuperación es inválido o ha expirado');
-    }
-
-    // Actualizar contraseña con bcrypt
-    $usuario->clave = bcrypt($request->password);
-    $usuario->token = null; // Limpiar token
-    $usuario->save();
-
-    Log::info('Contraseña restablecida exitosamente:', [
-        'usuario_id' => $usuario->idUsuario,
-        'email' => $usuario->correo
-    ]);
-
-    return redirect('/login')->with('success', 'Contraseña restablecida exitosamente');
-}
-
-
-
-
 }
