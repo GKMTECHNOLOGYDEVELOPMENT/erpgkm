@@ -2138,5 +2138,4 @@ Route::post('/usuario/contacto-emergencia/guardar', [UsuarioController::class, '
 Route::put('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'updateContactoEmergencia']);
 Route::delete('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'deleteContactoEmergencia']);
 Route::post('/usuario/{id}/cuenta-bancaria/guardar', [UsuarioController::class, 'guardarCuentaBancaria']);
-
 Route::post('/usuario/{id}/informacion', [UsuarioController::class, 'updateInformacion']);

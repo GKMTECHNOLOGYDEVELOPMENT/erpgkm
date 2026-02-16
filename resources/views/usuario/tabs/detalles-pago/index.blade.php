@@ -168,10 +168,10 @@
                 </div>
 
                 <div class="flex justify-end mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                   <button type="button" id="saveBtn" class="btn bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-none px-8 py-2.5 flex items-center gap-2 rounded-lg shadow-md hover:shadow-lg transition-all">
-    <i class="fas fa-save"></i>
-    {{ $fichaGeneral && $fichaGeneral->numeroCuenta ? 'Actualizar' : 'Guardar' }} Cuenta Bancaria
-</button>
+                    <button type="button" id="saveBtn" class="btn bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-none px-8 py-2.5 flex items-center gap-2 rounded-lg shadow-md hover:shadow-lg transition-all">
+                        <i class="fas fa-save"></i>
+                        {{ $fichaGeneral && $fichaGeneral->numeroCuenta ? 'Actualizar' : 'Guardar' }} Cuenta Bancaria
+                    </button>
                 </div>
             </form>
         </div>
@@ -269,5 +269,3 @@
         </div>
     </div>
 </template>
-
-

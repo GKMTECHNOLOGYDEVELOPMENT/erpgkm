@@ -314,13 +314,99 @@ class UsuarioController extends Controller
 
 
 
-    public function edit($id)
-    {
-        $usuario = Usuario::findOrFail($id);
-
-        return view('usuario.edit', compact('usuario'));
+ public function edit($id)
+{
+    $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios', 'laboral'])->findOrFail($id);
+    
+    // Datos para las pestañas
+    $tiposDocumento = Tipodocumento::all();
+    $sexos = Sexo::all();
+    $sucursales = Sucursal::all();
+    $tiposUsuario = Tipousuario::all();
+    $roles = Rol::all();
+    $tiposArea = Tipoarea::all();
+    $tiposContrato = TipoContrato::activos()->get();
+    
+    // Datos bancarios
+    $bancos = [
+        '1' => 'Banco de Crédito del Perú',
+        '2' => 'BBVA Perú',
+        '3' => 'Scotiabank Perú',
+        '4' => 'Interbank',
+        '5' => 'Banco de la Nación',
+        '6' => 'Banco de Comercio',
+        '7' => 'BanBif',
+        '8' => 'Banco Pichincha',
+        '9' => 'Citibank Perú',
+        '10' => 'MiBanco',
+        '11' => 'Banco GNB Perú',
+        '12' => 'Banco Falabella',
+        '13' => 'Banco Ripley',
+        '14' => 'Banco Santander Perú',
+        '15' => 'Alfin Banco',
+        '16' => 'Bank of China',
+        '17' => 'Bci Perú',
+        '18' => 'ICBC Perú Bank',
+    ];
+    
+    $tiposCuenta = [
+        '1' => 'Cuenta de Ahorros',
+        '2' => 'Cuenta Corriente',
+        '3' => 'Cuenta a Plazo Fijo',
+    ];
+    
+    $monedas = [
+        'PEN' => 'Soles',
+        'USD' => 'Dólares',
+        'EUR' => 'Euros',
+    ];
+    
+    // Datos de ficha general
+    $fichaGeneral = $usuario->fichaGeneral;
+    if (!$fichaGeneral) {
+        $fichaGeneral = new \App\Models\UsuarioFichaGeneral();
+        $fichaGeneral->idUsuario = $usuario->idUsuario;
     }
-
+    
+    // Datos laborales
+    $laboral = $usuario->laboral;
+    if (!$laboral) {
+        $laboral = new \App\Models\UsuarioLaboral();
+        $laboral->idUsuario = $usuario->idUsuario;
+    }
+    
+    // Datos de salud
+    $salud = $usuario->salud;
+    if (!$salud) {
+        $salud = new \App\Models\UsuarioSalud();
+        $salud->idUsuario = $usuario->idUsuario;
+    }
+    
+    // Procesar fechas de COVID
+    $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
+    $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
+    $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
+    
+    return view('usuario.edit', compact(
+        'usuario',
+        'tiposDocumento',
+        'sexos',
+        'sucursales',
+        'tiposUsuario',
+        'roles',
+        'tiposArea',
+        'tiposContrato',
+        'bancos',
+        'tiposCuenta',
+        'monedas',
+        'fichaGeneral',
+        'laboral',
+        'salud',
+        'covidDosis1',
+        'covidDosis2',
+        'covidDosis3'
+    ));
+}
    public function loadTab($id, $tab)
 {
     // Cargar usuario con todas las relaciones necesarias
@@ -2176,51 +2262,7 @@ public function deleteContactoEmergencia($id)
     }
 }
 
-
 /**
- * Guardar cuenta bancaria
- */
-public function guardarCuentaBancaria(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'entidadBancaria' => 'required|string',
-            'moneda' => 'required|string',
-            'tipoCuenta' => 'required|string',
-            'numeroCuenta' => 'required|string',
-            'numeroCCI' => 'required|string'
-        ]);
-
-        $usuario = Usuario::findOrFail($id);
-        
-        // Actualizar o crear ficha general
-        $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $id;
-        $fichaGeneral->entidadBancaria = $request->entidadBancaria;
-        $fichaGeneral->moneda = $request->moneda;
-        $fichaGeneral->tipoCuenta = $request->tipoCuenta;
-        $fichaGeneral->numeroCuenta = $request->numeroCuenta;
-        $fichaGeneral->numeroCCI = $request->numeroCCI;
-        $fichaGeneral->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cuenta bancaria guardada correctamente'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al guardar cuenta bancaria:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar la cuenta bancaria'
-        ], 500);
-    }
-}/**
  * Actualizar información laboral y de configuración
  */
 public function updateInformacion(Request $request, $id)
@@ -2284,6 +2326,60 @@ public function updateInformacion(Request $request, $id)
         return response()->json([
             'success' => false,
             'message' => 'Error al actualizar la información'
+        ], 500);
+    }
+}
+
+
+
+/**
+ * Guardar cuenta bancaria
+ */
+public function guardarCuentaBancaria(Request $request, $id)
+{
+    try {
+        $request->validate([
+            'entidadBancaria' => 'required|string',
+            'moneda' => 'required|string',
+            'tipoCuenta' => 'required|string',
+            'numeroCuenta' => 'required|string',
+            'numeroCCI' => 'required|string'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        
+        // Actualizar o crear ficha general
+        $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
+        $fichaGeneral->idUsuario = $id;
+        $fichaGeneral->entidadBancaria = $request->entidadBancaria;
+        $fichaGeneral->moneda = $request->moneda;
+        $fichaGeneral->tipoCuenta = $request->tipoCuenta;
+        $fichaGeneral->numeroCuenta = $request->numeroCuenta;
+        $fichaGeneral->numeroCCI = $request->numeroCCI;
+        $fichaGeneral->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cuenta bancaria guardada correctamente',
+            'data' => [
+                'entidadBancaria' => $fichaGeneral->entidadBancaria,
+                'moneda' => $fichaGeneral->moneda,
+                'tipoCuenta' => $fichaGeneral->tipoCuenta,
+                'numeroCuenta' => $fichaGeneral->numeroCuenta,
+                'numeroCCI' => $fichaGeneral->numeroCCI
+            ]
+        ]);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        \Log::error('Error al guardar cuenta bancaria:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al guardar la cuenta bancaria'
         ], 500);
     }
 }
