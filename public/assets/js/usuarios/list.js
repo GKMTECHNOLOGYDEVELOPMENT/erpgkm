@@ -29,7 +29,7 @@ document.addEventListener('alpine:init', () => {
                     { data: 'tipoDocumento', className: 'text-center' },
                     { data: 'documento', className: 'text-center' },
                     { data: 'telefono', className: 'text-center' },
-                    { data: 'usuario', className: 'text-center' },
+                    { data: 'usuario', className: 'text-center' }, // AHORA SÍ EXISTE EN LA RESPUESTA
                     { data: 'correo', className: 'text-center' },
                     { data: 'tipoUsuario', className: 'text-center' },
                     { data: 'rol', className: 'text-center' },
@@ -53,44 +53,49 @@ document.addEventListener('alpine:init', () => {
                         orderable: false,
                         searchable: false,
                         className: 'text-center',
-                       render: (_, __, row) => {
-    let botones = '<div class="flex justify-center items-center gap-2">';
+                        render: (_, __, row) => {
+                            // Verificar si permisos existe (por seguridad)
+                            const permisos = window.permisos || { 
+                                puedeEditar: false, 
+                                puedeActualizarEstado: false 
+                            };
 
-    // Botón Editar
-    if (window.permisos.puedeEditar) {
-        botones += `
-            <a href="/usuario/${row.idUsuario}/edit" class="text-blue-600 hover:text-blue-800" x-tooltip="Editar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
-                    <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5"/>
-                    <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-            </a>
-        `;
-    }
+                            let botones = '<div class="flex justify-center items-center gap-2">';
 
-    // Botón Cambiar Estado
-    if (window.permisos.puedeActualizarEstado) {
-        botones += `
-            <button type="button" class="text-gray-600 hover:text-gray-800" x-tooltip="Cambiar Estado" onclick="toggleEstadoUsuario(${row.idUsuario}, ${row.estado})">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
-                    <path d="M17 3L21 7L17 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M21 7H9C6.23858 7 4 9.23858 4 12V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M7 21L3 17L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M3 17H15C17.7614 17 20 14.7614 20 12V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </button>
-        `;
-    }
+                            // Botón Editar - SOLO si tiene permiso
+                            if (permisos.puedeEditar) {
+                                botones += `
+                                    <a href="/usuario/${row.idUsuario}/edit" class="text-blue-600 hover:text-blue-800" title="Editar usuario">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5">
+                                            <path d="M15.2869 3.15178L14.3601 4.07866L5.83882 12.5999C5.26166 13.1771 4.97308 13.4656 4.7249 13.7838C4.43213 14.1592 4.18114 14.5653 3.97634 14.995C3.80273 15.3593 3.67368 15.7465 3.41556 16.5208L2.32181 19.8021L2.05445 20.6042C1.92743 20.9852 2.0266 21.4053 2.31063 21.6894C2.59466 21.9734 3.01478 22.0726 3.39584 21.9456L4.19792 21.6782L7.47918 20.5844L7.47919 20.5844C8.25353 20.3263 8.6407 20.1973 9.00498 20.0237C9.43469 19.8189 9.84082 19.5679 10.2162 19.2751C10.5344 19.0269 10.8229 18.7383 11.4001 18.1612L19.9213 9.63993L20.8482 8.71306C22.3839 7.17735 22.3839 4.68748 20.8482 3.15178C19.3125 1.61607 16.8226 1.61607 15.2869 3.15178Z" stroke="currentColor" stroke-width="1.5"/>
+                                            <path opacity="0.5" d="M14.36 4.07812C14.36 4.07812 14.4759 6.04774 16.2138 7.78564C17.9517 9.52354 19.9213 9.6394 19.9213 9.6394M4.19789 21.6777L2.32178 19.8015" stroke="currentColor" stroke-width="1.5"/>
+                                        </svg>
+                                    </a>
+                                `;
+                            }
 
-    // Si no tiene ningún permiso
-    if (!window.permisos.puedeEditar && !window.permisos.puedeActualizarEstado) {
-        botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
-    }
+                            // Botón Cambiar Estado - SOLO si tiene permiso
+                            if (permisos.puedeActualizarEstado) {
+                                botones += `
+                                    <button type="button" class="text-gray-600 hover:text-gray-800" title="Cambiar Estado" onclick="toggleEstadoUsuario(${row.idUsuario}, ${row.estado})">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                                            <path d="M17 3L21 7L17 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            <path d="M21 7H9C6.23858 7 4 9.23858 4 12V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            <path d="M7 21L3 17L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                            <path d="M3 17H15C17.7614 17 20 14.7614 20 12V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                        </svg>
+                                    </button>
+                                `;
+                            }
 
-    botones += '</div>';
-    return botones;
-}
+                            // Si no tiene ningún permiso
+                            if (!permisos.puedeEditar && !permisos.puedeActualizarEstado) {
+                                botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
+                            }
 
+                            botones += '</div>';
+                            return botones;
+                        }
                     }
                 ],
                 responsive: true,
@@ -143,15 +148,16 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
-
 function toggleEstadoUsuario(idUsuario, estadoActual) {
     const nuevoEstado = estadoActual === 1 ? 0 : 1;
     const mensaje = nuevoEstado === 1 ? "activar" : "desactivar";
 
     Swal.fire({
-        icon: "warning",
         title: `¿Quieres ${mensaje} este usuario?`,
+        text: `El usuario quedará ${nuevoEstado === 1 ? 'activo' : 'inactivo'} en el sistema.`,
+        icon: "warning",
         showCancelButton: true,
+        confirmButtonColor: nuevoEstado === 1 ? '#28a745' : '#dc3545',
         confirmButtonText: `Sí, ${mensaje}`,
         cancelButtonText: "Cancelar",
     }).then(result => {
@@ -160,6 +166,7 @@ function toggleEstadoUsuario(idUsuario, estadoActual) {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
                 body: JSON.stringify({ estado: nuevoEstado }),
             })
@@ -168,8 +175,12 @@ function toggleEstadoUsuario(idUsuario, estadoActual) {
                     return response.json();
                 })
                 .then(() => {
-                    Swal.fire("Actualizado", "El estado del usuario ha sido cambiado con éxito.", "success")
-                        .then(() => location.reload());
+                    Swal.fire({
+                        title: "¡Actualizado!",
+                        text: `El estado del usuario ha sido cambiado a ${nuevoEstado === 1 ? 'activo' : 'inactivo'}.`,
+                        icon: "success"
+                    });
+                    $('#myTable1').DataTable().ajax.reload(); // Recargar tabla sin recargar página
                 })
                 .catch(error => {
                     Swal.fire("Error", error.message || "Ocurrió un error al cambiar el estado.", "error");

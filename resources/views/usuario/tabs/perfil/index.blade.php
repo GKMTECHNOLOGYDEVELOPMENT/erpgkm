@@ -1,14 +1,14 @@
 <template x-if="tab === 'perfil'">
     <div>
         <!-- ============================================ -->
-        <!-- SECCIÓN 1: INFORMACIÓN GENERAL (ORIGINAL + SEXO) -->
+        <!-- SECCIÓN 1: INFORMACIÓN GENERAL -->
         <!-- ============================================ -->
         <form data-userid="{{ $usuario->idUsuario }}" method="POST" enctype="multipart/form-data" id="update-forma"
             class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
 
             <div class="flex items-center mb-5">
                 <div class="w-1 h-6 bg-primary rounded-full mr-3"></div>
-                <h6 class="text-lg font-bold text-gray-800 dark:text-white">INFORMACIÓN GENERAL </h6>
+                <h6 class="text-lg font-bold text-gray-800 dark:text-white">INFORMACIÓN GENERAL</h6>
             </div>
             <div class="flex flex-col sm:flex-row">
                 <!-- Imagen de perfil -->
@@ -50,17 +50,19 @@
                             value="{{ $usuario->apellidoMaterno }}" class="form-input" />
                     </div>
 
-                    <!-- SEXO AGREGADO AQUÍ -->
+                    <!-- SEXO desde tabla usuarios -->
                     <div>
-                        <label for="sexo_static" class="flex items-center gap-1 text-sm font-medium">
+                        <label for="idSexo" class="flex items-center gap-1 text-sm font-medium">
                             <i class="fas fa-venus-mars text-gray-500 text-xs"></i>
                             Sexo
                         </label>
-                        <select id="sexo_static" name="sexo_static" class="form-input w-full">
-                            <option>Seleccione</option>
-                            <option>Masculino</option>
-                            <option>Femenino</option>
-                            <option>Otro</option>
+                        <select id="idSexo" name="idSexo" class="form-input w-full">
+                            <option value="">Seleccione</option>
+                            @foreach ($sexos ?? [] as $sexo)
+                                <option value="{{ $sexo->idSexo }}" {{ $usuario->idSexo == $sexo->idSexo ? 'selected' : '' }}>
+                                    {{ $sexo->nombre }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -104,8 +106,7 @@
                             <option value="" disabled>Seleccionar Estado Civil</option>
                             <option value="1" {{ $usuario->estadocivil == 1 ? 'selected' : '' }}>Soltero</option>
                             <option value="2" {{ $usuario->estadocivil == 2 ? 'selected' : '' }}>Casado</option>
-                            <option value="3" {{ $usuario->estadocivil == 3 ? 'selected' : '' }}>Divorciado
-                            </option>
+                            <option value="3" {{ $usuario->estadocivil == 3 ? 'selected' : '' }}>Divorciado</option>
                             <option value="4" {{ $usuario->estadocivil == 4 ? 'selected' : '' }}>Viudo</option>
                         </select>
                     </div>
@@ -141,7 +142,7 @@
         </form>
 
         <!-- ============================================ -->
-        <!-- SECCIÓN 2: FECHA Y LUGAR DE NACIMIENTO (MEJORADA) -->
+        <!-- SECCIÓN 2: FECHA Y LUGAR DE NACIMIENTO -->
         <!-- ============================================ -->
         <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
             <div class="flex items-center mb-5">
@@ -150,9 +151,8 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Fecha de nacimiento - Card style -->
-                <div
-                    class="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-blue-100/50 dark:border-blue-900/30">
+                <!-- Fecha de nacimiento -->
+                <div class="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-blue-100/50 dark:border-blue-900/30">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400 text-lg"></i>
                         <label class="font-semibold text-gray-700 dark:text-gray-300 leading-none required">
@@ -163,45 +163,50 @@
                         </label>
                     </div>
 
+                    @php
+                        $fechaNacimiento = $usuario->fechaNacimiento;
+                        $dia = $fechaNacimiento ? date('d', strtotime($fechaNacimiento)) : '';
+                        $mes = $fechaNacimiento ? date('m', strtotime($fechaNacimiento)) : '';
+                        $anio = $fechaNacimiento ? date('Y', strtotime($fechaNacimiento)) : '';
+                        $edad = $fechaNacimiento ? \Carbon\Carbon::parse($fechaNacimiento)->age : '';
+                    @endphp
+
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <input type="number" min="1" max="31" placeholder="Día"
+                            <input type="number" id="nacimiento_dia" name="nacimiento_dia" min="1" max="31" 
+                                placeholder="Día" value="{{ $dia }}"
                                 class="form-input w-full text-center placeholder:text-gray-400" />
                         </div>
                         <div>
-                            <select class="form-input w-full">
-                                <option>Mes</option>
-                                <option>Enero</option>
-                                <option>Febrero</option>
-                                <option>Marzo</option>
-                                <option>Abril</option>
-                                <option>Mayo</option>
-                                <option>Junio</option>
-                                <option>Julio</option>
-                                <option>Agosto</option>
-                                <option>Septiembre</option>
-                                <option>Octubre</option>
-                                <option>Noviembre</option>
-                                <option>Diciembre</option>
+                            <select id="nacimiento_mes" name="nacimiento_mes" class="form-input w-full">
+                                <option value="">Mes</option>
+                                @foreach(range(1, 12) as $mesNum)
+                                    @php
+                                        $nombreMes = \Carbon\Carbon::create()->month($mesNum)->locale('es')->monthName;
+                                    @endphp
+                                    <option value="{{ $mesNum }}" {{ $mes == $mesNum ? 'selected' : '' }}>
+                                        {{ $nombreMes }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
-                            <input type="number" min="1900" max="2026" placeholder="Año"
+                            <input type="number" id="nacimiento_anio" name="nacimiento_anio" min="1900" max="{{ date('Y') }}" 
+                                placeholder="Año" value="{{ $anio }}"
                                 class="form-input w-full text-center placeholder:text-gray-400" />
                         </div>
                     </div>
 
                     <div class="flex items-center justify-end mt-3 text-sm">
                         <span class="text-gray-500 dark:text-gray-400">Edad:</span>
-                        <span
-                            class="ml-2 font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full">--
-                            años</span>
+                        <span class="ml-2 font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full edad-span">
+                            {{ $edad ? $edad . ' años' : '-- años' }}
+                        </span>
                     </div>
                 </div>
 
-                <!-- Lugar de nacimiento - Card style -->
-                <div
-                    class="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-indigo-100/50 dark:border-indigo-900/30">
+                <!-- Lugar de nacimiento -->
+                <div class="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-indigo-100/50 dark:border-indigo-900/30">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="fas fa-map-marker-alt text-indigo-600 dark:text-indigo-400 text-lg"></i>
                         <label class="font-semibold text-gray-700 dark:text-gray-300 leading-none">
@@ -211,43 +216,42 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <select class="form-input w-full">
-                                <option>Departamento</option>
-                                <option>Amazonas</option>
-                                <option>Áncash</option>
-                                <option>Apurímac</option>
-                                <option>Arequipa</option>
-                                <option>Ayacucho</option>
-                                <option>Cajamarca</option>
-                                <option>Callao</option>
-                                <option>Cusco</option>
-                                <option>Huancavelica</option>
-                                <option>Huánuco</option>
-                                <option>Ica</option>
-                                <option>Junín</option>
-                                <option>La Libertad</option>
-                                <option>Lambayeque</option>
-                                <option>Lima</option>
-                                <option>Loreto</option>
-                                <option>Madre de Dios</option>
-                                <option>Moquegua</option>
-                                <option>Pasco</option>
-                                <option>Piura</option>
-                                <option>Puno</option>
-                                <option>San Martín</option>
-                                <option>Tacna</option>
-                                <option>Tumbes</option>
-                                <option>Ucayali</option>
+                            <select id="nacimiento_departamento" name="nacimiento_departamento" class="form-input w-full">
+                                <option value="">Departamento</option>
+                                @foreach($departamentos as $depto)
+                                    <option value="{{ $depto['id_ubigeo'] }}"
+                                        {{ ($fichaGeneral->nacimientoDepartamento ?? '') == $depto['id_ubigeo'] ? 'selected' : '' }}>
+                                        {{ $depto['nombre_ubigeo'] }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                         <div>
-                            <select class="form-input w-full bg-gray-50 dark:bg-[#1e293b]" disabled>
-                                <option>Provincia</option>
+                            <select id="nacimiento_provincia" name="nacimiento_provincia" class="form-input w-full" 
+                                {{ empty($fichaGeneral->nacimientoDepartamento) ? 'disabled' : '' }}>
+                                <option value="">Provincia</option>
+                                @if(!empty($provinciasNacimiento))
+                                    @foreach($provinciasNacimiento as $provincia)
+                                        <option value="{{ $provincia['id_ubigeo'] }}"
+                                            {{ ($fichaGeneral->nacimientoProvincia ?? '') == $provincia['id_ubigeo'] ? 'selected' : '' }}>
+                                            {{ $provincia['nombre_ubigeo'] }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                         <div>
-                            <select class="form-input w-full bg-gray-50 dark:bg-[#1e293b]" disabled>
-                                <option>Distrito</option>
+                            <select id="nacimiento_distrito" name="nacimiento_distrito" class="form-input w-full"
+                                {{ empty($fichaGeneral->nacimientoProvincia) ? 'disabled' : '' }}>
+                                <option value="">Distrito</option>
+                                @if(!empty($distritosNacimiento))
+                                    @foreach($distritosNacimiento as $distrito)
+                                        <option value="{{ $distrito['id_ubigeo'] }}"
+                                            {{ ($fichaGeneral->nacimientoDistrito ?? '') == $distrito['id_ubigeo'] ? 'selected' : '' }}>
+                                            {{ $distrito['nombre_ubigeo'] }}
+                                        </option>
+                                    @endforeach
+                                @endif
                             </select>
                         </div>
                     </div>
@@ -260,7 +264,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- SECCIÓN 3: SEGURO Y PENSIÓN (MEJORADA) -->
+        <!-- SECCIÓN 3: SEGURO Y PENSIÓN -->
         <!-- ============================================ -->
         <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
             <div class="flex items-center mb-5">
@@ -269,9 +273,8 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Seguro de salud - Card mejorado -->
-                <div
-                    class="bg-gradient-to-br from-green-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-green-100/50 dark:border-green-900/30">
+                <!-- Seguro de salud -->
+                <div class="bg-gradient-to-br from-green-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-green-100/50 dark:border-green-900/30">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="fas fa-shield-alt text-green-600 dark:text-green-400 text-lg"></i>
                         <label class="font-semibold text-gray-700 dark:text-gray-300 leading-none">
@@ -279,32 +282,28 @@
                         </label>
                     </div>
 
+                    @php $seguroSalud = $fichaGeneral->seguroSalud ?? ''; @endphp
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                            <input type="radio" id="sis_static" name="seguro_salud_static"
-                                class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500">
-                            <label for="sis_static" class="ml-2 text-sm font-medium cursor-pointer flex-1">SIS</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                            <input type="radio" id="sis" name="seguroSalud" value="SIS" class="w-4 h-4 text-green-600"
+                                {{ $seguroSalud == 'SIS' ? 'checked' : '' }}>
+                            <label for="sis" class="ml-2 text-sm font-medium cursor-pointer flex-1">SIS</label>
                         </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                            <input type="radio" id="essalud_static" name="seguro_salud_static"
-                                class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500">
-                            <label for="essalud_static"
-                                class="ml-2 text-sm font-medium cursor-pointer flex-1">ESSALUD</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                            <input type="radio" id="essalud" name="seguroSalud" value="ESSALUD" class="w-4 h-4 text-green-600"
+                                {{ $seguroSalud == 'ESSALUD' ? 'checked' : '' }}>
+                            <label for="essalud" class="ml-2 text-sm font-medium cursor-pointer flex-1">ESSALUD</label>
                         </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
-                            <input type="radio" id="eps_static" name="seguro_salud_static"
-                                class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500">
-                            <label for="eps_static" class="ml-2 text-sm font-medium cursor-pointer flex-1">EPS</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-300 dark:hover:border-green-700 transition-colors">
+                            <input type="radio" id="eps" name="seguroSalud" value="EPS" class="w-4 h-4 text-green-600"
+                                {{ $seguroSalud == 'EPS' ? 'checked' : '' }}>
+                            <label for="eps" class="ml-2 text-sm font-medium cursor-pointer flex-1">EPS</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sistema de pensiones - Card mejorado -->
-                <div
-                    class="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-purple-100/50 dark:border-purple-900/30">
+                <!-- Sistema de pensiones -->
+                <div class="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-[#1e293b] p-5 rounded-lg border border-purple-100/50 dark:border-purple-900/30">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="fas fa-piggy-bank text-purple-600 dark:text-purple-400 text-lg"></i>
                         <label class="font-semibold text-gray-700 dark:text-gray-300 leading-none">
@@ -312,41 +311,38 @@
                         </label>
                     </div>
 
+                    @php $sistemaPensiones = $fichaGeneral->sistemaPensiones ?? ''; @endphp
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-                            <input type="radio" id="onp_static" name="pension_static"
-                                class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500">
-                            <label for="onp_static" class="ml-2 text-sm font-medium cursor-pointer">ONP</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                            <input type="radio" id="onp" name="sistemaPensiones" value="ONP" class="w-4 h-4 text-purple-600"
+                                {{ $sistemaPensiones == 'ONP' ? 'checked' : '' }}>
+                            <label for="onp" class="ml-2 text-sm font-medium cursor-pointer">ONP</label>
                         </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-                            <input type="radio" id="afp_static" name="pension_static"
-                                class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500">
-                            <label for="afp_static" class="ml-2 text-sm font-medium cursor-pointer">AFP</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                            <input type="radio" id="afp" name="sistemaPensiones" value="AFP" class="w-4 h-4 text-purple-600"
+                                {{ $sistemaPensiones == 'AFP' ? 'checked' : '' }}>
+                            <label for="afp" class="ml-2 text-sm font-medium cursor-pointer">AFP</label>
                         </div>
-                        <div
-                            class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
-                            <input type="radio" id="noaplica_static" name="pension_static"
-                                class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 focus:ring-purple-500">
-                            <label for="noaplica_static" class="ml-2 text-sm font-medium cursor-pointer">No
-                                Aplica</label>
+                        <div class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                            <input type="radio" id="noaplica" name="sistemaPensiones" value="NA" class="w-4 h-4 text-purple-600"
+                                {{ $sistemaPensiones == 'NA' ? 'checked' : '' }}>
+                            <label for="noaplica" class="ml-2 text-sm font-medium cursor-pointer">No Aplica</label>
                         </div>
                     </div>
 
-                    <!-- AFP compañía - más integrado -->
+                    <!-- AFP compañía -->
                     <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center">
                             <i class="fas fa-building text-gray-400 mr-2 text-xs"></i>
-                            <label for="afp_compania_static"
-                                class="block text-sm font-medium text-gray-600 dark:text-gray-400">Compañía AFP</label>
+                            <label for="afpCompania" class="block text-sm font-medium text-gray-600 dark:text-gray-400">Compañía AFP</label>
                         </div>
-                        <select id="afp_compania_static" class="form-input w-full mt-2">
-                            <option>Seleccione AFP</option>
-                            <option>Integra</option>
-                            <option>Horizonte</option>
-                            <option>Profuturo</option>
-                            <option>Prima</option>
+                        <select id="afpCompania" name="afpCompania" class="form-input w-full mt-2" 
+                            {{ $sistemaPensiones != 'AFP' ? 'disabled' : '' }}>
+                            <option value="">Seleccione AFP</option>
+                            <option value="Integra" {{ ($fichaGeneral->afpCompania ?? '') == 'Integra' ? 'selected' : '' }}>Integra</option>
+                            <option value="Horizonte" {{ ($fichaGeneral->afpCompania ?? '') == 'Horizonte' ? 'selected' : '' }}>Horizonte</option>
+                            <option value="Profuturo" {{ ($fichaGeneral->afpCompania ?? '') == 'Profuturo' ? 'selected' : '' }}>Profuturo</option>
+                            <option value="Prima" {{ ($fichaGeneral->afpCompania ?? '') == 'Prima' ? 'selected' : '' }}>Prima</option>
                         </select>
                     </div>
                 </div>
@@ -354,7 +350,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- SECCIÓN 4: DIRECCIÓN (ORIGINAL MEJORADA) -->
+        <!-- SECCIÓN 4: DIRECCIÓN ACTUAL -->
         <!-- ============================================ -->
         <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
             <div class="flex items-center mb-5">
@@ -382,7 +378,7 @@
                             Departamento
                         </label>
                         <select id="departamento" name="departamento" class="form-input w-full mt-1">
-                            <option value="" disabled selected>Seleccionar Departamento</option>
+                            <option value="" disabled>Seleccionar Departamento</option>
                             @foreach ($departamentos as $departamento)
                                 <option value="{{ $departamento['id_ubigeo'] }}"
                                     {{ old('departamento', $usuario->departamento) == $departamento['id_ubigeo'] ? 'selected' : '' }}>
@@ -455,8 +451,9 @@
                 <div class="h-px w-10 bg-gradient-to-l from-transparent to-gray-300 dark:to-gray-700"></div>
             </div>
         </div>
+
         <!-- ============================================ -->
-        <!-- SECCIÓN 5: INFORMACIÓN ACADÉMICA (ESTÁTICO) -->
+        <!-- SECCIÓN 5: INFORMACIÓN ACADÉMICA -->
         <!-- ============================================ -->
         <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
             <div class="flex items-center mb-4">
@@ -464,7 +461,7 @@
                 <h6 class="text-lg font-bold text-gray-800 dark:text-white">INFORMACIÓN ACADEMICA</h6>
             </div>
 
-            <!-- Secundaria -->
+            <!-- SECUNDARIA -->
             <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center mb-3">
                     <div class="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
@@ -480,13 +477,15 @@
                         </label>
                         <div class="flex space-x-4 mt-1">
                             <div class="flex items-center">
-                                <input type="radio" name="secundaria_termino" class="w-4 h-4 text-blue-600">
+                                <input type="radio" name="secundaria_termino" value="1" class="w-4 h-4 text-blue-600"
+                                    {{ isset($estudioSecundaria) && $estudioSecundaria->termino == 1 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-check text-green-600 text-xs"></i> SI
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" name="secundaria_termino" class="w-4 h-4 text-blue-600">
+                                <input type="radio" name="secundaria_termino" value="0" class="w-4 h-4 text-blue-600"
+                                    {{ !isset($estudioSecundaria) || $estudioSecundaria->termino == 0 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-times text-red-600 text-xs"></i> NO
                                 </label>
@@ -498,19 +497,27 @@
                             <i class="fas fa-building text-blue-600 text-xs"></i>
                             Centro de Estudios
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Nombre del colegio">
+                        <input type="text" name="secundaria_centro" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioSecundaria->centroEstudios ?? '' }}"
+                            placeholder="Nombre del colegio"
+                            data-nivel="secundaria"
+                            {{ !isset($estudioSecundaria) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar text-blue-600 text-xs"></i>
-                            Año
+                            Año de culminación
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2018">
+                        <input type="text" name="secundaria_fin" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioSecundaria ? date('Y', strtotime($estudioSecundaria->fechaFin)) : '' }}"
+                            placeholder="Ej: 2018"
+                            data-nivel="secundaria"
+                            {{ !isset($estudioSecundaria) ? 'disabled' : '' }}>
                     </div>
                 </div>
             </div>
 
-            <!-- Técnico / Instituto -->
+            <!-- TÉCNICO / INSTITUTO -->
             <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center mb-3">
                     <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
@@ -526,13 +533,15 @@
                         </label>
                         <div class="flex space-x-4 mt-1">
                             <div class="flex items-center">
-                                <input type="radio" name="tecnico_termino" class="w-4 h-4 text-green-600">
+                                <input type="radio" name="tecnico_termino" value="1" class="w-4 h-4 text-green-600"
+                                    {{ isset($estudioTecnico) && $estudioTecnico->termino == 1 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-check text-green-600 text-xs"></i> SI
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" name="tecnico_termino" class="w-4 h-4 text-green-600">
+                                <input type="radio" name="tecnico_termino" value="0" class="w-4 h-4 text-green-600"
+                                    {{ !isset($estudioTecnico) || $estudioTecnico->termino == 0 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-times text-red-600 text-xs"></i> NO
                                 </label>
@@ -544,33 +553,49 @@
                             <i class="fas fa-building text-green-600 text-xs"></i>
                             Centro de Estudios
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Nombre del instituto">
+                        <input type="text" name="tecnico_centro" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioTecnico->centroEstudios ?? '' }}"
+                            placeholder="Nombre del instituto"
+                            data-nivel="tecnico"
+                            {{ !isset($estudioTecnico) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-book text-green-600 text-xs"></i>
                             Carrera
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: Administración">
+                        <input type="text" name="tecnico_especialidad" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioTecnico->especialidad ?? '' }}"
+                            placeholder="Ej: Administración"
+                            data-nivel="tecnico"
+                            {{ !isset($estudioTecnico) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-plus text-green-600 text-xs"></i>
                             Año inicio
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2019">
+                        <input type="text" name="tecnico_inicio" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioTecnico ? date('Y', strtotime($estudioTecnico->fechaInicio)) : '' }}"
+                            placeholder="Ej: 2019"
+                            data-nivel="tecnico"
+                            {{ !isset($estudioTecnico) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-check text-green-600 text-xs"></i>
                             Año fin
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2022">
+                        <input type="text" name="tecnico_fin" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioTecnico ? date('Y', strtotime($estudioTecnico->fechaFin)) : '' }}"
+                            placeholder="Ej: 2022"
+                            data-nivel="tecnico"
+                            {{ !isset($estudioTecnico) ? 'disabled' : '' }}>
                     </div>
                 </div>
             </div>
 
-            <!-- Universitario -->
+            <!-- UNIVERSITARIO -->
             <div class="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center mb-3">
                     <div class="w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center mr-2">
@@ -586,13 +611,15 @@
                         </label>
                         <div class="flex space-x-4 mt-1">
                             <div class="flex items-center">
-                                <input type="radio" name="universitario_termino" class="w-4 h-4 text-indigo-600">
+                                <input type="radio" name="universitario_termino" value="1" class="w-4 h-4 text-indigo-600"
+                                    {{ isset($estudioUniversitario) && $estudioUniversitario->termino == 1 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-check text-green-600 text-xs"></i> SI
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" name="universitario_termino" class="w-4 h-4 text-indigo-600">
+                                <input type="radio" name="universitario_termino" value="0" class="w-4 h-4 text-indigo-600"
+                                    {{ !isset($estudioUniversitario) || $estudioUniversitario->termino == 0 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-times text-red-600 text-xs"></i> NO
                                 </label>
@@ -604,46 +631,66 @@
                             <i class="fas fa-building-columns text-indigo-600 text-xs"></i>
                             Universidad
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Nombre de la universidad">
+                        <input type="text" name="universitario_centro" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioUniversitario->centroEstudios ?? '' }}"
+                            placeholder="Nombre de la universidad"
+                            data-nivel="universitario"
+                            {{ !isset($estudioUniversitario) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-graduation-cap text-indigo-600 text-xs"></i>
                             Carrera
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: Ingeniería">
+                        <input type="text" name="universitario_especialidad" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioUniversitario->especialidad ?? '' }}"
+                            placeholder="Ej: Ingeniería"
+                            data-nivel="universitario"
+                            {{ !isset($estudioUniversitario) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-award text-indigo-600 text-xs"></i>
                             Grado
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: Bachiller">
+                        <input type="text" name="universitario_grado" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioUniversitario->gradoAcademico ?? '' }}"
+                            placeholder="Ej: Bachiller"
+                            data-nivel="universitario"
+                            {{ !isset($estudioUniversitario) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-plus text-indigo-600 text-xs"></i>
                             Año inicio
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2020">
+                        <input type="text" name="universitario_inicio" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioUniversitario ? date('Y', strtotime($estudioUniversitario->fechaInicio)) : '' }}"
+                            placeholder="Ej: 2020"
+                            data-nivel="universitario"
+                            {{ !isset($estudioUniversitario) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-check text-indigo-600 text-xs"></i>
                             Año fin
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2024">
+                        <input type="text" name="universitario_fin" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioUniversitario ? date('Y', strtotime($estudioUniversitario->fechaFin)) : '' }}"
+                            placeholder="Ej: 2024"
+                            data-nivel="universitario"
+                            {{ !isset($estudioUniversitario) ? 'disabled' : '' }}>
                     </div>
                 </div>
             </div>
 
-            <!-- Post Grado -->
+            <!-- POST GRADO / MAESTRÍA -->
             <div class="mb-2">
                 <div class="flex items-center mb-3">
                     <div class="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center mr-2">
                         <i class="fas fa-user-graduate text-purple-600 text-xs"></i>
                     </div>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200">Post Grado</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">Post Grado / Maestría</span>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
@@ -653,13 +700,15 @@
                         </label>
                         <div class="flex space-x-4 mt-1">
                             <div class="flex items-center">
-                                <input type="radio" name="postgrado_termino" class="w-4 h-4 text-purple-600">
+                                <input type="radio" name="postgrado_termino" value="1" class="w-4 h-4 text-purple-600"
+                                    {{ isset($estudioPostgrado) && $estudioPostgrado->termino == 1 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-check text-green-600 text-xs"></i> SI
                                 </label>
                             </div>
                             <div class="flex items-center">
-                                <input type="radio" name="postgrado_termino" class="w-4 h-4 text-purple-600">
+                                <input type="radio" name="postgrado_termino" value="0" class="w-4 h-4 text-purple-600"
+                                    {{ !isset($estudioPostgrado) || $estudioPostgrado->termino == 0 ? 'checked' : '' }}>
                                 <label class="ml-1 text-sm flex items-center gap-1">
                                     <i class="fas fa-times text-red-600 text-xs"></i> NO
                                 </label>
@@ -671,43 +720,67 @@
                             <i class="fas fa-building-columns text-purple-600 text-xs"></i>
                             Universidad
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Nombre de la universidad">
+                        <input type="text" name="postgrado_centro" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioPostgrado->centroEstudios ?? '' }}"
+                            placeholder="Nombre de la universidad"
+                            data-nivel="postgrado"
+                            {{ !isset($estudioPostgrado) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-flask text-purple-600 text-xs"></i>
                             Especialidad
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: Maestría">
+                        <input type="text" name="postgrado_especialidad" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioPostgrado->especialidad ?? '' }}"
+                            placeholder="Ej: Maestría en Gestión"
+                            data-nivel="postgrado"
+                            {{ !isset($estudioPostgrado) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-award text-purple-600 text-xs"></i>
                             Grado
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: Magíster">
+                        <input type="text" name="postgrado_grado" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioPostgrado->gradoAcademico ?? '' }}"
+                            placeholder="Ej: Magíster"
+                            data-nivel="postgrado"
+                            {{ !isset($estudioPostgrado) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-plus text-purple-600 text-xs"></i>
                             Año inicio
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2024">
+                        <input type="text" name="postgrado_inicio" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioPostgrado ? date('Y', strtotime($estudioPostgrado->fechaInicio)) : '' }}"
+                            placeholder="Ej: 2024"
+                            data-nivel="postgrado"
+                            {{ !isset($estudioPostgrado) ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <i class="fas fa-calendar-check text-purple-600 text-xs"></i>
                             Año fin
                         </label>
-                        <input type="text" class="form-input mt-1 w-full" placeholder="Ej: 2026">
+                        <input type="text" name="postgrado_fin" class="form-input mt-1 w-full estudio-input" 
+                            value="{{ $estudioPostgrado ? date('Y', strtotime($estudioPostgrado->fechaFin)) : '' }}"
+                            placeholder="Ej: 2026"
+                            data-nivel="postgrado"
+                            {{ !isset($estudioPostgrado) ? 'disabled' : '' }}>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
 <script>
     $(document).ready(function() {
+        // ============================================
+        // ACTUALIZAR INFORMACIÓN GENERAL
+        // ============================================
         $('#update-button').click(function(e) {
             e.preventDefault();
 
@@ -719,7 +792,6 @@
             let correo = $('#correo').val();
             let correoPersonal = $('#correo_personal').val();
 
-            // Validar formato de correos
             if (correo && !isValidEmail(correo)) {
                 toastr.error('El correo corporativo no tiene un formato válido');
                 return;
@@ -741,15 +813,9 @@
                 },
                 success: function(response) {
                     toastr.success(response.success);
-
-                    // Actualizar visualmente el correo en la interfaz si es necesario
-                    if (correoPersonal) {
-                        // Puedes agregar aquí lógica para mostrar el correo personal actualizado
-                    }
                 },
-                error: function(xhr, status, error) {
+                error: function(xhr) {
                     if (xhr.status === 422) {
-                        // Mostrar errores de validación
                         let errors = xhr.responseJSON.errors;
                         $.each(errors, function(key, value) {
                             toastr.error(value[0]);
@@ -766,141 +832,350 @@
             return re.test(email);
         }
 
-        // Función para previsualizar imagen
-        function previewImage(event) {
+        // ============================================
+        // PREVISUALIZAR IMAGEN
+        // ============================================
+        window.previewImage = function(event) {
             var reader = new FileReader();
             reader.onload = function() {
                 var output = document.getElementById('profile-img');
                 output.src = reader.result;
             };
             reader.readAsDataURL(event.target.files[0]);
+        };
+
+        // ============================================
+        // HABILITAR/DESHABILITAR CAMPOS DE ESTUDIOS
+        // ============================================
+        function toggleEstudioFields(nivel) {
+            $(`input[name="${nivel}_termino"]`).on('change', function() {
+                let esSi = $(this).val() == '1';
+                if (esSi) {
+                    $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"], 
+                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"], 
+                       input[name="${nivel}_fin"]`).prop('disabled', false);
+                } else {
+                    $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"], 
+                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"], 
+                       input[name="${nivel}_fin"]`).val('').prop('disabled', true);
+                }
+            });
         }
-        window.previewImage = previewImage;
-    });
-</script>
-<script>
-    $(document).ready(function() {
-        // Cargar provincias y distritos al cargar el formulario si ya hay un departamento seleccionado
+
+        // Aplicar a todos los niveles
+        toggleEstudioFields('secundaria');
+        toggleEstudioFields('tecnico');
+        toggleEstudioFields('universitario');
+        toggleEstudioFields('postgrado');
+
+        // ============================================
+        // CALCULAR EDAD AUTOMÁTICAMENTE
+        // ============================================
+        function calcularEdad() {
+            let dia = $('#nacimiento_dia').val();
+            let mes = $('#nacimiento_mes').val();
+            let anio = $('#nacimiento_anio').val();
+            
+            if (dia && mes && anio) {
+                let fechaNacimiento = new Date(anio, mes - 1, dia);
+                let hoy = new Date();
+                let edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+                let mesActual = hoy.getMonth();
+                let diaActual = hoy.getDate();
+                
+                if (mesActual < (mes - 1) || (mesActual === (mes - 1) && diaActual < dia)) {
+                    edad--;
+                }
+                
+                if (edad >= 0 && edad < 150) {
+                    $('.edad-span').text(edad + ' años');
+                } else {
+                    $('.edad-span').text('-- años');
+                }
+            } else {
+                $('.edad-span').text('-- años');
+            }
+        }
+
+        $('#nacimiento_dia, #nacimiento_mes, #nacimiento_anio').on('change keyup', calcularEdad);
+
+        // ============================================
+        // UBIGEO PARA DIRECCIÓN ACTUAL
+        // ============================================
         function cargarProvincias(departamentoId) {
-            $.get('/ubigeo/provincias/' + departamentoId, function(data) {
-                var provinciaSelect = $('#provincia');
-                provinciaSelect.empty().prop('disabled', false);
-                provinciaSelect.append(
-                    '<option value="" disabled selected>Seleccionar Provincia</option>');
+            if (!departamentoId) {
+                $('#provincia').empty().prop('disabled', true).append('<option value="" disabled selected>Seleccionar Provincia</option>');
+                $('#distrito').empty().prop('disabled', true).append('<option value="" disabled selected>Seleccionar Distrito</option>');
+                return;
+            }
 
-                data.forEach(function(provincia) {
-                    provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
-                        provincia.nombre_ubigeo + '</option>');
-                });
+            $.ajax({
+                url: '/ubigeo/provincias/' + departamentoId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var provinciaSelect = $('#provincia');
+                    provinciaSelect.empty().prop('disabled', false);
+                    provinciaSelect.append('<option value="" disabled selected>Seleccionar Provincia</option>');
 
-                // Si hay provincia seleccionada previamente, se selecciona automáticamente
-                var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
-                if (provinciaSeleccionada) {
-                    $('#provincia').val(provinciaSeleccionada).change();
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, provincia) {
+                            provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                                provincia.nombre_ubigeo + '</option>');
+                        });
+
+                        var provinciaSeleccionada = '{{ old('provincia', $usuario->provincia) }}';
+                        if (provinciaSeleccionada) {
+                            provinciaSelect.val(provinciaSeleccionada).trigger('change');
+                        }
+                    }
+                },
+                error: function() {
+                    toastr.error('Error al cargar provincias');
                 }
             });
         }
 
         function cargarDistritos(provinciaId) {
-            $.get('/ubigeo/distritos/' + provinciaId, function(data) {
-                var distritoSelect = $('#distrito');
-                distritoSelect.empty().prop('disabled', false);
-                distritoSelect.append(
-                    '<option value="" disabled selected>Seleccionar Distrito</option>');
+            if (!provinciaId) {
+                $('#distrito').empty().prop('disabled', true).append('<option value="" disabled selected>Seleccionar Distrito</option>');
+                return;
+            }
 
-                data.forEach(function(distrito) {
+            $.ajax({
+                url: '/ubigeo/distritos/' + provinciaId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var distritoSelect = $('#distrito');
+                    distritoSelect.empty().prop('disabled', false);
+                    distritoSelect.append('<option value="" disabled selected>Seleccionar Distrito</option>');
+
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, distrito) {
+                            distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+                                distrito.nombre_ubigeo + '</option>');
+                        });
+
+                        var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
+                        if (distritoSeleccionado) {
+                            distritoSelect.val(distritoSeleccionado);
+                        }
+                    }
+                },
+                error: function() {
+                    toastr.error('Error al cargar distritos');
+                }
+            });
+        }
+
+        // Cargar datos iniciales si existen
+        var departamentoInicial = $('#departamento').val();
+        var provinciaInicial = '{{ $usuario->provincia }}';
+        var distritoInicial = '{{ $usuario->distrito }}';
+
+        if (departamentoInicial) {
+            cargarProvincias(departamentoInicial);
+        }
+
+        $('#departamento').on('change', function() {
+            var departamentoId = $(this).val();
+            cargarProvincias(departamentoId);
+            $('#distrito').empty().prop('disabled', true).append('<option value="" disabled selected>Seleccionar Distrito</option>');
+        });
+
+        $('#provincia').on('change', function() {
+            var provinciaId = $(this).val();
+            cargarDistritos(provinciaId);
+        });
+
+        if (provinciaInicial) {
+            cargarDistritos(provinciaInicial);
+        }
+
+        // ============================================
+        // ACTUALIZAR DIRECCIÓN
+        // ============================================
+        $('#direccion-form').on('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const formDataObj = {};
+            formData.forEach((value, key) => {
+                formDataObj[key] = value;
+            });
+
+            const userId = {{ $usuario->idUsuario }};
+            const url = `/usuario/direccion/${userId}`;
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+            $.ajax({
+                url: url,
+                method: 'PUT',
+                data: JSON.stringify(formDataObj),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(data) {
+                    if (data.success) {
+                        toastr.success('Dirección actualizada correctamente');
+                    } else {
+                        toastr.error('Error al actualizar la dirección');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error al intentar actualizar');
+                }
+            });
+        });
+
+        // ============================================
+        // UBIGEO PARA LUGAR DE NACIMIENTO
+        // ============================================
+        var provinciasNacimiento = @json($provinciasNacimiento ?? []);
+        var distritosNacimiento = @json($distritosNacimiento ?? []);
+
+        function cargarProvinciasNacimiento(departamentoId) {
+            if (!departamentoId) {
+                $('#nacimiento_provincia').empty().prop('disabled', true).append('<option value="">Seleccionar Provincia</option>');
+                $('#nacimiento_distrito').empty().prop('disabled', true).append('<option value="">Seleccionar Distrito</option>');
+                return;
+            }
+
+            // Si ya tenemos los datos precargados del servidor
+            if (provinciasNacimiento && provinciasNacimiento.length > 0) {
+                var provinciaSelect = $('#nacimiento_provincia');
+                provinciaSelect.empty().prop('disabled', false);
+                provinciaSelect.append('<option value="">Seleccionar Provincia</option>');
+
+                $.each(provinciasNacimiento, function(index, provincia) {
+                    provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                        provincia.nombre_ubigeo + '</option>');
+                });
+
+                var provinciaSeleccionada = '{{ $fichaGeneral->nacimientoProvincia ?? '' }}';
+                if (provinciaSeleccionada) {
+                    provinciaSelect.val(provinciaSeleccionada).trigger('change');
+                }
+                return;
+            }
+
+            // Si no hay datos precargados, hacer petición AJAX
+            $.ajax({
+                url: '/ubigeo/provincias/' + departamentoId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var provinciaSelect = $('#nacimiento_provincia');
+                    provinciaSelect.empty().prop('disabled', false);
+                    provinciaSelect.append('<option value="">Seleccionar Provincia</option>');
+
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, provincia) {
+                            provinciaSelect.append('<option value="' + provincia.id_ubigeo + '">' +
+                                provincia.nombre_ubigeo + '</option>');
+                        });
+
+                        var provinciaSeleccionada = '{{ $fichaGeneral->nacimientoProvincia ?? '' }}';
+                        if (provinciaSeleccionada) {
+                            provinciaSelect.val(provinciaSeleccionada).trigger('change');
+                        }
+                    }
+                },
+                error: function() {
+                    toastr.error('Error al cargar provincias');
+                }
+            });
+        }
+
+        function cargarDistritosNacimiento(provinciaId) {
+            if (!provinciaId) {
+                $('#nacimiento_distrito').empty().prop('disabled', true).append('<option value="">Seleccionar Distrito</option>');
+                return;
+            }
+
+            // Si ya tenemos los datos precargados del servidor
+            if (distritosNacimiento && distritosNacimiento.length > 0) {
+                var distritoSelect = $('#nacimiento_distrito');
+                distritoSelect.empty().prop('disabled', false);
+                distritoSelect.append('<option value="">Seleccionar Distrito</option>');
+
+                $.each(distritosNacimiento, function(index, distrito) {
                     distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
                         distrito.nombre_ubigeo + '</option>');
                 });
 
-                // Si hay distrito seleccionado previamente, se selecciona automáticamente
-                var distritoSeleccionado = '{{ old('distrito', $usuario->distrito) }}';
+                var distritoSeleccionado = '{{ $fichaGeneral->nacimientoDistrito ?? '' }}';
                 if (distritoSeleccionado) {
-                    $('#distrito').val(distritoSeleccionado);
+                    distritoSelect.val(distritoSeleccionado);
                 }
-            });
-        }
-
-        // Si ya hay un departamento seleccionado al cargar la página
-        var departamentoId = $('#departamento').val();
-        if (departamentoId) {
-            cargarProvincias(departamentoId);
-        }
-
-        // Cargar distritos si ya hay una provincia seleccionada al cargar la página
-        var provinciaId = $('#provincia').val();
-        if (provinciaId) {
-            cargarDistritos(provinciaId);
-        }
-
-        // Cuando se selecciona un nuevo departamento
-        $('#departamento').change(function() {
-            var departamentoId = $(this).val();
-            if (departamentoId) {
-                // Limpiar los selects de provincia y distrito
-                $('#provincia').empty().prop('disabled', true);
-                $('#distrito').empty().prop('disabled', true);
-
-                cargarProvincias(departamentoId);
+                return;
             }
-        });
 
-        // Cuando se selecciona una provincia
-        $('#provincia').on('change', function() {
-            var provinciaId = $(this).val();
-            if (provinciaId) {
-                // Limpiar el select de distritos
-                $('#distrito').empty().prop('disabled', true);
+            // Si no hay datos precargados, hacer petición AJAX
+            $.ajax({
+                url: '/ubigeo/distritos/' + provinciaId,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    var distritoSelect = $('#nacimiento_distrito');
+                    distritoSelect.empty().prop('disabled', false);
+                    distritoSelect.append('<option value="">Seleccionar Distrito</option>');
 
-                cargarDistritos(provinciaId);
-            }
-        });
-    });
-</script>
+                    if (data && data.length > 0) {
+                        $.each(data, function(index, distrito) {
+                            distritoSelect.append('<option value="' + distrito.id_ubigeo + '">' +
+                                distrito.nombre_ubigeo + '</option>');
+                        });
 
-<!-- <script src="{{ asset('assets/js/ubigeo.js') }}"></script> -->
-<script>
-    document.getElementById('direccion-form').addEventListener('submit', function(event) {
-        event.preventDefault(); // Evita el envío normal del formulario
-
-        // Recolecta los datos del formulario
-        const formData = new FormData(this);
-        const formDataObj = {};
-        formData.forEach((value, key) => {
-            formDataObj[key] = value;
-        });
-
-        // ID del usuario (será inyectado en tu Blade)
-        const userId = {{ $usuario->idUsuario }};
-
-        // URL para actualizar la dirección
-        const url = `/usuario/direccion/${userId}`;
-
-        // Obtener el token CSRF
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-        // Realiza la solicitud `fetch` con el método PUT y los datos JSON
-        fetch(url, {
-                method: 'PUT', // Usamos el método PUT para actualización
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
+                        var distritoSeleccionado = '{{ $fichaGeneral->nacimientoDistrito ?? '' }}';
+                        if (distritoSeleccionado) {
+                            distritoSelect.val(distritoSeleccionado);
+                        }
+                    }
                 },
-                body: JSON.stringify(formDataObj) // Convierte los datos del formulario a JSON
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Si la respuesta es exitosa, puedes mostrar un mensaje de éxito
-                    toastr.success('Dirección actualizada correctamente');
-                } else {
-                    // Si ocurre un error, mostrar los mensajes de error
-                    toastr.error('Error al actualizar la dirección');
+                error: function() {
+                    toastr.error('Error al cargar distritos');
                 }
-            })
-            .catch(error => {
-                console.error('Error al enviar la solicitud:', error);
-                toastr.error('Error al intentar actualizar');
             });
+        }
+
+        // Event listeners para lugar de nacimiento
+        $('#nacimiento_departamento').on('change', function() {
+            var departamentoId = $(this).val();
+            cargarProvinciasNacimiento(departamentoId);
+            $('#nacimiento_distrito').empty().prop('disabled', true).append('<option value="">Seleccionar Distrito</option>');
+        });
+
+        $('#nacimiento_provincia').on('change', function() {
+            var provinciaId = $(this).val();
+            cargarDistritosNacimiento(provinciaId);
+        });
+
+        // Cargar datos iniciales si existen
+        var deptoNacimiento = '{{ $fichaGeneral->nacimientoDepartamento ?? '' }}';
+        var provinciaNacimiento = '{{ $fichaGeneral->nacimientoProvincia ?? '' }}';
+
+        if (deptoNacimiento) {
+            $('#nacimiento_departamento').val(deptoNacimiento).trigger('change');
+            
+            if (provinciaNacimiento) {
+                setTimeout(function() {
+                    $('#nacimiento_provincia').val(provinciaNacimiento).trigger('change');
+                }, 500);
+            }
+        }
+
+        // ============================================
+        // CONTROL DE AFP SEGÚN PENSIÓN
+        // ============================================
+        $('input[name="sistemaPensiones"]').on('change', function() {
+            if ($(this).val() === 'AFP') {
+                $('#afpCompania').prop('disabled', false);
+            } else {
+                $('#afpCompania').prop('disabled', true).val('');
+            }
+        });
     });
 </script>

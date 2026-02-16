@@ -9,12 +9,10 @@
     <style>
         .panel {
             overflow: visible !important;
-            /* Asegura que el modal no restrinja contenido */
         }
 
         #myTable1 {
             min-width: 1000px;
-            /* puedes ajustar si quieres más ancho */
         }
 
         .dataTables_wrapper {
@@ -28,7 +26,6 @@
 
         .dataTables_scrollable table {
             min-width: 1000px;
-            /* ajusta según tus columnas */
         }
 
         .dataTables_length select {
@@ -38,12 +35,18 @@
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             padding-right: 1.5rem;
-            /* Ajusta espacio a la derecha para que el texto no se corte */
             background-image: none;
-            /* Opcional, elimina cualquier ícono */
         }
     </style>
 
+    <!-- PERMISOS - Definidos antes de cualquier script -->
+    <script>
+        window.permisos = {
+            puedeEditar: {{ \App\Helpers\PermisoHelper::tienePermiso('EDITAR USUARIO') ? 'true' : 'false' }},
+            puedeActualizarEstado: {{ \App\Helpers\PermisoHelper::tienePermiso('CAMBIAR ESTADO USUARIO') ? 'true' : 'false' }}
+        };
+        console.log('✅ Permisos de usuario cargados:', window.permisos);
+    </script>
 
     <div x-data="usuariosTable">
         <div>
@@ -139,6 +142,7 @@
                         <th>Tipo Documento</th>
                         <th>Documento</th>
                         <th>Teléfono</th>
+                        <th>Usuario</th>
                         <th>Email</th>
                         <th>Tipo Usuario</th>
                         <th>Rol</th>
@@ -152,6 +156,7 @@
             </table>
         </div>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Botón buscar
@@ -190,6 +195,4 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="/assets/js/simple-datatables.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/nice-select2/dist/js/nice-select2.js"></script>
-
-
 </x-layout.default>

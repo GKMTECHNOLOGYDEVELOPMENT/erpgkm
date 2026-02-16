@@ -2112,3 +2112,8 @@ Route::prefix('admin/formulario-personal')->name('admin.formulario-personal.')->
     Route::post('/draft', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'saveDraft'])->name('draft');
     Route::get('/{id}', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'show'])->name('show');
 });
+
+
+Route::post('/usuario/{id}/salud/guardar', [UsuarioController::class, 'guardarSalud']);
+Route::post('/usuario/familiar/guardar', [UsuarioController::class, 'guardarFamiliar']);
+Route::delete('/usuario/familiar/{id}', [UsuarioController::class, 'eliminarFamiliar']);

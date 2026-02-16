@@ -484,66 +484,66 @@ class UsuarioController extends Controller
     // use Illuminate\Support\Facades\Log;
 
     public function getUsuarios(Request $request)
-    {
-        Log::debug('Iniciando obtención paginada de usuarios');
-    
-        $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
-    
-        $total = $query->count();
-    
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('Nombre', 'like', "%$search%")
-                  ->orWhere('apellidoPaterno', 'like', "%$search%")
-                  ->orWhere('documento', 'like', "%$search%")
-                  ->orWhere('telefono', 'like', "%$search%")
-                  ->orWhere('correo', 'like', "%$search%")
-                  ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
-                      $q2->where('nombre', 'like', "%$search%");
-                  })
-                  ->orWhereHas('rol', function ($q3) use ($search) {
-                      $q3->where('nombre', 'like', "%$search%");
-                  })
-                  ->orWhereHas('tipoArea', function ($q4) use ($search) {
-                      $q4->where('nombre', 'like', "%$search%");
-                  });
-            });
-        }
-        
-        
-    
-        $filtered = $query->count();
-    
-        $usuarios = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-    
-        $data = $usuarios->map(function ($u) {
-            return [
-                'idUsuario' => $u->idUsuario,
-                'Nombre' => $u->Nombre,
-                'apellidoPaterno' => $u->apellidoPaterno,
-                'telefono' => $u->telefono ?? 'N/A',
-                'correo' => $u->correo ?? 'N/A',
-                'documento' => $u->documento ?? 'N/A',
-                'estado' => $u->estado,
-                'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
-                'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
-                'rol' => $u->rol->nombre ?? 'N/A',
-                'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
-                'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
-                'tieneFirma' => !empty($u->firma),
-            ];
+{
+    Log::debug('Iniciando obtención paginada de usuarios');
+
+    $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
+
+    $total = $query->count();
+
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('Nombre', 'like', "%$search%")
+              ->orWhere('apellidoPaterno', 'like', "%$search%")
+              ->orWhere('documento', 'like', "%$search%")
+              ->orWhere('telefono', 'like', "%$search%")
+              ->orWhere('correo', 'like', "%$search%")
+              ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
+              ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
+                  $q2->where('nombre', 'like', "%$search%");
+              })
+              ->orWhereHas('rol', function ($q3) use ($search) {
+                  $q3->where('nombre', 'like', "%$search%");
+              })
+              ->orWhereHas('tipoArea', function ($q4) use ($search) {
+                  $q4->where('nombre', 'like', "%$search%");
+              });
         });
-    
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
     }
+
+    $filtered = $query->count();
+
+    $usuarios = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $usuarios->map(function ($u) {
+        return [
+            'idUsuario' => $u->idUsuario,
+            'Nombre' => $u->Nombre,
+            'apellidoPaterno' => $u->apellidoPaterno,
+            'telefono' => $u->telefono ?? 'N/A',
+            'correo' => $u->correo ?? 'N/A',
+            'documento' => $u->documento ?? 'N/A',
+            'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
+            'estado' => $u->estado,
+            'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
+            'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
+            'rol' => $u->rol->nombre ?? 'N/A',
+            'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
+            'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
+            'tieneFirma' => !empty($u->firma),
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
     
 
 

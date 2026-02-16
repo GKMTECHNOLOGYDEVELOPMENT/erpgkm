@@ -318,120 +318,284 @@ class UsuarioController extends Controller
         return view('usuario.edit', compact('usuario'));
     }
 
-    public function loadTab($id, $tab)
-    {
-        $usuario = Usuario::findOrFail($id);
+   public function loadTab($id, $tab)
+{
+    // Cargar usuario con todas las relaciones necesarias
+    $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios'])->findOrFail($id);
 
-        switch ($tab) {
+    switch ($tab) {
+        case 'perfil':
+            $tiposDocumento = Tipodocumento::all();
+            $sexos = Sexo::all();
 
-            case 'perfil':
+            // ============================================
+            // CARGAR ARCHIVOS JSON
+            // ============================================
+            try {
+                // Departamentos es un array simple
+                $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true) ?? [];
+                
+                // Provincias viene como objeto con keys por departamento
+                $provinciasRaw = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true) ?? [];
+                
+                // Distritos viene como objeto con keys por provincia
+                $distritosRaw = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true) ?? [];
+                
+                // Reestructurar provincias a un array plano
+                $provincias = [];
+                foreach ($provinciasRaw as $deptoId => $provs) {
+                    foreach ($provs as $prov) {
+                        $prov['id_padre_ubigeo'] = $deptoId;
+                        $provincias[] = $prov;
+                    }
+                }
+                
+                // Reestructurar distritos a un array plano
+                $distritos = [];
+                foreach ($distritosRaw as $provId => $dists) {
+                    foreach ($dists as $dist) {
+                        $dist['id_padre_ubigeo'] = $provId;
+                        $distritos[] = $dist;
+                    }
+                }
+                
+            } catch (\Exception $e) {
+                \Log::error('Error cargando archivos ubigeo:', ['error' => $e->getMessage()]);
+                $departamentos = [];
+                $provincias = [];
+                $distritos = [];
+            }
 
-                $tiposDocumento = Tipodocumento::all();
-
-                // JSON ubigeo
-                $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-                $provincias = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true);
-                $distritos = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true);
-
-                // Departamento seleccionado
+            // ============================================
+            // PROCESAR DIRECCIÓN ACTUAL
+            // ============================================
+            
+            // DEPARTAMENTO SELECCIONADO
+            $departamentoSeleccionado = null;
+            $nombreDepartamento = '';
+            if ($usuario->departamento) {
                 $departamentoSeleccionado = collect($departamentos)
                     ->firstWhere('id_ubigeo', $usuario->departamento);
+                $nombreDepartamento = $departamentoSeleccionado['nombre_ubigeo'] ?? '';
+            }
 
-                // Provincias del departamento
-                $provinciasDelDepartamento = [];
-                if ($departamentoSeleccionado) {
-                    foreach ($provincias as $provincia) {
-                        if (($provincia['id_padre_ubigeo'] ?? null) == $departamentoSeleccionado['id_ubigeo']) {
-                            $provinciasDelDepartamento[] = $provincia;
-                        }
-                    }
-                }
+            // PROVINCIAS DEL DEPARTAMENTO SELECCIONADO
+            $provinciasDelDepartamento = [];
+            if ($usuario->departamento) {
+                $provinciasDelDepartamento = array_filter($provincias, function($prov) use ($usuario) {
+                    return isset($prov['id_padre_ubigeo']) && 
+                           $prov['id_padre_ubigeo'] == $usuario->departamento;
+                });
+                $provinciasDelDepartamento = array_values($provinciasDelDepartamento);
+            }
 
-                // Provincia seleccionada
-                $provinciaSeleccionada = collect($provinciasDelDepartamento)
+            // PROVINCIA SELECCIONADA
+            $provinciaSeleccionada = null;
+            $nombreProvincia = '';
+            if ($usuario->provincia) {
+                $provinciaSeleccionada = collect($provincias)
                     ->firstWhere('id_ubigeo', $usuario->provincia);
+                $nombreProvincia = $provinciaSeleccionada['nombre_ubigeo'] ?? '';
+            }
 
-                // Distritos de la provincia
-                $distritosDeLaProvincia = [];
-                if ($provinciaSeleccionada) {
-                    foreach ($distritos as $distrito) {
-                        if (($distrito['id_padre_ubigeo'] ?? null) == $provinciaSeleccionada['id_ubigeo']) {
-                            $distritosDeLaProvincia[] = $distrito;
-                        }
-                    }
+            // DISTRITOS DE LA PROVINCIA SELECCIONADA
+            $distritosDeLaProvincia = [];
+            if ($usuario->provincia) {
+                $distritosDeLaProvincia = array_filter($distritos, function($dist) use ($usuario) {
+                    return isset($dist['id_padre_ubigeo']) && 
+                           $dist['id_padre_ubigeo'] == $usuario->provincia;
+                });
+                $distritosDeLaProvincia = array_values($distritosDeLaProvincia);
+            }
+
+            // ============================================
+            // PROCESAR LUGAR DE NACIMIENTO
+            // ============================================
+            $fichaGeneral = $usuario->fichaGeneral;
+            
+            // Arrays para lugar de nacimiento
+            $provinciasNacimiento = [];
+            $distritosNacimiento = [];
+            
+            // Nombres para mostrar
+            $nombreNacimientoDepartamento = '';
+            $nombreNacimientoProvincia = '';
+            $nombreNacimientoDistrito = '';
+            
+            if ($fichaGeneral) {
+                // Departamento de nacimiento
+                if ($fichaGeneral->nacimientoDepartamento) {
+                    $deptoNac = collect($departamentos)
+                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDepartamento);
+                    $nombreNacimientoDepartamento = $deptoNac['nombre_ubigeo'] ?? '';
+                    
+                    // Provincias del departamento de nacimiento
+                    $provinciasNacimiento = array_filter($provincias, function($prov) use ($fichaGeneral) {
+                        return isset($prov['id_padre_ubigeo']) && 
+                               $prov['id_padre_ubigeo'] == $fichaGeneral->nacimientoDepartamento;
+                    });
+                    $provinciasNacimiento = array_values($provinciasNacimiento);
                 }
+                
+                // Provincia de nacimiento
+                if ($fichaGeneral->nacimientoProvincia) {
+                    $provNac = collect($provincias)
+                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoProvincia);
+                    $nombreNacimientoProvincia = $provNac['nombre_ubigeo'] ?? '';
+                    
+                    // Distritos de la provincia de nacimiento
+                    $distritosNacimiento = array_filter($distritos, function($dist) use ($fichaGeneral) {
+                        return isset($dist['id_padre_ubigeo']) && 
+                               $dist['id_padre_ubigeo'] == $fichaGeneral->nacimientoProvincia;
+                    });
+                    $distritosNacimiento = array_values($distritosNacimiento);
+                }
+                
+                // Distrito de nacimiento
+                if ($fichaGeneral->nacimientoDistrito) {
+                    $distNac = collect($distritos)
+                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDistrito);
+                    $nombreNacimientoDistrito = $distNac['nombre_ubigeo'] ?? '';
+                }
+            }
 
-                $distritoSeleccionado = null;
+            // DEBUG
+            \Log::info('=== DATOS DE NACIMIENTO ===');
+            \Log::info('Departamento nacimiento:', [
+                'id' => $fichaGeneral->nacimientoDepartamento ?? 'N/A',
+                'nombre' => $nombreNacimientoDepartamento
+            ]);
+            \Log::info('Provincias disponibles:', ['count' => count($provinciasNacimiento)]);
+            \Log::info('Provincia nacimiento:', [
+                'id' => $fichaGeneral->nacimientoProvincia ?? 'N/A',
+                'nombre' => $nombreNacimientoProvincia
+            ]);
+            \Log::info('Distritos disponibles:', ['count' => count($distritosNacimiento)]);
 
-                return view('usuario.tabs.perfil.index', compact(
-                    'usuario',
-                    'tiposDocumento',
-                    'departamentos',
-                    'provinciasDelDepartamento',
-                    'provinciaSeleccionada',
-                    'distritosDeLaProvincia',
-                    'distritoSeleccionado'
-                ));
+            // ============================================
+            // PROCESAR FECHA DE NACIMIENTO
+            // ============================================
+            $fechaNacimiento = $usuario->fechaNacimiento;
+            $dia = $fechaNacimiento ? date('d', strtotime($fechaNacimiento)) : '';
+            $mes = $fechaNacimiento ? date('m', strtotime($fechaNacimiento)) : '';
+            $anio = $fechaNacimiento ? date('Y', strtotime($fechaNacimiento)) : '';
+            $edad = $fechaNacimiento ? \Carbon\Carbon::parse($fechaNacimiento)->age : '';
 
-            case 'info-salud':
-                return view('usuario.tabs.info-salud.index', compact('usuario'));
+            // ============================================
+            // PROCESAR ESTUDIOS
+            // ============================================
+            $estudios = $usuario->estudios ?? collect([]);
+            $estudioSecundaria = $estudios->where('nivel', 'SECUNDARIA')->first();
+            $estudioTecnico = $estudios->where('nivel', 'TECNICO')->first();
+            $estudioUniversitario = $estudios->where('nivel', 'UNIVERSITARIO')->first();
+            $estudioPostgrado = $estudios->whereIn('nivel', ['POSTGRADO', 'MAESTRIA'])->first();
 
-
-            case 'payment-details':
-
-                $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get();
-
-                return view('usuario.tabs.detalles-pago.index', compact(
-                    'usuario',
-                    'cuentasBancarias'
-                ));
-
-            case 'informacion':
-
-                $sucursales = Sucursal::all();
-                $tiposUsuario = Tipousuario::all();
-                $sexos = Sexo::all();
-                $roles = Rol::all();
-                $tiposArea = Tipoarea::all();
-
-                return view('usuario.tabs.informacion.index', compact(
-                    'usuario',
-                    'sucursales',
-                    'tiposUsuario',
-                    'sexos',
-                    'roles',
-                    'tiposArea'
-                ));
-
-
-            case 'asignado':
-
-                return view('usuario.tabs.asignado.index', compact('usuario'));
-
-            case 'preferences':
-
-                $roles = Rol::all();
-                $tiposArea = Tipoarea::all();
-                $tiposUsuario = Tipousuario::all();
-                $sexos = Sexo::all();
-
-                return view('usuario.tabs.configuracion.index', compact(
-                    'usuario',
-                    'roles',
-                    'tiposArea',
-                    'tiposUsuario',
-                    'sexos'
-                ));
-
-            case 'danger-zone':
-
-                return view('usuario.tabs.detalles.index', compact('usuario'));
-
-            default:
-                abort(404);
-        }
+            return view('usuario.tabs.perfil.index', compact(
+                'usuario',
+                'tiposDocumento',
+                'sexos',
+                'departamentos',
+                'provincias',
+                'distritos',
+                'provinciasDelDepartamento',
+                'distritosDeLaProvincia',
+                'fichaGeneral',
+                'provinciasNacimiento',
+                'distritosNacimiento',
+                'fechaNacimiento',
+                'dia',
+                'mes',
+                'anio',
+                'edad',
+                'estudioSecundaria',
+                'estudioTecnico',
+                'estudioUniversitario',
+                'estudioPostgrado',
+                'nombreDepartamento',
+                'nombreProvincia',
+                'nombreNacimientoDepartamento',
+                'nombreNacimientoProvincia',
+                'nombreNacimientoDistrito'
+            ));
+       case 'info-salud':
+    // Cargar datos de salud, familiares y contactos de emergencia
+    $salud = $usuario->salud;
+    $familiares = $usuario->familiares ?? collect([]);
+    $contactosEmergencia = $usuario->contactosEmergencia ?? collect([]);
+    
+    // Si no existe registro de salud, crear uno vacío
+    if (!$salud) {
+        $salud = new \App\Models\UsuarioSalud();
+        $salud->idUsuario = $usuario->idUsuario;
     }
+    
+    // Procesar fechas de COVID para el formato flatpickr
+    $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
+    $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
+    $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
+    
+    // Debug
+    \Log::info('=== DATOS DE SALUD ===');
+    \Log::info('Usuario ID:', ['id' => $usuario->idUsuario]);
+    \Log::info('Salud:', ['data' => $salud]);
+    \Log::info('Familiares:', ['count' => $familiares->count()]);
+    \Log::info('Contactos Emergencia:', ['count' => $contactosEmergencia->count()]);
+    
+    return view('usuario.tabs.info-salud.index', compact(
+        'usuario',
+        'salud',
+        'familiares',
+        'contactosEmergencia',
+        'covidDosis1',
+        'covidDosis2',
+        'covidDosis3'
+    ));
 
+        case 'payment-details':
+            $cuentasBancarias = CuentasBancarias::where('idUsuario', $id)->get();
+            return view('usuario.tabs.detalles-pago.index', compact(
+                'usuario',
+                'cuentasBancarias'
+            ));
+
+        case 'informacion':
+            $sucursales = Sucursal::all();
+            $tiposUsuario = Tipousuario::all();
+            $sexos = Sexo::all();
+            $roles = Rol::all();
+            $tiposArea = Tipoarea::all();
+            return view('usuario.tabs.informacion.index', compact(
+                'usuario',
+                'sucursales',
+                'tiposUsuario',
+                'sexos',
+                'roles',
+                'tiposArea'
+            ));
+
+        case 'asignado':
+            return view('usuario.tabs.asignado.index', compact('usuario'));
+
+        case 'preferences':
+            $roles = Rol::all();
+            $tiposArea = Tipoarea::all();
+            $tiposUsuario = Tipousuario::all();
+            $sexos = Sexo::all();
+            return view('usuario.tabs.configuracion.index', compact(
+                'usuario',
+                'roles',
+                'tiposArea',
+                'tiposUsuario',
+                'sexos'
+            ));
+
+        case 'danger-zone':
+            return view('usuario.tabs.detalles.index', compact('usuario'));
+
+        default:
+            abort(404);
+    }
+}
 
 
 
@@ -651,66 +815,66 @@ class UsuarioController extends Controller
     // use Illuminate\Support\Facades\Log;
 
     public function getUsuarios(Request $request)
-    {
-        Log::debug('Iniciando obtención paginada de usuarios');
+{
+    Log::debug('Iniciando obtención paginada de usuarios');
 
-        $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
+    $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
 
-        $total = $query->count();
+    $total = $query->count();
 
-        if ($search = $request->input('search.value')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('Nombre', 'like', "%$search%")
-                    ->orWhere('apellidoPaterno', 'like', "%$search%")
-                    ->orWhere('documento', 'like', "%$search%")
-                    ->orWhere('telefono', 'like', "%$search%")
-                    ->orWhere('correo', 'like', "%$search%")
-                    ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
-                        $q2->where('nombre', 'like', "%$search%");
-                    })
-                    ->orWhereHas('rol', function ($q3) use ($search) {
-                        $q3->where('nombre', 'like', "%$search%");
-                    })
-                    ->orWhereHas('tipoArea', function ($q4) use ($search) {
-                        $q4->where('nombre', 'like', "%$search%");
-                    });
-            });
-        }
-
-
-
-        $filtered = $query->count();
-
-        $usuarios = $query
-            ->skip($request->start)
-            ->take($request->length)
-            ->get();
-
-        $data = $usuarios->map(function ($u) {
-            return [
-                'idUsuario' => $u->idUsuario,
-                'Nombre' => $u->Nombre,
-                'apellidoPaterno' => $u->apellidoPaterno,
-                'telefono' => $u->telefono ?? 'N/A',
-                'correo' => $u->correo ?? 'N/A',
-                'documento' => $u->documento ?? 'N/A',
-                'estado' => $u->estado,
-                'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
-                'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
-                'rol' => $u->rol->nombre ?? 'N/A',
-                'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
-                'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
-                'tieneFirma' => !empty($u->firma),
-            ];
+    if ($search = $request->input('search.value')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('Nombre', 'like', "%$search%")
+              ->orWhere('apellidoPaterno', 'like', "%$search%")
+              ->orWhere('documento', 'like', "%$search%")
+              ->orWhere('telefono', 'like', "%$search%")
+              ->orWhere('correo', 'like', "%$search%")
+              ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
+              ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
+                  $q2->where('nombre', 'like', "%$search%");
+              })
+              ->orWhereHas('rol', function ($q3) use ($search) {
+                  $q3->where('nombre', 'like', "%$search%");
+              })
+              ->orWhereHas('tipoArea', function ($q4) use ($search) {
+                  $q4->where('nombre', 'like', "%$search%");
+              });
         });
-
-        return response()->json([
-            'draw' => intval($request->draw),
-            'recordsTotal' => $total,
-            'recordsFiltered' => $filtered,
-            'data' => $data,
-        ]);
     }
+
+    $filtered = $query->count();
+
+    $usuarios = $query
+        ->skip($request->start)
+        ->take($request->length)
+        ->get();
+
+    $data = $usuarios->map(function ($u) {
+        return [
+            'idUsuario' => $u->idUsuario,
+            'Nombre' => $u->Nombre,
+            'apellidoPaterno' => $u->apellidoPaterno,
+            'telefono' => $u->telefono ?? 'N/A',
+            'correo' => $u->correo ?? 'N/A',
+            'documento' => $u->documento ?? 'N/A',
+            'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
+            'estado' => $u->estado,
+            'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
+            'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
+            'rol' => $u->rol->nombre ?? 'N/A',
+            'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
+            'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
+            'tieneFirma' => !empty($u->firma),
+        ];
+    });
+
+    return response()->json([
+        'draw' => intval($request->draw),
+        'recordsTotal' => $total,
+        'recordsFiltered' => $filtered,
+        'data' => $data,
+    ]);
+}
 
 
 
