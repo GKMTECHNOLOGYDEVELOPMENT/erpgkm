@@ -109,7 +109,8 @@ class Usuario extends Authenticatable
 		'idArea',
 		'idRol',
 		'firma',
-		'estadocivil'
+		'estadocivil',
+        'sueldoMensual'
 	];
 
 	public function sucursal()
