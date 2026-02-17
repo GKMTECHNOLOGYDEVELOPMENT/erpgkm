@@ -93,45 +93,35 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
         $data[$this->filaActual++] = ['FICHA DE DATOS DEL PERSONAL', '', '', '', '', '', ''];
         $data[$this->filaActual++] = ['', '', '', '', '', '', ''];
 
-        // SECCIÓN 1: INFORMACIÓN GENERAL
+        // SECCIÓN 1: INFORMACIÓN GENERAL - SIN ESPACIOS EXTRA
         $data[$this->filaActual++] = ['1. INFORMACIÓN GENERAL', '', '', '', '', '', ''];
-        $data[$this->filaActual++] = ['', '', '', '', '', '', ''];
 
         // Apellidos y Nombres
         $data[$this->filaActual++] = ['APELLIDO PATERNO', 'APELLIDO MATERNO', 'NOMBRES COMPLETOS', '', '', '', ''];
-        $this->filaActual++;
 
         // Fecha de Nacimiento y Lugar
         $data[$this->filaActual++] = ['FECHA DE NACIMIENTO', '', '', 'LUGAR DE NACIMIENTO', '', '', ''];
-        $this->filaActual++;
 
         // Tipo Doc, N° Doc, Edad, Sexo, Nacionalidad
         $data[$this->filaActual++] = ['TIPO DOC.', 'N° DOC.', 'EDAD', 'SEXO', 'NACIONALIDAD', '', ''];
-        $this->filaActual++;
 
         // Estado Civil, Email, Teléfono
         $data[$this->filaActual++] = ['ESTADO CIVIL', 'E-MAIL', 'TELÉFONO', '', '', '', ''];
-        $this->filaActual++;
 
         // Domicilio Actual
         $data[$this->filaActual++] = ['DOMICILIO ACTUAL', 'N° / Mz / Lt', 'URBANIZACIÓN', 'DEPARTAMENTO', 'PROVINCIA', 'DISTRITO', ''];
-        $this->filaActual++;
 
         // Datos Bancarios
         $data[$this->filaActual++] = ['ENTIDAD BANCARIA', '', 'TIPO CUENTA', 'MONEDA', 'N° CUENTA', 'CCI', ''];
-        $this->filaActual++;
 
         // Seguro y Pensiones
         $data[$this->filaActual++] = ['SEGURO SALUD', 'SISTEMA PENSIONES', 'COMPAÑÍA AFP', '', '', '', ''];
-        $this->filaActual++;
 
         // SECCIÓN 2: INFORMACIÓN ACADÉMICA
         $data[$this->filaActual++] = ['2. INFORMACIÓN ACADÉMICA (Consignar los estudios realizados)', '', '', '', '', '', ''];
-        $this->filaActual++;
 
         // Encabezados de la tabla
         $data[$this->filaActual++] = ['NIVEL', 'TERMINÓ', 'CENTRO DE ESTUDIOS', 'ESPECIALIDAD', 'NIVEL / GRADO ACADÉMICO', 'F. INICIO', 'F. FIN'];
-        $this->filaActual++;
 
         return $data;
     }
@@ -160,45 +150,45 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 $sheet->setCellValue('A4', '1. INFORMACIÓN GENERAL');
 
                 // ============================================
-                // APELLIDOS Y NOMBRES
+                // APELLIDOS Y NOMBRES (Fila 5: Títulos, Fila 6: Datos)
                 // ============================================
+                $sheet->mergeCells('A5:B5');
+                $sheet->mergeCells('C5:E5');
+                $sheet->mergeCells('F5:G5');
+                $sheet->setCellValue('A5', 'APELLIDO PATERNO');
+                $sheet->setCellValue('C5', 'APELLIDO MATERNO');
+                $sheet->setCellValue('F5', 'NOMBRES COMPLETOS');
+
+                // Datos de apellidos y nombres
                 $sheet->mergeCells('A6:B6');
                 $sheet->mergeCells('C6:E6');
                 $sheet->mergeCells('F6:G6');
-                $sheet->setCellValue('A6', 'APELLIDO PATERNO');
-                $sheet->setCellValue('C6', 'APELLIDO MATERNO');
-                $sheet->setCellValue('F6', 'NOMBRES COMPLETOS');
-
-                // Datos de apellidos y nombres
-                $sheet->mergeCells('A7:B7');
-                $sheet->mergeCells('C7:E7');
-                $sheet->mergeCells('F7:G7');
-                $sheet->setCellValue('A7', strtoupper($this->usuario->apellidoPaterno ?? ''));
-                $sheet->setCellValue('C7', strtoupper($this->usuario->apellidoMaterno ?? ''));
-                $sheet->setCellValue('F7', strtoupper($this->usuario->Nombre ?? ''));
+                $sheet->setCellValue('A6', strtoupper($this->usuario->apellidoPaterno ?? ''));
+                $sheet->setCellValue('C6', strtoupper($this->usuario->apellidoMaterno ?? ''));
+                $sheet->setCellValue('F6', strtoupper($this->usuario->Nombre ?? ''));
 
                 // ============================================
-                // FECHA DE NACIMIENTO
+                // FECHA DE NACIMIENTO (Fila 7: Títulos, Fila 8: Subtítulos, Fila 9: Datos)
                 // ============================================
                 $fechaNac = $this->usuario->fechaNacimiento ? Carbon::parse($this->usuario->fechaNacimiento) : null;
 
                 // Títulos
-                $sheet->mergeCells('A8:C8');
-                $sheet->mergeCells('D8:G8');
-                $sheet->setCellValue('A8', 'FECHA DE NACIMIENTO');
-                $sheet->setCellValue('D8', 'LUGAR DE NACIMIENTO');
+                $sheet->mergeCells('A7:C7');
+                $sheet->mergeCells('D7:G7');
+                $sheet->setCellValue('A7', 'FECHA DE NACIMIENTO');
+                $sheet->setCellValue('D7', 'LUGAR DE NACIMIENTO');
 
                 // Subtítulos
-                $sheet->setCellValue('A9', 'DÍA');
-                $sheet->setCellValue('B9', 'MES');
-                $sheet->setCellValue('C9', 'AÑO');
-                $sheet->mergeCells('D9:G9');
-                $sheet->setCellValue('D9', 'DEPARTAMENTO - PROVINCIA - DISTRITO');
+                $sheet->setCellValue('A8', 'DÍA');
+                $sheet->setCellValue('B8', 'MES');
+                $sheet->setCellValue('C8', 'AÑO');
+                $sheet->mergeCells('D8:G8');
+                $sheet->setCellValue('D8', 'DEPARTAMENTO - PROVINCIA - DISTRITO');
 
                 // DATOS: DÍA, MES, AÑO
-                $sheet->setCellValue('A10', $fechaNac ? $fechaNac->format('d') : '');
-                $sheet->setCellValue('B10', $fechaNac ? $fechaNac->format('m') : '');
-                $sheet->setCellValue('C10', $fechaNac ? $fechaNac->format('Y') : '');
+                $sheet->setCellValue('A9', $fechaNac ? $fechaNac->format('d') : '');
+                $sheet->setCellValue('B9', $fechaNac ? $fechaNac->format('m') : '');
+                $sheet->setCellValue('C9', $fechaNac ? $fechaNac->format('Y') : '');
 
                 // Lugar de nacimiento
                 $depNac = $this->getNombreDepartamento($this->usuario->fichaGeneral->nacimientoDepartamento ?? '');
@@ -206,136 +196,136 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 $distNac = $this->getNombreDistrito($this->usuario->fichaGeneral->nacimientoDistrito ?? '');
 
                 $lugarNacimiento = trim($depNac . ' - ' . $provNac . ' - ' . $distNac, ' -');
-                $sheet->mergeCells('D10:G10');
-                $sheet->setCellValue('D10', strtoupper($lugarNacimiento));
+                $sheet->mergeCells('D9:G9');
+                $sheet->setCellValue('D9', strtoupper($lugarNacimiento));
 
                 // ============================================
-                // TIPO DOC, N° DOC, EDAD, SEXO, NACIONALIDAD
+                // TIPO DOC, N° DOC, EDAD, SEXO, NACIONALIDAD (Fila 10: Títulos, Fila 11: Datos)
                 // ============================================
-                $sheet->mergeCells('A11:B11');
-                $sheet->mergeCells('C11:D11');
-                $sheet->setCellValue('A11', 'TIPO DOC.');
-                $sheet->setCellValue('C11', 'N° DOC.');
-                $sheet->setCellValue('E11', 'EDAD');
-                $sheet->setCellValue('F11', 'SEXO');
-                $sheet->setCellValue('G11', 'NAC.');
+                $sheet->mergeCells('A10:B10');
+                $sheet->mergeCells('C10:D10');
+                $sheet->setCellValue('A10', 'TIPO DOC.');
+                $sheet->setCellValue('C10', 'N° DOC.');
+                $sheet->setCellValue('E10', 'EDAD');
+                $sheet->setCellValue('F10', 'SEXO');
+                $sheet->setCellValue('G10', 'NAC.');
 
                 // Datos
-                $sheet->mergeCells('A12:B12');
-                $sheet->mergeCells('C12:D12');
-                $sheet->setCellValue('A12', strtoupper($this->usuario->tipoDocumento->nombre ?? ''));
-                $sheet->setCellValue('C12', $this->usuario->documento ?? '');
-                $sheet->setCellValue('E12', $fechaNac ? $fechaNac->age . ' años' : '');
-                $sheet->setCellValue('F12', strtoupper($this->usuario->sexo->nombre ?? ''));
-                $sheet->setCellValue('G12', strtoupper($this->usuario->nacionalidad ?? 'Peruana'));
+                $sheet->mergeCells('A11:B11');
+                $sheet->mergeCells('C11:D11');
+                $sheet->setCellValue('A11', strtoupper($this->usuario->tipoDocumento->nombre ?? ''));
+                $sheet->setCellValue('C11', $this->usuario->documento ?? '');
+                $sheet->setCellValue('E11', $fechaNac ? $fechaNac->age . ' años' : '');
+                $sheet->setCellValue('F11', strtoupper($this->usuario->sexo->nombre ?? ''));
+                $sheet->setCellValue('G11', strtoupper($this->usuario->nacionalidad ?? 'Peruana'));
 
                 // ============================================
-                // ESTADO CIVIL, EMAIL, TELÉFONO
+                // ESTADO CIVIL, EMAIL, TELÉFONO (Fila 12: Títulos, Fila 13: Datos)
                 // ============================================
+                $sheet->mergeCells('A12:B12');
+                $sheet->mergeCells('C12:D12');
+                $sheet->mergeCells('E12:G12');
+                $sheet->setCellValue('A12', 'ESTADO CIVIL');
+                $sheet->setCellValue('C12', 'E-MAIL');
+                $sheet->setCellValue('E12', 'TELÉFONO');
+
+                // Datos
                 $sheet->mergeCells('A13:B13');
                 $sheet->mergeCells('C13:D13');
                 $sheet->mergeCells('E13:G13');
-                $sheet->setCellValue('A13', 'ESTADO CIVIL');
-                $sheet->setCellValue('C13', 'E-MAIL');
-                $sheet->setCellValue('E13', 'TELÉFONO');
+                $sheet->setCellValue('A13', strtoupper($this->getEstadoCivilTexto($this->usuario->estadocivil)));
+                $sheet->setCellValue('C13', strtolower($this->usuario->correo ?? ''));
+                $sheet->setCellValue('E13', $this->usuario->telefono ?? '');
 
-                // Datos
+                // ============================================
+                // DOMICILIO (Fila 14: Títulos, Fila 15: Datos)
+                // ============================================
                 $sheet->mergeCells('A14:B14');
                 $sheet->mergeCells('C14:D14');
                 $sheet->mergeCells('E14:G14');
-                $sheet->setCellValue('A14', strtoupper($this->getEstadoCivilTexto($this->usuario->estadocivil)));
-                $sheet->setCellValue('C14', strtolower($this->usuario->correo ?? ''));
-                $sheet->setCellValue('E14', $this->usuario->telefono ?? '');
+                $sheet->setCellValue('A14', 'DOMICILIO');
+                $sheet->setCellValue('C14', 'N° / Mz / Lt');
+                $sheet->setCellValue('E14', 'URBANIZACIÓN');
 
-                // ============================================
-                // DOMICILIO
-                // ============================================
+                // Datos domicilio
                 $sheet->mergeCells('A15:B15');
                 $sheet->mergeCells('C15:D15');
                 $sheet->mergeCells('E15:G15');
-                $sheet->setCellValue('A15', 'DOMICILIO');
-                $sheet->setCellValue('C15', 'N° / Mz / Lt');
-                $sheet->setCellValue('E15', 'URBANIZACIÓN');
+                $sheet->setCellValue('A15', strtoupper($this->usuario->fichaGeneral->domicilioVia ?? ''));
+                $sheet->setCellValue('C15', strtoupper($this->usuario->fichaGeneral->domicilioMzLt ?? ''));
+                $sheet->setCellValue('E15', strtoupper($this->usuario->fichaGeneral->domicilioUrb ?? ''));
 
-                // Datos domicilio
+                // ============================================
+                // DEPARTAMENTO, PROVINCIA, DISTRITO (Fila 16: Títulos, Fila 17: Datos)
+                // ============================================
                 $sheet->mergeCells('A16:B16');
                 $sheet->mergeCells('C16:D16');
                 $sheet->mergeCells('E16:G16');
-                $sheet->setCellValue('A16', strtoupper($this->usuario->fichaGeneral->domicilioVia ?? ''));
-                $sheet->setCellValue('C16', strtoupper($this->usuario->fichaGeneral->domicilioMzLt ?? ''));
-                $sheet->setCellValue('E16', strtoupper($this->usuario->fichaGeneral->domicilioUrb ?? ''));
-
-                // ============================================
-                // DEPARTAMENTO, PROVINCIA, DISTRITO (DOMICILIO)
-                // ============================================
-                $sheet->mergeCells('A17:B17');
-                $sheet->mergeCells('C17:D17');
-                $sheet->mergeCells('E17:G17');
-                $sheet->setCellValue('A17', 'DEPARTAMENTO');
-                $sheet->setCellValue('C17', 'PROVINCIA');
-                $sheet->setCellValue('E17', 'DISTRITO');
+                $sheet->setCellValue('A16', 'DEPARTAMENTO');
+                $sheet->setCellValue('C16', 'PROVINCIA');
+                $sheet->setCellValue('E16', 'DISTRITO');
 
                 // Datos ubicación domicilio
                 $depDomicilio = $this->getNombreDepartamento($this->usuario->fichaGeneral->domicilioDepartamento ?? '');
                 $provDomicilio = $this->getNombreProvincia($this->usuario->fichaGeneral->domicilioProvincia ?? '');
                 $distDomicilio = $this->getNombreDistrito($this->usuario->fichaGeneral->domicilioDistrito ?? '');
 
+                $sheet->mergeCells('A17:B17');
+                $sheet->mergeCells('C17:D17');
+                $sheet->mergeCells('E17:G17');
+                $sheet->setCellValue('A17', strtoupper($depDomicilio));
+                $sheet->setCellValue('C17', strtoupper($provDomicilio));
+                $sheet->setCellValue('E17', strtoupper($distDomicilio));
+
+                // ============================================
+                // DATOS BANCARIOS (Fila 18: Títulos, Fila 19: Datos)
+                // ============================================
+                // TÍTULOS
                 $sheet->mergeCells('A18:B18');
-                $sheet->mergeCells('C18:D18');
-                $sheet->mergeCells('E18:G18');
-                $sheet->setCellValue('A18', strtoupper($depDomicilio));
-                $sheet->setCellValue('C18', strtoupper($provDomicilio));
-                $sheet->setCellValue('E18', strtoupper($distDomicilio));
+                $sheet->setCellValue('A18', 'ENTIDAD BANCARIA');
+                $sheet->setCellValue('C18', 'TIPO CUENTA');
+                $sheet->setCellValue('D18', 'MONEDA');
+                $sheet->setCellValue('E18', 'N° CUENTA');
+                $sheet->mergeCells('F18:G18');
+                $sheet->setCellValue('F18', 'CCI');
 
-                // ============================================
                 // DATOS BANCARIOS
-                // ============================================
-                // TÍTULOS (Fila 19)
-                $sheet->mergeCells('A19:B19');
-                $sheet->setCellValue('A19', 'ENTIDAD BANCARIA');
-                $sheet->setCellValue('C19', 'TIPO CUENTA');
-                $sheet->setCellValue('D19', 'MONEDA');
-                $sheet->setCellValue('E19', 'N° CUENTA');
-                $sheet->mergeCells('F19:G19');
-                $sheet->setCellValue('F19', 'CCI');
-
-                // DATOS BANCARIOS (Fila 20)
                 $entidadBancaria = $this->usuario->fichaGeneral->entidadBancaria ?? '';
                 $tipoCuenta = $this->usuario->fichaGeneral->tipoCuenta ?? '';
                 $moneda = $this->usuario->fichaGeneral->moneda ?? '';
                 $numeroCuenta = $this->usuario->fichaGeneral->numeroCuenta ?? '';
                 $numeroCCI = $this->usuario->fichaGeneral->numeroCCI ?? '';
 
-                $sheet->mergeCells('A20:B20');
-                $sheet->setCellValue('A20', strtoupper($this->getNombreEntidadBancaria($entidadBancaria)));
-                $sheet->setCellValue('C20', strtoupper($this->getNombreTipoCuenta($tipoCuenta)));
-                $sheet->setCellValue('D20', strtoupper($this->getNombreMoneda($moneda)));
-                $sheet->setCellValue('E20', $numeroCuenta);
-                $sheet->mergeCells('F20:G20');
-                $sheet->setCellValue('F20', $numeroCCI);
+                $sheet->mergeCells('A19:B19');
+                $sheet->setCellValue('A19', strtoupper($this->getNombreEntidadBancaria($entidadBancaria)));
+                $sheet->setCellValue('C19', strtoupper($this->getNombreTipoCuenta($tipoCuenta)));
+                $sheet->setCellValue('D19', strtoupper($this->getNombreMoneda($moneda)));
+                $sheet->setCellValue('E19', $numeroCuenta);
+                $sheet->mergeCells('F19:G19');
+                $sheet->setCellValue('F19', $numeroCCI);
 
                 // ============================================
-                // SEGURO Y PENSIÓN
+                // SEGURO Y PENSIÓN (Fila 20: Títulos, Fila 21: Datos)
                 // ============================================
+                $sheet->mergeCells('A20:B20');
+                $sheet->mergeCells('C20:D20');
+                $sheet->mergeCells('E20:G20');
+                $sheet->setCellValue('A20', 'SEGURO SALUD');
+                $sheet->setCellValue('C20', 'SISTEMA PENSIONES');
+                $sheet->setCellValue('E20', 'COMPAÑÍA AFP');
+
+                // Datos seguro y pensión
                 $sheet->mergeCells('A21:B21');
                 $sheet->mergeCells('C21:D21');
                 $sheet->mergeCells('E21:G21');
-                $sheet->setCellValue('A21', 'SEGURO SALUD');
-                $sheet->setCellValue('C21', 'SISTEMA PENSIONES');
-                $sheet->setCellValue('E21', 'COMPAÑÍA AFP');
-
-                // Datos seguro y pensión
-                $sheet->mergeCells('A22:B22');
-                $sheet->mergeCells('C22:D22');
-                $sheet->mergeCells('E22:G22');
-                $sheet->setCellValue('A22', $this->getFormatoSeguro($this->usuario->fichaGeneral->seguroSalud ?? ''));
-                $sheet->setCellValue('C22', $this->getFormatoPension($this->usuario->fichaGeneral->sistemaPensiones ?? ''));
-                $sheet->setCellValue('E22', $this->getFormatoAFP($this->usuario->fichaGeneral->afpCompania ?? ''));
+                $sheet->setCellValue('A21', $this->getFormatoSeguro($this->usuario->fichaGeneral->seguroSalud ?? ''));
+                $sheet->setCellValue('C21', $this->getFormatoPension($this->usuario->fichaGeneral->sistemaPensiones ?? ''));
+                $sheet->setCellValue('E21', $this->getFormatoAFP($this->usuario->fichaGeneral->afpCompania ?? ''));
 
                 // ============================================
                 // SECCIÓN: INFORMACIÓN ACADÉMICA
                 // ============================================
-                $filaActual = 23;
+                $filaActual = 22;
 
                 // Título de la sección
                 $sheet->mergeCells('A' . $filaActual . ':G' . $filaActual);
@@ -346,7 +336,7 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 ]);
                 $filaActual++;
 
-                // Encabezados de la tabla
+                // Encabezados de la tabla (Fila 23)
                 $sheet->setCellValue('A' . $filaActual, 'NIVEL');
                 $sheet->setCellValue('B' . $filaActual, 'TERMINÓ');
                 $sheet->setCellValue('C' . $filaActual, 'CENTRO DE ESTUDIOS');
@@ -369,7 +359,6 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 if ($estudios->count() > 0) {
                     foreach ($estudios as $estudio) {
                         $termino = $estudio->termino ? 'SI [X] NO [ ]' : 'SI [ ] NO [X]';
-
                         $fechaInicio = $estudio->fechaInicio ? Carbon::parse($estudio->fechaInicio)->format('d/m/Y') : '';
                         $fechaFin = $estudio->fechaFin ? Carbon::parse($estudio->fechaFin)->format('d/m/Y') : '';
 
@@ -380,7 +369,6 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                         $sheet->setCellValue('E' . $filaActual, $estudio->gradoAcademico ?? '');
                         $sheet->setCellValue('F' . $filaActual, $fechaInicio);
                         $sheet->setCellValue('G' . $filaActual, $fechaFin);
-
                         $filaActual++;
                     }
                 } else {
@@ -414,10 +402,9 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 $sheet->setCellValue('F' . $filaActual, 'F. NAC.');
                 $sheet->setCellValue('G' . $filaActual, 'DOMICILIO ACTUAL');
 
-                // Aplicar estilo a los encabezados
+                // Aplicar estilo a los encabezados (SIN FONDO GRIS)
                 $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
                     'font' => ['bold' => true],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
                 ]);
                 $filaActual++;
 
@@ -427,7 +414,6 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 // Si hay familiares, los mostramos
                 if ($familiares->count() > 0) {
                     foreach ($familiares as $familiar) {
-                        // Formatear fecha de nacimiento
                         $fechaNacFamiliar = $familiar->fechaNacimiento ? Carbon::parse($familiar->fechaNacimiento)->format('d/m/Y') : '';
 
                         $sheet->setCellValue('A' . $filaActual, $familiar->parentesco ?? '');
@@ -437,23 +423,16 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                         $sheet->setCellValue('E' . $filaActual, strtoupper($familiar->sexo ?? ''));
                         $sheet->setCellValue('F' . $filaActual, $fechaNacFamiliar);
                         $sheet->setCellValue('G' . $filaActual, strtoupper($familiar->domicilioActual ?? ''));
-
                         $filaActual++;
                     }
                 } else {
-                    // Si no hay familiares, mostramos filas vacías
                     $sheet->setCellValue('A' . $filaActual, 'CÓNYUGE');
                     $filaActual++;
-
                     $sheet->setCellValue('A' . $filaActual, 'CONCUBIN@');
                     $filaActual++;
-
-                    // Subtítulo HIJOS
                     $sheet->setCellValue('A' . $filaActual, 'HIJOS');
                     $sheet->getStyle('A' . $filaActual)->getFont()->setBold(true);
                     $filaActual++;
-
-                    // 4 filas para hijos
                     for ($i = 1; $i <= 4; $i++) {
                         $sheet->setCellValue('A' . $filaActual, $i);
                         $filaActual++;
@@ -461,7 +440,7 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 }
 
                 // ============================================
-                // SECCIÓN: INFORMACIÓN DE SALUD (MEJORADA)
+                // SECCIÓN: INFORMACIÓN DE SALUD
                 // ============================================
 
                 // Título de la sección
@@ -489,15 +468,12 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 // Obtener datos de salud
                 $salud = $this->usuario->salud ?? null;
 
-                // Vacuna COVID-19 (ahora con soporte para 3 dosis)
+                // Vacuna COVID-19
                 $sheet->setCellValue('A' . $filaActual, '¿Ha recibido la vacuna contra la COVID-19?');
                 $sheet->setCellValue('B' . $filaActual, $this->getFormatoCheckbox($salud->vacunaCovid ?? null));
-
-                // Formatear dosis (1, 2 y 3)
                 $dosis1 = $salud && $salud->covidDosis1 ? Carbon::parse($salud->covidDosis1)->format('d/m/Y') : '__/__/____';
                 $dosis2 = $salud && $salud->covidDosis2 ? Carbon::parse($salud->covidDosis2)->format('d/m/Y') : '__/__/____';
                 $dosis3 = $salud && $salud->covidDosis3 ? Carbon::parse($salud->covidDosis3)->format('d/m/Y') : '__/__/____';
-
                 $sheet->setCellValue('C' . $filaActual, '1° Dosis: ' . $dosis1 . ' | 2° Dosis: ' . $dosis2 . ' | 3° Dosis: ' . $dosis3);
                 $sheet->mergeCells('C' . $filaActual . ':G' . $filaActual);
                 $filaActual++;
@@ -516,15 +492,13 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 $sheet->mergeCells('C' . $filaActual . ':G' . $filaActual);
                 $filaActual++;
 
-                // TIPO DE SANGRE - Ahora como una fila más de la tabla con merge de celdas
+                // TIPO DE SANGRE
                 $sheet->setCellValue('A' . $filaActual, 'TIPO DE SANGRE:');
                 $sheet->setCellValue('B' . $filaActual, $salud->tipoSangre ?? '');
                 $sheet->setCellValue('C' . $filaActual, '');
                 $sheet->mergeCells('C' . $filaActual . ':G' . $filaActual);
-                // Aplicar estilo para destacar el tipo de sangre
                 $sheet->getStyle('A' . $filaActual . ':B' . $filaActual)->getFont()->setBold(true);
                 $filaActual++;
-
 
                 // Contactos de Emergencia
                 $sheet->setCellValue('A' . $filaActual, 'INDICAR DATOS DE FAMILIAR EN CASO DE ACCIDENTE Y/O EMERGENCIA:');
@@ -558,12 +532,135 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                         $filaActual++;
                     }
                 } else {
-                    // 2 filas vacías para contactos
                     for ($i = 1; $i <= 2; $i++) {
                         $sheet->mergeCells('C' . $filaActual . ':G' . $filaActual);
                         $filaActual++;
                     }
                 }
+
+                // ============================================
+                // SECCIÓN: DATOS LABORALES (DISEÑO CORREGIDO)
+                // ============================================
+
+                // Título de la sección
+                $sheet->mergeCells('A' . $filaActual . ':G' . $filaActual);
+                $sheet->setCellValue('A' . $filaActual, '5. DATOS LABORALES');
+                $sheet->getStyle('A' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 12, 'color' => ['argb' => 'FFFFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
+                ]);
+                $filaActual++;
+
+                // Obtener datos laborales
+                $laboral = $this->usuario->laboral ?? null;
+                $tipoContrato = null;
+
+                if ($laboral && $laboral->idTipoContrato) {
+                    $tipoContrato = \App\Models\TipoContrato::find($laboral->idTipoContrato);
+                }
+
+                // ============================================
+                // FILA 1: Sueldo y Área (títulos)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'SUELDO');
+                $sheet->setCellValue('D' . $filaActual, 'ÁREA'); // Cambiado a columna D
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual); // Sueldo ocupa A-C
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual); // Área ocupa D-G
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 2: Datos de Sueldo y Área
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'S/ ' . number_format($this->usuario->sueldoMensual ?? 0, 2));
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->setCellValue('D' . $filaActual, strtoupper($this->usuario->tipoArea->nombre ?? ''));
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 3: Tipo de Contrato y Cargo (títulos)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'TIPO DE CONTRATO');
+                $sheet->setCellValue('D' . $filaActual, 'CARGO'); // Cambiado a columna D
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 4: Datos de Tipo de Contrato y Cargo
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, strtoupper($tipoContrato->nombre ?? $laboral->tipoContrato ?? ''));
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->setCellValue('D' . $filaActual, strtoupper($this->usuario->tipoUsuario->nombre ?? ''));
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 5: Fecha de Inicio y Hora de Inicio de Jornada (títulos)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'FECHA DE INICIO');
+                $sheet->setCellValue('D' . $filaActual, 'HORA DE INICIO DE JORNADA'); // Cambiado a columna D
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 6: Datos de Fecha de Inicio y Hora de Inicio
+                // ============================================
+                $fechaInicio = $laboral && $laboral->fechaInicio ? Carbon::parse($laboral->fechaInicio)->format('d/m/Y') : '';
+                $horaInicio = $laboral && $laboral->horaInicioJornada ? Carbon::parse($laboral->horaInicioJornada)->format('H:i') : '';
+
+                $sheet->setCellValue('A' . $filaActual, $fechaInicio);
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->setCellValue('D' . $filaActual, $horaInicio);
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 7: Fecha de Término y Hora de Término de Jornada (títulos)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'FECHA DE TÉRMINO');
+                $sheet->setCellValue('D' . $filaActual, 'HORA DE TÉRMINO DE JORNADA'); // Cambiado a columna D
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 8: Datos de Fecha de Término y Hora de Término
+                // ============================================
+                $fechaTermino = $laboral && $laboral->fechaTermino ? Carbon::parse($laboral->fechaTermino)->format('d/m/Y') : '';
+                $horaFin = $laboral && $laboral->horaFinJornada ? Carbon::parse($laboral->horaFinJornada)->format('H:i') : '';
+
+                $sheet->setCellValue('A' . $filaActual, $fechaTermino);
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->setCellValue('D' . $filaActual, $horaFin);
+                $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
 
                 // ============================================
                 // ESTILOS FINALES
@@ -587,10 +684,8 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
                 ]);
 
-                // ============================================
-                // TÍTULOS DE CAMPOS (FONDO GRIS Y NEGRITA) - ¡AGREGA ESTO!
-                // ============================================
-                $filasTitulos = [6, 8, 9, 11, 13, 15, 17, 19, 21, 24];
+                // TÍTULOS DE CAMPOS CON FONDO GRIS
+                $filasTitulos = [5, 7, 8, 10, 12, 14, 16, 18, 20, 23];
                 foreach ($filasTitulos as $fila) {
                     $sheet->getStyle('A' . $fila . ':G' . $fila)->applyFromArray([
                         'font' => ['bold' => true],
@@ -607,12 +702,6 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                         ],
                     ],
                 ]);
-
-                // Ajustar altura de filas
-                $sheet->getRowDimension(21)->setRowHeight(25);
-                $sheet->getRowDimension(22)->setRowHeight(35);
-                $sheet->getRowDimension(23)->setRowHeight(25);
-                $sheet->getRowDimension(24)->setRowHeight(25);
 
                 // Configurar página
                 $sheet->getPageSetup()
