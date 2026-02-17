@@ -590,7 +590,7 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 // ============================================
                 // TÍTULOS DE CAMPOS (FONDO GRIS Y NEGRITA) - ¡AGREGA ESTO!
                 // ============================================
-                $filasTitulos = [6, 8, 9, 11, 13, 15, 17, 19, 21, 24, 27, 32];
+                $filasTitulos = [6, 8, 9, 11, 13, 15, 17, 19, 21, 24];
                 foreach ($filasTitulos as $fila) {
                     $sheet->getStyle('A' . $fila . ':G' . $fila)->applyFromArray([
                         'font' => ['bold' => true],
