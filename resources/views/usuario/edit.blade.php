@@ -1341,7 +1341,6 @@
     });
 </script>
 
-
 <script>
     $(document).ready(function() {
         // ============================================
@@ -1351,22 +1350,48 @@
             if (typeof flatpickr !== 'undefined') {
                 // Fechas
                 flatpickr(".flatpickr", {
+                    locale: 'es',
                     dateFormat: "Y-m-d",
                     allowInput: true,
-                    locale: "es"
+                    altInput: true,
+                    altFormat: "d/m/Y",
+                    altInputClass: 'form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700'
                 });
                 
-                // Horas
+                // Horas - Configuración simple
                 flatpickr(".flatpickr-time", {
                     enableTime: true,
                     noCalendar: true,
                     dateFormat: "H:i",
                     time_24hr: true,
-                    allowInput: true,
-                    locale: "es"
+                    defaultHour: 9,
+                    defaultMinute: 0,
+                    locale: 'es',
+                    allowInput: true
                 });
             }
         };
+
+        // Inicializar flatpickr
+        window.initFlatpickr();
+        
+        // ============================================
+        // FIX: Forzar valores iniciales después de cargar
+        // ============================================
+        setTimeout(function() {
+            // Obtener valores de los inputs ocultos o del backend
+            let horaInicio = "{{ $laboral->horaInicioJornada ?? '' }}";
+            let horaFin = "{{ $laboral->horaFinJornada ?? '' }}";
+            
+            // Aplicar a los inputs de hora
+            if (horaInicio) {
+                $('#horaInicioJornada').val(horaInicio);
+            }
+            
+            if (horaFin) {
+                $('#horaFinJornada').val(horaFin);
+            }
+        }, 100);
 
         // ============================================
         // ACTUALIZAR INFORMACIÓN LABORAL Y CONFIGURACIÓN
@@ -1378,8 +1403,6 @@
             // Recolectar datos
             let data = {
                 idTipoContrato: $('#idTipoContrato').val(),
-                cargoTexto: $('#cargoTexto').val(),
-                areaTexto: $('#areaTexto').val(),
                 fechaInicio: $('#fechaInicio').val(),
                 fechaTermino: $('#fechaTermino').val(),
                 horaInicioJornada: $('#horaInicioJornada').val(),
@@ -1427,8 +1450,6 @@
         });
     });
 </script>
-
-
 <script>
     $(document).ready(function() {
         // ============================================

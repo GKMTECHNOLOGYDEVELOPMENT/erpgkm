@@ -1090,79 +1090,91 @@ class UsuarioController extends Controller
     /**
      * Subir documento para usuario
      */
-    public function uploadDocumento(Request $request, $idUsuario)
-    {
-        try {
-            $validator = Validator::make($request->all(), [
-                'tipo_documento' => 'required|in:CV,DNI,PENALES,JUDICIALES,OTROS',
-                'archivo' => 'required|file|max:5120', // 5MB máximo
-            ]);
+   public function uploadDocumento(Request $request, $idUsuario)
+{
+    try {
+        $validator = Validator::make($request->all(), [
+            'tipo_documento' => 'required|in:CV,DNI,PENALES,JUDICIALES,DOMICILIO,TRABAJOS,MATRIMONIO,VACUNACION,ESTUDIOS,DNI_HIJOS,OTROS',
+            'archivo' => 'required|file|max:5120', // 5MB máximo
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Verificar que el usuario existe
-            $usuario = Usuario::find($idUsuario);
-            if (!$usuario) {
-                return response()->json(['success' => false, 'message' => 'Usuario no encontrado'], 404);
-            }
-
-            $archivo = $request->file('archivo');
-            $tipoDocumento = $request->tipo_documento;
-
-            // Definir extensiones permitidas según tipo
-            $extensionesPermitidas = [
-                'CV' => ['pdf', 'doc', 'docx'],
-                'DNI' => ['jpg', 'jpeg', 'png', 'pdf'],
-                'PENALES' => ['pdf'],
-                'JUDICIALES' => ['pdf'],
-                'OTROS' => ['pdf', 'jpg', 'jpeg', 'png']
-            ];
-
-            $extension = $archivo->getClientOriginalExtension();
-            if (!in_array(strtolower($extension), $extensionesPermitidas[$tipoDocumento])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tipo de archivo no permitido para este documento'
-                ], 422);
-            }
-
-            // Generar nombre único para el archivo
-            $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
-
-            // Guardar en storage (público)
-            $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
-
-            // Crear registro en la base de datos
-            $documento = DocumentoUsuario::create([
-                'idUsuario' => $idUsuario,
-                'tipo_documento' => $tipoDocumento,
-                'nombre_archivo' => $archivo->getClientOriginalName(),
-                'ruta_archivo' => $ruta,
-                'mime_type' => $archivo->getMimeType(),
-                'tamano' => $archivo->getSize()
-            ]);
-
-            Log::info('Documento subido exitosamente:', [
-                'usuario' => $idUsuario,
-                'tipo' => $tipoDocumento,
-                'documento_id' => $documento->idDocumento
-            ]);
-
+        if ($validator->fails()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Documento subido exitosamente',
-                'documento' => $documento
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
-            return response()->json(['success' => false, 'message' => 'Error al subir documento'], 500);
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
+
+        $usuario = Usuario::find($idUsuario);
+        if (!$usuario) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario no encontrado'
+            ], 404);
+        }
+
+        $archivo = $request->file('archivo');
+        $tipoDocumento = $request->tipo_documento;
+
+        // Extensiones permitidas según tipo
+        $extensionesPermitidas = [
+            'CV' => ['pdf', 'doc', 'docx'],
+            'DNI' => ['jpg', 'jpeg', 'png', 'pdf'],
+            'PENALES' => ['pdf'],
+            'JUDICIALES' => ['pdf'],
+            'DOMICILIO' => ['pdf', 'jpg', 'jpeg', 'png'],
+            'TRABAJOS' => ['pdf', 'doc', 'docx'],
+            'MATRIMONIO' => ['pdf', 'jpg', 'jpeg', 'png'],
+            'VACUNACION' => ['pdf', 'jpg', 'jpeg', 'png'],
+            'ESTUDIOS' => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+            'DNI_HIJOS' => ['pdf', 'jpg', 'jpeg', 'png'],
+            'OTROS' => ['pdf', 'jpg', 'jpeg', 'png']
+        ];
+
+        $extension = strtolower($archivo->getClientOriginalExtension());
+
+        if (!isset($extensionesPermitidas[$tipoDocumento]) ||
+            !in_array($extension, $extensionesPermitidas[$tipoDocumento])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tipo de archivo no permitido para este documento'
+            ], 422);
+        }
+
+        $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
+
+        $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
+
+        $documento = DocumentoUsuario::create([
+            'idUsuario' => $idUsuario,
+            'tipo_documento' => $tipoDocumento,
+            'nombre_archivo' => $archivo->getClientOriginalName(),
+            'ruta_archivo' => $ruta,
+            'mime_type' => $archivo->getMimeType(),
+            'tamano' => $archivo->getSize()
+        ]);
+
+        Log::info('Documento subido exitosamente:', [
+            'usuario' => $idUsuario,
+            'tipo' => $tipoDocumento,
+            'documento_id' => $documento->idDocumento
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Documento subido exitosamente',
+            'documento' => $documento
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al subir documento'
+        ], 500);
     }
+}
+
 
     /**
      * Descargar documento
