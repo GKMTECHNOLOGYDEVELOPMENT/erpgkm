@@ -2325,7 +2325,10 @@ class UsuarioController extends Controller
                 'sexo',
                 'fichaGeneral',
                 'estudios',
-                'cursos'
+                'cursos',
+                'familiares',
+                'salud',
+                'contactosEmergencia'
             ])->findOrFail($id);
 
             $export = new UsuarioFichaExport($usuario);

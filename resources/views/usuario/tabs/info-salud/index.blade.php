@@ -11,7 +11,7 @@
             
             <!-- Botón agregar -->
             <div class="flex justify-end mb-4">
-                <button type="button" id="add-familiar-btn" class="btn bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-black border-none px-4 py-2 flex items-center gap-2 rounded-lg">
+                <button type="button" id="add-familiar-btn" class="btn btn-primary border-none px-4 py-2 flex items-center gap-2 rounded-lg">
                     <i class="fas fa-plus"></i>
                     Agregar Familiar
                 </button>
