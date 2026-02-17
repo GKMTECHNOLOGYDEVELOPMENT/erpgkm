@@ -23,6 +23,8 @@ class UsuarioNotificacion extends Model
      * @var string
      */
     protected $primaryKey = 'idNotificacionUsuario';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     /**
      * Los atributos que son asignables en masa.
@@ -81,10 +83,10 @@ class UsuarioNotificacion extends Model
      */
     public function scopePendientes($query)
     {
-        return $query->where(function($q) {
+        return $query->where(function ($q) {
             $q->where('estado_web', '!=', 'leido')
-              ->orWhere('estado_web', 'pendiente')
-              ->orWhereNull('estado_web');
+                ->orWhere('estado_web', 'pendiente')
+                ->orWhereNull('estado_web');
         });
     }
 
