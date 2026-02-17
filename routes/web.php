@@ -2120,6 +2120,28 @@ Route::prefix('admin/formulario-personal')->name('admin.formulario-personal.')->
 });
 
 
-Route::post('/usuario/{id}/salud/guardar', [UsuarioController::class, 'guardarSalud']);
 Route::post('/usuario/familiar/guardar', [UsuarioController::class, 'guardarFamiliar']);
 Route::delete('/usuario/familiar/{id}', [UsuarioController::class, 'eliminarFamiliar']);
+
+
+Route::post('/usuario/{id}/informacion-general', [UsuarioController::class, 'updateInformacionGeneral']);
+Route::post('/usuario/{id}/fecha-nacimiento', [UsuarioController::class, 'updateFechaNacimiento']);
+Route::post('/usuario/{id}/lugar-nacimiento', [UsuarioController::class, 'updateLugarNacimiento']);
+Route::post('/usuario/{id}/estudios', [UsuarioController::class, 'updateEstudios']);
+Route::post('/usuario/{id}/seguro-pension', [UsuarioController::class, 'updateSeguroPension']);
+
+
+
+// Rutas para salud
+Route::post('/usuario/{id}/salud/guardar', [UsuarioController::class, 'guardarSalud']);
+// Rutas para familiares
+Route::post('/usuario/familiar/guardar', [UsuarioController::class, 'guardarFamiliar']);
+Route::get('/usuario/familiar/{id}', [UsuarioController::class, 'getFamiliar']);
+Route::put('/usuario/familiar/{id}', [UsuarioController::class, 'updateFamiliar']);
+Route::delete('/usuario/familiar/{id}', [UsuarioController::class, 'deleteFamiliar']);
+// Rutas para contactos de emergencia
+Route::post('/usuario/contacto-emergencia/guardar', [UsuarioController::class, 'guardarContactoEmergencia']);
+Route::put('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'updateContactoEmergencia']);
+Route::delete('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'deleteContactoEmergencia']);
+Route::post('/usuario/{id}/cuenta-bancaria/guardar', [UsuarioController::class, 'guardarCuentaBancaria']);
+Route::post('/usuario/{id}/informacion', [UsuarioController::class, 'updateInformacion']);

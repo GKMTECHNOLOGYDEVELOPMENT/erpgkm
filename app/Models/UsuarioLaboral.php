@@ -42,4 +42,9 @@ class UsuarioLaboral extends Model
     {
         return $this->belongsTo(Usuario::class, 'idUsuario', 'idUsuario');
     }
+
+      public function tipoContrato()
+    {
+        return $this->belongsTo(TipoContrato::class, 'idTipoContrato', 'idTipoContrato');
+    }
 }

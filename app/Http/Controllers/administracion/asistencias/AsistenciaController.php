@@ -26,12 +26,15 @@ class AsistenciaController extends Controller
         $length = $request->input('length', 10);
         $search = $request->input('search.value');
 
+
+        $usuariosPlanillaIds = \DB::table('usuarios_laboral')
+            ->where('idTipoContrato', 1)
+            ->pluck('idUsuario');
+
         $usuarios = \App\Models\Usuario::where('estado', 1)
-            ->where('departamento', 3926) // Solo departamento Lima
-            ->where('idTipoUsuario', '!=', 7) // Excluir tipo Invitado
+            ->whereIn('idUsuario', $usuariosPlanillaIds)
             ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
             ->get();
-
 
         $usuarioIds = $usuarios->pluck('idUsuario');
 
@@ -206,6 +209,7 @@ class AsistenciaController extends Controller
             'data' => $filtrados->slice($start)->take($length)->values()
         ]);
     }
+
     public function observacionesPorDia($idUsuario, $fecha)
     {
         return Observacion::where('idUsuario', $idUsuario)

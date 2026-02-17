@@ -13,301 +13,243 @@
     };
 
     // ============================================
-    // 2. FIRMA DIGITAL (SignaturePad)
-    // ============================================
-    const SignatureModule = (function() {
-        let signaturePad = null;
-        let canvas = null;
-
-        function init(userId) {
-            if (userId) config.userId = userId;
-            
-            canvas = document.getElementById('signature-pad');
-            if (!canvas) return;
-
-            // Evitar múltiples inicializaciones
-            if (window.signaturePadInstance) {
-                signaturePad = window.signaturePadInstance;
-                return;
-            }
-
-            // Verificar si SignaturePad está disponible
-            if (typeof SignaturePad === 'undefined') {
-                console.error('SignaturePad library no está cargada');
-                return;
-            }
-
-            // Crear instancia de SignaturePad
-            signaturePad = new SignaturePad(canvas, {
-                minWidth: 0.5,
-                maxWidth: 1.2,
-                penColor: 'black',
-                backgroundColor: 'white'
-            });
-
-            window.signaturePadInstance = signaturePad;
-            
-            setupEventListeners();
-            
-            if (config.userId) {
-                cargarFirmaExistente();
-            }
-        }
-
-        function setupEventListeners() {
-            const clearBtn = document.getElementById('clear-btn');
-            const saveBtn = document.getElementById('save-btn');
-            const refreshBtn = document.getElementById('refresh-btn');
-
-            if (clearBtn) {
-                clearBtn.addEventListener('click', () => signaturePad?.clear());
-            }
-
-            if (saveBtn) {
-                saveBtn.addEventListener('click', guardarFirma);
-            }
-
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => cargarFirmaExistente());
-            }
-        }
-
-        function guardarFirma() {
-            if (!signaturePad || !config.userId) {
-                toastr?.error('Error: No se pudo guardar la firma');
-                return;
-            }
-
-            if (signaturePad.isEmpty()) {
-                toastr?.error('Por favor, proporciona tu firma primero.');
-                return;
-            }
-
-            const dataURL = signaturePad.toDataURL();
-            const binaryData = dataURL.split(',')[1];
-
-            fetch(`/usuario/firma/${config.userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': config.csrfToken
-                },
-                body: JSON.stringify({ firma: binaryData })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                toastr?.success('Firma guardada correctamente.');
-                console.log('Firma guardada:', data);
-            })
-            .catch(error => {
-                console.error('Error al guardar la firma:', error);
-                toastr?.error('Error al guardar la firma');
-            });
-        }
-
-        function cargarFirmaExistente() {
-            if (!canvas || !config.userId) return;
-
-            fetch(`/usuario/firma/${config.userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.firma) {
-                        signaturePad?.fromDataURL(data.firma);
-                    }
-                })
-                .catch(error => console.error('Error al cargar la firma:', error));
-        }
-
-        return { init };
-    })();
-
-    // ============================================
-    // 3. CUENTAS BANCARIAS
+    // 2. CUENTAS BANCARIAS (desde usuarios_ficha_general)
     // ============================================
     const CuentasBancariasModule = (function() {
+        let datosBancarios = null; // Almacenar los datos cargados
+
         function init(userId) {
             if (userId) config.userId = userId;
+            cargarDatosBancarios();
             setupFormListeners();
-            if (config.userId) {
-                cargarCuentasBancarias(config.userId);
+        }
+
+        function cargarDatosBancarios() {
+            if (!config.userId) {
+                console.warn('No se puede cargar datos bancarios: userId no disponible');
+                return;
             }
+
+            // Los datos ya están en la vista a través de $fichaGeneral
+            // Esta función es para recargar después de guardar
+            const container = document.getElementById('cuentas-bancarias');
+            if (!container) return;
+
+            // Mostrar los datos actuales (ya vienen del servidor)
+            mostrarCuentaEnUI();
+        }
+
+        function mostrarCuentaEnUI() {
+            const container = document.getElementById('cuentas-bancarias');
+            if (!container) return;
+
+            // Obtener datos del formulario (ya están cargados del servidor)
+            const bancoSelect = document.getElementById('banco');
+            const monedaSelect = document.getElementById('moneda');
+            const tipoCuentaSelect = document.getElementById('tipoCuenta');
+            const numeroCuentaInput = document.getElementById('numeroCuenta');
+            const numeroCCIInput = document.getElementById('numeroCCI');
+
+            const bancoNombre = bancoSelect?.options[bancoSelect.selectedIndex]?.text || 'No especificado';
+            const monedaNombre = monedaSelect?.options[monedaSelect.selectedIndex]?.text || 'No especificada';
+            const tipoCuentaNombre = tipoCuentaSelect?.options[tipoCuentaSelect.selectedIndex]?.text || 'No especificado';
+            const numeroCuenta = numeroCuentaInput?.value || '';
+            const numeroCCI = numeroCCIInput?.value || '';
+
+            if (!numeroCuenta) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-university text-4xl text-green-300 mb-3"></i>
+                        <p>No hay cuentas bancarias registradas</p>
+                        <p class="text-xs mt-1">Complete el formulario para agregar su primera cuenta</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Crear la tarjeta de cuenta
+            const cuentaHTML = `
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800/30">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-semibold text-gray-800 dark:text-white">${bancoNombre}</h6>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${monedaNombre} - ${tipoCuentaNombre}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                            Principal
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Número de Cuenta</p>
+                            <p class="font-mono text-sm font-medium text-gray-800 dark:text-white">${numeroCuenta}</p>
+                        </div>
+                        ${numeroCCI ? `
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Número de CCI</p>
+                            <p class="font-mono text-sm font-medium text-gray-800 dark:text-white">${numeroCCI}</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-green-200 dark:border-green-800/30">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 edit-cuenta-btn">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = cuentaHTML;
         }
 
         function setupFormListeners() {
-            const payBrand = document.getElementById('payBrand');
             const saveBtn = document.getElementById('saveBtn');
 
-            if (payBrand) {
-                payBrand.addEventListener('change', function() {
-                    const tipoCuenta = this.value;
-                    const numeroCuentaInput = document.getElementById('payNumber');
-                    
-                    if (!numeroCuentaInput) return;
-
-                    numeroCuentaInput.value = '';
-                    numeroCuentaInput.removeAttribute('maxlength');
-                    numeroCuentaInput.placeholder = 'Número de cuenta';
-
-                    if (tipoCuenta === '1') {
-                        numeroCuentaInput.maxLength = 20;
-                        numeroCuentaInput.placeholder = 'Número interbancario (20 dígitos)';
-                    } else if (tipoCuenta === '2') {
-                        numeroCuentaInput.maxLength = 24;
-                        numeroCuentaInput.placeholder = 'Número de cuenta (13-24 dígitos)';
-                    }
-                });
-            }
-
             if (saveBtn) {
+                saveBtn.removeEventListener('click', guardarCuentaBancaria);
                 saveBtn.addEventListener('click', guardarCuentaBancaria);
             }
         }
 
-        function guardarCuentaBancaria() {
-            const tipoCuenta = document.getElementById('payBrand')?.value;
-            const numeroCuenta = document.getElementById('payNumber')?.value;
+        function guardarCuentaBancaria(e) {
+            e.preventDefault();
+            
             const banco = document.getElementById('banco')?.value;
+            const moneda = document.getElementById('moneda')?.value;
+            const tipoCuenta = document.getElementById('tipoCuenta')?.value;
+            const numeroCuenta = document.getElementById('numeroCuenta')?.value;
+            const numeroCCI = document.getElementById('numeroCCI')?.value;
 
-            if (!tipoCuenta || !numeroCuenta || !banco || tipoCuenta === 'Seleccione una Opción') {
-                toastr?.error('Por favor, complete todos los campos');
+            // Validaciones
+            if (!banco || banco === '') {
+                toastr?.error('Por favor, seleccione un banco');
                 return;
             }
 
-            if (tipoCuenta === '1' && numeroCuenta.length !== 20) {
-                toastr?.error('El número interbancario debe tener exactamente 20 dígitos.');
+            if (!moneda || moneda === '') {
+                toastr?.error('Por favor, seleccione una moneda');
                 return;
             }
 
-            if (tipoCuenta === '2' && (numeroCuenta.length < 13 || numeroCuenta.length > 24)) {
-                toastr?.error('El número de cuenta debe tener entre 13 y 24 dígitos.');
+            if (!tipoCuenta || tipoCuenta === '') {
+                toastr?.error('Por favor, seleccione un tipo de cuenta');
                 return;
             }
 
-            fetch('/api/guardar-cuenta', {
+            if (!numeroCuenta || numeroCuenta.trim() === '') {
+                toastr?.error('Por favor, ingrese el número de cuenta');
+                return;
+            }
+
+            if (!numeroCCI || numeroCCI.trim() === '') {
+                toastr?.error('Por favor, ingrese el número de CCI');
+                return;
+            }
+
+            // Validar formato (opcional)
+            if (numeroCuenta.length < 5) {
+                toastr?.error('El número de cuenta debe tener al menos 5 dígitos');
+                return;
+            }
+
+            if (numeroCCI.length < 10) {
+                toastr?.error('El CCI debe tener al menos 10 dígitos');
+                return;
+            }
+
+            // Mostrar indicador de carga
+            const $btn = $(saveBtn);
+            const originalText = $btn.html();
+            $btn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+
+            const data = {
+                entidadBancaria: banco,
+                moneda: moneda,
+                tipoCuenta: tipoCuenta,
+                numeroCuenta: numeroCuenta,
+                numeroCCI: numeroCCI
+            };
+
+            fetch(`/usuario/${config.userId}/cuenta-bancaria/guardar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': config.csrfToken
                 },
-                body: JSON.stringify({
-                    tipoCuenta: tipoCuenta,
-                    numeroCuenta: numeroCuenta,
-                    banco: banco,
-                    usuarioId: config.userId
-                })
+                body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => Promise.reject(err));
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    toastr?.success('Cuenta bancaria guardada con éxito');
-                    cargarCuentasBancarias(config.userId);
+                    toastr?.success(data.message);
+                    // Actualizar la UI sin recargar
+                    mostrarCuentaEnUI();
                     
-                    document.getElementById('payBrand').value = '';
-                    document.getElementById('payNumber').value = '';
-                    document.getElementById('banco').value = '';
-                } else {
-                    toastr?.error(data.message || 'Hubo un error al guardar la cuenta bancaria');
+                    // Cambiar título del formulario
+                    const formTitle = document.getElementById('form-title');
+                    if (formTitle) {
+                        formTitle.textContent = 'Editar Cuenta Bancaria';
+                    }
+                    
+                    // Cambiar texto del botón
+                    $btn.html('<i class="fas fa-save"></i> Actualizar Cuenta Bancaria');
                 }
             })
             .catch(error => {
-                console.error('Error al guardar la cuenta:', error);
-                toastr?.error('Error al guardar la cuenta bancaria');
+                console.error('Error:', error);
+                if (error.errors) {
+                    // Errores de validación
+                    Object.values(error.errors).forEach(err => {
+                        toastr?.error(err[0]);
+                    });
+                } else {
+                    toastr?.error(error.message || 'Error al guardar la cuenta bancaria');
+                }
+            })
+            .finally(() => {
+                $btn.prop('disabled', false);
+                if ($btn.html().includes('spinner')) {
+                    $btn.html(originalText);
+                }
             });
         }
 
-        function cargarCuentasBancarias(userId) {
-            if (!userId) {
-                console.warn('No se puede cargar cuentas bancarias: userId no disponible');
-                return;
-            }
-
-            const container = document.getElementById('cuentas-bancarias');
-            if (!container) return;
-
-            fetch(`/api/cuentas-bancarias/${userId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Error en la solicitud');
-                    return response.json();
-                })
-                .then(cuentas => {
-                    container.innerHTML = '';
-                    
-                    if (cuentas.length === 0) {
-                        container.innerHTML = '<p class="text-gray-500 text-center py-4">No hay cuentas bancarias registradas.</p>';
-                        return;
-                    }
-
-                    cuentas.forEach(cuenta => {
-                        const cuentaElement = document.createElement('div');
-                        cuentaElement.className = 'border-b border-[#ebedf2] dark:border-[#1b2e4b]';
-                        cuentaElement.innerHTML = `
-                            <div class="flex items-start justify-between py-3">
-                                <div class="flex-none ltr:mr-4 rtl:ml-4">
-                                    <img src="/assets/images/card-${cuenta.tipodecuenta === 1 ? 'visa' : 'mastercard'}.svg" alt="card" />
-                                </div>
-                                <h6 class="text-[#515365] font-bold dark:text-white-dark text-[15px]">
-                                    ${cuenta.banco_nombre || 'Banco'}
-                                    <span class="block text-white-dark dark:text-white-light font-normal text-xs mt-1">
-                                        **** **** **** ${cuenta.numerocuenta.slice(-4)}
-                                    </span>
-                                </h6>
-                                <div class="flex items-start justify-between ltr:ml-auto rtl:mr-auto gap-2">
-                                    <button class="btn btn-primary btn-sm" onclick="CuentasBancariasModule.verCuenta('${cuenta.id}')">Ver</button>
-                                    <button class="btn btn-dark btn-sm" onclick="CuentasBancariasModule.editarCuenta('${cuenta.id}')">Editar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="CuentasBancariasModule.eliminarCuenta('${cuenta.id}')">Eliminar</button>
-                                </div>
-                            </div>
-                        `;
-                        container.appendChild(cuentaElement);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error al cargar cuentas bancarias:', error);
-                    container.innerHTML = '<p class="text-red-500 text-center py-4">Error al cargar las cuentas bancarias.</p>';
-                });
-        }
-
-        function verCuenta(id) {
-            console.log('Ver cuenta:', id);
-        }
-
-        function editarCuenta(id) {
-            console.log('Editar cuenta:', id);
-        }
-
-        function eliminarCuenta(id) {
-            if (confirm('¿Estás seguro de que deseas eliminar esta cuenta bancaria?')) {
-                fetch(`/api/cuentas-bancarias/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': config.csrfToken
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        toastr?.success('Cuenta eliminada correctamente');
-                        cargarCuentasBancarias(config.userId);
-                    }
-                })
-                .catch(error => console.error('Error al eliminar cuenta:', error));
+        function editarCuenta() {
+            // Scroll al formulario
+            const form = document.getElementById('cuenta-bancaria-form');
+            if (form) {
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Resaltar el formulario
+                form.classList.add('ring-2', 'ring-purple-500', 'ring-opacity-50');
+                setTimeout(() => {
+                    form.classList.remove('ring-2', 'ring-purple-500', 'ring-opacity-50');
+                }, 2000);
             }
         }
 
+        // Exponer funciones públicas
         return {
             init,
-            cargarCuentasBancarias,
-            verCuenta,
-            editarCuenta,
-            eliminarCuenta
+            cargarDatosBancarios: mostrarCuentaEnUI,
+            editarCuenta
         };
     })();
 
     // ============================================
-    // 4. UTILIDADES GENERALES
+    // 3. UTILIDADES GENERALES
     // ============================================
     const Utils = {
         initSelect2() {
@@ -325,23 +267,66 @@
                 if (output) output.src = reader.result;
             };
             reader.readAsDataURL(event.target.files[0]);
+        },
+
+        // Validar números
+        soloNumeros(input) {
+            input.value = input.value.replace(/[^0-9-]/g, '');
+        },
+
+        soloNumerosSinGuion(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
         }
     };
 
     // ============================================
-    // 5. INICIALIZACIÓN DESDE ALPINE.JS
+    // 4. INICIALIZACIÓN
     // ============================================
-    window.initPaymentDetails = function(userId) {
-        config.userId = userId;
-        SignatureModule.init(userId);
-        CuentasBancariasModule.init(userId);
+    function init(userId) {
+        if (userId) config.userId = userId;
+        
+        console.log('✅ Payment Details inicializado con userId:', config.userId);
+        
+        CuentasBancariasModule.init(config.userId);
         Utils.initSelect2();
-        console.log('✅ Payment Details inicializado con userId:', userId);
-    };
+        setupEventListeners();
+    }
 
-    // Exponer funciones globales
+    function setupEventListeners() {
+        // Botón Editar cuenta
+        $(document).on('click', '.edit-cuenta-btn', function() {
+            CuentasBancariasModule.editarCuenta();
+        });
+
+        // Validaciones en tiempo real
+        const numeroCuenta = document.getElementById('numeroCuenta');
+        if (numeroCuenta) {
+            numeroCuenta.addEventListener('input', function() {
+                Utils.soloNumeros(this);
+            });
+        }
+
+        const numeroCCI = document.getElementById('numeroCCI');
+        if (numeroCCI) {
+            numeroCCI.addEventListener('input', function() {
+                Utils.soloNumerosSinGuion(this);
+            });
+        }
+    }
+
+    // ============================================
+    // 5. EXPORTAR FUNCIONES GLOBALES
+    // ============================================
+    window.initPaymentDetails = init;
     window.previewImage = Utils.previewImage;
     window.CuentasBancariasModule = CuentasBancariasModule;
-    window.cargarCuentasBancarias = CuentasBancariasModule.cargarCuentasBancarias;
+
+    // Auto-inicializar si hay userId en el DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        const userIdElement = document.getElementById('user-id-data');
+        if (userIdElement) {
+            init(userIdElement.value);
+        }
+    });
 
 })();

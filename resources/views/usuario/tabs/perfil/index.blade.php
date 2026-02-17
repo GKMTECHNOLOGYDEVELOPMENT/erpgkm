@@ -134,7 +134,7 @@
 
                     <div class="sm:col-span-2 mt-3">
                         <button type="button" id="update-button" class="btn btn-primary mr-2">
-                            <i class="fas fa-save mr-1"></i> Actualizar
+                            <i class="fas fa-save mr-1"></i> Actualizar Información General
                         </button>
                     </div>
                 </div>
@@ -197,11 +197,16 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-end mt-3 text-sm">
-                        <span class="text-gray-500 dark:text-gray-400">Edad:</span>
-                        <span class="ml-2 font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full edad-span">
-                            {{ $edad ? $edad . ' años' : '-- años' }}
-                        </span>
+                    <div class="flex items-center justify-between mt-3">
+                        <div class="text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Edad:</span>
+                            <span class="ml-2 font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full edad-span">
+                                {{ $edad ? $edad . ' años' : '-- años' }}
+                            </span>
+                        </div>
+                        <button type="button" id="guardar-fecha-nacimiento" class="btn btn-sm btn-primary">
+                            <i class="fas fa-save mr-1"></i> Guardar Fecha
+                        </button>
                     </div>
                 </div>
 
@@ -255,10 +260,15 @@
                             </select>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-2 flex items-center">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Seleccione un departamento para habilitar provincia y distrito
-                    </p>
+                    <div class="flex items-center justify-between mt-3">
+                        <p class="text-xs text-gray-400 flex items-center gap-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Seleccione un departamento para habilitar provincia y distrito
+                        </p>
+                        <button type="button" id="guardar-lugar-nacimiento" class="btn btn-sm btn-primary">
+                            <i class="fas fa-save mr-1"></i> Guardar Lugar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -346,6 +356,12 @@
                         </select>
                     </div>
                 </div>
+            </div>
+            
+            <div class="flex justify-end mt-4">
+                <button type="button" id="guardar-seguro-pension" class="btn btn-primary">
+                    <i class="fas fa-save mr-1"></i> Guardar Seguro y Pensión
+                </button>
             </div>
         </div>
 
@@ -772,47 +788,145 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="flex justify-end mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                <button type="button" id="guardar-estudios" class="btn btn-primary">
+                    <i class="fas fa-save mr-1"></i> Guardar Información Académica
+                </button>
+            </div>
         </div>
     </div>
 </template>
 
+
+
+
+
 <script>
+
+
+
     $(document).ready(function() {
-        // ============================================
-        // ACTUALIZAR INFORMACIÓN GENERAL
-        // ============================================
-        $('#update-button').click(function(e) {
-            e.preventDefault();
+     // ============================================
+// ACTUALIZAR INFORMACIÓN GENERAL
+// ============================================
+$('#update-button').click(function(e) {
+    e.preventDefault();
+    
+    console.log('1. Botón clickeado');
+    
+    let formData = new FormData($('#update-forma')[0]);
+    let userId = $('#update-forma').data('userid');
+    let csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+    console.log('2. User ID:', userId);
+    console.log('3. URL:', '/usuario/' + userId + '/informacion-general');
+    console.log('4. CSRF Token:', csrfToken ? 'Existe' : 'No existe');
+    
+    // Mostrar los datos que se van a enviar
+    console.log('5. Datos del formulario:');
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
 
-            let formData = new FormData($('#update-forma')[0]);
-            let userId = $('#update-forma').data('userid');
+    // Validar correos
+    let correo = $('#correo').val();
+    let correoPersonal = $('#correo_personal').val();
+
+    if (correo && !isValidEmail(correo)) {
+        toastr.error('El correo corporativo no tiene un formato válido');
+        return;
+    }
+
+    if (correoPersonal && !isValidEmail(correoPersonal)) {
+        toastr.error('El correo personal no tiene un formato válido');
+        return;
+    }
+
+    console.log('6. Validación de correos pasada');
+
+    $.ajax({
+        url: '/usuario/' + userId + '/informacion-general',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken
+        },
+        beforeSend: function() {
+            console.log('7. Enviando petición AJAX...');
+        },
+        success: function(response) {
+            console.log('8. Respuesta exitosa:', response);
+            if (response.success) {
+                toastr.success(response.message);
+                
+                // Actualizar avatar si cambió
+                if (response.data && response.data.avatar) {
+                    $('#profile-img').attr('src', response.data.avatar);
+                }
+            }
+        },
+        error: function(xhr, status, error) {
+            console.log('9. Error en AJAX:');
+            console.log('Status:', status);
+            console.log('Error:', error);
+            console.log('Respuesta:', xhr.responseText);
+            console.log('Status Code:', xhr.status);
+            
+            if (xhr.status === 422) {
+                let errors = xhr.responseJSON.errors;
+                $.each(errors, function(key, value) {
+                    toastr.error(value[0]);
+                });
+            } else if (xhr.status === 404) {
+                toastr.error('La ruta no existe. Verifica que la URL sea correcta');
+            } else if (xhr.status === 500) {
+                toastr.error('Error en el servidor. Revisa los logs de Laravel');
+            } else {
+                toastr.error('Hubo un error al actualizar los datos: ' + error);
+            }
+        }
+    });
+});
+
+        // ============================================
+        // ACTUALIZAR FECHA DE NACIMIENTO
+        // ============================================
+        $('#guardar-fecha-nacimiento').click(function() {
+            let userId = {{ $usuario->idUsuario }};
             let csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-            // Validar correos
-            let correo = $('#correo').val();
-            let correoPersonal = $('#correo_personal').val();
-
-            if (correo && !isValidEmail(correo)) {
-                toastr.error('El correo corporativo no tiene un formato válido');
+            
+            let dia = $('#nacimiento_dia').val();
+            let mes = $('#nacimiento_mes').val();
+            let anio = $('#nacimiento_anio').val();
+            
+            if (!dia || !mes || !anio) {
+                toastr.error('Debe completar todos los campos de fecha');
                 return;
             }
-
-            if (correoPersonal && !isValidEmail(correoPersonal)) {
-                toastr.error('El correo personal no tiene un formato válido');
-                return;
-            }
-
+            
+            let data = {
+                nacimiento_dia: dia,
+                nacimiento_mes: mes,
+                nacimiento_anio: anio
+            };
+            
             $.ajax({
-                url: '/usuarios/' + userId + '/update',
+                url: '/usuario/' + userId + '/fecha-nacimiento',
                 type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
+                data: JSON.stringify(data),
+                contentType: 'application/json',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken
                 },
                 success: function(response) {
-                    toastr.success(response.success);
+                    if (response.success) {
+                        toastr.success(response.message);
+                        // Actualizar la edad mostrada
+                        $('.edad-span').text(response.data.edad + ' años');
+                    }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
@@ -821,8 +935,144 @@
                             toastr.error(value[0]);
                         });
                     } else {
-                        toastr.error('Hubo un error al actualizar los datos');
+                        toastr.error('Error al actualizar la fecha de nacimiento');
                     }
+                }
+            });
+        });
+
+        // ============================================
+        // ACTUALIZAR LUGAR DE NACIMIENTO
+        // ============================================
+        $('#guardar-lugar-nacimiento').click(function() {
+            let userId = {{ $usuario->idUsuario }};
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            let departamento = $('#nacimiento_departamento').val();
+            let provincia = $('#nacimiento_provincia').val();
+            let distrito = $('#nacimiento_distrito').val();
+            
+            if (!departamento || !provincia || !distrito) {
+                toastr.error('Debe seleccionar departamento, provincia y distrito');
+                return;
+            }
+            
+            let data = {
+                nacimiento_departamento: departamento,
+                nacimiento_provincia: provincia,
+                nacimiento_distrito: distrito
+            };
+            
+            $.ajax({
+                url: '/usuario/' + userId + '/lugar-nacimiento',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            toastr.error(value[0]);
+                        });
+                    } else {
+                        toastr.error('Error al actualizar el lugar de nacimiento');
+                    }
+                }
+            });
+        });
+
+        // ============================================
+        // GUARDAR SEGURO Y PENSIÓN
+        // ============================================
+        $('#guardar-seguro-pension').click(function() {
+            let userId = {{ $usuario->idUsuario }};
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            let data = {
+                seguroSalud: $('input[name="seguroSalud"]:checked').val(),
+                sistemaPensiones: $('input[name="sistemaPensiones"]:checked').val(),
+                afpCompania: $('#afpCompania').val()
+            };
+            
+            $.ajax({
+                url: '/usuario/' + userId + '/seguro-pension',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Error al guardar seguro y pensión');
+                }
+            });
+        });
+
+        // ============================================
+        // GUARDAR INFORMACIÓN ACADÉMICA
+        // ============================================
+        $('#guardar-estudios').click(function() {
+            let userId = {{ $usuario->idUsuario }};
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            let data = {
+                // Secundaria
+                secundaria_termino: $('input[name="secundaria_termino"]:checked').val(),
+                secundaria_centro: $('input[name="secundaria_centro"]').val(),
+                secundaria_fin: $('input[name="secundaria_fin"]').val(),
+                
+                // Técnico
+                tecnico_termino: $('input[name="tecnico_termino"]:checked').val(),
+                tecnico_centro: $('input[name="tecnico_centro"]').val(),
+                tecnico_especialidad: $('input[name="tecnico_especialidad"]').val(),
+                tecnico_inicio: $('input[name="tecnico_inicio"]').val(),
+                tecnico_fin: $('input[name="tecnico_fin"]').val(),
+                
+                // Universitario
+                universitario_termino: $('input[name="universitario_termino"]:checked').val(),
+                universitario_centro: $('input[name="universitario_centro"]').val(),
+                universitario_especialidad: $('input[name="universitario_especialidad"]').val(),
+                universitario_grado: $('input[name="universitario_grado"]').val(),
+                universitario_inicio: $('input[name="universitario_inicio"]').val(),
+                universitario_fin: $('input[name="universitario_fin"]').val(),
+                
+                // Postgrado
+                postgrado_termino: $('input[name="postgrado_termino"]:checked').val(),
+                postgrado_centro: $('input[name="postgrado_centro"]').val(),
+                postgrado_especialidad: $('input[name="postgrado_especialidad"]').val(),
+                postgrado_grado: $('input[name="postgrado_grado"]').val(),
+                postgrado_inicio: $('input[name="postgrado_inicio"]').val(),
+                postgrado_fin: $('input[name="postgrado_fin"]').val()
+            };
+            
+            $.ajax({
+                url: '/usuario/' + userId + '/estudios',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    toastr.error('Error al guardar la información académica');
                 }
             });
         });
