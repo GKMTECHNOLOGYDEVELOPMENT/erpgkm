@@ -29,7 +29,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use App\Exports\UsuarioFichaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UsuarioController extends Controller
 {
@@ -2285,6 +2286,74 @@ public function updateInformacion(Request $request, $id)
             'success' => false,
             'message' => 'Error al actualizar la información'
         ], 500);
+    }
+}
+
+public function exportarFichaUsuario($id)
+{
+    try {
+        $usuario = Usuario::with([
+            'tipoDocumento',
+            'sexo',
+            'fichaGeneral',
+            'estudios',
+            'cursos'
+        ])->findOrFail($id);
+        
+        $export = new UsuarioFichaExport($usuario);
+        $nombreArchivo = 'Ficha_' . $usuario->Nombre . '_' . $usuario->apellidoPaterno . '.xlsx';
+        
+        return Excel::download($export, $nombreArchivo);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al exportar: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+/**
+ * Visualizar documento en el navegador
+ */
+public function view($idDocumento)
+{
+    try {
+        $documento = DocumentoUsuario::findOrFail($idDocumento);
+        
+        $rutaCompleta = storage_path('app/public/' . $documento->ruta_archivo);
+
+        if (!file_exists($rutaCompleta)) {
+            return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
+        }
+
+        // Determinar el tipo MIME del archivo
+        $extension = strtolower(pathinfo($rutaCompleta, PATHINFO_EXTENSION));
+        $mimeTypes = [
+            'pdf' => 'application/pdf',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'txt' => 'text/plain',
+            'doc' => 'application/msword',
+            'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ];
+
+        $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+
+        return response()->file($rutaCompleta, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $documento->nombre_archivo . '"'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('Error al visualizar documento:', ['error' => $e->getMessage()]);
+        return response()->json(['success' => false, 'message' => 'Error al visualizar documento'], 500);
     }
 }
 }
