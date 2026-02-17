@@ -379,24 +379,24 @@
                 name="entidadBancaria"
                 class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white cursor-pointer">
             <option value="" selected disabled>Seleccione una entidad bancaria</option>
-            <option value="BCP">Banco de Crédito del Perú (BCP)</option>
-            <option value="BBVA">BBVA Perú</option>
-            <option value="Scotiabank">Scotiabank Perú</option>
-            <option value="Interbank">Interbank</option>
-            <option value="Banco Nacion">Banco de la Nación</option>
-            <option value="Banco Comercio">Banco de Comercio</option>
-            <option value="BanBif">BanBif</option>
-            <option value="Pichincha">Banco Pichincha</option>
-            <option value="Citibank">Citibank Perú</option>
-            <option value="MiBanco">MiBanco</option>
-            <option value="GNB">Banco GNB Perú</option>
-            <option value="Falabella">Banco Falabella</option>
-            <option value="Ripley">Banco Ripley</option>
-            <option value="Santander">Banco Santander Perú</option>
-            <option value="Alfin">Alfin Banco</option>
-            <option value="Bank of China">Bank of China</option>
-            <option value="Bci">Bci Perú</option>
-            <option value="ICBC">ICBC Perú Bank</option>
+            <option value="1">Banco de Crédito del Perú (BCP)</option>
+            <option value="2">BBVA Perú</option>
+            <option value="3">Scotiabank Perú</option>
+            <option value="4">Interbank</option>
+            <option value="5">Banco de la Nación</option>
+            <option value="6">Banco de Comercio</option>
+            <option value="7">BanBif</option>
+            <option value="8">Banco Pichincha</option>
+            <option value="9">Citibank Perú</option>
+            <option value="10">MiBanco</option>
+            <option value="11">Banco GNB Perú</option>
+            <option value="12">Banco Falabella</option>
+            <option value="13">Banco Ripley</option>
+            <option value="14">Banco Santander Perú</option>
+            <option value="15">Alfin Banco</option>
+            <option value="16">Bank of China</option>
+            <option value="17">Bci Perú</option>
+            <option value="18">ICBC Perú Bank</option>
         </select>
         <i class="fas fa-building text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
         <i class="fas fa-chevron-down text-gray-400 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>
@@ -409,9 +409,9 @@
                         <select id="tipoCuenta" name="tipoCuenta"
                             class="campo-general w-full px-4 py-3 pl-10 border border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all appearance-none bg-white">
                             <option value="" disabled selected>Seleccione</option>
-                            <option value="Ahorros">Ahorros</option>
-                            <option value="Corriente">Corriente</option>
-                            <option value="CTS">CTS</option>
+                            <option value="1">Ahorros</option>
+                            <option value="2">Corriente</option>
+                            <option value="3">CTS</option>
                         </select>
                         <i
                             class="fas fa-wallet text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"></i>

@@ -1428,4 +1428,190 @@
     });
 </script>
 
+
+<script>
+    $(document).ready(function() {
+        // ============================================
+        // DATOS DE BANCOS, MONEDAS Y TIPOS DE CUENTA (desde PHP)
+        // ============================================
+        var bancosData = {
+            @foreach($bancos as $key => $banco)
+                "{{ $key }}": "{{ $banco }}",
+            @endforeach
+        };
+        
+        var monedasData = {
+            @foreach($monedas as $key => $moneda)
+                "{{ $key }}": "{{ $moneda }}",
+            @endforeach
+        };
+        
+        var tiposCuentaData = {
+            @foreach($tiposCuenta as $key => $tipo)
+                "{{ $key }}": "{{ $tipo }}",
+            @endforeach
+        };
+
+        // ============================================
+        // GUARDAR CUENTA BANCARIA
+        // ============================================
+        $(document).on('click', '#saveBtn', function(e) {
+            e.preventDefault();
+            
+            let userId = {{ $usuario->idUsuario }};
+            let csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            // Obtener valores
+            let banco = $('#banco').val();
+            let moneda = $('#moneda').val();
+            let tipoCuenta = $('#tipoCuenta').val();
+            let numeroCuenta = $('#numeroCuenta').val();
+            let numeroCCI = $('#numeroCCI').val();
+            
+            // Validaciones básicas
+            if (!banco) {
+                toastr.error('Por favor, seleccione un banco');
+                return;
+            }
+            if (!moneda) {
+                toastr.error('Por favor, seleccione una moneda');
+                return;
+            }
+            if (!tipoCuenta) {
+                toastr.error('Por favor, seleccione un tipo de cuenta');
+                return;
+            }
+            if (!numeroCuenta || numeroCuenta.trim() === '') {
+                toastr.error('Por favor, ingrese el número de cuenta');
+                return;
+            }
+            if (!numeroCCI || numeroCCI.trim() === '') {
+                toastr.error('Por favor, ingrese el número de CCI');
+                return;
+            }
+            
+            let data = {
+                entidadBancaria: banco,
+                moneda: moneda,
+                tipoCuenta: tipoCuenta,
+                numeroCuenta: numeroCuenta,
+                numeroCCI: numeroCCI
+            };
+            
+            // Mostrar indicador de carga
+            let $btn = $(this);
+            let originalText = $btn.html();
+            $btn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
+            
+            $.ajax({
+                url: '/usuario/' + userId + '/cuenta-bancaria/guardar',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        toastr.success(response.message);
+                        
+                        // Actualizar la vista sin recargar
+                        actualizarVistaCuentaBancaria(response.data);
+                        
+                        // Cambiar título y botón
+                        $('#form-title').text('Editar Cuenta Bancaria');
+                        $btn.html('<i class="fas fa-save"></i> Actualizar Cuenta Bancaria');
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        $.each(errors, function(key, value) {
+                            toastr.error(value[0]);
+                        });
+                    } else {
+                        toastr.error('Error al guardar la cuenta bancaria');
+                    }
+                    $btn.html(originalText);
+                },
+                complete: function() {
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+
+        // ============================================
+        // ACTUALIZAR VISTA DE CUENTA BANCARIA
+        // ============================================
+        function actualizarVistaCuentaBancaria(data) {
+            let nombreBanco = bancosData[data.entidadBancaria] || 'Banco no especificado';
+            let nombreMoneda = monedasData[data.moneda] || data.moneda;
+            let nombreTipoCuenta = tiposCuentaData[data.tipoCuenta] || data.tipoCuenta;
+            
+            let cuentaHTML = `
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800/30">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div>
+                                <h6 class="font-semibold text-gray-800 dark:text-white">${nombreBanco}</h6>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${nombreMoneda} - ${nombreTipoCuenta}</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                            Principal
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Número de Cuenta</p>
+                            <p class="font-mono text-sm font-medium text-gray-800 dark:text-white">${data.numeroCuenta}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Número de CCI</p>
+                            <p class="font-mono text-sm font-medium text-gray-800 dark:text-white">${data.numeroCCI}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-green-200 dark:border-green-800/30">
+                        <button type="button" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 edit-cuenta-btn">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            $('#cuenta-container').html(cuentaHTML);
+        }
+
+        // ============================================
+        // EDITAR CUENTA (scroll al formulario)
+        // ============================================
+        $(document).on('click', '.edit-cuenta-btn', function() {
+            $('html, body').animate({
+                scrollTop: $('#cuenta-bancaria-form').offset().top - 100
+            }, 500);
+            
+            // Resaltar el formulario
+            $('#cuenta-bancaria-form').addClass('ring-2 ring-purple-500 ring-opacity-50');
+            setTimeout(function() {
+                $('#cuenta-bancaria-form').removeClass('ring-2 ring-purple-500 ring-opacity-50');
+            }, 2000);
+        });
+
+        // ============================================
+        // VALIDACIONES EN TIEMPO REAL
+        // ============================================
+        $('#numeroCuenta').on('input', function() {
+            this.value = this.value.replace(/[^0-9-]/g, '');
+        });
+        
+        $('#numeroCCI').on('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    });
+</script>
 </x-layout.default>

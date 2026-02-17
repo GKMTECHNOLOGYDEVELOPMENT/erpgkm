@@ -509,7 +509,7 @@ Route::prefix('kardex')->name('kardex.')->group(function () {
     Route::get('/get-all', [RepuestosController::class, 'getAll'])->name('getAll'); // Obtener todos los artículos en formato JSON
     Route::post('/check-nombre', [RepuestosController::class, 'checkNombre'])->name('checkNombre'); // Validar si un nombre ya existe
     Route::get('/export-excel', [KardexController::class, 'exportExcel'])
-    ->name('export.excel');
+        ->name('export.excel');
 });
 /// INICIO DESPACHO ///
 Route::prefix('despacho')->name('despacho.')->group(function () {
@@ -793,18 +793,20 @@ Route::prefix('solicitudrepuesto')->name('solicitudrepuesto.')->group(function (
     Route::post('/{id}/aceptar-individual', [SolicitudRepuestoController::class, 'aceptarIndividual'])->name('solicitudrepuesto.aceptar.individual');
 
     // En routes/web.php
-Route::post('/{id}/confirmar-entrega-cedida', 
-    [SolicitudRepuestoController::class, 'confirmarEntregaCedidaConFoto'])
-    ->name('solicitudrepuesto.confirmar-entrega-cedida');
+    Route::post(
+        '/{id}/confirmar-entrega-cedida',
+        [SolicitudRepuestoController::class, 'confirmarEntregaCedidaConFoto']
+    )
+        ->name('solicitudrepuesto.confirmar-entrega-cedida');
 
     // Rutas para ceder repuestos
-Route::post('/{id}/ceder-repuesto', [SolicitudRepuestoController::class, 'cederRepuesto'])
-    ->name('solicitudrepuesto.ceder-repuesto')
-    ->middleware('auth');
+    Route::post('/{id}/ceder-repuesto', [SolicitudRepuestoController::class, 'cederRepuesto'])
+        ->name('solicitudrepuesto.ceder-repuesto')
+        ->middleware('auth');
 
-Route::post('/{id}/confirmar-entrega-cedido', [SolicitudRepuestoController::class, 'confirmarEntregaCedido'])
-    ->name('solicitudrepuesto.confirmar-entrega-cedido')
-    ->middleware('auth');
+    Route::post('/{id}/confirmar-entrega-cedido', [SolicitudRepuestoController::class, 'confirmarEntregaCedido'])
+        ->name('solicitudrepuesto.confirmar-entrega-cedido')
+        ->middleware('auth');
 
     Route::post('/store-provincia', [SolicitudRepuestoController::class, 'storeProvincia'])
         ->name('solicitudrepuesto.store-provincia')
@@ -2051,18 +2053,18 @@ Route::prefix('repuestos-transito')->name('repuesto-transito.')->group(function 
 Route::prefix('almacen')->group(function () {
     Route::get('/harvest', [HarvestController::class, 'index'])
         ->name('harvest.index');
-    
+
     Route::get('/harvest/{id}', [HarvestController::class, 'show'])
         ->name('harvest.show');
-    
+
     // ✅ Ruta para exportación general (de toda la tabla)
     Route::get('/harvest/export/excel', [HarvestController::class, 'export'])
         ->name('harvest.export');
-    
+
     // ✅ Ruta para exportación de un repuesto específico (modal)
     Route::get('/harvest/{id}/export/detail', [HarvestController::class, 'exportDetail'])
         ->name('harvest.export.detail');
-    
+
     Route::get('/harvest/estadisticas/datos', [HarvestController::class, 'estadisticas'])
         ->name('harvest.estadisticas');
 });
@@ -2071,13 +2073,13 @@ Route::prefix('almacen')->group(function () {
 Route::get('/api/visitas-por-ticket/{ticketId}', [SolicitudrepuestoController::class, 'getVisitasPorTicket'])->name('visitas.por.ticket')->middleware('auth');
 
 
-    Route::get('/api/obtener-solicitudes-repuestos/{ticketId}/{visitaId?}', [OrdenesTrabajoController::class, 'obtenerSolicitudesRepuestos'])->name('obtener.solicitudes.repuestos')->middleware('auth');
-    Route::post('/api/actualizar-estado-articulo', [OrdenesTrabajoController::class, 'actualizarEstadoArticulo'])->name('actualizar.estado.articulo')->middleware('auth');
+Route::get('/api/obtener-solicitudes-repuestos/{ticketId}/{visitaId?}', [OrdenesTrabajoController::class, 'obtenerSolicitudesRepuestos'])->name('obtener.solicitudes.repuestos')->middleware('auth');
+Route::post('/api/actualizar-estado-articulo', [OrdenesTrabajoController::class, 'actualizarEstadoArticulo'])->name('actualizar.estado.articulo')->middleware('auth');
 Route::get('/api/obtener-info-articulo/{id}', [OrdenesTrabajoController::class, 'obtenerInfoArticulo'])->name('obtener.info.articulo')->middleware('auth');
 Route::get('/api/foto-evidencia/{tipo}/{nombre}', [OrdenesTrabajoController::class, 'obtenerFotoEvidencia'])->name('foto.evidencia')->middleware('auth');
 
 
-    Route::post('/api/actualizar-datos-solicitud', [OrdenesTrabajoController::class, 'marcarComoUsado'])->name('actualizar.datos.solicitud')->middleware('auth');
+Route::post('/api/actualizar-datos-solicitud', [OrdenesTrabajoController::class, 'marcarComoUsado'])->name('actualizar.datos.solicitud')->middleware('auth');
 
 
 
@@ -2086,10 +2088,12 @@ Route::get('/api/foto-evidencia/{tipo}/{nombre}', [OrdenesTrabajoController::cla
 Route::prefix('administracion')->name('administracion.')->group(function () {
     Route::resource('solicitud-asistencia', SolicitudAsistenciaController::class)
         ->only(['index', 'create', 'store', 'edit', 'update', 'destroy', 'show']); // Agrega 'show'
-    
+
     // Ruta para cambiar estado
-    Route::post('solicitud-asistencia/{id}/cambiar-estado', 
-        [SolicitudAsistenciaController::class, 'cambiarEstado'])
+    Route::post(
+        'solicitud-asistencia/{id}/cambiar-estado',
+        [SolicitudAsistenciaController::class, 'cambiarEstado']
+    )
         ->name('solicitud-asistencia.cambiar-estado');
 });
 
@@ -2097,7 +2101,9 @@ Route::prefix('administracion')->name('administracion.')->group(function () {
 Route::get(
     '/administracion/formulario-personal',
     [FormularioPersonalEmpleadoController::class, 'create']
-)->name('formulariopersonal.create');
+)
+    ->middleware('form.link')   // ✅ PROTEGE por token (?token=...)
+    ->name('formulariopersonal.create');
 
 // Rutas para ubigeo en formulario personal
 Route::get('/formulario-personal/provincias/{departamento}', [FormularioPersonalEmpleadoController::class, 'getProvincias']);
@@ -2106,7 +2112,7 @@ Route::get('/repuestos/export/reporte-inventario-general', [RepuestosController:
     ->name('repuestos.export.inventario.general');
 
 
-    // Rutas para formulario de personal
+// Rutas para formulario de personal
 Route::prefix('admin/formulario-personal')->name('admin.formulario-personal.')->group(function () {
     Route::get('/create', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'create'])->name('create');
     Route::post('/store', [App\Http\Controllers\administracion\formulariopersonal\FormularioPersonalEmpleadoController::class, 'store'])->name('store');
@@ -2139,5 +2145,4 @@ Route::post('/usuario/contacto-emergencia/guardar', [UsuarioController::class, '
 Route::put('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'updateContactoEmergencia']);
 Route::delete('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'deleteContactoEmergencia']);
 Route::post('/usuario/{id}/cuenta-bancaria/guardar', [UsuarioController::class, 'guardarCuentaBancaria']);
-
 Route::post('/usuario/{id}/informacion', [UsuarioController::class, 'updateInformacion']);
