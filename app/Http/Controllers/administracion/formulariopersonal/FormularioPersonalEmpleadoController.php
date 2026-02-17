@@ -20,6 +20,7 @@ use App\Models\UsuarioDocumentoArchivo;
 use App\Models\UsuarioNotificacion;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Services\WsBridge;
 
 class FormularioPersonalEmpleadoController extends Controller
 {
@@ -53,11 +54,22 @@ class FormularioPersonalEmpleadoController extends Controller
      */
     public function store(Request $request)
     {
+        // ✅ Debug para que el JSON te diga EXACTAMENTE qué falló
+        $debug = [
+            'tx'       => ['committed' => false],
+            'link'     => ['ok' => false, 'id' => null, 'error' => null],
+            'notif'    => ['ok' => false, 'id' => null, 'error' => null],
+            'ws'       => ['ok' => false, 'error' => null, 'payload' => null],
+        ];
+
         try {
             DB::beginTransaction();
 
             // ========== 1. VALIDACIÓN DE DATOS ==========
             $validator = Validator::make($request->all(), [
+                // ✅ LINK (obligatorio para invalidar al guardar)
+                'form_link_id' => 'required|integer|exists:form_links,id',
+
                 // SECCIÓN 1 - DATOS PERSONALES (OBLIGATORIOS)
                 'paterno' => 'required|string|max:255',
                 'materno' => 'nullable|string|max:255',
@@ -174,6 +186,8 @@ class FormularioPersonalEmpleadoController extends Controller
                 'dni_declaracion' => 'required|string|size:8',
                 'acepto_declaracion' => 'required|accepted',
             ], [
+                'form_link_id.required' => 'Link inválido: falta form_link_id.',
+                'form_link_id.exists' => 'Link inválido o no encontrado.',
                 'num_documento.unique' => 'El número de documento ya está registrado en el sistema.',
                 'email.unique' => 'El correo electrónico ya está registrado en el sistema.',
                 'covid_dosis1.required_if' => 'La fecha de la primera dosis es obligatoria cuando indica que fue vacunado.',
@@ -192,16 +206,55 @@ class FormularioPersonalEmpleadoController extends Controller
             ]);
 
             if ($validator->fails()) {
+                DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'errors' => $validator->errors()
+                    'errors' => $validator->errors(),
+                    'debug_notificacion_ws' => $debug,
                 ], 422);
             }
+
+            // ========== 1.5 VALIDAR LINK (EXPIRE/USO) + LOCK ==========
+            $formLinkId = (int) $request->input('form_link_id');
+            $linkRow = DB::table('form_links')
+                ->where('id', $formLinkId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$linkRow) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Link inválido o no encontrado.',
+                    'debug_notificacion_ws' => $debug,
+                ], 403);
+            }
+
+            $debug['link']['id'] = $formLinkId;
+
+            if (!empty($linkRow->used_at)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este link ya fue utilizado.',
+                    'debug_notificacion_ws' => $debug,
+                ], 403);
+            }
+
+            if (!empty($linkRow->expires_at) && now()->greaterThan($linkRow->expires_at)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este link expiró.',
+                    'debug_notificacion_ws' => $debug,
+                ], 403);
+            }
+
+            $debug['link']['ok'] = true;
 
             // ========== 2. CREAR O ACTUALIZAR USUARIO ==========
             $fechaNacimiento = $request->anio . '-' . $request->mes . '-' . str_pad($request->dia, 2, '0', STR_PAD_LEFT);
 
-            // Generar usuario y clave por defecto
             $username = strtolower(substr($request->nombres, 0, 1) . $request->paterno . substr($request->num_documento, -4));
             $defaultPassword = bcrypt($request->num_documento);
 
@@ -260,88 +313,38 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]
             );
 
-            // ========== 4. GUARDAR ESTUDIOS (NAMES SIMPLES) ==========
-            Log::channel('single')->info('========== DEBUG ESTUDIOS ==========');
-            Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-
-            // Eliminar estudios anteriores
+            // ========== 4. GUARDAR ESTUDIOS ==========
             UsuarioEstudio::where('idUsuario', $usuario->idUsuario)->delete();
-            Log::channel('single')->info('Estudios anteriores eliminados');
-
-            $estudiosGuardados = 0;
-            $niveles = [0, 1, 2, 3];
-            $nombresNiveles = [
-                0 => 'SECUNDARIA',
-                1 => 'TECNICO',
-                2 => 'UNIVERSITARIO',
-                3 => 'POSTGRADO'
-            ];
-
-            foreach ($niveles as $nivelId) {
+            for ($nivelId = 0; $nivelId <= 3; $nivelId++) {
                 $termino = $request->input("termino_{$nivelId}");
-                $nivel = $request->input("nivel_{$nivelId}", $nombresNiveles[$nivelId]);
-
-                Log::channel('single')->info("--- Procesando nivel {$nivelId}: {$nivel} ---");
-                Log::channel('single')->info("Termino: " . ($termino ?? 'NO DEFINIDO'));
-
                 if ($termino === 'SI') {
                     $centro = $request->input("centro_{$nivelId}");
                     $inicio = $request->input("inicio_{$nivelId}");
-
                     if (!empty($centro) && !empty($inicio)) {
-                        $dataToInsert = [
+                        UsuarioEstudio::create([
                             'idUsuario' => $usuario->idUsuario,
-                            'nivel' => $nivel,
+                            'nivel' => $request->input("nivel_{$nivelId}"),
                             'termino' => 1,
                             'centroEstudios' => $centro,
                             'especialidad' => $request->input("especialidad_{$nivelId}"),
                             'gradoAcademico' => $request->input("grado_{$nivelId}"),
                             'fechaInicio' => $inicio,
                             'fechaFin' => $request->input("fin_{$nivelId}"),
-                        ];
-
-                        try {
-                            UsuarioEstudio::create($dataToInsert);
-                            $estudiosGuardados++;
-                            Log::channel('single')->info('✅ ESTUDIO GUARDADO');
-                        } catch (\Exception $e) {
-                            Log::channel('single')->error('❌ ERROR: ' . $e->getMessage());
-                        }
+                        ]);
                     }
                 }
             }
 
-            Log::channel('single')->info("📊 TOTAL: {$estudiosGuardados} estudios guardados");
-            Log::channel('single')->info('========== FIN DEBUG ESTUDIOS ==========');
-
-            // ========== 5. GUARDAR FAMILIARES (NAMES SIMPLES) ==========
-            Log::channel('single')->info('========== DEBUG FAMILIARES ==========');
-            Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-
-            // Eliminar familiares anteriores
+            // ========== 5. GUARDAR FAMILIARES ==========
             UsuarioFamilia::where('idUsuario', $usuario->idUsuario)->delete();
-            Log::channel('single')->info('Familiares anteriores eliminados');
-
-            $familiaresGuardados = 0;
-            $indicesEncontrados = [];
-
-            // Buscar todos los índices de nombres (solo desktop, no mobile)
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'nombres_') === 0 && !strpos($key, 'mobile')) {
                     $index = str_replace('nombres_', '', $key);
-
-                    if (is_numeric($index) && !in_array($index, $indicesEncontrados)) {
-                        $indicesEncontrados[] = $index;
-
+                    if (is_numeric($index)) {
                         $nombres = $request->input("nombres_{$index}");
                         $parentesco = $request->input("parentesco_{$index}");
-
-                        Log::channel('single')->info("--- Procesando familiar índice {$index} ---");
-                        Log::channel('single')->info("Nombres: " . ($nombres ?? 'VACÍO'));
-                        Log::channel('single')->info("Parentesco: " . ($parentesco ?? 'VACÍO'));
-
                         if (!empty($nombres) && !empty($parentesco)) {
-                            $dataToInsert = [
+                            UsuarioFamilia::create([
                                 'idUsuario' => $usuario->idUsuario,
                                 'parentesco' => $this->mapParentesco($parentesco),
                                 'apellidosNombres' => $nombres,
@@ -350,26 +353,11 @@ class FormularioPersonalEmpleadoController extends Controller
                                 'sexo' => $request->input("sexo_{$index}"),
                                 'fechaNacimiento' => $request->input("fecha_nacimiento_{$index}"),
                                 'domicilioActual' => $request->input("domicilio_{$index}"),
-                            ];
-
-                            Log::channel('single')->info('Datos a insertar:', $dataToInsert);
-
-                            try {
-                                UsuarioFamilia::create($dataToInsert);
-                                $familiaresGuardados++;
-                                Log::channel('single')->info('✅ FAMILIAR GUARDADO');
-                            } catch (\Exception $e) {
-                                Log::channel('single')->error('❌ ERROR guardando familiar: ' . $e->getMessage());
-                            }
-                        } else {
-                            Log::channel('single')->info('⏭️ Familiar incompleto (faltan nombres o parentesco)');
+                            ]);
                         }
                     }
                 }
             }
-
-            Log::channel('single')->info("📊 TOTAL: {$familiaresGuardados} familiares guardados");
-            Log::channel('single')->info('========== FIN DEBUG FAMILIARES ==========');
 
             // ========== 6. GUARDAR SALUD ==========
             UsuarioSalud::updateOrCreate(
@@ -387,7 +375,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]
             );
 
-            // ========== 7. GUARDAR CONTACTOS DE EMERGENCIA ==========
+            // ========== 7. GUARDAR CONTACTOS EMERGENCIA ==========
             UsuarioEmergenciaContacto::where('idUsuario', $usuario->idUsuario)->delete();
 
             if ($request->emergencia1_nombres) {
@@ -427,10 +415,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 $usuario->save();
 
                 UsuarioDocumentoArchivo::updateOrCreate(
-                    [
-                        'idUsuario' => $usuario->idUsuario,
-                        'tipoDocumento' => 'HUELLA'
-                    ],
+                    ['idUsuario' => $usuario->idUsuario, 'tipoDocumento' => 'HUELLA'],
                     [
                         'nombreArchivo' => $firma->getClientOriginalName(),
                         'mimeType' => $firma->getMimeType(),
@@ -450,29 +435,71 @@ class FormularioPersonalEmpleadoController extends Controller
                 ]
             );
 
-            DB::commit();
-
-            // ========== 10. CREAR NOTIFICACIÓN DE USUARIO CREADO ==========
+            // ========== 10. CREAR NOTIFICACIÓN (DENTRO TX) ==========
+            $idNotifUserNew = null;
             try {
-                Log::channel('single')->info('========== CREANDO NOTIFICACIÓN ==========');
-                Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-
-                // Crear UNA SOLA notificación con estado 0
-                UsuarioNotificacion::create([
-                    'idUsuario' => $usuario->idUsuario,
-                    'estado_web' => '0',
-                    'estado_app' => '0',
-                    'fecha' => now(),
-                    'tipo' => 'USUARIO_CREADO',
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                $noti = UsuarioNotificacion::create([
+                    'idUsuario'   => $usuario->idUsuario,
+                    'estado_web'  => '0',
+                    'estado_app'  => '0',
+                    'fecha'       => now(),
+                    'tipo'        => 'REGISTRO_USUARIO_CREADO',
+                    'created_at'  => now(),
+                    'updated_at'  => now(),
                 ]);
 
-                Log::channel('single')->info('✅ NOTIFICACIÓN CREADA: Usuario creado exitosamente');
-                Log::channel('single')->info('========== FIN NOTIFICACIÓN ==========');
-            } catch (\Exception $e) {
-                Log::channel('single')->error('❌ ERROR CREANDO NOTIFICACIÓN: ' . $e->getMessage());
-                // No hacer rollback, solo loguear el error
+                $idNotifUserNew = (int) ($noti->idNotificacionUsuario ?? $noti->getKey() ?? 0);
+
+                if ($idNotifUserNew <= 0) {
+                    throw new \Exception('No se pudo obtener idNotificacionUsuario.');
+                }
+
+                $debug['notif'] = ['ok' => true, 'id' => $idNotifUserNew, 'error' => null];
+            } catch (\Throwable $e) {
+                $debug['notif'] = ['ok' => false, 'id' => null, 'error' => $e->getMessage()];
+                Log::channel('single')->error('[USU] ❌ error creando notificación: ' . $e->getMessage());
+            }
+
+            // ========== 10.1 INVALIDAR LINK (ANTES DEL COMMIT) ==========
+            // ✅ marca used_at y rota token_hash para que el token anterior sea inútil
+            $deadToken = bin2hex(random_bytes(32));
+            $deadHash = hash('sha256', $deadToken);
+
+            DB::table('form_links')
+                ->where('id', $formLinkId)
+                ->update([
+                    'used_at' => now(),
+                    'token_hash' => $deadHash,
+                ]);
+
+            // ✅ Commit UNA SOLA VEZ
+            DB::commit();
+            $debug['tx']['committed'] = true;
+
+            // ========== 10.5 WS (DESPUÉS DEL COMMIT) ==========
+            if (!empty($debug['notif']['id'])) {
+                $payload = [
+                    'type' => 'creacion_usuario_evento',
+                    'idNotificacion' => (int) $debug['notif']['id'],
+                    'idNotificacionUsuario' => (int) $debug['notif']['id'],
+                    'idUsuarioCreado' => (int) $usuario->idUsuario,
+                    'tipoNotificacionForzada' => 'REGISTRO_USUARIO_CREADO',
+                    'nombreUsuarioCreado' => trim($usuario->apellidoPaterno . ' ' . $usuario->apellidoMaterno . ' ' . $usuario->Nombre),
+                    'idUsuarioCreador' => (int) (auth()->id() ?? 0),
+                ];
+
+                $debug['ws']['payload'] = $payload;
+
+                try {
+                    WsBridge::emitSolicitudEvento($payload);
+                    $debug['ws']['ok'] = true;
+                } catch (\Throwable $e) {
+                    $debug['ws']['ok'] = false;
+                    $debug['ws']['error'] = $e->getMessage();
+                }
+            } else {
+                $debug['ws']['ok'] = false;
+                $debug['ws']['error'] = 'No se envió WS porque no existe idNotificacionUsuario.';
             }
 
             // ========== 11. RESPUESTA DE ÉXITO ==========
@@ -485,7 +512,10 @@ class FormularioPersonalEmpleadoController extends Controller
                         'nombre_completo' => $usuario->apellidoPaterno . ' ' . $usuario->apellidoMaterno . ', ' . $usuario->Nombre,
                         'documento' => $usuario->documento,
                         'usuario' => $usuario->usuario,
-                    ]
+                        'idNotificacionUsuario' => $debug['notif']['id'],
+                        'tipo_notificacion' => 'REGISTRO_USUARIO_CREADO',
+                    ],
+                    'debug_notificacion_ws' => $debug,
                 ]);
             }
 
@@ -499,12 +529,16 @@ class FormularioPersonalEmpleadoController extends Controller
             Log::channel('single')->error('LINE: ' . $e->getLine());
             Log::channel('single')->error('FILE: ' . $e->getFile());
 
+            $debug['link']['ok'] = $debug['link']['ok'] ?? false;
+            $debug['link']['error'] = $debug['link']['error'] ?? null;
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Error al guardar el formulario: ' . $e->getMessage(),
                     'line' => $e->getLine(),
-                    'file' => $e->getFile()
+                    'file' => $e->getFile(),
+                    'debug_notificacion_ws' => $debug,
                 ], 500);
             }
 
@@ -512,6 +546,8 @@ class FormularioPersonalEmpleadoController extends Controller
                 ->with('error', 'Error al guardar el formulario: ' . $e->getMessage());
         }
     }
+
+
 
     /**
      * Guardar borrador del formulario
