@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use App\Models\TipoDocumento;
+use App\Models\Tipodocumento;
 use App\Models\Sexo;
 use App\Models\Usuario;
 use App\Models\UsuarioDocumentoCheck;
@@ -23,22 +23,31 @@ use Illuminate\Support\Facades\Log;
 
 class FormularioPersonalEmpleadoController extends Controller
 {
-    public function create()
+
+    public function create(Request $request)
     {
+        // ✅ viene del middleware ValidateFormLinkToken
+        $formLinkId = $request->attributes->get('form_link_id'); // opcional
+        $createdBy  = $request->attributes->get('form_link_created_by'); // opcional
+
         // Cargar datos para los selects
-        $tiposDocumento = TipoDocumento::all();
+        $tiposDocumento = Tipodocumento::all();
         $sexos = Sexo::all();
-        
+
         // Cargar datos de ubigeo desde el JSON
-        $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true);
-        
+        $departamentos = json_decode(
+            file_get_contents(public_path('ubigeos/departamentos.json')),
+            true
+        );
+
         return view('administracion.formulariopersonal.create', compact(
             'tiposDocumento',
             'sexos',
-            'departamentos'
+            'departamentos',
+            'formLinkId', // ✅ para enviarlo oculto en el form (recomendado)
+            'createdBy'   // opcional
         ));
     }
-    
     /**
      * Guardar todo el formulario completo
      */
@@ -46,7 +55,7 @@ class FormularioPersonalEmpleadoController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             // ========== 1. VALIDACIÓN DE DATOS ==========
             $validator = Validator::make($request->all(), [
                 // SECCIÓN 1 - DATOS PERSONALES (OBLIGATORIOS)
@@ -60,70 +69,70 @@ class FormularioPersonalEmpleadoController extends Controller
                 'num_documento' => 'required|string|max:20|unique:usuarios,documento',
                 'email' => 'required|email|max:255|unique:usuarios,correo',
                 'telefono' => 'required|string|max:20',
-                
+
                 // UBIGEO NACIMIENTO
                 'nacimientoDepartamento' => 'nullable|string|max:255',
                 'nacimientoProvincia' => 'nullable|string|max:255',
                 'nacimientoDistrito' => 'nullable|string|max:255',
-                
+
                 // SEXO, ESTADO CIVIL
                 'idSexo' => 'nullable|exists:sexo,idSexo',
                 'estado_civil' => 'nullable|in:S,C,V,D',
-                
+
                 // DOMICILIO
                 'direccion' => 'nullable|string|max:255',
                 'domicilioDepartamento' => 'nullable|string|max:255',
                 'domicilioProvincia' => 'nullable|string|max:255',
                 'domicilioDistrito' => 'nullable|string|max:255',
-                
+
                 // BANCARIO
                 'entidadBancaria' => 'nullable|string|max:255',
                 'tipoCuenta' => 'nullable|string|max:100',
                 'moneda' => 'nullable|string|max:50|in:PEN,USD',
                 'numeroCuenta' => 'nullable|string|max:100',
                 'numeroCCI' => 'nullable|string|max:100',
-                
+
                 // SEGURO Y PENSIÓN
                 'seguroSalud' => 'nullable|in:SIS,ESSALUD,EPS',
                 'sistemaPensiones' => 'nullable|in:ONP,AFP,NA',
                 'afpCompania' => 'required_if:sistemaPensiones,AFP|nullable|in:Integra,Horizonte,Profuturo,Prima',
-                
+
                 // SECCIÓN 2 - INFORMACIÓN ACADÉMICA (NAMES SIMPLES)
                 'nivel_0' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 'nivel_1' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 'nivel_2' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 'nivel_3' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
-                
+
                 'termino_0' => 'nullable|in:SI,NO',
                 'termino_1' => 'nullable|in:SI,NO',
                 'termino_2' => 'nullable|in:SI,NO',
                 'termino_3' => 'nullable|in:SI,NO',
-                
+
                 'centro_0' => 'nullable|string|max:255',
                 'centro_1' => 'nullable|string|max:255',
                 'centro_2' => 'nullable|string|max:255',
                 'centro_3' => 'nullable|string|max:255',
-                
+
                 'especialidad_0' => 'nullable|string|max:255',
                 'especialidad_1' => 'nullable|string|max:255',
                 'especialidad_2' => 'nullable|string|max:255',
                 'especialidad_3' => 'nullable|string|max:255',
-                
+
                 'grado_0' => 'nullable|string|max:255',
                 'grado_1' => 'nullable|string|max:255',
                 'grado_2' => 'nullable|string|max:255',
                 'grado_3' => 'nullable|string|max:255',
-                
+
                 'inicio_0' => 'nullable|date',
                 'inicio_1' => 'nullable|date',
                 'inicio_2' => 'nullable|date',
                 'inicio_3' => 'nullable|date',
-                
+
                 'fin_0' => 'nullable|date|after_or_equal:inicio_0',
                 'fin_1' => 'nullable|date|after_or_equal:inicio_1',
                 'fin_2' => 'nullable|date|after_or_equal:inicio_2',
                 'fin_3' => 'nullable|date|after_or_equal:inicio_3',
-                
+
                 // SECCIÓN 3 - INFORMACIÓN FAMILIAR (NAMES SIMPLES)
                 'parentesco_*' => 'nullable|in:conyuge,concubino,hijo',
                 'nombres_*' => 'nullable|string|max:255',
@@ -132,24 +141,24 @@ class FormularioPersonalEmpleadoController extends Controller
                 'sexo_*' => 'nullable|in:M,F',
                 'fecha_nacimiento_*' => 'nullable|date',
                 'domicilio_*' => 'nullable|string|max:255',
-                
+
                 // SECCIÓN 4 - INFORMACIÓN DE SALUD
                 'vacuna_covid' => 'nullable|in:SI,NO',
                 'covid_dosis1' => 'nullable|date|required_if:vacuna_covid,SI',
                 'covid_dosis2' => 'nullable|date|required_if:vacuna_covid,SI',
                 'covid_dosis3' => 'nullable|date',
-                
+
                 'tiene_operacion' => 'nullable|in:SI,NO',
                 'operacion_especificar' => 'nullable|string|max:500|required_if:tiene_operacion,SI',
-                
+
                 'dolencia_cronica' => 'nullable|in:SI,NO',
                 'dolencia_especificar' => 'nullable|string|max:500|required_if:dolencia_cronica,SI',
-                
+
                 'discapacidad' => 'nullable|in:SI,NO',
                 'discapacidad_especificar' => 'nullable|string|max:500|required_if:discapacidad,SI',
-                
+
                 'tipo_sangre' => 'nullable|string|max:10|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
-                
+
                 // CONTACTOS DE EMERGENCIA
                 'emergencia1_nombres' => 'required|string|max:255',
                 'emergencia1_parentesco' => 'required|string|max:100',
@@ -157,7 +166,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 'emergencia2_nombres' => 'required|string|max:255',
                 'emergencia2_parentesco' => 'required|string|max:100',
                 'emergencia2_direccion' => 'required|string',
-                
+
                 // SECCIÓN 5 - DECLARACIÓN JURADA
                 'dia_declaracion' => 'required|numeric|min:1|max:31',
                 'mes_declaracion' => 'required|string',
@@ -191,11 +200,11 @@ class FormularioPersonalEmpleadoController extends Controller
 
             // ========== 2. CREAR O ACTUALIZAR USUARIO ==========
             $fechaNacimiento = $request->anio . '-' . $request->mes . '-' . str_pad($request->dia, 2, '0', STR_PAD_LEFT);
-            
+
             // Generar usuario y clave por defecto
             $username = strtolower(substr($request->nombres, 0, 1) . $request->paterno . substr($request->num_documento, -4));
             $defaultPassword = bcrypt($request->num_documento);
-            
+
             $usuario = Usuario::updateOrCreate(
                 ['documento' => $request->num_documento],
                 [
@@ -254,11 +263,11 @@ class FormularioPersonalEmpleadoController extends Controller
             // ========== 4. GUARDAR ESTUDIOS (NAMES SIMPLES) ==========
             Log::channel('single')->info('========== DEBUG ESTUDIOS ==========');
             Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-            
+
             // Eliminar estudios anteriores
             UsuarioEstudio::where('idUsuario', $usuario->idUsuario)->delete();
             Log::channel('single')->info('Estudios anteriores eliminados');
-            
+
             $estudiosGuardados = 0;
             $niveles = [0, 1, 2, 3];
             $nombresNiveles = [
@@ -267,18 +276,18 @@ class FormularioPersonalEmpleadoController extends Controller
                 2 => 'UNIVERSITARIO',
                 3 => 'POSTGRADO'
             ];
-            
+
             foreach ($niveles as $nivelId) {
                 $termino = $request->input("termino_{$nivelId}");
                 $nivel = $request->input("nivel_{$nivelId}", $nombresNiveles[$nivelId]);
-                
+
                 Log::channel('single')->info("--- Procesando nivel {$nivelId}: {$nivel} ---");
                 Log::channel('single')->info("Termino: " . ($termino ?? 'NO DEFINIDO'));
-                
+
                 if ($termino === 'SI') {
                     $centro = $request->input("centro_{$nivelId}");
                     $inicio = $request->input("inicio_{$nivelId}");
-                    
+
                     if (!empty($centro) && !empty($inicio)) {
                         $dataToInsert = [
                             'idUsuario' => $usuario->idUsuario,
@@ -290,7 +299,7 @@ class FormularioPersonalEmpleadoController extends Controller
                             'fechaInicio' => $inicio,
                             'fechaFin' => $request->input("fin_{$nivelId}"),
                         ];
-                        
+
                         try {
                             UsuarioEstudio::create($dataToInsert);
                             $estudiosGuardados++;
@@ -301,36 +310,36 @@ class FormularioPersonalEmpleadoController extends Controller
                     }
                 }
             }
-            
+
             Log::channel('single')->info("📊 TOTAL: {$estudiosGuardados} estudios guardados");
             Log::channel('single')->info('========== FIN DEBUG ESTUDIOS ==========');
 
             // ========== 5. GUARDAR FAMILIARES (NAMES SIMPLES) ==========
             Log::channel('single')->info('========== DEBUG FAMILIARES ==========');
             Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-            
+
             // Eliminar familiares anteriores
             UsuarioFamilia::where('idUsuario', $usuario->idUsuario)->delete();
             Log::channel('single')->info('Familiares anteriores eliminados');
-            
+
             $familiaresGuardados = 0;
             $indicesEncontrados = [];
-            
+
             // Buscar todos los índices de nombres (solo desktop, no mobile)
             foreach ($request->all() as $key => $value) {
                 if (strpos($key, 'nombres_') === 0 && !strpos($key, 'mobile')) {
                     $index = str_replace('nombres_', '', $key);
-                    
+
                     if (is_numeric($index) && !in_array($index, $indicesEncontrados)) {
                         $indicesEncontrados[] = $index;
-                        
+
                         $nombres = $request->input("nombres_{$index}");
                         $parentesco = $request->input("parentesco_{$index}");
-                        
+
                         Log::channel('single')->info("--- Procesando familiar índice {$index} ---");
                         Log::channel('single')->info("Nombres: " . ($nombres ?? 'VACÍO'));
                         Log::channel('single')->info("Parentesco: " . ($parentesco ?? 'VACÍO'));
-                        
+
                         if (!empty($nombres) && !empty($parentesco)) {
                             $dataToInsert = [
                                 'idUsuario' => $usuario->idUsuario,
@@ -342,9 +351,9 @@ class FormularioPersonalEmpleadoController extends Controller
                                 'fechaNacimiento' => $request->input("fecha_nacimiento_{$index}"),
                                 'domicilioActual' => $request->input("domicilio_{$index}"),
                             ];
-                            
+
                             Log::channel('single')->info('Datos a insertar:', $dataToInsert);
-                            
+
                             try {
                                 UsuarioFamilia::create($dataToInsert);
                                 $familiaresGuardados++;
@@ -358,7 +367,7 @@ class FormularioPersonalEmpleadoController extends Controller
                     }
                 }
             }
-            
+
             Log::channel('single')->info("📊 TOTAL: {$familiaresGuardados} familiares guardados");
             Log::channel('single')->info('========== FIN DEBUG FAMILIARES ==========');
 
@@ -380,7 +389,7 @@ class FormularioPersonalEmpleadoController extends Controller
 
             // ========== 7. GUARDAR CONTACTOS DE EMERGENCIA ==========
             UsuarioEmergenciaContacto::where('idUsuario', $usuario->idUsuario)->delete();
-            
+
             if ($request->emergencia1_nombres) {
                 UsuarioEmergenciaContacto::create([
                     'idUsuario' => $usuario->idUsuario,
@@ -389,7 +398,7 @@ class FormularioPersonalEmpleadoController extends Controller
                     'direccionTelefono' => $request->emergencia1_direccion,
                 ]);
             }
-            
+
             if ($request->emergencia2_nombres) {
                 UsuarioEmergenciaContacto::create([
                     'idUsuario' => $usuario->idUsuario,
@@ -398,7 +407,7 @@ class FormularioPersonalEmpleadoController extends Controller
                     'direccionTelefono' => $request->emergencia2_direccion,
                 ]);
             }
-            
+
             for ($i = 3; $i <= 5; $i++) {
                 $nombres = $request->input("emergencia{$i}_nombres");
                 if ($nombres) {
@@ -416,7 +425,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 $firma = $request->file('firma');
                 $usuario->firma = file_get_contents($firma->getRealPath());
                 $usuario->save();
-                
+
                 UsuarioDocumentoArchivo::updateOrCreate(
                     [
                         'idUsuario' => $usuario->idUsuario,
@@ -447,7 +456,7 @@ class FormularioPersonalEmpleadoController extends Controller
             try {
                 Log::channel('single')->info('========== CREANDO NOTIFICACIÓN ==========');
                 Log::channel('single')->info('Usuario ID: ' . $usuario->idUsuario);
-                
+
                 // Crear UNA SOLA notificación con estado 0
                 UsuarioNotificacion::create([
                     'idUsuario' => $usuario->idUsuario,
@@ -458,10 +467,9 @@ class FormularioPersonalEmpleadoController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                
+
                 Log::channel('single')->info('✅ NOTIFICACIÓN CREADA: Usuario creado exitosamente');
                 Log::channel('single')->info('========== FIN NOTIFICACIÓN ==========');
-                
             } catch (\Exception $e) {
                 Log::channel('single')->error('❌ ERROR CREANDO NOTIFICACIÓN: ' . $e->getMessage());
                 // No hacer rollback, solo loguear el error
@@ -484,14 +492,13 @@ class FormularioPersonalEmpleadoController extends Controller
             return redirect()->route('admin.formulario-pelicula.exito')
                 ->with('success', 'Formulario guardado exitosamente')
                 ->with('usuario_id', $usuario->idUsuario);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::channel('single')->error('ERROR EN FORMULARIO: ' . $e->getMessage());
             Log::channel('single')->error('LINE: ' . $e->getLine());
             Log::channel('single')->error('FILE: ' . $e->getFile());
-            
+
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -500,12 +507,12 @@ class FormularioPersonalEmpleadoController extends Controller
                     'file' => $e->getFile()
                 ], 500);
             }
-            
+
             return back()->withInput()
                 ->with('error', 'Error al guardar el formulario: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Guardar borrador del formulario
      */
@@ -513,17 +520,17 @@ class FormularioPersonalEmpleadoController extends Controller
     {
         try {
             DB::beginTransaction();
-            
+
             $usuario = null;
             if ($request->num_documento) {
                 $usuario = Usuario::where('documento', $request->num_documento)->first();
             }
-            
+
             if (!$usuario && $request->num_documento) {
-                $fechaNacimiento = $request->anio && $request->mes && $request->dia 
+                $fechaNacimiento = $request->anio && $request->mes && $request->dia
                     ? $request->anio . '-' . $request->mes . '-' . str_pad($request->dia, 2, '0', STR_PAD_LEFT)
                     : null;
-                
+
                 $usuario = Usuario::create([
                     'apellidoPaterno' => $request->paterno ?? 'TEMPORAL',
                     'apellidoMaterno' => $request->materno ?? '',
@@ -539,11 +546,11 @@ class FormularioPersonalEmpleadoController extends Controller
                     'estado' => 0,
                 ]);
             }
-            
+
             if (!$usuario) {
                 throw new \Exception('No se pudo identificar al usuario para guardar el borrador');
             }
-            
+
             $fichaData = array_filter([
                 'nacimientoDepartamento' => $request->nacimientoDepartamento,
                 'nacimientoProvincia' => $request->nacimientoProvincia,
@@ -562,17 +569,17 @@ class FormularioPersonalEmpleadoController extends Controller
                 'seguroSalud' => $request->seguroSalud,
                 'sistemaPensiones' => $request->sistemaPensiones,
                 'afpCompania' => $request->afpCompania,
-            ], function($value) {
+            ], function ($value) {
                 return !is_null($value) && $value !== '';
             });
-            
+
             if (!empty($fichaData)) {
                 UsuarioFichaGeneral::updateOrCreate(
                     ['idUsuario' => $usuario->idUsuario],
                     $fichaData
                 );
             }
-            
+
             $saludData = array_filter([
                 'vacunaCovid' => $request->vacuna_covid === 'SI' ? 1 : ($request->vacuna_covid ? 0 : null),
                 'covidDosis1' => $request->covid_dosis1,
@@ -583,17 +590,17 @@ class FormularioPersonalEmpleadoController extends Controller
                 'discapacidad' => $request->discapacidad === 'SI' ? 1 : ($request->discapacidad ? 0 : null),
                 'discapacidadDetalle' => $request->discapacidad_especificar,
                 'tipoSangre' => $request->tipo_sangre,
-            ], function($value) {
+            ], function ($value) {
                 return !is_null($value) && $value !== '';
             });
-            
+
             if (!empty($saludData)) {
                 UsuarioSalud::updateOrCreate(
                     ['idUsuario' => $usuario->idUsuario],
                     $saludData
                 );
             }
-            
+
             DB::commit();
 
             // ========== CREAR NOTIFICACIÓN DE BORRADOR ==========
@@ -608,29 +615,28 @@ class FormularioPersonalEmpleadoController extends Controller
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
-                    
+
                     Log::channel('single')->info('✅ NOTIFICACIÓN DE BORRADOR CREADA');
                 }
             } catch (\Exception $e) {
                 Log::channel('single')->error('❌ ERROR EN NOTIFICACIÓN DE BORRADOR: ' . $e->getMessage());
             }
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Borrador guardado exitosamente',
                 'usuario_id' => $usuario->idUsuario
             ]);
-            
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error al guardar borrador: ' . $e->getMessage()
             ], 500);
         }
     }
-    
+
     /**
      * Obtener datos de un usuario para edición
      */
@@ -644,13 +650,13 @@ class FormularioPersonalEmpleadoController extends Controller
             'emergenciaContactos',
             'notificaciones'
         ])->findOrFail($id);
-        
+
         return response()->json([
             'success' => true,
             'data' => $usuario
         ]);
     }
-    
+
     /**
      * Mapear estado civil de letra a número
      */
@@ -662,10 +668,10 @@ class FormularioPersonalEmpleadoController extends Controller
             'V' => 3,
             'D' => 4,
         ];
-        
+
         return $map[$estado] ?? null;
     }
-    
+
     /**
      * Mapear parentesco del formulario a ENUM de base de datos
      */
@@ -676,7 +682,7 @@ class FormularioPersonalEmpleadoController extends Controller
             'concubino' => 'CONCUBINO',
             'hijo' => 'HIJO',
         ];
-        
+
         return $map[$parentesco] ?? null;
     }
 }
