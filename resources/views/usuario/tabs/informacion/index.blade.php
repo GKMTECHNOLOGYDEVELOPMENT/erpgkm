@@ -44,30 +44,6 @@
                         </select>
                     </div>
 
-                    <!-- Cargo / Puesto -->
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            <i class="fas fa-briefcase text-blue-500 mr-1"></i>
-                            Cargo / Puesto
-                        </label>
-                        <input type="text" name="cargoTexto" id="cargoTexto" 
-                               value="{{ $laboral->cargoTexto ?? '' }}"
-                               placeholder="Ej: Analista de Sistemas"
-                               class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500">
-                    </div>
-
-                    <!-- Área -->
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            <i class="fas fa-building text-blue-500 mr-1"></i>
-                            Área
-                        </label>
-                        <input type="text" name="areaTexto" id="areaTexto" 
-                               value="{{ $laboral->areaTexto ?? '' }}"
-                               placeholder="Ej: Tecnología de la Información"
-                               class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500">
-                    </div>
-
                     <!-- Fecha Inicio - Flatpickr -->
                     <div>
                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
