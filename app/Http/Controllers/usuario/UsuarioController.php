@@ -29,7 +29,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-
+use App\Exports\UsuarioFichaExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UsuarioController extends Controller
 {
@@ -314,439 +315,438 @@ class UsuarioController extends Controller
 
 
 
- public function edit($id)
-{
-    $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios', 'laboral'])->findOrFail($id);
-    
-    // Datos para las pestañas
-    $tiposDocumento = Tipodocumento::all();
-    $sexos = Sexo::all();
-    $sucursales = Sucursal::all();
-    $tiposUsuario = Tipousuario::all();
-    $roles = Rol::all();
-    $tiposArea = Tipoarea::all();
-    $tiposContrato = TipoContrato::activos()->get();
-    
-    // Datos bancarios
-    $bancos = [
-        '1' => 'Banco de Crédito del Perú',
-        '2' => 'BBVA Perú',
-        '3' => 'Scotiabank Perú',
-        '4' => 'Interbank',
-        '5' => 'Banco de la Nación',
-        '6' => 'Banco de Comercio',
-        '7' => 'BanBif',
-        '8' => 'Banco Pichincha',
-        '9' => 'Citibank Perú',
-        '10' => 'MiBanco',
-        '11' => 'Banco GNB Perú',
-        '12' => 'Banco Falabella',
-        '13' => 'Banco Ripley',
-        '14' => 'Banco Santander Perú',
-        '15' => 'Alfin Banco',
-        '16' => 'Bank of China',
-        '17' => 'Bci Perú',
-        '18' => 'ICBC Perú Bank',
-    ];
-    
-    $tiposCuenta = [
-        '1' => 'Cuenta de Ahorros',
-        '2' => 'Cuenta Corriente',
-        '3' => 'Cuenta a Plazo Fijo',
-    ];
-    
-    $monedas = [
-        'PEN' => 'Soles',
-        'USD' => 'Dólares',
-        'EUR' => 'Euros',
-    ];
-    
-    // Datos de ficha general
-    $fichaGeneral = $usuario->fichaGeneral;
-    if (!$fichaGeneral) {
-        $fichaGeneral = new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $usuario->idUsuario;
-    }
-    
-    // Datos laborales
-    $laboral = $usuario->laboral;
-    if (!$laboral) {
-        $laboral = new \App\Models\UsuarioLaboral();
-        $laboral->idUsuario = $usuario->idUsuario;
-    }
-    
-    // Datos de salud
-    $salud = $usuario->salud;
-    if (!$salud) {
-        $salud = new \App\Models\UsuarioSalud();
-        $salud->idUsuario = $usuario->idUsuario;
-    }
-    
-    // Procesar fechas de COVID
-    $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
-    $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
-    $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
-    
-    return view('usuario.edit', compact(
-        'usuario',
-        'tiposDocumento',
-        'sexos',
-        'sucursales',
-        'tiposUsuario',
-        'roles',
-        'tiposArea',
-        'tiposContrato',
-        'bancos',
-        'tiposCuenta',
-        'monedas',
-        'fichaGeneral',
-        'laboral',
-        'salud',
-        'covidDosis1',
-        'covidDosis2',
-        'covidDosis3'
-    ));
-}
-   public function loadTab($id, $tab)
-{
-    // Cargar usuario con todas las relaciones necesarias
-    $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios'])->findOrFail($id);
+    public function edit($id)
+    {
+        $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios', 'laboral'])->findOrFail($id);
 
-    switch ($tab) {
-        case 'perfil':
-            $tiposDocumento = Tipodocumento::all();
-            $sexos = Sexo::all();
+        // Datos para las pestañas
+        $tiposDocumento = Tipodocumento::all();
+        $sexos = Sexo::all();
+        $sucursales = Sucursal::all();
+        $tiposUsuario = Tipousuario::all();
+        $roles = Rol::all();
+        $tiposArea = Tipoarea::all();
+        $tiposContrato = TipoContrato::activos()->get();
 
-            // ============================================
-            // CARGAR ARCHIVOS JSON
-            // ============================================
-            try {
-                // Departamentos es un array simple
-                $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true) ?? [];
-                
-                // Provincias viene como objeto con keys por departamento
-                $provinciasRaw = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true) ?? [];
-                
-                // Distritos viene como objeto con keys por provincia
-                $distritosRaw = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true) ?? [];
-                
-                // Reestructurar provincias a un array plano
-                $provincias = [];
-                foreach ($provinciasRaw as $deptoId => $provs) {
-                    foreach ($provs as $prov) {
-                        $prov['id_padre_ubigeo'] = $deptoId;
-                        $provincias[] = $prov;
+        // Datos bancarios
+        $bancos = [
+            '1' => 'Banco de Crédito del Perú',
+            '2' => 'BBVA Perú',
+            '3' => 'Scotiabank Perú',
+            '4' => 'Interbank',
+            '5' => 'Banco de la Nación',
+            '6' => 'Banco de Comercio',
+            '7' => 'BanBif',
+            '8' => 'Banco Pichincha',
+            '9' => 'Citibank Perú',
+            '10' => 'MiBanco',
+            '11' => 'Banco GNB Perú',
+            '12' => 'Banco Falabella',
+            '13' => 'Banco Ripley',
+            '14' => 'Banco Santander Perú',
+            '15' => 'Alfin Banco',
+            '16' => 'Bank of China',
+            '17' => 'Bci Perú',
+            '18' => 'ICBC Perú Bank',
+        ];
+
+        $tiposCuenta = [
+            '1' => 'Cuenta de Ahorros',
+            '2' => 'Cuenta Corriente',
+            '3' => 'Cuenta a Plazo Fijo',
+        ];
+
+        $monedas = [
+            'PEN' => 'Soles',
+            'USD' => 'Dólares',
+            'EUR' => 'Euros',
+        ];
+
+        // Datos de ficha general
+        $fichaGeneral = $usuario->fichaGeneral;
+        if (!$fichaGeneral) {
+            $fichaGeneral = new \App\Models\UsuarioFichaGeneral();
+            $fichaGeneral->idUsuario = $usuario->idUsuario;
+        }
+
+        // Datos laborales
+        $laboral = $usuario->laboral;
+        if (!$laboral) {
+            $laboral = new \App\Models\UsuarioLaboral();
+            $laboral->idUsuario = $usuario->idUsuario;
+        }
+
+        // Datos de salud
+        $salud = $usuario->salud;
+        if (!$salud) {
+            $salud = new \App\Models\UsuarioSalud();
+            $salud->idUsuario = $usuario->idUsuario;
+        }
+
+        // Procesar fechas de COVID
+        $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
+        $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
+        $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
+
+        return view('usuario.edit', compact(
+            'usuario',
+            'tiposDocumento',
+            'sexos',
+            'sucursales',
+            'tiposUsuario',
+            'roles',
+            'tiposArea',
+            'tiposContrato',
+            'bancos',
+            'tiposCuenta',
+            'monedas',
+            'fichaGeneral',
+            'laboral',
+            'salud',
+            'covidDosis1',
+            'covidDosis2',
+            'covidDosis3'
+        ));
+    }
+    public function loadTab($id, $tab)
+    {
+        // Cargar usuario con todas las relaciones necesarias
+        $usuario = Usuario::with(['salud', 'fichaGeneral', 'estudios'])->findOrFail($id);
+
+        switch ($tab) {
+            case 'perfil':
+                $tiposDocumento = Tipodocumento::all();
+                $sexos = Sexo::all();
+
+                // ============================================
+                // CARGAR ARCHIVOS JSON
+                // ============================================
+                try {
+                    // Departamentos es un array simple
+                    $departamentos = json_decode(file_get_contents(public_path('ubigeos/departamentos.json')), true) ?? [];
+
+                    // Provincias viene como objeto con keys por departamento
+                    $provinciasRaw = json_decode(file_get_contents(public_path('ubigeos/provincias.json')), true) ?? [];
+
+                    // Distritos viene como objeto con keys por provincia
+                    $distritosRaw = json_decode(file_get_contents(public_path('ubigeos/distritos.json')), true) ?? [];
+
+                    // Reestructurar provincias a un array plano
+                    $provincias = [];
+                    foreach ($provinciasRaw as $deptoId => $provs) {
+                        foreach ($provs as $prov) {
+                            $prov['id_padre_ubigeo'] = $deptoId;
+                            $provincias[] = $prov;
+                        }
+                    }
+
+                    // Reestructurar distritos a un array plano
+                    $distritos = [];
+                    foreach ($distritosRaw as $provId => $dists) {
+                        foreach ($dists as $dist) {
+                            $dist['id_padre_ubigeo'] = $provId;
+                            $distritos[] = $dist;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error cargando archivos ubigeo:', ['error' => $e->getMessage()]);
+                    $departamentos = [];
+                    $provincias = [];
+                    $distritos = [];
+                }
+
+                // ============================================
+                // PROCESAR DIRECCIÓN ACTUAL
+                // ============================================
+
+                // DEPARTAMENTO SELECCIONADO
+                $departamentoSeleccionado = null;
+                $nombreDepartamento = '';
+                if ($usuario->departamento) {
+                    $departamentoSeleccionado = collect($departamentos)
+                        ->firstWhere('id_ubigeo', $usuario->departamento);
+                    $nombreDepartamento = $departamentoSeleccionado['nombre_ubigeo'] ?? '';
+                }
+
+                // PROVINCIAS DEL DEPARTAMENTO SELECCIONADO
+                $provinciasDelDepartamento = [];
+                if ($usuario->departamento) {
+                    $provinciasDelDepartamento = array_filter($provincias, function ($prov) use ($usuario) {
+                        return isset($prov['id_padre_ubigeo']) &&
+                            $prov['id_padre_ubigeo'] == $usuario->departamento;
+                    });
+                    $provinciasDelDepartamento = array_values($provinciasDelDepartamento);
+                }
+
+                // PROVINCIA SELECCIONADA
+                $provinciaSeleccionada = null;
+                $nombreProvincia = '';
+                if ($usuario->provincia) {
+                    $provinciaSeleccionada = collect($provincias)
+                        ->firstWhere('id_ubigeo', $usuario->provincia);
+                    $nombreProvincia = $provinciaSeleccionada['nombre_ubigeo'] ?? '';
+                }
+
+                // DISTRITOS DE LA PROVINCIA SELECCIONADA
+                $distritosDeLaProvincia = [];
+                if ($usuario->provincia) {
+                    $distritosDeLaProvincia = array_filter($distritos, function ($dist) use ($usuario) {
+                        return isset($dist['id_padre_ubigeo']) &&
+                            $dist['id_padre_ubigeo'] == $usuario->provincia;
+                    });
+                    $distritosDeLaProvincia = array_values($distritosDeLaProvincia);
+                }
+
+                // ============================================
+                // PROCESAR LUGAR DE NACIMIENTO
+                // ============================================
+                $fichaGeneral = $usuario->fichaGeneral;
+
+                // Arrays para lugar de nacimiento
+                $provinciasNacimiento = [];
+                $distritosNacimiento = [];
+
+                // Nombres para mostrar
+                $nombreNacimientoDepartamento = '';
+                $nombreNacimientoProvincia = '';
+                $nombreNacimientoDistrito = '';
+
+                if ($fichaGeneral) {
+                    // Departamento de nacimiento
+                    if ($fichaGeneral->nacimientoDepartamento) {
+                        $deptoNac = collect($departamentos)
+                            ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDepartamento);
+                        $nombreNacimientoDepartamento = $deptoNac['nombre_ubigeo'] ?? '';
+
+                        // Provincias del departamento de nacimiento
+                        $provinciasNacimiento = array_filter($provincias, function ($prov) use ($fichaGeneral) {
+                            return isset($prov['id_padre_ubigeo']) &&
+                                $prov['id_padre_ubigeo'] == $fichaGeneral->nacimientoDepartamento;
+                        });
+                        $provinciasNacimiento = array_values($provinciasNacimiento);
+                    }
+
+                    // Provincia de nacimiento
+                    if ($fichaGeneral->nacimientoProvincia) {
+                        $provNac = collect($provincias)
+                            ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoProvincia);
+                        $nombreNacimientoProvincia = $provNac['nombre_ubigeo'] ?? '';
+
+                        // Distritos de la provincia de nacimiento
+                        $distritosNacimiento = array_filter($distritos, function ($dist) use ($fichaGeneral) {
+                            return isset($dist['id_padre_ubigeo']) &&
+                                $dist['id_padre_ubigeo'] == $fichaGeneral->nacimientoProvincia;
+                        });
+                        $distritosNacimiento = array_values($distritosNacimiento);
+                    }
+
+                    // Distrito de nacimiento
+                    if ($fichaGeneral->nacimientoDistrito) {
+                        $distNac = collect($distritos)
+                            ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDistrito);
+                        $nombreNacimientoDistrito = $distNac['nombre_ubigeo'] ?? '';
                     }
                 }
-                
-                // Reestructurar distritos a un array plano
-                $distritos = [];
-                foreach ($distritosRaw as $provId => $dists) {
-                    foreach ($dists as $dist) {
-                        $dist['id_padre_ubigeo'] = $provId;
-                        $distritos[] = $dist;
-                    }
+
+                // DEBUG
+                \Log::info('=== DATOS DE NACIMIENTO ===');
+                \Log::info('Departamento nacimiento:', [
+                    'id' => $fichaGeneral->nacimientoDepartamento ?? 'N/A',
+                    'nombre' => $nombreNacimientoDepartamento
+                ]);
+                \Log::info('Provincias disponibles:', ['count' => count($provinciasNacimiento)]);
+                \Log::info('Provincia nacimiento:', [
+                    'id' => $fichaGeneral->nacimientoProvincia ?? 'N/A',
+                    'nombre' => $nombreNacimientoProvincia
+                ]);
+                \Log::info('Distritos disponibles:', ['count' => count($distritosNacimiento)]);
+
+                // ============================================
+                // PROCESAR FECHA DE NACIMIENTO
+                // ============================================
+                $fechaNacimiento = $usuario->fechaNacimiento;
+                $dia = $fechaNacimiento ? date('d', strtotime($fechaNacimiento)) : '';
+                $mes = $fechaNacimiento ? date('m', strtotime($fechaNacimiento)) : '';
+                $anio = $fechaNacimiento ? date('Y', strtotime($fechaNacimiento)) : '';
+                $edad = $fechaNacimiento ? \Carbon\Carbon::parse($fechaNacimiento)->age : '';
+
+                // ============================================
+                // PROCESAR ESTUDIOS
+                // ============================================
+                $estudios = $usuario->estudios ?? collect([]);
+                $estudioSecundaria = $estudios->where('nivel', 'SECUNDARIA')->first();
+                $estudioTecnico = $estudios->where('nivel', 'TECNICO')->first();
+                $estudioUniversitario = $estudios->where('nivel', 'UNIVERSITARIO')->first();
+                $estudioPostgrado = $estudios->whereIn('nivel', ['POSTGRADO', 'MAESTRIA'])->first();
+
+                return view('usuario.tabs.perfil.index', compact(
+                    'usuario',
+                    'tiposDocumento',
+                    'sexos',
+                    'departamentos',
+                    'provincias',
+                    'distritos',
+                    'provinciasDelDepartamento',
+                    'distritosDeLaProvincia',
+                    'fichaGeneral',
+                    'provinciasNacimiento',
+                    'distritosNacimiento',
+                    'fechaNacimiento',
+                    'dia',
+                    'mes',
+                    'anio',
+                    'edad',
+                    'estudioSecundaria',
+                    'estudioTecnico',
+                    'estudioUniversitario',
+                    'estudioPostgrado',
+                    'nombreDepartamento',
+                    'nombreProvincia',
+                    'nombreNacimientoDepartamento',
+                    'nombreNacimientoProvincia',
+                    'nombreNacimientoDistrito'
+                ));
+            case 'info-salud':
+                // Cargar datos de salud, familiares y contactos de emergencia
+                $salud = $usuario->salud;
+                $familiares = $usuario->familiares ?? collect([]);
+                $contactosEmergencia = $usuario->contactosEmergencia ?? collect([]);
+
+                // Si no existe registro de salud, crear uno vacío
+                if (!$salud) {
+                    $salud = new \App\Models\UsuarioSalud();
+                    $salud->idUsuario = $usuario->idUsuario;
                 }
-                
-            } catch (\Exception $e) {
-                \Log::error('Error cargando archivos ubigeo:', ['error' => $e->getMessage()]);
-                $departamentos = [];
-                $provincias = [];
-                $distritos = [];
-            }
 
-            // ============================================
-            // PROCESAR DIRECCIÓN ACTUAL
-            // ============================================
-            
-            // DEPARTAMENTO SELECCIONADO
-            $departamentoSeleccionado = null;
-            $nombreDepartamento = '';
-            if ($usuario->departamento) {
-                $departamentoSeleccionado = collect($departamentos)
-                    ->firstWhere('id_ubigeo', $usuario->departamento);
-                $nombreDepartamento = $departamentoSeleccionado['nombre_ubigeo'] ?? '';
-            }
+                // Procesar fechas de COVID para el formato flatpickr
+                $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
+                $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
+                $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
 
-            // PROVINCIAS DEL DEPARTAMENTO SELECCIONADO
-            $provinciasDelDepartamento = [];
-            if ($usuario->departamento) {
-                $provinciasDelDepartamento = array_filter($provincias, function($prov) use ($usuario) {
-                    return isset($prov['id_padre_ubigeo']) && 
-                           $prov['id_padre_ubigeo'] == $usuario->departamento;
-                });
-                $provinciasDelDepartamento = array_values($provinciasDelDepartamento);
-            }
+                // Debug
+                \Log::info('=== DATOS DE SALUD ===');
+                \Log::info('Usuario ID:', ['id' => $usuario->idUsuario]);
+                \Log::info('Salud:', ['data' => $salud]);
+                \Log::info('Familiares:', ['count' => $familiares->count()]);
+                \Log::info('Contactos Emergencia:', ['count' => $contactosEmergencia->count()]);
 
-            // PROVINCIA SELECCIONADA
-            $provinciaSeleccionada = null;
-            $nombreProvincia = '';
-            if ($usuario->provincia) {
-                $provinciaSeleccionada = collect($provincias)
-                    ->firstWhere('id_ubigeo', $usuario->provincia);
-                $nombreProvincia = $provinciaSeleccionada['nombre_ubigeo'] ?? '';
-            }
+                return view('usuario.tabs.info-salud.index', compact(
+                    'usuario',
+                    'salud',
+                    'familiares',
+                    'contactosEmergencia',
+                    'covidDosis1',
+                    'covidDosis2',
+                    'covidDosis3'
+                ));
 
-            // DISTRITOS DE LA PROVINCIA SELECCIONADA
-            $distritosDeLaProvincia = [];
-            if ($usuario->provincia) {
-                $distritosDeLaProvincia = array_filter($distritos, function($dist) use ($usuario) {
-                    return isset($dist['id_padre_ubigeo']) && 
-                           $dist['id_padre_ubigeo'] == $usuario->provincia;
-                });
-                $distritosDeLaProvincia = array_values($distritosDeLaProvincia);
-            }
+            case 'payment-details':
+                // Obtener la ficha general del usuario
+                $fichaGeneral = $usuario->fichaGeneral;
 
-            // ============================================
-            // PROCESAR LUGAR DE NACIMIENTO
-            // ============================================
-            $fichaGeneral = $usuario->fichaGeneral;
-            
-            // Arrays para lugar de nacimiento
-            $provinciasNacimiento = [];
-            $distritosNacimiento = [];
-            
-            // Nombres para mostrar
-            $nombreNacimientoDepartamento = '';
-            $nombreNacimientoProvincia = '';
-            $nombreNacimientoDistrito = '';
-            
-            if ($fichaGeneral) {
-                // Departamento de nacimiento
-                if ($fichaGeneral->nacimientoDepartamento) {
-                    $deptoNac = collect($departamentos)
-                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDepartamento);
-                    $nombreNacimientoDepartamento = $deptoNac['nombre_ubigeo'] ?? '';
-                    
-                    // Provincias del departamento de nacimiento
-                    $provinciasNacimiento = array_filter($provincias, function($prov) use ($fichaGeneral) {
-                        return isset($prov['id_padre_ubigeo']) && 
-                               $prov['id_padre_ubigeo'] == $fichaGeneral->nacimientoDepartamento;
-                    });
-                    $provinciasNacimiento = array_values($provinciasNacimiento);
+                // Si no existe, crear una instancia vacía
+                if (!$fichaGeneral) {
+                    $fichaGeneral = new \App\Models\UsuarioFichaGeneral();
+                    $fichaGeneral->idUsuario = $usuario->idUsuario;
                 }
-                
-                // Provincia de nacimiento
-                if ($fichaGeneral->nacimientoProvincia) {
-                    $provNac = collect($provincias)
-                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoProvincia);
-                    $nombreNacimientoProvincia = $provNac['nombre_ubigeo'] ?? '';
-                    
-                    // Distritos de la provincia de nacimiento
-                    $distritosNacimiento = array_filter($distritos, function($dist) use ($fichaGeneral) {
-                        return isset($dist['id_padre_ubigeo']) && 
-                               $dist['id_padre_ubigeo'] == $fichaGeneral->nacimientoProvincia;
-                    });
-                    $distritosNacimiento = array_values($distritosNacimiento);
+
+                // Mapeo de bancos (puedes tener una tabla de bancos o hacerlo así)
+                $bancos = [
+                    '1' => 'Banco de Crédito del Perú',
+                    '2' => 'BBVA Perú',
+                    '3' => 'Scotiabank Perú',
+                    '4' => 'Interbank',
+                    '5' => 'Banco de la Nación',
+                    '6' => 'Banco de Comercio',
+                    '7' => 'BanBif',
+                    '8' => 'Banco Pichincha',
+                    '9' => 'Citibank Perú',
+                    '10' => 'MiBanco',
+                    '11' => 'Banco GNB Perú',
+                    '12' => 'Banco Falabella',
+                    '13' => 'Banco Ripley',
+                    '14' => 'Banco Santander Perú',
+                    '15' => 'Alfin Banco',
+                    '16' => 'Bank of China',
+                    '17' => 'Bci Perú',
+                    '18' => 'ICBC Perú Bank',
+                ];
+
+                $tiposCuenta = [
+                    '1' => 'Cuenta de Ahorros',
+                    '2' => 'Cuenta Corriente',
+                    '3' => 'Cuenta a Plazo Fijo',
+                ];
+
+                $monedas = [
+                    'PEN' => 'Soles',
+                    'USD' => 'Dólares',
+                    'EUR' => 'Euros',
+                ];
+
+                \Log::info('=== DATOS BANCARIOS ===');
+                \Log::info('Usuario ID:', ['id' => $usuario->idUsuario]);
+                \Log::info('Ficha General:', ['data' => $fichaGeneral]);
+
+                return view('usuario.tabs.detalles-pago.index', compact(
+                    'usuario',
+                    'fichaGeneral',
+                    'bancos',
+                    'tiposCuenta',
+                    'monedas'
+                ));
+
+            case 'informacion':
+                $sucursales = Sucursal::all();
+                $tiposUsuario = Tipousuario::all();
+                $sexos = Sexo::all();
+                $roles = Rol::all();
+                $tiposArea = Tipoarea::all();
+                $tiposContrato = TipoContrato::activos()->get();
+
+                // Cargar datos laborales
+                $laboral = $usuario->laboral;
+
+                // Si no existe, crear uno vacío
+                if (!$laboral) {
+                    $laboral = new \App\Models\UsuarioLaboral();
+                    $laboral->idUsuario = $usuario->idUsuario;
                 }
-                
-                // Distrito de nacimiento
-                if ($fichaGeneral->nacimientoDistrito) {
-                    $distNac = collect($distritos)
-                        ->firstWhere('id_ubigeo', $fichaGeneral->nacimientoDistrito);
-                    $nombreNacimientoDistrito = $distNac['nombre_ubigeo'] ?? '';
-                }
-            }
 
-            // DEBUG
-            \Log::info('=== DATOS DE NACIMIENTO ===');
-            \Log::info('Departamento nacimiento:', [
-                'id' => $fichaGeneral->nacimientoDepartamento ?? 'N/A',
-                'nombre' => $nombreNacimientoDepartamento
-            ]);
-            \Log::info('Provincias disponibles:', ['count' => count($provinciasNacimiento)]);
-            \Log::info('Provincia nacimiento:', [
-                'id' => $fichaGeneral->nacimientoProvincia ?? 'N/A',
-                'nombre' => $nombreNacimientoProvincia
-            ]);
-            \Log::info('Distritos disponibles:', ['count' => count($distritosNacimiento)]);
+                return view('usuario.tabs.informacion.index', compact(
+                    'usuario',
+                    'sucursales',
+                    'tiposUsuario',
+                    'sexos',
+                    'roles',
+                    'tiposArea',
+                    'tiposContrato',
+                    'laboral'
+                ));
 
-            // ============================================
-            // PROCESAR FECHA DE NACIMIENTO
-            // ============================================
-            $fechaNacimiento = $usuario->fechaNacimiento;
-            $dia = $fechaNacimiento ? date('d', strtotime($fechaNacimiento)) : '';
-            $mes = $fechaNacimiento ? date('m', strtotime($fechaNacimiento)) : '';
-            $anio = $fechaNacimiento ? date('Y', strtotime($fechaNacimiento)) : '';
-            $edad = $fechaNacimiento ? \Carbon\Carbon::parse($fechaNacimiento)->age : '';
+            case 'asignado':
+                return view('usuario.tabs.asignado.index', compact('usuario'));
 
-            // ============================================
-            // PROCESAR ESTUDIOS
-            // ============================================
-            $estudios = $usuario->estudios ?? collect([]);
-            $estudioSecundaria = $estudios->where('nivel', 'SECUNDARIA')->first();
-            $estudioTecnico = $estudios->where('nivel', 'TECNICO')->first();
-            $estudioUniversitario = $estudios->where('nivel', 'UNIVERSITARIO')->first();
-            $estudioPostgrado = $estudios->whereIn('nivel', ['POSTGRADO', 'MAESTRIA'])->first();
+            case 'preferences':
+                $roles = Rol::all();
+                $tiposArea = Tipoarea::all();
+                $tiposUsuario = Tipousuario::all();
+                $sexos = Sexo::all();
+                return view('usuario.tabs.configuracion.index', compact(
+                    'usuario',
+                    'roles',
+                    'tiposArea',
+                    'tiposUsuario',
+                    'sexos'
+                ));
 
-            return view('usuario.tabs.perfil.index', compact(
-                'usuario',
-                'tiposDocumento',
-                'sexos',
-                'departamentos',
-                'provincias',
-                'distritos',
-                'provinciasDelDepartamento',
-                'distritosDeLaProvincia',
-                'fichaGeneral',
-                'provinciasNacimiento',
-                'distritosNacimiento',
-                'fechaNacimiento',
-                'dia',
-                'mes',
-                'anio',
-                'edad',
-                'estudioSecundaria',
-                'estudioTecnico',
-                'estudioUniversitario',
-                'estudioPostgrado',
-                'nombreDepartamento',
-                'nombreProvincia',
-                'nombreNacimientoDepartamento',
-                'nombreNacimientoProvincia',
-                'nombreNacimientoDistrito'
-            ));
-       case 'info-salud':
-    // Cargar datos de salud, familiares y contactos de emergencia
-    $salud = $usuario->salud;
-    $familiares = $usuario->familiares ?? collect([]);
-    $contactosEmergencia = $usuario->contactosEmergencia ?? collect([]);
-    
-    // Si no existe registro de salud, crear uno vacío
-    if (!$salud) {
-        $salud = new \App\Models\UsuarioSalud();
-        $salud->idUsuario = $usuario->idUsuario;
+            case 'danger-zone':
+                return view('usuario.tabs.detalles.index', compact('usuario'));
+
+            default:
+                abort(404);
+        }
     }
-    
-    // Procesar fechas de COVID para el formato flatpickr
-    $covidDosis1 = $salud->covidDosis1 ? date('Y-m-d', strtotime($salud->covidDosis1)) : '';
-    $covidDosis2 = $salud->covidDosis2 ? date('Y-m-d', strtotime($salud->covidDosis2)) : '';
-    $covidDosis3 = $salud->covidDosis3 ? date('Y-m-d', strtotime($salud->covidDosis3)) : '';
-    
-    // Debug
-    \Log::info('=== DATOS DE SALUD ===');
-    \Log::info('Usuario ID:', ['id' => $usuario->idUsuario]);
-    \Log::info('Salud:', ['data' => $salud]);
-    \Log::info('Familiares:', ['count' => $familiares->count()]);
-    \Log::info('Contactos Emergencia:', ['count' => $contactosEmergencia->count()]);
-    
-    return view('usuario.tabs.info-salud.index', compact(
-        'usuario',
-        'salud',
-        'familiares',
-        'contactosEmergencia',
-        'covidDosis1',
-        'covidDosis2',
-        'covidDosis3'
-    ));
-
-        case 'payment-details':
-    // Obtener la ficha general del usuario
-    $fichaGeneral = $usuario->fichaGeneral;
-    
-    // Si no existe, crear una instancia vacía
-    if (!$fichaGeneral) {
-        $fichaGeneral = new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $usuario->idUsuario;
-    }
-    
-    // Mapeo de bancos (puedes tener una tabla de bancos o hacerlo así)
-    $bancos = [
-        '1' => 'Banco de Crédito del Perú',
-        '2' => 'BBVA Perú',
-        '3' => 'Scotiabank Perú',
-        '4' => 'Interbank',
-        '5' => 'Banco de la Nación',
-        '6' => 'Banco de Comercio',
-        '7' => 'BanBif',
-        '8' => 'Banco Pichincha',
-        '9' => 'Citibank Perú',
-        '10' => 'MiBanco',
-        '11' => 'Banco GNB Perú',
-        '12' => 'Banco Falabella',
-        '13' => 'Banco Ripley',
-        '14' => 'Banco Santander Perú',
-        '15' => 'Alfin Banco',
-        '16' => 'Bank of China',
-        '17' => 'Bci Perú',
-        '18' => 'ICBC Perú Bank',
-    ];
-    
-    $tiposCuenta = [
-        '1' => 'Cuenta de Ahorros',
-        '2' => 'Cuenta Corriente',
-        '3' => 'Cuenta a Plazo Fijo',
-    ];
-    
-    $monedas = [
-        'PEN' => 'Soles',
-        'USD' => 'Dólares',
-        'EUR' => 'Euros',
-    ];
-    
-    \Log::info('=== DATOS BANCARIOS ===');
-    \Log::info('Usuario ID:', ['id' => $usuario->idUsuario]);
-    \Log::info('Ficha General:', ['data' => $fichaGeneral]);
-    
-    return view('usuario.tabs.detalles-pago.index', compact(
-        'usuario',
-        'fichaGeneral',
-        'bancos',
-        'tiposCuenta',
-        'monedas'
-    ));
-
-      case 'informacion':
-    $sucursales = Sucursal::all();
-    $tiposUsuario = Tipousuario::all();
-    $sexos = Sexo::all();
-    $roles = Rol::all();
-    $tiposArea = Tipoarea::all();
-    $tiposContrato = TipoContrato::activos()->get();
-    
-    // Cargar datos laborales
-    $laboral = $usuario->laboral;
-    
-    // Si no existe, crear uno vacío
-    if (!$laboral) {
-        $laboral = new \App\Models\UsuarioLaboral();
-        $laboral->idUsuario = $usuario->idUsuario;
-    }
-    
-    return view('usuario.tabs.informacion.index', compact(
-        'usuario',
-        'sucursales',
-        'tiposUsuario',
-        'sexos',
-        'roles',
-        'tiposArea',
-        'tiposContrato',
-        'laboral'
-    ));
-
-        case 'asignado':
-            return view('usuario.tabs.asignado.index', compact('usuario'));
-
-        case 'preferences':
-            $roles = Rol::all();
-            $tiposArea = Tipoarea::all();
-            $tiposUsuario = Tipousuario::all();
-            $sexos = Sexo::all();
-            return view('usuario.tabs.configuracion.index', compact(
-                'usuario',
-                'roles',
-                'tiposArea',
-                'tiposUsuario',
-                'sexos'
-            ));
-
-        case 'danger-zone':
-            return view('usuario.tabs.detalles.index', compact('usuario'));
-
-        default:
-            abort(404);
-    }
-}
 
 
 
@@ -966,66 +966,66 @@ class UsuarioController extends Controller
     // use Illuminate\Support\Facades\Log;
 
     public function getUsuarios(Request $request)
-{
-    Log::debug('Iniciando obtención paginada de usuarios');
+    {
+        Log::debug('Iniciando obtención paginada de usuarios');
 
-    $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
+        $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
 
-    $total = $query->count();
+        $total = $query->count();
 
-    if ($search = $request->input('search.value')) {
-        $query->where(function ($q) use ($search) {
-            $q->where('Nombre', 'like', "%$search%")
-              ->orWhere('apellidoPaterno', 'like', "%$search%")
-              ->orWhere('documento', 'like', "%$search%")
-              ->orWhere('telefono', 'like', "%$search%")
-              ->orWhere('correo', 'like', "%$search%")
-              ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
-              ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
-                  $q2->where('nombre', 'like', "%$search%");
-              })
-              ->orWhereHas('rol', function ($q3) use ($search) {
-                  $q3->where('nombre', 'like', "%$search%");
-              })
-              ->orWhereHas('tipoArea', function ($q4) use ($search) {
-                  $q4->where('nombre', 'like', "%$search%");
-              });
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('Nombre', 'like', "%$search%")
+                    ->orWhere('apellidoPaterno', 'like', "%$search%")
+                    ->orWhere('documento', 'like', "%$search%")
+                    ->orWhere('telefono', 'like', "%$search%")
+                    ->orWhere('correo', 'like', "%$search%")
+                    ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
+                    ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
+                        $q2->where('nombre', 'like', "%$search%");
+                    })
+                    ->orWhereHas('rol', function ($q3) use ($search) {
+                        $q3->where('nombre', 'like', "%$search%");
+                    })
+                    ->orWhereHas('tipoArea', function ($q4) use ($search) {
+                        $q4->where('nombre', 'like', "%$search%");
+                    });
+            });
+        }
+
+        $filtered = $query->count();
+
+        $usuarios = $query
+            ->skip($request->start)
+            ->take($request->length)
+            ->get();
+
+        $data = $usuarios->map(function ($u) {
+            return [
+                'idUsuario' => $u->idUsuario,
+                'Nombre' => $u->Nombre,
+                'apellidoPaterno' => $u->apellidoPaterno,
+                'telefono' => $u->telefono ?? 'N/A',
+                'correo' => $u->correo ?? 'N/A',
+                'documento' => $u->documento ?? 'N/A',
+                'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
+                'estado' => $u->estado,
+                'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
+                'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
+                'rol' => $u->rol->nombre ?? 'N/A',
+                'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
+                'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
+                'tieneFirma' => !empty($u->firma),
+            ];
         });
+
+        return response()->json([
+            'draw' => intval($request->draw),
+            'recordsTotal' => $total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+        ]);
     }
-
-    $filtered = $query->count();
-
-    $usuarios = $query
-        ->skip($request->start)
-        ->take($request->length)
-        ->get();
-
-    $data = $usuarios->map(function ($u) {
-        return [
-            'idUsuario' => $u->idUsuario,
-            'Nombre' => $u->Nombre,
-            'apellidoPaterno' => $u->apellidoPaterno,
-            'telefono' => $u->telefono ?? 'N/A',
-            'correo' => $u->correo ?? 'N/A',
-            'documento' => $u->documento ?? 'N/A',
-            'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
-            'estado' => $u->estado,
-            'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
-            'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
-            'rol' => $u->rol->nombre ?? 'N/A',
-            'tipoArea' => $u->tipoArea->nombre ?? 'N/A',
-            'avatar' => $u->avatar ? 'data:image/png;base64,' . base64_encode($u->avatar) : null,
-            'tieneFirma' => !empty($u->firma),
-        ];
-    });
-
-    return response()->json([
-        'draw' => intval($request->draw),
-        'recordsTotal' => $total,
-        'recordsFiltered' => $filtered,
-        'data' => $data,
-    ]);
-}
 
 
 
@@ -1716,671 +1716,720 @@ class UsuarioController extends Controller
 ///NUEVOS DATOS DEL CONTROLADOR
 
 
-/**
- * Actualizar información general del usuario
- */
-public function updateInformacionGeneral(Request $request, $id)
-{
-    try {
-        $usuario = Usuario::findOrFail($id);
+    /**
+     * Actualizar información general del usuario
+     */
+    public function updateInformacionGeneral(Request $request, $id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
 
-        $validated = $request->validate([
-            'Nombre' => 'required|string|max:255',
-            'apellidoPaterno' => 'required|string|max:255',
-            'apellidoMaterno' => 'required|string|max:255',
-            'idSexo' => 'nullable|integer',
-            'idTipoDocumento' => 'required|integer',
-            'documento' => 'required|string|max:255|unique:usuarios,documento,' . $id . ',idUsuario',
-            'telefono' => 'required|string|max:255|unique:usuarios,telefono,' . $id . ',idUsuario',
-            'estadocivil' => 'nullable|integer|in:1,2,3,4',
-            'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario',
-            'correo_personal' => 'nullable|email|max:255|unique:usuarios,correo_personal,' . $id . ',idUsuario',
-            'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
+            $validated = $request->validate([
+                'Nombre' => 'required|string|max:255',
+                'apellidoPaterno' => 'required|string|max:255',
+                'apellidoMaterno' => 'required|string|max:255',
+                'idSexo' => 'nullable|integer',
+                'idTipoDocumento' => 'required|integer',
+                'documento' => 'required|string|max:255|unique:usuarios,documento,' . $id . ',idUsuario',
+                'telefono' => 'required|string|max:255|unique:usuarios,telefono,' . $id . ',idUsuario',
+                'estadocivil' => 'nullable|integer|in:1,2,3,4',
+                'correo' => 'required|email|max:255|unique:usuarios,correo,' . $id . ',idUsuario',
+                'correo_personal' => 'nullable|email|max:255|unique:usuarios,correo_personal,' . $id . ',idUsuario',
+                'profile-image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
 
-        // Actualizar datos básicos
-        $usuario->Nombre = $request->Nombre;
-        $usuario->apellidoPaterno = $request->apellidoPaterno;
-        $usuario->apellidoMaterno = $request->apellidoMaterno;
-        $usuario->idSexo = $request->idSexo;
-        $usuario->idTipoDocumento = $request->idTipoDocumento;
-        $usuario->documento = $request->documento;
-        $usuario->telefono = $request->telefono;
-        $usuario->estadocivil = $request->estadocivil;
-        $usuario->correo = $request->correo;
-        $usuario->correo_personal = $request->correo_personal;
+            // Actualizar datos básicos
+            $usuario->Nombre = $request->Nombre;
+            $usuario->apellidoPaterno = $request->apellidoPaterno;
+            $usuario->apellidoMaterno = $request->apellidoMaterno;
+            $usuario->idSexo = $request->idSexo;
+            $usuario->idTipoDocumento = $request->idTipoDocumento;
+            $usuario->documento = $request->documento;
+            $usuario->telefono = $request->telefono;
+            $usuario->estadocivil = $request->estadocivil;
+            $usuario->correo = $request->correo;
+            $usuario->correo_personal = $request->correo_personal;
 
-        // Procesar imagen si se subió
-        if ($request->hasFile('profile-image')) {
-            $image = $request->file('profile-image');
-            $imageData = file_get_contents($image->getRealPath());
-            $usuario->avatar = $imageData;
-        }
-
-        $usuario->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Información general actualizada correctamente',
-            'data' => [
-                'avatar' => $usuario->avatar ? 'data:image/jpeg;base64,' . base64_encode($usuario->avatar) : null,
-                'Nombre' => $usuario->Nombre,
-                'apellidoPaterno' => $usuario->apellidoPaterno,
-                'apellidoMaterno' => $usuario->apellidoMaterno,
-                'correo' => $usuario->correo,
-                'correo_personal' => $usuario->correo_personal
-            ]
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar información general:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la información general'
-        ], 500);
-    }
-}
-
-/**
- * Actualizar fecha de nacimiento
- */
-public function updateFechaNacimiento(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'nacimiento_dia' => 'required|numeric|min:1|max:31',
-            'nacimiento_mes' => 'required|numeric|min:1|max:12',
-            'nacimiento_anio' => 'required|numeric|min:1900|max:' . date('Y'),
-        ]);
-
-        $usuario = Usuario::findOrFail($id);
-        
-        $fechaNacimiento = sprintf('%04d-%02d-%02d', 
-            $request->nacimiento_anio, 
-            $request->nacimiento_mes, 
-            $request->nacimiento_dia
-        );
-        
-        $usuario->fechaNacimiento = $fechaNacimiento;
-        $usuario->save();
-
-        $edad = \Carbon\Carbon::parse($fechaNacimiento)->age;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Fecha de nacimiento actualizada correctamente',
-            'data' => [
-                'fechaNacimiento' => $fechaNacimiento,
-                'edad' => $edad
-            ]
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar fecha de nacimiento:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la fecha de nacimiento'
-        ], 500);
-    }
-}
-
-/**
- * Actualizar lugar de nacimiento
- */
-public function updateLugarNacimiento(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'nacimiento_departamento' => 'required|string',
-            'nacimiento_provincia' => 'required|string',
-            'nacimiento_distrito' => 'required|string',
-        ]);
-
-        $usuario = Usuario::findOrFail($id);
-        
-        $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $id;
-        $fichaGeneral->nacimientoDepartamento = $request->nacimiento_departamento;
-        $fichaGeneral->nacimientoProvincia = $request->nacimiento_provincia;
-        $fichaGeneral->nacimientoDistrito = $request->nacimiento_distrito;
-        $fichaGeneral->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Lugar de nacimiento actualizado correctamente'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar lugar de nacimiento:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el lugar de nacimiento'
-        ], 500);
-    }
-}
-
-/**
- * Actualizar información académica
- */
-public function updateEstudios(Request $request, $id)
-{
-    try {
-        $usuario = Usuario::findOrFail($id);
-        
-        // Array de niveles a procesar
-        $niveles = [
-            'secundaria' => 'SECUNDARIA',
-            'tecnico' => 'TECNICO',
-            'universitario' => 'UNIVERSITARIO',
-            'postgrado' => 'POSTGRADO'
-        ];
-        
-        $estudiosGuardados = [];
-        
-        foreach ($niveles as $key => $nivel) {
-            // Verificar si se enviaron datos para este nivel
-            $termino = $request->input($key . '_termino');
-            $centro = $request->input($key . '_centro');
-            $especialidad = $request->input($key . '_especialidad');
-            $grado = $request->input($key . '_grado');
-            $inicio = $request->input($key . '_inicio');
-            $fin = $request->input($key . '_fin');
-            
-            // Solo guardar si el usuario marcó que terminó (SI) o si hay datos
-            if ($termino == '1' || ($centro && $termino !== '0')) {
-                $estudioData = [
-                    'termino' => $termino,
-                    'centroEstudios' => $centro,
-                    'especialidad' => $especialidad,
-                    'gradoAcademico' => $grado,
-                    'fechaInicio' => $inicio ? $inicio . '-01-01' : null,
-                    'fechaFin' => $fin ? $fin . '-12-31' : null
-                ];
-                
-                $estudio = \App\Models\UsuarioEstudio::updateOrCreate(
-                    [
-                        'idUsuario' => $id,
-                        'nivel' => $nivel
-                    ],
-                    $estudioData
-                );
-                
-                $estudiosGuardados[$key] = $estudio;
-            } else {
-                // Si marcó NO, eliminar el registro si existe
-                \App\Models\UsuarioEstudio::where('idUsuario', $id)
-                    ->where('nivel', $nivel)
-                    ->delete();
+            // Procesar imagen si se subió
+            if ($request->hasFile('profile-image')) {
+                $image = $request->file('profile-image');
+                $imageData = file_get_contents($image->getRealPath());
+                $usuario->avatar = $imageData;
             }
+
+            $usuario->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Información general actualizada correctamente',
+                'data' => [
+                    'avatar' => $usuario->avatar ? 'data:image/jpeg;base64,' . base64_encode($usuario->avatar) : null,
+                    'Nombre' => $usuario->Nombre,
+                    'apellidoPaterno' => $usuario->apellidoPaterno,
+                    'apellidoMaterno' => $usuario->apellidoMaterno,
+                    'correo' => $usuario->correo,
+                    'correo_personal' => $usuario->correo_personal
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar información general:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la información general'
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Información académica actualizada correctamente',
-            'data' => $estudiosGuardados
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar estudios:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la información académica'
-        ], 500);
     }
-}
 
+    /**
+     * Actualizar fecha de nacimiento
+     */
+    public function updateFechaNacimiento(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'nacimiento_dia' => 'required|numeric|min:1|max:31',
+                'nacimiento_mes' => 'required|numeric|min:1|max:12',
+                'nacimiento_anio' => 'required|numeric|min:1900|max:' . date('Y'),
+            ]);
 
-/**
- * Actualizar seguro y pensión
- */
-public function updateSeguroPension(Request $request, $id)
-{
-    try {
-        $usuario = Usuario::findOrFail($id);
-        
-        $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $id;
-        $fichaGeneral->seguroSalud = $request->seguroSalud;
-        $fichaGeneral->sistemaPensiones = $request->sistemaPensiones;
-        $fichaGeneral->afpCompania = $request->sistemaPensiones == 'AFP' ? $request->afpCompania : null;
-        $fichaGeneral->save();
+            $usuario = Usuario::findOrFail($id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Seguro y pensión actualizados correctamente'
-        ]);
+            $fechaNacimiento = sprintf(
+                '%04d-%02d-%02d',
+                $request->nacimiento_anio,
+                $request->nacimiento_mes,
+                $request->nacimiento_dia
+            );
 
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar seguro y pensión:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar seguro y pensión'
-        ], 500);
+            $usuario->fechaNacimiento = $fechaNacimiento;
+            $usuario->save();
+
+            $edad = \Carbon\Carbon::parse($fechaNacimiento)->age;
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Fecha de nacimiento actualizada correctamente',
+                'data' => [
+                    'fechaNacimiento' => $fechaNacimiento,
+                    'edad' => $edad
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar fecha de nacimiento:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la fecha de nacimiento'
+            ], 500);
+        }
     }
-}
 
+    /**
+     * Actualizar lugar de nacimiento
+     */
+    public function updateLugarNacimiento(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'nacimiento_departamento' => 'required|string',
+                'nacimiento_provincia' => 'required|string',
+                'nacimiento_distrito' => 'required|string',
+            ]);
 
+            $usuario = Usuario::findOrFail($id);
 
+            $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
+            $fichaGeneral->idUsuario = $id;
+            $fichaGeneral->nacimientoDepartamento = $request->nacimiento_departamento;
+            $fichaGeneral->nacimientoProvincia = $request->nacimiento_provincia;
+            $fichaGeneral->nacimientoDistrito = $request->nacimiento_distrito;
+            $fichaGeneral->save();
 
-
-
-
-/**
- * Guardar información de salud
- */
-public function guardarSalud(Request $request, $id)
-{
-    try {
-        $usuario = Usuario::findOrFail($id);
-        
-        $request->validate([
-            'vacuna_covid' => 'nullable|in:0,1',
-            'covid_dosis1' => 'nullable|date',
-            'covid_dosis2' => 'nullable|date',
-            'covid_dosis3' => 'nullable|date',
-            'dolencia_cronica' => 'nullable|in:0,1',
-            'dolencia_detalle' => 'nullable|string|max:500',
-            'discapacidad' => 'nullable|in:0,1',
-            'discapacidad_detalle' => 'nullable|string|max:500',
-            'tipo_sangre' => 'nullable|string|max:10'
-        ]);
-
-        $salud = $usuario->salud ?? new \App\Models\UsuarioSalud();
-        $salud->idUsuario = $id;
-        $salud->vacunaCovid = $request->vacuna_covid !== null ? (bool)$request->vacuna_covid : null;
-        $salud->covidDosis1 = $request->covid_dosis1;
-        $salud->covidDosis2 = $request->covid_dosis2;
-        $salud->covidDosis3 = $request->covid_dosis3;
-        $salud->dolenciaCronica = $request->dolencia_cronica !== null ? (bool)$request->dolencia_cronica : null;
-        $salud->dolenciaDetalle = $request->dolencia_detalle;
-        $salud->discapacidad = $request->discapacidad !== null ? (bool)$request->discapacidad : null;
-        $salud->discapacidadDetalle = $request->discapacidad_detalle;
-        $salud->tipoSangre = $request->tipo_sangre;
-        $salud->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Información de salud guardada correctamente'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al guardar salud:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar la información de salud'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Lugar de nacimiento actualizado correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar lugar de nacimiento:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el lugar de nacimiento'
+            ], 500);
+        }
     }
-}
 
-/**
- * Guardar familiar
- */
-public function guardarFamiliar(Request $request)
-{
-    try {
-        $request->validate([
-            'idUsuario' => 'required|integer|exists:usuarios,idUsuario',
-            'parentesco' => 'required|string|in:CONYUGE,CONCUBINO,HIJO',
-            'apellidosNombres' => 'required|string|max:255',
-            'nroDocumento' => 'nullable|string|max:50',
-            'ocupacion' => 'nullable|string|max:255',
-            'sexo' => 'nullable|string|max:20',
-            'fechaNacimiento' => 'nullable|date',
-            'domicilioActual' => 'nullable|string|max:255'
-        ]);
+    /**
+     * Actualizar información académica
+     */
+    public function updateEstudios(Request $request, $id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
 
-        $familiar = UsuarioFamilia::create([
-            'idUsuario' => $request->idUsuario,
-            'parentesco' => $request->parentesco,
-            'apellidosNombres' => $request->apellidosNombres,
-            'nroDocumento' => $request->nroDocumento,
-            'ocupacion' => $request->ocupacion,
-            'sexo' => $request->sexo,
-            'fechaNacimiento' => $request->fechaNacimiento,
-            'domicilioActual' => $request->domicilioActual
-        ]);
+            // Array de niveles a procesar
+            $niveles = [
+                'secundaria' => 'SECUNDARIA',
+                'tecnico' => 'TECNICO',
+                'universitario' => 'UNIVERSITARIO',
+                'postgrado' => 'POSTGRADO'
+            ];
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Familiar agregado correctamente',
-            'familiar' => $familiar
-        ]);
+            $estudiosGuardados = [];
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al guardar familiar:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar el familiar'
-        ], 500);
+            foreach ($niveles as $key => $nivel) {
+                // Verificar si se enviaron datos para este nivel
+                $termino = $request->input($key . '_termino');
+                $centro = $request->input($key . '_centro');
+                $especialidad = $request->input($key . '_especialidad');
+                $grado = $request->input($key . '_grado');
+                $inicio = $request->input($key . '_inicio');
+                $fin = $request->input($key . '_fin');
+
+                // Solo guardar si el usuario marcó que terminó (SI) o si hay datos
+                if ($termino == '1' || ($centro && $termino !== '0')) {
+                    $estudioData = [
+                        'termino' => $termino,
+                        'centroEstudios' => $centro,
+                        'especialidad' => $especialidad,
+                        'gradoAcademico' => $grado,
+                        'fechaInicio' => $inicio ? $inicio . '-01-01' : null,
+                        'fechaFin' => $fin ? $fin . '-12-31' : null
+                    ];
+
+                    $estudio = \App\Models\UsuarioEstudio::updateOrCreate(
+                        [
+                            'idUsuario' => $id,
+                            'nivel' => $nivel
+                        ],
+                        $estudioData
+                    );
+
+                    $estudiosGuardados[$key] = $estudio;
+                } else {
+                    // Si marcó NO, eliminar el registro si existe
+                    \App\Models\UsuarioEstudio::where('idUsuario', $id)
+                        ->where('nivel', $nivel)
+                        ->delete();
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Información académica actualizada correctamente',
+                'data' => $estudiosGuardados
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar estudios:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la información académica'
+            ], 500);
+        }
     }
-}
 
-/**
- * Obtener familiar por ID
- */
-public function getFamiliar($id)
-{
-    try {
-        $familiar = UsuarioFamilia::findOrFail($id);
-        
-        return response()->json([
-            'success' => true,
-            'familiar' => $familiar
-        ]);
 
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Familiar no encontrado'
-        ], 404);
+    /**
+     * Actualizar seguro y pensión
+     */
+    public function updateSeguroPension(Request $request, $id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+
+            $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
+            $fichaGeneral->idUsuario = $id;
+            $fichaGeneral->seguroSalud = $request->seguroSalud;
+            $fichaGeneral->sistemaPensiones = $request->sistemaPensiones;
+            $fichaGeneral->afpCompania = $request->sistemaPensiones == 'AFP' ? $request->afpCompania : null;
+            $fichaGeneral->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Seguro y pensión actualizados correctamente'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar seguro y pensión:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar seguro y pensión'
+            ], 500);
+        }
     }
-}
 
-/**
- * Actualizar familiar
- */
-public function updateFamiliar(Request $request, $id)
-{
-    try {
-        $familiar = UsuarioFamilia::findOrFail($id);
-        
-        $request->validate([
-            'parentesco' => 'required|string|in:CONYUGE,CONCUBINO,HIJO',
-            'apellidosNombres' => 'required|string|max:255',
-            'nroDocumento' => 'nullable|string|max:50',
-            'ocupacion' => 'nullable|string|max:255',
-            'sexo' => 'nullable|string|max:20',
-            'fechaNacimiento' => 'nullable|date',
-            'domicilioActual' => 'nullable|string|max:255'
-        ]);
 
-        $familiar->update($request->all());
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Familiar actualizado correctamente',
-            'familiar' => $familiar
-        ]);
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar familiar:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el familiar'
-        ], 500);
+
+
+
+    /**
+     * Guardar información de salud
+     */
+    public function guardarSalud(Request $request, $id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+
+            $request->validate([
+                'vacuna_covid' => 'nullable|in:0,1',
+                'covid_dosis1' => 'nullable|date',
+                'covid_dosis2' => 'nullable|date',
+                'covid_dosis3' => 'nullable|date',
+                'dolencia_cronica' => 'nullable|in:0,1',
+                'dolencia_detalle' => 'nullable|string|max:500',
+                'discapacidad' => 'nullable|in:0,1',
+                'discapacidad_detalle' => 'nullable|string|max:500',
+                'tipo_sangre' => 'nullable|string|max:10'
+            ]);
+
+            $salud = $usuario->salud ?? new \App\Models\UsuarioSalud();
+            $salud->idUsuario = $id;
+            $salud->vacunaCovid = $request->vacuna_covid !== null ? (bool)$request->vacuna_covid : null;
+            $salud->covidDosis1 = $request->covid_dosis1;
+            $salud->covidDosis2 = $request->covid_dosis2;
+            $salud->covidDosis3 = $request->covid_dosis3;
+            $salud->dolenciaCronica = $request->dolencia_cronica !== null ? (bool)$request->dolencia_cronica : null;
+            $salud->dolenciaDetalle = $request->dolencia_detalle;
+            $salud->discapacidad = $request->discapacidad !== null ? (bool)$request->discapacidad : null;
+            $salud->discapacidadDetalle = $request->discapacidad_detalle;
+            $salud->tipoSangre = $request->tipo_sangre;
+            $salud->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Información de salud guardada correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar salud:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la información de salud'
+            ], 500);
+        }
     }
-}
 
-/**
- * Eliminar familiar
- */
-public function deleteFamiliar($id)
-{
-    try {
-        $familiar = UsuarioFamilia::findOrFail($id);
-        $familiar->delete();
+    /**
+     * Guardar familiar
+     */
+    public function guardarFamiliar(Request $request)
+    {
+        try {
+            $request->validate([
+                'idUsuario' => 'required|integer|exists:usuarios,idUsuario',
+                'parentesco' => 'required|string|in:CONYUGE,CONCUBINO,HIJO',
+                'apellidosNombres' => 'required|string|max:255',
+                'nroDocumento' => 'nullable|string|max:50',
+                'ocupacion' => 'nullable|string|max:255',
+                'sexo' => 'nullable|string|max:20',
+                'fechaNacimiento' => 'nullable|date',
+                'domicilioActual' => 'nullable|string|max:255'
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Familiar eliminado correctamente'
-        ]);
+            $familiar = UsuarioFamilia::create([
+                'idUsuario' => $request->idUsuario,
+                'parentesco' => $request->parentesco,
+                'apellidosNombres' => $request->apellidosNombres,
+                'nroDocumento' => $request->nroDocumento,
+                'ocupacion' => $request->ocupacion,
+                'sexo' => $request->sexo,
+                'fechaNacimiento' => $request->fechaNacimiento,
+                'domicilioActual' => $request->domicilioActual
+            ]);
 
-    } catch (\Exception $e) {
-        \Log::error('Error al eliminar familiar:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al eliminar el familiar'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Familiar agregado correctamente',
+                'familiar' => $familiar
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar familiar:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el familiar'
+            ], 500);
+        }
     }
-}
 
-/**
- * Guardar contacto de emergencia
- */
-public function guardarContactoEmergencia(Request $request)
-{
-    try {
-        $request->validate([
-            'idUsuario' => 'required|integer|exists:usuarios,idUsuario',
-            'apellidosNombres' => 'required|string|max:255',
-            'parentesco' => 'required|string|max:100',
-            'direccionTelefono' => 'required|string|max:255'
-        ]);
+    /**
+     * Obtener familiar por ID
+     */
+    public function getFamiliar($id)
+    {
+        try {
+            $familiar = UsuarioFamilia::findOrFail($id);
 
-        $contacto = UsuarioEmergenciaContacto::create([
-            'idUsuario' => $request->idUsuario,
-            'apellidosNombres' => $request->apellidosNombres,
-            'parentesco' => $request->parentesco,
-            'direccionTelefono' => $request->direccionTelefono
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Contacto de emergencia agregado correctamente',
-            'contacto' => $contacto
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al guardar contacto:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar el contacto'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'familiar' => $familiar
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Familiar no encontrado'
+            ], 404);
+        }
     }
-}
 
-/**
- * Actualizar contacto de emergencia
- */
-public function updateContactoEmergencia(Request $request, $id)
-{
-    try {
-        $contacto = UsuarioEmergenciaContacto::findOrFail($id);
-        
-        $request->validate([
-            'apellidosNombres' => 'required|string|max:255',
-            'parentesco' => 'required|string|max:100',
-            'direccionTelefono' => 'required|string|max:255'
-        ]);
+    /**
+     * Actualizar familiar
+     */
+    public function updateFamiliar(Request $request, $id)
+    {
+        try {
+            $familiar = UsuarioFamilia::findOrFail($id);
 
-        $contacto->update($request->all());
+            $request->validate([
+                'parentesco' => 'required|string|in:CONYUGE,CONCUBINO,HIJO',
+                'apellidosNombres' => 'required|string|max:255',
+                'nroDocumento' => 'nullable|string|max:50',
+                'ocupacion' => 'nullable|string|max:255',
+                'sexo' => 'nullable|string|max:20',
+                'fechaNacimiento' => 'nullable|date',
+                'domicilioActual' => 'nullable|string|max:255'
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Contacto actualizado correctamente'
-        ]);
+            $familiar->update($request->all());
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar contacto:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el contacto'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Familiar actualizado correctamente',
+                'familiar' => $familiar
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar familiar:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el familiar'
+            ], 500);
+        }
     }
-}
 
-/**
- * Eliminar contacto de emergencia
- */
-public function deleteContactoEmergencia($id)
-{
-    try {
-        $contacto = \App\Models\UsuarioEmergenciaContacto::findOrFail($id);
-        $contacto->delete();
+    /**
+     * Eliminar familiar
+     */
+    public function deleteFamiliar($id)
+    {
+        try {
+            $familiar = UsuarioFamilia::findOrFail($id);
+            $familiar->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Contacto eliminado correctamente'
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Error al eliminar contacto:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al eliminar el contacto'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Familiar eliminado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al eliminar familiar:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el familiar'
+            ], 500);
+        }
     }
-}
 
-/**
- * Actualizar información laboral y de configuración
- */
-public function updateInformacion(Request $request, $id)
-{
-    try {
-        $usuario = Usuario::findOrFail($id);
+    /**
+     * Guardar contacto de emergencia
+     */
+    public function guardarContactoEmergencia(Request $request)
+    {
+        try {
+            $request->validate([
+                'idUsuario' => 'required|integer|exists:usuarios,idUsuario',
+                'apellidosNombres' => 'required|string|max:255',
+                'parentesco' => 'required|string|max:100',
+                'direccionTelefono' => 'required|string|max:255'
+            ]);
 
-        // Validar datos - CORREGIDO: sucursal (sin s) y sueldoMensual
-        $request->validate([
-            // Datos laborales
-            'idTipoContrato' => 'nullable|integer|exists:tipos_contrato,idTipoContrato',
-            'fechaInicio' => 'nullable|date',
-            'fechaTermino' => 'nullable|date|after_or_equal:fechaInicio',
-            'horaInicioJornada' => 'nullable|string',
-            'horaFinJornada' => 'nullable|string',
-            'areaTexto' => 'nullable|string|max:255',
-            'cargoTexto' => 'nullable|string|max:255',
-            
-            // Datos de configuración - CORREGIDO: sucursal (sin s)
-            'idSucursal' => 'nullable|integer|exists:sucursal,idSucursal',
-            'idTipoArea' => 'nullable|integer|exists:tipoarea,idTipoArea',
-            'idTipoUsuario' => 'nullable|integer|exists:tipousuario,idTipoUsuario',
-            'idRol' => 'nullable|integer|exists:rol,idRol',
-            'idSexo' => 'nullable|integer|exists:sexo,idSexo',
-            'sueldoMensual' => 'nullable|numeric|min:0' // CAMBIADO: sueldoPorHora -> sueldoMensual
-        ]);
+            $contacto = UsuarioEmergenciaContacto::create([
+                'idUsuario' => $request->idUsuario,
+                'apellidosNombres' => $request->apellidosNombres,
+                'parentesco' => $request->parentesco,
+                'direccionTelefono' => $request->direccionTelefono
+            ]);
 
-        // Actualizar datos del usuario - CORREGIDO: sueldoMensual
-        $usuario->idSucursal = $request->idSucursal;
-        $usuario->idTipoArea = $request->idTipoArea;
-        $usuario->idTipoUsuario = $request->idTipoUsuario;
-        $usuario->idRol = $request->idRol;
-        $usuario->idSexo = $request->idSexo;
-        $usuario->sueldoMensual = $request->sueldoMensual; // CAMBIADO: sueldoPorHora -> sueldoMensual
-        $usuario->save();
-
-        // Actualizar datos laborales
-        $laboral = $usuario->laboral ?? new \App\Models\UsuarioLaboral();
-        $laboral->idUsuario = $id;
-        $laboral->idTipoContrato = $request->idTipoContrato;
-        $laboral->fechaInicio = $request->fechaInicio;
-        $laboral->fechaTermino = $request->fechaTermino;
-        $laboral->horaInicioJornada = $request->horaInicioJornada;
-        $laboral->horaFinJornada = $request->horaFinJornada;
-        $laboral->areaTexto = $request->areaTexto;
-        $laboral->cargoTexto = $request->cargoTexto;
-        $laboral->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Información actualizada correctamente'
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al actualizar información:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la información'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Contacto de emergencia agregado correctamente',
+                'contacto' => $contacto
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar contacto:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el contacto'
+            ], 500);
+        }
     }
-}
 
+    /**
+     * Actualizar contacto de emergencia
+     */
+    public function updateContactoEmergencia(Request $request, $id)
+    {
+        try {
+            $contacto = UsuarioEmergenciaContacto::findOrFail($id);
 
+            $request->validate([
+                'apellidosNombres' => 'required|string|max:255',
+                'parentesco' => 'required|string|max:100',
+                'direccionTelefono' => 'required|string|max:255'
+            ]);
 
-/**
- * Guardar cuenta bancaria
- */
-public function guardarCuentaBancaria(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'entidadBancaria' => 'required|string',
-            'moneda' => 'required|string',
-            'tipoCuenta' => 'required|string',
-            'numeroCuenta' => 'required|string',
-            'numeroCCI' => 'required|string'
-        ]);
+            $contacto->update($request->all());
 
-        $usuario = Usuario::findOrFail($id);
-        
-        // Actualizar o crear ficha general
-        $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
-        $fichaGeneral->idUsuario = $id;
-        $fichaGeneral->entidadBancaria = $request->entidadBancaria;
-        $fichaGeneral->moneda = $request->moneda;
-        $fichaGeneral->tipoCuenta = $request->tipoCuenta;
-        $fichaGeneral->numeroCuenta = $request->numeroCuenta;
-        $fichaGeneral->numeroCCI = $request->numeroCCI;
-        $fichaGeneral->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cuenta bancaria guardada correctamente',
-            'data' => [
-                'entidadBancaria' => $fichaGeneral->entidadBancaria,
-                'moneda' => $fichaGeneral->moneda,
-                'tipoCuenta' => $fichaGeneral->tipoCuenta,
-                'numeroCuenta' => $fichaGeneral->numeroCuenta,
-                'numeroCCI' => $fichaGeneral->numeroCCI
-            ]
-        ]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        \Log::error('Error al guardar cuenta bancaria:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar la cuenta bancaria'
-        ], 500);
+            return response()->json([
+                'success' => true,
+                'message' => 'Contacto actualizado correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar contacto:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el contacto'
+            ], 500);
+        }
     }
-}
+
+    /**
+     * Eliminar contacto de emergencia
+     */
+    public function deleteContactoEmergencia($id)
+    {
+        try {
+            $contacto = \App\Models\UsuarioEmergenciaContacto::findOrFail($id);
+            $contacto->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contacto eliminado correctamente'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al eliminar contacto:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar el contacto'
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar información laboral y de configuración
+     */
+    public function updateInformacion(Request $request, $id)
+    {
+        try {
+            $usuario = Usuario::findOrFail($id);
+
+            // Validar datos - CORREGIDO: sucursal (sin s) y sueldoMensual
+            $request->validate([
+                // Datos laborales
+                'idTipoContrato' => 'nullable|integer|exists:tipos_contrato,idTipoContrato',
+                'fechaInicio' => 'nullable|date',
+                'fechaTermino' => 'nullable|date|after_or_equal:fechaInicio',
+                'horaInicioJornada' => 'nullable|string',
+                'horaFinJornada' => 'nullable|string',
+                'areaTexto' => 'nullable|string|max:255',
+                'cargoTexto' => 'nullable|string|max:255',
+
+                // Datos de configuración - CORREGIDO: sucursal (sin s)
+                'idSucursal' => 'nullable|integer|exists:sucursal,idSucursal',
+                'idTipoArea' => 'nullable|integer|exists:tipoarea,idTipoArea',
+                'idTipoUsuario' => 'nullable|integer|exists:tipousuario,idTipoUsuario',
+                'idRol' => 'nullable|integer|exists:rol,idRol',
+                'idSexo' => 'nullable|integer|exists:sexo,idSexo',
+                'sueldoMensual' => 'nullable|numeric|min:0' // CAMBIADO: sueldoPorHora -> sueldoMensual
+            ]);
+
+            // Actualizar datos del usuario - CORREGIDO: sueldoMensual
+            $usuario->idSucursal = $request->idSucursal;
+            $usuario->idTipoArea = $request->idTipoArea;
+            $usuario->idTipoUsuario = $request->idTipoUsuario;
+            $usuario->idRol = $request->idRol;
+            $usuario->idSexo = $request->idSexo;
+            $usuario->sueldoMensual = $request->sueldoMensual; // CAMBIADO: sueldoPorHora -> sueldoMensual
+            $usuario->save();
+
+            // Actualizar datos laborales
+            $laboral = $usuario->laboral ?? new \App\Models\UsuarioLaboral();
+            $laboral->idUsuario = $id;
+            $laboral->idTipoContrato = $request->idTipoContrato;
+            $laboral->fechaInicio = $request->fechaInicio;
+            $laboral->fechaTermino = $request->fechaTermino;
+            $laboral->horaInicioJornada = $request->horaInicioJornada;
+            $laboral->horaFinJornada = $request->horaFinJornada;
+            $laboral->areaTexto = $request->areaTexto;
+            $laboral->cargoTexto = $request->cargoTexto;
+            $laboral->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Información actualizada correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al actualizar información:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la información'
+            ], 500);
+        }
+    }
+
+    public function exportarFichaUsuario($id)
+    {
+        try {
+            $usuario = Usuario::with([
+                'tipoDocumento',
+                'sexo',
+                'fichaGeneral',
+                'estudios',
+                'cursos'
+            ])->findOrFail($id);
+
+            $export = new UsuarioFichaExport($usuario);
+            $nombreArchivo = 'Ficha_' . $usuario->Nombre . '_' . $usuario->apellidoPaterno . '.xlsx';
+
+            return Excel::download($export, $nombreArchivo);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al exportar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
+    /**
+     * Visualizar documento en el navegador
+     */
+    public function view($idDocumento)
+    {
+        try {
+            $documento = DocumentoUsuario::findOrFail($idDocumento);
+
+            $rutaCompleta = storage_path('app/public/' . $documento->ruta_archivo);
+
+            if (!file_exists($rutaCompleta)) {
+                return response()->json(['success' => false, 'message' => 'Archivo no encontrado'], 404);
+            }
+
+            // Determinar el tipo MIME del archivo
+            $extension = strtolower(pathinfo($rutaCompleta, PATHINFO_EXTENSION));
+            $mimeTypes = [
+                'pdf' => 'application/pdf',
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'txt' => 'text/plain',
+                'doc' => 'application/msword',
+                'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'xls' => 'application/vnd.ms-excel',
+                'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ];
+
+            $mimeType = $mimeTypes[$extension] ?? 'application/octet-stream';
+
+            return response()->file($rutaCompleta, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $documento->nombre_archivo . '"'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al visualizar documento:', ['error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error al visualizar documento'], 500);
+        }
+    }
+    /**
+     * Guardar cuenta bancaria
+     */
+    public function guardarCuentaBancaria(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'entidadBancaria' => 'required|string',
+                'moneda' => 'required|string',
+                'tipoCuenta' => 'required|string',
+                'numeroCuenta' => 'required|string',
+                'numeroCCI' => 'required|string'
+            ]);
+
+            $usuario = Usuario::findOrFail($id);
+
+            // Actualizar o crear ficha general
+            $fichaGeneral = $usuario->fichaGeneral ?? new \App\Models\UsuarioFichaGeneral();
+            $fichaGeneral->idUsuario = $id;
+            $fichaGeneral->entidadBancaria = $request->entidadBancaria;
+            $fichaGeneral->moneda = $request->moneda;
+            $fichaGeneral->tipoCuenta = $request->tipoCuenta;
+            $fichaGeneral->numeroCuenta = $request->numeroCuenta;
+            $fichaGeneral->numeroCCI = $request->numeroCCI;
+            $fichaGeneral->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cuenta bancaria guardada correctamente',
+                'data' => [
+                    'entidadBancaria' => $fichaGeneral->entidadBancaria,
+                    'moneda' => $fichaGeneral->moneda,
+                    'tipoCuenta' => $fichaGeneral->tipoCuenta,
+                    'numeroCuenta' => $fichaGeneral->numeroCuenta,
+                    'numeroCCI' => $fichaGeneral->numeroCCI
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error al guardar cuenta bancaria:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar la cuenta bancaria'
+            ], 500);
+        }
+    }
 }

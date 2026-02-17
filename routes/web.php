@@ -1182,6 +1182,7 @@ Route::get('/usuario/documentos/{id}/view', [UsuarioController::class, 'view']);
 Route::post('/usuario/store', [UsuarioController::class, 'store'])->name('usuarios.store');
 Route::put('config/{id}', [UsuarioController::class, 'config'])->name('usuario.config');
 Route::put('/usuario/direccion/{id}', [UsuarioController::class, 'direccion'])->name('usuario.direccion');
+Route::get('/usuario/{id}/exportar-ficha', [UsuarioController::class, 'exportarFichaUsuario'])->name('usuario.exportar.ficha');
 
 
 Route::get('/usuario/{id}/documentos', [UsuarioController::class, 'getDocumentos'])->name('usuario.documentos');
