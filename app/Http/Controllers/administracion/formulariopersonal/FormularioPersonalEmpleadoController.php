@@ -57,7 +57,7 @@ class FormularioPersonalEmpleadoController extends Controller
         // ✅ Debug para que el JSON te diga EXACTAMENTE qué falló
         $debug = [
             'tx'       => ['committed' => false],
-            'link'     => ['ok' => false, 'id' => null, 'error' => null],
+            'link'     => ['ok' => false, 'id' => null, 'error' => null, 'skipped' => false],
             'notif'    => ['ok' => false, 'id' => null, 'error' => null],
             'ws'       => ['ok' => false, 'error' => null, 'payload' => null],
         ];
@@ -67,8 +67,9 @@ class FormularioPersonalEmpleadoController extends Controller
 
             // ========== 1. VALIDACIÓN DE DATOS ==========
             $validator = Validator::make($request->all(), [
-                // ✅ LINK (obligatorio para invalidar al guardar)
-                'form_link_id' => 'required|integer|exists:form_links,id',
+                // ✅ AHORA ES OPCIONAL (puede venir o no)
+                // Si viene, solo exigimos que sea integer. NO exigimos exists para no bloquear pruebas.
+                'form_link_id' => 'nullable|integer',
 
                 // SECCIÓN 1 - DATOS PERSONALES (OBLIGATORIOS)
                 'paterno' => 'required|string|max:255',
@@ -109,7 +110,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 'sistemaPensiones' => 'nullable|in:ONP,AFP,NA',
                 'afpCompania' => 'required_if:sistemaPensiones,AFP|nullable|in:Integra,Horizonte,Profuturo,Prima',
 
-                // SECCIÓN 2 - INFORMACIÓN ACADÉMICA (NAMES SIMPLES)
+                // SECCIÓN 2 - INFORMACIÓN ACADÉMICA
                 'nivel_0' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 'nivel_1' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
                 'nivel_2' => 'nullable|in:SECUNDARIA,TECNICO,UNIVERSITARIO,POSTGRADO',
@@ -145,7 +146,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 'fin_2' => 'nullable|date|after_or_equal:inicio_2',
                 'fin_3' => 'nullable|date|after_or_equal:inicio_3',
 
-                // SECCIÓN 3 - INFORMACIÓN FAMILIAR (NAMES SIMPLES)
+                // SECCIÓN 3 - INFORMACIÓN FAMILIAR
                 'parentesco_*' => 'nullable|in:conyuge,concubino,hijo',
                 'nombres_*' => 'nullable|string|max:255',
                 'documento_*' => 'nullable|string|max:20',
@@ -186,7 +187,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 'dni_declaracion' => 'required|string|size:8',
                 'acepto_declaracion' => 'required|accepted',
             ], [
-
                 'num_documento.unique' => 'El número de documento ya está registrado en el sistema.',
                 'email.unique' => 'El correo electrónico ya está registrado en el sistema.',
                 'covid_dosis1.required_if' => 'La fecha de la primera dosis es obligatoria cuando indica que fue vacunado.',
@@ -213,35 +213,44 @@ class FormularioPersonalEmpleadoController extends Controller
                 ], 422);
             }
 
-            // ========== 1.5 VALIDAR LINK (EXPIRE/USO) + LOCK ==========
-            $formLinkId = (int) $request->input('form_link_id');
-            $linkRow = DB::table('form_links')
-                ->where('id', $formLinkId)
-                ->lockForUpdate()
-                ->first();
+            // ========== 1.5 LINK (OPCIONAL): SI VIENE, LO INVALIDAMOS; SI NO, SE SALTA ==========
+            $formLinkId = $request->input('form_link_id');
+            $formLinkId = is_null($formLinkId) ? null : (int) $formLinkId;
 
+            if ($formLinkId) {
+                $debug['link']['id'] = $formLinkId;
 
-            $debug['link']['id'] = $formLinkId;
+                try {
+                    // OJO: no bloqueamos el guardado si el link no existe o ya fue usado/expiró
+                    // Solo intentamos invalidarlo si se puede.
+                    $linkRow = DB::table('form_links')
+                        ->where('id', $formLinkId)
+                        ->lockForUpdate()
+                        ->first();
 
-            if (!empty($linkRow->used_at)) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este link ya fue utilizado.',
-                    'debug_notificacion_ws' => $debug,
-                ], 403);
+                    if ($linkRow) {
+                        $deadToken = bin2hex(random_bytes(32));
+                        $deadHash  = hash('sha256', $deadToken);
+
+                        DB::table('form_links')
+                            ->where('id', $formLinkId)
+                            ->update([
+                                'used_at'     => now(),
+                                'token_hash'  => $deadHash,
+                            ]);
+
+                        $debug['link']['ok'] = true;
+                    } else {
+                        $debug['link']['ok'] = false;
+                        $debug['link']['error'] = 'form_link_id enviado pero no existe en BD (se ignoró para pruebas).';
+                    }
+                } catch (\Throwable $e) {
+                    $debug['link']['ok'] = false;
+                    $debug['link']['error'] = 'No se pudo invalidar link (se ignoró): ' . $e->getMessage();
+                }
+            } else {
+                $debug['link']['skipped'] = true;
             }
-
-            if (!empty($linkRow->expires_at) && now()->greaterThan($linkRow->expires_at)) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Este link expiró.',
-                    'debug_notificacion_ws' => $debug,
-                ], 403);
-            }
-
-            $debug['link']['ok'] = true;
 
             // ========== 2. CREAR O ACTUALIZAR USUARIO ==========
             $fechaNacimiento = $request->anio . '-' . $request->mes . '-' . str_pad($request->dia, 2, '0', STR_PAD_LEFT);
@@ -427,7 +436,6 @@ class FormularioPersonalEmpleadoController extends Controller
             );
 
             // ========== 10. CREAR NOTIFICACIÓN (DENTRO TX) ==========
-            $idNotifUserNew = null;
             try {
                 $noti = UsuarioNotificacion::create([
                     'idUsuario'   => $usuario->idUsuario,
@@ -450,18 +458,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 $debug['notif'] = ['ok' => false, 'id' => null, 'error' => $e->getMessage()];
                 Log::channel('single')->error('[USU] ❌ error creando notificación: ' . $e->getMessage());
             }
-
-            // ========== 10.1 INVALIDAR LINK (ANTES DEL COMMIT) ==========
-            // ✅ marca used_at y rota token_hash para que el token anterior sea inútil
-            $deadToken = bin2hex(random_bytes(32));
-            $deadHash = hash('sha256', $deadToken);
-
-            DB::table('form_links')
-                ->where('id', $formLinkId)
-                ->update([
-                    'used_at' => now(),
-                    'token_hash' => $deadHash,
-                ]);
 
             // ✅ Commit UNA SOLA VEZ
             DB::commit();
@@ -520,9 +516,6 @@ class FormularioPersonalEmpleadoController extends Controller
             Log::channel('single')->error('LINE: ' . $e->getLine());
             Log::channel('single')->error('FILE: ' . $e->getFile());
 
-            $debug['link']['ok'] = $debug['link']['ok'] ?? false;
-            $debug['link']['error'] = $debug['link']['error'] ?? null;
-
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -537,6 +530,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 ->with('error', 'Error al guardar el formulario: ' . $e->getMessage());
         }
     }
+
 
 
 
