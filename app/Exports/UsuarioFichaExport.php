@@ -16,6 +16,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, WithTitle, ShouldAutoSize, WithEvents
 {
@@ -76,7 +78,7 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
             'A' => 18,
             'B' => 18,
             'C' => 18,
-            'D' => 18,
+            'D' => 25,
             'E' => 18,
             'F' => 18,
             'G' => 18
@@ -661,13 +663,246 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 $sheet->mergeCells('D' . $filaActual . ':G' . $filaActual);
                 $filaActual++;
 
+                // ============================================
+                // SECCIÓN: DOCUMENTOS IMPORTANTES (VERSIÓN FINAL)
+                // ============================================
+
+                // Título de la sección
+                $sheet->mergeCells('A' . $filaActual . ':G' . $filaActual);
+                $sheet->setCellValue('A' . $filaActual, '6. DOCUMENTOS IMPORTANTES');
+                $sheet->getStyle('A' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 12, 'color' => ['argb' => 'FFFFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
+                ]);
+                $filaActual++;
+
+                // Obtener documentos del usuario
+                $documentos = $this->usuario->documentos_usuario ?? collect();
+
+                // Función auxiliar para verificar si existe un tipo de documento
+                $tieneDocumento = function ($tipo) use ($documentos) {
+                    $tipo = strtoupper($tipo);
+                    $existe = $documentos->filter(function ($doc) use ($tipo) {
+                        return strtoupper($doc->tipo_documento ?? '') === $tipo;
+                    })->count() > 0;
+                    return $existe ? 'X' : '';
+                };
+
+                // ============================================
+                // FILA 1: Primera fila de títulos (3 columnas)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'Currículum Vitae');
+                $sheet->setCellValue('C' . $filaActual, 'Certificado de antecedentes policiales');
+                $sheet->setCellValue('E' . $filaActual, 'Declaración Jurada de domicilio');
+
+                // Merges para distribuir correctamente (cada título ocupa 2 columnas)
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 2: Valores de la primera fila de documentos
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, $tieneDocumento('CV'));
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->setCellValue('C' . $filaActual, $tieneDocumento('PENALES'));
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->setCellValue('E' . $filaActual, $tieneDocumento('DOMICILIO'));
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 3: Segunda fila de títulos (3 columnas)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'Copia de DNI Vigente');
+                $sheet->setCellValue('C' . $filaActual, 'Certificados de trabajos anteriores');
+                $sheet->setCellValue('E' . $filaActual, 'Partida de Matrimonio u otros');
+
+                // Merges para distribuir correctamente
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 4: Valores de la segunda fila de documentos
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, $tieneDocumento('DNI'));
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->setCellValue('C' . $filaActual, $tieneDocumento('TRABAJOS'));
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->setCellValue('E' . $filaActual, $tieneDocumento('MATRIMONIO'));
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 5: Tercera fila de títulos (3 columnas)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, 'Cartilla de Vacunación');
+                $sheet->setCellValue('C' . $filaActual, 'Certificados de estudios técnicos u otros');
+                $sheet->setCellValue('E' . $filaActual, 'Copia de DNI de hijos');
+
+                // Merges para distribuir correctamente
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+
+                // Aplicar estilo a los títulos
+                $sheet->getStyle('A' . $filaActual . ':G' . $filaActual)->applyFromArray([
+                    'font' => ['bold' => true],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                ]);
+                $filaActual++;
+
+                // ============================================
+                // FILA 6: Valores de la tercera fila de documentos
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, $tieneDocumento('VACUNACION'));
+                $sheet->mergeCells('A' . $filaActual . ':B' . $filaActual);
+                $sheet->setCellValue('C' . $filaActual, $tieneDocumento('ESTUDIOS'));
+                $sheet->mergeCells('C' . $filaActual . ':D' . $filaActual);
+                $sheet->setCellValue('E' . $filaActual, $tieneDocumento('DNI_HIJOS'));
+                $sheet->mergeCells('E' . $filaActual . ':G' . $filaActual);
+                $filaActual++;
+
+                // ============================================
+                // FILA 7: Declaración jurada (CON ALTURA AUMENTADA)
+                // ============================================
+                // Guardar el número de fila para ajustar altura después
+                $filaDeclaracion = $filaActual;
+
+                $sheet->setCellValue('A' . $filaActual, 'Declaro bajo juramento que los datos proporcionados a la EMPRESA son veraces, autorizando a la misma efectuar las verificaciones que considere pertinentes. En caso se compruebe que los datos no son verídicos, LA EMPRESA podrá tomar las medidas que considere convenientes sin compromiso ni responsabilidad alguna.');
+                $sheet->mergeCells('A' . $filaActual . ':G' . $filaActual);
+                $sheet->getStyle('A' . $filaActual)->getAlignment()->setWrapText(true);
+                $sheet->getStyle('A' . $filaActual)->getFont()->setItalic(true);
+
+                // Aumentar la altura de la fila de la declaración para que se lea completa
+                $sheet->getRowDimension($filaDeclaracion)->setRowHeight(40); // 40 píxeles de altura
+
+                // ============================================
+                // SECCIÓN: FIRMA Y DECLARACIÓN (AJUSTE FINAL)
+                // ============================================
+
+                // Guardamos la última fila con bordes (documentos importantes)
+                $ultimaFilaConBordes = $filaActual - 1;
+
+                $filaActual++; // Espacio en blanco después de documentos importantes
+
+                // Avanzar hasta llegar aproximadamente a la fila 57
+                while ($filaActual < 57) {
+                    $sheet->setCellValue('A' . $filaActual, '');
+                    $filaActual++;
+                }
+
+                // ============================================
+                // FILA 57: Espacio (vacío)
+                // ============================================
+                $sheet->setCellValue('A' . $filaActual, '');
+                $filaActual++; // Fila 58
+
+                // ============================================
+                // FILA 58: IMAGEN DE LA FIRMA (COLUMNA D)
+                // ============================================
+                $filaFirma = 58; // Fija en fila 58
+
+                // Verificar si hay firma guardada
+                if (!empty($this->usuario->firma)) {
+                    // Crear un archivo temporal con la imagen de la firma
+                    $tempFile = tempnam(sys_get_temp_dir(), 'firma_');
+                    file_put_contents($tempFile, $this->usuario->firma);
+
+                    // Insertar la imagen en el Excel en columna D
+                    $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                    $drawing->setName('Firma');
+                    $drawing->setDescription('Firma del trabajador');
+                    $drawing->setPath($tempFile);
+                    $drawing->setHeight(50); // Altura de la firma
+                    $drawing->setWidth(150); // Ancho de la firma
+                    $drawing->setCoordinates('D' . $filaFirma); // COLUMNA D, FILA 58
+                    $drawing->setWorksheet($sheet);
+                }
+
+                $filaActual = 61; // Continuamos desde la fila 61
+
+                // ============================================
+                // FILA 61: TEXTO "Firma del Trabajador" (COLUMNA D) y Fecha (COLUMNAS A, B, C)
+                // ============================================
+
+                // Obtener fecha actual para mostrar en columnas A, B, C
+                $fechaActual = Carbon::now();
+                $dia = $fechaActual->format('d');
+                $mes = $fechaActual->format('m');
+                $anio = $fechaActual->format('Y');
+                $nombreMes = $this->getNombreMes($mes);
+
+                // Fecha en columnas A, B, C
+                $sheet->setCellValue('A' . $filaActual, 'Lima, ' . $dia . ' de ' . $nombreMes . ' de ' . $anio);
+                $sheet->mergeCells('A' . $filaActual . ':C' . $filaActual);
+                $sheet->getStyle('A' . $filaActual)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $filaActual)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+                // "Firma del Trabajador" en columna D
+                $sheet->setCellValue('D' . $filaActual, 'Firma del Trabajador');
+                $sheet->getStyle('D' . $filaActual)->getFont()->setBold(true);
+                $sheet->getStyle('D' . $filaActual)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+                $filaActual++; // Fila 62
+
+                // ============================================
+                // FILA 62: DNI (COLUMNA D - SIN MERGE) y HUELLA (COLUMNA F)
+                // ============================================
+                $sheet->setCellValue('D' . $filaActual, 'DNI N° ' . ($this->usuario->documento ?? '____________'));
+                $sheet->getStyle('D' . $filaActual)->getFont()->setBold(true);
+                $sheet->getStyle('D' . $filaActual)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+                // Huella en columna F
+                $sheet->setCellValue('F' . $filaActual, 'Huella');
+                $sheet->getStyle('F' . $filaActual)->getFont()->setBold(true);
+                $sheet->getStyle('F' . $filaActual)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+                $filaActual++; // Fila 63
+
+                // ============================================
+                // FILA 63: Espacio para la huella (vacío)
+                // ============================================
+                $sheet->setCellValue('F' . $filaActual, '');
+                $sheet->mergeCells('F' . $filaActual . ':G' . $filaActual);
+                $filaActual += 2;
+
+                // ============================================
+                // APLICAR BORDES EXTERNOS A COLUMNA F, FILAS 58-61
+                // ============================================
+                $sheet->getStyle('F58:F61')->applyFromArray([
+                    'borders' => [
+                        'outline' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['argb' => 'FF000000'],
+                        ],
+                        'inside' => [
+                            'borderStyle' => Border::BORDER_NONE,
+                        ],
+                    ],
+                ]);
 
                 // ============================================
                 // ESTILOS FINALES
                 // ============================================
                 $lastRow = $sheet->getHighestRow();
 
-                // Estilos generales
+                // Estilos generales (sin bordes)
                 $sheet->getStyle('A1:G' . $lastRow)->getFont()->setName('Arial')->setSize(10);
                 $sheet->getStyle('A1:G' . $lastRow)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle('A1:G' . $lastRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -678,23 +913,26 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                     'font' => ['bold' => true, 'size' => 16],
                 ]);
 
-                // Títulos de sección
+                // Títulos de sección (solo hasta la última fila con bordes)
                 $sheet->getStyle('A4:G4')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 12, 'color' => ['argb' => 'FFFFFFFF']],
+                    'font' => ['bold' => true, 'size' => 10, 'color' => ['argb' => 'FFFFFFFF']],
                     'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1E3A8A']],
                 ]);
 
-                // TÍTULOS DE CAMPOS CON FONDO GRIS
+
+                // TÍTULOS DE CAMPOS CON FONDO GRIS (solo hasta la última fila con bordes)
                 $filasTitulos = [5, 7, 8, 10, 12, 14, 16, 18, 20, 23];
                 foreach ($filasTitulos as $fila) {
-                    $sheet->getStyle('A' . $fila . ':G' . $fila)->applyFromArray([
-                        'font' => ['bold' => true],
-                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
-                    ]);
+                    if ($fila <= $ultimaFilaConBordes) {
+                        $sheet->getStyle('A' . $fila . ':G' . $fila)->applyFromArray([
+                            'font' => ['bold' => true],
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFF3F4F6']],
+                        ]);
+                    }
                 }
 
-                // Bordes
-                $sheet->getStyle('A1:G' . $lastRow)->applyFromArray([
+                // APLICAR BORDES SOLO HASTA LA ÚLTIMA FILA CON BORDES (documentos importantes)
+                $sheet->getStyle('A1:G' . $ultimaFilaConBordes)->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -702,6 +940,8 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
                         ],
                     ],
                 ]);
+
+                // Las filas después de $ultimaFilaConBordes NO tienen bordes
 
                 // Configurar página
                 $sheet->getPageSetup()
@@ -742,7 +982,25 @@ class UsuarioFichaExport implements FromArray, WithStyles, WithColumnWidths, Wit
         }
         return $valor ? 'SI [X] NO [ ]' : 'SI [ ] NO [X]';
     }
+    private function getNombreMes($mes)
+    {
+        $meses = [
+            '01' => 'enero',
+            '02' => 'febrero',
+            '03' => 'marzo',
+            '04' => 'abril',
+            '05' => 'mayo',
+            '06' => 'junio',
+            '07' => 'julio',
+            '08' => 'agosto',
+            '09' => 'septiembre',
+            '10' => 'octubre',
+            '11' => 'noviembre',
+            '12' => 'diciembre'
+        ];
 
+        return $meses[$mes] ?? $mes;
+    }
     private function getNombreEntidadBancaria($id)
     {
         $bancos = [

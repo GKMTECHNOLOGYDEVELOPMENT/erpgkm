@@ -2343,7 +2343,8 @@ class UsuarioController extends Controller
                 'contactosEmergencia',
                 'laboral',  // <--- Agrega esta línea
                 'tipoArea',  // <--- Agrega esta línea
-                'tipoUsuario' // <--- Agrega esta línea
+                'tipoUsuario', // <--- Agrega esta línea
+                'documentos_usuario'
             ])->findOrFail($id);
 
             $export = new UsuarioFichaExport($usuario);
