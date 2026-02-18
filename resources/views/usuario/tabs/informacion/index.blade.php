@@ -10,7 +10,8 @@
                 <div class="w-1 h-8 bg-blue-600 rounded-full"></div>
                 <div>
                     <h5 class="text-lg font-bold text-gray-800 dark:text-white">Datos Laborales</h5>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Información contractual y jornada laboral</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Información contractual y jornada laboral
+                    </p>
                 </div>
             </div>
 
@@ -21,7 +22,8 @@
                     <div class="w-7 h-7 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                         <i class="fas fa-file-contract text-blue-600 dark:text-blue-400 text-sm"></i>
                     </div>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200">Información de Contrato y Horario</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">Información de Contrato y
+                        Horario</span>
                 </div>
 
                 <!-- Campos en grid de 2 columnas -->
@@ -35,15 +37,28 @@
                         <select name="idTipoContrato" id="idTipoContrato"
                             class="form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500">
                             <option value="">Seleccione tipo de contrato</option>
-                            @foreach($tiposContrato as $tipo)
-                                <option value="{{ $tipo->idTipoContrato }}" 
+                            @foreach ($tiposContrato as $tipo)
+                                <option value="{{ $tipo->idTipoContrato }}"
                                     {{ ($laboral->idTipoContrato ?? '') == $tipo->idTipoContrato ? 'selected' : '' }}>
                                     {{ $tipo->nombre }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
-
+                    <!-- Sueldo Mensual -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            <i class="fas fa-coins text-blue-500 mr-1"></i>
+                            Sueldo Mensual
+                        </label>
+                        <div class="relative">
+                            <span
+                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">S/</span>
+                            <input type="number" name="sueldoMensual" id="sueldoMensual" step="0.01"
+                                value="{{ $usuario->sueldoMensual ?? '' }}" placeholder="0.00"
+                                class="form-input w-full pl-9 bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500">
+                        </div>
+                    </div>
                     <!-- Fecha Inicio - Flatpickr -->
                     <div>
                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -55,7 +70,8 @@
                                 class="flatpickr form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500"
                                 placeholder="Seleccione fecha"
                                 value="{{ $laboral->fechaInicio ? date('Y-m-d', strtotime($laboral->fechaInicio)) : '' }}">
-                            <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                            <i
+                                class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
 
@@ -70,7 +86,8 @@
                                 class="flatpickr form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500"
                                 placeholder="Seleccione fecha"
                                 value="{{ $laboral->fechaTermino ? date('Y-m-d', strtotime($laboral->fechaTermino)) : '' }}">
-                            <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                            <i
+                                class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
 
@@ -84,8 +101,9 @@
                             <input type="text" name="horaInicioJornada" id="horaInicioJornada"
                                 class="flatpickr-time form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-green-500"
                                 placeholder="Seleccione hora"
-                                value="{{ $laboral->horaInicioJornada ?? '' }}">
-                            <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                value="{{ $laboral->horaInicioJornada ? \Carbon\Carbon::parse($laboral->horaInicioJornada)->format('H:i') : '' }}">
+                            <i
+                                class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
 
@@ -99,24 +117,13 @@
                             <input type="text" name="horaFinJornada" id="horaFinJornada"
                                 class="flatpickr-time form-input w-full bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-green-500"
                                 placeholder="Seleccione hora"
-                                value="{{ $laboral->horaFinJornada ?? '' }}">
-                            <i class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                value="{{ $laboral->horaFinJornada ? \Carbon\Carbon::parse($laboral->horaFinJornada)->format('H:i') : '' }}">
+                            <i
+                                class="fas fa-clock absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
                         </div>
                     </div>
 
-                    <!-- Sueldo Mensual -->
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            <i class="fas fa-coins text-blue-500 mr-1"></i>
-                            Sueldo Mensual
-                        </label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">S/</span>
-                            <input type="number" name="sueldoMensual" id="sueldoMensual" step="0.01" 
-                                   value="{{ $usuario->sueldoMensual ?? '' }}" placeholder="0.00"
-                                   class="form-input w-full pl-9 bg-gray-50 dark:bg-[#1a1f2e] border-gray-200 dark:border-gray-700 focus:border-blue-500">
-                        </div>
-                    </div>
+
                 </div>
 
                 <!-- Texto ayuda -->
@@ -132,7 +139,8 @@
                 <div class="w-1 h-7 bg-secondary rounded-full"></div>
                 <div>
                     <h6 class="text-lg font-bold text-gray-800 dark:text-white">Configuración de Usuario</h6>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Asignación de sucursal, área y permisos</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Asignación de sucursal, área y permisos
+                    </p>
                 </div>
             </div>
 
@@ -204,24 +212,6 @@
                             <option value="{{ $rol->idRol }}"
                                 {{ $usuario->idRol == $rol->idRol ? 'selected' : '' }}>
                                 {{ $rol->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <!-- Sexo -->
-                <div>
-                    <label for="idSexo"
-                        class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1 mb-1">
-                        <i class="fas fa-venus-mars text-purple-500"></i>
-                        Sexo
-                    </label>
-                    <select name="idSexo" id="idSexo" class="form-input w-full">
-                        <option value="" selected disabled>Selecciona un Sexo</option>
-                        @foreach ($sexos as $sexo)
-                            <option value="{{ $sexo->idSexo }}"
-                                {{ $usuario->idSexo == $sexo->idSexo ? 'selected' : '' }}>
-                                {{ $sexo->nombre }}
                             </option>
                         @endforeach
                     </select>
