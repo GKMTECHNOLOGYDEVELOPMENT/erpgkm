@@ -2102,7 +2102,6 @@ Route::get(
     '/administracion/formulario-personal',
     [FormularioPersonalEmpleadoController::class, 'create']
 )
-    ->middleware('form.link')   // ✅ PROTEGE por token (?token=...)
     ->name('formulariopersonal.create');
 
 // Rutas para ubigeo en formulario personal
