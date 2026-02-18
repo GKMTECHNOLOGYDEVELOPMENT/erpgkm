@@ -28,8 +28,9 @@ class AsistenciaController extends Controller
 
 
         $usuariosPlanillaIds = \DB::table('usuarios_laboral')
-            ->where('idTipoContrato', 1)
+            ->whereIn('idTipoContrato', [1, 2]) // Planilla y Locatario
             ->pluck('idUsuario');
+
 
         $usuarios = \App\Models\Usuario::where('estado', 1)
             ->whereIn('idUsuario', $usuariosPlanillaIds)
