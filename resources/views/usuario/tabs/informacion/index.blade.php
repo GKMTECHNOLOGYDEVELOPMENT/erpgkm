@@ -129,7 +129,7 @@
         <!-- ============================================ -->
         <div class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-5 bg-white dark:bg-[#0e1726]">
             <div class="flex items-center gap-2 mb-5">
-                <div class="w-1 h-7 bg-purple-600 rounded-full"></div>
+                <div class="w-1 h-7 bg-secondary rounded-full"></div>
                 <div>
                     <h6 class="text-lg font-bold text-gray-800 dark:text-white">Configuración de Usuario</h6>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Asignación de sucursal, área y permisos</p>

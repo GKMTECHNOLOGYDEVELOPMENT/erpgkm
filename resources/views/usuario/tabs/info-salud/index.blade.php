@@ -244,7 +244,7 @@
                 
                 <!-- Botón agregar contacto -->
                 <div class="flex justify-end mb-4">
-                    <button type="button" id="add-contacto-btn" class="btn bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-none px-4 py-2 flex items-center gap-2 rounded-lg">
+                    <button type="button" id="add-contacto-btn" class="btn bg-warning text-white border-none px-4 py-2 flex items-center gap-2 rounded-lg">
                         <i class="fas fa-plus"></i>
                         Agregar Contacto de Emergencia
                     </button>
@@ -286,7 +286,7 @@
 
             <!-- Botones de acción -->
             <div class="flex justify-end gap-3 mt-6">
-                <button type="button" id="guardar-salud-btn" class="btn bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-none px-6 py-2 flex items-center gap-2 rounded-lg">
+                <button type="button" id="guardar-salud-btn" class="btn bg-success text-white border-none px-6 py-2 flex items-center gap-2 rounded-lg">
                     <i class="fas fa-save"></i>
                     Guardar Información de Salud
                 </button>

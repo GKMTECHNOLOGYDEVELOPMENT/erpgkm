@@ -115,6 +115,7 @@
     <script src="{{ asset('assets/js/usuario/tabs/danger-zone.js') }}"></script>
     <script src="{{ asset('assets/js/usuario/tabs/payment-details.js') }}"></script>
     <script src="{{ asset('assets/js/usuario/tabs/perfil-usuario.js') }}"></script>
+    <script src="{{ asset('assets/js/usuario/tabs/familia-salud.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -785,17 +786,48 @@
 
 
 <script>
+    // Función para inicializar flatpickr en los inputs de salud
+    function initFlatpickrSalud() {
+        if (typeof flatpickr !== 'undefined') {
+            setTimeout(function() {
+                $('#covid_dosis1, #covid_dosis2, #covid_dosis3').each(function() {
+                    // Solo inicializar si el input está visible y habilitado
+                    if ($(this).is(':visible') && !$(this).prop('disabled')) {
+                        // Destruir instancia anterior si existe
+                        if (this._flatpickr) {
+                            this._flatpickr.destroy();
+                        }
+                        // Crear nueva instancia
+                        flatpickr(this, {
+                            dateFormat: "Y-m-d",
+                            allowInput: true,
+                            locale: "es"
+                        });
+                    }
+                });
+            }, 100);
+        }
+    }
+
     $(document).ready(function() {
         // ============================================
-        // INICIALIZAR FLATPICKR PARA FECHAS COVID
+        // INICIALIZAR FLATPICKR PARA FECHAS COVID (PRIMERA VEZ)
         // ============================================
-        if (typeof flatpickr !== 'undefined') {
-            flatpickr(".flatpickr", {
-                dateFormat: "Y-m-d",
-                allowInput: true,
-                locale: "es"
-            });
-        }
+        initFlatpickrSalud();
+
+        // ============================================
+        // DETECTAR CAMBIO DE TAB Y REINICIALIZAR FLATPICKR
+        // ============================================
+        $(document).on('click', '[x-on\\:click="tab = \'info-salud\'"]', function() {
+            initFlatpickrSalud();
+        });
+
+        // También detectar si usan otro método para cambiar tabs
+        $(document).on('click', 'button, a', function() {
+            if ($(this).text().includes('Salud') || $(this).text().includes('salud')) {
+                setTimeout(initFlatpickrSalud, 200);
+            }
+        });
 
         // ============================================
         // GUARDAR INFORMACIÓN DE SALUD
@@ -1306,9 +1338,24 @@
         // ============================================
         $(document).on('change', 'input[name="vacuna_covid"]', function() {
             if ($(this).val() == '1') {
+                // Habilitar inputs
                 $('#covid_dosis1, #covid_dosis2, #covid_dosis3').prop('disabled', false);
+                // Reinicializar flatpickr
+                setTimeout(function() {
+                    $('#covid_dosis1, #covid_dosis2, #covid_dosis3').each(function() {
+                        if (this._flatpickr) {
+                            this._flatpickr.destroy();
+                        }
+                        flatpickr(this, {
+                            dateFormat: "Y-m-d",
+                            allowInput: true,
+                            locale: "es"
+                        });
+                    });
+                }, 50);
             } else {
-                $('#covid_dosis1, #covid_dosis2, #covid_dosis3').val('').prop('disabled', true);
+                // SOLO deshabilitar, NO borrar valores
+                $('#covid_dosis1, #covid_dosis2, #covid_dosis3').prop('disabled', true);
             }
         });
 
@@ -1316,7 +1363,7 @@
             if ($(this).val() == '1') {
                 $('input[name="dolencia_detalle"]').prop('disabled', false);
             } else {
-                $('input[name="dolencia_detalle"]').val('').prop('disabled', true);
+                $('input[name="dolencia_detalle"]').prop('disabled', true);
             }
         });
 
@@ -1324,20 +1371,35 @@
             if ($(this).val() == '1') {
                 $('input[name="discapacidad_detalle"]').prop('disabled', false);
             } else {
-                $('input[name="discapacidad_detalle"]').val('').prop('disabled', true);
+                $('input[name="discapacidad_detalle"]').prop('disabled', true);
             }
         });
 
-        // Estado inicial de los campos según valores guardados
-        if ($('input[name="vacuna_covid"]:checked').val() == '0') {
-            $('#covid_dosis1, #covid_dosis2, #covid_dosis3').prop('disabled', true);
-        }
-        if ($('input[name="dolencia_cronica"]:checked').val() == '0') {
-            $('input[name="dolencia_detalle"]').prop('disabled', true);
-        }
-        if ($('input[name="discapacidad"]:checked').val() == '0') {
-            $('input[name="discapacidad_detalle"]').prop('disabled', true);
-        }
+        // Estado inicial
+        setTimeout(function() {
+            if ($('input[name="vacuna_covid"]:checked').val() == '0') {
+                $('#covid_dosis1, #covid_dosis2, #covid_dosis3').prop('disabled', true);
+            } else {
+                // Si está en Sí, aseguramos flatpickr
+                $('#covid_dosis1, #covid_dosis2, #covid_dosis3').each(function() {
+                    if (!$(this).prop('disabled') && !this._flatpickr) {
+                        flatpickr(this, {
+                            dateFormat: "Y-m-d",
+                            allowInput: true,
+                            locale: "es"
+                        });
+                    }
+                });
+            }
+            
+            if ($('input[name="dolencia_cronica"]:checked').val() == '0') {
+                $('input[name="dolencia_detalle"]').prop('disabled', true);
+            }
+            
+            if ($('input[name="discapacidad"]:checked').val() == '0') {
+                $('input[name="discapacidad_detalle"]').prop('disabled', true);
+            }
+        }, 200);
     });
 </script>
 
@@ -1450,6 +1512,7 @@
         });
     });
 </script>
+
 <script>
     $(document).ready(function() {
         // ============================================
