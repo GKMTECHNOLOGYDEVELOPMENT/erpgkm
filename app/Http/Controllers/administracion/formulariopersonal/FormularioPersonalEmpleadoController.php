@@ -68,7 +68,6 @@ class FormularioPersonalEmpleadoController extends Controller
             // ========== 1. VALIDACIÓN DE DATOS ==========
             $validator = Validator::make($request->all(), [
                 // ✅ LINK (obligatorio para invalidar al guardar)
-                'form_link_id' => 'required|integer|exists:form_links,id',
 
                 // SECCIÓN 1 - DATOS PERSONALES (OBLIGATORIOS)
                 'paterno' => 'required|string|max:255',
