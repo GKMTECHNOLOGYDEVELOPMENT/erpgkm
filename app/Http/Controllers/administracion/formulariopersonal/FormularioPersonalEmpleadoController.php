@@ -68,6 +68,7 @@ class FormularioPersonalEmpleadoController extends Controller
             // ========== 1. VALIDACIÓN DE DATOS ==========
             $validator = Validator::make($request->all(), [
                 // ✅ LINK (obligatorio para invalidar al guardar)
+                'form_link_id' => 'required|integer|exists:form_links,id',
 
                 // SECCIÓN 1 - DATOS PERSONALES (OBLIGATORIOS)
                 'paterno' => 'required|string|max:255',
@@ -185,8 +186,7 @@ class FormularioPersonalEmpleadoController extends Controller
                 'dni_declaracion' => 'required|string|size:8',
                 'acepto_declaracion' => 'required|accepted',
             ], [
-                'form_link_id.required' => 'Link inválido: falta form_link_id.',
-                'form_link_id.exists' => 'Link inválido o no encontrado.',
+
                 'num_documento.unique' => 'El número de documento ya está registrado en el sistema.',
                 'email.unique' => 'El correo electrónico ya está registrado en el sistema.',
                 'covid_dosis1.required_if' => 'La fecha de la primera dosis es obligatoria cuando indica que fue vacunado.',
@@ -220,14 +220,6 @@ class FormularioPersonalEmpleadoController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (!$linkRow) {
-                DB::rollBack();
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Link inválido o no encontrado.',
-                    'debug_notificacion_ws' => $debug,
-                ], 403);
-            }
 
             $debug['link']['id'] = $formLinkId;
 
