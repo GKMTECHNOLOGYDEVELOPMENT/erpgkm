@@ -103,6 +103,7 @@ use App\Http\Controllers\solicitud\SolicitudingresoController;
 use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Http\Controllers\administracion\horasextras\HorasExtrasController;
 use App\Models\Cliente;
 use App\Models\Custodia;
 use App\Models\Marca;
@@ -2145,3 +2146,10 @@ Route::put('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'upda
 Route::delete('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'deleteContactoEmergencia']);
 Route::post('/usuario/{id}/cuenta-bancaria/guardar', [UsuarioController::class, 'guardarCuentaBancaria']);
 Route::post('/usuario/{id}/informacion', [UsuarioController::class, 'updateInformacion']);
+
+
+
+
+Route::get('/horas-extras', [HorasExtrasController::class, 'index'])
+    ->name('horas-extras.index')
+    ->middleware('auth');
