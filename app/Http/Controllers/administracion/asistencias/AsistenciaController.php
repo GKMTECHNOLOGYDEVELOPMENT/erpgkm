@@ -32,10 +32,19 @@ class AsistenciaController extends Controller
             ->pluck('idUsuario');
 
 
-        $usuarios = \App\Models\Usuario::where('estado', 1)
-            ->whereIn('idUsuario', $usuariosPlanillaIds)
-            ->select('idUsuario', 'Nombre', 'apellidoPaterno', 'apellidoMaterno')
+        $usuarios = \App\Models\Usuario::query()
+            ->join('tipousuario', 'usuarios.idTipoUsuario', '=', 'tipousuario.idTipoUsuario')
+            ->where('usuarios.estado', 1)
+            ->whereIn('usuarios.idUsuario', $usuariosPlanillaIds)
+            ->whereNotIn(\DB::raw('LOWER(tipousuario.nombre)'), ['gerencial', 'gerencia'])
+            ->select(
+                'usuarios.idUsuario',
+                'usuarios.Nombre',
+                'usuarios.apellidoPaterno',
+                'usuarios.apellidoMaterno'
+            )
             ->get();
+
 
         $usuarioIds = $usuarios->pluck('idUsuario');
 
