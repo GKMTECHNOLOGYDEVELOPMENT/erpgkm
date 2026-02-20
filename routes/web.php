@@ -2145,3 +2145,9 @@ Route::put('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'upda
 Route::delete('/usuario/contacto-emergencia/{id}', [UsuarioController::class, 'deleteContactoEmergencia']);
 Route::post('/usuario/{id}/cuenta-bancaria/guardar', [UsuarioController::class, 'guardarCuentaBancaria']);
 Route::post('/usuario/{id}/informacion', [UsuarioController::class, 'updateInformacion']);
+
+// Rutas para danger zone (accesos) - Agregar dentro del grupo de rutas existente
+Route::post('/usuario/{id}/actualizar-estado', [UsuarioController::class, 'actualizarEstado'])->name('usuario.actualizar-estado');
+Route::post('/usuario/{id}/actualizar-correo-configurado', [UsuarioController::class, 'actualizarCorreoConfigurado'])->name('usuario.actualizar-correo-configurado');
+Route::post('/usuario/{id}/guardar-contrasenas', [UsuarioController::class, 'guardarContrasenas'])->name('usuario.guardar-contrasenas');
+Route::post('/usuario/{id}/enviar-credenciales', [UsuarioController::class, 'enviarCredenciales'])->name('usuario.enviar-credenciales');

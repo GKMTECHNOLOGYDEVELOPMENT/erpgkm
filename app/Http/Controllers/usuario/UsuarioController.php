@@ -30,6 +30,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use App\Exports\UsuarioFichaExport;
+use App\Mail\CredencialesAppMail;
+use App\Mail\CredencialesWebMail;
+use App\Mail\NotificacionGerenciaMail;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UsuarioController extends Controller
@@ -2451,4 +2454,251 @@ class UsuarioController extends Controller
             ], 500);
         }
     }
+
+
+
+/**
+ * Actualizar estado de plataforma (Web/App)
+ */
+public function actualizarEstado($id, Request $request)
+{
+    try {
+        $request->validate([
+            'plataforma' => 'required|in:web,app',
+            'estado' => 'required|boolean'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        
+        if ($request->plataforma === 'web') {
+            $usuario->estadoWeb = $request->estado;
+        } else {
+            $usuario->estadoApp = $request->estado;
+        }
+        
+        $usuario->save();
+        
+        Log::info('Estado de plataforma actualizado', [
+            'usuario_id' => $id,
+            'plataforma' => $request->plataforma,
+            'estado' => $request->estado,
+            'admin_id' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Estado actualizado correctamente'
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar estado: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar el estado'
+        ], 500);
+    }
+}
+
+/**
+ * Actualizar tipo de correo configurado para acceso web
+ */
+public function actualizarCorreoConfigurado($id, Request $request)
+{
+    try {
+        $request->validate([
+            'tipo_correo' => 'required|in:corporativo,personal'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        
+        $usuario->correo_configurado_web = $request->tipo_correo;
+        $usuario->save();
+        
+        Log::info('Correo configurado actualizado', [
+            'usuario_id' => $id,
+            'tipo_correo' => $request->tipo_correo,
+            'admin_id' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Configuración de correo actualizada correctamente',
+            'correo' => $request->tipo_correo === 'corporativo' ? $usuario->correo : $usuario->correo_personal
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar correo configurado: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar la configuración'
+        ], 500);
+    }
+}
+
+/**
+ * Guardar contraseñas independientes
+ */
+public function guardarContrasenas($id, Request $request)
+{
+    try {
+        $request->validate([
+            'passwordWeb' => 'nullable|string|min:8',
+            'passwordApp' => 'nullable|string|min:8'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        
+        if ($request->filled('passwordWeb')) {
+            $usuario->passwordWeb = Hash::make($request->passwordWeb);
+        }
+        
+        if ($request->filled('passwordApp')) {
+            $usuario->passwordApp = Hash::make($request->passwordApp);
+        }
+        
+        $usuario->save();
+        
+        Log::info('Contraseñas actualizadas', [
+            'usuario_id' => $id,
+            'admin_id' => auth()->id()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Contraseñas guardadas correctamente'
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al guardar contraseñas: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al guardar las contraseñas'
+        ], 500);
+    }
+}
+/**
+ * Enviar credenciales por correo
+ */
+public function enviarCredenciales($id, Request $request)
+{
+    try {
+        $request->validate([
+            'enviarWeb' => 'required|boolean',
+            'enviarApp' => 'required|boolean',
+            'destinatario' => 'required|in:corporativo,personal'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        
+        // Determinar correo destinatario
+        $destinatario = $request->destinatario === 'corporativo' 
+            ? $usuario->correo 
+            : $usuario->correo_personal;
+            
+        if (!$destinatario) {
+            return response()->json([
+                'success' => false,
+                'message' => 'El correo seleccionado no está configurado'
+            ], 400);
+        }
+
+        // Generar contraseñas temporales si no existen
+        if ($request->enviarWeb && !$usuario->passwordWeb) {
+            $tempPasswordWeb = Str::random(10);
+            $usuario->passwordWeb = Hash::make($tempPasswordWeb);
+        } else {
+            $tempPasswordWeb = '********'; // No mostrar la real
+        }
+
+        if ($request->enviarApp && !$usuario->passwordApp) {
+            $tempPasswordApp = Str::random(10);
+            $usuario->passwordApp = Hash::make($tempPasswordApp);
+        } else {
+            $tempPasswordApp = '********';
+        }
+
+        $usuario->save();
+
+        // ENVIAR CREDENCIALES WEB
+        if ($request->enviarWeb) {
+            $correoWebAcceso = $usuario->correo_configurado_web === 'corporativo' 
+                ? $usuario->correo 
+                : $usuario->correo_personal;
+                
+            Mail::to($destinatario)->send(new CredencialesWebMail(
+                $usuario,
+                $correoWebAcceso,
+                $tempPasswordWeb
+            ));
+        }
+
+        // ENVIAR CREDENCIALES APP
+        if ($request->enviarApp) {
+            $usuarioApp = $usuario->usuario . '_app'; // o el formato que uses
+            Mail::to($destinatario)->send(new CredencialesAppMail(
+                $usuario,
+                $usuarioApp,
+                $tempPasswordApp
+            ));
+        }
+
+        // NOTIFICACIÓN A GERENCIA (CORREOS FIJO O DE BD)
+        $gerentes = ['saldarriagacruz31@gmail.com', 'saldarriagacruz31@gmail.com']; // Configurar según necesidad
+        
+        foreach ($gerentes as $gerenteCorreo) {
+            Mail::to($gerenteCorreo)->send(new NotificacionGerenciaMail(
+                $usuario,
+                $request->enviarWeb,
+                $request->enviarApp,
+                auth()->user()
+            ));
+        }
+
+        Log::info('Credenciales enviadas exitosamente', [
+            'usuario_id' => $id,
+            'web' => $request->enviarWeb,
+            'app' => $request->enviarApp,
+            'destinatario' => $destinatario,
+            'admin_id' => auth()->id()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => '✅ Credenciales enviadas correctamente'
+        ]);
+        
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        Log::error('Error al enviar credenciales: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al enviar las credenciales: ' . $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
+
+    
 }

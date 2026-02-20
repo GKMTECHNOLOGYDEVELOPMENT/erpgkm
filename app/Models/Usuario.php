@@ -110,7 +110,12 @@ class Usuario extends Authenticatable
         'idRol',
         'firma',
         'estadocivil',
-        'sueldoMensual'
+        'sueldoMensual',
+        'passwordWeb',
+        'passwordApp', 
+        'estadoWeb',
+        'estadoApp',
+        'correo_configurado_web'
     ];
 
     public function sucursal()
