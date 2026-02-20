@@ -71,77 +71,10 @@ class UsuarioController extends Controller
         $roles = Rol::all(); // Obtener todos los roles
         $tiposArea = Tipoarea::all(); // Obtener todos los tipos de área
 
-        // Create 
+        // Create
         return view('usuario.create', compact('tiposDocumento', 'sucursales', 'tiposUsuario', 'sexos', 'roles', 'tiposArea', 'departamentos'));
     }
 
-    //     public function store(Request $request)
-    // {
-    //     try {
-    //         Log::info('Inicio del proceso de creación de usuario.');
-
-    //         // Validación
-    //         $request->validate([
-    //             'Nombre' => 'required|string|max:255',
-    //             'apellidoPaterno' => 'required|string|max:255',
-    //             'apellidoMaterno' => 'required|string|max:255',
-    //             'idTipoDocumento' => 'required|integer',
-    //             'documento' => 'required|string|max:255|unique:usuarios,documento',
-    //             'telefono' => 'required|string|max:255|unique:usuarios,telefono',
-    //             'correo' => 'required|email|max:255|unique:usuarios,correo',
-    //             'profile-image' => 'nullable|image|max:1024',
-    //         ]);
-    //         Log::info('Formulario validado con éxito.');
-
-    //         // Procesamiento de la imagen
-    //         $imageData = $request->hasFile('profile-image') ? file_get_contents($request->file('profile-image')) : null;
-    //         Log::info('Imagen procesada. ¿Imagen subida? ', ['has_image' => $request->hasFile('profile-image')]);
-
-    //         // Generación de usuario y clave
-    //         $usuario = strtolower(substr($request->Nombre, 0, 6)) . strtolower(substr($request->apellidoPaterno, 0, 6)) . rand(1, 9);
-    //         $usuario = str_replace(' ', '', $usuario);
-    //         $clave = Str::random(8);
-    //         $claveEncriptada = bcrypt($clave);
-
-    //         Log::info('Datos generados para el nuevo usuario:', [
-    //             'usuario' => $usuario,
-    //             'clave' => $clave
-    //         ]);
-
-    //         // Creación del usuario
-    //         $usuarioNuevo = new Usuario();
-    //         $usuarioNuevo->Nombre = $request->Nombre;
-    //         $usuarioNuevo->apellidoPaterno = $request->apellidoPaterno;
-    //         $usuarioNuevo->apellidoMaterno = $request->apellidoMaterno;
-    //         $usuarioNuevo->idTipoDocumento = $request->idTipoDocumento;
-    //         $usuarioNuevo->documento = $request->documento;
-    //         $usuarioNuevo->telefono = $request->telefono;
-    //         $usuarioNuevo->correo = $request->correo;
-    //         $usuarioNuevo->avatar = $imageData;
-    //         $usuarioNuevo->usuario = $usuario;
-    //         $usuarioNuevo->clave = $claveEncriptada;
-    //         $usuarioNuevo->estado = 1;
-    //         $usuarioNuevo->save();
-    //         Log::info('Usuario creado exitosamente:', ['usuario' => $usuarioNuevo]);
-
-    //         // Enviar correo
-    //         Mail::to($request->correo)->send(new UsuarioCreado($usuario, $clave));
-    //         Log::info('Correo enviado al usuario.', ['correo' => $request->correo]);
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Usuario creado y datos enviados al correo.',
-    //             'usuarioId' => $usuarioNuevo->idUsuario  // Asegúrate de devolver el ID del nuevo usuario
-
-    //         ]);
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         Log::error('Error en la validación de los datos:', ['errors' => $e->errors()]);
-    //         return response()->json(['success' => false, 'errors' => $e->errors()], 422);
-    //     } catch (\Exception $e) {
-    //         Log::error('Error inesperado al crear el usuario:', ['message' => $e->getMessage()]);
-    //         return response()->json(['success' => false, 'message' => 'Error al crear el usuario.'], 500);
-    //     }
-    // }
 
 
     public function getUsuariostecnico()
@@ -411,6 +344,7 @@ class UsuarioController extends Controller
             'covidDosis3'
         ));
     }
+
     public function loadTab($id, $tab)
     {
         // Cargar usuario con todas las relaciones necesarias
@@ -983,7 +917,7 @@ class UsuarioController extends Controller
                     ->orWhere('documento', 'like', "%$search%")
                     ->orWhere('telefono', 'like', "%$search%")
                     ->orWhere('correo', 'like', "%$search%")
-                    ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
+                    ->orWhere('usuario', 'like', "%$search%")
                     ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
                         $q2->where('nombre', 'like', "%$search%");
                     })
@@ -1011,8 +945,10 @@ class UsuarioController extends Controller
                 'telefono' => $u->telefono ?? 'N/A',
                 'correo' => $u->correo ?? 'N/A',
                 'documento' => $u->documento ?? 'N/A',
-                'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
+                'usuario' => $u->usuario ?? 'N/A',
                 'estado' => $u->estado,
+                'estadoWeb' => $u->estadoWeb ?? 0, // 👈 AGREGADO: estado web
+                'estadoApp' => $u->estadoApp ?? 0, // 👈 AGREGADO: estado app
                 'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
                 'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',
                 'rol' => $u->rol->nombre ?? 'N/A',
@@ -1093,90 +1029,91 @@ class UsuarioController extends Controller
     /**
      * Subir documento para usuario
      */
-   public function uploadDocumento(Request $request, $idUsuario)
-{
-    try {
-        $validator = Validator::make($request->all(), [
-            'tipo_documento' => 'required|in:CV,DNI,PENALES,JUDICIALES,DOMICILIO,TRABAJOS,MATRIMONIO,VACUNACION,ESTUDIOS,DNI_HIJOS,OTROS',
-            'archivo' => 'required|file|max:5120', // 5MB máximo
-        ]);
+    public function uploadDocumento(Request $request, $idUsuario)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'tipo_documento' => 'required|in:CV,DNI,PENALES,JUDICIALES,DOMICILIO,TRABAJOS,MATRIMONIO,VACUNACION,ESTUDIOS,DNI_HIJOS,OTROS',
+                'archivo' => 'required|file|max:5120', // 5MB máximo
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $usuario = Usuario::find($idUsuario);
+            if (!$usuario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuario no encontrado'
+                ], 404);
+            }
+
+            $archivo = $request->file('archivo');
+            $tipoDocumento = $request->tipo_documento;
+
+            // Extensiones permitidas según tipo
+            $extensionesPermitidas = [
+                'CV' => ['pdf', 'doc', 'docx'],
+                'DNI' => ['jpg', 'jpeg', 'png', 'pdf'],
+                'PENALES' => ['pdf'],
+                'JUDICIALES' => ['pdf'],
+                'DOMICILIO' => ['pdf', 'jpg', 'jpeg', 'png'],
+                'TRABAJOS' => ['pdf', 'doc', 'docx'],
+                'MATRIMONIO' => ['pdf', 'jpg', 'jpeg', 'png'],
+                'VACUNACION' => ['pdf', 'jpg', 'jpeg', 'png'],
+                'ESTUDIOS' => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+                'DNI_HIJOS' => ['pdf', 'jpg', 'jpeg', 'png'],
+                'OTROS' => ['pdf', 'jpg', 'jpeg', 'png']
+            ];
+
+            $extension = strtolower($archivo->getClientOriginalExtension());
+
+            if (
+                !isset($extensionesPermitidas[$tipoDocumento]) ||
+                !in_array($extension, $extensionesPermitidas[$tipoDocumento])
+            ) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tipo de archivo no permitido para este documento'
+                ], 422);
+            }
+
+            $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
+
+            $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
+
+            $documento = DocumentoUsuario::create([
+                'idUsuario' => $idUsuario,
+                'tipo_documento' => $tipoDocumento,
+                'nombre_archivo' => $archivo->getClientOriginalName(),
+                'ruta_archivo' => $ruta,
+                'mime_type' => $archivo->getMimeType(),
+                'tamano' => $archivo->getSize()
+            ]);
+
+            Log::info('Documento subido exitosamente:', [
+                'usuario' => $idUsuario,
+                'tipo' => $tipoDocumento,
+                'documento_id' => $documento->idDocumento
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Documento subido exitosamente',
+                'documento' => $documento
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+                'message' => 'Error al subir documento'
+            ], 500);
         }
-
-        $usuario = Usuario::find($idUsuario);
-        if (!$usuario) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Usuario no encontrado'
-            ], 404);
-        }
-
-        $archivo = $request->file('archivo');
-        $tipoDocumento = $request->tipo_documento;
-
-        // Extensiones permitidas según tipo
-        $extensionesPermitidas = [
-            'CV' => ['pdf', 'doc', 'docx'],
-            'DNI' => ['jpg', 'jpeg', 'png', 'pdf'],
-            'PENALES' => ['pdf'],
-            'JUDICIALES' => ['pdf'],
-            'DOMICILIO' => ['pdf', 'jpg', 'jpeg', 'png'],
-            'TRABAJOS' => ['pdf', 'doc', 'docx'],
-            'MATRIMONIO' => ['pdf', 'jpg', 'jpeg', 'png'],
-            'VACUNACION' => ['pdf', 'jpg', 'jpeg', 'png'],
-            'ESTUDIOS' => ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
-            'DNI_HIJOS' => ['pdf', 'jpg', 'jpeg', 'png'],
-            'OTROS' => ['pdf', 'jpg', 'jpeg', 'png']
-        ];
-
-        $extension = strtolower($archivo->getClientOriginalExtension());
-
-        if (!isset($extensionesPermitidas[$tipoDocumento]) ||
-            !in_array($extension, $extensionesPermitidas[$tipoDocumento])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tipo de archivo no permitido para este documento'
-            ], 422);
-        }
-
-        $nombreArchivo = 'doc_' . $idUsuario . '_' . $tipoDocumento . '_' . time() . '.' . $extension;
-
-        $ruta = $archivo->storeAs('documentos_usuarios', $nombreArchivo, 'public');
-
-        $documento = DocumentoUsuario::create([
-            'idUsuario' => $idUsuario,
-            'tipo_documento' => $tipoDocumento,
-            'nombre_archivo' => $archivo->getClientOriginalName(),
-            'ruta_archivo' => $ruta,
-            'mime_type' => $archivo->getMimeType(),
-            'tamano' => $archivo->getSize()
-        ]);
-
-        Log::info('Documento subido exitosamente:', [
-            'usuario' => $idUsuario,
-            'tipo' => $tipoDocumento,
-            'documento_id' => $documento->idDocumento
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Documento subido exitosamente',
-            'documento' => $documento
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error('Error al subir documento:', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al subir documento'
-        ], 500);
     }
-}
 
 
     /**
@@ -2453,248 +2390,238 @@ class UsuarioController extends Controller
 
 
 
-/**
- * Actualizar estado de plataforma (Web/App)
- */
-public function actualizarEstado($id, Request $request)
-{
-    try {
-        $request->validate([
-            'plataforma' => 'required|in:web,app',
-            'estado' => 'required|boolean'
-        ]);
+    /**
+     * Actualizar estado de plataforma (Web/App)
+     */
+    public function actualizarEstado($id, Request $request)
+    {
+        try {
+            $request->validate([
+                'plataforma' => 'required|in:web,app',
+                'estado' => 'required|boolean'
+            ]);
 
-        $usuario = Usuario::findOrFail($id);
-        
-        if ($request->plataforma === 'web') {
-            $usuario->estadoWeb = $request->estado;
-        } else {
-            $usuario->estadoApp = $request->estado;
-        }
-        
-        $usuario->save();
-        
-        Log::info('Estado de plataforma actualizado', [
-            'usuario_id' => $id,
-            'plataforma' => $request->plataforma,
-            'estado' => $request->estado,
-            'admin_id' => auth()->id()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Estado actualizado correctamente'
-        ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Error al actualizar estado: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar el estado'
-        ], 500);
-    }
-}
+            $usuario = Usuario::findOrFail($id);
 
-/**
- * Actualizar tipo de correo configurado para acceso web
- */
-public function actualizarCorreoConfigurado($id, Request $request)
-{
-    try {
-        $request->validate([
-            'tipo_correo' => 'required|in:corporativo,personal'
-        ]);
+            if ($request->plataforma === 'web') {
+                $usuario->estadoWeb = $request->estado;
+            } else {
+                $usuario->estadoApp = $request->estado;
+            }
 
-        $usuario = Usuario::findOrFail($id);
-        
-        $usuario->correo_configurado_web = $request->tipo_correo;
-        $usuario->save();
-        
-        Log::info('Correo configurado actualizado', [
-            'usuario_id' => $id,
-            'tipo_correo' => $request->tipo_correo,
-            'admin_id' => auth()->id()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Configuración de correo actualizada correctamente',
-            'correo' => $request->tipo_correo === 'corporativo' ? $usuario->correo : $usuario->correo_personal
-        ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Error al actualizar correo configurado: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al actualizar la configuración'
-        ], 500);
-    }
-}
+            $usuario->save();
 
-/**
- * Guardar contraseñas independientes
- */
-public function guardarContrasenas($id, Request $request)
-{
-    try {
-        $request->validate([
-            'passwordWeb' => 'nullable|string|min:8',
-            'passwordApp' => 'nullable|string|min:8'
-        ]);
+            Log::info('Estado de plataforma actualizado', [
+                'usuario_id' => $id,
+                'plataforma' => $request->plataforma,
+                'estado' => $request->estado,
+                'admin_id' => auth()->id()
+            ]);
 
-        $usuario = Usuario::findOrFail($id);
-        
-        if ($request->filled('passwordWeb')) {
-            $usuario->passwordWeb = Hash::make($request->passwordWeb);
-        }
-        
-        if ($request->filled('passwordApp')) {
-            $usuario->passwordApp = Hash::make($request->passwordApp);
-        }
-        
-        $usuario->save();
-        
-        Log::info('Contraseñas actualizadas', [
-            'usuario_id' => $id,
-            'admin_id' => auth()->id()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Contraseñas guardadas correctamente'
-        ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Error al guardar contraseñas: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al guardar las contraseñas'
-        ], 500);
-    }
-}
-/**
- * Enviar credenciales por correo
- */
-public function enviarCredenciales($id, Request $request)
-{
-    try {
-        $request->validate([
-            'enviarWeb' => 'required|boolean',
-            'enviarApp' => 'required|boolean',
-            'destinatario' => 'required|in:corporativo,personal'
-        ]);
-
-        $usuario = Usuario::findOrFail($id);
-        
-        // Determinar correo destinatario
-        $destinatario = $request->destinatario === 'corporativo' 
-            ? $usuario->correo 
-            : $usuario->correo_personal;
-            
-        if (!$destinatario) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'El correo seleccionado no está configurado'
-            ], 400);
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar estado: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el estado'
+            ], 500);
         }
-
-        // Generar contraseñas temporales si no existen
-        if ($request->enviarWeb && !$usuario->passwordWeb) {
-            $tempPasswordWeb = Str::random(10);
-            $usuario->passwordWeb = Hash::make($tempPasswordWeb);
-        } else {
-            $tempPasswordWeb = '********'; // No mostrar la real
-        }
-
-        if ($request->enviarApp && !$usuario->passwordApp) {
-            $tempPasswordApp = Str::random(10);
-            $usuario->passwordApp = Hash::make($tempPasswordApp);
-        } else {
-            $tempPasswordApp = '********';
-        }
-
-        $usuario->save();
-
-        // ENVIAR CREDENCIALES WEB
-        if ($request->enviarWeb) {
-            $correoWebAcceso = $usuario->correo_configurado_web === 'corporativo' 
-                ? $usuario->correo 
-                : $usuario->correo_personal;
-                
-            Mail::to($destinatario)->send(new CredencialesWebMail(
-                $usuario,
-                $correoWebAcceso,
-                $tempPasswordWeb
-            ));
-        }
-
-        // ENVIAR CREDENCIALES APP
-        if ($request->enviarApp) {
-            $usuarioApp = $usuario->usuario . '_app'; // o el formato que uses
-            Mail::to($destinatario)->send(new CredencialesAppMail(
-                $usuario,
-                $usuarioApp,
-                $tempPasswordApp
-            ));
-        }
-
-        // NOTIFICACIÓN A GERENCIA (CORREOS FIJO O DE BD)
-        $gerentes = ['saldarriagacruz31@gmail.com', 'saldarriagacruz31@gmail.com']; // Configurar según necesidad
-        
-        foreach ($gerentes as $gerenteCorreo) {
-            Mail::to($gerenteCorreo)->send(new NotificacionGerenciaMail(
-                $usuario,
-                $request->enviarWeb,
-                $request->enviarApp,
-                auth()->user()
-            ));
-        }
-
-        Log::info('Credenciales enviadas exitosamente', [
-            'usuario_id' => $id,
-            'web' => $request->enviarWeb,
-            'app' => $request->enviarApp,
-            'destinatario' => $destinatario,
-            'admin_id' => auth()->id()
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => '✅ Credenciales enviadas correctamente'
-        ]);
-        
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Error al enviar credenciales: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al enviar las credenciales: ' . $e->getMessage()
-        ], 500);
     }
-}
 
+    /**
+     * Actualizar tipo de correo configurado para acceso web
+     */
+    public function actualizarCorreoConfigurado($id, Request $request)
+    {
+        try {
+            $request->validate([
+                'tipo_correo' => 'required|in:corporativo,personal'
+            ]);
 
+            $usuario = Usuario::findOrFail($id);
 
+            $usuario->correo_configurado_web = $request->tipo_correo;
+            $usuario->save();
 
+            Log::info('Correo configurado actualizado', [
+                'usuario_id' => $id,
+                'tipo_correo' => $request->tipo_correo,
+                'admin_id' => auth()->id()
+            ]);
 
-    
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuración de correo actualizada correctamente',
+                'correo' => $request->tipo_correo === 'corporativo' ? $usuario->correo : $usuario->correo_personal
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar correo configurado: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la configuración'
+            ], 500);
+        }
+    }
+
+    /**
+     * Guardar contraseñas independientes
+     */
+    public function guardarContrasenas($id, Request $request)
+    {
+        try {
+            $request->validate([
+                'passwordWeb' => 'nullable|string|min:8',
+                'passwordApp' => 'nullable|string|min:8'
+            ]);
+
+            $usuario = Usuario::findOrFail($id);
+
+            if ($request->filled('passwordWeb')) {
+                $usuario->passwordWeb = Hash::make($request->passwordWeb);
+            }
+
+            if ($request->filled('passwordApp')) {
+                $usuario->passwordApp = Hash::make($request->passwordApp);
+            }
+
+            $usuario->save();
+
+            Log::info('Contraseñas actualizadas', [
+                'usuario_id' => $id,
+                'admin_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contraseñas guardadas correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al guardar contraseñas: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar las contraseñas'
+            ], 500);
+        }
+    }
+    /**
+     * Enviar credenciales por correo
+     */
+    public function enviarCredenciales($id, Request $request)
+    {
+        try {
+            $request->validate([
+                'enviarWeb' => 'required|boolean',
+                'enviarApp' => 'required|boolean',
+                'destinatario' => 'required|in:corporativo,personal'
+            ]);
+
+            $usuario = Usuario::findOrFail($id);
+
+            // Determinar correo destinatario
+            $destinatario = $request->destinatario === 'corporativo'
+                ? $usuario->correo
+                : $usuario->correo_personal;
+
+            if (!$destinatario) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El correo seleccionado no está configurado'
+                ], 400);
+            }
+
+            // Generar contraseñas temporales si no existen
+            if ($request->enviarWeb && !$usuario->passwordWeb) {
+                $tempPasswordWeb = Str::random(10);
+                $usuario->passwordWeb = Hash::make($tempPasswordWeb);
+            } else {
+                $tempPasswordWeb = '********'; // No mostrar la real
+            }
+
+            if ($request->enviarApp && !$usuario->passwordApp) {
+                $tempPasswordApp = Str::random(10);
+                $usuario->passwordApp = Hash::make($tempPasswordApp);
+            } else {
+                $tempPasswordApp = '********';
+            }
+
+            $usuario->save();
+
+            // ENVIAR CREDENCIALES WEB
+            if ($request->enviarWeb) {
+                $correoWebAcceso = $usuario->correo_configurado_web === 'corporativo'
+                    ? $usuario->correo
+                    : $usuario->correo_personal;
+
+                Mail::to($destinatario)->send(new CredencialesWebMail(
+                    $usuario,
+                    $correoWebAcceso,
+                    $tempPasswordWeb
+                ));
+            }
+
+            // ENVIAR CREDENCIALES APP
+            if ($request->enviarApp) {
+                $usuarioApp = $usuario->usuario . '_app'; // o el formato que uses
+                Mail::to($destinatario)->send(new CredencialesAppMail(
+                    $usuario,
+                    $usuarioApp,
+                    $tempPasswordApp
+                ));
+            }
+
+            // NOTIFICACIÓN A GERENCIA (CORREOS FIJO O DE BD)
+            $gerentes = ['saldarriagacruz31@gmail.com', 'saldarriagacruz31@gmail.com']; // Configurar según necesidad
+
+            foreach ($gerentes as $gerenteCorreo) {
+                Mail::to($gerenteCorreo)->send(new NotificacionGerenciaMail(
+                    $usuario,
+                    $request->enviarWeb,
+                    $request->enviarApp,
+                    auth()->user()
+                ));
+            }
+
+            Log::info('Credenciales enviadas exitosamente', [
+                'usuario_id' => $id,
+                'web' => $request->enviarWeb,
+                'app' => $request->enviarApp,
+                'destinatario' => $destinatario,
+                'admin_id' => auth()->id()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Credenciales enviadas correctamente'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al enviar credenciales: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar las credenciales: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
