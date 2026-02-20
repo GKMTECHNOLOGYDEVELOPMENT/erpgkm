@@ -489,12 +489,12 @@
                 $(document).on('change', `input[name="${nivel}_termino"]`, function() {
                     let esSi = $(this).val() == '1';
                     if (esSi) {
-                        $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"], 
-                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"], 
+                        $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"],
+                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"],
                        input[name="${nivel}_fin"]`).prop('disabled', false);
                     } else {
-                        $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"], 
-                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"], 
+                        $(`input[name="${nivel}_centro"], input[name="${nivel}_especialidad"],
+                       input[name="${nivel}_grado"], input[name="${nivel}_inicio"],
                        input[name="${nivel}_fin"]`).val('').prop('disabled', true);
                     }
                 });
@@ -899,7 +899,7 @@
             <form id="familiar-form" class="text-left space-y-4 mt-2">
 
                 <div class="grid grid-cols-2 gap-4">
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Parentesco *</label>
                         <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" name="parentesco" required>
@@ -923,24 +923,24 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Apellidos y Nombres *</label>
-                    <input type="text" 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" 
+                    <input type="text"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         name="apellidosNombres" required>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">N° Documento</label>
-                        <input type="text" 
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" 
+                        <input type="text"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                             name="nroDocumento">
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-600 mb-1">Fecha de Nacimiento</label>
-                        <input type="text" 
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2 flatpickr focus:ring-2 focus:ring-emerald-500 focus:outline-none" 
+                        <input type="text"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2 flatpickr focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                             name="fechaNacimiento">
                     </div>
 
@@ -948,15 +948,15 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Ocupación</label>
-                    <input type="text" 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" 
+                    <input type="text"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         name="ocupacion">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-600 mb-1">Domicilio Actual</label>
-                    <input type="text" 
-                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" 
+                    <input type="text"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                         name="domicilioActual">
                 </div>
 
@@ -1072,11 +1072,11 @@
                             title: '<span class="text-xl font-semibold text-gray-800">Actualizar Familiar</span>',
                             html: `
                 <form id="familiar-edit-form" class="text-left space-y-4 mt-2">
-                    
+
                     <input type="hidden" name="idFamiliar" value="${familiar.idFamiliar}">
 
                     <div class="grid grid-cols-2 gap-4">
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-600 mb-1">Parentesco *</label>
                             <select name="parentesco"
@@ -1110,7 +1110,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-600 mb-1">N° Documento</label>
                             <input type="text" name="nroDocumento"
@@ -1327,9 +1327,9 @@
                             let nuevoContacto = `
                 <div class="relative bg-white dark:bg-[#0e1726] border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition">
 
-                    <button 
+                    <button
                         class="absolute top-3 right-3 text-gray-400 hover:text-red-600 delete-contacto transition"
-                        data-id="${contacto.idContacto}" 
+                        data-id="${contacto.idContacto}"
                         title="Eliminar">
                         <i class="fas fa-times"></i>
                     </button>
@@ -1685,24 +1685,48 @@ const adminNombre = '{{ auth()->user()->name ?? auth()->user()->usuario ?? "Sist
 // ============================================ -->
 function inicializarDangerZone() {
     console.log('🚀 Inicializando DANGER ZONE (tab activa)');
-    
+
     // Verificar que los elementos existen antes de inicializar
     const estadoWeb = document.getElementById('estadoWeb');
     const estadoApp = document.getElementById('estadoApp');
-    
+
     if (!estadoWeb || !estadoApp) {
-        console.log('⏳ Elementos no encontrados, reintentando en 100ms...');
-        setTimeout(inicializarDangerZone, 100);
+        // Solo mostrar este log UNA vez
+        if (!window._dangerZoneReintentado) {
+            console.log('⏳ Elementos no encontrados, esperando a que cargue el DOM...');
+            window._dangerZoneReintentado = true;
+        }
+
+        // Usar MutationObserver en lugar de setTimeout recursivo
+        const observer = new MutationObserver(function(mutations) {
+            const web = document.getElementById('estadoWeb');
+            const app = document.getElementById('estadoApp');
+
+            if (web && app) {
+                console.log('✅ Elementos encontrados, inicializando...');
+                observer.disconnect();
+                window._dangerZoneReintentado = false;
+                initControlAcceso();
+                initConfiguracionCorreo();
+                initEnvioCredenciales();
+                initGestionContrasenas();
+                verificarGenerador();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
         return;
     }
-    
+
     console.log('✅ Elementos encontrados, inicializando...');
     initControlAcceso();
     initConfiguracionCorreo();
     initEnvioCredenciales();
     initGestionContrasenas();
-    
-    // Verificar elementos del generador
     verificarGenerador();
 }
 
@@ -1711,59 +1735,59 @@ function inicializarDangerZone() {
 // ============================================ -->
 function initControlAcceso() {
     console.log('🎮 Inicializando Control de Acceso...');
-    
+
     const estadoWeb = document.getElementById('estadoWeb');
     const estadoApp = document.getElementById('estadoApp');
     const estadoWebText = document.getElementById('estadoWebText');
     const estadoAppText = document.getElementById('estadoAppText');
-    
+
     console.log('📊 Elementos Control Acceso:', {
         estadoWeb: estadoWeb ? '✅' : '❌',
         estadoApp: estadoApp ? '✅' : '❌',
         estadoWebText: estadoWebText ? '✅' : '❌',
         estadoAppText: estadoAppText ? '✅' : '❌'
     });
-    
+
     if (estadoWeb) {
         // Remover event listeners anteriores
         const newWeb = estadoWeb.cloneNode(true);
         estadoWeb.parentNode.replaceChild(newWeb, estadoWeb);
-        
+
         newWeb.addEventListener('change', function() {
             const estado = this.checked ? 1 : 0;
             console.log('🌐 Web toggled:', { checked: this.checked, estado });
-            
+
             // Actualizar texto
             if (estadoWebText) {
                 estadoWebText.textContent = this.checked ? 'Activo' : 'Inactivo';
-                estadoWebText.className = this.checked 
-                    ? 'text-green-600 dark:text-green-400 font-semibold' 
+                estadoWebText.className = this.checked
+                    ? 'text-green-600 dark:text-green-400 font-semibold'
                     : 'text-red-600 dark:text-red-400 font-semibold';
             }
-            
+
             // Enviar al backend
             actualizarEstado('web', estado);
         });
         console.log('✅ Event listener para Web configurado');
     }
-    
+
     if (estadoApp) {
         // Remover event listeners anteriores
         const newApp = estadoApp.cloneNode(true);
         estadoApp.parentNode.replaceChild(newApp, estadoApp);
-        
+
         newApp.addEventListener('change', function() {
             const estado = this.checked ? 1 : 0;
             console.log('📱 App toggled:', { checked: this.checked, estado });
-            
+
             // Actualizar texto
             if (estadoAppText) {
                 estadoAppText.textContent = this.checked ? 'Activo' : 'Inactivo';
-                estadoAppText.className = this.checked 
-                    ? 'text-green-600 dark:text-green-400 font-semibold' 
+                estadoAppText.className = this.checked
+                    ? 'text-green-600 dark:text-green-400 font-semibold'
                     : 'text-red-600 dark:text-red-400 font-semibold';
             }
-            
+
             // Enviar al backend
             actualizarEstado('app', estado);
         });
@@ -1774,7 +1798,7 @@ function initControlAcceso() {
 // Función para actualizar estado en el backend
 async function actualizarEstado(plataforma, estado) {
     console.log(`📡 Enviando actualización de estado ${plataforma}:`, estado);
-    
+
     try {
         const response = await fetch(`/usuario/${usuarioId}/actualizar-estado`, {
             method: 'POST',
@@ -1788,18 +1812,18 @@ async function actualizarEstado(plataforma, estado) {
                 estado: estado
             })
         });
-        
+
         const data = await response.json();
         console.log('📥 Respuesta del servidor:', data);
-        
+
         if (data.success) {
-            mostrarMensaje('✅ Estado actualizado correctamente', 'exito');
+            toastr.success('✅ Estado actualizado correctamente');
         } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al actualizar'), 'error');
+            toastr.error('❌ ' + (data.message || 'Error al actualizar'));
         }
     } catch (error) {
         console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al actualizar', 'error');
+        toastr.error('❌ Error de conexión al actualizar');
     }
 }
 
@@ -1808,35 +1832,35 @@ async function actualizarEstado(plataforma, estado) {
 // ============================================ -->
 function initConfiguracionCorreo() {
     console.log('📧 Inicializando Configuración de Correo...');
-    
+
     const btnGuardarCorreo = document.getElementById('btnGuardarCorreoConfig');
     const correoCorporativoRadio = document.getElementById('correoCorporativo');
     const correoPersonalRadio = document.getElementById('correoPersonal');
     const correoConfiguradoMostrar = document.getElementById('correoConfiguradoMostrar');
     const usuarioWebSpan = document.getElementById('usuarioWeb');
-    
+
     console.log('📊 Elementos Configuración Correo:', {
         btnGuardarCorreo: btnGuardarCorreo ? '✅' : '❌',
         correoCorporativoRadio: correoCorporativoRadio ? '✅' : '❌',
         correoPersonalRadio: correoPersonalRadio ? '✅' : '❌',
         correoConfiguradoMostrar: correoConfiguradoMostrar ? '✅' : '❌'
     });
-    
+
     if (btnGuardarCorreo) {
         // Remover event listeners anteriores
         const newBtn = btnGuardarCorreo.cloneNode(true);
         btnGuardarCorreo.parentNode.replaceChild(newBtn, btnGuardarCorreo);
-        
+
         newBtn.addEventListener('click', function() {
             console.log('💾 Guardando configuración de correo...');
-            
+
             let tipoCorreo = 'corporativo';
             if (correoPersonalRadio && correoPersonalRadio.checked) {
                 tipoCorreo = 'personal';
             }
-            
+
             console.log('Tipo seleccionado:', tipoCorreo);
-            
+
             // Actualizar UI inmediatamente
             const correoMostrar = tipoCorreo === 'corporativo' ? correoCorporativo : correoPersonal;
             if (correoConfiguradoMostrar) {
@@ -1845,7 +1869,7 @@ function initConfiguracionCorreo() {
             if (usuarioWebSpan) {
                 usuarioWebSpan.textContent = correoMostrar || 'No configurado';
             }
-            
+
             // Enviar al backend
             actualizarCorreoConfigurado(tipoCorreo);
         });
@@ -1855,7 +1879,7 @@ function initConfiguracionCorreo() {
 
 async function actualizarCorreoConfigurado(tipo) {
     console.log('📡 Enviando configuración de correo:', tipo);
-    
+
     try {
         const response = await fetch(`/usuario/${usuarioId}/actualizar-correo-configurado`, {
             method: 'POST',
@@ -1868,18 +1892,18 @@ async function actualizarCorreoConfigurado(tipo) {
                 tipo_correo: tipo
             })
         });
-        
+
         const data = await response.json();
         console.log('📥 Respuesta del servidor:', data);
-        
+
         if (data.success) {
-            mostrarMensaje('✅ Configuración de correo guardada', 'exito');
+            toastr.success('✅ Configuración de correo guardada');
         } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
+            toastr.error('❌ ' + (data.message || 'Error al guardar'));
         }
     } catch (error) {
         console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al guardar', 'error');
+        toastr.error('❌ Error de conexión al guardar');
     }
 }
 
@@ -1888,14 +1912,14 @@ async function actualizarCorreoConfigurado(tipo) {
 // ============================================ -->
 function initEnvioCredenciales() {
     console.log('📨 Inicializando Envío de Credenciales...');
-    
+
     const btnEnviar = document.getElementById('btnEnviarCredenciales');
     const enviarWeb = document.getElementById('enviarWeb');
     const enviarApp = document.getElementById('enviarApp');
     const credencialesWeb = document.getElementById('credencialesWeb');
     const credencialesApp = document.getElementById('credencialesApp');
     const destinatarioRadios = document.querySelectorAll('input[name="destinatario"]');
-    
+
     console.log('📊 Elementos Envío Credenciales:', {
         btnEnviar: btnEnviar ? '✅' : '❌',
         enviarWeb: enviarWeb ? '✅' : '❌',
@@ -1903,7 +1927,7 @@ function initEnvioCredenciales() {
         credencialesWeb: credencialesWeb ? '✅' : '❌',
         credencialesApp: credencialesApp ? '✅' : '❌'
     });
-    
+
     // Mostrar/ocultar credenciales según checkboxes
     if (enviarWeb) {
         enviarWeb.addEventListener('change', function() {
@@ -1913,7 +1937,7 @@ function initEnvioCredenciales() {
             actualizarNotificacion();
         });
     }
-    
+
     if (enviarApp) {
         enviarApp.addEventListener('change', function() {
             if (credencialesApp) {
@@ -1922,29 +1946,29 @@ function initEnvioCredenciales() {
             actualizarNotificacion();
         });
     }
-    
+
     // Botón enviar
     if (btnEnviar) {
         // Remover event listeners anteriores
         const newBtn = btnEnviar.cloneNode(true);
         btnEnviar.parentNode.replaceChild(newBtn, btnEnviar);
-        
+
         newBtn.addEventListener('click', function() {
             console.log('🚀 Enviando credenciales...');
-            
+
             const webChecked = enviarWeb ? enviarWeb.checked : false;
             const appChecked = enviarApp ? enviarApp.checked : false;
-            
+
             if (!webChecked && !appChecked) {
                 mostrarMensaje('❌ Selecciona al menos un tipo de credencial', 'error');
                 return;
             }
-            
+
             let destinatario = 'corporativo';
             destinatarioRadios.forEach(radio => {
                 if (radio.checked) destinatario = radio.value;
             });
-            
+
             // Verificar que el destinatario tenga correo
             if (destinatario === 'corporativo' && !correoCorporativo) {
                 mostrarMensaje('❌ El correo corporativo no está configurado', 'error');
@@ -1954,16 +1978,16 @@ function initEnvioCredenciales() {
                 mostrarMensaje('❌ El correo personal no está configurado', 'error');
                 return;
             }
-            
+
             // Deshabilitar botón
             newBtn.disabled = true;
             newBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
-            
+
             enviarCredenciales(webChecked, appChecked, destinatario, newBtn);
         });
         console.log('✅ Event listener para enviar credenciales configurado');
     }
-    
+
     // Inicializar visibilidad
     if (enviarWeb && credencialesWeb) {
         credencialesWeb.style.display = enviarWeb.checked ? 'block' : 'none';
@@ -1976,25 +2000,35 @@ function initEnvioCredenciales() {
 function actualizarNotificacion() {
     const notificacion = document.getElementById('notificacionGerencia');
     if (!notificacion) return;
-    
+
     const enviarWeb = document.getElementById('enviarWeb');
     const enviarApp = document.getElementById('enviarApp');
-    
+
     const fecha = new Date().toLocaleDateString('es-ES', {
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     });
-    
+
     let accesos = [];
     if (enviarWeb?.checked) accesos.push('Web');
     if (enviarApp?.checked) accesos.push('App');
-    
+
     notificacion.textContent = `Se notificará a gerencia: Usuario: ${nombreUsuario} | Acceso: ${accesos.join(' + ')} | Fecha: ${fecha} | Admin: ${adminNombre}`;
 }
 
 async function enviarCredenciales(web, app, destinatario, btn) {
     console.log('📡 Enviando credenciales:', { web, app, destinatario });
-    
+
+    // Configuración opcional de toastr (puedes personalizar colores, duración, etc.)
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 5000,
+        extendedTimeOut: 2000,
+        preventDuplicates: true
+    };
+
     try {
         const response = await fetch(`/usuario/${usuarioId}/enviar-credenciales`, {
             method: 'POST',
@@ -2009,18 +2043,18 @@ async function enviarCredenciales(web, app, destinatario, btn) {
                 destinatario: destinatario
             })
         });
-        
+
         const data = await response.json();
         console.log('📥 Respuesta del servidor:', data);
-        
+
         if (data.success) {
-            mostrarMensaje('✅ Credenciales enviadas correctamente', 'exito');
+            toastr.success('✅ Credenciales enviadas correctamente');
         } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al enviar'), 'error');
+            toastr.error('❌ ' + (data.message || 'Error al enviar'));
         }
     } catch (error) {
         console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al enviar', 'error');
+        toastr.error('❌ Error de conexión al enviar');
     } finally {
         // Restaurar botón
         if (btn) {
@@ -2035,38 +2069,38 @@ async function enviarCredenciales(web, app, destinatario, btn) {
 // ============================================ -->
 function initGestionContrasenas() {
     console.log('🔐 Inicializando Gestión de Contraseñas...');
-    
+
     const btnGuardar = document.getElementById('btnGuardarContrasenas');
     const passwordWeb = document.getElementById('passwordWeb');
     const passwordApp = document.getElementById('passwordApp');
-    
+
     console.log('📊 Elementos Gestión Contraseñas:', {
         btnGuardar: btnGuardar ? '✅' : '❌',
         passwordWeb: passwordWeb ? '✅' : '❌',
         passwordApp: passwordApp ? '✅' : '❌'
     });
-    
+
     if (btnGuardar) {
         // Remover event listeners anteriores
         const newBtn = btnGuardar.cloneNode(true);
         btnGuardar.parentNode.replaceChild(newBtn, btnGuardar);
-        
+
         newBtn.addEventListener('click', function() {
             console.log('💾 Guardando contraseñas...');
-            
+
             const passwordWebVal = document.getElementById('passwordWeb')?.value || '';
             const passwordAppVal = document.getElementById('passwordApp')?.value || '';
-            
+
             // Validar longitud mínima
             if (passwordWebVal && passwordWebVal.length < 8) {
-                mostrarMensaje('❌ La contraseña web debe tener al menos 8 caracteres', 'error');
+                toastr.error('❌ La contraseña web debe tener al menos 8 caracteres');
                 return;
             }
             if (passwordAppVal && passwordAppVal.length < 8) {
-                mostrarMensaje('❌ La contraseña app debe tener al menos 8 caracteres', 'error');
+                toastr.error('❌ La contraseña app debe tener al menos 8 caracteres');
                 return;
             }
-            
+
             guardarContrasenas(passwordWebVal, passwordAppVal);
         });
         console.log('✅ Event listener para guardar contraseñas configurado');
@@ -2075,7 +2109,7 @@ function initGestionContrasenas() {
 
 async function guardarContrasenas(passwordWeb, passwordApp) {
     console.log('📡 Enviando contraseñas al servidor...');
-    
+
     try {
         const response = await fetch(`/usuario/${usuarioId}/guardar-contrasenas`, {
             method: 'POST',
@@ -2089,18 +2123,22 @@ async function guardarContrasenas(passwordWeb, passwordApp) {
                 passwordApp: passwordApp
             })
         });
-        
+
         const data = await response.json();
         console.log('📥 Respuesta del servidor:', data);
-        
+
         if (data.success) {
-            mostrarMensaje('✅ Contraseñas guardadas correctamente', 'exito');
+            toastr.success('✅ Contraseñas guardadas correctamente');
+
+            // Limpiar los campos después de guardar exitosamente
+            document.getElementById('passwordWeb').value = '';
+            document.getElementById('passwordApp').value = '';
         } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
+            toastr.error('❌ ' + (data.message || 'Error al guardar'));
         }
     } catch (error) {
         console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al guardar', 'error');
+        toastr.error('❌ Error de conexión al guardar');
     }
 }
 
@@ -2115,7 +2153,7 @@ function verificarGenerador() {
         configEspeciales: document.getElementById('configEspeciales'),
         passwordGenerada: document.getElementById('passwordGenerada')
     };
-    
+
     console.log('🔍 Verificación generador:', {
         configLongitud: elementosGen.configLongitud ? '✅' : '❌',
         configMayusculas: elementosGen.configMayusculas ? '✅' : '❌',
@@ -2123,7 +2161,7 @@ function verificarGenerador() {
         configEspeciales: elementosGen.configEspeciales ? '✅' : '❌',
         passwordGenerada: elementosGen.passwordGenerada ? '✅' : '❌'
     });
-    
+
     // Generar contraseña por defecto
     if (elementosGen.passwordGenerada && !elementosGen.passwordGenerada.value) {
         setTimeout(generarPassword, 500);
@@ -2134,9 +2172,9 @@ function verificarGenerador() {
 function togglePassword(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
-    
+
     if (!input || !icon) return;
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         icon.classList.remove('fa-eye');
@@ -2151,27 +2189,27 @@ function togglePassword(inputId, iconId) {
 // Función para generar contraseña segura
 function generarPassword() {
     console.log('🎯 Generando contraseña...');
-    
+
     const longitud = parseInt(document.getElementById('configLongitud')?.value) || 12;
     const mayusculas = document.getElementById('configMayusculas')?.checked || false;
     const numeros = document.getElementById('configNumeros')?.checked || false;
     const especiales = document.getElementById('configEspeciales')?.checked || false;
-    
+
     const minusculas = 'abcdefghijklmnopqrstuvwxyz';
     const mayusculasChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const numerosChars = '0123456789';
     const especialesChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    
+
     let caracteres = minusculas;
     if (mayusculas) caracteres += mayusculasChars;
     if (numeros) caracteres += numerosChars;
     if (especiales) caracteres += especialesChars;
-    
+
     let password = '';
     for (let i = 0; i < longitud; i++) {
         password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     }
-    
+
     const passwordGenerada = document.getElementById('passwordGenerada');
     if (passwordGenerada) passwordGenerada.value = password;
 }
@@ -2179,13 +2217,13 @@ function generarPassword() {
 // Función para copiar contraseña al portapapeles
 function copiarPassword() {
     console.log('📋 Copiando contraseña...');
-    
+
     const passwordGenerada = document.getElementById('passwordGenerada');
     if (!passwordGenerada || !passwordGenerada.value) {
         console.error('❌ No hay contraseña para copiar');
         return;
     }
-    
+
     navigator.clipboard.writeText(passwordGenerada.value)
         .then(() => {
             console.log('✅ Contraseña copiada');
@@ -2205,19 +2243,19 @@ function copiarPassword() {
 // ============================================ -->
 function mostrarMensaje(texto, tipo) {
     console.log('📢 Mostrando mensaje:', texto, tipo);
-    
+
     const alertaContainer = document.getElementById('alertaContainer');
     const alerta = document.getElementById('alerta');
-    
+
     if (!alertaContainer || !alerta) {
         console.error('❌ No se encontraron elementos para mostrar mensaje');
         return;
     }
-    
+
     alertaContainer.classList.remove('hidden');
     alerta.className = `p-4 rounded-lg ${tipo === 'exito' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
     alerta.innerHTML = `<i class="fas mr-2 ${tipo === 'exito' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>${texto}`;
-    
+
     setTimeout(() => {
         alertaContainer.classList.add('hidden');
     }, 3000);
@@ -2235,7 +2273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         nombreUsuario,
         adminNombre
     });
-    
+
     // Intentar inicializar inmediatamente
     setTimeout(inicializarDangerZone, 300);
 });
@@ -2259,32 +2297,6 @@ document.addEventListener('tab-changed', (e) => {
     }
 });
 </script>
-
-<!-- Estilos adicionales -->
-<style>
-/* Animaciones para mensajes */
-#alertaContainer {
-    transition: opacity 0.3s ease;
-}
-#alertaContainer.hidden {
-    display: none;
-}
-#alerta {
-    animation: slideIn 0.3s ease;
-}
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Mejoras para botones */
-.btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-</style>
-
-
 
 
 
@@ -2423,7 +2435,7 @@ document.addEventListener('tab-changed', (e) => {
                             Principal
                         </span>
                     </div>
-                    
+
                     <div class="space-y-2">
                         <div>
                             <p class="text-xs text-gray-500 dark:text-gray-400">Número de Cuenta</p>
@@ -2434,7 +2446,7 @@ document.addEventListener('tab-changed', (e) => {
                             <p class="font-mono text-sm font-medium text-gray-800 dark:text-white">${data.numeroCCI}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-green-200 dark:border-green-800/30">
                         <button type="button" class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1 edit-cuenta-btn">
                             <i class="fas fa-edit"></i> Editar
