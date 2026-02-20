@@ -74,22 +74,14 @@
                         </a>
                     </li>
 
-                  <li class="inline-block">
-                    <a href="javascript:;" :class="{ '!border-primary text-primary': tab == 'danger-zone' }"
-                        @click="loadTab('danger-zone')"
-                        class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary">
-                        
-                        <!-- SVG de Configuraciones (Engranaje) -->
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        
-                        Configuraciones
-                    </a>
-                </li>
+                    <li class="inline-block">
+                        <a href="javascript:;" :class="{ '!border-primary text-primary': tab == 'danger-zone' }"
+                            @click="loadTab('danger-zone')"
+                            class="flex gap-2 p-4 border-b border-transparent hover:border-primary hover:text-primary">
+                            <i class="fa-regular fa-triangle-exclamation"></i>
+                            Zona de Peligro
+                        </a>
+                    </li>
                 </ul>
 
                 <div class="panel mt-6 p-5 relative min-h-[200px]">
@@ -127,627 +119,6 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-
-
-<!-- ============================================ -->
-<!-- JAVASCRIPT COMPLETO PARA DANGER ZONE -->
-<!-- ============================================ -->
-<script>
-// Variables globales
-const usuarioId = {{ $usuario->idUsuario }};
-const csrfToken = '{{ csrf_token() }}';
-const correoCorporativo = '{{ $usuario->correo ?? "" }}';
-const correoPersonal = '{{ $usuario->correo_personal ?? "" }}';
-const nombreUsuario = '{{ $usuario->Nombre ?? "" }} {{ $usuario->apellidoPaterno ?? "" }}';
-const adminNombre = '{{ auth()->user()->name ?? auth()->user()->usuario ?? "Sistema" }}';
-
-// ============================================ -->
-// FUNCIÓN PARA INICIALIZAR CUANDO LA TAB ESTÉ ACTIVA
-// ============================================ -->
-function inicializarDangerZone() {
-    console.log('🚀 Inicializando DANGER ZONE (tab activa)');
-    
-    // Verificar que los elementos existen antes de inicializar
-    const estadoWeb = document.getElementById('estadoWeb');
-    const estadoApp = document.getElementById('estadoApp');
-    
-    if (!estadoWeb || !estadoApp) {
-        console.log('⏳ Elementos no encontrados, reintentando en 100ms...');
-        setTimeout(inicializarDangerZone, 100);
-        return;
-    }
-    
-    console.log('✅ Elementos encontrados, inicializando...');
-    initControlAcceso();
-    initConfiguracionCorreo();
-    initEnvioCredenciales();
-    initGestionContrasenas();
-    
-    // Verificar elementos del generador
-    verificarGenerador();
-}
-
-// ============================================ -->
-// SECCIÓN 1: CONTROL DE ACCESO POR PLATAFORMA
-// ============================================ -->
-function initControlAcceso() {
-    console.log('🎮 Inicializando Control de Acceso...');
-    
-    const estadoWeb = document.getElementById('estadoWeb');
-    const estadoApp = document.getElementById('estadoApp');
-    const estadoWebText = document.getElementById('estadoWebText');
-    const estadoAppText = document.getElementById('estadoAppText');
-    
-    console.log('📊 Elementos Control Acceso:', {
-        estadoWeb: estadoWeb ? '✅' : '❌',
-        estadoApp: estadoApp ? '✅' : '❌',
-        estadoWebText: estadoWebText ? '✅' : '❌',
-        estadoAppText: estadoAppText ? '✅' : '❌'
-    });
-    
-    if (estadoWeb) {
-        // Remover event listeners anteriores
-        const newWeb = estadoWeb.cloneNode(true);
-        estadoWeb.parentNode.replaceChild(newWeb, estadoWeb);
-        
-        newWeb.addEventListener('change', function() {
-            const estado = this.checked ? 1 : 0;
-            console.log('🌐 Web toggled:', { checked: this.checked, estado });
-            
-            // Actualizar texto
-            if (estadoWebText) {
-                estadoWebText.textContent = this.checked ? 'Activo' : 'Inactivo';
-                estadoWebText.className = this.checked 
-                    ? 'text-green-600 dark:text-green-400 font-semibold' 
-                    : 'text-red-600 dark:text-red-400 font-semibold';
-            }
-            
-            // Enviar al backend
-            actualizarEstado('web', estado);
-        });
-        console.log('✅ Event listener para Web configurado');
-    }
-    
-    if (estadoApp) {
-        // Remover event listeners anteriores
-        const newApp = estadoApp.cloneNode(true);
-        estadoApp.parentNode.replaceChild(newApp, estadoApp);
-        
-        newApp.addEventListener('change', function() {
-            const estado = this.checked ? 1 : 0;
-            console.log('📱 App toggled:', { checked: this.checked, estado });
-            
-            // Actualizar texto
-            if (estadoAppText) {
-                estadoAppText.textContent = this.checked ? 'Activo' : 'Inactivo';
-                estadoAppText.className = this.checked 
-                    ? 'text-green-600 dark:text-green-400 font-semibold' 
-                    : 'text-red-600 dark:text-red-400 font-semibold';
-            }
-            
-            // Enviar al backend
-            actualizarEstado('app', estado);
-        });
-        console.log('✅ Event listener para App configurado');
-    }
-}
-
-// Función para actualizar estado en el backend
-async function actualizarEstado(plataforma, estado) {
-    console.log(`📡 Enviando actualización de estado ${plataforma}:`, estado);
-    
-    try {
-        const response = await fetch(`/usuario/${usuarioId}/actualizar-estado`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                plataforma: plataforma,
-                estado: estado
-            })
-        });
-        
-        const data = await response.json();
-        console.log('📥 Respuesta del servidor:', data);
-        
-        if (data.success) {
-            mostrarMensaje('✅ Estado actualizado correctamente', 'exito');
-        } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al actualizar'), 'error');
-        }
-    } catch (error) {
-        console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al actualizar', 'error');
-    }
-}
-
-// ============================================ -->
-// SECCIÓN 2: CONFIGURACIÓN DE CORREO
-// ============================================ -->
-function initConfiguracionCorreo() {
-    console.log('📧 Inicializando Configuración de Correo...');
-    
-    const btnGuardarCorreo = document.getElementById('btnGuardarCorreoConfig');
-    const correoCorporativoRadio = document.getElementById('correoCorporativo');
-    const correoPersonalRadio = document.getElementById('correoPersonal');
-    const correoConfiguradoMostrar = document.getElementById('correoConfiguradoMostrar');
-    const usuarioWebSpan = document.getElementById('usuarioWeb');
-    
-    console.log('📊 Elementos Configuración Correo:', {
-        btnGuardarCorreo: btnGuardarCorreo ? '✅' : '❌',
-        correoCorporativoRadio: correoCorporativoRadio ? '✅' : '❌',
-        correoPersonalRadio: correoPersonalRadio ? '✅' : '❌',
-        correoConfiguradoMostrar: correoConfiguradoMostrar ? '✅' : '❌'
-    });
-    
-    if (btnGuardarCorreo) {
-        // Remover event listeners anteriores
-        const newBtn = btnGuardarCorreo.cloneNode(true);
-        btnGuardarCorreo.parentNode.replaceChild(newBtn, btnGuardarCorreo);
-        
-        newBtn.addEventListener('click', function() {
-            console.log('💾 Guardando configuración de correo...');
-            
-            let tipoCorreo = 'corporativo';
-            if (correoPersonalRadio && correoPersonalRadio.checked) {
-                tipoCorreo = 'personal';
-            }
-            
-            console.log('Tipo seleccionado:', tipoCorreo);
-            
-            // Actualizar UI inmediatamente
-            const correoMostrar = tipoCorreo === 'corporativo' ? correoCorporativo : correoPersonal;
-            if (correoConfiguradoMostrar) {
-                correoConfiguradoMostrar.textContent = correoMostrar || 'No configurado';
-            }
-            if (usuarioWebSpan) {
-                usuarioWebSpan.textContent = correoMostrar || 'No configurado';
-            }
-            
-            // Enviar al backend
-            actualizarCorreoConfigurado(tipoCorreo);
-        });
-        console.log('✅ Event listener para guardar correo configurado');
-    }
-}
-
-async function actualizarCorreoConfigurado(tipo) {
-    console.log('📡 Enviando configuración de correo:', tipo);
-    
-    try {
-        const response = await fetch(`/usuario/${usuarioId}/actualizar-correo-configurado`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                tipo_correo: tipo
-            })
-        });
-        
-        const data = await response.json();
-        console.log('📥 Respuesta del servidor:', data);
-        
-        if (data.success) {
-            mostrarMensaje('✅ Configuración de correo guardada', 'exito');
-        } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
-        }
-    } catch (error) {
-        console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al guardar', 'error');
-    }
-}
-
-// ============================================ -->
-// SECCIÓN 3: ENVÍO DE CREDENCIALES
-// ============================================ -->
-function initEnvioCredenciales() {
-    console.log('📨 Inicializando Envío de Credenciales...');
-    
-    const btnEnviar = document.getElementById('btnEnviarCredenciales');
-    const enviarWeb = document.getElementById('enviarWeb');
-    const enviarApp = document.getElementById('enviarApp');
-    const credencialesWeb = document.getElementById('credencialesWeb');
-    const credencialesApp = document.getElementById('credencialesApp');
-    const destinatarioRadios = document.querySelectorAll('input[name="destinatario"]');
-    
-    console.log('📊 Elementos Envío Credenciales:', {
-        btnEnviar: btnEnviar ? '✅' : '❌',
-        enviarWeb: enviarWeb ? '✅' : '❌',
-        enviarApp: enviarApp ? '✅' : '❌',
-        credencialesWeb: credencialesWeb ? '✅' : '❌',
-        credencialesApp: credencialesApp ? '✅' : '❌'
-    });
-    
-    // Mostrar/ocultar credenciales según checkboxes
-    if (enviarWeb) {
-        enviarWeb.addEventListener('change', function() {
-            if (credencialesWeb) {
-                credencialesWeb.style.display = this.checked ? 'block' : 'none';
-            }
-            actualizarNotificacion();
-        });
-    }
-    
-    if (enviarApp) {
-        enviarApp.addEventListener('change', function() {
-            if (credencialesApp) {
-                credencialesApp.style.display = this.checked ? 'block' : 'none';
-            }
-            actualizarNotificacion();
-        });
-    }
-    
-    // Botón enviar
-    if (btnEnviar) {
-        // Remover event listeners anteriores
-        const newBtn = btnEnviar.cloneNode(true);
-        btnEnviar.parentNode.replaceChild(newBtn, btnEnviar);
-        
-        newBtn.addEventListener('click', function() {
-            console.log('🚀 Enviando credenciales...');
-            
-            const webChecked = enviarWeb ? enviarWeb.checked : false;
-            const appChecked = enviarApp ? enviarApp.checked : false;
-            
-            if (!webChecked && !appChecked) {
-                mostrarMensaje('❌ Selecciona al menos un tipo de credencial', 'error');
-                return;
-            }
-            
-            let destinatario = 'corporativo';
-            destinatarioRadios.forEach(radio => {
-                if (radio.checked) destinatario = radio.value;
-            });
-            
-            // Verificar que el destinatario tenga correo
-            if (destinatario === 'corporativo' && !correoCorporativo) {
-                mostrarMensaje('❌ El correo corporativo no está configurado', 'error');
-                return;
-            }
-            if (destinatario === 'personal' && !correoPersonal) {
-                mostrarMensaje('❌ El correo personal no está configurado', 'error');
-                return;
-            }
-            
-            // Deshabilitar botón
-            newBtn.disabled = true;
-            newBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
-            
-            enviarCredenciales(webChecked, appChecked, destinatario, newBtn);
-        });
-        console.log('✅ Event listener para enviar credenciales configurado');
-    }
-    
-    // Inicializar visibilidad
-    if (enviarWeb && credencialesWeb) {
-        credencialesWeb.style.display = enviarWeb.checked ? 'block' : 'none';
-    }
-    if (enviarApp && credencialesApp) {
-        credencialesApp.style.display = enviarApp.checked ? 'block' : 'none';
-    }
-}
-
-function actualizarNotificacion() {
-    const notificacion = document.getElementById('notificacionGerencia');
-    if (!notificacion) return;
-    
-    const enviarWeb = document.getElementById('enviarWeb');
-    const enviarApp = document.getElementById('enviarApp');
-    
-    const fecha = new Date().toLocaleDateString('es-ES', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    });
-    
-    let accesos = [];
-    if (enviarWeb?.checked) accesos.push('Web');
-    if (enviarApp?.checked) accesos.push('App');
-    
-    notificacion.textContent = `Se notificará a gerencia: Usuario: ${nombreUsuario} | Acceso: ${accesos.join(' + ')} | Fecha: ${fecha} | Admin: ${adminNombre}`;
-}
-
-async function enviarCredenciales(web, app, destinatario, btn) {
-    console.log('📡 Enviando credenciales:', { web, app, destinatario });
-    
-    try {
-        const response = await fetch(`/usuario/${usuarioId}/enviar-credenciales`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                enviarWeb: web,
-                enviarApp: app,
-                destinatario: destinatario
-            })
-        });
-        
-        const data = await response.json();
-        console.log('📥 Respuesta del servidor:', data);
-        
-        if (data.success) {
-            mostrarMensaje('✅ Credenciales enviadas correctamente', 'exito');
-        } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al enviar'), 'error');
-        }
-    } catch (error) {
-        console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al enviar', 'error');
-    } finally {
-        // Restaurar botón
-        if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Enviar Credenciales';
-        }
-    }
-}
-
-// ============================================ -->
-// SECCIÓN 4: GESTIÓN DE CONTRASEÑAS
-// ============================================ -->
-function initGestionContrasenas() {
-    console.log('🔐 Inicializando Gestión de Contraseñas...');
-    
-    const btnGuardar = document.getElementById('btnGuardarContrasenas');
-    const passwordWeb = document.getElementById('passwordWeb');
-    const passwordApp = document.getElementById('passwordApp');
-    
-    console.log('📊 Elementos Gestión Contraseñas:', {
-        btnGuardar: btnGuardar ? '✅' : '❌',
-        passwordWeb: passwordWeb ? '✅' : '❌',
-        passwordApp: passwordApp ? '✅' : '❌'
-    });
-    
-    if (btnGuardar) {
-        // Remover event listeners anteriores
-        const newBtn = btnGuardar.cloneNode(true);
-        btnGuardar.parentNode.replaceChild(newBtn, btnGuardar);
-        
-        newBtn.addEventListener('click', function() {
-            console.log('💾 Guardando contraseñas...');
-            
-            const passwordWebVal = document.getElementById('passwordWeb')?.value || '';
-            const passwordAppVal = document.getElementById('passwordApp')?.value || '';
-            
-            // Validar longitud mínima
-            if (passwordWebVal && passwordWebVal.length < 8) {
-                mostrarMensaje('❌ La contraseña web debe tener al menos 8 caracteres', 'error');
-                return;
-            }
-            if (passwordAppVal && passwordAppVal.length < 8) {
-                mostrarMensaje('❌ La contraseña app debe tener al menos 8 caracteres', 'error');
-                return;
-            }
-            
-            guardarContrasenas(passwordWebVal, passwordAppVal);
-        });
-        console.log('✅ Event listener para guardar contraseñas configurado');
-    }
-}
-
-async function guardarContrasenas(passwordWeb, passwordApp) {
-    console.log('📡 Enviando contraseñas al servidor...');
-    
-    try {
-        const response = await fetch(`/usuario/${usuarioId}/guardar-contrasenas`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                passwordWeb: passwordWeb,
-                passwordApp: passwordApp
-            })
-        });
-        
-        const data = await response.json();
-        console.log('📥 Respuesta del servidor:', data);
-        
-        if (data.success) {
-            mostrarMensaje('✅ Contraseñas guardadas correctamente', 'exito');
-        } else {
-            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
-        }
-    } catch (error) {
-        console.error('❌ Error en fetch:', error);
-        mostrarMensaje('❌ Error de conexión al guardar', 'error');
-    }
-}
-
-// ============================================ -->
-// FUNCIONES DEL GENERADOR
-// ============================================ -->
-function verificarGenerador() {
-    const elementosGen = {
-        configLongitud: document.getElementById('configLongitud'),
-        configMayusculas: document.getElementById('configMayusculas'),
-        configNumeros: document.getElementById('configNumeros'),
-        configEspeciales: document.getElementById('configEspeciales'),
-        passwordGenerada: document.getElementById('passwordGenerada')
-    };
-    
-    console.log('🔍 Verificación generador:', {
-        configLongitud: elementosGen.configLongitud ? '✅' : '❌',
-        configMayusculas: elementosGen.configMayusculas ? '✅' : '❌',
-        configNumeros: elementosGen.configNumeros ? '✅' : '❌',
-        configEspeciales: elementosGen.configEspeciales ? '✅' : '❌',
-        passwordGenerada: elementosGen.passwordGenerada ? '✅' : '❌'
-    });
-    
-    // Generar contraseña por defecto
-    if (elementosGen.passwordGenerada && !elementosGen.passwordGenerada.value) {
-        setTimeout(generarPassword, 500);
-    }
-}
-
-// Función para mostrar/ocultar contraseña
-function togglePassword(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    
-    if (!input || !icon) return;
-    
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-}
-
-// Función para generar contraseña segura
-function generarPassword() {
-    console.log('🎯 Generando contraseña...');
-    
-    const longitud = parseInt(document.getElementById('configLongitud')?.value) || 12;
-    const mayusculas = document.getElementById('configMayusculas')?.checked || false;
-    const numeros = document.getElementById('configNumeros')?.checked || false;
-    const especiales = document.getElementById('configEspeciales')?.checked || false;
-    
-    const minusculas = 'abcdefghijklmnopqrstuvwxyz';
-    const mayusculasChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numerosChars = '0123456789';
-    const especialesChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-    
-    let caracteres = minusculas;
-    if (mayusculas) caracteres += mayusculasChars;
-    if (numeros) caracteres += numerosChars;
-    if (especiales) caracteres += especialesChars;
-    
-    let password = '';
-    for (let i = 0; i < longitud; i++) {
-        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-    }
-    
-    const passwordGenerada = document.getElementById('passwordGenerada');
-    if (passwordGenerada) passwordGenerada.value = password;
-}
-
-// Función para copiar contraseña al portapapeles
-function copiarPassword() {
-    console.log('📋 Copiando contraseña...');
-    
-    const passwordGenerada = document.getElementById('passwordGenerada');
-    if (!passwordGenerada || !passwordGenerada.value) {
-        console.error('❌ No hay contraseña para copiar');
-        return;
-    }
-    
-    navigator.clipboard.writeText(passwordGenerada.value)
-        .then(() => {
-            console.log('✅ Contraseña copiada');
-            mostrarMensaje('✅ Contraseña copiada al portapapeles', 'exito');
-        })
-        .catch(err => {
-            console.error('❌ Error al copiar:', err);
-            // Fallback
-            passwordGenerada.select();
-            document.execCommand('copy');
-            mostrarMensaje('✅ Contraseña copiada (método alternativo)', 'exito');
-        });
-}
-
-// ============================================ -->
-// FUNCIONES UTILITARIAS
-// ============================================ -->
-function mostrarMensaje(texto, tipo) {
-    console.log('📢 Mostrando mensaje:', texto, tipo);
-    
-    const alertaContainer = document.getElementById('alertaContainer');
-    const alerta = document.getElementById('alerta');
-    
-    if (!alertaContainer || !alerta) {
-        console.error('❌ No se encontraron elementos para mostrar mensaje');
-        return;
-    }
-    
-    alertaContainer.classList.remove('hidden');
-    alerta.className = `p-4 rounded-lg ${tipo === 'exito' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
-    alerta.innerHTML = `<i class="fas mr-2 ${tipo === 'exito' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>${texto}`;
-    
-    setTimeout(() => {
-        alertaContainer.classList.add('hidden');
-    }, 3000);
-}
-
-// ============================================ -->
-// INICIALIZACIÓN PRINCIPAL
-// ============================================ -->
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 ===== INICIALIZANDO DANGER ZONE =====');
-    console.log('📊 Datos del usuario:', {
-        id: usuarioId,
-        correoCorporativo,
-        correoPersonal,
-        nombreUsuario,
-        adminNombre
-    });
-    
-    // Intentar inicializar inmediatamente
-    setTimeout(inicializarDangerZone, 300);
-});
-
-// También cuando Alpine.js cambie de tab
-document.addEventListener('alpine:init', () => {
-    console.log('⚡ Alpine.js detectado');
-});
-
-document.addEventListener('alpine:initialized', () => {
-    console.log('🎯 Alpine.js inicializado completamente');
-    // Reintentar inicialización cuando Alpine esté listo
-    setTimeout(inicializarDangerZone, 500);
-});
-
-// Si hay un evento personalizado cuando cambia la tab
-document.addEventListener('tab-changed', (e) => {
-    if (e.detail === 'danger-zone') {
-        console.log('🔄 Tab cambiada a danger-zone');
-        setTimeout(inicializarDangerZone, 200);
-    }
-});
-</script>
-
-<!-- Estilos adicionales -->
-<style>
-/* Animaciones para mensajes */
-#alertaContainer {
-    transition: opacity 0.3s ease;
-}
-#alertaContainer.hidden {
-    display: none;
-}
-#alerta {
-    animation: slideIn 0.3s ease;
-}
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Mejoras para botones */
-.btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-</style>
-
-
-
 
 
     <script>
@@ -2144,125 +1515,12 @@ document.addEventListener('tab-changed', (e) => {
                 }
             });
 
-
-
-
-<script>
-    // En la consola del navegador (F12), escribe:
-console.log('console');
-console.log('console');
-</script>
-
-
-
-
-<script>
-    $(document).ready(function() {
-        // ============================================
-        // DATOS DE BANCOS, MONEDAS Y TIPOS DE CUENTA (desde PHP)
-        // ============================================
-        var bancosData = {
-            @foreach($bancos as $key => $banco)
-                "{{ $key }}": "{{ $banco }}",
-            @endforeach
-        };
-        
-        var monedasData = {
-            @foreach($monedas as $key => $moneda)
-                "{{ $key }}": "{{ $moneda }}",
-            @endforeach
-        };
-        
-        var tiposCuentaData = {
-            @foreach($tiposCuenta as $key => $tipo)
-                "{{ $key }}": "{{ $tipo }}",
-            @endforeach
-        };
-
-        // ============================================
-        // GUARDAR CUENTA BANCARIA
-        // ============================================
-        $(document).on('click', '#saveBtn', function(e) {
-            e.preventDefault();
-            
-            let userId = {{ $usuario->idUsuario }};
-            let csrfToken = $('meta[name="csrf-token"]').attr('content');
-            
-            // Obtener valores
-            let banco = $('#banco').val();
-            let moneda = $('#moneda').val();
-            let tipoCuenta = $('#tipoCuenta').val();
-            let numeroCuenta = $('#numeroCuenta').val();
-            let numeroCCI = $('#numeroCCI').val();
-            
-            // Validaciones básicas
-            if (!banco) {
-                toastr.error('Por favor, seleccione un banco');
-                return;
-            }
-            if (!moneda) {
-                toastr.error('Por favor, seleccione una moneda');
-                return;
-            }
-            if (!tipoCuenta) {
-                toastr.error('Por favor, seleccione un tipo de cuenta');
-                return;
-            }
-            if (!numeroCuenta || numeroCuenta.trim() === '') {
-                toastr.error('Por favor, ingrese el número de cuenta');
-                return;
-            }
-            if (!numeroCCI || numeroCCI.trim() === '') {
-                toastr.error('Por favor, ingrese el número de CCI');
-                return;
-            }
-            
-            let data = {
-                entidadBancaria: banco,
-                moneda: moneda,
-                tipoCuenta: tipoCuenta,
-                numeroCuenta: numeroCuenta,
-                numeroCCI: numeroCCI
-            };
-            
-            // Mostrar indicador de carga
-            let $btn = $(this);
-            let originalText = $btn.html();
-            $btn.html('<i class="fas fa-spinner fa-spin"></i> Guardando...').prop('disabled', true);
-            
-            $.ajax({
-                url: '/usuario/' + userId + '/cuenta-bancaria/guardar',
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                success: function(response) {
-                    if (response.success) {
-                        toastr.success(response.message);
-                        
-                        // Actualizar la vista sin recargar
-                        actualizarVistaCuentaBancaria(response.data);
-                        
-                        // Cambiar título y botón
-                        $('#form-title').text('Editar Cuenta Bancaria');
-                        $btn.html('<i class="fas fa-save"></i> Actualizar Cuenta Bancaria');
-                    }
-                },
-                error: function(xhr) {
-                    if (xhr.status === 422) {
-                        let errors = xhr.responseJSON.errors;
-                        $.each(errors, function(key, value) {
-                            toastr.error(value[0]);
-                        });
-                    } else {
-                        toastr.error('Error al guardar la cuenta bancaria');
-                    }
-                    $btn.html(originalText);
-                },
-                complete: function() {
-                    $btn.prop('disabled', false);
+            $(document).on('change', 'input[name="dolencia_cronica"]', function() {
+                if ($(this).val() == '1') {
+                    $('input[name="dolencia_detalle"]').prop('disabled', false);
+                } else {
+                    // BORRAR VALOR y deshabilitar cuando selecciona NO
+                    $('input[name="dolencia_detalle"]').val('').prop('disabled', true);
                 }
             });
 
@@ -2407,6 +1665,628 @@ console.log('console');
             });
         });
     </script>
+
+
+
+<!-- ============================================ -->
+<!-- JAVASCRIPT COMPLETO PARA DANGER ZONE -->
+<!-- ============================================ -->
+<script>
+// Variables globales
+const usuarioId = {{ $usuario->idUsuario }};
+const csrfToken = '{{ csrf_token() }}';
+const correoCorporativo = '{{ $usuario->correo ?? "" }}';
+const correoPersonal = '{{ $usuario->correo_personal ?? "" }}';
+const nombreUsuario = '{{ $usuario->Nombre ?? "" }} {{ $usuario->apellidoPaterno ?? "" }}';
+const adminNombre = '{{ auth()->user()->name ?? auth()->user()->usuario ?? "Sistema" }}';
+
+// ============================================ -->
+// FUNCIÓN PARA INICIALIZAR CUANDO LA TAB ESTÉ ACTIVA
+// ============================================ -->
+function inicializarDangerZone() {
+    console.log('🚀 Inicializando DANGER ZONE (tab activa)');
+    
+    // Verificar que los elementos existen antes de inicializar
+    const estadoWeb = document.getElementById('estadoWeb');
+    const estadoApp = document.getElementById('estadoApp');
+    
+    if (!estadoWeb || !estadoApp) {
+        console.log('⏳ Elementos no encontrados, reintentando en 100ms...');
+        setTimeout(inicializarDangerZone, 100);
+        return;
+    }
+    
+    console.log('✅ Elementos encontrados, inicializando...');
+    initControlAcceso();
+    initConfiguracionCorreo();
+    initEnvioCredenciales();
+    initGestionContrasenas();
+    
+    // Verificar elementos del generador
+    verificarGenerador();
+}
+
+// ============================================ -->
+// SECCIÓN 1: CONTROL DE ACCESO POR PLATAFORMA
+// ============================================ -->
+function initControlAcceso() {
+    console.log('🎮 Inicializando Control de Acceso...');
+    
+    const estadoWeb = document.getElementById('estadoWeb');
+    const estadoApp = document.getElementById('estadoApp');
+    const estadoWebText = document.getElementById('estadoWebText');
+    const estadoAppText = document.getElementById('estadoAppText');
+    
+    console.log('📊 Elementos Control Acceso:', {
+        estadoWeb: estadoWeb ? '✅' : '❌',
+        estadoApp: estadoApp ? '✅' : '❌',
+        estadoWebText: estadoWebText ? '✅' : '❌',
+        estadoAppText: estadoAppText ? '✅' : '❌'
+    });
+    
+    if (estadoWeb) {
+        // Remover event listeners anteriores
+        const newWeb = estadoWeb.cloneNode(true);
+        estadoWeb.parentNode.replaceChild(newWeb, estadoWeb);
+        
+        newWeb.addEventListener('change', function() {
+            const estado = this.checked ? 1 : 0;
+            console.log('🌐 Web toggled:', { checked: this.checked, estado });
+            
+            // Actualizar texto
+            if (estadoWebText) {
+                estadoWebText.textContent = this.checked ? 'Activo' : 'Inactivo';
+                estadoWebText.className = this.checked 
+                    ? 'text-green-600 dark:text-green-400 font-semibold' 
+                    : 'text-red-600 dark:text-red-400 font-semibold';
+            }
+            
+            // Enviar al backend
+            actualizarEstado('web', estado);
+        });
+        console.log('✅ Event listener para Web configurado');
+    }
+    
+    if (estadoApp) {
+        // Remover event listeners anteriores
+        const newApp = estadoApp.cloneNode(true);
+        estadoApp.parentNode.replaceChild(newApp, estadoApp);
+        
+        newApp.addEventListener('change', function() {
+            const estado = this.checked ? 1 : 0;
+            console.log('📱 App toggled:', { checked: this.checked, estado });
+            
+            // Actualizar texto
+            if (estadoAppText) {
+                estadoAppText.textContent = this.checked ? 'Activo' : 'Inactivo';
+                estadoAppText.className = this.checked 
+                    ? 'text-green-600 dark:text-green-400 font-semibold' 
+                    : 'text-red-600 dark:text-red-400 font-semibold';
+            }
+            
+            // Enviar al backend
+            actualizarEstado('app', estado);
+        });
+        console.log('✅ Event listener para App configurado');
+    }
+}
+
+// Función para actualizar estado en el backend
+async function actualizarEstado(plataforma, estado) {
+    console.log(`📡 Enviando actualización de estado ${plataforma}:`, estado);
+    
+    try {
+        const response = await fetch(`/usuario/${usuarioId}/actualizar-estado`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                plataforma: plataforma,
+                estado: estado
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
+        
+        if (data.success) {
+            mostrarMensaje('✅ Estado actualizado correctamente', 'exito');
+        } else {
+            mostrarMensaje('❌ ' + (data.message || 'Error al actualizar'), 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error en fetch:', error);
+        mostrarMensaje('❌ Error de conexión al actualizar', 'error');
+    }
+}
+
+// ============================================ -->
+// SECCIÓN 2: CONFIGURACIÓN DE CORREO
+// ============================================ -->
+function initConfiguracionCorreo() {
+    console.log('📧 Inicializando Configuración de Correo...');
+    
+    const btnGuardarCorreo = document.getElementById('btnGuardarCorreoConfig');
+    const correoCorporativoRadio = document.getElementById('correoCorporativo');
+    const correoPersonalRadio = document.getElementById('correoPersonal');
+    const correoConfiguradoMostrar = document.getElementById('correoConfiguradoMostrar');
+    const usuarioWebSpan = document.getElementById('usuarioWeb');
+    
+    console.log('📊 Elementos Configuración Correo:', {
+        btnGuardarCorreo: btnGuardarCorreo ? '✅' : '❌',
+        correoCorporativoRadio: correoCorporativoRadio ? '✅' : '❌',
+        correoPersonalRadio: correoPersonalRadio ? '✅' : '❌',
+        correoConfiguradoMostrar: correoConfiguradoMostrar ? '✅' : '❌'
+    });
+    
+    if (btnGuardarCorreo) {
+        // Remover event listeners anteriores
+        const newBtn = btnGuardarCorreo.cloneNode(true);
+        btnGuardarCorreo.parentNode.replaceChild(newBtn, btnGuardarCorreo);
+        
+        newBtn.addEventListener('click', function() {
+            console.log('💾 Guardando configuración de correo...');
+            
+            let tipoCorreo = 'corporativo';
+            if (correoPersonalRadio && correoPersonalRadio.checked) {
+                tipoCorreo = 'personal';
+            }
+            
+            console.log('Tipo seleccionado:', tipoCorreo);
+            
+            // Actualizar UI inmediatamente
+            const correoMostrar = tipoCorreo === 'corporativo' ? correoCorporativo : correoPersonal;
+            if (correoConfiguradoMostrar) {
+                correoConfiguradoMostrar.textContent = correoMostrar || 'No configurado';
+            }
+            if (usuarioWebSpan) {
+                usuarioWebSpan.textContent = correoMostrar || 'No configurado';
+            }
+            
+            // Enviar al backend
+            actualizarCorreoConfigurado(tipoCorreo);
+        });
+        console.log('✅ Event listener para guardar correo configurado');
+    }
+}
+
+async function actualizarCorreoConfigurado(tipo) {
+    console.log('📡 Enviando configuración de correo:', tipo);
+    
+    try {
+        const response = await fetch(`/usuario/${usuarioId}/actualizar-correo-configurado`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                tipo_correo: tipo
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
+        
+        if (data.success) {
+            mostrarMensaje('✅ Configuración de correo guardada', 'exito');
+        } else {
+            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error en fetch:', error);
+        mostrarMensaje('❌ Error de conexión al guardar', 'error');
+    }
+}
+
+// ============================================ -->
+// SECCIÓN 3: ENVÍO DE CREDENCIALES
+// ============================================ -->
+function initEnvioCredenciales() {
+    console.log('📨 Inicializando Envío de Credenciales...');
+    
+    const btnEnviar = document.getElementById('btnEnviarCredenciales');
+    const enviarWeb = document.getElementById('enviarWeb');
+    const enviarApp = document.getElementById('enviarApp');
+    const credencialesWeb = document.getElementById('credencialesWeb');
+    const credencialesApp = document.getElementById('credencialesApp');
+    const destinatarioRadios = document.querySelectorAll('input[name="destinatario"]');
+    
+    console.log('📊 Elementos Envío Credenciales:', {
+        btnEnviar: btnEnviar ? '✅' : '❌',
+        enviarWeb: enviarWeb ? '✅' : '❌',
+        enviarApp: enviarApp ? '✅' : '❌',
+        credencialesWeb: credencialesWeb ? '✅' : '❌',
+        credencialesApp: credencialesApp ? '✅' : '❌'
+    });
+    
+    // Mostrar/ocultar credenciales según checkboxes
+    if (enviarWeb) {
+        enviarWeb.addEventListener('change', function() {
+            if (credencialesWeb) {
+                credencialesWeb.style.display = this.checked ? 'block' : 'none';
+            }
+            actualizarNotificacion();
+        });
+    }
+    
+    if (enviarApp) {
+        enviarApp.addEventListener('change', function() {
+            if (credencialesApp) {
+                credencialesApp.style.display = this.checked ? 'block' : 'none';
+            }
+            actualizarNotificacion();
+        });
+    }
+    
+    // Botón enviar
+    if (btnEnviar) {
+        // Remover event listeners anteriores
+        const newBtn = btnEnviar.cloneNode(true);
+        btnEnviar.parentNode.replaceChild(newBtn, btnEnviar);
+        
+        newBtn.addEventListener('click', function() {
+            console.log('🚀 Enviando credenciales...');
+            
+            const webChecked = enviarWeb ? enviarWeb.checked : false;
+            const appChecked = enviarApp ? enviarApp.checked : false;
+            
+            if (!webChecked && !appChecked) {
+                mostrarMensaje('❌ Selecciona al menos un tipo de credencial', 'error');
+                return;
+            }
+            
+            let destinatario = 'corporativo';
+            destinatarioRadios.forEach(radio => {
+                if (radio.checked) destinatario = radio.value;
+            });
+            
+            // Verificar que el destinatario tenga correo
+            if (destinatario === 'corporativo' && !correoCorporativo) {
+                mostrarMensaje('❌ El correo corporativo no está configurado', 'error');
+                return;
+            }
+            if (destinatario === 'personal' && !correoPersonal) {
+                mostrarMensaje('❌ El correo personal no está configurado', 'error');
+                return;
+            }
+            
+            // Deshabilitar botón
+            newBtn.disabled = true;
+            newBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
+            
+            enviarCredenciales(webChecked, appChecked, destinatario, newBtn);
+        });
+        console.log('✅ Event listener para enviar credenciales configurado');
+    }
+    
+    // Inicializar visibilidad
+    if (enviarWeb && credencialesWeb) {
+        credencialesWeb.style.display = enviarWeb.checked ? 'block' : 'none';
+    }
+    if (enviarApp && credencialesApp) {
+        credencialesApp.style.display = enviarApp.checked ? 'block' : 'none';
+    }
+}
+
+function actualizarNotificacion() {
+    const notificacion = document.getElementById('notificacionGerencia');
+    if (!notificacion) return;
+    
+    const enviarWeb = document.getElementById('enviarWeb');
+    const enviarApp = document.getElementById('enviarApp');
+    
+    const fecha = new Date().toLocaleDateString('es-ES', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+    
+    let accesos = [];
+    if (enviarWeb?.checked) accesos.push('Web');
+    if (enviarApp?.checked) accesos.push('App');
+    
+    notificacion.textContent = `Se notificará a gerencia: Usuario: ${nombreUsuario} | Acceso: ${accesos.join(' + ')} | Fecha: ${fecha} | Admin: ${adminNombre}`;
+}
+
+async function enviarCredenciales(web, app, destinatario, btn) {
+    console.log('📡 Enviando credenciales:', { web, app, destinatario });
+    
+    try {
+        const response = await fetch(`/usuario/${usuarioId}/enviar-credenciales`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                enviarWeb: web,
+                enviarApp: app,
+                destinatario: destinatario
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
+        
+        if (data.success) {
+            mostrarMensaje('✅ Credenciales enviadas correctamente', 'exito');
+        } else {
+            mostrarMensaje('❌ ' + (data.message || 'Error al enviar'), 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error en fetch:', error);
+        mostrarMensaje('❌ Error de conexión al enviar', 'error');
+    } finally {
+        // Restaurar botón
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Enviar Credenciales';
+        }
+    }
+}
+
+// ============================================ -->
+// SECCIÓN 4: GESTIÓN DE CONTRASEÑAS
+// ============================================ -->
+function initGestionContrasenas() {
+    console.log('🔐 Inicializando Gestión de Contraseñas...');
+    
+    const btnGuardar = document.getElementById('btnGuardarContrasenas');
+    const passwordWeb = document.getElementById('passwordWeb');
+    const passwordApp = document.getElementById('passwordApp');
+    
+    console.log('📊 Elementos Gestión Contraseñas:', {
+        btnGuardar: btnGuardar ? '✅' : '❌',
+        passwordWeb: passwordWeb ? '✅' : '❌',
+        passwordApp: passwordApp ? '✅' : '❌'
+    });
+    
+    if (btnGuardar) {
+        // Remover event listeners anteriores
+        const newBtn = btnGuardar.cloneNode(true);
+        btnGuardar.parentNode.replaceChild(newBtn, btnGuardar);
+        
+        newBtn.addEventListener('click', function() {
+            console.log('💾 Guardando contraseñas...');
+            
+            const passwordWebVal = document.getElementById('passwordWeb')?.value || '';
+            const passwordAppVal = document.getElementById('passwordApp')?.value || '';
+            
+            // Validar longitud mínima
+            if (passwordWebVal && passwordWebVal.length < 8) {
+                mostrarMensaje('❌ La contraseña web debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            if (passwordAppVal && passwordAppVal.length < 8) {
+                mostrarMensaje('❌ La contraseña app debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            guardarContrasenas(passwordWebVal, passwordAppVal);
+        });
+        console.log('✅ Event listener para guardar contraseñas configurado');
+    }
+}
+
+async function guardarContrasenas(passwordWeb, passwordApp) {
+    console.log('📡 Enviando contraseñas al servidor...');
+    
+    try {
+        const response = await fetch(`/usuario/${usuarioId}/guardar-contrasenas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                passwordWeb: passwordWeb,
+                passwordApp: passwordApp
+            })
+        });
+        
+        const data = await response.json();
+        console.log('📥 Respuesta del servidor:', data);
+        
+        if (data.success) {
+            mostrarMensaje('✅ Contraseñas guardadas correctamente', 'exito');
+        } else {
+            mostrarMensaje('❌ ' + (data.message || 'Error al guardar'), 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error en fetch:', error);
+        mostrarMensaje('❌ Error de conexión al guardar', 'error');
+    }
+}
+
+// ============================================ -->
+// FUNCIONES DEL GENERADOR
+// ============================================ -->
+function verificarGenerador() {
+    const elementosGen = {
+        configLongitud: document.getElementById('configLongitud'),
+        configMayusculas: document.getElementById('configMayusculas'),
+        configNumeros: document.getElementById('configNumeros'),
+        configEspeciales: document.getElementById('configEspeciales'),
+        passwordGenerada: document.getElementById('passwordGenerada')
+    };
+    
+    console.log('🔍 Verificación generador:', {
+        configLongitud: elementosGen.configLongitud ? '✅' : '❌',
+        configMayusculas: elementosGen.configMayusculas ? '✅' : '❌',
+        configNumeros: elementosGen.configNumeros ? '✅' : '❌',
+        configEspeciales: elementosGen.configEspeciales ? '✅' : '❌',
+        passwordGenerada: elementosGen.passwordGenerada ? '✅' : '❌'
+    });
+    
+    // Generar contraseña por defecto
+    if (elementosGen.passwordGenerada && !elementosGen.passwordGenerada.value) {
+        setTimeout(generarPassword, 500);
+    }
+}
+
+// Función para mostrar/ocultar contraseña
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (!input || !icon) return;
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// Función para generar contraseña segura
+function generarPassword() {
+    console.log('🎯 Generando contraseña...');
+    
+    const longitud = parseInt(document.getElementById('configLongitud')?.value) || 12;
+    const mayusculas = document.getElementById('configMayusculas')?.checked || false;
+    const numeros = document.getElementById('configNumeros')?.checked || false;
+    const especiales = document.getElementById('configEspeciales')?.checked || false;
+    
+    const minusculas = 'abcdefghijklmnopqrstuvwxyz';
+    const mayusculasChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numerosChars = '0123456789';
+    const especialesChars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    
+    let caracteres = minusculas;
+    if (mayusculas) caracteres += mayusculasChars;
+    if (numeros) caracteres += numerosChars;
+    if (especiales) caracteres += especialesChars;
+    
+    let password = '';
+    for (let i = 0; i < longitud; i++) {
+        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    
+    const passwordGenerada = document.getElementById('passwordGenerada');
+    if (passwordGenerada) passwordGenerada.value = password;
+}
+
+// Función para copiar contraseña al portapapeles
+function copiarPassword() {
+    console.log('📋 Copiando contraseña...');
+    
+    const passwordGenerada = document.getElementById('passwordGenerada');
+    if (!passwordGenerada || !passwordGenerada.value) {
+        console.error('❌ No hay contraseña para copiar');
+        return;
+    }
+    
+    navigator.clipboard.writeText(passwordGenerada.value)
+        .then(() => {
+            console.log('✅ Contraseña copiada');
+            mostrarMensaje('✅ Contraseña copiada al portapapeles', 'exito');
+        })
+        .catch(err => {
+            console.error('❌ Error al copiar:', err);
+            // Fallback
+            passwordGenerada.select();
+            document.execCommand('copy');
+            mostrarMensaje('✅ Contraseña copiada (método alternativo)', 'exito');
+        });
+}
+
+// ============================================ -->
+// FUNCIONES UTILITARIAS
+// ============================================ -->
+function mostrarMensaje(texto, tipo) {
+    console.log('📢 Mostrando mensaje:', texto, tipo);
+    
+    const alertaContainer = document.getElementById('alertaContainer');
+    const alerta = document.getElementById('alerta');
+    
+    if (!alertaContainer || !alerta) {
+        console.error('❌ No se encontraron elementos para mostrar mensaje');
+        return;
+    }
+    
+    alertaContainer.classList.remove('hidden');
+    alerta.className = `p-4 rounded-lg ${tipo === 'exito' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+    alerta.innerHTML = `<i class="fas mr-2 ${tipo === 'exito' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>${texto}`;
+    
+    setTimeout(() => {
+        alertaContainer.classList.add('hidden');
+    }, 3000);
+}
+
+// ============================================ -->
+// INICIALIZACIÓN PRINCIPAL
+// ============================================ -->
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 ===== INICIALIZANDO DANGER ZONE =====');
+    console.log('📊 Datos del usuario:', {
+        id: usuarioId,
+        correoCorporativo,
+        correoPersonal,
+        nombreUsuario,
+        adminNombre
+    });
+    
+    // Intentar inicializar inmediatamente
+    setTimeout(inicializarDangerZone, 300);
+});
+
+// También cuando Alpine.js cambie de tab
+document.addEventListener('alpine:init', () => {
+    console.log('⚡ Alpine.js detectado');
+});
+
+document.addEventListener('alpine:initialized', () => {
+    console.log('🎯 Alpine.js inicializado completamente');
+    // Reintentar inicialización cuando Alpine esté listo
+    setTimeout(inicializarDangerZone, 500);
+});
+
+// Si hay un evento personalizado cuando cambia la tab
+document.addEventListener('tab-changed', (e) => {
+    if (e.detail === 'danger-zone') {
+        console.log('🔄 Tab cambiada a danger-zone');
+        setTimeout(inicializarDangerZone, 200);
+    }
+});
+</script>
+
+<!-- Estilos adicionales -->
+<style>
+/* Animaciones para mensajes */
+#alertaContainer {
+    transition: opacity 0.3s ease;
+}
+#alertaContainer.hidden {
+    display: none;
+}
+#alerta {
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mejoras para botones */
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+</style>
+
+
+
+
 
     <script>
         $(document).ready(function() {

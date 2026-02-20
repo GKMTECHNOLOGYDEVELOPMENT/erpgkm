@@ -2155,6 +2155,20 @@ Route::post('/usuario/{id}/enviar-credenciales', [UsuarioController::class, 'env
 
 
 
-Route::get('/horas-extras', [HorasExtrasController::class, 'index'])
-    ->name('horas-extras.index')
-    ->middleware('auth');
+// Horas Extras
+Route::prefix('administracion/horasextras')->name('administracion.horasextras.')->group(function () {
+    Route::get('/', [HorasExtrasController::class, 'index'])->name('index');
+    
+    // API Routes
+    Route::get('/listar', [HorasExtrasController::class, 'getHorasExtras']);
+    Route::get('/usuarios', [HorasExtrasController::class, 'getUsuarios']);
+    Route::get('/contadores', [HorasExtrasController::class, 'getContadores']);
+    Route::get('/detalle/{id}', [HorasExtrasController::class, 'getDetalle']);
+    
+    Route::post('/aprobar', [HorasExtrasController::class, 'aprobar']);
+    Route::post('/rechazar', [HorasExtrasController::class, 'rechazar']);
+    
+    // Procesar horas extras (puede ser llamado por cron)
+    Route::post('/procesar', [HorasExtrasController::class, 'procesarHorasExtras']);
+    Route::get('/verificar-visitas', [HorasExtrasController::class, 'verificarVisitas']);
+});

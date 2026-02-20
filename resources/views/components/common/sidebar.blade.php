@@ -485,7 +485,7 @@
 
 
                     <li class="menu nav-item">
-                        <a href="{{ route('horas-extras.index') }}" class="nav-link group">
+                        <a href="{{ route('administracion.horasextras.index') }}" class="nav-link group">
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor"
