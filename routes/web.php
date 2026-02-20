@@ -103,6 +103,7 @@ use App\Http\Controllers\solicitud\SolicitudingresoController;
 use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
+use App\Http\Controllers\administracion\horasextras\HorasExtrasController;
 use App\Models\Cliente;
 use App\Models\Custodia;
 use App\Models\Marca;
@@ -2151,3 +2152,9 @@ Route::post('/usuario/{id}/actualizar-estado', [UsuarioController::class, 'actua
 Route::post('/usuario/{id}/actualizar-correo-configurado', [UsuarioController::class, 'actualizarCorreoConfigurado'])->name('usuario.actualizar-correo-configurado');
 Route::post('/usuario/{id}/guardar-contrasenas', [UsuarioController::class, 'guardarContrasenas'])->name('usuario.guardar-contrasenas');
 Route::post('/usuario/{id}/enviar-credenciales', [UsuarioController::class, 'enviarCredenciales'])->name('usuario.enviar-credenciales');
+
+
+
+Route::get('/horas-extras', [HorasExtrasController::class, 'index'])
+    ->name('horas-extras.index')
+    ->middleware('auth');

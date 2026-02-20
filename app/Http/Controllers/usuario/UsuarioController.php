@@ -2281,8 +2281,6 @@ class UsuarioController extends Controller
                 'fechaTermino' => 'nullable|date|after_or_equal:fechaInicio',
                 'horaInicioJornada' => 'nullable|string',
                 'horaFinJornada' => 'nullable|string',
-                'areaTexto' => 'nullable|string|max:255',
-                'cargoTexto' => 'nullable|string|max:255',
 
                 // Datos de configuración - CORREGIDO: sucursal (sin s)
                 'idSucursal' => 'nullable|integer|exists:sucursal,idSucursal',
@@ -2310,8 +2308,6 @@ class UsuarioController extends Controller
             $laboral->fechaTermino = $request->fechaTermino;
             $laboral->horaInicioJornada = $request->horaInicioJornada;
             $laboral->horaFinJornada = $request->horaFinJornada;
-            $laboral->areaTexto = $request->areaTexto;
-            $laboral->cargoTexto = $request->cargoTexto;
             $laboral->save();
 
             return response()->json([

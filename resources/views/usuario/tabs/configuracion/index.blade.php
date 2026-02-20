@@ -83,31 +83,60 @@
         window.open(`/usuario/documentos/${documentoId}/download`, '_blank');
     },
 
-    async deleteDocumento(documentoId) {
-        if (!confirm('¿Estás seguro de eliminar este documento?')) return;
+async deleteDocumento(documentoId) {
 
-        try {
-            const response = await fetch(`/usuario/documentos/${documentoId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
+    const result = await Swal.fire({
+        title: 'Eliminar Documento',
+        text: 'Esta acción no se puede deshacer.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-xl'
+        }
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+
+        const response = await fetch(`/usuario/documentos/${documentoId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+
+            await Swal.fire({
+                title: 'Eliminado',
+                text: 'El documento fue eliminado correctamente.',
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                customClass: {
+                    popup: 'rounded-xl'
                 }
             });
 
-            const data = await response.json();
-            
-            if (data.success) {
-                toastr.success('🗑️ Documento eliminado');
-                await this.loadDocumentos();
-            } else {
-                toastr.error(data.message || 'Error al eliminar documento');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            toastr.error('Error al eliminar documento');
+            await this.loadDocumentos();
+
+        } else {
+            toastr.error(data.message || 'Error al eliminar documento');
         }
-    },
+
+    } catch (error) {
+        console.error(error);
+        toastr.error('Error al eliminar documento');
+    }
+},
 
     async viewDocumento(documentoId) {
         window.open(`/usuario/documentos/${documentoId}/view`, '_blank');

@@ -483,6 +483,26 @@
                     </li>
                 @endif
 
+
+                    <li class="menu nav-item">
+                        <a href="{{ route('horas-extras.index') }}" class="nav-link group">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor"
+                                    class="w-6 h-6 group-hover:!text-primary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+
+                                <span
+                                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                    Evaluar Horas Extras
+                                </span>
+                            </div>
+                        </a>
+                    </li>
+                
+
                 @if (PermisoHelper::tienePermiso('VER ASISTENCIAS'))
                     <li class="menu nav-item">
                         <a href="{{ route('solicitudcompra.gestionadministracion') }}" class="nav-link group">
