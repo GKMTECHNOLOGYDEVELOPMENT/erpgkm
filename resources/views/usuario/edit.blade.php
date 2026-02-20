@@ -115,7 +115,6 @@
     <script src="{{ asset('assets/js/usuario/tabs/danger-zone.js') }}"></script>
     <script src="{{ asset('assets/js/usuario/tabs/payment-details.js') }}"></script>
     <script src="{{ asset('assets/js/usuario/tabs/perfil-usuario.js') }}"></script>
-    <script src="{{ asset('assets/js/usuario/tabs/familia-salud.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
