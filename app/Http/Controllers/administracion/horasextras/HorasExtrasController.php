@@ -39,6 +39,7 @@ class HorasExtrasController extends Controller
                     'u.sueldoPorHora'
                 );
 
+            // Aplicar filtros
             if ($request->filled('usuario')) {
                 $query->where('ah.idUsuario', $request->usuario);
             }
@@ -57,35 +58,41 @@ class HorasExtrasController extends Controller
                 $query->whereDate('ah.fechaHora_original', '<=', $fechaHasta);
             }
 
-            $horasExtras = $query->orderBy('ah.fechaHora_original', 'desc')->get();
+            // ========== PAGINACIÓN ==========
+            $perPage = $request->input('per_page', 10); // Número de items por página (default 10)
+            $page = $request->input('page', 1); // Página actual (default 1)
 
-            $horasExtras = $horasExtras->map(function($item) {
+            // Ordenar y paginar
+            $horasExtras = $query->orderBy('ah.fechaHora_original', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            // Transformar los datos de la página actual
+            $horasExtras->getCollection()->transform(function ($item) {
                 $fechaOriginal = Carbon::parse($item->fechaHora_original);
-                
+
                 $horaInicioExtra = $fechaOriginal->copy()->setTime(17, 0, 0);
                 $horaFinalExtra = $fechaOriginal;
-                
+
                 $minutosExtras = $item->diferencia_minutos ?? 0;
                 $horas = floor($minutosExtras / 60);
                 $minutos = $minutosExtras % 60;
-                
-                $tiempoFormateado = $horas > 0 
-                    ? "{$horas}h {$minutos}m" 
+
+                $tiempoFormateado = $horas > 0
+                    ? "{$horas}h {$minutos}m"
                     : "{$minutos}m";
-                
+
                 $item->hora_inicio_extra = $horaInicioExtra->format('H:i');
                 $item->hora_final_extra = $horaFinalExtra->format('H:i');
                 $item->tiempo_extra_formateado = $tiempoFormateado;
                 $item->minutos_extras = $minutosExtras;
-                
+
                 return $item;
             });
 
             return response()->json([
                 'success' => true,
-                'data' => $horasExtras
+                'data' => $horasExtras // Laravel ya formatea la paginación automáticamente
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -100,7 +107,7 @@ class HorasExtrasController extends Controller
             DB::beginTransaction();
 
             $horaUmbral = '17:20:00';
-            
+
             $asistencias = DB::table('asistencias as a')
                 ->leftJoin('aprobacion_horas as ah', 'a.idAsistencia', '=', 'ah.idAsistencia')
                 ->where('a.idTipoHorario', 4)
@@ -119,10 +126,10 @@ class HorasExtrasController extends Controller
                 $horaMarcada = Carbon::parse($asistencia->fechaHora);
                 $horaSalida = $horaMarcada->copy()->startOfDay()->setTime(17, 0, 0);
                 $diferenciaMinutos = $horaSalida->diffInMinutes($horaMarcada, false);
-                
+
                 if ($diferenciaMinutos > 0) {
                     $tipoMarca = $this->determinarTipoMarca($horaMarcada->format('H:i:s'));
-                    
+
                     $idAprobacion = DB::table('aprobacion_horas')->insertGetId([
                         'idAsistencia' => $asistencia->idAsistencia,
                         'idUsuario' => $asistencia->idUsuario,
@@ -155,7 +162,6 @@ class HorasExtrasController extends Controller
                 'success' => true,
                 'message' => "Se procesaron {$registrosCreados} registros de horas extras"
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -168,7 +174,7 @@ class HorasExtrasController extends Controller
     private function determinarTipoMarca($hora)
     {
         $horaCarbon = Carbon::parse($hora);
-        
+
         if ($horaCarbon->between('17:20:00', '19:00:00')) {
             return 'HORA_EXTRA_1';
         } elseif ($horaCarbon->between('19:00:01', '22:00:00')) {
@@ -211,7 +217,7 @@ class HorasExtrasController extends Controller
             }
 
             $idUsuario = Auth::id() ?? 1;
-            
+
             $aprobacion = DB::table('aprobacion_horas')
                 ->where('idAprobacion', $request->idAprobacion)
                 ->first();
@@ -225,7 +231,7 @@ class HorasExtrasController extends Controller
 
             $fechaOriginal = Carbon::parse($request->fecha_original);
             $horaFinalModificada = $request->hora_final_modificada;
-            
+
             $partes = explode(':', $horaFinalModificada);
             if (count($partes) != 2) {
                 return response()->json([
@@ -233,24 +239,24 @@ class HorasExtrasController extends Controller
                     'message' => 'Formato de hora inválido'
                 ], 400);
             }
-            
+
             $hora = (int)$partes[0];
             $minuto = (int)$partes[1];
-            
+
             if ($hora < 0 || $hora > 23 || $minuto < 0 || $minuto > 59) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Hora o minuto fuera de rango'
                 ], 400);
             }
-            
+
             if ($hora < 17) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La hora final no puede ser menor a 17:00'
                 ], 400);
             }
-            
+
             $fechaModificada = $fechaOriginal->copy()->setTime($hora, $minuto, 0);
             $fechaModificadaMySQL = $fechaModificada->format('Y-m-d H:i:s');
 
@@ -286,7 +292,6 @@ class HorasExtrasController extends Controller
                 'success' => true,
                 'message' => 'Hora extra aprobada correctamente. Nueva hora: ' . $horaFinalModificada
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -355,7 +360,6 @@ class HorasExtrasController extends Controller
                 'success' => true,
                 'message' => 'Hora extra rechazada correctamente'
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -381,7 +385,6 @@ class HorasExtrasController extends Controller
                 'success' => true,
                 'data' => $usuarios
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -416,7 +419,6 @@ class HorasExtrasController extends Controller
                     'total' => $total
                 ]
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -468,7 +470,6 @@ class HorasExtrasController extends Controller
                 'success' => true,
                 'data' => $detalle
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -477,222 +478,218 @@ class HorasExtrasController extends Controller
         }
     }
 
-public function verificarVisitas(Request $request)
-{
-    // Log 1: Inicio del método y datos recibidos
-    \Log::info('=== INICIO VERIFICACIÓN DE VISITAS ===');
-    \Log::info('Request recibido:', [
-        'idUsuario' => $request->idUsuario,
-        'fecha' => $request->fecha,
-        'all_data' => $request->all()
-    ]);
-
-    try {
-        $request->validate([
-            'idUsuario' => 'required|integer',
-            'fecha' => 'required|date'
+    public function verificarVisitas(Request $request)
+    {
+        // Log 1: Inicio del método y datos recibidos
+        \Log::info('=== INICIO VERIFICACIÓN DE VISITAS ===');
+        \Log::info('Request recibido:', [
+            'idUsuario' => $request->idUsuario,
+            'fecha' => $request->fecha,
+            'all_data' => $request->all()
         ]);
 
-        \Log::info('Validación exitosa');
-
-        $fecha = Carbon::parse($request->fecha)->format('Y-m-d');
-        \Log::info('Fecha formateada para BD:', ['fecha' => $fecha]);
-
-        // Habilitar log de queries
-        \DB::enableQueryLog();
-
-        // PRIMERO: Verificar si hay registros en ticketflujo para esta fecha
-        $flujosEnFecha = DB::table('ticketflujo')
-            ->whereDate('fecha_creacion', $fecha)
-            ->where('idEstadflujo', 7)
-            ->count();
-        
-        \Log::info('Registros en ticketflujo para la fecha:', [
-            'fecha' => $fecha,
-            'total_flujos' => $flujosEnFecha
-        ]);
-
-        $visitas = DB::table('visitas as v')
-            ->join('tickets as t', 'v.idTickets', '=', 't.idTickets')
-            ->join('ticketflujo as tf', function($join) use ($fecha) {
-                $join->on('v.idVisitas', '=', 'tf.idVisitas')
-                     ->where('tf.idEstadflujo', '=', 7)
-                     ->whereDate('tf.fecha_creacion', '=', $fecha);
-            })
-            ->where('v.idUsuario', $request->idUsuario)
-            ->whereDate('v.fecha_programada', '=', $fecha)
-            ->select(
-                'v.idVisitas',
-                'v.nombre as nombre_visita',
-                'v.fecha_programada',
-                'v.fecha_inicio',
-                'v.estado as estado_visita',
-                'v.necesita_apoyo',
-                't.idTickets',
-                't.numero_ticket',
-                't.fallaReportada',
-                't.idTecnico',
-                't.idClienteGeneral',
-                'tf.idTicketFlujo',
-                'tf.fecha_creacion as fecha_finalizacion',
-                'tf.comentarioflujo',
-                'tf.idEstadflujo'
-            )
-            ->orderBy('tf.fecha_creacion')
-            ->get();
-
-        // Log 3: Resultado de la query
-        $queryLog = \DB::getQueryLog();
-        \Log::info('SQL Query:', [
-            'query' => $queryLog[0]['query'] ?? 'No query',
-            'bindings' => $queryLog[0]['bindings'] ?? []
-        ]);
-
-        \Log::info('Visitas encontradas:', [
-            'cantidad' => $visitas->count(),
-            'ids_visitas' => $visitas->pluck('idVisitas')->toArray()
-        ]);
-
-        if ($visitas->isEmpty()) {
-            \Log::warning('No se encontraron visitas finalizadas', [
-                'idUsuario' => $request->idUsuario,
-                'fecha' => $fecha
-            ]);
-        }
-
-        // Procesar TODAS las visitas con su hora final
-        $visitasProcesadas = [];
-        $totalMinutosExtra = 0;
-        $visitasDespues17 = 0;
-
-        foreach ($visitas as $visita) {
-            \Log::info('Procesando visita:', [
-                'idVisita' => $visita->idVisitas,
-                'ticket' => $visita->numero_ticket,
-                'fecha_finalizacion_RAW' => $visita->fecha_finalizacion,
-                'fecha_inicio' => $visita->fecha_inicio
+        try {
+            $request->validate([
+                'idUsuario' => 'required|integer',
+                'fecha' => 'required|date'
             ]);
 
-            // Formatear fecha de inicio
-            $visita->hora_inicio = $visita->fecha_inicio ? 
-                Carbon::parse($visita->fecha_inicio)->format('H:i') : '--:--';
-            
-            // Verificar si tiene fecha de finalización
-            if ($visita->fecha_finalizacion) {
-                $horaFinal = Carbon::parse($visita->fecha_finalizacion);
-                $horaLimite = $horaFinal->copy()->setTime(17, 0, 0);
-                
-                $visita->hora_final = $horaFinal->format('H:i');
-                
-                // Verificar si terminó después de las 17:00
-                if ($horaFinal->gt($horaLimite)) {
-                    // Calcular minutos extras y redondear
-                    $minutosExtra = round($horaLimite->diffInMinutes($horaFinal));
-                    $visita->minutos_extra = (int)$minutosExtra;
-                    $visita->tiene_extra = true;
-                    $visitasDespues17++;
-                    
-                    // Formatear tiempo extra
-                    if ($visita->minutos_extra >= 60) {
-                        $horas = floor($visita->minutos_extra / 60);
-                        $minutos = $visita->minutos_extra % 60;
-                        $visita->tiempo_extra = $minutos > 0 ? "{$horas}h {$minutos}m" : "{$horas}h";
+            \Log::info('Validación exitosa');
+
+            $fecha = Carbon::parse($request->fecha)->format('Y-m-d');
+            \Log::info('Fecha formateada para BD:', ['fecha' => $fecha]);
+
+            // Habilitar log de queries
+            \DB::enableQueryLog();
+
+            // PRIMERO: Verificar si hay registros en ticketflujo para esta fecha
+            $flujosEnFecha = DB::table('ticketflujo')
+                ->whereDate('fecha_creacion', $fecha)
+                ->where('idEstadflujo', 7)
+                ->count();
+
+            \Log::info('Registros en ticketflujo para la fecha:', [
+                'fecha' => $fecha,
+                'total_flujos' => $flujosEnFecha
+            ]);
+
+            $visitas = DB::table('visitas as v')
+                ->join('tickets as t', 'v.idTickets', '=', 't.idTickets')
+                ->join('ticketflujo as tf', function ($join) use ($fecha) {
+                    $join->on('v.idVisitas', '=', 'tf.idVisitas')
+                        ->where('tf.idEstadflujo', '=', 7)
+                        ->whereDate('tf.fecha_creacion', '=', $fecha);
+                })
+                ->where('v.idUsuario', $request->idUsuario)
+                ->whereDate('v.fecha_programada', '=', $fecha)
+                ->select(
+                    'v.idVisitas',
+                    'v.nombre as nombre_visita',
+                    'v.fecha_programada',
+                    'v.fecha_inicio',
+                    'v.estado as estado_visita',
+                    'v.necesita_apoyo',
+                    't.idTickets',
+                    't.numero_ticket',
+                    't.fallaReportada',
+                    't.idTecnico',
+                    't.idClienteGeneral',
+                    'tf.idTicketFlujo',
+                    'tf.fecha_creacion as fecha_finalizacion',
+                    'tf.comentarioflujo',
+                    'tf.idEstadflujo'
+                )
+                ->orderBy('tf.fecha_creacion')
+                ->get();
+
+            // Log 3: Resultado de la query
+            $queryLog = \DB::getQueryLog();
+            \Log::info('SQL Query:', [
+                'query' => $queryLog[0]['query'] ?? 'No query',
+                'bindings' => $queryLog[0]['bindings'] ?? []
+            ]);
+
+            \Log::info('Visitas encontradas:', [
+                'cantidad' => $visitas->count(),
+                'ids_visitas' => $visitas->pluck('idVisitas')->toArray()
+            ]);
+
+            if ($visitas->isEmpty()) {
+                \Log::warning('No se encontraron visitas finalizadas', [
+                    'idUsuario' => $request->idUsuario,
+                    'fecha' => $fecha
+                ]);
+            }
+
+            // Procesar TODAS las visitas con su hora final
+            $visitasProcesadas = [];
+            $totalMinutosExtra = 0;
+            $visitasDespues17 = 0;
+
+            foreach ($visitas as $visita) {
+                \Log::info('Procesando visita:', [
+                    'idVisita' => $visita->idVisitas,
+                    'ticket' => $visita->numero_ticket,
+                    'fecha_finalizacion_RAW' => $visita->fecha_finalizacion,
+                    'fecha_inicio' => $visita->fecha_inicio
+                ]);
+
+                // Formatear fecha de inicio
+                $visita->hora_inicio = $visita->fecha_inicio ?
+                    Carbon::parse($visita->fecha_inicio)->format('H:i') : '--:--';
+
+                // Verificar si tiene fecha de finalización
+                if ($visita->fecha_finalizacion) {
+                    $horaFinal = Carbon::parse($visita->fecha_finalizacion);
+                    $horaLimite = $horaFinal->copy()->setTime(17, 0, 0);
+
+                    $visita->hora_final = $horaFinal->format('H:i');
+
+                    // Verificar si terminó después de las 17:00
+                    if ($horaFinal->gt($horaLimite)) {
+                        // Calcular minutos extras y redondear
+                        $minutosExtra = round($horaLimite->diffInMinutes($horaFinal));
+                        $visita->minutos_extra = (int)$minutosExtra;
+                        $visita->tiene_extra = true;
+                        $visitasDespues17++;
+
+                        // Formatear tiempo extra
+                        if ($visita->minutos_extra >= 60) {
+                            $horas = floor($visita->minutos_extra / 60);
+                            $minutos = $visita->minutos_extra % 60;
+                            $visita->tiempo_extra = $minutos > 0 ? "{$horas}h {$minutos}m" : "{$horas}h";
+                        } else {
+                            $visita->tiempo_extra = $visita->minutos_extra . 'm';
+                        }
+
+                        $totalMinutosExtra += $visita->minutos_extra;
+
+                        \Log::info('Visita CON horas extras:', [
+                            'idVisita' => $visita->idVisitas,
+                            'hora_final' => $visita->hora_final,
+                            'minutos_extra' => $visita->minutos_extra,
+                            'tiempo_formateado' => $visita->tiempo_extra
+                        ]);
                     } else {
-                        $visita->tiempo_extra = $visita->minutos_extra . 'm';
+                        // No tiene horas extras
+                        $visita->minutos_extra = 0;
+                        $visita->tiempo_extra = '0m';
+                        $visita->tiene_extra = false;
+
+                        \Log::info('Visita SIN horas extras:', [
+                            'idVisita' => $visita->idVisitas,
+                            'hora_final' => $visita->hora_final
+                        ]);
                     }
-                    
-                    $totalMinutosExtra += $visita->minutos_extra;
-                    
-                    \Log::info('Visita CON horas extras:', [
-                        'idVisita' => $visita->idVisitas,
-                        'hora_final' => $visita->hora_final,
-                        'minutos_extra' => $visita->minutos_extra,
-                        'tiempo_formateado' => $visita->tiempo_extra
-                    ]);
                 } else {
-                    // No tiene horas extras
+                    // No tiene fecha de finalización
+                    $visita->hora_final = '--:--';
                     $visita->minutos_extra = 0;
                     $visita->tiempo_extra = '0m';
                     $visita->tiene_extra = false;
-                    
-                    \Log::info('Visita SIN horas extras:', [
+
+                    \Log::warning('fecha_finalizacion es NULL para visita:', [
                         'idVisita' => $visita->idVisitas,
-                        'hora_final' => $visita->hora_final
+                        'ticket' => $visita->numero_ticket
                     ]);
                 }
-            } else {
-                // No tiene fecha de finalización
-                $visita->hora_final = '--:--';
-                $visita->minutos_extra = 0;
-                $visita->tiempo_extra = '0m';
-                $visita->tiene_extra = false;
-                
-                \Log::warning('fecha_finalizacion es NULL para visita:', [
-                    'idVisita' => $visita->idVisitas,
-                    'ticket' => $visita->numero_ticket
-                ]);
+
+                $visitasProcesadas[] = $visita;
             }
-            
-            $visitasProcesadas[] = $visita;
-        }
 
-        // Obtener información del técnico
-        $tecnico = DB::table('usuarios')
-            ->where('idUsuario', $request->idUsuario)
-            ->select(
-                'idUsuario',
-                DB::raw("CONCAT(Nombre, ' ', apellidoPaterno, ' ', apellidoMaterno) as nombre_completo")
-            )
-            ->first();
+            // Obtener información del técnico
+            $tecnico = DB::table('usuarios')
+                ->where('idUsuario', $request->idUsuario)
+                ->select(
+                    'idUsuario',
+                    DB::raw("CONCAT(Nombre, ' ', apellidoPaterno, ' ', apellidoMaterno) as nombre_completo")
+                )
+                ->first();
 
-        // Formatear tiempo total
-        $horasTotal = floor($totalMinutosExtra / 60);
-        $minutosTotal = $totalMinutosExtra % 60;
-        
-        if ($horasTotal > 0) {
-            $tiempoTotal = $minutosTotal > 0 ? "{$horasTotal}h {$minutosTotal}m" : "{$horasTotal}h";
-        } else {
-            $tiempoTotal = "{$minutosTotal}m";
-        }
+            // Formatear tiempo total
+            $horasTotal = floor($totalMinutosExtra / 60);
+            $minutosTotal = $totalMinutosExtra % 60;
 
-        \Log::info('RESUMEN FINAL (TODAS las visitas):', [
-            'total_visitas' => count($visitasProcesadas),
-            'visitas_despues_17' => $visitasDespues17,
-            'total_minutos_extra' => $totalMinutosExtra,
-            'tiempo_extra_total' => $tiempoTotal
-        ]);
+            if ($horasTotal > 0) {
+                $tiempoTotal = $minutosTotal > 0 ? "{$horasTotal}h {$minutosTotal}m" : "{$horasTotal}h";
+            } else {
+                $tiempoTotal = "{$minutosTotal}m";
+            }
 
-        \Log::info('=== FIN VERIFICACIÓN DE VISITAS ===');
+            \Log::info('RESUMEN FINAL (TODAS las visitas):', [
+                'total_visitas' => count($visitasProcesadas),
+                'visitas_despues_17' => $visitasDespues17,
+                'total_minutos_extra' => $totalMinutosExtra,
+                'tiempo_extra_total' => $tiempoTotal
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'tecnico' => $tecnico,
-                'visitas' => $visitasProcesadas, // ✅ TODAS las visitas
-                'resumen' => [
-                    'total_visitas' => count($visitasProcesadas),
-                    'visitas_despues_17' => $visitasDespues17,
-                    'total_minutos_extra' => $totalMinutosExtra,
-                    'tiempo_extra_total' => $tiempoTotal
+            \Log::info('=== FIN VERIFICACIÓN DE VISITAS ===');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'tecnico' => $tecnico,
+                    'visitas' => $visitasProcesadas, // ✅ TODAS las visitas
+                    'resumen' => [
+                        'total_visitas' => count($visitasProcesadas),
+                        'visitas_despues_17' => $visitasDespues17,
+                        'total_minutos_extra' => $totalMinutosExtra,
+                        'tiempo_extra_total' => $tiempoTotal
+                    ]
                 ]
-            ]
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error al verificar visitas:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-    } catch (\Exception $e) {
-        \Log::error('Error al verificar visitas:', [
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al verificar visitas: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al verificar visitas: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
-
-
-
 }
