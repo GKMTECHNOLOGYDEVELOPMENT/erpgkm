@@ -484,24 +484,23 @@
                 @endif
 
 
-                    <li class="menu nav-item">
-                        <a href="{{ route('administracion.horasextras.index') }}" class="nav-link group">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor"
-                                    class="w-6 h-6 group-hover:!text-primary">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                <li class="menu nav-item">
+                    <a href="{{ route('administracion.horasextras.index') }}" class="nav-link group">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="w-6 h-6 group-hover:!text-primary">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
 
-                                <span
-                                    class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
-                                    Evaluar Horas Extras
-                                </span>
-                            </div>
-                        </a>
-                    </li>
-                
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Evaluar Horas Extras
+                            </span>
+                        </div>
+                    </a>
+                </li>
+
 
                 @if (PermisoHelper::tienePermiso('VER ASISTENCIAS'))
                     <li class="menu nav-item">
@@ -1796,20 +1795,38 @@
                         {{-- @if (PermisoHelper::tienePermiso('VER_TEC_LABORATORIO'))
                         <li>
                             <a href="{{ route('ordenes.helpdesk') }}">Tec.Laboratorio</a>
-            </li>
-            @endif
+                        </li>
+                        @endif
 
-            @if (PermisoHelper::tienePermiso('VER_TEC_LABOR_SMART'))
-            <li>
-                <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
-            </li>
-            @endif --}}
+                        @if (PermisoHelper::tienePermiso('VER_TEC_LABOR_SMART'))
+                        <li>
+                            <a href="{{ route('ordenes.helpdesk') }}">Tec.Labor-smart</a>
+                        </li>
+                        @endif --}}
                     </ul>
                 </li>
-
-
-
-
+                <li class="menu nav-item">
+                    <a href="{{ route('evaluar.ticket.index') }}" class="nav-link group">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="group-hover:!text-primary shrink-0"
+                                width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <!-- Ticket base -->
+                                <path
+                                    d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4V8z"
+                                    fill="currentColor" />
+                                <!-- Línea perforada central -->
+                                <path d="M12 7v10" stroke="white" stroke-width="1.6" stroke-linecap="round"
+                                    stroke-dasharray="1.5 2" />
+                                <!-- Detalle lateral -->
+                                <circle cx="7.5" cy="12" r="1" fill="white" />
+                            </svg>
+                            <span
+                                class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">
+                                Tickets de Clientes
+                            </span>
+                        </div>
+                    </a>
+                </li>
 
                 @if (PermisoHelper::tienePermiso('VER AREA COMERCIAL'))
                     <h2

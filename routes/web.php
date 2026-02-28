@@ -115,6 +115,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\unity\UnityController;
+use App\Http\Controllers\evaluarticket\EvaluatTicketController;
 use App\Http\Controllers\usuario\VentasController;
 use App\Http\Controllers\ventas\VentasController as VentasVentasController;
 
@@ -2171,4 +2172,11 @@ Route::prefix('administracion/horasextras')->name('administracion.horasextras.')
     // Procesar horas extras (puede ser llamado por cron)
     Route::post('/procesar', [HorasExtrasController::class, 'procesarHorasExtras']);
     Route::get('/verificar-visitas', [HorasExtrasController::class, 'verificarVisitas']);
+});
+
+Route::prefix('evaluar-ticket')->group(function () {
+    Route::get('/', [EvaluatTicketController::class, 'index'])->name('evaluar.ticket.index');
+    Route::post('/guardar', [EvaluatTicketController::class, 'store'])->name('evaluar.ticket.store');
+    Route::put('/{id}', [EvaluatTicketController::class, 'update'])->name('evaluar.ticket.update');
+    Route::delete('/{id}', [EvaluatTicketController::class, 'destroy'])->name('evaluar.ticket.destroy');
 });
