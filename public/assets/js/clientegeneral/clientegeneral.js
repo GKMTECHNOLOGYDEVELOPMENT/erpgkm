@@ -9,6 +9,21 @@ document.addEventListener('alpine:init', () => {
             document.addEventListener('borrar', (e) => {
                 this.deleteClient(e.detail.id);
             });
+
+            // Escuchar evento para abrir el modal de crear usuario
+            document.addEventListener('abrir-modal-crear-usuario', (e) => {
+                this.abrirModalCrearUsuario(e.detail.clienteId);
+            });
+        },
+
+        // Método para abrir el modal de crear usuario
+        abrirModalCrearUsuario(clienteId) {
+            // Disparar evento para que el modal de crear usuario se abra
+            // y pase el ID del cliente
+            const event = new CustomEvent('abrir-modal', {
+                detail: { clienteId: clienteId }
+            });
+            document.dispatchEvent(event);
         },
 
         async fetchDataAndInitTable() {
@@ -46,7 +61,7 @@ document.addEventListener('alpine:init', () => {
                         className: 'text-center',
                         render: (_, __, row) => {
                             let botones = '<div class="flex justify-center items-center gap-2">';
-                            
+
                             // Botón Editar
                             if (this.permisos.puedeEditar) {
                                 botones += `
@@ -57,7 +72,7 @@ document.addEventListener('alpine:init', () => {
                                         </svg>
                                     </a>`;
                             }
-                            
+
                             // Botón Eliminar
                             if (this.permisos.puedeEliminar) {
                                 botones += `
@@ -71,12 +86,34 @@ document.addEventListener('alpine:init', () => {
                                         </svg>
                                     </button>`;
                             }
-                            
+
+                            // Botón Crear Usuario (MODIFICADO - usa onclick en lugar de @click)
+                            botones += `
+    <button type="button" class="ltr:mr-2 rtl:ml-2"
+            onclick="abrirModalCrearUsuario(${row.idClienteGeneral})"
+            title="Crear Usuario">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600">
+            <path d="M12 6V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M18 12H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+    </button>`;
+
+                            // Botón Lista de Usuarios (mantiene href por ahora)
+                            botones += `
+                                <a href="/cliente-general/${row.idClienteGeneral}/usuarios" class="ltr:mr-2 rtl:ml-2" x-tooltip="Lista de Usuarios">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600">
+                                        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                                        <path d="M5 18V17C5 14.2386 7.23858 12 10 12H14C16.7614 12 19 14.2386 19 17V18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M20 12H22M2 12H4M12 2V4M12 20V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+                                    </svg>
+                                </a>`;
+
                             // Si no tiene ningún permiso, mostrar mensaje
                             if (!this.permisos.puedeEditar && !this.permisos.puedeEliminar) {
                                 botones += `<span class="text-gray-400 text-sm">Sin permisos</span>`;
                             }
-                            
+
                             botones += '</div>';
                             return botones;
                         }
@@ -174,21 +211,21 @@ document.addEventListener('alpine:init', () => {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         },
                     })
-                    .then(async res => {
-                        const data = await res.json();
-                        if (!res.ok) {
-                            if (data.error && data.error.includes('foreign key constraint')) {
-                                throw new Error('No puedes eliminar, el cliente general está asociado a una o más marcas.');
-                            } else {
-                                throw new Error(data.message || 'Error al eliminar cliente.');
+                        .then(async res => {
+                            const data = await res.json();
+                            if (!res.ok) {
+                                if (data.error && data.error.includes('foreign key constraint')) {
+                                    throw new Error('No puedes eliminar, el cliente general está asociado a una o más marcas.');
+                                } else {
+                                    throw new Error(data.message || 'Error al eliminar cliente.');
+                                }
                             }
-                        }
 
-                        Swal.fire('¡Eliminado!', data.message, 'success').then(() => location.reload());
-                    })
-                    .catch(error => {
-                        Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
-                    });
+                            Swal.fire('¡Eliminado!', data.message, 'success').then(() => location.reload());
+                        })
+                        .catch(error => {
+                            Swal.fire('Error', error.message || 'Ocurrió un error.', 'error');
+                        });
                 }
             });
         }

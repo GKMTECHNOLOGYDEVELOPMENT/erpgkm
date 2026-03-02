@@ -471,4 +471,10 @@ public function destroy($id)
         // Retornar los datos en formato JSON
         return response()->json($clientesGenerales);
     }
+
+    public function usuarios($id)
+{
+    $clienteGeneral = ClienteGeneral::findOrFail($id);
+    return view('administracion.asociados.clienteGeneral.usuariosXclientes.index', compact('clienteGeneral'));
+}
 }
