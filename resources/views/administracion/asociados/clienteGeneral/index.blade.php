@@ -308,7 +308,7 @@
                                         :class="{ 'border-red-500': errores.numeroDocumento }"
                                         placeholder="Ej: 12345678" required>
                                     <p x-show="errores.numeroDocumento" class="text-xs text-red-500 mt-1" x-text="errores.numeroDocumento"></p>
-                                    <p class="text-xs text-gray-500 mt-1">No puede repetirse</p>
+                                    
                                 </div>
 
                                 <!-- Teléfono -->
@@ -321,7 +321,6 @@
                                         :class="{ 'border-red-500': errores.telefono }"
                                         placeholder="Ej: 987654321" required>
                                     <p x-show="errores.telefono" class="text-xs text-red-500 mt-1" x-text="errores.telefono"></p>
-                                    <p class="text-xs text-gray-500 mt-1">No puede repetirse</p>
                                 </div>
 
                                 <!-- Correo Personal -->
@@ -334,7 +333,6 @@
                                         :class="{ 'border-red-500': errores.correoPersonal }"
                                         placeholder="Ej: usuario@email.com" required>
                                     <p x-show="errores.correoPersonal" class="text-xs text-red-500 mt-1" x-text="errores.correoPersonal"></p>
-                                    <p class="text-xs text-gray-500 mt-1">No puede repetirse</p>
                                 </div>
 
                                 <!-- Rol -->
@@ -564,59 +562,75 @@
                 },
 
                 submitForm() {
-                    if (!this.clienteId) {
-                        this.errorGeneral = 'Error: ID de cliente no encontrado';
-                        return;
-                    }
+    if (!this.clienteId) {
+        this.errorGeneral = 'Error: ID de cliente no encontrado';
+        return;
+    }
 
-                    this.limpiarErrores();
+    this.limpiarErrores();
 
-                    if (!this.validarCampos()) {
-                        return;
-                    }
+    if (!this.validarCampos()) {
+        return;
+    }
 
-                    this.cargando = true;
+    this.cargando = true;
 
-                    const datos = {
-                        ...this.form,
-                        idClienteGeneral: this.clienteId
-                    };
+    const datos = {
+        ...this.form,
+        idClienteGeneral: this.clienteId
+    };
 
-                    fetch('/usuarios-cliente-general', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
-                        },
-                        body: JSON.stringify(datos)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            this.mostrarNotificacion('success', '✅ Usuario creado exitosamente');
-                            this.toggle();
-                            
-                            if (window.$ && $('#myTable1').DataTable()) {
-                                $('#myTable1').DataTable().ajax.reload();
-                            }
-                        } else {
-                            if (data.errors) {
-                                this.procesarErroresValidacion(data.errors);
-                            } else {
-                                this.errorGeneral = data.message || 'Error al crear usuario';
-                                this.mostrarNotificacion('error', this.errorGeneral);
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        this.errorGeneral = '❌ Error de conexión al servidor';
-                        this.mostrarNotificacion('error', this.errorGeneral);
-                    })
-                    .finally(() => {
-                        this.cargando = false;
-                    });
-                },
+    console.log('Enviando datos:', datos); // Para debug
+
+    fetch('/usuarios-cliente-general', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest' // IMPORTANTE: Para que Laravel lo detecte como AJAX
+        },
+        body: JSON.stringify(datos)
+    })
+    .then(response => {
+        console.log('Status:', response.status);
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Respuesta:', data);
+        if (data.success) {
+            this.mostrarNotificacion('success', '✅ Usuario creado exitosamente');
+            this.toggle(); // Cerrar modal
+            
+            // REDIRECCIONAR a la lista de usuarios del cliente
+            setTimeout(() => {
+                window.location.href = `/cliente-general/${this.clienteId}/usuarios`;
+            }, 1500); // Pequeño delay para mostrar la notificación
+        } else {
+            if (data.errors) {
+                this.procesarErroresValidacion(data.errors);
+            } else {
+                this.errorGeneral = data.message || 'Error al crear usuario';
+                this.mostrarNotificacion('error', this.errorGeneral);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (error.errors) {
+            this.procesarErroresValidacion(error.errors);
+        } else {
+            this.errorGeneral = error.message || '❌ Error de conexión al servidor';
+            this.mostrarNotificacion('error', this.errorGeneral);
+        }
+    })
+    .finally(() => {
+        this.cargando = false;
+    });
+},
 
                 procesarErroresValidacion(errors) {
                     console.log('Errores recibidos:', errors);

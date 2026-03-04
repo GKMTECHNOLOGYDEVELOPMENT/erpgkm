@@ -91,6 +91,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <div class="flex items-center justify-center gap-2">
+                                <!-- Botón Editar -->
                                 <button type="button" 
                                         class="p-2 hover:bg-yellow-100 rounded-full transition-colors group"
                                         title="Editar" 
@@ -106,6 +107,22 @@
                                             stroke="currentColor" stroke-width="1.5" />
                                     </svg>
                                 </button>
+
+                                <!-- NUEVO: Botón Reenviar Credenciales -->
+                                <button type="button" 
+                                        class="p-2 hover:bg-blue-100 rounded-full transition-colors group"
+                                        title="Reenviar Credenciales" 
+                                        onclick="reenviarCredenciales({{ $usuario->idUsuario }})">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="text-gray-600 group-hover:scale-110 transition-transform group-hover:text-blue-600">
+                                        <path d="M22 12C22 6.47715 17.5228 2 12 2C7.835 2 4.24507 4.27513 2.42676 7.5M2.42676 7.5H6.5M2.42676 7.5L2.5 7M22 12C22 17.5228 17.5228 22 12 22C7.835 22 4.24507 19.7249 2.42676 16.5M2.42676 16.5H6.5M2.42676 16.5L2.5 17" 
+                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                        <path d="M9 12H15M15 12L13 10M15 12L13 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Botón Eliminar -->
                                 <button type="button" 
                                         class="p-2 hover:bg-red-100 rounded-full transition-colors group"
                                         title="Eliminar" 
@@ -357,6 +374,49 @@
         </div>
     </div>
 
+    <!-- NUEVO: MODAL DE REENVIAR CREDENCIALES -->
+    <div x-data="reenviarModal()" x-init="initReenviar()">
+        <div class="fixed inset-0 bg-[black]/60 z-[999] hidden overflow-y-auto" :class="open && '!block'">
+            <div class="flex items-start justify-center min-h-screen px-4" @click.self="open = false">
+                <div x-show="open" x-transition.duration.300
+                    class="panel border-0 p-0 rounded-lg overflow-hidden w-full max-w-md my-8">
+                    <div class="flex bg-[#fbfbfb] dark:bg-[#121c2c] items-center justify-between px-5 py-3">
+                        <h5 class="font-bold text-lg">Reenviar Credenciales</h5>
+                        <button type="button" class="text-white-dark hover:text-dark" @click="cerrar">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round" class="w-6 h-6">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-5 text-center">
+                        <div class="text-center mb-4">
+                            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" 
+                                xmlns="http://www.w3.org/2000/svg" class="mx-auto text-blue-500">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
+                                <path d="M12 6V12L15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                                <path d="M22 12C22 6.47715 17.5228 2 12 2C7.835 2 4.24507 4.27513 2.42676 7.5" 
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <p class="text-base font-medium mb-2">¿Reenviar credenciales?</p>
+                        <p class="text-sm text-gray-500 mb-4">Se generará una nueva contraseña y se enviará al correo del usuario.</p>
+                        <p class="text-xs text-gray-400 mb-6">Esta acción no afecta los datos del usuario, solo su contraseña.</p>
+                        <div class="flex justify-center gap-4">
+                            <button type="button" class="btn btn-outline-secondary" @click="cerrar">Cancelar</button>
+                            <button type="button" class="btn btn-primary" @click="confirmarReenviar" :disabled="cargando">
+                                <span x-show="!cargando">Reenviar</span>
+                                <span x-show="cargando">Enviando...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Datos iniciales desde PHP
         const clienteGeneralId = {{ $clienteGeneral->idClienteGeneral }};
@@ -413,6 +473,7 @@
                     this.form.idClienteGeneral = clienteId;
                     this.resetForm();
                     this.open = true;
+                    console.log('Modal crear abierto para cliente:', clienteId);
                 },
 
                 abrirModalEditar(usuarioId) {
@@ -439,6 +500,7 @@
                                     activo: u.estado == 1
                                 };
                                 this.open = true;
+                                console.log('Modal editar abierto para usuario:', usuarioId);
                             } else {
                                 alert('Error al cargar datos del usuario');
                             }
@@ -483,12 +545,10 @@
 
                     this.cargando = true;
                     
-                    // CORREGIDO: Usar POST con _method para actualizar
                     const url = this.modo === 'crear' 
                         ? '/usuarios-cliente-general' 
                         : `/usuarios-cliente-general/${this.form.idUsuario}`;
                     
-                    // Para actualizar, enviamos _method: 'PUT'
                     const datos = this.modo === 'crear' 
                         ? this.form 
                         : { ...this.form, _method: 'PUT' };
@@ -496,25 +556,29 @@
                     console.log('Enviando a:', url, 'Datos:', datos);
 
                     fetch(url, {
-                        method: 'POST', // Siempre POST, Laravel leerá _method
+                        method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                            'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify(datos)
                     })
                     .then(response => {
                         console.log('Status:', response.status);
+                        console.log('Content-Type:', response.headers.get('content-type'));
+                        
                         if (!response.ok) {
                             return response.text().then(text => {
-                                throw new Error(`Error ${response.status}: ${text.substring(0, 100)}`);
+                                console.error('Respuesta no OK:', text.substring(0, 200));
+                                throw new Error(`Error ${response.status}: El servidor devolvió HTML en lugar de JSON`);
                             });
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Respuesta:', data);
+                        console.log('Respuesta JSON:', data);
                         if (data.success) {
                             alert(this.modo === 'crear' ? '✅ Usuario creado exitosamente' : '✅ Usuario actualizado exitosamente');
                             this.cerrarModal();
@@ -555,6 +619,7 @@
                         this.usuarioId = e.detail.usuarioId;
                         this.userName = e.detail.userName;
                         this.open = true;
+                        console.log('Modal eliminar abierto para usuario:', this.usuarioId);
                     });
                 },
 
@@ -569,16 +634,25 @@
                     
                     this.cargando = true;
                     
-                    // Para eliminar también usamos POST con _method
                     fetch(`/usuarios-cliente-general/${this.usuarioId}`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
                         },
                         body: JSON.stringify({ _method: 'DELETE' })
                     })
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('Status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`Error ${response.status}: ${text.substring(0, 100)}`);
+                            });
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         if (data.success) {
                             alert('✅ Usuario eliminado exitosamente');
@@ -589,7 +663,69 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('❌ Error al eliminar usuario');
+                        alert('❌ Error al eliminar usuario: ' + error.message);
+                    })
+                    .finally(() => {
+                        this.cargando = false;
+                        this.cerrar();
+                    });
+                }
+            }
+        }
+
+        // NUEVO: Modal de Reenviar Credenciales
+        function reenviarModal() {
+            return {
+                open: false,
+                usuarioId: null,
+                cargando: false,
+
+                initReenviar() {
+                    document.addEventListener('abrir-modal-reenviar', (e) => {
+                        this.usuarioId = e.detail.usuarioId;
+                        this.open = true;
+                        console.log('Modal reenviar abierto para usuario:', this.usuarioId);
+                    });
+                },
+
+                cerrar() {
+                    this.open = false;
+                    this.usuarioId = null;
+                },
+
+                confirmarReenviar() {
+                    if (!this.usuarioId) return;
+                    
+                    this.cargando = true;
+                    
+                    fetch(`/usuarios-cliente-general/${this.usuarioId}/reenviar-credenciales`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Status:', response.status);
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(`Error ${response.status}: ${text.substring(0, 100)}`);
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert('✅ Credenciales reenviadas exitosamente');
+                        } else {
+                            alert('❌ ' + (data.message || 'Error al reenviar credenciales'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('❌ Error al reenviar credenciales: ' + error.message);
                     })
                     .finally(() => {
                         this.cargando = false;
@@ -601,21 +737,41 @@
 
         // Funciones globales
         function abrirModalCrearUsuario(clienteId) {
-            document.dispatchEvent(new CustomEvent('abrir-modal-crear', {
+            console.log('abrirModalCrearUsuario llamado con clienteId:', clienteId);
+            const event = new CustomEvent('abrir-modal-crear', {
                 detail: { clienteId: clienteId }
-            }));
+            });
+            document.dispatchEvent(event);
         }
 
         function editarUsuario(usuarioId) {
-            document.dispatchEvent(new CustomEvent('abrir-modal-editar', {
+            console.log('editarUsuario llamado con usuarioId:', usuarioId);
+            const event = new CustomEvent('abrir-modal-editar', {
                 detail: { usuarioId: usuarioId }
-            }));
+            });
+            document.dispatchEvent(event);
         }
 
         function eliminarUsuario(usuarioId, userName) {
-            document.dispatchEvent(new CustomEvent('abrir-modal-eliminar', {
+            console.log('eliminarUsuario llamado con usuarioId:', usuarioId, 'userName:', userName);
+            const event = new CustomEvent('abrir-modal-eliminar', {
                 detail: { usuarioId: usuarioId, userName: userName }
-            }));
+            });
+            document.dispatchEvent(event);
+        }
+
+        // NUEVA: Función global para reenviar credenciales
+        function reenviarCredenciales(usuarioId) {
+            console.log('reenviarCredenciales llamado con usuarioId:', usuarioId);
+            
+            if (!confirm('¿Estás seguro de reenviar las credenciales? Se generará una nueva contraseña y se enviará al correo del usuario.')) {
+                return;
+            }
+            
+            const event = new CustomEvent('abrir-modal-reenviar', {
+                detail: { usuarioId: usuarioId }
+            });
+            document.dispatchEvent(event);
         }
     </script>
 

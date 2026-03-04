@@ -2197,8 +2197,11 @@ Route::prefix('usuarios-cliente-general')->group(function () {
 });
 
 // Ruta para ver usuarios por cliente
-Route::get('/clientes-generales/{idClienteGeneral}/usuarios', [UsuarioclientegeneralController::class, 'index'])
-    ->name('usuarios-por-cliente');
+
 
     Route::get('/cliente-general/{id}/usuarios', [UsuarioclientegeneralController::class, 'usuarios'])
     ->name('cliente-general.usuarios');
+
+    Route::post('/usuarios-cliente-general/{id}/reenviar-credenciales', 
+    [UsuarioclientegeneralController::class, 'reenviarCredenciales'])
+    ->name('usuarios-cliente-general.reenviar');

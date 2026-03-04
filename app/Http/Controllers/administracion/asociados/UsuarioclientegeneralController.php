@@ -17,66 +17,7 @@ use Illuminate\Validation\Rule;
 
 class UsuarioclientegeneralController extends Controller
 {
-   /**
- * Mostrar lista de usuarios por cliente general
- */
-/**
- * Mostrar lista de usuarios por cliente general
- */
-public function index($idClienteGeneral)
-{
-    Log::info('=== INICIO: Listar usuarios por cliente general ===');
-    Log::info('ID Cliente General recibido: ' . $idClienteGeneral);
-    
-    try {
-        // Buscar el cliente
-        $clienteGeneral = ClienteGeneral::find($idClienteGeneral);
-        
-        if (!$clienteGeneral) {
-            Log::error('Cliente no encontrado con ID: ' . $idClienteGeneral);
-            return redirect()->route('administracion.cliente-general')
-                ->with('error', 'Cliente no encontrado');
-        }
-        
-        Log::info('Cliente encontrado: ' . $clienteGeneral->descripcion . ' (ID: ' . $clienteGeneral->idClienteGeneral . ')');
-        
-        // Obtener usuarios - SIEMPRE será una colección, incluso si está vacía
-        $usuarios = Usuario::with(['tipodocumento', 'rol'])
-            ->where('idClienteGeneral', $idClienteGeneral)
-            ->orderBy('idUsuario', 'desc')
-            ->get();
-        
-        Log::info('Total usuarios encontrados: ' . $usuarios->count());
-        Log::info('Tipo de variable $usuarios: ' . get_class($usuarios));
-        
-        // Verificar que la vista existe
-        $vista = 'administracion.asociados.clienteGeneral.usuariosXclientes.index';
-        
-        if (!view()->exists($vista)) {
-            Log::error('LA VISTA NO EXISTE: ' . $vista);
-            
-            // Intentar con la ruta alternativa
-            $vistaAlternativa = 'administracion.asociados.usuarios-por-cliente';
-            
-            if (view()->exists($vistaAlternativa)) {
-                Log::info('Usando vista alternativa: ' . $vistaAlternativa);
-                return view($vistaAlternativa, compact('clienteGeneral', 'usuarios'));
-            }
-            
-            throw new \Exception('La vista no existe: ' . $vista);
-        }
-        
-        return view($vista, compact('clienteGeneral', 'usuarios'));
-        
-    } catch (\Exception $e) {
-        Log::error('ERROR al cargar usuarios: ' . $e->getMessage());
-        Log::error('Archivo: ' . $e->getFile() . ':' . $e->getLine());
-        Log::error('Trace: ' . $e->getTraceAsString());
-        
-        return redirect()->route('administracion.cliente-general')
-            ->with('error', 'Error al cargar los usuarios: ' . $e->getMessage());
-    }
-}
+
     /**
      * Obtener datos para el formulario (tipos de documento y roles)
      */
@@ -450,7 +391,7 @@ public function index($idClienteGeneral)
                 ]);
             }
 
-            return redirect()->route('usuarios-por-cliente', $usuario->idClienteGeneral)
+            return redirect()->route('cliente-general.usuarios', $usuario->idClienteGeneral)
                 ->with('success', 'Usuario actualizado exitosamente');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -515,7 +456,7 @@ public function index($idClienteGeneral)
                 ]);
             }
 
-            return redirect()->route('usuarios-por-cliente', $idClienteGeneral)
+return redirect()->route('cliente-general.usuarios', $idClienteGeneral)
                 ->with('success', 'Usuario eliminado exitosamente');
 
         } catch (\Exception $e) {
@@ -647,4 +588,60 @@ private function enviarCredenciales($usuario, $password)
                 ->with('error', 'Error al cargar los usuarios');
         }
     }
+
+
+    /**
+ * Reenviar credenciales al usuario (genera nueva contraseña)
+ */
+public function reenviarCredenciales($id)
+{
+    Log::info('=== INICIO: Reenviar credenciales ===');
+    Log::info('ID Usuario: ' . $id);
+    
+    try {
+        DB::beginTransaction();
+        
+        $usuario = Usuario::findOrFail($id);
+        Log::info('Usuario encontrado: ' . $usuario->Nombre);
+        
+        // Generar nueva contraseña
+        $nuevaPassword = $this->generarPassword();
+        Log::info('Nueva contraseña generada');
+        
+        // Actualizar contraseña en la base de datos
+        $usuario->clave = $nuevaPassword;
+        $usuario->save();
+        Log::info('Contraseña actualizada en BD');
+        
+        // Enviar credenciales por correo
+        $this->enviarCredenciales($usuario, $nuevaPassword);
+        Log::info('Credenciales enviadas por correo');
+        
+        DB::commit();
+        Log::info('Transacción COMMIT exitosa');
+        
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Credenciales reenviadas exitosamente'
+            ]);
+        }
+        
+        return back()->with('success', 'Credenciales reenviadas exitosamente');
+        
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('ERROR al reenviar credenciales: ' . $e->getMessage());
+        Log::error('Trace: ' . $e->getTraceAsString());
+        
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al reenviar credenciales: ' . $e->getMessage()
+            ], 500);
+        }
+        
+        return back()->with('error', 'Error al reenviar credenciales: ' . $e->getMessage());
+    }
+}
 }
