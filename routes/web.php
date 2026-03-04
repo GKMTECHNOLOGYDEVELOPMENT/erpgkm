@@ -57,6 +57,7 @@ use App\Exports\CategoriaExport;
 use App\Exports\ArticuloExport;
 use App\Exports\ModeloExport;
 use App\Http\Controllers\administracion\asociados\ContactoFinalController;
+use App\Http\Controllers\administracion\asociados\UsuarioclientegeneralController;
 use App\Http\Controllers\administracion\compras\ComprasController;
 use App\Http\Controllers\administracion\cotizacionesl\cotizacionlController as CotizacioneslCotizacionlController;
 use App\Http\Controllers\administracion\cotizacionesls\cotizacionlController;
@@ -218,8 +219,7 @@ Route::get('/cliente-general', [ClienteGeneralController::class, 'index'])
 
 Route::get('/cliente-general/{id}/edit', [ClienteGeneralController::class, 'edit'])->name('cliente-general.edit');
 
-Route::get('/cliente-general/{id}/usuarios', [ClienteGeneralController::class, 'usuarios'])
-    ->name('cliente-general.usuarios');
+
 
 
 Route::get('/exportar-clientes-general', function () {
@@ -2183,3 +2183,22 @@ Route::prefix('evaluar-ticket')->group(function () {
     Route::put('/{id}', [EvaluatTicketController::class, 'update'])->name('evaluar.ticket.update');
     Route::delete('/{id}', [EvaluatTicketController::class, 'destroy'])->name('evaluar.ticket.destroy');
 });
+
+
+// routes/web.php - Agrega estas rutas
+
+// Rutas para usuarios por cliente general
+Route::prefix('usuarios-cliente-general')->group(function () {
+    Route::get('/get-form-data', [UsuarioclientegeneralController::class, 'getFormData'])->name('usuarios-cliente-general.get-form-data');
+    Route::post('/', [UsuarioclientegeneralController::class, 'store'])->name('usuarios-cliente-general.store');
+    Route::get('/{id}/edit', [UsuarioclientegeneralController::class, 'edit'])->name('usuarios-cliente-general.edit');
+    Route::put('/{id}', [UsuarioclientegeneralController::class, 'update'])->name('usuarios-cliente-general.update');
+    Route::delete('/{id}', [UsuarioclientegeneralController::class, 'destroy'])->name('usuarios-cliente-general.destroy');
+});
+
+// Ruta para ver usuarios por cliente
+Route::get('/clientes-generales/{idClienteGeneral}/usuarios', [UsuarioclientegeneralController::class, 'index'])
+    ->name('usuarios-por-cliente');
+
+    Route::get('/cliente-general/{id}/usuarios', [UsuarioclientegeneralController::class, 'usuarios'])
+    ->name('cliente-general.usuarios');

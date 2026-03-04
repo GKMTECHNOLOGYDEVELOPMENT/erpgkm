@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\GeneralRequests;
 use App\Models\Clientegeneral;
 use App\Models\Marca;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -472,9 +473,35 @@ public function destroy($id)
         return response()->json($clientesGenerales);
     }
 
-    public function usuarios($id)
-{
-    $clienteGeneral = ClienteGeneral::findOrFail($id);
-    return view('administracion.asociados.clienteGeneral.usuariosXclientes.index', compact('clienteGeneral'));
-}
+     public function usuarios($id)
+    {
+        Log::info('=== INICIO: Listar usuarios por cliente general ===');
+        Log::info('ID Cliente General recibido: ' . $id);
+        
+        try {
+            // Buscar el cliente
+            $clienteGeneral = ClienteGeneral::findOrFail($id);
+            Log::info('Cliente encontrado: ' . $clienteGeneral->descripcion . ' (ID: ' . $clienteGeneral->idClienteGeneral . ')');
+            
+            // Obtener usuarios del cliente - ¡ESTO ES LO QUE FALTABA!
+            $usuarios = Usuario::with(['tipodocumento', 'rol'])
+                ->where('idClienteGeneral', $id)
+                ->orderBy('idUsuario', 'desc')
+                ->get();
+            
+            Log::info('Total usuarios encontrados: ' . $usuarios->count());
+            
+            // Pasar AMBAS variables a la vista
+            return view('administracion.asociados.clienteGeneral.usuariosXclientes.index', 
+                compact('clienteGeneral', 'usuarios'));
+            
+        } catch (\Exception $e) {
+            Log::error('ERROR al cargar usuarios: ' . $e->getMessage());
+            Log::error('Trace: ' . $e->getTraceAsString());
+            
+            return redirect()->route('administracion.cliente-general')
+                ->with('error', 'Error al cargar los usuarios');
+        }
+    }
+
 }

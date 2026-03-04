@@ -95,6 +95,7 @@ class Usuario extends Authenticatable
         'clave',
         'token',
         'nacionalidad',
+        'idClienteGeneral',
         'departamento',
         'provincia',
         'distrito',
@@ -121,6 +122,10 @@ class Usuario extends Authenticatable
     public function sucursal()
     {
         return $this->belongsTo(Sucursal::class, 'idSucursal');
+    }
+        public function clienteGeneral()
+    {
+        return $this->belongsTo(ClienteGeneral::class, 'idClienteGeneral', 'idClienteGeneral');
     }
 
     public function tipoDocumento()
@@ -482,4 +487,35 @@ class Usuario extends Authenticatable
     {
         return $this->hasMany(DocumentoUsuario::class, 'idUsuario', 'idUsuario');
     }
+    /**
+ * Mutator para encriptar contraseña automáticamente
+ */
+public function setClaveAttribute($value)
+{
+    $this->attributes['clave'] = bcrypt($value);
 }
+
+/**
+ * Accessor para estado en texto
+ */
+public function getEstadoTextoAttribute()
+{
+    return $this->estado == 1 ? 'Activo' : 'Inactivo';
+}
+
+/**
+ * Accessor para estado badge
+ */
+public function getEstadoBadgeAttribute()
+{
+    return $this->estado == 1 
+        ? '<span class="badge badge-outline-success">Activo</span>' 
+        : '<span class="badge badge-outline-danger">Inactivo</span>';
+}
+}
+
+
+// app/Models/Usuario.php
+
+// Agrega estos métodos a tu clase Usuario existente
+
