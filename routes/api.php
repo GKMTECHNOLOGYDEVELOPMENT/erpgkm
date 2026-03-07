@@ -34,6 +34,7 @@ use App\Http\Controllers\areacomercial\EmpresaController;
 use App\Http\Controllers\areacomercial\EmpresaFormController;
 use App\Http\Controllers\areacomercial\ScrumboarddController;
 use App\Http\Controllers\areacomercial\SeleccionSeguimientoController;
+use App\Http\Controllers\evaluarticket\EvaluarTicketController;
 use App\Http\Controllers\solicitud\SolicitudarticuloController;
 use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\tickets\OrdenesHelpdeskController;
@@ -751,4 +752,7 @@ Route::get('/contactos-por-cliente-general/{idClienteGeneral}', function($idClie
 Route::get('/obtener-info-entrega/{solicitudId}/{articuloId}',[SolicitudrepuestoController::class, 'obtenerInfoEntrega']
 )->name('api.obtener-info-entrega');
 
-
+// routes/api.php
+Route::prefix('evaluar-ticket')->group(function () {
+    Route::get('/tickets', [EvaluarTicketController::class, 'getTickets']);
+});

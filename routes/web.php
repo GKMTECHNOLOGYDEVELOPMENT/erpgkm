@@ -105,6 +105,7 @@ use App\Http\Controllers\solicitud\SolicitudrepuestoController;
 use App\Http\Controllers\UbigeoController;
 use App\Http\Controllers\usuario\UsuarioController;
 use App\Http\Controllers\administracion\horasextras\HorasExtrasController;
+use App\Http\Controllers\evaluarticket\EvaluarTicketController;
 use App\Models\Cliente;
 use App\Models\Custodia;
 use App\Models\Marca;
@@ -2178,10 +2179,10 @@ Route::prefix('administracion/horasextras')->name('administracion.horasextras.')
 });
 
 Route::prefix('evaluar-ticket')->group(function () {
-    Route::get('/', [EvaluatTicketController::class, 'index'])->name('evaluar.ticket.index');
-    Route::post('/guardar', [EvaluatTicketController::class, 'store'])->name('evaluar.ticket.store');
-    Route::put('/{id}', [EvaluatTicketController::class, 'update'])->name('evaluar.ticket.update');
-    Route::delete('/{id}', [EvaluatTicketController::class, 'destroy'])->name('evaluar.ticket.destroy');
+    Route::get('/', [EvaluarTicketController::class, 'index'])->name('evaluar.ticket.index');
+    Route::post('/guardar', [EvaluarTicketController::class, 'store'])->name('evaluar.ticket.store');
+    Route::put('/{id}', [EvaluarTicketController::class, 'update'])->name('evaluar.ticket.update');
+    Route::delete('/{id}', [EvaluarTicketController::class, 'destroy'])->name('evaluar.ticket.destroy');
 });
 
 

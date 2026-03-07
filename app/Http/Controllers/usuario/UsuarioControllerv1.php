@@ -483,11 +483,12 @@ class UsuarioController extends Controller
 
     // use Illuminate\Support\Facades\Log;
 
-    public function getUsuarios(Request $request)
+   public function getUsuarios(Request $request)
 {
     Log::debug('Iniciando obtención paginada de usuarios');
 
-    $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
+    $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
+        ->whereNull('idClienteGeneral'); // AGREGADO: excluir usuarios con idClienteGeneral
 
     $total = $query->count();
 
@@ -498,7 +499,7 @@ class UsuarioController extends Controller
               ->orWhere('documento', 'like', "%$search%")
               ->orWhere('telefono', 'like', "%$search%")
               ->orWhere('correo', 'like', "%$search%")
-              ->orWhere('usuario', 'like', "%$search%") // AGREGADO: búsqueda por usuario
+              ->orWhere('usuario', 'like', "%$search%")
               ->orWhereHas('tipoUsuario', function ($q2) use ($search) {
                   $q2->where('nombre', 'like', "%$search%");
               })
@@ -526,7 +527,7 @@ class UsuarioController extends Controller
             'telefono' => $u->telefono ?? 'N/A',
             'correo' => $u->correo ?? 'N/A',
             'documento' => $u->documento ?? 'N/A',
-            'usuario' => $u->usuario ?? 'N/A', // AGREGADO: campo usuario
+            'usuario' => $u->usuario ?? 'N/A',
             'estado' => $u->estado,
             'tipoDocumento' => $u->tipoDocumento->nombre ?? 'N/A',
             'tipoUsuario' => $u->tipoUsuario->nombre ?? 'N/A',

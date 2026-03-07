@@ -906,8 +906,8 @@ class UsuarioController extends Controller
     {
         Log::debug('Iniciando obtención paginada de usuarios');
 
-        $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea']);
-
+        $query = Usuario::with(['tipoDocumento', 'tipoUsuario', 'rol', 'tipoArea'])
+                    ->whereNull('idClienteGeneral');
         $total = $query->count();
 
         if ($search = $request->input('search.value')) {
