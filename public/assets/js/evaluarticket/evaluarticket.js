@@ -58,10 +58,15 @@ function renderModalContent(ticket) {
 
     const fechaCompra = ticket.fechaCompra ? new Date(ticket.fechaCompra).toLocaleDateString('es-PE') : 'No registrada';
     const fechaCreacion = ticket.fechaCreacion ? new Date(ticket.fechaCreacion).toLocaleString('es-PE') : 'No registrada';
+    
+    // Datos del cliente general
+    const clienteGeneral = ticket.clienteGeneral || null;
+    const clienteGeneralDescripcion = clienteGeneral ? clienteGeneral.descripcion : 'No asignado';
+    const clienteGeneralFoto = clienteGeneral && clienteGeneral.foto ? clienteGeneral.foto : null;
 
     const html = `
         <div class="space-y-6">
-            <!-- Información del Ticket -->
+            <!-- Información del Ticket y Cliente General -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                     <div class="flex items-center gap-2 mb-2">
@@ -75,14 +80,32 @@ function renderModalContent(ticket) {
                     </div>
                 </div>
 
-                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
                     <div class="flex items-center gap-2 mb-2">
-                        <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
-                        <h4 class="font-semibold text-purple-800 dark:text-purple-300">Datos del Cliente</h4>
+                        <div class="flex items-center gap-2">
+                            ${renderClienteGeneralFoto(clienteGeneralFoto, clienteGeneralDescripcion)}
+                            <h4 class="font-semibold text-indigo-800 dark:text-indigo-300">Cliente General</h4>
+                        </div>
                     </div>
                     <div class="space-y-2">
+                        <p><span class="font-medium">Empresa/Cliente:</span> ${clienteGeneralDescripcion}</p>
+                        <p><span class="font-medium">ID Cliente:</span> ${ticket.idClienteGeneral || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Datos del Cliente (persona que reporta) -->
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
+                    <h4 class="font-semibold text-purple-800 dark:text-purple-300">Datos del Contacto</h4>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
                         <p><span class="font-medium">Nombre:</span> ${ticket.nombreCompleto || 'N/A'}</p>
                         <p><span class="font-medium">Documento:</span> ${ticket.tipoDocumento || 'N/A'}: ${ticket.dni_ruc_ce || 'N/A'}</p>
+                    </div>
+                    <div>
                         <p><span class="font-medium">Email:</span> ${ticket.correoElectronico || 'N/A'}</p>
                         <p><span class="font-medium">Teléfonos:</span> ${ticket.telefonoCelular || 'N/A'} ${ticket.telefonoFijo ? '/ ' + ticket.telefonoFijo : ''}</p>
                     </div>
@@ -149,6 +172,22 @@ function renderModalContent(ticket) {
     `;
 
     $('#modalContent').html(html);
+}
+
+// Función auxiliar para renderizar la foto del cliente general
+function renderClienteGeneralFoto(foto, descripcion) {
+    if (foto) {
+        return `<img src="${foto}" alt="${descripcion}" 
+                    class="w-8 h-8 rounded-full object-cover border border-indigo-300"
+                    onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold" style="display: none;">
+                    ${descripcion.charAt(0)}
+                </div>`;
+    } else {
+        return `<div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">
+                    ${descripcion.charAt(0)}
+                </div>`;
+    }
 }
 
 // Función auxiliar para renderizar imágenes
@@ -218,6 +257,7 @@ function cargarTickets() {
                     console.log('📸 ===== VERIFICANDO PRIMER TICKET =====');
                     console.log('   ID:', ticketsData[0].id);
                     console.log('   Ticket:', ticketsData[0].numeroTicket);
+                    console.log('   Cliente General:', ticketsData[0].clienteGeneral);
                     console.log('   fotoVideoFalla:', ticketsData[0].fotoVideoFalla);
                     console.log('   fotoBoletaFactura:', ticketsData[0].fotoBoletaFactura);
                     console.log('   fotoNumeroSerie:', ticketsData[0].fotoNumeroSerie);
@@ -280,7 +320,7 @@ function cargarTickets() {
     });
 }
 
-// Función para obtener badge de estado - CORREGIDA
+// Función para obtener badge de estado
 function getStatusBadge(estado) {
     const statusConfig = {
         evaluando: {
@@ -411,7 +451,7 @@ $('#refreshData').click(function() {
     cargarTickets();
 });
 
-// Función para filtrar datos
+// Función para filtrar datos - ACTUALIZADA
 function filterData() {
     if (!ticketsData || ticketsData.length === 0) {
         filteredData = [];
@@ -428,11 +468,17 @@ function filterData() {
         // Filtro por búsqueda
         if (searchText) {
             const searchLower = searchText.toLowerCase();
+            
+            // Obtener descripción del cliente general para búsqueda
+            const clienteGeneralDesc = item.clienteGeneral ? item.clienteGeneral.descripcion.toLowerCase() : '';
+            
             const matchesSearch = 
                 (item.numeroTicket && item.numeroTicket.toLowerCase().includes(searchLower)) ||
                 (item.nombreCompleto && item.nombreCompleto.toLowerCase().includes(searchLower)) ||
+                (clienteGeneralDesc && clienteGeneralDesc.includes(searchLower)) ||
                 (item.correoElectronico && item.correoElectronico.toLowerCase().includes(searchLower)) ||
                 (item.telefonoCelular && item.telefonoCelular.includes(searchText)) ||
+                (item.dni_ruc_ce && item.dni_ruc_ce.includes(searchText)) ||
                 (item.marca && item.marca.toLowerCase().includes(searchLower)) ||
                 (item.modelo && item.modelo.toLowerCase().includes(searchLower)) ||
                 (item.serie && item.serie.toLowerCase().includes(searchLower));
@@ -460,7 +506,7 @@ function filterData() {
     renderTable();
 }
 
-// Función para renderizar tabla
+// Función para renderizar tabla - CORREGIDA (cliente general y contacto separados)
 function renderTable() {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
@@ -497,6 +543,11 @@ function renderTable() {
             const marcaTexto = ticket.marca ? ticket.marca : '';
             const modeloTexto = ticket.modelo ? ticket.modelo : 'N/A';
             
+            // Obtener datos del cliente general
+            const clienteGeneral = ticket.clienteGeneral || null;
+            const clienteGeneralDescripcion = clienteGeneral ? clienteGeneral.descripcion : 'N/A';
+            const clienteGeneralFoto = clienteGeneral && clienteGeneral.foto ? clienteGeneral.foto : null;
+            
             html += `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-300 text-center font-mono font-bold">
@@ -504,28 +555,33 @@ function renderTable() {
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex flex-col items-center justify-center">
-                            <span class="font-medium flex items-center gap-1">
-                                <i class="fas fa-user text-gray-500 w-3 h-3"></i>
+                            <div class="flex items-center gap-2 mb-1">
+                                ${renderClienteGeneralTableFoto(clienteGeneralFoto, clienteGeneralDescripcion)}
+                                <span class="font-medium text-sm" title="${clienteGeneralDescripcion}">
+                                    ${clienteGeneralDescripcion}
+                                </span>
+                            </div>
+                           
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="font-medium text-xs text-gray-800 dark:text-gray-200">
+                                <i class="fas fa-user text-gray-500 mr-1"></i>
                                 ${ticket.nombreCompleto || 'N/A'}
+                            </span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <i class="fas fa-phone text-gray-400"></i>
+                                ${ticket.telefonoCelular || 'N/A'} ${ticket.telefonoFijo ? ' / ' + ticket.telefonoFijo : ''}
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                                 <i class="fas fa-envelope text-gray-400"></i>
                                 ${ticket.correoElectronico || 'N/A'}
                             </span>
-                        </div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <span class="flex items-center gap-1">
-                                <i class="fas fa-mobile-alt text-gray-500"></i>
-                                ${ticket.telefonoCelular || 'N/A'}
+                            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <i class="fas fa-id-card text-gray-400"></i>
+                                ${ticket.tipoDocumento || 'N/A'}: ${ticket.dni_ruc_ce || 'N/A'}
                             </span>
-                            ${ticket.telefonoFijo ? `
-                                <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                    <i class="fas fa-phone text-gray-400"></i>
-                                    ${ticket.telefonoFijo}
-                                </span>
-                            ` : ''}
                         </div>
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
@@ -572,10 +628,10 @@ function renderTable() {
                                 <i class="fas fa-eye text-sm"></i>
                             </button>
 
-                            <!-- Botón Evaluar (próximamente) -->
+                            <!-- Botón Evaluar -->
                             <button class="w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors evaluate-ticket flex items-center justify-center"
                                     data-id="${ticket.id}"
-                                    title="Evaluar ticket (próximamente)">
+                                    title="Evaluar ticket">
                                 <i class="fas fa-clipboard-check text-sm"></i>
                             </button>
                         </div>
@@ -587,6 +643,22 @@ function renderTable() {
 
     $('#evaluarTicketsTableBody').html(html);
     renderPagination();
+}
+
+// Función auxiliar para renderizar la foto del cliente general en la tabla
+function renderClienteGeneralTableFoto(foto, descripcion) {
+    if (foto) {
+        return `<img src="${foto}" alt="${descripcion}" 
+                    class="w-6 h-6 rounded-full object-cover border border-gray-300"
+                    onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold" style="display: none;">
+                    ${descripcion.charAt(0)}
+                </div>`;
+    } else {
+        return `<div class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
+                    ${descripcion.charAt(0)}
+                </div>`;
+    }
 }
 
 // Función para renderizar paginación

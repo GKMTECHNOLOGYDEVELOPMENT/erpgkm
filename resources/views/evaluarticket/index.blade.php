@@ -46,6 +46,29 @@
         #ticketModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        
+        /* Estilo para el avatar del cliente general */
+        .cliente-general-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .cliente-general-iniciales {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #4361ee;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 2px solid #e5e7eb;
+        }
     </style>
 
     <div class="container-fluid py-4">
@@ -124,35 +147,35 @@
                 <!-- Filtros de estado y búsqueda -->
                 <div class="flex flex-wrap items-center justify-between mb-4">
                     <!-- Filtros de estado -->
-<div class="flex items-center gap-2 flex-wrap">
-    <span class="text-gray-600 flex items-center gap-1">
-        <i class="fas fa-filter"></i>
-        Estado:
-    </span>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-gray-600 flex items-center gap-1">
+                            <i class="fas fa-filter"></i>
+                            Estado:
+                        </span>
 
-    <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
-        data-status="todos" id="filterTodos">
-        Todos
-    </button>
+                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                            data-status="todos" id="filterTodos">
+                            Todos
+                        </button>
 
-    <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
-        data-status="evaluando" id="filterEvaluando">
-        <i class="fas fa-search mr-1"></i>
-        Evaluando
-    </button>
+                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                            data-status="evaluando" id="filterEvaluando">
+                            <i class="fas fa-search mr-1"></i>
+                            Evaluando
+                        </button>
 
-    <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
-        data-status="gestionando" id="filterGestionando">
-        <i class="fas fa-tools mr-1"></i>
-        Gestionando
-    </button>
+                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                            data-status="gestionando" id="filterGestionando">
+                            <i class="fas fa-tools mr-1"></i>
+                            Gestionando
+                        </button>
 
-    <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
-        data-status="finalizado" id="filterFinalizado">
-        <i class="fas fa-check-double mr-1"></i>
-        Finalizado
-    </button>
-</div>
+                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                            data-status="finalizado" id="filterFinalizado">
+                            <i class="fas fa-check-double mr-1"></i>
+                            Finalizado
+                        </button>
+                    </div>
 
                     <!-- Buscador -->
                     <div class="flex items-center bg-white border rounded-lg p-1">
@@ -166,31 +189,31 @@
                 <!-- Tabla -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200" id="evaluarTicketsTable">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    N° Ticket
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Cliente
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Contacto
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Producto
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Fecha
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Estado
-                                </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Acciones
-                                </th>
-                            </tr>
-                        </thead>
+                      <thead class="bg-gray-50">
+    <tr>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            N° Ticket
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Cliente General
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Contacto
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Producto
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Fecha
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Estado
+        </th>
+        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Acciones
+        </th>
+    </tr>
+</thead>
                         <tbody id="evaluarTicketsTableBody" class="bg-white divide-y divide-gray-200">
                             <!-- Los datos se cargarán vía JavaScript -->
                             <tr>
@@ -283,8 +306,7 @@
     {{-- Toastr JS --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-
+    {{-- Script personalizado --}}
     <script src="{{ asset('assets/js/evaluarticket/evaluarticket.js') }}"></script>
-   
 
 </x-layout.default>
