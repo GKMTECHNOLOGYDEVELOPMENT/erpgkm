@@ -9,7 +9,44 @@ let dateRange = { start: '', end: '' };
 let isLoading = true;
 let currentTicket = null;
 
-const API_URL = window.API_URL || 'http://127.0.0.1:5000/api';
+const API_URL = window.API_URL || 'http://127.0.0.1:5000';
+
+// Función para obtener el token CSRF
+function getCsrfToken() {
+    // Buscar en meta tag
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken) {
+        return metaToken.getAttribute('content');
+    }
+    
+    // Buscar en cookie (para Laravel)
+    const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+    
+    if (cookieValue) {
+        return decodeURIComponent(cookieValue);
+    }
+    
+    return null;
+}
+
+// Función para verificar si el botón debe estar deshabilitado
+function isOrderButtonDisabled(estado) {
+    return estado === 'gestionando' || estado === 'finalizado';
+}
+
+// Función para obtener el tooltip según el estado
+function getOrderButtonTitle(estado) {
+    if (estado === 'gestionando') {
+        return 'No se puede crear orden - Ticket en gestión';
+    }
+    if (estado === 'finalizado') {
+        return 'No se puede crear orden - Ticket finalizado';
+    }
+    return 'Crear orden de trabajo';
+}
 
 // Función para abrir el modal de detalles
 function abrirModal(ticket) {
@@ -451,7 +488,7 @@ $('#refreshData').click(function() {
     cargarTickets();
 });
 
-// Función para filtrar datos - ACTUALIZADA
+// Función para filtrar datos
 function filterData() {
     if (!ticketsData || ticketsData.length === 0) {
         filteredData = [];
@@ -506,7 +543,7 @@ function filterData() {
     renderTable();
 }
 
-// Función para renderizar tabla - CORREGIDA (cliente general y contacto separados)
+// Función para renderizar tabla
 function renderTable() {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
@@ -539,14 +576,19 @@ function renderTable() {
         `;
     } else {
         paginatedData.forEach(ticket => {
-            // Determinar la marca y modelo para mostrar
             const marcaTexto = ticket.marca ? ticket.marca : '';
             const modeloTexto = ticket.modelo ? ticket.modelo : 'N/A';
             
-            // Obtener datos del cliente general
             const clienteGeneral = ticket.clienteGeneral || null;
             const clienteGeneralDescripcion = clienteGeneral ? clienteGeneral.descripcion : 'N/A';
             const clienteGeneralFoto = clienteGeneral && clienteGeneral.foto ? clienteGeneral.foto : null;
+            
+            // Verificar si el botón debe estar deshabilitado
+            const ordenDeshabilitado = isOrderButtonDisabled(ticket.estado);
+            const ordenButtonClass = ordenDeshabilitado 
+                ? 'w-8 h-8 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed flex items-center justify-center'
+                : 'w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors evaluate-ticket flex items-center justify-center';
+            const ordenTitle = getOrderButtonTitle(ticket.estado);
             
             html += `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -561,7 +603,6 @@ function renderTable() {
                                     ${clienteGeneralDescripcion}
                                 </span>
                             </div>
-                           
                         </div>
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
@@ -621,17 +662,15 @@ function renderTable() {
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <!-- Botón Ver detalles -->
                             <button class="w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors view-ticket flex items-center justify-center"
                                     data-id="${ticket.id}"
                                     title="Ver detalles del ticket">
                                 <i class="fas fa-eye text-sm"></i>
                             </button>
-
-                            <!-- Botón Evaluar -->
-                            <button class="w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors evaluate-ticket flex items-center justify-center"
+                            <button class="${ordenButtonClass}"
                                     data-id="${ticket.id}"
-                                    title="Evaluar ticket">
+                                    title="${ordenTitle}"
+                                    ${ordenDeshabilitado ? 'disabled' : ''}>
                                 <i class="fas fa-clipboard-check text-sm"></i>
                             </button>
                         </div>
@@ -726,18 +765,15 @@ window.changePage = function (page) {
 
 // Función para limpiar todos los filtros
 window.limpiarTodosFiltros = function() {
-    // Resetear filtros de estado
     selectedStatus = 'todos';
     $('.filter-btn').removeClass('bg-primary text-white')
         .addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
     $('#filterTodos').removeClass('bg-gray-100').addClass('bg-primary text-white');
     
-    // Resetear búsqueda
     $('#searchInput').val('');
     searchText = '';
     $('#clearSearch').addClass('hidden');
     
-    // Resetear fechas
     dateRange = { start: '', end: '' };
     $('#startDate').val('');
     $('#endDate').val('');
@@ -749,7 +785,6 @@ window.limpiarTodosFiltros = function() {
     }
     updateDateFilterUI();
     
-    // Aplicar filtros
     filterData();
 };
 
@@ -766,9 +801,69 @@ $(document).on('click', '.view-ticket', function () {
     }
 });
 
-$(document).on('click', '.evaluate-ticket', function () {
+// Event listeners para botones de acción - CON PROTECCIÓN CSRF (solo para tickets en estado evaluando)
+$(document).on('click', '.evaluate-ticket:not([disabled])', function () {
     const id = $(this).data('id');
-    toastr.info(`Funcionalidad de evaluación para ticket #${id} - Próximamente disponible`);
+    const ticket = ticketsData.find(t => t.id == id);
+    
+    // Verificar nuevamente el estado por seguridad
+    if (isOrderButtonDisabled(ticket.estado)) {
+        toastr.error('No se puede crear orden para tickets en estado ' + ticket.estado);
+        return;
+    }
+    
+    const csrfToken = getCsrfToken();
+    
+    if (confirm('¿Está seguro de crear una orden de trabajo para este ticket?')) {
+        $.ajax({
+            url: `${API_URL}/evaluar-ticket/crear-orden/${id}`,
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'X-XSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success('✅ Orden de trabajo creada exitosamente');
+                    
+                    if (response.data && response.data.idOrden) {
+                        window.open(`/ordenes/smart/${response.data.idOrden}/edit`, '_blank');
+                    }
+                    
+                    cargarTickets();
+                } else {
+                    toastr.error(response.message || 'Error al crear la orden');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr);
+                let errorMsg = 'Error al conectar con el servidor';
+                
+                if (xhr.status === 401) {
+                    errorMsg = 'No autorizado. Inicie sesión nuevamente.';
+                } else if (xhr.status === 419) {
+                    errorMsg = 'Token CSRF expirado. Recargue la página.';
+                    setTimeout(() => location.reload(), 3000);
+                } else if (xhr.status === 422) {
+                    errorMsg = 'Error de validación. Verifique los datos.';
+                }
+                
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.message) {
+                        errorMsg = response.message;
+                    }
+                    if (response.errors) {
+                        console.error('Errores de validación:', response.errors);
+                    }
+                } catch (e) {}
+                
+                toastr.error(errorMsg);
+            }
+        });
+    }
 });
 
 // Activar el filtro "Todos" por defecto

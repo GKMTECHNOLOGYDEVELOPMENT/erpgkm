@@ -2185,6 +2185,10 @@ Route::prefix('evaluar-ticket')->group(function () {
     Route::delete('/{id}', [EvaluarTicketController::class, 'destroy'])->name('evaluar.ticket.destroy');
 });
 
+    Route::post('/evaluar-ticket/crear-orden/{id}', [EvaluarTicketController::class, 'crearOrdenTrabajo'])->name('evaluar.ticket.crear-orden')->middleware('auth');
+// routes/api.php
+
+    Route::get('/evaluar-ticket/tickets', [EvaluarTicketController::class, 'getTickets']);
 
 // routes/web.php - Agrega estas rutas
 

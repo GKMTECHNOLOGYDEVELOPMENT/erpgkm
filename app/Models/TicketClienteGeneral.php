@@ -75,7 +75,7 @@ class TicketClienteGeneral extends Model
     {
         $ultimoTicket = self::orderBy('idTicket', 'desc')->first();
         $numero = $ultimoTicket ? intval(substr($ultimoTicket->numero_ticket, -6)) + 1 : 1;
-        return 'TK-' . str_pad($numero, 6, '0', STR_PAD_LEFT);
+        return 'TKT-' . str_pad($numero, 6, '0', STR_PAD_LEFT);
     }
 
     // app/Models/TicketClienteGeneral.php

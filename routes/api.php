@@ -756,3 +756,5 @@ Route::get('/obtener-info-entrega/{solicitudId}/{articuloId}',[Solicitudrepuesto
 Route::prefix('evaluar-ticket')->group(function () {
     Route::get('/tickets', [EvaluarTicketController::class, 'getTickets']);
 });
+
+
