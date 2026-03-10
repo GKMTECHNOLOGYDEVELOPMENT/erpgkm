@@ -1,4 +1,3 @@
-{{-- resources/views/evaluarticket/index.blade.php --}}
 <x-layout.default>
 
     {{-- Flatpickr CSS --}}
@@ -7,69 +6,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     {{-- Font Awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <style>
-        /* Estilos para los modales */
-        #ticketModal, #imageModal {
-            z-index: 9999;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        #modalContent img {
-            transition: transform 0.2s;
-        }
-        
-        #modalContent img:hover {
-            transform: scale(1.02);
-        }
-        
-        /* Scroll personalizado para el modal */
-        #ticketModal .overflow-y-auto::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        #ticketModal .overflow-y-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        
-        #ticketModal .overflow-y-auto::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        
-        #ticketModal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* Estilo para el avatar del cliente general */
-        .cliente-general-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e5e7eb;
-        }
-        
-        .cliente-general-iniciales {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background-color: #4361ee;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-            border: 2px solid #e5e7eb;
-        }
-    </style>
 
     <div class="container-fluid py-4">
         <!-- Breadcrumb -->
@@ -87,7 +23,7 @@
         </div>
 
         <!-- Header -->
-        <div class="bg-white rounded-2xl border border-gray-200 p-5 mb-6 shadow-sm">
+        <div class="panel rounded-2xl border border-gray-200 p-5 mb-6 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">
@@ -109,7 +45,7 @@
         </div>
 
         <!-- Filtros de fecha -->
-        <div class="bg-white rounded-lg shadow-sm mb-4 p-4">
+        <div class="panel rounded-lg shadow-sm mb-4 p-4">
             <div class="flex items-center gap-4 flex-wrap">
                 <span class="text-gray-600 flex items-center gap-1">
                     <i class="fas fa-calendar-alt"></i>
@@ -119,7 +55,8 @@
                 <!-- Fecha inicio -->
                 <div class="relative">
                     <input type="text" id="startDate" class="form-input pl-8 w-40" placeholder="Fecha inicial">
-                    <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <i
+                        class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                 </div>
 
                 <span class="text-gray-400">-</span>
@@ -127,7 +64,8 @@
                 <!-- Fecha fin -->
                 <div class="relative">
                     <input type="text" id="endDate" class="form-input pl-8 w-40" placeholder="Fecha final">
-                    <i class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <i
+                        class="fas fa-calendar-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
                 </div>
 
                 <!-- Botón limpiar filtros -->
@@ -142,7 +80,7 @@
         </div>
 
         <!-- Panel de filtros y tabla -->
-        <div class="bg-white rounded-lg shadow-sm">
+        <div class="panel rounded-lg shadow-sm">
             <div class="p-4">
                 <!-- Filtros de estado y búsqueda -->
                 <div class="flex flex-wrap items-center justify-between mb-4">
@@ -153,32 +91,40 @@
                             Estado:
                         </span>
 
-                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                        <!-- Botón TODOS (se mantiene igual) -->
+                        <button
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 filter-btn bg-gray-100 text-gray-700 hover:bg-gray-200"
                             data-status="todos" id="filterTodos">
                             Todos
                         </button>
 
-                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                        <!-- Botón EVALUANDO - Color púrpura -->
+                        <button
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 filter-btn bg-purple-100 text-purple-800 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
                             data-status="evaluando" id="filterEvaluando">
                             <i class="fas fa-search mr-1"></i>
                             Evaluando
                         </button>
 
-                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                        <!-- Botón GESTIONANDO - Color azul -->
+                        <button
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 filter-btn bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
                             data-status="gestionando" id="filterGestionando">
                             <i class="fas fa-tools mr-1"></i>
                             Gestionando
                         </button>
 
-                        <button class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors filter-btn"
+                        <!-- Botón FINALIZADO - Color verde -->
+                        <button
+                            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 filter-btn bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
                             data-status="finalizado" id="filterFinalizado">
                             <i class="fas fa-check-double mr-1"></i>
                             Finalizado
                         </button>
                     </div>
 
-                    <!-- Buscador -->
-                    <div class="flex items-center bg-white border rounded-lg p-1">
+                    <!-- Buscador (se mantiene igual) -->
+                    <div class="flex items-center border rounded-lg p-1">
                         <i class="fas fa-search text-gray-400 ml-2"></i>
                         <input type="text" id="searchInput" class="form-input border-0 focus:ring-0 w-64"
                             placeholder="Buscar por ticket, cliente, producto...">
@@ -186,40 +132,49 @@
                     </div>
                 </div>
 
-                <!-- Tabla -->
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200" id="evaluarTicketsTable">
-                      <thead class="bg-gray-50">
-    <tr>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            N° Ticket
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Cliente General
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Contacto
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Producto
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Fecha
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Estado
-        </th>
-        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Acciones
-        </th>
-    </tr>
-</thead>
-                        <tbody id="evaluarTicketsTableBody" class="bg-white divide-y divide-gray-200">
+                <!-- Tabla - CON SOPORTE PARA MODO DARK -->
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="evaluarTicketsTable">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    N° Ticket
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Cliente General
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Contacto
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Producto
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Fecha
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Estado
+                                </th>
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="evaluarTicketsTableBody"
+                            class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             <!-- Los datos se cargarán vía JavaScript -->
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-gray-500">
-                                    <div class="flex justify-center items-center">
-                                        <i class="fas fa-spinner fa-spin text-3xl text-primary mr-3"></i>
+                                <td colspan="7" class="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <i
+                                            class="fas fa-spinner fa-spin text-3xl text-primary dark:text-primary-light mb-3"></i>
                                         <p>Cargando tickets para evaluación...</p>
                                     </div>
                                 </td>
@@ -248,17 +203,24 @@
         </div>
     </div>
 
-    <!-- Modal para ver detalles del ticket -->
-    <div id="ticketModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto" style="display: none;">
+    <!-- Modal para ver detalles del ticket - CON CIERRE AL HACER CLIC FUERA -->
+    <div id="ticketModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden overflow-y-auto"
+        style="display: none;">
+        <!-- Fondo que cierra al hacer clic -->
+        <div class="absolute inset-0" onclick="cerrarModal()"></div>
+
         <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative"
+                onclick="event.stopPropagation()">
                 <!-- Cabecera del modal -->
-                <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+                <div
+                    class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                     <h3 class="text-lg font-semibold flex items-center gap-2">
                         <i class="fas fa-clipboard-check text-primary"></i>
                         Detalles del Ticket
                     </h3>
-                    <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <button onclick="cerrarModal()"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
@@ -273,7 +235,8 @@
                 </div>
 
                 <!-- Pie del modal -->
-                <div class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
+                <div
+                    class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
                     <button onclick="cerrarModal()" class="btn btn-outline-danger">
                         <i class="fas fa-times mr-1"></i>
                         Cerrar
@@ -287,14 +250,24 @@
         </div>
     </div>
 
-    <!-- Modal para imagen ampliada -->
-    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-90 z-[60] hidden" style="display: none;">
-        <div class="flex items-center justify-center h-full p-4">
-            <div class="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
-                <button onclick="cerrarImageModal()" class="absolute top-4 right-4 bg-white text-gray-800 rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-10">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-                <img id="ampliadaImagen" src="" alt="Vista ampliada" class="max-w-full max-h-[90vh] object-contain rounded-lg">
+    <!-- Modal para imagen ampliada - CORREGIDO: imagen COMPLETA y SIN ZOOM -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+        style="display: none;">
+        <!-- Fondo que cierra al hacer clic -->
+        <div class="absolute inset-0" onclick="cerrarImageModal()"></div>
+
+        <!-- Contenedor de la imagen - SIN LÍMITES DE TAMAÑO ESTRICTOS -->
+        <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-[95vw] max-h-[95vh] overflow-hidden">
+            <!-- Botón de cerrar - FUERA del padding de la imagen -->
+            <button onclick="cerrarImageModal()"
+                class="absolute -top-3 -right-3 bg-danger text-white rounded-full w-10 h-10 flex items-center justify-center shadow-lg hover:bg-danger/90 transition-colors z-20 border-2 border-white">
+                <i class="fas fa-times text-white text-xl"></i>
+            </button>
+
+            <!-- Contenedor de la imagen - SIN PADDING QUE LA RECORTE -->
+            <div class="flex items-center justify-center bg-white dark:bg-gray-800 p-1">
+                <img id="ampliadaImagen" src="" alt="Vista ampliada"
+                    class="max-w-[90vw] max-h-[90vh] w-auto h-auto object-contain">
             </div>
         </div>
     </div>

@@ -63,6 +63,51 @@ function abrirModal(ticket) {
     renderModalContent(ticket);
 }
 
+// AÑADE ESTA FUNCIÓN DE DEPURACIÓN AL INICIO DEL ARCHIVO
+function diagnosticarImagenes() {
+    console.group('🔍 DIAGNÓSTICO DE IMÁGENES');
+    
+    // Verificar si hay tickets
+    if (!ticketsData || ticketsData.length === 0) {
+        console.log('❌ No hay tickets cargados');
+        console.groupEnd();
+        return;
+    }
+    
+    // Analizar cada ticket
+    ticketsData.forEach((ticket, index) => {
+        console.log(`\n📋 TICKET #${index + 1}: ${ticket.numeroTicket}`);
+        console.log('ID:', ticket.id);
+        
+        // Verificar cada tipo de imagen
+        const imagenes = [
+            { nombre: 'fotoVideoFalla', valor: ticket.fotoVideoFalla },
+            { nombre: 'fotoBoletaFactura', valor: ticket.fotoBoletaFactura },
+            { nombre: 'fotoNumeroSerie', valor: ticket.fotoNumeroSerie }
+        ];
+        
+        imagenes.forEach(img => {
+            if (img.valor) {
+                console.log(`   ✅ ${img.nombre}:`, img.valor);
+                // Verificar si la URL es accesible
+                testImageUrl(img.valor, img.nombre);
+            } else {
+                console.log(`   ❌ ${img.nombre}: NO TIENE IMAGEN`);
+            }
+        });
+    });
+    
+    console.groupEnd();
+}
+
+// Función auxiliar para probar si una imagen es accesible
+function testImageUrl(url, nombre) {
+    const img = new Image();
+    img.onload = () => console.log(`      ✅ ${nombre} - IMAGEN ACCESIBLE`);
+    img.onerror = () => console.log(`      ❌ ${nombre} - ERROR: IMAGEN NO ACCESIBLE (404)`);
+    img.src = url;
+}
+
 // Función para cerrar el modal
 function cerrarModal() {
     console.log('🔚 Cerrando modal');
@@ -77,6 +122,13 @@ function abrirImageModal(src) {
     $('#imageModal').removeClass('hidden').show();
 }
 
+function cerrarImageModalFuera(event) {
+    // Si el clic fue en el fondo negro (no en el contenido del modal)
+    if (event.target === event.currentTarget) {
+        cerrarImageModal();
+    }
+}
+
 // Función para cerrar modal de imagen ampliada
 function cerrarImageModal() {
     console.log('🔚 Cerrando modal de imagen');
@@ -84,131 +136,232 @@ function cerrarImageModal() {
     $('#ampliadaImagen').attr('src', '');
 }
 
-// Función para renderizar el contenido del modal
 function renderModalContent(ticket) {
+    // Validación inicial
     if (!ticket) {
-        console.log('❌ No hay ticket para renderizar');
+        console.error('❌ renderModalContent: No se proporcionó ticket');
         return;
     }
 
     console.log('🎨 Renderizando modal para ticket:', ticket.numeroTicket);
 
-    const fechaCompra = ticket.fechaCompra ? new Date(ticket.fechaCompra).toLocaleDateString('es-PE') : 'No registrada';
-    const fechaCreacion = ticket.fechaCreacion ? new Date(ticket.fechaCreacion).toLocaleString('es-PE') : 'No registrada';
+    // ============================================
+    // CONSTANTES Y UTILIDADES DE FORMATEO
+    // ============================================
     
-    // Datos del cliente general
+    const formatDate = (date, includeTime = false) => {
+        if (!date) return 'No registrada';
+        try {
+            const dateObj = new Date(date);
+            return includeTime 
+                ? dateObj.toLocaleString('es-PE') 
+                : dateObj.toLocaleDateString('es-PE');
+        } catch (e) {
+            console.warn('Error formateando fecha:', date, e);
+            return date;
+        }
+    };
+
+    const fechaCompra = formatDate(ticket.fechaCompra);
+    const fechaCreacion = formatDate(ticket.fechaCreacion, true);
+    
+    // ============================================
+    // DATOS DEL CLIENTE GENERAL
+    // ============================================
+    
     const clienteGeneral = ticket.clienteGeneral || null;
-    const clienteGeneralDescripcion = clienteGeneral ? clienteGeneral.descripcion : 'No asignado';
-    const clienteGeneralFoto = clienteGeneral && clienteGeneral.foto ? clienteGeneral.foto : null;
+    const clienteGeneralDescripcion = clienteGeneral?.descripcion || 'No asignado';
+    const clienteGeneralFoto = clienteGeneral?.foto || null;
 
-    const html = `
-        <div class="space-y-6">
-            <!-- Información del Ticket y Cliente General -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="fas fa-ticket-alt text-blue-600 dark:text-blue-400"></i>
-                        <h4 class="font-semibold text-blue-800 dark:text-blue-300">Información del Ticket</h4>
-                    </div>
-                    <div class="space-y-2">
-                        <p><span class="font-medium">N° Ticket:</span> ${ticket.numeroTicket || 'N/A'}</p>
-                        <p><span class="font-medium">Fecha Creación:</span> ${fechaCreacion}</p>
-                        <p><span class="font-medium">Estado:</span> ${getStatusBadge(ticket.estado || 'pendiente')}</p>
-                    </div>
-                </div>
+    // ============================================
+    // SECCIÓN: INFORMACIÓN DEL TICKET
+    // ============================================
+    
+    const ticketInfoSection = `
+        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-ticket-alt text-blue-600 dark:text-blue-400"></i>
+                <h4 class="font-semibold text-blue-800 dark:text-blue-300">Información del Ticket</h4>
+            </div>
+            <div class="space-y-2">
+                <p><span class="font-medium">N° Ticket:</span> ${ticket.numeroTicket || 'N/A'}</p>
+                <p><span class="font-medium">Fecha Creación:</span> ${fechaCreacion}</p>
+                <p><span class="font-medium">Estado:</span> ${getStatusBadge(ticket.estado || 'pendiente')}</p>
+            </div>
+        </div>
+    `;
 
-                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <div class="flex items-center gap-2">
-                            ${renderClienteGeneralFoto(clienteGeneralFoto, clienteGeneralDescripcion)}
-                            <h4 class="font-semibold text-indigo-800 dark:text-indigo-300">Cliente General</h4>
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <p><span class="font-medium">Empresa/Cliente:</span> ${clienteGeneralDescripcion}</p>
-                        <p><span class="font-medium">ID Cliente:</span> ${ticket.idClienteGeneral || 'N/A'}</p>
-                    </div>
+    // ============================================
+    // SECCIÓN: CLIENTE GENERAL
+    // ============================================
+    
+    const clienteGeneralSection = `
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                    ${renderClienteGeneralFoto(clienteGeneralFoto, clienteGeneralDescripcion)}
+                    <h4 class="font-semibold text-indigo-800 dark:text-indigo-300">Cliente General</h4>
                 </div>
             </div>
-
-            <!-- Datos del Cliente (persona que reporta) -->
-            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
-                    <h4 class="font-semibold text-purple-800 dark:text-purple-300">Datos del Contacto</h4>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                        <p><span class="font-medium">Nombre:</span> ${ticket.nombreCompleto || 'N/A'}</p>
-                        <p><span class="font-medium">Documento:</span> ${ticket.tipoDocumento || 'N/A'}: ${ticket.dni_ruc_ce || 'N/A'}</p>
-                    </div>
-                    <div>
-                        <p><span class="font-medium">Email:</span> ${ticket.correoElectronico || 'N/A'}</p>
-                        <p><span class="font-medium">Teléfonos:</span> ${ticket.telefonoCelular || 'N/A'} ${ticket.telefonoFijo ? '/ ' + ticket.telefonoFijo : ''}</p>
-                    </div>
-                </div>
+            <div class="space-y-2">
+                <p><span class="font-medium">Empresa/Cliente:</span> ${clienteGeneralDescripcion}</p>
             </div>
+        </div>
+    `;
 
-            <!-- Dirección -->
-            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-map-marker-alt text-green-600 dark:text-green-400"></i>
-                    <h4 class="font-semibold text-green-800 dark:text-green-300">Dirección</h4>
-                </div>
-                <p><span class="font-medium">Dirección:</span> ${ticket.direccionCompleta || 'No registrada'}</p>
-                <p><span class="font-medium">Referencia:</span> ${ticket.referenciaDomicilio || 'No registrada'}</p>
-                <p><span class="font-medium">Ubicación:</span> ${ticket.distrito || ''}, ${ticket.provincia || ''}, ${ticket.departamento || ''}</p>
-                ${ticket.ubicacionGoogleMaps ? `
-                    <a href="${ticket.ubicacionGoogleMaps}" target="_blank" class="inline-flex items-center gap-1 mt-2 text-blue-600 hover:underline">
-                        <i class="fas fa-external-link-alt"></i>
-                        Ver en Google Maps
-                    </a>
-                ` : ''}
+    // ============================================
+    // SECCIÓN: DATOS DEL CONTACTO
+    // ============================================
+    
+    const contactoSection = `
+        <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
+                <h4 class="font-semibold text-purple-800 dark:text-purple-300">Datos del Contacto</h4>
             </div>
-
-            <!-- Producto y Falla -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="fas fa-laptop text-orange-600 dark:text-orange-400"></i>
-                        <h4 class="font-semibold text-orange-800 dark:text-orange-300">Producto</h4>
-                    </div>
-                    <div class="space-y-2">
-                        <p><span class="font-medium">Categoría:</span> ${ticket.tipoProducto || 'N/A'}</p>
-                        <p><span class="font-medium">Marca:</span> ${ticket.marca || 'N/A'}</p>
-                        <p><span class="font-medium">Modelo:</span> ${ticket.modelo || 'N/A'}</p>
-                        <p><span class="font-medium">Serie:</span> ${ticket.serie || 'N/A'}</p>
-                        <p><span class="font-medium">Fecha Compra:</span> ${fechaCompra}</p>
-                        <p><span class="font-medium">Tienda:</span> ${ticket.tiendaSedeCompra || 'N/A'}</p>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                    <p><span class="font-medium">Nombre:</span> ${ticket.nombreCompleto || 'N/A'}</p>
+                    <p><span class="font-medium">Documento:</span> ${ticket.tipoDocumento || 'N/A'}: ${ticket.dni_ruc_ce || 'N/A'}</p>
                 </div>
-
-                <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
-                        <h4 class="font-semibold text-red-800 dark:text-red-300">Detalles de la Falla</h4>
-                    </div>
-                    <p class="whitespace-pre-line">${ticket.detallesFalla || 'No especificada'}</p>
-                </div>
-            </div>
-
-            <!-- Evidencias -->
-            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                <div class="flex items-center gap-2 mb-4">
-                    <i class="fas fa-camera text-gray-600 dark:text-gray-400"></i>
-                    <h4 class="font-semibold text-gray-800 dark:text-gray-300">Evidencias</h4>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    ${renderImagen(ticket.fotoVideoFalla, 'Falla', 'video')}
-                    ${renderImagen(ticket.fotoBoletaFactura, 'Boleta/Factura', 'file-invoice')}
-                    ${renderImagen(ticket.fotoNumeroSerie, 'N° de Serie', 'hashtag')}
+                <div>
+                    <p><span class="font-medium">Email:</span> ${ticket.correoElectronico || 'N/A'}</p>
+                    <p><span class="font-medium">Teléfonos:</span> ${ticket.telefonoCelular || 'N/A'} ${ticket.telefonoFijo ? '/ ' + ticket.telefonoFijo : ''}</p>
                 </div>
             </div>
         </div>
     `;
 
-    $('#modalContent').html(html);
+    // ============================================
+    // SECCIÓN: DIRECCIÓN
+    // ============================================
+    
+    const direccionSection = `
+        <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-map-marker-alt text-green-600 dark:text-green-400"></i>
+                <h4 class="font-semibold text-green-800 dark:text-green-300">Dirección</h4>
+            </div>
+            <div class="space-y-1">
+                <p><span class="font-medium">Dirección:</span> ${ticket.direccionCompleta || 'No registrada'}</p>
+                <p><span class="font-medium">Referencia:</span> ${ticket.referenciaDomicilio || 'No registrada'}</p>
+                <p><span class="font-medium">Ubicación:</span> ${[ticket.distrito, ticket.provincia, ticket.departamento].filter(Boolean).join(', ') || 'No especificada'}</p>
+                ${ticket.ubicacionGoogleMaps ? `
+                    <a href="${ticket.ubicacionGoogleMaps}" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-1 mt-2 text-blue-600 hover:underline">
+                        <i class="fas fa-external-link-alt"></i>
+                        Ver en Google Maps
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    // ============================================
+    // SECCIÓN: PRODUCTO
+    // ============================================
+    
+    const productoSection = `
+        <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-laptop text-orange-600 dark:text-orange-400"></i>
+                <h4 class="font-semibold text-orange-800 dark:text-orange-300">Producto</h4>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <p><span class="font-medium">Categoría:</span> ${ticket.tipoProducto || 'N/A'}</p>
+                <p><span class="font-medium">Marca:</span> ${ticket.marca || 'N/A'}</p>
+                <p><span class="font-medium">Modelo:</span> ${ticket.modelo || 'N/A'}</p>
+                <p><span class="font-medium">Serie:</span> ${ticket.serie || 'N/A'}</p>
+                <p><span class="font-medium">Fecha Compra:</span> ${fechaCompra}</p>
+                <p><span class="font-medium">Tienda:</span> ${ticket.tiendaSedeCompra || 'N/A'}</p>
+            </div>
+        </div>
+    `;
+
+    // ============================================
+    // SECCIÓN: DETALLES DE LA FALLA
+    // ============================================
+    
+    const fallaSection = `
+        <div class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400"></i>
+                <h4 class="font-semibold text-red-800 dark:text-red-300">Detalles de la Falla</h4>
+            </div>
+            <div class="bg-white dark:bg-gray-700 p-3 rounded border border-red-100 dark:border-red-800">
+                <p class="whitespace-pre-line text-gray-700 dark:text-gray-300">
+                    ${ticket.detallesFalla || 'No especificada'}
+                </p>
+            </div>
+        </div>
+    `;
+
+    // ============================================
+    // SECCIÓN: EVIDENCIAS
+    // ============================================
+    
+    const evidenciasSection = `
+        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+            <div class="flex items-center gap-2 mb-4">
+                <i class="fas fa-camera text-gray-600 dark:text-gray-400"></i>
+                <h4 class="font-semibold text-gray-800 dark:text-gray-300">Evidencias</h4>
+                <span class="text-xs text-gray-500 ml-2">(Haz clic en las imágenes para ampliar)</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                ${renderImagen(ticket.fotoVideoFalla, 'Foto de la Falla', 'video')}
+                ${renderImagen(ticket.fotoBoletaFactura, 'Boleta/Factura', 'file-invoice')}
+                ${renderImagen(ticket.fotoNumeroSerie, 'Número de Serie', 'hashtag')}
+            </div>
+        </div>
+    `;
+
+    // ============================================
+    // CONSTRUCCIÓN FINAL DEL HTML
+    // ============================================
+    
+    const html = `
+        <div class="space-y-6">
+            <!-- Fila 1: Ticket y Cliente General -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${ticketInfoSection}
+                ${clienteGeneralSection}
+            </div>
+
+            <!-- Fila 2: Contacto -->
+            ${contactoSection}
+
+            <!-- Fila 3: Dirección -->
+            ${direccionSection}
+
+            <!-- Fila 4: Producto y Falla -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${productoSection}
+                ${fallaSection}
+            </div>
+
+            <!-- Fila 5: Evidencias -->
+            ${evidenciasSection}
+        </div>
+    `;
+
+    // ============================================
+    // INYECCIÓN EN EL DOM
+    // ============================================
+    
+    try {
+        $('#modalContent').html(html);
+        console.log('✅ Modal renderizado correctamente');
+    } catch (error) {
+        console.error('❌ Error al renderizar modal:', error);
+        $('#modalContent').html(`
+            <div class="text-center py-10 text-red-600">
+                <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+                <p>Error al cargar los detalles del ticket</p>
+                <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+            </div>
+        `);
+    }
 }
 
 // Función auxiliar para renderizar la foto del cliente general
@@ -227,40 +380,44 @@ function renderClienteGeneralFoto(foto, descripcion) {
     }
 }
 
-// Función auxiliar para renderizar imágenes
+// Función auxiliar para renderizar imágenes - VERSIÓN 100% INLINE (como React pero sin bordes)
 function renderImagen(url, titulo, icono) {
-    console.log(`🖼️ Renderizando imagen ${titulo}:`, url ? url : 'URL vacía');
-    
-    if (!url) {
-        console.log(`❌ No hay URL para ${titulo}, mostrando placeholder "Sin imagen"`);
+    if (!url || url === '' || url === 'null' || url === 'undefined') {
         return `
-            <div class="bg-white dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-${icono} text-gray-400"></i>
-                    <span class="font-medium text-sm">${titulo}</span>
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fas fa-${icono}" style="color: #9ca3af;"></i>
+                    <span style="font-weight: 500; font-size: 14px;">${titulo}</span>
                 </div>
-                <div class="h-32 flex items-center justify-center bg-gray-100 dark:bg-gray-600 rounded">
-                    <i class="fas fa-image text-gray-400 text-3xl"></i>
-                    <span class="text-xs text-gray-500 ml-2">Sin imagen</span>
+                <div style="height: 128px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 4px;">
+                    <i class="fas fa-image" style="color: #9ca3af; font-size: 24px;"></i>
+                    <span style="font-size: 12px; color: #6b7280; margin-left: 8px;">Sin imagen</span>
                 </div>
             </div>
         `;
     }
 
-    console.log(`✅ URL encontrada para ${titulo}:`, url);
-    
+    const timestamp = new Date().getTime();
+    const cacheBuster = url.includes('?') ? `&_t=${timestamp}` : `?_t=${timestamp}`;
+    const finalUrl = url + cacheBuster;
+
+    // VERSIÓN 100% INLINE - IGUAL QUE LA DE PRUEBA PERO SIN BORDES DE COLORES
     return `
-        <div class="bg-white dark:bg-gray-700 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-            <div class="flex items-center gap-2 mb-2">
-                <i class="fas fa-${icono} text-blue-600 dark:text-blue-400"></i>
-                <span class="font-medium text-sm">${titulo}</span>
+        <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                <i class="fas fa-${icono}" style="color: #2563eb;"></i>
+                <span style="font-weight: 500; font-size: 14px;">${titulo}</span>
             </div>
-            <div class="relative group cursor-pointer" onclick="abrirImageModal('${url}')">
-                <img src="${url}" alt="${titulo}" 
-                     class="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
-                     onerror="this.onerror=null; this.src='https://placehold.co/300x200/cccccc/000?text=Error+al+cargar'; console.error('❌ Error cargando imagen ${titulo}:', '${url}');">
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center rounded-lg">
-                    <i class="fas fa-search-plus text-white opacity-0 group-hover:opacity-100 text-2xl"></i>
+            <div style="position: relative; cursor: pointer;" onclick="abrirImageModal('${finalUrl}')">
+                <img src="${finalUrl}" 
+                     alt="${titulo}" 
+                     style="width: 100%; height: 128px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb; background: #f9fafb; display: block;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0); transition: all 0.3s; display: flex; align-items: center; justify-content: center; border-radius: 8px;"
+                     onmouseover="this.style.background='rgba(0,0,0,0.3)'" 
+                     onmouseout="this.style.background='rgba(0,0,0,0)'">
+                    <i class="fas fa-search-plus" style="color: white; opacity: 0; font-size: 24px;" 
+                       onmouseover="this.style.opacity='1'" 
+                       onmouseout="this.style.opacity='0'"></i>
                 </div>
             </div>
         </div>
@@ -442,23 +599,57 @@ $('#clearDates').click(function () {
     filterData();
 });
 
-// Filtros de estado
+// Filtros de estado - CADA BOTÓN CON SU COLOR ESPECÍFICO CUANDO ESTÁ ACTIVO
 $('.filter-btn').click(function () {
     const status = $(this).data('status');
 
-    // Resetear todos los botones a estado inactivo
-    $('.filter-btn').removeClass('bg-primary text-white')
-        .addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
+    // Resetear todos los botones a su estado inactivo (con sus colores originales)
+    $('.filter-btn').each(function() {
+        const btnStatus = $(this).data('status');
+        
+        // Remover clases activas específicas
+        $(this).removeClass('bg-primary text-white bg-secondary text-white bg-success text-white');
+        
+        // Aplicar clases inactivas según el tipo de botón
+        if (btnStatus === 'todos') {
+            $(this).addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
+        } else if (btnStatus === 'evaluando') {
+            $(this).addClass('bg-purple-100 text-purple-800 hover:bg-purple-200');
+        } else if (btnStatus === 'gestionando') {
+            $(this).addClass('bg-blue-100 text-blue-800 hover:bg-blue-200');
+        } else if (btnStatus === 'finalizado') {
+            $(this).addClass('bg-green-100 text-green-800 hover:bg-green-200');
+        }
+    });
 
-    // Activar el botón seleccionado
-    $(this).removeClass('bg-gray-100 text-gray-700 hover:bg-gray-200')
-           .addClass('bg-primary text-white');
+    // Activar el botón seleccionado con su color específico
+    if (status === 'todos') {
+        $(this).removeClass('bg-gray-100 text-gray-700 hover:bg-gray-200')
+               .addClass('bg-primary text-white');
+    } else if (status === 'evaluando') {
+        $(this).removeClass('bg-purple-100 text-purple-800 hover:bg-purple-200')
+               .addClass('bg-secondary text-white');
+    } else if (status === 'gestionando') {
+        $(this).removeClass('bg-blue-100 text-blue-800 hover:bg-blue-200')
+               .addClass('bg-primary text-white'); // Gestionando usa bg-primary cuando activo
+    } else if (status === 'finalizado') {
+        $(this).removeClass('bg-green-100 text-green-800 hover:bg-green-200')
+               .addClass('bg-success text-white');
+    }
 
     selectedStatus = status;
     filterData();
 });
 
-// Búsqueda
+// Activar el filtro "Todos" por defecto al cargar la página
+$(document).ready(function() {
+    $('#filterTodos').removeClass('bg-gray-100 text-gray-700 hover:bg-gray-200')
+                     .addClass('bg-primary text-white');
+});
+
+
+
+// Búsqueda (se mantiene igual)
 $('#searchInput').on('keyup', function () {
     searchText = $(this).val().toLowerCase();
     if (searchText.length > 0) {
@@ -487,6 +678,50 @@ $('#perPage').change(function () {
 $('#refreshData').click(function() {
     cargarTickets();
 });
+
+// Función para limpiar todos los filtros (opcional)
+window.limpiarTodosFiltros = function() {
+    selectedStatus = 'todos';
+    
+    // Resetear todos los botones
+    $('.filter-btn').each(function() {
+        const btnStatus = $(this).data('status');
+        $(this).removeClass('active-filter bg-primary text-white bg-secondary text-white bg-blue-700 text-white bg-success text-white');
+        
+        if (btnStatus === 'todos') {
+            $(this).addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
+        } else if (btnStatus === 'evaluando') {
+            $(this).addClass('bg-purple-100 text-purple-800 hover:bg-purple-200');
+        } else if (btnStatus === 'gestionando') {
+            $(this).addClass('bg-blue-100 text-blue-800 hover:bg-blue-200');
+        } else if (btnStatus === 'finalizado') {
+            $(this).addClass('bg-green-100 text-green-800 hover:bg-green-200');
+        }
+    });
+    
+    // Activar el botón "Todos"
+    $('#filterTodos').removeClass('bg-gray-100 text-gray-700 hover:bg-gray-200')
+                     .addClass('bg-primary text-white active-filter');
+    
+    // Limpiar búsqueda
+    $('#searchInput').val('');
+    searchText = '';
+    $('#clearSearch').addClass('hidden');
+    
+    // Limpiar fechas
+    dateRange = { start: '', end: '' };
+    $('#startDate').val('');
+    $('#endDate').val('');
+    if ($('#startDate').data('flatpickr')) {
+        $('#startDate').data('flatpickr').clear();
+    }
+    if ($('#endDate').data('flatpickr')) {
+        $('#endDate').data('flatpickr').clear();
+    }
+    updateDateFilterUI();
+    
+    filterData();
+};
 
 // Función para filtrar datos
 function filterData() {
@@ -543,7 +778,7 @@ function filterData() {
     renderTable();
 }
 
-// Función para renderizar tabla
+// Función para renderizar tabla - SIN EFECTO HOVER
 function renderTable() {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
@@ -554,23 +789,27 @@ function renderTable() {
     if (!ticketsData || ticketsData.length === 0) {
         html = `
             <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500">
-                    <i class="fas fa-clipboard-check text-4xl text-gray-300 mb-3"></i>
-                    <p>No hay tickets disponibles</p>
-                    <p class="text-sm text-gray-400 mt-2">Los tickets aparecerán aquí cuando sean creados</p>
+                <td colspan="7" class="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class="fas fa-clipboard-check text-4xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                        <p>No hay tickets disponibles</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Los tickets aparecerán aquí cuando sean creados</p>
+                    </div>
                 </td>
             </tr>
         `;
     } else if (paginatedData.length === 0) {
         html = `
             <tr>
-                <td colspan="7" class="px-4 py-10 text-center text-gray-500">
-                    <i class="fas fa-search text-4xl text-gray-300 mb-3"></i>
-                    <p>No se encontraron tickets con los filtros aplicados</p>
-                    <button class="btn btn-sm btn-primary mt-3" onclick="limpiarTodosFiltros()">
-                        <i class="fas fa-times mr-1"></i>
-                        Limpiar filtros
-                    </button>
+                <td colspan="7" class="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class="fas fa-search text-4xl text-gray-300 dark:text-gray-600 mb-3"></i>
+                        <p>No se encontraron tickets con los filtros aplicados</p>
+                        <button class="btn btn-sm btn-primary mt-3" onclick="limpiarTodosFiltros()">
+                            <i class="fas fa-times mr-1"></i>
+                            Limpiar filtros
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -586,20 +825,20 @@ function renderTable() {
             // Verificar si el botón debe estar deshabilitado
             const ordenDeshabilitado = isOrderButtonDisabled(ticket.estado);
             const ordenButtonClass = ordenDeshabilitado 
-                ? 'w-8 h-8 rounded-full bg-gray-100 text-gray-400 cursor-not-allowed flex items-center justify-center'
-                : 'w-8 h-8 rounded-full bg-green-50 hover:bg-green-100 text-green-600 transition-colors evaluate-ticket flex items-center justify-center';
+                ? 'w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed flex items-center justify-center'
+                : 'w-8 h-8 rounded-full bg-green-50 dark:bg-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 transition-colors evaluate-ticket flex items-center justify-center';
             const ordenTitle = getOrderButtonTitle(ticket.estado);
             
             html += `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-300 text-center font-mono font-bold">
+                <tr class="transition-colors"> <!-- SIN hover -->
+                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-200 text-center font-mono font-bold">
                         ${ticket.numeroTicket || 'N/A'}
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex flex-col items-center justify-center">
                             <div class="flex items-center gap-2 mb-1">
                                 ${renderClienteGeneralTableFoto(clienteGeneralFoto, clienteGeneralDescripcion)}
-                                <span class="font-medium text-sm" title="${clienteGeneralDescripcion}">
+                                <span class="font-medium text-sm text-gray-800 dark:text-gray-200" title="${clienteGeneralDescripcion}">
                                     ${clienteGeneralDescripcion}
                                 </span>
                             </div>
@@ -608,19 +847,19 @@ function renderTable() {
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex flex-col items-center justify-center">
                             <span class="font-medium text-xs text-gray-800 dark:text-gray-200">
-                                <i class="fas fa-user text-gray-500 mr-1"></i>
+                                <i class="fas fa-user text-gray-500 dark:text-gray-500 mr-1"></i>
                                 ${ticket.nombreCompleto || 'N/A'}
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <i class="fas fa-phone text-gray-400"></i>
+                                <i class="fas fa-phone text-gray-400 dark:text-gray-500"></i>
                                 ${ticket.telefonoCelular || 'N/A'} ${ticket.telefonoFijo ? ' / ' + ticket.telefonoFijo : ''}
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <i class="fas fa-envelope text-gray-400"></i>
+                                <i class="fas fa-envelope text-gray-400 dark:text-gray-500"></i>
                                 ${ticket.correoElectronico || 'N/A'}
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <i class="fas fa-id-card text-gray-400"></i>
+                                <i class="fas fa-id-card text-gray-400 dark:text-gray-500"></i>
                                 ${ticket.tipoDocumento || 'N/A'}: ${ticket.dni_ruc_ce || 'N/A'}
                             </span>
                         </div>
@@ -628,16 +867,16 @@ function renderTable() {
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex flex-col items-center justify-center">
                             <div class="flex items-center gap-1 mb-1">
-                                <span class="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">
+                                <span class="text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded-full text-gray-700 dark:text-gray-300">
                                     ${ticket.tipoProducto || 'N/A'}
                                 </span>
                                 ${marcaTexto ? `
-                                    <span class="text-xs bg-blue-100 dark:bg-blue-900 px-1.5 py-0.5 rounded-full text-blue-800 dark:text-blue-300">
+                                    <span class="text-xs bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded-full text-blue-800 dark:text-blue-300">
                                         ${marcaTexto}
                                     </span>
                                 ` : ''}
                             </div>
-                            <span class="text-xs font-medium">${modeloTexto}</span>
+                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">${modeloTexto}</span>
                             <span class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
                                 <i class="fas fa-hashtag"></i>
                                 Serie: ${ticket.serie || 'N/A'}
@@ -646,8 +885,8 @@ function renderTable() {
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex flex-col items-center justify-center">
-                            <span class="flex items-center gap-1">
-                                <i class="fas fa-calendar-alt text-gray-500"></i>
+                            <span class="flex items-center gap-1 text-gray-700 dark:text-gray-300">
+                                <i class="fas fa-calendar-alt text-gray-500 dark:text-gray-500"></i>
                                 ${ticket.fechaCreacion ? ticket.fechaCreacion.split(' ')[0] : 'N/A'}
                             </span>
                             <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -662,7 +901,7 @@ function renderTable() {
                     </td>
                     <td class="px-4 py-3 text-sm text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button class="w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors view-ticket flex items-center justify-center"
+                            <button class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors view-ticket flex items-center justify-center"
                                     data-id="${ticket.id}"
                                     title="Ver detalles del ticket">
                                 <i class="fas fa-eye text-sm"></i>
@@ -766,14 +1005,32 @@ window.changePage = function (page) {
 // Función para limpiar todos los filtros
 window.limpiarTodosFiltros = function() {
     selectedStatus = 'todos';
-    $('.filter-btn').removeClass('bg-primary text-white')
-        .addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
-    $('#filterTodos').removeClass('bg-gray-100').addClass('bg-primary text-white');
     
+    // Resetear todos los botones
+    $('.filter-btn').each(function() {
+        const btnStatus = $(this).data('status');
+        $(this).removeClass('bg-primary text-white');
+        
+        if (btnStatus === 'todos') {
+            $(this).addClass('bg-gray-100 text-gray-700 hover:bg-gray-200');
+        } else if (btnStatus === 'evaluando') {
+            $(this).addClass('bg-purple-100 text-purple-800 hover:bg-purple-200');
+        } else if (btnStatus === 'gestionando') {
+            $(this).addClass('bg-blue-100 text-blue-800 hover:bg-blue-200');
+        } else if (btnStatus === 'finalizado') {
+            $(this).addClass('bg-green-100 text-green-800 hover:bg-green-200');
+        }
+    });
+    
+    // Activar el botón "Todos"
+    $('#filterTodos').addClass('bg-primary text-white');
+    
+    // Limpiar búsqueda
     $('#searchInput').val('');
     searchText = '';
     $('#clearSearch').addClass('hidden');
     
+    // Limpiar fechas
     dateRange = { start: '', end: '' };
     $('#startDate').val('');
     $('#endDate').val('');
@@ -801,20 +1058,170 @@ $(document).on('click', '.view-ticket', function () {
     }
 });
 
-// Event listeners para botones de acción - CON PROTECCIÓN CSRF (solo para tickets en estado evaluando)
+// ============================================
+// CONFIGURACIÓN DE SWEETALERT
+// ============================================
+const SwalConfig = {
+    colors: {
+        primary: '#4361ee',
+        success: '#10b981',
+        danger: '#ef4444',
+        warning: '#f59e0b'
+    },
+    buttons: {
+        confirm: 'btn btn-primary px-5',
+        cancel: 'btn btn-danger px-5'
+    }
+};
+
+// ============================================
+// UTILIDADES PARA MENSAJES
+// ============================================
+const MessageUtils = {
+    // Mostrar loading
+    showLoading: (title = 'Procesando...', message = 'Por favor espere') => {
+        return Swal.fire({
+            title,
+            html: message,
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+    },
+
+    // Mostrar error
+    showError: (title, message) => {
+        return Swal.fire({
+            icon: 'error',
+            title,
+            text: message,
+            confirmButtonColor: SwalConfig.colors.primary,
+            confirmButtonText: 'Aceptar'
+        });
+    },
+
+    // Mostrar éxito
+    showSuccess: (title, message, callback = null) => {
+        return Swal.fire({
+            icon: 'success',
+            title,
+            html: message,
+            confirmButtonColor: SwalConfig.colors.primary,
+            confirmButtonText: 'Aceptar'
+        }).then((result) => {
+            if (callback && result.isConfirmed) callback();
+        });
+    }
+};
+
+// ============================================
+// FORMATEADORES DE TICKET
+// ============================================
+const TicketFormatter = {
+    // Formato para confirmación - CENTRADO Y SIMPLE
+    confirmMessage: (ticket) => {
+        return `
+            <div class="text-center space-y-2">
+                <p class="text-base font-semibold text-gray-800 dark:text-white">
+                    #${ticket.numeroTicket}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    ${ticket.nombreCompleto}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    DNI: ${ticket.dni_ruc_ce || 'N/A'}
+                </p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    ${ticket.tipoProducto} - ${ticket.modelo}
+                </p>
+            </div>
+        `;
+    },
+
+    // Formato para éxito
+    successMessage: (response) => {
+        return `
+            <div class="text-center">
+                <p class="text-base font-semibold text-gray-800 dark:text-white mb-2">¡Orden creada exitosamente!</p>
+            </div>
+        `;
+    }
+};
+
+// ============================================
+// MANEJADOR DE ERRORES HTTP
+// ============================================
+const HttpErrorHandler = {
+    getMessage: (xhr) => {
+        const statusMessages = {
+            401: 'No autorizado. Inicie sesión nuevamente.',
+            419: 'Sesión expirada. Recargando página...',
+            422: 'Error de validación. Verifique los datos.',
+            500: 'Error interno del servidor'
+        };
+
+        let message = statusMessages[xhr.status] || 'Error al conectar con el servidor';
+
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (response.message) message = response.message;
+        } catch (e) {}
+
+        return message;
+    },
+
+    handleSpecialErrors: (xhr) => {
+        if (xhr.status === 419) {
+            setTimeout(() => location.reload(), 3000);
+        }
+    }
+};
+
+// ============================================
+// EVENTO PRINCIPAL - CREAR ORDEN
+// ============================================
 $(document).on('click', '.evaluate-ticket:not([disabled])', function () {
     const id = $(this).data('id');
     const ticket = ticketsData.find(t => t.id == id);
     
-    // Verificar nuevamente el estado por seguridad
+    // Validar estado del ticket
     if (isOrderButtonDisabled(ticket.estado)) {
-        toastr.error('No se puede crear orden para tickets en estado ' + ticket.estado);
+        toastr.error(`No se puede crear orden - Ticket en estado ${ticket.estado}`);
         return;
     }
     
     const csrfToken = getCsrfToken();
-    
-    if (confirm('¿Está seguro de crear una orden de trabajo para este ticket?')) {
+
+    // ========================================
+    // PASO 1: CONFIRMACIÓN
+    // ========================================
+    Swal.fire({
+        title: '¿Crear orden de trabajo?',
+        html: TicketFormatter.confirmMessage(ticket),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: SwalConfig.colors.primary,
+        cancelButtonColor: SwalConfig.colors.danger,
+        confirmButtonText: 'Sí, crear orden',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+            confirmButton: SwalConfig.buttons.confirm,
+            cancelButton: SwalConfig.buttons.cancel
+        }
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        // ========================================
+        // PASO 2: LOADING
+        // ========================================
+        const loadingSwal = MessageUtils.showLoading(
+            'Creando orden...',
+            'Por favor espere'
+        );
+
+        // ========================================
+        // PASO 3: PETICIÓN AJAX
+        // ========================================
         $.ajax({
             url: `${API_URL}/evaluar-ticket/crear-orden/${id}`,
             method: 'POST',
@@ -824,45 +1231,45 @@ $(document).on('click', '.evaluate-ticket:not([disabled])', function () {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             },
-            success: function(response) {
-                if (response.success) {
-                    toastr.success('✅ Orden de trabajo creada exitosamente');
-                    
-                    if (response.data && response.data.idOrden) {
-                        window.open(`/ordenes/smart/${response.data.idOrden}/edit`, '_blank');
-                    }
-                    
-                    cargarTickets();
-                } else {
-                    toastr.error(response.message || 'Error al crear la orden');
-                }
-            },
-            error: function(xhr) {
-                console.error('Error:', xhr);
-                let errorMsg = 'Error al conectar con el servidor';
-                
-                if (xhr.status === 401) {
-                    errorMsg = 'No autorizado. Inicie sesión nuevamente.';
-                } else if (xhr.status === 419) {
-                    errorMsg = 'Token CSRF expirado. Recargue la página.';
-                    setTimeout(() => location.reload(), 3000);
-                } else if (xhr.status === 422) {
-                    errorMsg = 'Error de validación. Verifique los datos.';
-                }
-                
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.message) {
-                        errorMsg = response.message;
-                    }
-                    if (response.errors) {
-                        console.error('Errores de validación:', response.errors);
-                    }
-                } catch (e) {}
-                
-                toastr.error(errorMsg);
-            }
+            success: handleSuccess,
+            error: handleError,
+            complete: () => loadingSwal.close()
         });
+    });
+
+    // ========================================
+    // MANEJADORES DE RESPUESTA
+    // ========================================
+    function handleSuccess(response) {
+        if (!response.success) {
+            return MessageUtils.showError(
+                'Error',
+                response.message || 'Error al crear la orden'
+            );
+        }
+
+        // Mostrar éxito
+        MessageUtils.showSuccess(
+            '¡Orden creada!',
+            TicketFormatter.successMessage(response),
+            () => {
+                if (response.data?.idOrden) {
+                    window.open(`/ordenes/smart/${response.data.idOrden}/edit`, '_blank');
+                }
+            }
+        );
+
+        // Recargar tickets
+        cargarTickets();
+    }
+
+    function handleError(xhr) {
+        HttpErrorHandler.handleSpecialErrors(xhr);
+        
+        MessageUtils.showError(
+            'Error',
+            HttpErrorHandler.getMessage(xhr)
+        );
     }
 });
 
