@@ -164,7 +164,9 @@
                             <h5 class="font-semibold text-lg">Tickets por Distrito</h5>
                         </div>
                         <div class="flex gap-1 bg-white-dark/10 rounded-lg p-1">
-                            <button @click="vistaDistritos = 'grafico'" class="px-3 py-1 rounded-md text-sm"
+                            <button
+                                @click="vistaDistritos = 'grafico'; setTimeout(() => reinicializarDistritosChart(), 50)"
+                                class="px-3 py-1 rounded-md text-sm"
                                 :class="vistaDistritos === 'grafico' ? 'bg-primary text-white' : ''">
                                 <i class="fa-solid fa-chart-bar"></i>
                             </button>
@@ -177,7 +179,14 @@
 
                     <template x-if="vistaDistritos === 'grafico'">
                         <div>
-                            <div x-ref="distritosChart" style="height: 350px; width: 100%;"></div>
+                            <!-- 👇 AGREGAR x-init PARA REINICIALIZAR EL CHART -->
+                            <div x-ref="distritosChart" x-init="setTimeout(() => {
+                                if ($refs.distritosChart) {
+                                    charts.distritos = echarts.init($refs.distritosChart);
+                                    charts.distritos.setOption({ ... });
+                                }
+                            }, 100)" style="height: 350px; width: 100%;">
+                            </div>
                             <div class="mt-4 flex flex-wrap gap-2 text-sm">
                                 <span class="bg-success/10 text-success px-2 py-1 rounded-full text-xs">
                                     <i class="fa-solid fa-arrow-trend-up mr-1"></i> Crecimiento
@@ -1322,19 +1331,19 @@
                                 const item = this.mockData.ticketsPorDistrito[params[0]
                                     .dataIndex];
                                 return `
-                    <div class="font-semibold">${item.distrito}</div>
-                    <div class="text-xs">Provincia: ${item.provincia}</div>
-                    <div class="flex justify-between mt-1">
-                        <span>Tickets:</span>
-                        <span class="font-bold">${item.cantidad}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Variación:</span>
-                        <span class="${item.variacion >= 0 ? 'text-success' : 'text-danger'}">
-                            ${item.variacion >= 0 ? '+' : ''}${item.variacion}%
-                        </span>
-                    </div>
-                `;
+                <div class="font-semibold">${item.distrito}</div>
+                <div class="text-xs">Provincia: ${item.provincia}</div>
+                <div class="flex justify-between mt-1">
+                    <span>Tickets:</span>
+                    <span class="font-bold">${item.cantidad}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Variación:</span>
+                    <span class="${item.variacion >= 0 ? 'text-success' : 'text-danger'}">
+                        ${item.variacion >= 0 ? '+' : ''}${item.variacion}%
+                    </span>
+                </div>
+            `;
                             }
                         },
                         grid: {
@@ -1457,16 +1466,16 @@
                                 const item = this.mockData.ticketsPorEstado[params[0]
                                     .dataIndex];
                                 return `
-                    <div class="font-semibold">${item.estado}</div>
-                    <div class="flex justify-between mt-1">
-                        <span>Tickets:</span>
-                        <span class="font-bold">${item.cantidad}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Porcentaje:</span>
-                        <span>${Math.round(item.cantidad / this.mockData.ticketsPorPeriodo.mes * 100)}%</span>
-                    </div>
-                `;
+                <div class="font-semibold">${item.estado}</div>
+                <div class="flex justify-between mt-1">
+                    <span>Tickets:</span>
+                    <span class="font-bold">${item.cantidad}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Porcentaje:</span>
+                    <span>${Math.round(item.cantidad / this.mockData.ticketsPorPeriodo.mes * 100)}%</span>
+                </div>
+            `;
                             }
                         },
                         grid: {
@@ -1533,20 +1542,20 @@
                                 const item = this.mockData.ticketsPorTecnico[this
                                     .periodoTecnicos][params[0].dataIndex];
                                 return `
-                    <div class="font-semibold">${item.tecnico}</div>
-                    <div class="flex justify-between mt-1">
-                        <span>Tickets:</span>
-                        <span class="font-bold">${item.tickets}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Eficiencia:</span>
-                        <span class="${item.eficiencia >= 90 ? 'text-success' : 'text-warning'}">${item.eficiencia}%</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Reincidencias:</span>
-                        <span class="text-danger">${item.reincidencias}</span>
-                    </div>
-                `;
+                <div class="font-semibold">${item.tecnico}</div>
+                <div class="flex justify-between mt-1">
+                    <span>Tickets:</span>
+                    <span class="font-bold">${item.tickets}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Eficiencia:</span>
+                    <span class="${item.eficiencia >= 90 ? 'text-success' : 'text-warning'}">${item.eficiencia}%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Reincidencias:</span>
+                    <span class="text-danger">${item.reincidencias}</span>
+                </div>
+            `;
                             }
                         },
                         grid: {
@@ -1606,6 +1615,110 @@
                     });
                 },
 
+                // ✅ NUEVA FUNCIÓN AGREGADA AQUÍ
+                reinicializarDistritosChart() {
+                    if (this.vistaDistritos === 'grafico' && this.$refs.distritosChart) {
+                        // Destruir el chart anterior si existe
+                        if (this.charts.distritos) {
+                            this.charts.distritos.dispose();
+                        }
+
+                        setTimeout(() => {
+                            // Crear nuevo chart
+                            this.charts.distritos = echarts.init(this.$refs.distritosChart);
+
+                            const isDark = document.querySelector('html').classList.contains(
+                                'dark');
+
+                            this.charts.distritos.setOption({
+                                tooltip: {
+                                    trigger: 'axis',
+                                    axisPointer: {
+                                        type: 'shadow'
+                                    },
+                                    formatter: (params) => {
+                                        const item = this.mockData
+                                            .ticketsPorDistrito[params[0]
+                                            .dataIndex];
+                                        return `
+                                        <div class="font-semibold">${item.distrito}</div>
+                                        <div class="text-xs">Provincia: ${item.provincia}</div>
+                                        <div class="flex justify-between mt-1">
+                                            <span>Tickets:</span>
+                                            <span class="font-bold">${item.cantidad}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>Variación:</span>
+                                            <span class="${item.variacion >= 0 ? 'text-success' : 'text-danger'}">
+                                                ${item.variacion >= 0 ? '+' : ''}${item.variacion}%
+                                            </span>
+                                        </div>
+                                    `;
+                                    }
+                                },
+                                grid: {
+                                    left: '3%',
+                                    right: '4%',
+                                    bottom: '3%',
+                                    containLabel: true
+                                },
+                                xAxis: {
+                                    type: 'value',
+                                    axisLabel: {
+                                        color: isDark ? '#bfc9d4' : '#506690'
+                                    },
+                                    splitLine: {
+                                        lineStyle: {
+                                            color: isDark ? '#191e3a' : '#e0e6ed'
+                                        }
+                                    }
+                                },
+                                yAxis: {
+                                    type: 'category',
+                                    data: this.mockData.ticketsPorDistrito.map(item =>
+                                        item.distrito),
+                                    axisLabel: {
+                                        color: isDark ? '#bfc9d4' : '#506690'
+                                    },
+                                    axisLine: {
+                                        lineStyle: {
+                                            color: isDark ? '#3b3f5c' : '#e0e6ed'
+                                        }
+                                    }
+                                },
+                                series: [{
+                                    name: 'Tickets',
+                                    type: 'bar',
+                                    data: this.mockData.ticketsPorDistrito.map(
+                                        item => item.cantidad),
+                                    itemStyle: {
+                                        color: (params) => {
+                                            const item = this.mockData
+                                                .ticketsPorDistrito[params
+                                                    .dataIndex];
+                                            return item.variacion >= 0 ?
+                                                '#10b981' : '#e7515a';
+                                        },
+                                        borderRadius: [0, 8, 8, 0]
+                                    },
+                                    barWidth: 20,
+                                    label: {
+                                        show: true,
+                                        position: 'right',
+                                        formatter: (params) => {
+                                            const item = this.mockData
+                                                .ticketsPorDistrito[params
+                                                    .dataIndex];
+                                            return `${item.cantidad} (${item.variacion >= 0 ? '+' : ''}${item.variacion}%)`;
+                                        },
+                                        color: isDark ? '#bfc9d4' : '#506690',
+                                        fontSize: 11
+                                    }
+                                }]
+                            });
+                        }, 100);
+                    }
+                },
             }));
         });
     </script>
