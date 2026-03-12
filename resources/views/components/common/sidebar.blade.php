@@ -76,7 +76,7 @@
 
                             @if (PermisoHelper::tienePermiso('VER DASHBOARD TICKETS'))
                                 <li>
-                                    <a href="{{ route('tickets') }}">Tickets</a>
+                                    <a href="{{ route('tickets') }}">Tickets Smart</a>
                                 </li>
                             @endif
 
@@ -679,7 +679,7 @@
             </ul>
             </li> --}}
 
-                <!-- <li class="menu nav-item">
+                <li class="menu nav-item">
                 <button type="button" class="nav-link group"
                     :class="{ 'active': activeDropdown === 'elements' }"
                     @click="activeDropdown === 'elements' ? activeDropdown = null : activeDropdown = 'elements'">
@@ -761,7 +761,7 @@
                         <a href="/elements/typography">Typography</a>
                     </li>
                 </ul>
-            </li> -->
+            </li>
 
 
 
